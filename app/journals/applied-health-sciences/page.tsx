@@ -32,29 +32,6 @@ const stats = [
   { label: "OA License", value: "CC BY 4.0" },
 ]
 
-const keyFeatures = [
-  {
-    icon: Award,
-    title: "Expert Review",
-    description: "Peer review by leading data scientists and machine learning researchers."
-  },
-  {
-    icon: BookOpen,
-    title: "Practice-Oriented",
-    description: "Emphasis on reproducible, practical applications with code availability."
-  },
-  {
-    icon: Globe,
-    title: "Interdisciplinary Scope",
-    description: "Publish data science research across all domains and application areas."
-  },
-  {
-    icon: Users,
-    title: "Community Impact",
-    description: "Engage with the global data science community and influence practical implementations."
-  }
-]
-
 // Sample Articles
 const sampleArticles: Article[] = [
   {

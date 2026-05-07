@@ -32,29 +32,6 @@ const stats = [
   { label: "License", value: "CC BY 4.0" },
 ]
 
-const keyFeatures = [
-  {
-    icon: Award,
-    title: "Expert Evaluation",
-    description: "Reviewed by leading sustainability scientists and environmental experts."
-  },
-  {
-    icon: Globe,
-    title: "Global Audience",
-    description: "Reach policymakers, practitioners, and researchers worldwide working on climate solutions."
-  },
-  {
-    icon: BookOpen,
-    title: "Translational Bridge",
-    description: "Connect research findings directly to real-world sustainability applications and policy."
-  },
-  {
-    icon: Users,
-    title: "Interdisciplinary",
-    description: "Publish across environmental science, technology, economics, and social sustainability."
-  }
-]
-
 // Sample Articles
 const sampleArticles: Article[] = [
   {
