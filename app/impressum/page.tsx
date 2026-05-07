@@ -79,7 +79,7 @@ export default function ImpressumPage() {
               <div>
                 <h2 className="text-2xl font-bold mb-4">Kontakt</h2>
                 <div className="p-6 bg-muted/50 rounded-lg border border-border space-y-2 text-muted-foreground">
-                  <p><strong className="text-foreground">E-Mail:</strong> info@scholarisch.com</p>
+                  <p><strong className="text-foreground">E-Mail:</strong> abbas.qurasani+info-scholarisch@gmail.com</p>
                   <p><strong className="text-foreground">Website:</strong> www.scholarisch.com</p>
                 </div>
               </div>

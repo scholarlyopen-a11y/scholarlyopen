@@ -43,7 +43,7 @@ export default function PrivacyPolicyPage() {
               <address className="not-italic text-muted-foreground mb-6 p-4 bg-muted/50 rounded-lg">
                 PeerRex<br />
                 International Open Access Publisher<br />
-                Email: privacy@peerrex.com
+                Email: abbas.qurasani+privacy-scholarisch@gmail.com
               </address>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">2. Data We Collect</h2>
@@ -142,7 +142,7 @@ export default function PrivacyPolicyPage() {
                 <li><strong>Withdraw consent:</strong> Where processing is based on consent</li>
               </ul>
               <p className="text-muted-foreground mb-4">
-                To exercise these rights, please contact us at privacy@peerrex.com.
+                To exercise these rights, please contact us at abbas.qurasani+privacy-scholarisch@gmail.com.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">9. Cookies</h2>
@@ -166,7 +166,7 @@ export default function PrivacyPolicyPage() {
 
               <h2 className="text-2xl font-bold mt-8 mb-4">11. Complaints</h2>
               <p className="text-muted-foreground mb-4">
-                If you believe we have not handled your personal data correctly, you have the right to lodge a complaint with a supervisory authority in your jurisdiction. Please contact us at privacy@peerrex.com and we will assist you in identifying the appropriate authority.
+                If you believe we have not handled your personal data correctly, you have the right to lodge a complaint with a supervisory authority in your jurisdiction. Please contact us at abbas.qurasani+privacy-scholarisch@gmail.com and we will assist you in identifying the appropriate authority.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">12. Changes to This Policy</h2>
@@ -181,7 +181,7 @@ export default function PrivacyPolicyPage() {
               <address className="not-italic text-muted-foreground p-4 bg-muted/50 rounded-lg">
                 Data Protection Officer<br />
                 PeerRex<br />
-                Email: privacy@peerrex.com
+                Email: abbas.qurasani+privacy-scholarisch@gmail.com
               </address>
             </div>
           </div>

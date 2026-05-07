@@ -49,7 +49,7 @@ export const translations = {
     
     // Journals Section
     "journals.title": "Our Journals",
-    "journals.subtitle": "We publish high-quality research across five peer-reviewed journals, all offering Gold open access.",
+    "journals.subtitle": "We publish high-quality research across four peer-reviewed journals, all offering Gold open access.",
     "journals.viewJournal": "View Journal",
     "journals.sso.title": "Scholarisch Journal of Artificial Intelligence",
     "journals.sso.description": "Cutting-edge research in machine learning, AI algorithms, neural networks, and artificial intelligence applications.",
@@ -73,13 +73,13 @@ export const translations = {
     "features.editorialBoard.description": "Distinguished scholars from leading institutions across the globe.",
     
     // Open Access Models
-    "oaModels.title": "Gold Open Access Publishing",
+    "oaModels.title": "Open Access Publishing",
     "oaModels.subtitle": "Publishing Model",
-    "oaModels.description": "All Scholarisch journals publish exclusively in Gold open access. Articles are immediately and permanently free to access upon publication under a Creative Commons license.",
+    "oaModels.description": "We publish open access journals with immediate, permanent availability under Creative Commons licensing.",
     "oaModels.gold.title": "Gold Open Access",
     "oaModels.gold.description": "All articles are immediately and permanently free to access upon publication under a Creative Commons license.",
-    "oaModels.hybrid.title": "Gold Open Access",
-    "oaModels.hybrid.description": "All our journals use Gold open access. No subscription barriers, fully open access to all published research.",
+    "oaModels.hybrid.title": "Creative Commons Licensing",
+    "oaModels.hybrid.description": "Clear reuse rights with standard open licenses (e.g., CC BY 4.0) to maximize distribution and impact.",
     "oaModels.learnMore": "Learn About Our OA Policy",
     "oaModels.accessible": "Making research accessible to all",
     "oaModels.fromMainz": "Connecting researchers worldwide",
@@ -208,13 +208,13 @@ export const translations = {
     "features.editorialBoard.description": "Angesehene Wissenschaftler von führenden Institutionen weltweit.",
     
     // Open Access Models
-    "oaModels.title": "Gold-Open-Access-Veröffentlichung",
+    "oaModels.title": "Open-Access-Veröffentlichung",
     "oaModels.subtitle": "Publikationsmodell",
-    "oaModels.description": "Alle Scholarisch-Zeitschriften veröffentlichen ausschließlich im Gold-Open-Access. Artikel sind unmittelbar und dauerhaft unter einer Creative-Commons-Lizenz kostenlos zugänglich.",
+    "oaModels.description": "Wir veröffentlichen Open-Access-Zeitschriften mit sofortiger, dauerhafter Verfügbarkeit unter Creative-Commons-Lizenzen.",
     "oaModels.gold.title": "Gold Open Access",
     "oaModels.gold.description": "Alle Artikel sind unmittelbar und dauerhaft unter einer Creative-Commons-Lizenz kostenlos zugänglich.",
-    "oaModels.hybrid.title": "Gold Open Access",
-    "oaModels.hybrid.description": "Alle unsere Zeitschriften nutzen Gold-Open-Access. Keine Abonnementbarrieren, vollständiger offener Zugang zu allen veröffentlichten Arbeiten.",
+    "oaModels.hybrid.title": "Creative-Commons-Lizenzierung",
+    "oaModels.hybrid.description": "Klare Nutzungsrechte durch Standardlizenzen (z.B. CC BY 4.0) für maximale Verbreitung und Wirkung.",
     "oaModels.learnMore": "Mehr über unsere OA-Richtlinie",
     "oaModels.accessible": "Forschung für alle zugänglich machen",
     "oaModels.fromMainz": "Forscher weltweit verbinden",

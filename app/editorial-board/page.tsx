@@ -16,7 +16,7 @@ const editorInChief = {
   role: "Editor-in-Chief",
   affiliation: "European University Institute",
   specialization: "Social Sciences & Research Methodology",
-  email: "editor@mainzacademicpress.com",
+  email: "abbas.qurasani+editorial-board-scholarisch@gmail.com",
 }
 
 const seniorEditors = [
