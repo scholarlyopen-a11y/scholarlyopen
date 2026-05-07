@@ -34,6 +34,36 @@ Open:
 
 - http://localhost:3000
 
+## Local Email Setup
+
+Submission and contact forms send real emails through SMTP (works locally, no Vercel-only config required).
+
+1. Copy env template:
+
+```bash
+cp .env.example .env.local
+```
+
+2. Fill these values in `.env.local`:
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
+- `SUBMISSIONS_TO` (optional override)
+- `CONTACT_TO` (optional override)
+
+For Gmail, use an App Password (not your normal account password).
+
+### Quick SMTP Test (Local)
+
+In development, open `/contact` and use the `Send Test Email` button in the `Local SMTP Test` block.
+
+- It calls `POST /api/test-email`
+- It sends a test email to `CONTACT_TO` (or fallback default)
+- It is disabled automatically in production
+
 ## Scripts
 
 - `pnpm dev` - start local development server
