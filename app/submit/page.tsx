@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,20 @@ const checklist = [
 export default function SubmitPage() {
   const { t } = useLanguage()
   const [agreed, setAgreed] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const recipient = "abbas.qurasani+submissions-scholarisch@gmail.com"
+
+  const submitToEditorialOffice = async (formData: FormData) => {
+    const response = await fetch("/api/submit", { method: "POST", body: formData })
+    const json = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null
+    if (!response.ok || !json?.ok) {
+      throw new Error(json?.error || "Submission failed.")
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -144,8 +158,8 @@ export default function SubmitPage() {
                       <h4 className="font-semibold">Need Help?</h4>
                       <p className="text-sm text-muted-foreground mt-1">
                         Contact our editorial office at{" "}
-                        <a href="mailto:submissions@peerrex.de" className="text-primary hover:underline">
-                          submissions@peerrex.de
+                        <a href="mailto:abbas.qurasani+submissions-scholarisch@gmail.com" className="text-primary hover:underline">
+                          abbas.qurasani+submissions-scholarisch@gmail.com
                         </a>
                       </p>
                     </div>
@@ -183,7 +197,7 @@ export default function SubmitPage() {
                         </label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input id="firstName" placeholder="Enter first name" className="pl-10" required />
+                          <Input id="firstName" name="firstName" placeholder="Enter first name" className="pl-10" required />
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -192,7 +206,7 @@ export default function SubmitPage() {
                         </label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input id="lastName" placeholder="Enter last name" className="pl-10" required />
+                          <Input id="lastName" name="lastName" placeholder="Enter last name" className="pl-10" required />
                         </div>
                       </div>
                     </div>
@@ -203,7 +217,7 @@ export default function SubmitPage() {
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="email" type="email" placeholder="Enter email address" className="pl-10" required />
+                        <Input id="email" name="email" type="email" placeholder="Enter email address" className="pl-10" required />
                       </div>
                     </div>
                     
@@ -213,7 +227,7 @@ export default function SubmitPage() {
                       </label>
                       <div className="relative">
                         <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="affiliation" placeholder="Enter your institution" className="pl-10" required />
+                        <Input id="affiliation" name="affiliation" placeholder="Enter your institution" className="pl-10" required />
                       </div>
                     </div>
                     
@@ -225,13 +239,15 @@ export default function SubmitPage() {
                         <BookOpen className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <select 
                           id="discipline" 
+                          name="discipline"
                           className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm"
                           required
                         >
                           <option value="">Select a discipline</option>
-                          <option value="social-sciences">Social Sciences</option>
-                          <option value="archaeology">Archaeology</option>
-                          <option value="medical-sciences">Medical Sciences</option>
+                          <option value="social-sciences-open">Social Sciences Open</option>
+                          <option value="archaeological-frontiers">Archaeological Frontiers</option>
+                          <option value="medical-research-review">Medical Research Review</option>
+                          <option value="applied-health-sciences">Applied Health Sciences</option>
                         </select>
                       </div>
                     </div>
@@ -240,7 +256,7 @@ export default function SubmitPage() {
                       <label htmlFor="title" className="text-sm font-medium">
                         Manuscript Title *
                       </label>
-                      <Input id="title" placeholder="Enter the title of your manuscript" required />
+                      <Input id="title" name="title" placeholder="Enter the title of your manuscript" required />
                     </div>
                     
                     <div className="space-y-2">
@@ -249,6 +265,7 @@ export default function SubmitPage() {
                       </label>
                       <Textarea 
                         id="abstract" 
+                        name="abstract"
                         placeholder="Paste your abstract here (max 300 words)" 
                         rows={6}
                         required 
@@ -267,7 +284,26 @@ export default function SubmitPage() {
                         <p className="mt-2 text-xs text-muted-foreground">
                           Accepted formats: .docx, .doc, .pdf (max 50MB)
                         </p>
-                        <Button variant="outline" className="mt-4" type="button">
+                        {selectedFileName && (
+                          <p className="mt-3 text-xs text-muted-foreground">
+                            Selected: <span className="font-medium text-foreground">{selectedFileName}</span>
+                          </p>
+                        )}
+                        <input
+                          ref={fileInputRef}
+                          id="manuscript"
+                          name="manuscript"
+                          type="file"
+                          accept=".doc,.docx,.pdf"
+                          className="hidden"
+                          onChange={(e) => setSelectedFileName(e.target.files?.[0]?.name ?? null)}
+                        />
+                        <Button
+                          variant="outline"
+                          className="mt-4"
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
                           <FileText className="mr-2 h-4 w-4" />
                           Select File
                         </Button>
@@ -278,6 +314,8 @@ export default function SubmitPage() {
                       <input 
                         type="checkbox" 
                         id="agreement" 
+                        name="agreed"
+                        value="true"
                         className="mt-1"
                         checked={agreed}
                         onChange={(e) => setAgreed(e.target.checked)}
@@ -291,10 +329,45 @@ export default function SubmitPage() {
                       </label>
                     </div>
                     
-                    <Button type="submit" size="lg" className="w-full" disabled={!agreed}>
-                      {t("nav.submitManuscript")}
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="w-full"
+                      disabled={!agreed || status === "submitting"}
+                      onClick={async (e) => {
+                        const form = (e.currentTarget as HTMLButtonElement).form
+                        if (!form) return
+                        if (!form.reportValidity()) return
+                        setStatus("submitting")
+                        setErrorMessage(null)
+                        const formData = new FormData(form)
+                        try {
+                          await submitToEditorialOffice(formData)
+                          setStatus("success")
+                        } catch (err) {
+                          setStatus("error")
+                          setErrorMessage(err instanceof Error ? err.message : "Submission failed.")
+                        }
+                      }}
+                    >
+                      {status === "submitting" ? "Submitting..." : t("nav.submitManuscript")}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
+
+                    {status === "success" && (
+                      <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm">
+                        <p className="font-medium">Submitted.</p>
+                        <p className="mt-1 text-muted-foreground">
+                          Your manuscript has been emailed to the editorial office. You will be contacted at the email address you provided.
+                        </p>
+                      </div>
+                    )}
+                    {status === "error" && (
+                      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
+                        <p className="font-medium">Submission failed.</p>
+                        <p className="mt-1 text-muted-foreground">{errorMessage || `Please email the editorial office at ${recipient}.`}</p>
+                      </div>
+                    )}
                   </form>
                 </CardContent>
               </Card>

@@ -15,9 +15,9 @@ const contactInfo = [
     icon: Mail,
     title: "Email",
     details: [
-      { label: "General Inquiries", value: "info@scholarisch.com" },
-      { label: "Editorial Office", value: "editorial@scholarisch.com" },
-      { label: "Submissions", value: "submissions@scholarisch.com" },
+      { label: "General Inquiries", value: "abbas.qurasani+info-scholarisch@gmail.com" },
+      { label: "Editorial Office", value: "abbas.qurasani+editorial-scholarisch@gmail.com" },
+      { label: "Submissions", value: "abbas.qurasani+submissions-scholarisch@gmail.com" },
     ],
   },
   {
@@ -31,8 +31,7 @@ const contactInfo = [
     icon: Phone,
     title: "Phone",
     details: [
-      { label: "Main Office", value: "+49 6131 XXXXXXX" },
-      { label: "Fax", value: "+49 6131 XXXXXXX" },
+      { label: "Main Office", value: "+49 15228080302" },
     ],
   },
   {
@@ -48,32 +47,70 @@ const contactInfo = [
 const departments = [
   {
     name: "Editorial Office",
-    email: "editorial@scholarisch.com",
+    email: "abbas.qurasani+editorial-scholarisch@gmail.com",
     description: "For manuscript-related inquiries, peer review questions, and editorial decisions.",
   },
   {
     name: "Author Support",
-    email: "authors@scholarisch.com",
+    email: "abbas.qurasani+author-support-scholarisch@gmail.com",
     description: "For submission assistance, formatting questions, and author guidelines.",
   },
   {
     name: "Finance & APCs",
-    email: "finance@scholarisch.com",
+    email: "abbas.qurasani+finance-apc-scholarisch@gmail.com",
     description: "For invoices, payment inquiries, and APC waiver requests.",
   },
   {
     name: "Technical Support",
-    email: "support@scholarisch.com",
+    email: "abbas.qurasani+technical-support-scholarisch@gmail.com",
     description: "For website issues, submission system problems, and technical questions.",
   },
 ]
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [testingMail, setTestingMail] = useState(false)
+  const [testMessage, setTestMessage] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setSubmitted(true)
+    const form = e.currentTarget
+    if (!form.reportValidity()) return
+    setSubmitting(true)
+    setErrorMessage(null)
+    try {
+      const formData = new FormData(form)
+      const response = await fetch("/api/contact", { method: "POST", body: formData })
+      const json = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null
+      if (!response.ok || !json?.ok) {
+        throw new Error(json?.error || "Failed to send message.")
+      }
+      setSubmitted(true)
+      form.reset()
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Failed to send message.")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleTestEmail = async () => {
+    setTestingMail(true)
+    setTestMessage(null)
+    try {
+      const response = await fetch("/api/test-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
+      const json = (await response.json().catch(() => null)) as { ok?: boolean; sentTo?: string; error?: string } | null
+      if (!response.ok || !json?.ok) {
+        throw new Error(json?.error || "SMTP test failed.")
+      }
+      setTestMessage(`Test email sent to ${json.sentTo}.`)
+    } catch (err) {
+      setTestMessage(err instanceof Error ? err.message : "SMTP test failed.")
+    } finally {
+      setTestingMail(false)
+    }
   }
 
   return (
@@ -174,31 +211,40 @@ export default function ContactPage() {
                   <h3 className="font-semibold mb-4">Before contacting us, you might find answers in:</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li>
-                      <Link href="/author-guidelines" className="text-primary hover:underline">
+                      <Link href="/author-guidelines" className="text-primary font-medium hover:text-primary/80 hover:underline">
                         Author Guidelines
                       </Link>
                       {" "}- Manuscript preparation and submission requirements
                     </li>
                     <li>
-                      <Link href="/apc-fees" className="text-primary hover:underline">
+                      <Link href="/apc-fees" className="text-primary font-medium hover:text-primary/80 hover:underline">
                         APC & Fees
                       </Link>
                       {" "}- Pricing, waivers, and payment information
                     </li>
                     <li>
-                      <Link href="/peer-review" className="text-primary hover:underline">
+                      <Link href="/peer-review" className="text-primary font-medium hover:text-primary/80 hover:underline">
                         Peer Review Process
                       </Link>
                       {" "}- How we review manuscripts
                     </li>
                     <li>
-                      <Link href="/open-access" className="text-primary hover:underline">
+                      <Link href="/open-access" className="text-primary font-medium hover:text-primary/80 hover:underline">
                         Open Access Policy
                       </Link>
                       {" "}- Licensing and author rights
                     </li>
                   </ul>
                 </div>
+                {process.env.NODE_ENV !== "production" && (
+                  <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border space-y-3">
+                    <p className="text-sm font-medium">Local SMTP Test</p>
+                    <Button type="button" variant="outline" onClick={handleTestEmail} disabled={testingMail}>
+                      {testingMail ? "Testing SMTP..." : "Send Test Email"}
+                    </Button>
+                    {testMessage && <p className="text-sm text-muted-foreground">{testMessage}</p>}
+                  </div>
+                )}
               </div>
               
               <Card>
@@ -235,7 +281,7 @@ export default function ContactPage() {
                           </label>
                           <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="name" placeholder="Your name" className="pl-10" required />
+                            <Input id="name" name="name" placeholder="Your name" className="pl-10" required />
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -244,7 +290,7 @@ export default function ContactPage() {
                           </label>
                           <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="email" type="email" placeholder="your@email.com" className="pl-10" required />
+                            <Input id="email" name="email" type="email" placeholder="your@email.com" className="pl-10" required />
                           </div>
                         </div>
                       </div>
@@ -255,7 +301,7 @@ export default function ContactPage() {
                         </label>
                         <div className="relative">
                           <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input id="affiliation" placeholder="Your institution (optional)" className="pl-10" />
+                          <Input id="affiliation" name="affiliation" placeholder="Your institution (optional)" className="pl-10" />
                         </div>
                       </div>
                       
@@ -265,6 +311,7 @@ export default function ContactPage() {
                         </label>
                         <select 
                           id="subject" 
+                          name="subject"
                           className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                           required
                         >
@@ -287,6 +334,7 @@ export default function ContactPage() {
                           <MessageSquare className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Textarea 
                             id="message" 
+                            name="message"
                             placeholder="Please describe your inquiry in detail..." 
                             rows={6}
                             className="pl-10"
@@ -296,7 +344,7 @@ export default function ContactPage() {
                       </div>
                       
                       <div className="flex items-start gap-3">
-                        <input type="checkbox" id="privacy" className="mt-1" required />
+                        <input type="checkbox" id="privacy" name="privacy" value="true" className="mt-1" required />
                         <label htmlFor="privacy" className="text-sm text-muted-foreground">
                           I have read and agree to the{" "}
                           <Link href="/privacy" className="text-primary hover:underline">
@@ -306,9 +354,14 @@ export default function ContactPage() {
                         </label>
                       </div>
                       
-                      <Button type="submit" size="lg" className="w-full">
+                      {errorMessage && (
+                        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-muted-foreground">
+                          {errorMessage}
+                        </div>
+                      )}
+                      <Button type="submit" size="lg" className="w-full" disabled={submitting}>
                         <Send className="mr-2 h-4 w-4" />
-                        Send Message
+                        {submitting ? "Sending..." : "Send Message"}
                       </Button>
                     </form>
                   )}
