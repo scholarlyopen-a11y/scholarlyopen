@@ -98,7 +98,7 @@ const editorInChief: EditorMember = {
   role: "Editor-in-Chief",
   affiliation: "Charité - University Medicine Berlin, Germany",
   specialization: "Internal Medicine & Clinical Pharmacology",
-  email: "s.martin@scholarisch.com",
+  email: "abbas.qurasani+clinical-medicine-journal-scholarisch@gmail.com",
   orcid: "0000-0001-3456-7890",
 }
 
@@ -195,7 +195,7 @@ export default function ArchaeologicalFrontiersPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-accent-foreground/30 text-accent-foreground hover:bg-accent-foreground/10">
+              <Button size="lg" variant="outline" asChild className="border-accent-foreground/30 bg-accent-foreground/5 text-accent-foreground hover:bg-accent-foreground/10 hover:text-accent-foreground">
                 <Link href="/author-guidelines">Author Guidelines</Link>
               </Button>
             </div>
@@ -364,7 +364,7 @@ export default function ArchaeologicalFrontiersPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-background/30 text-background hover:bg-background/10">
+                <Button size="lg" variant="outline" asChild className="border-background/30 bg-background/5 text-background hover:bg-background/10 hover:text-background">
                   <Link href="/apc-fees">{t("nav.apcFees")}</Link>
                 </Button>
               </div>

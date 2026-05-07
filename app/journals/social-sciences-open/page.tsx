@@ -94,11 +94,11 @@ const sampleArticles: Article[] = [
 
 // Editorial Board
 const editorInChief: EditorMember = {
-  name: "Prof. Dr. Geoffrey Hinton",
+  name: "Prof. Dr. Geoffrey",
   role: "Editor-in-Chief",
   affiliation: "Vector Institute, Canada",
   specialization: "Deep Learning & Neural Networks",
-  email: "g.hinton@scholarisch.com",
+  email: "abbas.qurasani+social-sciences-journal-scholarisch@gmail.com",
   orcid: "0000-0001-2345-6789",
 }
 
@@ -218,7 +218,7 @@ export default function SocialSciencesOpenPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-primary/30 text-primary hover:bg-primary/10">
+              <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground">
                 <Link href="/author-guidelines">Author Guidelines</Link>
               </Button>
             </div>
@@ -390,7 +390,7 @@ export default function SocialSciencesOpenPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-background/30 text-background hover:bg-background/10">
+                <Button size="lg" variant="outline" asChild className="border-background/30 bg-background/5 text-background hover:bg-background/10 hover:text-background">
                   <Link href="/apc-fees">{t("nav.apcFees")}</Link>
                 </Button>
               </div>

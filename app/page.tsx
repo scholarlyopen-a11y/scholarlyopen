@@ -109,7 +109,7 @@ export default function HomePage() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10">
+                  <Button size="lg" variant="outline" asChild className="border-primary-foreground/40 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                     <Link href="/about">{t("hero.cta.learn")}</Link>
                   </Button>
                 </div>
@@ -156,10 +156,10 @@ export default function HomePage() {
                     </p>
                     
                     {/* Floating badges */}
-                    <div className="absolute -top-3 -right-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                    <div className="absolute -top-3 -right-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
                       DOAJ
                     </div>
-                    <div className="absolute -bottom-3 -left-3 bg-primary-foreground text-primary px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                    <div className="absolute -bottom-3 -left-3 bg-primary-foreground text-primary px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
                       COPE
                     </div>
                   </div>
@@ -330,7 +330,7 @@ export default function HomePage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-white/30 text-white hover:bg-white/10">
+                <Button size="lg" variant="outline" asChild className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white">
                   <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
                 </Button>
               </div>

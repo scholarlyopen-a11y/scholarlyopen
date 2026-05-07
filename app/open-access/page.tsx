@@ -298,7 +298,7 @@ export default function OpenAccessPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                   <Link href="/apc-fees">View APC Information</Link>
                 </Button>
               </div>

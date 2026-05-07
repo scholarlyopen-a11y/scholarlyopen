@@ -8,10 +8,10 @@ import { useLanguage } from "@/lib/language-context"
 function ComplianceBadge({ name, abbr, description }: { name: string; abbr: string; description: string }) {
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg" title={description}>
-      <div className="flex h-8 w-8 items-center justify-center rounded bg-accent text-accent-foreground text-xs font-bold shrink-0">
+      <div className="flex h-8 w-8 items-center justify-center rounded bg-accent text-accent-foreground text-[11px] font-bold shrink-0">
         {abbr}
       </div>
-      <span className="text-xs text-white/80">{name}</span>
+      <span className="text-sm font-medium text-white/90">{name}</span>
     </div>
   )
 }
@@ -130,26 +130,26 @@ export function Footer() {
             <p className="mt-4 text-sm text-white/70 leading-relaxed">
               {t("brand.description")}
             </p>
-            <div className="mt-6 space-y-3 text-sm text-white/70">
+            <div className="mt-6 space-y-3 text-xs text-white/70">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
-                <a href="mailto:info@scholarisch.com" className="hover:text-white transition-colors">
-                  info@scholarisch.com
+                <a href="mailto:abbas.qurasani+info-scholarisch@gmail.com" className="break-all hover:text-white transition-colors">
+                  abbas.qurasani+info-scholarisch@gmail.com
                 </a>
               </div>
             </div>
             {/* Social Media */}
-            <div className="mt-6 flex items-center gap-4">
+            <div className="mt-6 flex items-center gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/60 hover:text-white transition-colors"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors"
                   aria-label={social.name}
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="h-5 w-5 block" />
                 </a>
               ))}
             </div>

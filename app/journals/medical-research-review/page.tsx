@@ -78,7 +78,7 @@ const editorInChief: EditorMember = {
   role: "Editor-in-Chief",
   affiliation: "ETH Zurich, Switzerland",
   specialization: "Renewable Energy & Sustainability",
-  email: "k.wagner@scholarisch.com",
+  email: "abbas.qurasani+sustainability-journal-scholarisch@gmail.com",
   orcid: "0000-0001-2345-6789",
 }
 
@@ -198,7 +198,7 @@ export default function MedicalResearchReviewPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-secondary/30 text-secondary hover:bg-secondary/10">
+              <Button size="lg" variant="outline" asChild className="border-background/30 bg-background/10 text-background hover:bg-background/20 hover:text-background">
                 <Link href="/author-guidelines">Author Guidelines</Link>
               </Button>
             </div>
@@ -397,7 +397,7 @@ export default function MedicalResearchReviewPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                   <Link href="/apc-fees">{t("nav.apcFees")}</Link>
                 </Button>
               </div>

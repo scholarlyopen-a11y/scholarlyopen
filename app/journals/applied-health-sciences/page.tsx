@@ -78,7 +78,7 @@ const editorInChief: EditorMember = {
   role: "Editor-in-Chief",
   affiliation: "Stanford University, USA",
   specialization: "Machine Learning & Data Science",
-  email: "s.mitchell@scholarisch.com",
+  email: "abbas.qurasani+data-science-journal-scholarisch@gmail.com",
   orcid: "0000-0001-5678-9012",
 }
 
@@ -197,7 +197,7 @@ export default function AppliedHealthSciencesPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-primary/30 text-primary hover:bg-primary/10">
+              <Button size="lg" variant="outline" asChild className="border-background/30 bg-background/10 text-background hover:bg-background/20 hover:text-background">
                 <Link href="/author-guidelines">Author Guidelines</Link>
               </Button>
             </div>
@@ -396,7 +396,7 @@ export default function AppliedHealthSciencesPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                   <Link href="/apc-fees">{t("nav.apcFees")}</Link>
                 </Button>
               </div>
