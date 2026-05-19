@@ -52,6 +52,20 @@ export default function MedicinePage() {
         "Medical technology",
         "Translational research",
       ]}
+      sectionTopics={[
+        "Cardiology",
+        "Neurology",
+        "Oncology",
+        "Gynecology & Obstetrics",
+        "Pediatrics",
+        "Psychiatry",
+        "Surgery",
+        "Public Health",
+        "Physiotherapy & Rehabilitation",
+        "Medical Imaging",
+        "Emergency Medicine",
+        "Pharmacology",
+      ]}
       mainHighlights={[
         { title: "Patient-Centered Research", description: "Work that improves clinical outcomes and healthcare delivery." },
         { title: "Transparent Methodology", description: "Supports open protocols and reproducible clinical science." },

@@ -52,6 +52,15 @@ export default function BiologyPage() {
         "Translational research",
         "Conservation biology",
       ]}
+      sectionTopics={[
+        "Molecular Biology",
+        "Cell Biology",
+        "Genetics & Genomics",
+        "Microbiology",
+        "Ecology",
+        "Evolutionary Biology",
+        "Biotechnology",
+      ]}
       mainHighlights={[
         { title: "Translational Impact", description: "Bridges fundamental biology and applied research for health and environment." },
         { title: "Reproducible Data", description: "Encourages open data and clear methods for reuse." },

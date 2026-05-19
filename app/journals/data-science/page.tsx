@@ -52,6 +52,17 @@ export default function DataSciencePage() {
         "Decision support systems",
         "Reproducible data workflows",
       ]}
+      sectionTopics={[
+        "Machine Learning",
+        "Artificial Intelligence",
+        "Big Data",
+        "Statistics",
+        "Data Ethics",
+        "Computational Modeling",
+        "NLP",
+        "Computer Vision",
+        "Reproducible Workflows",
+      ]}
       mainHighlights={[
         { title: "Ethical AI", description: "Supports data science that is transparent, accountable, and fair." },
         { title: "Applied Insights", description: "Bridges theory and practice in real-world data applications." },

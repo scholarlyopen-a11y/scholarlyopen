@@ -52,6 +52,17 @@ export default function ChemistryPage() {
         "Energy materials",
         "Chemical synthesis",
       ]}
+      sectionTopics={[
+        "Organic Chemistry",
+        "Inorganic Chemistry",
+        "Analytical Chemistry",
+        "Physical Chemistry",
+        "Materials Chemistry",
+        "Computational Chemistry",
+        "Green Chemistry",
+        "Catalysis",
+        "Conservation Biology",
+      ]}
       mainHighlights={[
         { title: "Sustainable Innovation", description: "Highlighting chemistry solutions for energy, climate and materials." },
         { title: "Data-Driven Results", description: "Encourages detailed data reporting for reproducibility." },

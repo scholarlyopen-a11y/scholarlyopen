@@ -52,6 +52,16 @@ export default function EnvironmentalSciencePage() {
         "Natural resource management",
         "Urban ecology",
       ]}
+      sectionTopics={[
+        "Climate Science",
+        "Sustainability",
+        "Ecology",
+        "Environmental Chemistry",
+        "Water & Air Quality",
+        "Conservation",
+        "Natural Resource Management",
+        "Urban Ecology",
+      ]}
       mainHighlights={[
         { title: "Climate Action", description: "Research shaping policy and practice for a sustainable future." },
         { title: "Systemic Solutions", description: "Connects science, policy, and communities for environmental resilience." },

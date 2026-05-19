@@ -52,6 +52,17 @@ export default function EngineeringPage() {
         "Environmental engineering",
         "Smart systems and IoT",
       ]}
+      sectionTopics={[
+        "Mechanical Engineering",
+        "Electrical Engineering",
+        "Civil Engineering",
+        "Chemical Engineering",
+        "Computer Engineering",
+        "Robotics",
+        "Materials Engineering",
+        "Energy Systems",
+        "Industrial Engineering",
+      ]}
       mainHighlights={[
         { title: "Sustainable Systems", description: "Engineering research focused on environmental and societal resilience." },
         { title: "Technology Impact", description: "Prioritizes practical solutions for real-world challenges." },

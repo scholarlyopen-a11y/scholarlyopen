@@ -19,6 +19,7 @@ interface JournalPageProps {
   heroDescription: string
   heroIcon: ReactNode
   scopeAreas: string[]
+  sectionTopics: string[]
   sampleArticles: Article[]
   journalSlug: string
   mainHighlights: { title: string; description: string }[]
@@ -79,6 +80,7 @@ export function JournalPage({
   heroDescription,
   heroIcon,
   scopeAreas,
+  sectionTopics,
   sampleArticles,
   journalSlug,
   mainHighlights,
@@ -98,11 +100,14 @@ export function JournalPage({
       <main className="flex-1">
         <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary-foreground/15">
                 {heroIcon}
               </div>
-              <Badge className="bg-accent text-accent-foreground border-0">Gold OA</Badge>
+              <div>
+                <Badge className="bg-accent text-accent-foreground border-0">Gold OA</Badge>
+                <div className="mt-2 text-sm text-muted-foreground">ISSN: requested</div>
+              </div>
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">{title}</h1>
             <p className="mt-6 text-xl text-secondary-foreground/80 max-w-3xl leading-relaxed">{heroDescription}</p>
@@ -164,6 +169,17 @@ export function JournalPage({
                         </li>
                       ))}
                     </ul>
+                  </div>
+                </div>
+
+                <div className="mt-12">
+                  <h3 className="text-xl font-semibold mb-6">Journal Sections</h3>
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {sectionTopics.map((topic) => (
+                      <Card key={topic} className="border-border">
+                        <CardContent className="text-sm text-muted-foreground">{topic}</CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </div>
 

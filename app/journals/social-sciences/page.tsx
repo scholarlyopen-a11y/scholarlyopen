@@ -52,6 +52,16 @@ export default function SocialSciencesPage() {
         "Education and learning",
         "Civic participation and democracy",
       ]}
+      sectionTopics={[
+        "Sociology",
+        "Psychology",
+        "Education",
+        "Economics",
+        "Political Science",
+        "Anthropology",
+        "Communication Studies",
+        "Law & Public Policy",
+      ]}
       mainHighlights={[
         { title: "Policy Relevance", description: "Research with direct implications for public policy and social innovation." },
         { title: "Global Perspectives", description: "Comparative studies from communities around the world." },
