@@ -29,7 +29,7 @@ export default function SubmitPage() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const recipient = "abbas.qurasani+submissions-scholarisch@gmail.com"
+  const recipient = "submissions@scholarlyopen.org"
 
   const submitToEditorialOffice = async (formData: FormData) => {
     const response = await fetch("/api/submit", { method: "POST", body: formData })
@@ -158,8 +158,8 @@ export default function SubmitPage() {
                       <h4 className="font-semibold">Need Help?</h4>
                       <p className="text-sm text-muted-foreground mt-1">
                         Contact our editorial office at{" "}
-                        <a href="mailto:abbas.qurasani+submissions-scholarisch@gmail.com" className="text-primary hover:underline">
-                          abbas.qurasani+submissions-scholarisch@gmail.com
+                        <a href="mailto:submissions@scholarlyopen.org" className="text-primary hover:underline">
+                          submissions@scholarlyopen.org
                         </a>
                       </p>
                     </div>
@@ -244,10 +244,13 @@ export default function SubmitPage() {
                           required
                         >
                           <option value="">Select a discipline</option>
-                          <option value="social-sciences-open">Social Sciences Open</option>
-                          <option value="archaeological-frontiers">Archaeological Frontiers</option>
-                          <option value="medical-research-review">Medical Research Review</option>
-                          <option value="applied-health-sciences">Applied Health Sciences</option>
+                          <option value="social-sciences">Social Sciences Open</option>
+                          <option value="biology">Biology</option>
+                          <option value="chemistry">Chemistry</option>
+                          <option value="medicine">Medicine</option>
+                          <option value="data-science">Data Science</option>
+                          <option value="engineering">Engineering</option>
+                          <option value="environmental-science">Environmental Science</option>
                         </select>
                       </div>
                     </div>

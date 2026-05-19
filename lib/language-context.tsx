@@ -31,13 +31,13 @@ export const translations = {
     "nav.hybridOA": "Hybrid Open Access",
     
     // Brand
-    "brand.name": "Scholarisch",
-    "brand.tagline": "International Open Access Publishing",
+    "brand.name": "Scholarly Open",
+    "brand.tagline": "Where Research Meets FAIR Principles",
     "brand.description": "An international open-access publisher dedicated to advancing knowledge through rigorous peer review and open access.",
     
     // Hero Section
     "hero.title": "Advancing Knowledge Through Open Access",
-    "hero.subtitle": "Scholarisch is an international open-access publisher committed to disseminating high-quality research in Artificial Intelligence, Clinical Medicine, Sustainability, Data Science, and Engineering through Gold open access.",
+    "hero.subtitle": "Scholarly Open is an international open-access publisher committed to disseminating high-quality research in Artificial Intelligence, Clinical Medicine, Environmental Science, Data Science, Engineering, and Social Sciences through Gold open access.",
     "hero.cta.submit": "Submit Your Research",
     "hero.cta.learn": "Learn More",
     
@@ -49,16 +49,22 @@ export const translations = {
     
     // Journals Section
     "journals.title": "Our Journals",
-    "journals.subtitle": "We publish high-quality research across four peer-reviewed journals, all offering Gold open access.",
+    "journals.subtitle": "We publish high-quality research across seven peer-reviewed journals, all offering Gold open access.",
     "journals.viewJournal": "View Journal",
-    "journals.sso.title": "Scholarisch Journal of Artificial Intelligence",
-    "journals.sso.description": "Cutting-edge research in machine learning, AI algorithms, neural networks, and artificial intelligence applications.",
-    "journals.af.title": "Scholarisch Journal of Clinical Medicine",
-    "journals.af.description": "Advanced clinical research, therapeutic innovations, and evidence-based medical practice.",
-    "journals.mrr.title": "Scholarisch Advances in Sustainability",
-    "journals.mrr.description": "Environmental sustainability, green technology, renewable energy, and climate solutions.",
-    "journals.jahs.title": "Scholarisch Communications: Data Science",
-    "journals.jahs.description": "Data analytics, statistical methods, computational data science, and data-driven research.",
+    "journals.bio.title": "Scholarly Open: Biology",
+    "journals.bio.description": "Experimental and translational biology spanning molecular, cellular, and systems research.",
+    "journals.chem.title": "Scholarly Open: Chemistry",
+    "journals.chem.description": "Research in chemical sciences, materials, catalysis, and sustainable chemical technologies.",
+    "journals.med.title": "Scholarly Open: Medicine",
+    "journals.med.description": "Clinical research, translational medicine, and healthcare innovations that advance patient outcomes.",
+    "journals.ds.title": "Scholarly Open: Data Science",
+    "journals.ds.description": "Data-driven research, AI-enabled analytics, statistical methods, and computational science.",
+    "journals.eng.title": "Scholarly Open: Engineering",
+    "journals.eng.description": "Applied engineering research across infrastructure, energy, robotics, and systems innovation.",
+    "journals.env.title": "Scholarly Open: Environmental Science",
+    "journals.env.description": "Interdisciplinary research in climate science, sustainability, ecosystems, and environmental policy.",
+    "journals.ss.title": "Scholarly Open: Social Sciences",
+    "journals.ss.description": "Research in society, behavior, policy, and interdisciplinary social science inquiry.",
     
     // Features
     "features.title": "Why Publish With Us",
@@ -86,7 +92,7 @@ export const translations = {
     
     // CTA Section
     "cta.title": "Ready to Share Your Research?",
-    "cta.subtitle": "Join researchers worldwide who trust Scholarisch to publish their work with integrity and impact.",
+    "cta.subtitle": "Join researchers worldwide who trust Scholarly Open to publish their work with integrity and impact.",
     "cta.submit": "Submit Manuscript",
     "cta.guidelines": "Author Guidelines",
     
@@ -95,7 +101,7 @@ export const translations = {
     "footer.forAuthors": "For Authors",
     "footer.aboutUs": "About Us",
     "footer.policies": "Policies",
-    "footer.copyright": "Scholarisch i.G. All rights reserved.",
+    "footer.copyright": "Scholarly Open i.G. All rights reserved.",
     "footer.privacy": "Privacy Policy",
     "footer.impressum": "Impressum",
     "footer.archiving": "Archiving & Indexing",
@@ -122,8 +128,8 @@ export const translations = {
     "editorial.expressInterest": "Express Interest",
     
     // About Page
-    "about.title": "About Scholarisch",
-    "about.subtitle": "Scholarisch is an international open-access publisher dedicated to advancing knowledge through rigorous peer review and open access.",
+    "about.title": "About Scholarly Open",
+    "about.subtitle": "Scholarly Open is an international open-access publisher dedicated to advancing knowledge through rigorous peer review and open access.",
     
     // Contact
     "contact.title": "Contact Us",
@@ -132,6 +138,8 @@ export const translations = {
     // Articles
     "articles.title": "Articles",
     "articles.latest": "Latest Articles",
+    "articles.sampleTitle": "Sample Articles",
+    "articles.sampleNote": "These article outlines are illustrative examples for our launch journals.",
     "articles.viewAll": "View All Articles",
     "articles.readMore": "Read More",
     "articles.published": "Published",
@@ -166,13 +174,13 @@ export const translations = {
     "nav.hybridOA": "Hybrid Open Access",
     
     // Brand
-    "brand.name": "Scholarisch",
-    "brand.tagline": "Internationaler Open-Access-Verlag",
+    "brand.name": "Scholarly Open",
+    "brand.tagline": "Wo Forschung auf FAIR-Prinzipien trifft",
     "brand.description": "Ein internationaler Open-Access-Verlag, der sich der Förderung von Wissen durch rigoroses Peer-Review und offenen Zugang verschrieben hat.",
     
     // Hero Section
     "hero.title": "Wissen fördern durch Open Access",
-    "hero.subtitle": "Scholarisch ist ein internationaler Open-Access-Verlag, der sich der Verbreitung hochwertiger Forschung in den Bereichen Künstliche Intelligenz, Klinische Medizin, Nachhaltigkeit, Data Science und Ingenieurwesen durch Gold-Open-Access verschrieben hat.",
+    "hero.subtitle": "Scholarly Open ist ein internationaler Open-Access-Verlag, der sich der Verbreitung hochwertiger Forschung in den Bereichen Künstliche Intelligenz, Klinische Medizin, Umweltwissenschaften, Data Science, Ingenieurwesen und Sozialwissenschaften durch Gold-Open-Access verschrieben hat.",
     "hero.cta.submit": "Ihre Forschung einreichen",
     "hero.cta.learn": "Mehr erfahren",
     
@@ -184,16 +192,22 @@ export const translations = {
     
     // Journals Section
     "journals.title": "Unsere Zeitschriften",
-    "journals.subtitle": "Wir veröffentlichen hochwertige Forschung in fünf peer-reviewed Zeitschriften mit vollständigem Gold-Open-Access.",
+    "journals.subtitle": "Wir veröffentlichen hochwertige Forschung in sieben peer-reviewed Zeitschriften mit vollständigem Gold-Open-Access.",
     "journals.viewJournal": "Zeitschrift ansehen",
-    "journals.sso.title": "Scholarisch Journal of Artificial Intelligence",
-    "journals.sso.description": "Spitzenforschung in maschinellem Lernen, KI-Algorithmen, neuronalen Netzen und KI-Anwendungen.",
-    "journals.af.title": "Scholarisch Journal of Clinical Medicine",
-    "journals.af.description": "Fortgeschrittene klinische Forschung, therapeutische Innovationen und evidenzbasierte medizinische Praxis.",
-    "journals.mrr.title": "Scholarisch Advances in Sustainability",
-    "journals.mrr.description": "Umweltnachhaltigkeit, grüne Technologie, erneuerbare Energien und Klimalösungen.",
-    "journals.jahs.title": "Scholarisch Communications: Data Science",
-    "journals.jahs.description": "Datenanalyse, statistische Methoden, rechnergestützte Datenwissenschaft und datengestützte Forschung.",
+    "journals.bio.title": "Scholarly Open: Biology",
+    "journals.bio.description": "Experimentelle und translationale Biologie von molekularer bis systemischer Ebene.",
+    "journals.chem.title": "Scholarly Open: Chemistry",
+    "journals.chem.description": "Forschung in Chemie, Materialien, Katalyse und nachhaltiger Chemietechnik.",
+    "journals.med.title": "Scholarly Open: Medicine",
+    "journals.med.description": "Klinische Forschung, translationale Medizin und Innovationen im Gesundheitswesen.",
+    "journals.ds.title": "Scholarly Open: Data Science",
+    "journals.ds.description": "Datengetriebene Forschung, KI-gestützte Analytik, Statistik und rechnergestützte Wissenschaft.",
+    "journals.eng.title": "Scholarly Open: Engineering",
+    "journals.eng.description": "Angewandte Ingenieurswissenschaften in Infrastruktur, Energie, Robotik und Systeminnovation.",
+    "journals.env.title": "Scholarly Open: Environmental Science",
+    "journals.env.description": "Interdisziplinäre Forschung zu Klima, Nachhaltigkeit, Ökosystemen und Umweltpolitik.",
+    "journals.ss.title": "Scholarly Open: Social Sciences",
+    "journals.ss.description": "Forschung zu Gesellschaft, Verhalten, Politik und interdisziplinären Sozialwissenschaften.",
     
     // Features
     "features.title": "Warum bei uns veröffentlichen",
@@ -221,7 +235,7 @@ export const translations = {
     
     // CTA Section
     "cta.title": "Bereit, Ihre Forschung zu teilen?",
-    "cta.subtitle": "Schließen Sie sich Forschern weltweit an, die Scholarisch vertrauen, um ihre Arbeit mit Integrität und Wirkung zu veröffentlichen.",
+    "cta.subtitle": "Schließen Sie sich Forschern weltweit an, die Scholarly Open vertrauen, um ihre Arbeit mit Integrität und Wirkung zu veröffentlichen.",
     "cta.submit": "Manuskript einreichen",
     "cta.guidelines": "Autorenrichtlinien",
     
@@ -230,7 +244,7 @@ export const translations = {
     "footer.forAuthors": "Für Autoren",
     "footer.aboutUs": "Über uns",
     "footer.policies": "Richtlinien",
-    "footer.copyright": "Scholarisch i.G. Alle Rechte vorbehalten.",
+    "footer.copyright": "Scholarly Open i.G. Alle Rechte vorbehalten.",
     "footer.privacy": "Datenschutz",
     "footer.impressum": "Impressum",
     "footer.archiving": "Archivierung & Indexierung",
@@ -257,8 +271,8 @@ export const translations = {
     "editorial.expressInterest": "Interesse bekunden",
     
     // About Page
-    "about.title": "Über Scholarisch",
-    "about.subtitle": "Scholarisch ist ein internationaler Open-Access-Verlag, der sich der Förderung von Wissen durch rigoroses Peer-Review und offenen Zugang verschrieben hat.",
+    "about.title": "Über Scholarly Open",
+    "about.subtitle": "Scholarly Open ist ein internationaler Open-Access-Verlag, der sich der Förderung von Wissen durch rigoroses Peer-Review und offenen Zugang verschrieben hat.",
     
     // Contact
     "contact.title": "Kontaktieren Sie uns",
@@ -266,8 +280,8 @@ export const translations = {
     
     // Articles
     "articles.title": "Artikel",
-    "articles.latest": "Neueste Artikel",
-    "articles.viewAll": "Alle Artikel anzeigen",
+    "articles.latest": "Neueste Artikel",    "articles.sampleTitle": "Beispielartikel",
+    "articles.sampleNote": "Diese Artikelangaben dienen als illustrative Beispiele für den Start unserer Zeitschriften.",    "articles.viewAll": "Alle Artikel anzeigen",
     "articles.readMore": "Weiterlesen",
     "articles.published": "Veröffentlicht",
     "articles.doi": "DOI",
@@ -302,7 +316,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en")
 
   useEffect(() => {
-    const stored = localStorage.getItem("peerrex-language") as Language
+    const stored = localStorage.getItem("scholarly-open-language") as Language
     if (stored && (stored === "en" || stored === "de")) {
       setLanguageState(stored)
     }
@@ -310,7 +324,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
-    localStorage.setItem("peerrex-language", lang)
+    localStorage.setItem("scholarly-open-language", lang)
   }
 
   const t = (key: string): string => {
@@ -328,3 +342,4 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 export function useLanguage() {
   return useContext(LanguageContext)
 }
+

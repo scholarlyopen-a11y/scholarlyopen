@@ -107,8 +107,11 @@ export function ArticleList({ articles, journalSlug }: { articles: Article[]; jo
   
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">{t("articles.latest")}</h2>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">{t("articles.sampleTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("articles.sampleNote")}</p>
+        </div>
         <Button variant="outline" size="sm" asChild>
           <Link href={`/journals/${journalSlug}/articles`}>
             {t("articles.viewAll")}

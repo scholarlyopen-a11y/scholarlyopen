@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
-import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Lock, Zap } from "lucide-react"
+import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Lock, Zap, Leaf, Heart, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -38,34 +37,58 @@ export default function HomePage() {
 
   const journals = [
     {
-      title: t("journals.sso.title"),
-      description: t("journals.sso.description"),
-      icon: Brain,
-      href: "/journals/social-sciences-open",
+      title: t("journals.ss.title"),
+      description: t("journals.ss.description"),
+      icon: Users,
+      href: "/journals/social-sciences",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
     },
     {
-      title: t("journals.af.title"),
-      description: t("journals.af.description"),
-      icon: Landmark,
-      href: "/journals/archaeological-frontiers",
+      title: t("journals.bio.title"),
+      description: t("journals.bio.description"),
+      icon: Leaf,
+      href: "/journals/biology",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
     },
     {
-      title: t("journals.mrr.title"),
-      description: t("journals.mrr.description"),
-      icon: Microscope,
-      href: "/journals/medical-research-review",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
-    {
-      title: t("journals.jahs.title"),
-      description: t("journals.jahs.description"),
+      title: t("journals.chem.title"),
+      description: t("journals.chem.description"),
       icon: Beaker,
-      href: "/journals/applied-health-sciences",
+      href: "/journals/chemistry",
+      type: "Gold OA",
+      typeColor: "bg-accent text-accent-foreground",
+    },
+    {
+      title: t("journals.med.title"),
+      description: t("journals.med.description"),
+      icon: Heart,
+      href: "/journals/medicine",
+      type: "Gold OA",
+      typeColor: "bg-accent text-accent-foreground",
+    },
+    {
+      title: t("journals.ds.title"),
+      description: t("journals.ds.description"),
+      icon: Brain,
+      href: "/journals/data-science",
+      type: "Gold OA",
+      typeColor: "bg-accent text-accent-foreground",
+    },
+    {
+      title: t("journals.eng.title"),
+      description: t("journals.eng.description"),
+      icon: Settings,
+      href: "/journals/engineering",
+      type: "Gold OA",
+      typeColor: "bg-accent text-accent-foreground",
+    },
+    {
+      title: t("journals.env.title"),
+      description: t("journals.env.description"),
+      icon: Globe,
+      href: "/journals/environmental-science",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
     },
@@ -73,7 +96,7 @@ export default function HomePage() {
 
   const stats = [
     { value: "100%", label: t("stats.openAccess") },
-    { value: "4", label: t("stats.journals") },
+    { value: "7", label: t("stats.journals") },
     { value: "Global", label: t("stats.reach") },
     { value: "COPE", label: t("stats.guidelines") },
   ]
@@ -83,7 +106,7 @@ export default function HomePage() {
       <Header />
       
       <main className="flex-1">
-        {/* Hero Section - Gulf Air Maroon Theme */}
+        {/* Hero Section - Scholarly Open Leafy Green Theme */}
         <section className="relative overflow-hidden bg-primary">
           {/* Decorative Pattern */}
           <div className="absolute inset-0 opacity-10">
@@ -112,60 +135,6 @@ export default function HomePage() {
                   <Button size="lg" variant="outline" asChild className="border-primary-foreground/40 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                     <Link href="/about">{t("hero.cta.learn")}</Link>
                   </Button>
-                </div>
-              </div>
-              <div className="hidden lg:block relative">
-                {/* Scholarly Illustration */}
-                <div className="relative">
-                  {/* Main card with book/journal visual */}
-                  <div className="aspect-[4/3] rounded-2xl bg-primary-foreground/10 border border-primary-foreground/20 backdrop-blur-sm p-8 flex flex-col items-center justify-center">
-                    {/* Open book illustration */}
-                    <div className="relative mb-6">
-                      <div className="flex gap-1">
-                        {/* Left page */}
-                        <div className="w-24 h-32 bg-primary-foreground/95 rounded-l-sm shadow-lg transform -rotate-3 flex flex-col p-3">
-                          <div className="h-1 w-12 bg-primary/30 rounded mb-1" />
-                          <div className="h-1 w-16 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-14 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-10 bg-primary/20 rounded mb-2" />
-                          <div className="h-1 w-16 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-12 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-14 bg-primary/20 rounded" />
-                        </div>
-                        {/* Right page */}
-                        <div className="w-24 h-32 bg-primary-foreground/95 rounded-r-sm shadow-lg transform rotate-3 flex flex-col p-3">
-                          <div className="h-1 w-14 bg-primary/30 rounded mb-1" />
-                          <div className="h-1 w-12 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-16 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-10 bg-primary/20 rounded mb-2" />
-                          <div className="h-1 w-14 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-16 bg-primary/20 rounded mb-1" />
-                          <div className="h-1 w-12 bg-primary/20 rounded" />
-                        </div>
-                      </div>
-                      {/* Book spine shadow */}
-                      <div className="absolute inset-y-0 left-1/2 w-1 bg-primary/20 -translate-x-1/2" />
-                    </div>
-                    
-                    {/* Brand badge */}
-                    <div className="bg-accent text-accent-foreground px-6 py-3 rounded-lg font-bold text-xl tracking-wide">
-                      Scholarisch
-                    </div>
-                    <p className="text-primary-foreground/80 text-sm mt-3 text-center">
-                      {t("oaModels.fromMainz")}
-                    </p>
-                    
-                    {/* Floating badges */}
-                    <div className="absolute -top-3 -right-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                      DOAJ
-                    </div>
-                    <div className="absolute -bottom-3 -left-3 bg-primary-foreground text-primary px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                      COPE
-                    </div>
-                  </div>
-                  
-                  {/* Decorative elements */}
-                  <div className="absolute -z-10 top-4 left-4 w-full h-full rounded-2xl border border-accent/30" />
                 </div>
               </div>
             </div>
@@ -264,7 +233,7 @@ export default function HomePage() {
                 </p>
                 <div className="mt-8 space-y-6">
                   <div className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{background: 'var(--primary-foreground)'}}>
                       <Lock className="h-5 w-5" />
                     </div>
                     <div>
@@ -287,7 +256,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <Button asChild>
+                  <Button variant="secondary" asChild className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold">
                     <Link href="/open-access">
                       {t("oaModels.learnMore")}
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -296,11 +265,11 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="relative">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-muted/50 via-primary/5 to-accent/10 border border-border p-8 flex items-center justify-center">
-                  <div className="text-center">
-                    <BookOpen className="h-24 w-24 mx-auto text-primary/30" />
-                    <p className="mt-4 text-muted-foreground font-medium">{t("oaModels.accessible")}</p>
-                    <p className="mt-2 text-sm text-muted-foreground">{t("oaModels.fromMainz")}</p>
+                <div className="aspect-square rounded-2xl bg-gradient-to-r from-[var(--primary)] via-[var(--primary-mid)] to-[var(--primary-dark)] border border-border p-8 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <BookOpen className="h-24 w-24 mx-auto text-white" />
+                    <p className="mt-4 font-medium">{t("oaModels.accessible")}</p>
+                    <p className="mt-2 text-sm text-white/80">{t("oaModels.fromMainz")}</p>
                   </div>
                 </div>
               </div>
@@ -309,28 +278,23 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section 
-          className="text-white"
-          style={{
-            background: 'linear-gradient(135deg, oklch(0.45 0.12 200) 0%, oklch(0.35 0.10 220) 50%, oklch(0.28 0.08 240) 100%)'
-          }}
-        >
+        <section className="bg-secondary text-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">
                 {t("cta.title")}
               </h2>
-              <p className="mt-4 text-lg text-white/80">
+              <p className="mt-4 text-lg text-muted-foreground">
                 {t("cta.subtitle")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
+                <Button size="lg" asChild className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
                   <Link href="/submit">
                     {t("cta.submit")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white">
+                <Button size="lg" variant="outline" asChild className="border-primary bg-background text-foreground hover:bg-primary/10 hover:text-foreground">
                   <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
                 </Button>
               </div>
@@ -343,3 +307,4 @@ export default function HomePage() {
     </div>
   )
 }
+

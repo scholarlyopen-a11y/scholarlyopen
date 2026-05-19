@@ -41,10 +41,9 @@ const manuscriptSections = [
   {
     title: "References",
     items: [
-      "APA 7th edition format",
-      "DOI links where available",
-      "All references cited in text",
-      "Recent and relevant sources preferred",
+      "APA 7th edition for social sciences and most journals",
+      "AMA style or ICMJE recommendations for medical submissions",
+      "Other discipline-appropriate guidelines where noted",
     ],
   },
 ]
@@ -92,7 +91,7 @@ export default function AuthorGuidelinesPage() {
                 {t("nav.authorGuidelines")}
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Comprehensive instructions for preparing your manuscript for submission to {t("brand.name")} journals. Following these guidelines will help ensure a smooth review process.
+                Comprehensive instructions for preparing your manuscript for submission to {t("brand.name")} journals. Following these guidelines will help ensure a smooth review process across social sciences, medical, and other discipline-specific journals.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button asChild>
@@ -303,7 +302,7 @@ export default function AuthorGuidelinesPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-bold tracking-tight">Reference Style</h2>
               <p className="mt-4 text-muted-foreground mb-8">
-                Use APA 7th edition citation style. Include DOIs where available.
+                Use APA 7th edition citation style for social sciences and most journals, and AMA style or ICMJE recommendations for medical submissions. Always follow the journal-specific instructions for final formatting.
               </p>
               
               <div className="space-y-6">
@@ -333,13 +332,13 @@ export default function AuthorGuidelinesPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-primary text-primary-foreground">
+        <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 {t("cta.title")}
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 Once your manuscript is prepared according to these guidelines, you can submit through our online system.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -349,7 +348,7 @@ export default function AuthorGuidelinesPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
                   <Link href="/contact">{t("nav.contact")}</Link>
                 </Button>
               </div>

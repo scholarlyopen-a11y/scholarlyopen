@@ -3,120 +3,119 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* PeerRex Brand Palette: Deep Cyan (#0891B2) + Warm Amber accents */
-/* Differentiates from PLOS (green), Frontiers (teal-blue), MDPI (orange) */
+/* Scholarly Open Brand Palette: Leafy Green + Yellow */
+/* Designed to convey growth, openness, and FAIR research values */
 :root {
-  /* Background & Surface - Clean white with subtle cool undertone */
-  --background: oklch(0.99 0.002 220);
-  --foreground: oklch(0.15 0.02 220);
+  /* Background & Surface */
+  --background: oklch(0.98 0.01 135);
+  --foreground: oklch(0.12 0.03 145);
   
   /* Cards & Popovers */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 220);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 220);
+  --card: oklch(0.99 0.005 135);
+  --card-foreground: oklch(0.12 0.03 145);
+  --popover: oklch(0.99 0.005 135);
+  --popover-foreground: oklch(0.12 0.03 145);
   
-  /* Primary: Deep Cyan - #0891B2 equivalent */
-  --primary: oklch(0.58 0.14 200);
-  --primary-foreground: oklch(0.99 0 0);
+  /* Primary: Leafy green */
+  --primary: oklch(0.32 0.16 140);
+  --primary-mid: oklch(0.24 0.14 140);
+  --primary-dark: oklch(0.16 0.18 140);
+  --primary-foreground: oklch(0.98 0.005 145);
   
-  /* Secondary: Soft cyan tint for backgrounds */
-  --secondary: oklch(0.95 0.02 200);
-  --secondary-foreground: oklch(0.35 0.08 200);
+  /* Secondary: Soft green surface */
+  --secondary: oklch(0.90 0.03 140);
+  --secondary-foreground: oklch(0.18 0.04 140);
   
-  /* Accent: Bright Gold for CTAs and highlights - #F59E0B equivalent */
-  --accent: oklch(0.82 0.16 85);
-  --accent-foreground: oklch(0.18 0.04 85);
+  /* Accent: Warm yellow */
+  --accent: oklch(0.88 0.18 95);
+  --accent-foreground: oklch(0.10 0.02 95);
   
   /* Muted surfaces */
-  --muted: oklch(0.96 0.01 220);
-  --muted-foreground: oklch(0.45 0.02 220);
+  --muted: oklch(0.96 0.01 135);
+  --muted-foreground: oklch(0.22 0.05 145);
   
   /* Destructive */
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(1 0 0);
   
   /* Borders & Inputs */
-  --border: oklch(0.90 0.01 220);
-  --input: oklch(0.95 0.008 220);
-  --ring: oklch(0.58 0.14 200);
+  --border: oklch(0.88 0.01 135);
+  --input: oklch(0.94 0.008 135);
+  --ring: oklch(0.32 0.16 140);
   
-  /* Charts - Branded palette */
-  --chart-1: oklch(0.58 0.14 200);
-  --chart-2: oklch(0.82 0.16 85);
-  --chart-3: oklch(0.50 0.12 160);
-  --chart-4: oklch(0.45 0.10 260);
-  --chart-5: oklch(0.55 0.12 330);
+  /* Charts - Green / Yellow palette */
+  --chart-1: oklch(0.32 0.16 140);
+  --chart-2: oklch(0.88 0.18 95);
+  --chart-3: oklch(0.30 0.12 150);
+  --chart-4: oklch(0.27 0.10 120);
+  --chart-5: oklch(0.35 0.14 160);
   
   --radius: 0.5rem;
   
-  /* Sidebar - Deep cyan themed */
-  --sidebar: oklch(0.22 0.06 200);
-  --sidebar-foreground: oklch(0.96 0.01 200);
-  --sidebar-primary: oklch(0.82 0.16 85);
-  --sidebar-primary-foreground: oklch(0.18 0.04 85);
-  --sidebar-accent: oklch(0.30 0.06 200);
-  --sidebar-accent-foreground: oklch(0.96 0.01 200);
-  --sidebar-border: oklch(0.35 0.05 200);
-  --sidebar-ring: oklch(0.82 0.16 85);
+  /* Sidebar */
+  --sidebar: oklch(0.22 0.06 140);
+  --sidebar-foreground: oklch(0.97 0.01 140);
+  --sidebar-primary: oklch(0.88 0.18 95);
+  --sidebar-primary-foreground: oklch(0.10 0.02 95);
+  --sidebar-accent: oklch(0.30 0.08 140);
+  --sidebar-accent-foreground: oklch(0.97 0.01 140);
+  --sidebar-border: oklch(0.40 0.06 140);
+  --sidebar-ring: oklch(0.88 0.18 95);
   
-  /* Custom: Footer/CTA gradient - Cyan to Deep Blue */
-  --cta-gradient-start: oklch(0.45 0.12 200);
-  --cta-gradient-mid: oklch(0.35 0.10 220);
-  --cta-gradient-end: oklch(0.28 0.08 240);
+  /* Custom: Footer/CTA gradient */
+  --cta-gradient-start: oklch(0.32 0.16 140);
+  --cta-gradient-mid: oklch(0.88 0.18 95);
+  --cta-gradient-end: oklch(0.95 0.14 80);
 }
 
 .dark {
-  /* Dark mode with PeerRex Cyan palette */
-  --background: oklch(0.13 0.02 220);
-  --foreground: oklch(0.96 0.01 200);
+  --background: oklch(0.12 0.03 145);
+  --foreground: oklch(0.96 0.01 135);
   
-  --card: oklch(0.17 0.02 220);
-  --card-foreground: oklch(0.96 0.01 200);
-  --popover: oklch(0.17 0.02 220);
-  --popover-foreground: oklch(0.96 0.01 200);
+  --card: oklch(0.16 0.02 140);
+  --card-foreground: oklch(0.96 0.01 135);
+  --popover: oklch(0.16 0.02 140);
+  --popover-foreground: oklch(0.96 0.01 135);
   
-  /* Primary: Brighter cyan for dark mode */
-  --primary: oklch(0.65 0.14 200);
-  --primary-foreground: oklch(0.12 0.02 200);
+  --primary: oklch(0.38 0.17 140);
+  --primary-mid: oklch(0.26 0.15 140);
+  --primary-dark: oklch(0.14 0.20 140);
+  --primary-foreground: oklch(0.98 0.005 145);
   
-  /* Secondary */
-  --secondary: oklch(0.24 0.04 220);
-  --secondary-foreground: oklch(0.96 0.01 200);
+  --secondary: oklch(0.22 0.05 140);
+  --secondary-foreground: oklch(0.96 0.01 135);
   
-  /* Accent: Bright Gold for dark mode */
-  --accent: oklch(0.85 0.16 85);
-  --accent-foreground: oklch(0.18 0.04 85);
+  --accent: oklch(0.88 0.18 95);
+  --accent-foreground: oklch(0.10 0.02 95);
   
-  --muted: oklch(0.20 0.02 220);
-  --muted-foreground: oklch(0.65 0.02 200);
+  --muted: oklch(0.18 0.03 145);
+  --muted-foreground: oklch(0.74 0.02 140);
   
   --destructive: oklch(0.55 0.20 25);
-  --destructive-foreground: oklch(0.96 0 0);
+  --destructive-foreground: oklch(0.98 0.005 145);
   
-  --border: oklch(0.28 0.02 220);
-  --input: oklch(0.22 0.02 220);
-  --ring: oklch(0.65 0.14 200);
+  --border: oklch(0.24 0.02 145);
+  --input: oklch(0.20 0.02 145);
+  --ring: oklch(0.38 0.17 140);
   
-  --chart-1: oklch(0.65 0.14 200);
-  --chart-2: oklch(0.85 0.16 85);
-  --chart-3: oklch(0.55 0.12 160);
-  --chart-4: oklch(0.50 0.10 260);
-  --chart-5: oklch(0.58 0.12 330);
+  --chart-1: oklch(0.38 0.17 140);
+  --chart-2: oklch(0.88 0.18 95);
+  --chart-3: oklch(0.32 0.12 150);
+  --chart-4: oklch(0.28 0.10 120);
+  --chart-5: oklch(0.35 0.14 160);
   
-  --sidebar: oklch(0.15 0.02 220);
-  --sidebar-foreground: oklch(0.96 0.01 200);
-  --sidebar-primary: oklch(0.85 0.16 85);
-  --sidebar-primary-foreground: oklch(0.18 0.04 85);
-  --sidebar-accent: oklch(0.24 0.04 220);
-  --sidebar-accent-foreground: oklch(0.96 0.01 200);
-  --sidebar-border: oklch(0.30 0.03 220);
-  --sidebar-ring: oklch(0.65 0.14 200);
+  --sidebar: oklch(0.14 0.02 145);
+  --sidebar-foreground: oklch(0.96 0.01 135);
+  --sidebar-primary: oklch(0.88 0.18 95);
+  --sidebar-primary-foreground: oklch(0.10 0.02 95);
+  --sidebar-accent: oklch(0.22 0.05 140);
+  --sidebar-accent-foreground: oklch(0.96 0.01 135);
+  --sidebar-border: oklch(0.26 0.03 145);
+  --sidebar-ring: oklch(0.38 0.17 140);
   
-  /* Custom: Footer/CTA gradient - Cyan to Deep Blue */
-  --cta-gradient-start: oklch(0.48 0.12 200);
-  --cta-gradient-mid: oklch(0.38 0.10 220);
-  --cta-gradient-end: oklch(0.30 0.08 240);
+  --cta-gradient-start: oklch(0.38 0.17 140);
+  --cta-gradient-mid: oklch(0.88 0.18 95);
+  --cta-gradient-end: oklch(0.95 0.14 80);
 }
 
 @theme inline {
@@ -176,8 +175,8 @@
   }
 }
 
-/* PeerRex gradient for footer and CTA sections */
-.peerrex-gradient {
+/* Scholarly Open gradient for footer and CTA sections */
+.brand-gradient {
   background: linear-gradient(
     135deg,
     var(--cta-gradient-start) 0%,

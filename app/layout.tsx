@@ -15,10 +15,10 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: 'PeerRex | Open Access Scholarly Publishing',
-  description: 'PeerRex is an international open-access publisher dedicated to advancing knowledge in Social Sciences, Archaeology, and Medical research through rigorous peer review and open scholarship. DOAJ compliant, COPE member.',
+  title: 'Scholarly Open | Open Access Scholarly Publishing',
+  description: 'Scholarly Open is an international open-access publisher committed to advancing research across Biology, Chemistry, Medicine, Data Science, Engineering, Environmental Science, and Social Sciences with FAIR-aligned open access.',
   generator: 'v0.app',
-  keywords: ['open access', 'academic publishing', 'peer review', 'social sciences', 'archaeology', 'medical journals', 'international', 'DOAJ', 'COPE', 'CrossRef', 'DOI', 'scholarly publishing', 'PeerRex'],
+  keywords: ['open access', 'academic publishing', 'peer review', 'international', 'DOAJ', 'COPE', 'CrossRef', 'DOI', 'scholarly publishing', 'Scholarly Open'],
   icons: {
     icon: [
       {
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   openGraph: {
-    title: 'PeerRex | Open Access Scholarly Publishing',
-    description: 'International open-access publisher committed to advancing knowledge through rigorous peer review. DOAJ compliant, COPE member.',
+    title: 'Scholarly Open | Open Access Scholarly Publishing',
+    description: 'International open-access publisher committed to FAIR research dissemination, rigorous peer review, and global scholarly impact.',
     type: 'website',
     locale: 'en_US',
     alternateLocale: 'de_DE',

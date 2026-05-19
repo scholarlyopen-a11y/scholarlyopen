@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.CONTACT_TO ?? "abbas.qurasani+info-scholarisch@gmail.com"
+    recipient = process.env.CONTACT_TO ?? "info@scholarlyopen.org"
   } catch (err) {
     return Response.json(
       { ok: false, error: err instanceof Error ? err.message : "Email service not configured." },
@@ -57,9 +57,10 @@ export async function POST(request: Request) {
   await transporter.sendMail({
     from: smtpFrom,
     to,
-    subject: "Scholarisch SMTP Test",
+    subject: "Scholarly Open SMTP Test",
     text: "SMTP configuration is working. This is a local test email from the project.",
   })
 
   return Response.json({ ok: true, sentTo: to })
 }
+

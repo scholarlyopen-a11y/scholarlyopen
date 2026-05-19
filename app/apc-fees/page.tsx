@@ -10,11 +10,11 @@ import { useLanguage } from "@/lib/language-context"
 
 const apcDetails = [
   {
-    journal: "Social Sciences Journals",
+    journal: "Social Sciences Journal",
     regularAPC: "1,200",
     currency: "EUR",
     includes: [
-      "Full open access publication",
+      "Full Gold open access publication",
       "Peer review coordination",
       "Professional copyediting",
       "XML and PDF production",
@@ -24,31 +24,87 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Archaeology Journals",
-    regularAPC: "1,400",
+    journal: "Biology Journal",
+    regularAPC: "1,450",
     currency: "EUR",
     includes: [
-      "Full open access publication",
+      "Full Gold open access publication",
       "Peer review coordination",
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
       "Indexing and archiving",
-      "Enhanced figure support",
+      "Figures and data presentation support",
     ],
   },
   {
-    journal: "Medical Sciences Journals",
+    journal: "Chemistry Journal",
+    regularAPC: "1,450",
+    currency: "EUR",
+    includes: [
+      "Full Gold open access publication",
+      "Peer review coordination",
+      "Professional copyediting",
+      "XML and PDF production",
+      "DOI assignment",
+      "Indexing and archiving",
+      "Chemical structure and equation support",
+    ],
+  },
+  {
+    journal: "Medical Research Review",
     regularAPC: "2,200",
     currency: "EUR",
     includes: [
-      "Full open access publication",
+      "Full Gold open access publication",
       "Peer review coordination",
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
       "Indexing and archiving",
       "MEDLINE formatting",
+    ],
+  },
+  {
+    journal: "Data Science Journal",
+    regularAPC: "1,350",
+    currency: "EUR",
+    includes: [
+      "Full Gold open access publication",
+      "Peer review coordination",
+      "Professional copyediting",
+      "XML and PDF production",
+      "DOI assignment",
+      "Indexing and archiving",
+      "Code and dataset availability support",
+    ],
+  },
+  {
+    journal: "Engineering Journal",
+    regularAPC: "1,350",
+    currency: "EUR",
+    includes: [
+      "Full Gold open access publication",
+      "Peer review coordination",
+      "Professional copyediting",
+      "XML and PDF production",
+      "DOI assignment",
+      "Indexing and archiving",
+      "Technical figure and schematic support",
+    ],
+  },
+  {
+    journal: "Environmental Science Journal",
+    regularAPC: "1,300",
+    currency: "EUR",
+    includes: [
+      "Full Gold open access publication",
+      "Peer review coordination",
+      "Professional copyediting",
+      "XML and PDF production",
+      "DOI assignment",
+      "Indexing and archiving",
+      "Data visualization and sustainability support",
     ],
   },
 ]
@@ -145,7 +201,7 @@ export default function APCFeesPage() {
             <div className="max-w-2xl mb-12">
               <h2 className="text-3xl font-bold tracking-tight">Current APC Rates</h2>
               <p className="mt-4 text-muted-foreground">
-                Our APCs vary by discipline to reflect the different costs and services involved.
+                Our APCs vary by discipline to reflect the different costs and services involved. These rates apply across our portfolio of seven Scholarly Open journals.
               </p>
             </div>
             <div className="grid gap-6 lg:grid-cols-3">
@@ -283,13 +339,13 @@ export default function APCFeesPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-primary text-primary-foreground">
+        <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Questions About Fees?
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 Our team is happy to discuss payment options, waivers, or institutional agreements.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -299,7 +355,7 @@ export default function APCFeesPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
                   <Link href="/submit">{t("nav.submitManuscript")}</Link>
                 </Button>
               </div>

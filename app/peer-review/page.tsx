@@ -6,7 +6,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Peer Review Process | PeerRex",
+  title: "Peer Review Process | Scholarly Open",
   description: "Learn about our rigorous double-blind peer review process that ensures the quality and integrity of published research.",
 }
 
@@ -113,8 +113,8 @@ export default function PeerReviewPage() {
                 {steps.map((step, index) => (
                   <div key={step.number} className="relative flex gap-6">
                     {/* Step indicator */}
-                    <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-4 border-background bg-primary text-primary-foreground font-bold">
-                      {step.number}
+                    <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-4 border-background" style={{background: 'var(--primary-foreground)'}}>
+                      <span className="text-white font-bold">{step.number}</span>
                     </div>
                     
                     {/* Content */}
@@ -239,17 +239,17 @@ export default function PeerReviewPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-primary text-primary-foreground">
+        <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Submit Your Manuscript
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 Ready to share your research with the world? Start the submission process today.
               </p>
               <div className="mt-8">
-                <Button size="lg" variant="secondary" asChild>
+                <Button size="lg" asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
                   <Link href="/submit">
                     Submit Now
                     <ArrowRight className="ml-2 h-4 w-4" />

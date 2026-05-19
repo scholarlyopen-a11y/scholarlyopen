@@ -4,8 +4,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | PeerRex",
-  description: "Privacy policy and data protection information for PeerRex.",
+  title: "Privacy Policy | Scholarly Open",
+  description: "Privacy policy and data protection information for Scholarly Open.",
 }
 
 export default function PrivacyPolicyPage() {
@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
                 Privacy Policy
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                This privacy policy explains how PeerRex collects, uses, and protects your personal data in accordance with the General Data Protection Regulation (GDPR) and German data protection laws.
+                This privacy policy explains how Scholarly Open collects, uses, and protects your personal data in accordance with the General Data Protection Regulation (GDPR) and German data protection laws.
               </p>
               <p className="mt-4 text-sm text-muted-foreground">
                 Last updated: January 2024
@@ -41,9 +41,9 @@ export default function PrivacyPolicyPage() {
                 The data controller responsible for processing your personal data is:
               </p>
               <address className="not-italic text-muted-foreground mb-6 p-4 bg-muted/50 rounded-lg">
-                PeerRex<br />
+                Scholarly Open<br />
                 International Open Access Publisher<br />
-                Email: abbas.qurasani+privacy-scholarisch@gmail.com
+                Email: info@scholarlyopen.org
               </address>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">2. Data We Collect</h2>
@@ -142,7 +142,7 @@ export default function PrivacyPolicyPage() {
                 <li><strong>Withdraw consent:</strong> Where processing is based on consent</li>
               </ul>
               <p className="text-muted-foreground mb-4">
-                To exercise these rights, please contact us at abbas.qurasani+privacy-scholarisch@gmail.com.
+                To exercise these rights, please contact us at privacy@scholarlyopen.org.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">9. Cookies</h2>
@@ -166,7 +166,7 @@ export default function PrivacyPolicyPage() {
 
               <h2 className="text-2xl font-bold mt-8 mb-4">11. Complaints</h2>
               <p className="text-muted-foreground mb-4">
-                If you believe we have not handled your personal data correctly, you have the right to lodge a complaint with a supervisory authority in your jurisdiction. Please contact us at abbas.qurasani+privacy-scholarisch@gmail.com and we will assist you in identifying the appropriate authority.
+                If you believe we have not handled your personal data correctly, you have the right to lodge a complaint with a supervisory authority in your jurisdiction. Please contact us at privacy@scholarlyopen.org and we will assist you in identifying the appropriate authority.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">12. Changes to This Policy</h2>
@@ -180,8 +180,8 @@ export default function PrivacyPolicyPage() {
               </p>
               <address className="not-italic text-muted-foreground p-4 bg-muted/50 rounded-lg">
                 Data Protection Officer<br />
-                PeerRex<br />
-                Email: abbas.qurasani+privacy-scholarisch@gmail.com
+                Scholarly Open<br />
+                Email: info@scholarlyopen.org
               </address>
             </div>
           </div>

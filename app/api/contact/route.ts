@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.CONTACT_TO ?? "abbas.qurasani+info-scholarisch@gmail.com"
+    recipient = process.env.CONTACT_TO ?? "info@scholarlyopen.org"
   } catch (err) {
     return Response.json(
       { ok: false, error: err instanceof Error ? err.message : "Email service not configured." },
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
   const mailSubject = `Contact inquiry: ${subjectLabel(subject)}`
   const text = [
-    "New contact inquiry via Scholarisch website",
+    "New contact inquiry via Scholarly Open website",
     "",
     `Name: ${fullName}`,
     `Email: ${email}`,
@@ -111,3 +111,4 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true })
 }
+

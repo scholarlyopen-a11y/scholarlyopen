@@ -7,8 +7,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Open Access Policy | PeerRex",
-  description: "Learn about our commitment to open access publishing, licensing options, and how we make research freely available worldwide.",
+  title: "Open Access Policy | Scholarly Open",
+  description: "Learn about Scholarly Open's commitment to open access publishing, licensing options, and how we make research freely available worldwide.",
 }
 
 const benefits = [
@@ -37,26 +37,14 @@ const benefits = [
 const models = [
   {
     title: "Gold Open Access",
-    badge: "Primary Model",
-    description: "Articles are published immediately open access under a Creative Commons license. The author or their institution pays an Article Processing Charge (APC) to cover publication costs.",
+    badge: "Standard Model",
+    description: "All Scholarly Open journals publish immediately open access under a Creative Commons license. The author or their institution pays an Article Processing Charge (APC) to cover publication costs.",
     features: [
       "Immediate open access upon publication",
       "CC BY 4.0 license by default",
       "Full copyright retained by authors",
       "Indexed in major databases",
       "Permanent free access",
-    ],
-  },
-  {
-    title: "Hybrid Open Access",
-    badge: "Alternative",
-    description: "Authors can choose to make individual articles open access in otherwise subscription-based journals by paying an APC.",
-    features: [
-      "Open access option in subscription journals",
-      "Same CC BY licensing options",
-      "Author choice at acceptance",
-      "Meets funder OA requirements",
-      "Wider journal selection",
     ],
   },
 ]
@@ -75,7 +63,7 @@ export default function OpenAccessPage() {
                 Open Access Policy
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                PeerRex is committed to open access publishing. We believe that scientific knowledge should be freely available to everyone, everywhere, to accelerate research and benefit society.
+                Scholarly Open is committed to open access publishing. We believe that scientific knowledge should be freely available to everyone, everywhere, to accelerate research and benefit society.
               </p>
             </div>
           </div>
@@ -140,9 +128,9 @@ export default function OpenAccessPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
-              <h2 className="text-3xl font-bold tracking-tight">Our Open Access Models</h2>
+              <h2 className="text-3xl font-bold tracking-tight">Our Open Access Model</h2>
               <p className="mt-4 text-muted-foreground">
-                We offer both Gold and Hybrid open access options to accommodate different author and funder requirements.
+                All Scholarly Open journals publish using a Gold open access model, ensuring every article is freely available from the moment it is published.
               </p>
             </div>
             <div className="grid gap-8 lg:grid-cols-2">
@@ -215,7 +203,7 @@ export default function OpenAccessPage() {
               <div>
                 <h2 className="text-3xl font-bold tracking-tight">Author Rights</h2>
                 <p className="mt-4 text-muted-foreground mb-8">
-                  At PeerRex, authors retain copyright of their work. Here&apos;s what this means for you:
+                  At Scholarly Open, authors retain copyright of their work. Here&apos;s what this means for you:
                 </p>
                 <div className="space-y-4">
                   <div className="p-4 rounded-lg bg-background border border-border">
@@ -282,13 +270,13 @@ export default function OpenAccessPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-primary text-primary-foreground">
+        <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Publish Open Access With Us
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 Join the open access movement and make your research freely available to the world.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -298,7 +286,7 @@ export default function OpenAccessPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
                   <Link href="/apc-fees">View APC Information</Link>
                 </Button>
               </div>

@@ -6,8 +6,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "About Us | Scholarisch",
-  description: "Learn about Scholarisch, an international open-access publisher dedicated to advancing scholarly communication.",
+  title: "About Us | Scholarly Open",
+  description: "Learn about Scholarly Open, an international open-access publisher dedicated to advancing scholarly communication.",
 }
 
 const values = [
@@ -37,22 +37,22 @@ const timeline = [
   {
     year: "2024",
     title: "Foundation",
-    description: "Scholarisch was established with a vision to transform scholarly publishing.",
-  },
-  {
-    year: "2024",
-    title: "First Journals Launched",
-    description: "Launch of our flagship journals in Artificial Intelligence, Clinical Medicine, and related disciplines.",
+    description: "Scholarly Open was established with a vision to transform scholarly publishing.",
   },
   {
     year: "2025",
-    title: "Compliance Standards",
-    description: "Aligned with the highest standards in open access publishing and research integrity.",
+    title: "Building Our Team",
+    description: "We assembled an editorial team, advisory board, and publishing partners to launch our journal portfolio.",
   },
   {
     year: "2025",
-    title: "Indexing Milestones",
-    description: "Journals indexed in major international databases and discovery services.",
+    title: "Developing Workflows",
+    description: "We are putting in place FAIR workflows, open access processes, and author support systems.",
+  },
+  {
+    year: "2026",
+    title: "Preparing for Launch",
+    description: "Our first journals are being prepared for publication, with compliance and indexing efforts underway.",
   },
 ]
 
@@ -67,7 +67,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
             <div className="max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-                About Scholarisch
+                About Scholarly Open
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
                 We are an international open-access publisher committed to advancing scholarly communication through innovative publishing practices and unwavering commitment to research integrity.
@@ -120,7 +120,7 @@ export default function AboutPage() {
                 Our Core Values
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                These principles guide everything we do at Scholarisch.
+                These principles guide everything we do at Scholarly Open.
               </p>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -145,7 +145,7 @@ export default function AboutPage() {
                 Our Journey
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Key milestones in the development of Scholarisch.
+                Scholarly Open is a new publishing initiative. We are currently building our journal portfolio, refining our processes, and preparing our first open access publications.
               </p>
             </div>
             <div className="relative">
@@ -181,7 +181,7 @@ export default function AboutPage() {
                   Serving Researchers Worldwide
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  Scholarisch is dedicated to connecting researchers across the globe. We work with authors, reviewers, and institutions from every continent to advance scholarly communication.
+                  Scholarly Open is dedicated to connecting researchers across the globe. We work with authors, reviewers, and institutions from every continent to advance scholarly communication.
                 </p>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
                   Our international editorial board and global network of peer reviewers ensure that research from all regions receives the attention and rigorous evaluation it deserves.
@@ -208,7 +208,7 @@ export default function AboutPage() {
                 Whether as an author, reviewer, or editorial board member, we welcome your participation in advancing open scholarship.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild>
+                <Button size="lg" variant="secondary" asChild className="bg-primary text-primary-foreground hover:bg-primary-dark font-semibold">
                   <Link href="/submit">
                     Submit Your Research
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -227,3 +227,4 @@ export default function AboutPage() {
     </div>
   )
 }
+

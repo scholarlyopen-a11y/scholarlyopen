@@ -4,8 +4,8 @@ import { Footer } from "@/components/footer"
 import { AlertCircle } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Impressum | Scholarisch",
-  description: "Legal notice and company information for Scholarisch as required by German law.",
+  title: "Impressum | Scholarly Open",
+  description: "Legal notice and company information for Scholarly Open as required by German law.",
 }
 
 export default function ImpressumPage() {
@@ -40,10 +40,10 @@ export default function ImpressumPage() {
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Gründungsphase (i.G.)</h2>
                     <p className="mt-2 text-muted-foreground">
-                      Scholarisch befindet sich derzeit in der Gründungsphase (in Gründung / i.G.). Die formelle Eintragung ins Handelsregister sowie die Beantragung der Umsatzsteuer-Identifikationsnummer erfolgen nach Abschluss der organisatorischen Aufbauphase. Bis zur vollständigen Registrierung handelt es sich um ein Einzelunternehmen unter der Verantwortung der unten genannten Person.
+                      Scholarly Open befindet sich derzeit in der Gründungsphase (in Gründung / i.G.). Die formelle Eintragung ins Handelsregister sowie die Beantragung der Umsatzsteuer-Identifikationsnummer erfolgen nach Abschluss der organisatorischen Aufbauphase. Bis zur vollständigen Registrierung sind die unten genannten Personen gemeinsam verantwortlich.
                     </p>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Scholarisch is currently in the founding phase (in Gründung / i.G.). Formal registration in the commercial register and application for the VAT identification number will take place after the organizational setup phase is completed. Until full registration, this is a sole proprietorship under the responsibility of the person named below.
+                      Scholarly Open is currently in the founding phase (in Gründung / i.G.). Formal registration in the commercial register and application for the VAT identification number will take place after the organizational setup phase is completed. Until full registration, the persons named below are jointly responsible for the content.
                     </p>
                   </div>
                 </div>
@@ -53,7 +53,7 @@ export default function ImpressumPage() {
               <div>
                 <h2 className="text-2xl font-bold mb-4">Angaben gemäß § 5 TMG</h2>
                 <div className="p-6 bg-muted/50 rounded-lg border border-border">
-                  <p className="font-semibold text-lg">Scholarisch i.G.</p>
+                  <p className="font-semibold text-lg">Scholarly Open i.G.</p>
                   <p className="text-sm text-muted-foreground mt-1">(in Gründung / under formation)</p>
                   <p className="mt-4 text-muted-foreground">
                     International Open Access Publisher
@@ -61,17 +61,20 @@ export default function ImpressumPage() {
                 </div>
               </div>
 
-              {/* Responsible Person */}
+              {/* Responsible Persons */}
               <div>
-                <h2 className="text-2xl font-bold mb-4">Verantwortliche Person</h2>
-                <div className="p-6 bg-muted/50 rounded-lg border border-border">
-                  <p className="font-semibold text-foreground">Abbas Qurasani</p>
-                  <p className="text-muted-foreground mt-2">
-                    Inhaber und verantwortlich für den gesamten Inhalt
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    (Owner and responsible for all content)
-                  </p>
+                <h2 className="text-2xl font-bold mb-4">Verantwortliche Personen</h2>
+                <div className="p-6 bg-muted/50 rounded-lg border border-border space-y-4">
+                  <div>
+                    <p className="font-semibold text-foreground">Herr Gregor Fefer</p>
+                    <p className="text-muted-foreground mt-2">Inhaber und verantwortlich für den gesamten Inhalt</p>
+                    <p className="text-sm text-muted-foreground mt-1">(Owner and responsible for all content)</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Herr M. Abbas Qurasani</p>
+                    <p className="text-muted-foreground mt-2">Inhaber und verantwortlich für den gesamten Inhalt</p>
+                    <p className="text-sm text-muted-foreground mt-1">(Owner and responsible for all content)</p>
+                  </div>
                 </div>
               </div>
 
@@ -79,8 +82,8 @@ export default function ImpressumPage() {
               <div>
                 <h2 className="text-2xl font-bold mb-4">Kontakt</h2>
                 <div className="p-6 bg-muted/50 rounded-lg border border-border space-y-2 text-muted-foreground">
-                  <p><strong className="text-foreground">E-Mail:</strong> abbas.qurasani+info-scholarisch@gmail.com</p>
-                  <p><strong className="text-foreground">Website:</strong> www.scholarisch.com</p>
+                  <p><strong className="text-foreground">E-Mail:</strong> info@scholarlyopen.org</p>
+                  <p><strong className="text-foreground">Website:</strong> www.scholarlyopen.org</p>
                 </div>
               </div>
 
@@ -110,8 +113,12 @@ export default function ImpressumPage() {
                 <h2 className="text-2xl font-bold mb-4">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
                 <div className="p-6 bg-muted/50 rounded-lg border border-border">
                   <p className="text-muted-foreground">
-                    <strong className="text-foreground">Abbas Qurasani</strong><br />
-                    Scholarisch i.G.
+                    <strong className="text-foreground">Herr Gregor Fefer</strong><br />
+                    Scholarly Open i.G.
+                  </p>
+                  <p className="text-muted-foreground mt-4">
+                    <strong className="text-foreground">Herr M. Abbas Qurasani</strong><br />
+                    Scholarly Open i.G.
                   </p>
                 </div>
               </div>
@@ -200,3 +207,4 @@ export default function ImpressumPage() {
     </div>
   )
 }
+

@@ -7,7 +7,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Archiving & Indexing | PeerRex",
+  title: "Archiving & Indexing | Scholarly Open",
   description: "Learn about our archiving partners, indexing databases, and commitment to long-term preservation of scholarly content.",
 }
 
@@ -15,27 +15,27 @@ const indexingServices = [
   {
     category: "Major Databases",
     services: [
-      { name: "Crossref", status: "active" },
-      { name: "Google Scholar", status: "active" },
-      { name: "Microsoft Academic", status: "active" },
-      { name: "Semantic Scholar", status: "active" },
+      { name: "Crossref", status: "pending" },
+      { name: "Google Scholar", status: "pending" },
+      { name: "Microsoft Academic", status: "pending" },
+      { name: "Semantic Scholar", status: "pending" },
     ],
   },
   {
     category: "Discovery Services",
     services: [
       { name: "DOAJ (Directory of Open Access Journals)", status: "pending" },
-      { name: "Dimensions", status: "active" },
-      { name: "OpenAIRE", status: "active" },
-      { name: "BASE (Bielefeld Academic Search Engine)", status: "active" },
+      { name: "Dimensions", status: "pending" },
+      { name: "OpenAIRE", status: "pending" },
+      { name: "BASE (Bielefeld Academic Search Engine)", status: "pending" },
     ],
   },
   {
     category: "Discipline-Specific",
     services: [
-      { name: "PubMed / MEDLINE", status: "planned" },
-      { name: "Scopus", status: "planned" },
-      { name: "Web of Science", status: "planned" },
+      { name: "PubMed / MEDLINE", status: "pending" },
+      { name: "Scopus", status: "pending" },
+      { name: "Web of Science", status: "pending" },
       { name: "JSTOR", status: "planned" },
     ],
   },
@@ -45,12 +45,12 @@ const archivingPartners = [
   {
     name: "CLOCKSS",
     description: "Community-governed archive providing long-term preservation through a global network of redundant nodes.",
-    status: "Active",
+    status: "In Progress",
   },
   {
     name: "LOCKSS",
     description: "Libraries preserve and provide access to material through distributed digital preservation.",
-    status: "Active",
+    status: "In Progress",
   },
   {
     name: "Portico",
@@ -60,7 +60,7 @@ const archivingPartners = [
   {
     name: "Internet Archive",
     description: "Non-profit library providing free access to archived web content including scholarly articles.",
-    status: "Active",
+    status: "In Progress",
   },
 ]
 
@@ -189,7 +189,7 @@ export default function ArchivingIndexingPage() {
               ))}
             </div>
             <p className="mt-8 text-sm text-muted-foreground text-center">
-              We are actively working to expand our indexing coverage. Contact us for the latest status of specific journals.
+              We are actively working to expand our indexing coverage. Our current focus is on services that are pending or planned while we grow the journal portfolio.
             </p>
           </div>
         </section>
@@ -289,13 +289,13 @@ export default function ArchivingIndexingPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-primary text-primary-foreground">
+        <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Publish With Confidence
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 Your research will be preserved and discoverable for generations to come.
               </p>
               <div className="mt-8">

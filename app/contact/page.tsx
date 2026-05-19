@@ -15,16 +15,17 @@ const contactInfo = [
     icon: Mail,
     title: "Email",
     details: [
-      { label: "General Inquiries", value: "abbas.qurasani+info-scholarisch@gmail.com" },
-      { label: "Editorial Office", value: "abbas.qurasani+editorial-scholarisch@gmail.com" },
-      { label: "Submissions", value: "abbas.qurasani+submissions-scholarisch@gmail.com" },
+      { label: "General Inquiries", value: "info@scholarlyopen.org" },
+      { label: "Editorial Office", value: "editorial@scholarlyopen.org" },
+      { label: "Submissions", value: "submissions@scholarlyopen.org" },
     ],
   },
   {
     icon: MapPin,
     title: "Location",
     details: [
-      { label: "Scholarisch", value: "International Publisher" },
+      { label: "Address", value: "Am Gonsenheim 49a, 55122 Mainz, Germany" },
+      { label: "Headquarters", value: "Scholarly Open i.G." },
     ],
   },
   {
@@ -47,22 +48,22 @@ const contactInfo = [
 const departments = [
   {
     name: "Editorial Office",
-    email: "abbas.qurasani+editorial-scholarisch@gmail.com",
+    email: "editorial@scholarlyopen.org",
     description: "For manuscript-related inquiries, peer review questions, and editorial decisions.",
   },
   {
     name: "Author Support",
-    email: "abbas.qurasani+author-support-scholarisch@gmail.com",
+    email: "author-support@scholarlyopen.org",
     description: "For submission assistance, formatting questions, and author guidelines.",
   },
   {
     name: "Finance & APCs",
-    email: "abbas.qurasani+finance-apc-scholarisch@gmail.com",
+    email: "finance@scholarlyopen.org",
     description: "For invoices, payment inquiries, and APC waiver requests.",
   },
   {
     name: "Technical Support",
-    email: "abbas.qurasani+technical-support-scholarisch@gmail.com",
+    email: "technical-support@scholarlyopen.org",
     description: "For website issues, submission system problems, and technical questions.",
   },
 ]
@@ -377,14 +378,14 @@ export default function ContactPage() {
             <div className="text-center max-w-2xl mx-auto mb-12">
               <h2 className="text-3xl font-bold tracking-tight">Global Reach</h2>
               <p className="mt-4 text-muted-foreground">
-                Scholarisch serves researchers worldwide, connecting scholars across all continents.
+                Scholarly Open serves researchers worldwide, connecting scholars across all continents.
               </p>
             </div>
             <div className="aspect-video rounded-lg bg-muted border border-border flex items-center justify-center">
               <div className="text-center p-8">
                 <MapPin className="h-16 w-16 mx-auto text-primary/20" />
-                <p className="mt-4 font-semibold">International Open Access Publisher</p>
-                <p className="text-sm text-muted-foreground">Connecting researchers worldwide</p>
+                <p className="mt-4 font-semibold">Based in Mainz, Germany</p>
+                <p className="text-sm text-muted-foreground">Am Gonsenheim 49a, 55122 Mainz, Germany</p>
               </div>
             </div>
           </div>
@@ -395,3 +396,4 @@ export default function ContactPage() {
     </div>
   )
 }
+

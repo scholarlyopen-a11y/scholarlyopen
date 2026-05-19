@@ -104,8 +104,8 @@ export function JournalEditorialBoard({
       <div>
         <h3 className="text-xl font-semibold mb-6">{t("editorial.seniorEditors")}</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {associateEditors.map((editor) => (
-            <EditorCard key={editor.name} editor={editor} />
+          {associateEditors.map((editor, index) => (
+            <EditorCard key={`${editor.role}-${index}`} editor={editor} />
           ))}
         </div>
       </div>
@@ -114,8 +114,8 @@ export function JournalEditorialBoard({
       <div>
         <h3 className="text-xl font-semibold mb-6">{t("editorial.boardMembers")}</h3>
         <div className="grid gap-3 md:grid-cols-2">
-          {editorialBoard.map((editor) => (
-            <BoardMemberRow key={editor.name} editor={editor} />
+          {editorialBoard.map((editor, index) => (
+            <BoardMemberRow key={`${editor.role}-${index}`} editor={editor} />
           ))}
         </div>
       </div>

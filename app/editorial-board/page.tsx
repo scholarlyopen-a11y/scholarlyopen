@@ -7,7 +7,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Editorial Board | PeerRex",
+  title: "Editorial Board | Scholarly Open",
   description: "Meet our distinguished editorial board members who ensure the highest standards of scholarly publishing.",
 }
 
@@ -16,7 +16,7 @@ const editorInChief = {
   role: "Editor-in-Chief",
   affiliation: "European University Institute",
   specialization: "Social Sciences & Research Methodology",
-  email: "abbas.qurasani+editorial-board-scholarisch@gmail.com",
+  email: "editorial-board@scholarlyopen.org",
 }
 
 const seniorEditors = [
@@ -269,13 +269,13 @@ export default function EditorialBoardPage() {
         </section>
 
         {/* Join Editorial Board */}
-        <section className="py-16 lg:py-24 bg-primary text-primary-foreground">
+        <section className="py-16 lg:py-24 bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Join Our Editorial Team
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 We are always looking for distinguished scholars to join our editorial board. If you are interested in contributing to the advancement of open scholarship, we would love to hear from you.
               </p>
               <div className="mt-8">

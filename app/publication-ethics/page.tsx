@@ -7,7 +7,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Publication Ethics | PeerRex",
+  title: "Publication Ethics | Scholarly Open",
   description: "Our commitment to publication ethics, research integrity, and COPE guidelines.",
 }
 
@@ -87,26 +87,25 @@ export default function PublicationEthicsPage() {
                 Publication Ethics
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                PeerRex is committed to upholding the highest standards of publication ethics. We follow the guidelines of the Committee on Publication Ethics (COPE) in all our editorial processes.
+                Scholarly Open is committed to upholding the highest standards of publication ethics. We follow the guidelines of the Committee on Publication Ethics (COPE) in all our editorial processes.
               </p>
             </div>
           </div>
         </section>
 
-        {/* COPE Membership */}
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
               <div>
                 <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Commitment</span>
                 <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                  COPE Member
+                  COPE Best Practices
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  As a member of the Committee on Publication Ethics (COPE), we adhere to its core practices and guidelines for ethical scholarly publishing. COPE provides leadership, resources, and support for editors and publishers on all aspects of publication ethics.
+                  We align our editorial and ethical policies with the Committee on Publication Ethics (COPE) core practices. These best practices help us handle research integrity issues consistently and transparently.
                 </p>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  We use COPE flowcharts and guidelines when handling cases of suspected misconduct, ensuring consistent and fair treatment of all parties involved.
+                  We use COPE flowcharts and guidance when addressing suspected misconduct, ensuring fair treatment of authors, reviewers, and readers.
                 </p>
                 <div className="mt-8">
                   <Button variant="outline" asChild>
@@ -289,13 +288,13 @@ export default function PublicationEthicsPage() {
         </section>
 
         {/* Report Concerns */}
-        <section className="bg-primary text-primary-foreground">
+        <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Report Ethical Concerns
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 If you have concerns about the ethical conduct of any work published by or submitted to our journals, please contact us. All reports are treated confidentially.
               </p>
               <div className="mt-8">

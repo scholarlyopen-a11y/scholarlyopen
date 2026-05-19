@@ -1,21 +1,21 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, Brain, Landmark, Microscope, CheckCircle } from "lucide-react"
+import { ArrowRight, Brain, Leaf, Beaker, Microscope, Settings, Globe, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Aims & Scope | PeerRex",
-  description: "Discover the aims, scope, and research areas covered by PeerRex journals.",
+  title: "Aims & Scope | Scholarly Open",
+  description: "Discover the aims, scope, and research areas covered by Scholarly Open journals.",
 }
 
 const disciplines = [
   {
     icon: Brain,
     title: "Social Sciences",
-    description: "Our social sciences journals publish cutting-edge research that advances understanding of human society, behavior, and institutions.",
+    description: "Our social sciences journal publishes research that advances understanding of human society, behavior, and institutions.",
     areas: [
       "Sociology and Social Policy",
       "Political Science and International Relations",
@@ -29,25 +29,41 @@ const disciplines = [
     color: "primary",
   },
   {
-    icon: Landmark,
-    title: "Archaeology",
-    description: "Our archaeology journals advance the study of human history through material remains, from prehistoric times to the recent past.",
+    icon: Leaf,
+    title: "Biology",
+    description: "Our biology journal publishes research on living systems, ecology, and biological innovations.",
     areas: [
-      "Prehistoric and Protohistoric Archaeology",
-      "Classical and Mediterranean Archaeology",
-      "Medieval and Historical Archaeology",
-      "Archaeological Science and Methods",
-      "Cultural Heritage and Conservation",
-      "Near Eastern and Asian Archaeology",
-      "African and American Archaeology",
-      "Maritime and Underwater Archaeology",
+      "Molecular and Cellular Biology",
+      "Ecology and Evolution",
+      "Genetics and Genomics",
+      "Conservation Biology",
+      "Developmental Biology",
+      "Systems Biology",
+      "Biotechnology",
+      "Environmental Biology",
     ],
     color: "accent",
   },
   {
+    icon: Beaker,
+    title: "Chemistry",
+    description: "Our chemistry journal publishes research on chemical science, materials, and sustainable technologies.",
+    areas: [
+      "Analytical Chemistry",
+      "Organic and Inorganic Chemistry",
+      "Materials Science",
+      "Physical Chemistry",
+      "Chemical Engineering",
+      "Sustainable Chemistry",
+      "Catalysis and Reaction Mechanisms",
+      "Environmental Chemistry",
+    ],
+    color: "chart-3",
+  },
+  {
     icon: Microscope,
-    title: "Medical Sciences",
-    description: "Our medical science journals publish research that improves human health through clinical, translational, and public health research.",
+    title: "Medicine",
+    description: "Our medical journal publishes research that improves human health through clinical, translational, and public health studies.",
     areas: [
       "Clinical Medicine and Diagnostics",
       "Public Health and Epidemiology",
@@ -57,6 +73,54 @@ const disciplines = [
       "Mental Health and Psychiatry",
       "Global Health and Health Policy",
       "Medical Education",
+    ],
+    color: "accent",
+  },
+  {
+    icon: Settings,
+    title: "Data Science",
+    description: "Our data science journal publishes research on AI, analytics, and FAIR data practices.",
+    areas: [
+      "Machine Learning and AI",
+      "Data Mining and Visualization",
+      "Statistical Modeling",
+      "Reproducible Research",
+      "Big Data Systems",
+      "Ethics in Data Science",
+      "Open Data and FAIR Practices",
+      "Computational Methods",
+    ],
+    color: "primary",
+  },
+  {
+    icon: Globe,
+    title: "Environmental Science",
+    description: "Our environmental science journal publishes research on ecosystems, sustainability, and climate resilience.",
+    areas: [
+      "Climate Change and Adaptation",
+      "Sustainability Science",
+      "Ecosystem Services",
+      "Environmental Monitoring",
+      "Conservation Science",
+      "Water and Air Quality",
+      "Renewable Energy",
+      "Environmental Policy",
+    ],
+    color: "accent",
+  },
+  {
+    icon: Settings,
+    title: "Engineering",
+    description: "Our engineering journal publishes research on sustainable systems, infrastructure, and applied technology.",
+    areas: [
+      "Civil and Structural Engineering",
+      "Electrical and Mechanical Systems",
+      "Sustainable Infrastructure",
+      "Biomedical Engineering",
+      "Materials and Manufacturing",
+      "Robotics and Automation",
+      "Energy Systems",
+      "Systems Design",
     ],
     color: "chart-3",
   },
@@ -103,7 +167,7 @@ export default function AimsScopePage() {
                 Aims & Scope
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                PeerRex is dedicated to publishing impactful research across Social Sciences, Archaeology, and Medical Sciences, serving the global scholarly community through open access.
+                Scholarly Open is dedicated to publishing impactful research across Social Sciences, Medicine, Environmental Science, Biology, Chemistry, Data Science, and Engineering, serving the global scholarly community through open access.
               </p>
             </div>
           </div>
@@ -138,7 +202,7 @@ export default function AimsScopePage() {
             <div className="max-w-2xl mb-12">
               <h2 className="text-3xl font-bold tracking-tight">Research Areas</h2>
               <p className="mt-4 text-muted-foreground">
-                We publish peer-reviewed research in three major disciplines, covering a wide range of specialized areas.
+                We publish peer-reviewed research across seven scholarly disciplines, covering a wide range of specialized areas and interdisciplinary topics.
               </p>
             </div>
             <div className="space-y-12">
@@ -148,11 +212,15 @@ export default function AimsScopePage() {
                     <div className="flex items-start gap-4">
                       <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
                         discipline.color === 'primary' ? 'bg-primary/10' :
-                        discipline.color === 'accent' ? 'bg-accent/10' : 'bg-chart-3/20'
+                        discipline.color === 'accent' ? 'bg-accent/10' :
+                        discipline.color === 'secondary' ? 'bg-secondary/10' :
+                        'bg-chart-3/20'
                       }`}>
                         <discipline.icon className={`h-6 w-6 ${
                           discipline.color === 'primary' ? 'text-primary' :
-                          discipline.color === 'accent' ? 'text-accent' : 'text-foreground'
+                          discipline.color === 'accent' ? 'text-accent' :
+                          discipline.color === 'secondary' ? 'text-secondary' :
+                          'text-foreground'
                         }`} />
                       </div>
                       <div>
@@ -170,7 +238,9 @@ export default function AimsScopePage() {
                         <div key={area} className="flex items-center gap-2 text-sm">
                           <div className={`h-1.5 w-1.5 rounded-full ${
                             discipline.color === 'primary' ? 'bg-primary' :
-                            discipline.color === 'accent' ? 'bg-accent' : 'bg-chart-3'
+                            discipline.color === 'accent' ? 'bg-accent' :
+                            discipline.color === 'secondary' ? 'bg-secondary' :
+                            'bg-chart-3'
                           }`} />
                           {area}
                         </div>
@@ -234,13 +304,13 @@ export default function AimsScopePage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-primary text-primary-foreground">
+        <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Ready to Submit Your Research?
               </h2>
-              <p className="mt-4 text-lg text-primary-foreground/80">
+              <p className="mt-4 text-lg text-secondary-foreground/80">
                 If your research falls within our scope, we invite you to submit your manuscript for consideration.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -250,7 +320,7 @@ export default function AimsScopePage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
                   <Link href="/author-guidelines">Author Guidelines</Link>
                 </Button>
               </div>

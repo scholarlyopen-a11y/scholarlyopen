@@ -25,14 +25,20 @@ function safeText(value: unknown, max = 5000) {
 
 function journalLabel(value: string) {
   switch (value) {
-    case "social-sciences-open":
+    case "social-sciences":
       return "Social Sciences Open"
-    case "archaeological-frontiers":
-      return "Archaeological Frontiers"
-    case "medical-research-review":
-      return "Medical Research Review"
-    case "applied-health-sciences":
-      return "Applied Health Sciences"
+    case "biology":
+      return "Biology"
+    case "chemistry":
+      return "Chemistry"
+    case "medicine":
+      return "Medicine"
+    case "data-science":
+      return "Data Science"
+    case "engineering":
+      return "Engineering"
+    case "environmental-science":
+      return "Environmental Science"
     default:
       return "Unspecified"
   }
@@ -52,7 +58,7 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.SUBMISSIONS_TO ?? "abbas.qurasani+submissions-scholarisch@gmail.com"
+    recipient = process.env.SUBMISSIONS_TO ?? "submissions@scholarlyopen.org"
   } catch (err) {
     return Response.json(
       {
@@ -94,7 +100,7 @@ export async function POST(request: Request) {
   const subject = `Manuscript submission: ${title} (${journalLabel(discipline)})`
 
   const text = [
-    `Submission request via Scholarisch website`,
+    `Submission request via Scholarly Open website`,
     ``,
     `Corresponding author`,
     `- Name: ${[firstName, lastName].filter(Boolean).join(" ")}`,
@@ -140,3 +146,4 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true })
 }
+

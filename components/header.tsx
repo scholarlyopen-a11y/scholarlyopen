@@ -13,27 +13,26 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { useLanguage } from "@/lib/language-context"
+import { LogoSO } from "./logo-so"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { language, setLanguage, t } = useLanguage()
 
   const journals = [
-    { name: t("journals.sso.title"), href: "/journals/social-sciences-open", type: "Gold OA" },
-    { name: t("journals.af.title"), href: "/journals/archaeological-frontiers", type: "Gold OA" },
-    { name: t("journals.mrr.title"), href: "/journals/medical-research-review", type: "Hybrid OA" },
-    { name: t("journals.jahs.title"), href: "/journals/applied-health-sciences", type: "Hybrid OA" },
+    { name: t("journals.ss.title"), href: "/journals/social-sciences", type: "Gold OA" },
+    { name: t("journals.bio.title"), href: "/journals/biology", type: "Gold OA" },
+    { name: t("journals.chem.title"), href: "/journals/chemistry", type: "Gold OA" },
+    { name: t("journals.med.title"), href: "/journals/medicine", type: "Gold OA" },
+    { name: t("journals.ds.title"), href: "/journals/data-science", type: "Gold OA" },
+    { name: t("journals.eng.title"), href: "/journals/engineering", type: "Gold OA" },
+    { name: t("journals.env.title"), href: "/journals/environmental-science", type: "Gold OA" },
   ]
 
   const navigation = [
     { name: t("nav.home"), href: "/" },
     { name: t("nav.about"), href: "/about" },
-    {
-      name: t("nav.journals"),
-      href: "#",
-      children: journals,
-      isJournals: true,
-    },
+    { name: t("nav.journals"), href: "#", children: journals, isJournals: true },
     {
       name: t("nav.forAuthors"),
       href: "#",
@@ -58,19 +57,19 @@ export function Header() {
 
   return (
     <header 
-      className="sticky top-0 z-50 text-white border-b border-white/10"
+      className="sticky top-0 z-50 border-b"
       style={{
-        background: 'linear-gradient(135deg, oklch(0.45 0.12 200) 0%, oklch(0.35 0.10 220) 50%, oklch(0.28 0.08 240) 100%)'
+        background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-mid) 45%, var(--primary-dark) 100%)',
       }}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
-              <span className="text-lg font-bold text-white">SC</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg">
+              <LogoSO />
             </div>
             <div className="hidden sm:block">
-              <span className="text-lg font-semibold text-white">{t("brand.name")}</span>
+              <span className="text-lg font-semibold text-[var(--primary-foreground)]">{t("brand.name")}</span>
             </div>
           </Link>
         </div>
@@ -79,7 +78,7 @@ export function Header() {
           {/* Language Toggle Mobile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10">
                 <Globe className="h-4 w-4 mr-1" />
                 {language.toUpperCase()}
               </Button>
@@ -97,7 +96,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white hover:bg-white/10"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-[var(--primary-foreground)] hover:bg-primary/10"
           >
             <span className="sr-only">Toggle menu</span>
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -109,7 +108,7 @@ export function Header() {
             item.children ? (
               <DropdownMenu key={item.name}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-sm font-medium text-white/90 hover:text-white hover:bg-white/10">
+                  <Button variant="ghost" className="text-sm font-medium text-[var(--primary-foreground)] hover:bg-primary/10">
                     {item.name}
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
@@ -125,15 +124,19 @@ export function Header() {
                           </Link>
                         </DropdownMenuItem>
                       ))}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">{t("nav.hybridOA")}</DropdownMenuLabel>
-                      {item.children.filter(j => j.type === "Hybrid OA").map((child) => (
-                        <DropdownMenuItem key={child.name} asChild>
-                          <Link href={child.href} className="w-full cursor-pointer">
-                            {child.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
+                      {item.children.some(j => j.type === "Hybrid OA") && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="text-xs text-muted-foreground">{t("nav.hybridOA")}</DropdownMenuLabel>
+                          {item.children.filter(j => j.type === "Hybrid OA").map((child) => (
+                            <DropdownMenuItem key={child.name} asChild>
+                              <Link href={child.href} className="w-full cursor-pointer">
+                                {child.name}
+                              </Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </>
+                      )}
                     </>
                   ) : (
                     item.children.map((child) => (
@@ -150,7 +153,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-3 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors"
+                className="px-3 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-colors"
               >
                 {item.name}
               </Link>
@@ -162,7 +165,7 @@ export function Header() {
           {/* Language Toggle Desktop */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10">
                 <Globe className="h-4 w-4 mr-1" />
                 {language.toUpperCase()}
               </Button>
@@ -177,7 +180,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button asChild>
+          <Button variant="secondary" asChild className="bg-secondary text-secondary-foreground border border-secondary/60 shadow-sm hover:bg-secondary/90">
             <Link href="/submit">{t("nav.submitManuscript")}</Link>
           </Button>
         </div>
@@ -206,7 +209,7 @@ export function Header() {
                       {child.name}
                     </Link>
                   ))}
-                  {item.isJournals && (
+                  {item.isJournals && item.children.some(c => c.type === "Hybrid OA") && (
                     <>
                       <span className="block px-6 py-1 text-xs text-muted-foreground font-medium mt-2">{t("nav.hybridOA")}</span>
                       {item.children.filter(c => c.type === "Hybrid OA").map((child) => (
