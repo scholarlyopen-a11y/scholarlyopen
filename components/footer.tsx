@@ -17,6 +17,17 @@ function ComplianceBadge({ name, abbr, description }: { name: string; abbr: stri
   )
 }
 
+function CcByLogo() {
+  return (
+    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white text-[0.65rem] font-bold">
+      <div className="flex flex-col items-center leading-tight">
+        <span className="text-[0.7rem]">CC</span>
+        <span className="text-[0.56rem]">BY</span>
+      </div>
+    </div>
+  )
+}
+
 const socialLinks = [
   {
     name: "X (Twitter)",
@@ -228,10 +239,16 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-[var(--primary-foreground)]/20 pt-8">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-sm text-white/60">
-              &copy; {new Date().getFullYear()} {t("footer.copyright")}
-            </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 text-sm text-white/60">
+              <p>
+                &copy; {new Date().getFullYear()} {t("footer.copyright")}
+              </p>
+              <div className="flex flex-wrap items-center gap-3 text-white/70">
+                <CcByLogo />
+                <span>{t("footer.ccbyStatement")}</span>
+              </div>
+            </div>
             <div className="flex items-center gap-6 text-sm text-white/60">
               <Link href="/privacy" className="hover:text-white transition-colors">
                 {t("footer.privacy")}

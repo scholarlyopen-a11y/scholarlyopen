@@ -26,51 +26,51 @@ interface JournalPageProps {
 }
 
 const placeholderEditorInChief = {
-  name: "To be recruited",
+  name: "Position open",
   role: "Editor-in-Chief",
   affiliation: "Under formation",
-  specialization: "Editorial leadership",
+  specialization: "Currently appointing",
 }
 
 const placeholderAssociateEditors = [
   {
-    name: "To be recruited",
+    name: "Position open",
     role: "Associate Editor",
     affiliation: "Under formation",
-    specialization: "Editorial development",
+    specialization: "Currently appointing",
   },
   {
-    name: "To be recruited",
+    name: "Position open",
     role: "Associate Editor",
     affiliation: "Under formation",
-    specialization: "Editorial development",
+    specialization: "Currently appointing",
   },
   {
-    name: "To be recruited",
+    name: "Position open",
     role: "Associate Editor",
     affiliation: "Under formation",
-    specialization: "Editorial development",
+    specialization: "Currently appointing",
   },
 ]
 
 const placeholderEditorialBoard = [
   {
-    name: "Under formation",
+    name: "Position open",
     role: "Board Member",
     affiliation: "Under formation",
-    specialization: "To be recruited",
+    specialization: "Currently appointing",
   },
   {
-    name: "Under formation",
+    name: "Position open",
     role: "Board Member",
     affiliation: "Under formation",
-    specialization: "To be recruited",
+    specialization: "Currently appointing",
   },
   {
-    name: "Under formation",
+    name: "Position open",
     role: "Board Member",
     affiliation: "Under formation",
-    specialization: "To be recruited",
+    specialization: "Currently appointing",
   },
 ]
 
