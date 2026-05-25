@@ -206,7 +206,7 @@ export default function SocialSciencesOpenPage() {
               <Badge className="bg-primary-foreground/20 text-primary-foreground border-0">{t("nav.goldOA")}</Badge>
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-              Scholarisch Journal of Artificial Intelligence
+              Scholarly Open Journal of Artificial Intelligence
             </h1>
             <p className="mt-6 text-xl text-primary-foreground/80 max-w-3xl leading-relaxed">
               A rigorous peer-reviewed journal advancing cutting-edge research in Artificial Intelligence, Machine Learning, and AI Systems. All articles published with Gold open access.
@@ -257,7 +257,7 @@ export default function SocialSciencesOpenPage() {
                     <h2 className="text-3xl font-bold tracking-tight mb-6">About the Journal</h2>
                     <div className="prose prose-lg text-muted-foreground">
                       <p>
-                        Scholarisch Journal of Artificial Intelligence is a fully Gold Open Access journal published by Scholarisch. We are committed to advancing the frontiers of AI research while maintaining the highest standards of scientific rigor and ethical responsibility.
+                        Scholarly Open Journal of Artificial Intelligence is a fully Gold Open Access journal published by Scholarly Open. We are committed to advancing the frontiers of AI research while maintaining the highest standards of scientific rigor and ethical responsibility.
                       </p>
                       <p>
                         The journal welcomes original research articles, review articles, and methodological papers across all areas of artificial intelligence. We encourage both theoretical contributions and practical applications.

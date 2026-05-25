@@ -183,7 +183,7 @@ export default function ArchaeologicalFrontiersPage() {
               <Badge className="bg-accent-foreground/20 text-accent-foreground border-0">{t("nav.goldOA")}</Badge>
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-              Scholarisch Journal of Clinical Medicine
+              Scholarly Open Journal of Clinical Medicine
             </h1>
             <p className="mt-6 text-xl text-accent-foreground/80 max-w-3xl leading-relaxed">
               A gold open-access journal dedicated to advancing clinical medicine through rigorous peer review of cutting-edge research, innovations, and evidence-based practice improvements.
@@ -234,7 +234,7 @@ export default function ArchaeologicalFrontiersPage() {
                     <h2 className="text-3xl font-bold tracking-tight mb-6">About the Journal</h2>
                     <div className="prose prose-lg text-muted-foreground">
                       <p>
-                        Scholarisch Journal of Clinical Medicine is a fully Gold Open Access journal published by Scholarisch. We are dedicated to advancing clinical practice through publication of high-quality research with direct patient care implications.
+                        Scholarly Open Journal of Clinical Medicine is a fully Gold Open Access journal published by Scholarly Open. We are dedicated to advancing clinical practice through publication of high-quality research with direct patient care implications.
                       </p>
                       <p>
                         We publish original research, systematic reviews, case reports, and clinical innovations across all areas of medicine. The journal bridges basic science discoveries with clinical applications.

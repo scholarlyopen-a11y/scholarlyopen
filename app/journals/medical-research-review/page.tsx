@@ -186,7 +186,7 @@ export default function MedicalResearchReviewPage() {
               <Badge className="bg-secondary text-secondary-foreground border-0">Gold Open Access</Badge>
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-              Scholarisch Advances in Sustainability
+              Scholarly Open Advances in Sustainability
             </h1>
             <p className="mt-6 text-xl text-background/80 max-w-3xl leading-relaxed">
               A peer-reviewed journal dedicated to advancing sustainable development, environmental solutions, and climate action. All articles published with Gold open access.
@@ -237,7 +237,7 @@ export default function MedicalResearchReviewPage() {
                     <h2 className="text-3xl font-bold tracking-tight mb-6">About the Journal</h2>
                     <div className="prose prose-lg text-muted-foreground">
                       <p>
-                        Scholarisch Advances in Sustainability is a fully Gold Open Access journal published by Scholarisch. We are committed to advancing environmental sustainability, climate solutions, and sustainable development globally.
+                        Scholarly Open Advances in Sustainability is a fully Gold Open Access journal published by Scholarly Open. We are committed to advancing environmental sustainability, climate solutions, and sustainable development globally.
                       </p>
                       <p>
                         The journal welcomes original research articles, review articles, and methodological papers across all areas of sustainability including environmental science, renewable energy, circular economy, and sustainable development.

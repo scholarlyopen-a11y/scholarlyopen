@@ -1,4 +1,4 @@
-# Scholarisch Open Access Portal
+# Scholarly Open Access Portal
 
 Marketing website for an open-access publishing/journals brand, built with Next.js (App Router), TypeScript, and Tailwind CSS.
 

@@ -62,14 +62,11 @@ export function Header() {
         background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-mid) 45%, var(--primary-dark) 100%)',
       }}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg">
-              <LogoSO />
-            </div>
-            <div className="hidden sm:block">
-              <span className="text-lg font-semibold text-[var(--primary-foreground)]">{t("brand.name")}</span>
+            <div className="flex h-16 w-[250px] shrink-0 items-center sm:h-20 sm:w-[330px] lg:w-[360px]">
+              <LogoSO variant="lockup" className="h-full w-auto object-contain" priority />
             </div>
           </Link>
         </div>
@@ -199,7 +196,7 @@ export function Header() {
                   {item.isJournals && (
                     <span className="block px-6 py-1 text-xs text-muted-foreground font-medium">{t("nav.goldOA")}</span>
                   )}
-                  {item.children.filter(c => !item.isJournals || c.type === "Gold OA").map((child) => (
+                  {item.children.filter(c => !item.isJournals || ("type" in c && c.type === "Gold OA")).map((child) => (
                     <Link
                       key={child.name}
                       href={child.href}
@@ -209,10 +206,10 @@ export function Header() {
                       {child.name}
                     </Link>
                   ))}
-                  {item.isJournals && item.children.some(c => c.type === "Hybrid OA") && (
+                  {item.isJournals && item.children.some(c => "type" in c && c.type === "Hybrid OA") && (
                     <>
                       <span className="block px-6 py-1 text-xs text-muted-foreground font-medium mt-2">{t("nav.hybridOA")}</span>
-                      {item.children.filter(c => c.type === "Hybrid OA").map((child) => (
+                      {item.children.filter(c => "type" in c && c.type === "Hybrid OA").map((child) => (
                         <Link
                           key={child.name}
                           href={child.href}

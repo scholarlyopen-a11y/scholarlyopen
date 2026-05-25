@@ -136,10 +136,9 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg">
-                  <LogoSO />
-                </div>
-              <span className="text-lg font-semibold">{t("brand.name")}</span>
+              <div className="flex h-24 w-[320px] max-w-full shrink-0 items-center">
+                <LogoSO variant="lockup" className="h-full w-auto object-contain" />
+              </div>
             </Link>
             <p className="mt-4 text-sm text-white/70 leading-relaxed">
               {t("brand.description")}

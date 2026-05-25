@@ -15,6 +15,7 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://scholarlyopen.org'),
   title: 'Scholarly Open | Open Access Scholarly Publishing',
   description: 'Scholarly Open is an international open-access publisher committed to advancing research across Biology, Chemistry, Medicine, Data Science, Engineering, Environmental Science, and Social Sciences with FAIR-aligned open access.',
   generator: 'v0.app',
@@ -22,19 +23,21 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
         url: '/icon.svg',
         type: 'image/svg+xml',
       },
+      {
+        url: '/icon-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
     ],
-    apple: '/apple-icon.png',
+    shortcut: '/icon.svg',
+    apple: {
+      url: '/apple-icon.png',
+      sizes: '180x180',
+      type: 'image/png',
+    },
   },
   openGraph: {
     title: 'Scholarly Open | Open Access Scholarly Publishing',
@@ -42,6 +45,20 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     alternateLocale: 'de_DE',
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Scholarly Open',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Scholarly Open | Open Access Scholarly Publishing',
+    description: 'International open-access publisher committed to FAIR research dissemination, rigorous peer review, and global scholarly impact.',
+    images: ['/og-image.svg'],
   },
 }
 

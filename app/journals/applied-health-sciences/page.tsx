@@ -185,7 +185,7 @@ export default function AppliedHealthSciencesPage() {
               </div>
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-              Scholarisch Communications: Data Science
+              Scholarly Open Communications: Data Science
             </h1>
             <p className="mt-6 text-xl text-background/80 max-w-3xl leading-relaxed">
               A gold open-access journal dedicated to advancing data science through rigorous peer review of cutting-edge research, methods, and practical applications across all domains.
@@ -236,7 +236,7 @@ export default function AppliedHealthSciencesPage() {
                     <h2 className="text-3xl font-bold tracking-tight mb-6">About the Journal</h2>
                     <div className="prose prose-lg text-muted-foreground">
                       <p>
-                        Scholarisch Communications: Data Science is a fully Gold Open Access journal published by Scholarisch. We are committed to advancing data science through publication of high-quality research with practical impact.
+                        Scholarly Open Communications: Data Science is a fully Gold Open Access journal published by Scholarly Open. We are committed to advancing data science through publication of high-quality research with practical impact.
                       </p>
                       <p>
                         We publish original research, methodological papers, and practical applications across all areas of data science including machine learning, statistical methods, big data, and data analytics.
