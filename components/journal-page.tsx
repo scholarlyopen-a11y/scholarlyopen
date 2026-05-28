@@ -100,16 +100,18 @@ export function JournalPage({
       <main className="flex-1">
         <section className="bg-secondary text-secondary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
-            <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary-foreground/15">
-                {heroIcon}
-              </div>
-              <div>
-                <Badge className="bg-accent text-accent-foreground border-0">Gold OA</Badge>
-                <div className="mt-2 text-sm text-muted-foreground">ISSN: requested</div>
+            <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl text-balance">{title}</h1>
+              <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-primary-foreground/10 px-4 py-3 ring-1 ring-primary-foreground/15">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary-foreground/15">
+                  {heroIcon}
+                </div>
+                <div className="min-w-0">
+                  <Badge className="bg-accent text-accent-foreground border-0">Gold OA</Badge>
+                  <div className="mt-2 whitespace-nowrap text-sm text-secondary-foreground/75">ISSN: requested</div>
+                </div>
               </div>
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">{title}</h1>
             <p className="mt-6 text-xl text-secondary-foreground/80 max-w-3xl leading-relaxed">{heroDescription}</p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">

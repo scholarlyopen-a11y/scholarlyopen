@@ -176,15 +176,20 @@ export default function ArchaeologicalFrontiersPage() {
         {/* Hero */}
         <section className="bg-accent text-accent-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-accent-foreground/20">
-                <Landmark className="h-8 w-8" />
+            <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl text-balance">
+                Scholarly Open Journal of Clinical Medicine
+              </h1>
+              <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-accent-foreground/10 px-4 py-3 ring-1 ring-accent-foreground/15">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent-foreground/20">
+                  <Landmark className="h-8 w-8" />
+                </div>
+                <div className="min-w-0">
+                  <Badge className="bg-accent-foreground/20 text-accent-foreground border-0">{t("nav.goldOA")}</Badge>
+                  <div className="mt-2 whitespace-nowrap text-sm text-accent-foreground/75">ISSN: requested</div>
+                </div>
               </div>
-              <Badge className="bg-accent-foreground/20 text-accent-foreground border-0">{t("nav.goldOA")}</Badge>
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-              Scholarly Open Journal of Clinical Medicine
-            </h1>
             <p className="mt-6 text-xl text-accent-foreground/80 max-w-3xl leading-relaxed">
               A gold open-access journal dedicated to advancing clinical medicine through rigorous peer review of cutting-edge research, innovations, and evidence-based practice improvements.
             </p>

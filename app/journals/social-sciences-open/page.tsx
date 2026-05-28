@@ -199,15 +199,20 @@ export default function SocialSciencesOpenPage() {
         {/* Hero */}
         <section className="bg-primary text-primary-foreground">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary-foreground/20">
-                <Brain className="h-8 w-8" />
+            <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl text-balance">
+                Scholarly Open Journal of Artificial Intelligence
+              </h1>
+              <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-primary-foreground/10 px-4 py-3 ring-1 ring-primary-foreground/15">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary-foreground/20">
+                  <Brain className="h-8 w-8" />
+                </div>
+                <div className="min-w-0">
+                  <Badge className="bg-primary-foreground/20 text-primary-foreground border-0">{t("nav.goldOA")}</Badge>
+                  <div className="mt-2 whitespace-nowrap text-sm text-primary-foreground/75">ISSN: requested</div>
+                </div>
               </div>
-              <Badge className="bg-primary-foreground/20 text-primary-foreground border-0">{t("nav.goldOA")}</Badge>
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-              Scholarly Open Journal of Artificial Intelligence
-            </h1>
             <p className="mt-6 text-xl text-primary-foreground/80 max-w-3xl leading-relaxed">
               A rigorous peer-reviewed journal advancing cutting-edge research in Artificial Intelligence, Machine Learning, and AI Systems. All articles published with Gold open access.
             </p>
