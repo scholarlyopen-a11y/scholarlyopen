@@ -100,12 +100,12 @@ export function Header() {
           </button>
         </div>
 
-        <div className="hidden lg:flex lg:gap-x-1">
+        <div className="hidden lg:flex lg:gap-x-0.5 xl:gap-x-1">
           {navigation.map((item) =>
             item.children ? (
               <DropdownMenu key={item.name}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-sm font-medium text-[var(--primary-foreground)] hover:bg-primary/10">
+                  <Button variant="ghost" className="text-sm font-medium text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1.5 lg:px-2 xl:px-3">
                     {item.name}
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
@@ -150,7 +150,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-3 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-colors"
+                className="px-1.5 lg:px-2 xl:px-3 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
               >
                 {item.name}
               </Link>

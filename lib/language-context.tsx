@@ -151,6 +151,15 @@ export const translations = {
     "articles.pdf": "Download PDF",
     "articles.cite": "Cite",
     
+    // Journal Page
+    "journal.about": "About the Journal",
+    "journal.aboutText": "Scholarly Open publishes highly relevant and FAIR-aligned research across our journals. We focus on transparent processes, rapid dissemination, and strong author support.",
+    "journal.scope": "Scope & Coverage",
+    "journal.sections": "Journal Sections",
+    "journal.submitTo": "Submit to",
+    "journal.submitText": "Please review our author guidelines and prepare your manuscript according to our submission requirements. We welcome original research, reviews, and methodological contributions that support FAIR scholarship.",
+    "journal.startSubmission": "Start Submission",
+    
     // Language Toggle
     "language.en": "English",
     "language.de": "Deutsch",
@@ -292,6 +301,15 @@ export const translations = {
     "articles.fullText": "Volltext",
     "articles.pdf": "PDF herunterladen",
     "articles.cite": "Zitieren",
+    
+    // Journal Page
+    "journal.about": "Über diese Zeitschrift",
+    "journal.aboutText": "Scholarly Open veröffentlicht hochrelevante und FAIR-konforme Forschung in allen unseren Zeitschriften. Wir konzentrieren uns auf transparente Prozesse, schnelle Verbreitung und starke Unterstützung für Autoren.",
+    "journal.scope": "Ziele & Reichweite",
+    "journal.sections": "Zeitschriftenrubriken",
+    "journal.submitTo": "Einreichen bei",
+    "journal.submitText": "Bitte lesen Sie unsere Autorenrichtlinien und bereiten Sie Ihr Manuskript gemäß unseren Einreichungsanforderungen vor. Wir begrüßen Originalarbeiten, Reviews und methodische Beiträge, die das FAIR-Wissenschaftsprinzip unterstützen.",
+    "journal.startSubmission": "Einreichung starten",
     
     // Language Toggle
     "language.en": "English",

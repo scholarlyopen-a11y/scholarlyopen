@@ -235,12 +235,12 @@ export function JournalPage({
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-md shadow-accent/15">
                 <Link href="/submit">
-                  Submit Manuscript
+                  {t("cta.submit")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className={`transition-all duration-300 ${theme.buttonOutline}`}>
-                <Link href="/author-guidelines">Author Guidelines</Link>
+                <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
               </Button>
             </div>
           </div>
@@ -265,25 +265,25 @@ export function JournalPage({
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <Tabs defaultValue="about" className="space-y-8">
               <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="about">{t("nav.about")}</TabsTrigger>
                 <TabsTrigger value="articles">{t("articles.title")}</TabsTrigger>
                 <TabsTrigger value="editorial">{t("nav.editorialBoard")}</TabsTrigger>
-                <TabsTrigger value="submit">Submit</TabsTrigger>
+                <TabsTrigger value="submit">{t("nav.submitManuscript")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="about" className="space-y-12">
                 <div className="grid gap-12 lg:grid-cols-2">
                   <div>
-                    <h2 className="text-3xl font-bold tracking-tight mb-6">About the Journal</h2>
+                    <h2 className="text-3xl font-bold tracking-tight mb-6">{t("journal.about")}</h2>
                     <div className="prose prose-lg text-muted-foreground">
                       <p>{description}</p>
                       <p>
-                        Scholarly Open publishes highly relevant and FAIR-aligned research across our journals. We focus on transparent processes, rapid dissemination, and strong author support.
+                        {t("journal.aboutText")}
                       </p>
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold tracking-tight mb-6">Scope & Coverage</h2>
+                    <h2 className="text-3xl font-bold tracking-tight mb-6">{t("journal.scope")}</h2>
                     <ul className="grid gap-3">
                       {scopeAreas.map((area) => (
                         <li key={area} className="flex items-center gap-3">
@@ -296,7 +296,7 @@ export function JournalPage({
                 </div>
 
                 <div className="mt-12">
-                  <h3 className="text-xl font-semibold mb-6">Journal Sections</h3>
+                  <h3 className="text-xl font-semibold mb-6">{t("journal.sections")}</h3>
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {sectionTopics.map((topic) => (
                       <Card key={topic} className="border-border">
@@ -334,16 +334,16 @@ export function JournalPage({
 
               <TabsContent value="submit" className="space-y-12">
                 <div className="rounded-3xl border border-border bg-muted/50 p-8">
-                  <h2 className="text-3xl font-bold tracking-tight mb-4">Submit to {title}</h2>
+                  <h2 className="text-3xl font-bold tracking-tight mb-4">{t("journal.submitTo")} {title}</h2>
                   <p className="text-muted-foreground mb-6">
-                    Please review our author guidelines and prepare your manuscript according to our submission requirements. We welcome original research, reviews, and methodological contributions that support FAIR scholarship.
+                    {t("journal.submitText")}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                      <Link href="/submit">Start Submission</Link>
+                      <Link href="/submit">{t("journal.startSubmission")}</Link>
                     </Button>
                     <Button size="lg" variant="outline" asChild className="border-primary/20 bg-background text-foreground hover:bg-primary/10 hover:text-foreground">
-                      <Link href="/author-guidelines">Author Guidelines</Link>
+                      <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
                     </Button>
                   </div>
                 </div>
