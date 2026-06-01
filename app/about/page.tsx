@@ -1,62 +1,68 @@
-import { Metadata } from "next"
+"use client"
+
 import Link from "next/link"
+import { useEffect } from "react"
 import { ArrowRight, Target, Eye, Award, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-
-export const metadata: Metadata = {
-  title: "About Us | Scholarly Open",
-  description: "Learn about Scholarly Open, an international open-access publisher dedicated to advancing scholarly communication.",
-}
-
-const values = [
-  {
-    icon: Target,
-    title: "Integrity",
-    description: "We uphold the highest ethical standards in scholarly publishing, ensuring transparency and accountability in all our processes.",
-  },
-  {
-    icon: Eye,
-    title: "Openness",
-    description: "We believe knowledge should be freely accessible to all, breaking down barriers to scientific and scholarly information.",
-  },
-  {
-    icon: Award,
-    title: "Excellence",
-    description: "We are committed to publishing only the highest quality research through rigorous peer review and editorial oversight.",
-  },
-  {
-    icon: Globe,
-    title: "Global Impact",
-    description: "We connect researchers across borders, fostering international collaboration and knowledge exchange.",
-  },
-]
-
-const timeline = [
-  {
-    year: "2024",
-    title: "Foundation",
-    description: "Scholarly Open was established with a vision to transform scholarly publishing.",
-  },
-  {
-    year: "2025",
-    title: "Building Our Team",
-    description: "We assembled an editorial team, advisory board, and publishing partners to launch our journal portfolio.",
-  },
-  {
-    year: "2025",
-    title: "Developing Workflows",
-    description: "We are putting in place FAIR workflows, open access processes, and author support systems.",
-  },
-  {
-    year: "2026",
-    title: "Preparing for Launch",
-    description: "Our first journals are being prepared for publication, with compliance and indexing efforts underway.",
-  },
-]
+import { useLanguage } from "@/lib/language-context"
 
 export default function AboutPage() {
+  const { t } = useLanguage()
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.title = `${t("about.heroTitle")} | Scholarly Open`
+    }
+  }, [t])
+
+  const values = [
+    {
+      icon: Target,
+      title: t("about.value1.title"),
+      description: t("about.value1.desc"),
+    },
+    {
+      icon: Eye,
+      title: t("about.value2.title"),
+      description: t("about.value2.desc"),
+    },
+    {
+      icon: Award,
+      title: t("about.value3.title"),
+      description: t("about.value3.desc"),
+    },
+    {
+      icon: Globe,
+      title: t("about.value4.title"),
+      description: t("about.value4.desc"),
+    },
+  ]
+
+  const timeline = [
+    {
+      year: "2024",
+      title: t("about.time1.title"),
+      description: t("about.time1.desc"),
+    },
+    {
+      year: "2025",
+      title: t("about.time2.title"),
+      description: t("about.time2.desc"),
+    },
+    {
+      year: "2025",
+      title: t("about.time3.title"),
+      description: t("about.time3.desc"),
+    },
+    {
+      year: "2026",
+      title: t("about.time4.title"),
+      description: t("about.time4.desc"),
+    },
+  ]
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -67,10 +73,10 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
             <div className="max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-                About Scholarly Open
+                {t("about.heroTitle")}
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                We are an international open-access publisher committed to advancing scholarly communication through innovative publishing practices and unwavering commitment to research integrity.
+                {t("about.heroSubtitle")}
               </p>
             </div>
           </div>
@@ -82,30 +88,30 @@ export default function AboutPage() {
             <div className="grid gap-12 lg:grid-cols-2">
               <div className="space-y-6">
                 <div>
-                  <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Mission</span>
+                  <span className="text-sm font-medium text-primary uppercase tracking-wider">{t("about.ourMission")}</span>
                   <h2 className="mt-2 text-3xl font-bold tracking-tight">
-                    Democratizing Knowledge
+                    {t("about.missionTitle")}
                   </h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
-                  Our mission is to facilitate the global dissemination of high-quality research by providing open access to peer-reviewed scholarly articles. We believe that knowledge should not be constrained by financial or geographical barriers.
+                  {t("about.missionP1")}
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  We work with researchers, institutions, and funders worldwide to ensure that important discoveries in Artificial Intelligence, Clinical Medicine, Sustainability, Data Science, and Engineering reach the audiences who need them most.
+                  {t("about.missionP2")}
                 </p>
               </div>
               <div className="space-y-6">
                 <div>
-                  <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Vision</span>
+                  <span className="text-sm font-medium text-primary uppercase tracking-wider">{t("about.ourVision")}</span>
                   <h2 className="mt-2 text-3xl font-bold tracking-tight">
-                    A More Open Future
+                    {t("about.visionTitle")}
                   </h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
-                  We envision a world where all scholarly research is freely accessible, where researchers are recognized for their contributions, and where the advancement of human knowledge benefits everyone equally.
+                  {t("about.visionP1")}
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  Through continuous innovation in publishing technology and processes, we strive to create a sustainable and equitable publishing ecosystem that serves the global research community.
+                  {t("about.visionP2")}
                 </p>
               </div>
             </div>
@@ -117,10 +123,10 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Our Core Values
+                {t("about.valuesTitle")}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                These principles guide everything we do at Scholarly Open.
+                {t("about.valuesSub")}
               </p>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -142,10 +148,10 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Our Journey
+                {t("about.journeyTitle")}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Scholarly Open is a new publishing initiative. We are currently building our journal portfolio, refining our processes, and preparing our first open access publications.
+                {t("about.journeySub")}
               </p>
             </div>
             <div className="relative">
@@ -176,21 +182,21 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
               <div>
-                <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Reach</span>
+                <span className="text-sm font-medium text-primary uppercase tracking-wider">{t("stats.reach")}</span>
                 <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                  Serving Researchers Worldwide
+                  {t("about.reachTitle")}
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  Scholarly Open is dedicated to connecting researchers across the globe. We work with authors, reviewers, and institutions from every continent to advance scholarly communication.
+                  {t("about.reachP1")}
                 </p>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  Our international editorial board and global network of peer reviewers ensure that research from all regions receives the attention and rigorous evaluation it deserves.
+                  {t("about.reachP2")}
                 </p>
               </div>
               <div className="aspect-video rounded-lg bg-muted border border-border flex items-center justify-center">
                 <div className="text-center p-8">
                   <Globe className="h-16 w-16 mx-auto text-primary/20" />
-                  <p className="mt-4 text-sm text-muted-foreground">Connecting researchers worldwide</p>
+                  <p className="mt-4 text-sm text-muted-foreground">{t("oaModels.fromMainz")}</p>
                 </div>
               </div>
             </div>
@@ -202,20 +208,20 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Join Our Community
+                {t("about.communityTitle")}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Whether as an author, reviewer, or editorial board member, we welcome your participation in advancing open scholarship.
+                {t("about.communitySub")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" asChild className="bg-primary text-primary-foreground hover:bg-primary-dark font-semibold">
                   <Link href="/submit">
-                    Submit Your Research
+                    {t("about.communitySubmit")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <Link href="/contact">Contact Us</Link>
+                  <Link href="/contact">{t("nav.contact")}</Link>
                 </Button>
               </div>
             </div>
@@ -227,4 +233,3 @@ export default function AboutPage() {
     </div>
   )
 }
-
