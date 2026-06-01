@@ -87,6 +87,121 @@ export function JournalPage({
 }: JournalPageProps) {
   const { t } = useLanguage()
 
+  const brandThemes: Record<string, { bgColor: string; border: string; text: string; subtext: string; buttonOutline: string; iconBg: string; badge: string }> = {
+    "biology": {
+      bgColor: "#D0DEC0", // pale green (olive shade)
+      border: "border-[#BDCEAA]",
+      text: "text-emerald-950",
+      subtext: "text-emerald-900/80",
+      buttonOutline: "border-emerald-300 bg-emerald-100/30 text-emerald-900 hover:bg-emerald-100/60",
+      iconBg: "bg-emerald-950/10 text-emerald-900",
+      badge: "bg-emerald-900/10 text-emerald-900 border-emerald-900/25 shadow-none hover:bg-emerald-900/20"
+    },
+    "chemistry": {
+      bgColor: "#FFF7C2", // gorgeous light banana/mango pastel yellow
+      border: "border-[#F5DE88]",
+      text: "text-amber-950",
+      subtext: "text-amber-900/80",
+      buttonOutline: "border-amber-400 bg-amber-100/30 text-amber-950 hover:bg-amber-100/60",
+      iconBg: "bg-amber-950/10 text-amber-900",
+      badge: "bg-amber-900/10 text-amber-900 border-amber-950/20 shadow-none hover:bg-amber-900/20"
+    },
+    "medicine": {
+      bgColor: "#FFEBEB", // very light red
+      border: "border-[#FAD2D2]",
+      text: "text-rose-950",
+      subtext: "text-rose-900/80",
+      buttonOutline: "border-rose-300 bg-rose-100/30 text-rose-900 hover:bg-rose-100/60",
+      iconBg: "bg-rose-900/10 text-rose-800",
+      badge: "bg-rose-900/10 text-rose-900 border-rose-900/25 shadow-none hover:bg-rose-900/20"
+    },
+    "applied-health-sciences": {
+      bgColor: "#FFEBEB",
+      border: "border-[#FAD2D2]",
+      text: "text-rose-950",
+      subtext: "text-rose-900/80",
+      buttonOutline: "border-rose-300 bg-rose-100/30 text-rose-900 hover:bg-rose-100/60",
+      iconBg: "bg-rose-900/10 text-rose-800",
+      badge: "bg-rose-900/10 text-rose-900 border-rose-900/25 shadow-none hover:bg-rose-900/20"
+    },
+    "medical-research-review": {
+      bgColor: "#FFEBEB",
+      border: "border-[#FAD2D2]",
+      text: "text-rose-950",
+      subtext: "text-rose-900/80",
+      buttonOutline: "border-rose-300 bg-rose-100/30 text-rose-900 hover:bg-rose-100/60",
+      iconBg: "bg-rose-900/10 text-rose-800",
+      badge: "bg-rose-900/10 text-rose-900 border-rose-900/25 shadow-none hover:bg-rose-900/20"
+    },
+    "data-science": {
+      bgColor: "#E0F2FE", // stunning light sky or sea blue
+      border: "border-[#BAE6FD]",
+      text: "text-blue-950",
+      subtext: "text-blue-900/80",
+      buttonOutline: "border-blue-300 bg-blue-100/30 text-blue-900 hover:bg-blue-100/60",
+      iconBg: "bg-blue-950/10 text-blue-900",
+      badge: "bg-blue-900/10 text-blue-900 border-blue-900/25 shadow-none hover:bg-blue-900/20"
+    },
+    "engineering": {
+      bgColor: "#F3F4F6", // very light grey
+      border: "border-slate-200",
+      text: "text-slate-900",
+      subtext: "text-slate-600",
+      buttonOutline: "border-slate-300 bg-slate-100/50 text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+      iconBg: "bg-slate-900/10 text-slate-800",
+      badge: "bg-slate-950/10 text-slate-950 border-slate-900/15 shadow-none hover:bg-slate-950/20"
+    },
+    "environmental-science": {
+      bgColor: "#F5FCD2", // distinct lime-greenish yellow
+      border: "border-[#E1ECA9]",
+      text: "text-lime-950",
+      subtext: "text-lime-900/80",
+      buttonOutline: "border-lime-300 bg-lime-100/30 text-lime-900 hover:bg-lime-100/60",
+      iconBg: "bg-lime-950/10 text-lime-900",
+      badge: "bg-lime-900/10 text-lime-900 border-[#C5D37E]/25 shadow-none hover:bg-lime-900/20"
+    },
+    "social-sciences": {
+      bgColor: "#F5E6CC", // light brown (caramel)
+      border: "border-[#EEDCB8]",
+      text: "text-amber-950",
+      subtext: "text-amber-900/80",
+      buttonOutline: "border-amber-300 bg-amber-100/30 text-amber-900 hover:bg-amber-100/60",
+      iconBg: "bg-amber-900/10 text-amber-800",
+      badge: "bg-amber-900/10 text-amber-900 border-amber-900/25 shadow-none hover:bg-amber-900/20"
+    },
+    "social-sciences-open": {
+      bgColor: "#F5E6CC",
+      border: "border-[#EEDCB8]",
+      text: "text-amber-950",
+      subtext: "text-amber-900/80",
+      buttonOutline: "border-amber-300 bg-amber-100/30 text-amber-900 hover:bg-amber-100/60",
+      iconBg: "bg-amber-900/10 text-amber-800",
+      badge: "bg-amber-900/10 text-amber-900 border-amber-900/25 shadow-none hover:bg-amber-900/20"
+    },
+    "archaeological-frontiers": {
+      bgColor: "#F5E6CC",
+      border: "border-[#EEDCB8]",
+      text: "text-amber-950",
+      subtext: "text-amber-900/80",
+      buttonOutline: "border-amber-300 bg-amber-100/30 text-amber-900 hover:bg-amber-100/60",
+      iconBg: "bg-amber-900/10 text-amber-800",
+      badge: "bg-amber-900/10 text-amber-900 border-amber-900/25 shadow-none hover:bg-amber-900/20"
+    },
+  }
+
+  const defaultTheme = {
+    bgColor: "#F8FAFC",
+    border: "border-slate-200",
+    text: "text-slate-900",
+    subtext: "text-slate-600",
+    buttonOutline: "border-slate-300 bg-slate-100/50 text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+    iconBg: "bg-slate-900/10 text-slate-800",
+    badge: "bg-slate-950/10 text-slate-950 border-slate-900/15 shadow-none hover:bg-slate-950/20"
+  }
+
+  const theme = brandThemes["biology"]
+  const currentBrandTheme = brandThemes[journalSlug] || defaultTheme
+
   const stats = [
     { label: "Average Review Time", value: "4-8 weeks" },
     { label: "Acceptance Rate", value: "~30%" },
@@ -98,35 +213,40 @@ export function JournalPage({
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1">
-        <section className="bg-secondary text-secondary-foreground">
+        {/* Dynamic Branded Header */}
+        <section 
+          className={`relative overflow-hidden ${theme.text} border-b ${theme.border}`}
+          style={{ backgroundColor: theme.bgColor }}
+        >
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
             <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl text-balance">{title}</h1>
-              <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-primary-foreground/10 px-4 py-3 ring-1 ring-primary-foreground/15">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary-foreground/15">
+              <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-black/5 px-4 py-3 ring-1 ring-black/10 backdrop-blur-sm">
+                <div className={`flex h-14 w-14 items-center justify-center rounded-xl ${currentBrandTheme.iconBg}`}>
                   {heroIcon}
                 </div>
                 <div className="min-w-0">
-                  <Badge className="bg-accent text-accent-foreground border-0">Gold OA</Badge>
-                  <div className="mt-2 whitespace-nowrap text-sm text-secondary-foreground/75">ISSN: requested</div>
+                  <Badge className="bg-accent text-accent-foreground border-0 font-bold shadow-none">Gold OA</Badge>
+                  <div className={`mt-2 whitespace-nowrap text-sm ${theme.subtext}`}>ISSN: requested</div>
                 </div>
               </div>
             </div>
-            <p className="mt-6 text-xl text-secondary-foreground/80 max-w-3xl leading-relaxed">{heroDescription}</p>
+            <p className={`mt-6 text-xl max-w-3xl leading-relaxed ${theme.subtext}`}>{heroDescription}</p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-md shadow-accent/15">
                 <Link href="/submit">
                   Submit Manuscript
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-primary/20 bg-background text-foreground hover:bg-primary/10 hover:text-foreground">
+              <Button size="lg" variant="outline" asChild className={`transition-all duration-300 ${theme.buttonOutline}`}>
                 <Link href="/author-guidelines">Author Guidelines</Link>
               </Button>
             </div>
           </div>
         </section>
 
+        {/* Stats Section */}
         <section className="border-b border-border bg-muted/50">
           <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
             <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
@@ -140,6 +260,7 @@ export function JournalPage({
           </div>
         </section>
 
+        {/* Content Section with Tabs */}
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <Tabs defaultValue="about" className="space-y-8">

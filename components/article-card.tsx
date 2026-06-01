@@ -17,6 +17,7 @@ export interface Article {
   publishedDate: string
   articleType: "research" | "review" | "methodology"
   pdfUrl?: string
+  isOpenAccess?: boolean
 }
 
 interface ArticleCardProps {

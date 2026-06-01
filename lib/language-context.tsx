@@ -318,15 +318,47 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en")
 
   useEffect(() => {
-    const stored = localStorage.getItem("scholarly-open-language") as Language
-    if (stored && (stored === "en" || stored === "de")) {
-      setLanguageState(stored)
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname
+      const isDeDomain = hostname.endsWith(".de") || hostname.includes("localhost.de")
+      
+      const stored = localStorage.getItem("scholarly-open-language") as Language
+      if (isDeDomain) {
+        setLanguageState("de")
+      } else if (stored && (stored === "en" || stored === "de")) {
+        setLanguageState(stored)
+      } else {
+        setLanguageState("en")
+      }
     }
   }, [])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
     localStorage.setItem("scholarly-open-language", lang)
+
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname
+      const pathname = window.location.pathname
+      const search = window.location.search
+
+      // Support local domain simulation (localhost.de) vs general localhost
+      const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1") || hostname.includes("10.")
+      const isLocalDeSim = hostname === "localhost.de"
+
+      if (lang === "de" && !hostname.endsWith(".de") && !isLocalDeSim) {
+        if (!isLocalhost) {
+          window.location.href = `https://scholarlyopen.de${pathname}${search}`
+        }
+      } else if (lang === "en" && (hostname.endsWith(".de") || isLocalDeSim)) {
+        if (!isLocalhost || isLocalDeSim) {
+          const targetHost = isLocalDeSim ? "localhost" : "scholarlyopen.com"
+          const protocol = isLocalDeSim ? "http" : "https"
+          const port = isLocalDeSim ? ":3000" : ""
+          window.location.href = `${protocol}://${targetHost}${port}${pathname}${search}`
+        }
+      }
+    }
   }
 
   const t = (key: string): string => {
