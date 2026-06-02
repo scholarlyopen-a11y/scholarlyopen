@@ -13,7 +13,7 @@ interface UnitSegment {
   p2: Point3D;
 }
 
-// 1. High-fidelity continent outlines (lat/lon in degrees) for a decent, recognizable world map
+// 1. High-fidelity Continent Polygon Coordinates (lat/lon in degrees)
 const NORTH_AMERICA = [
   { lat: 72, lon: -168 }, { lat: 70, lon: -145 }, { lat: 60, lon: -140 },
   { lat: 55, lon: -165 }, { lat: 52, lon: -175 }, { lat: 50, lon: -180 },
@@ -287,11 +287,12 @@ export function HeroGlobe() {
       }
     }
     
+    // Correct Canvas Y-axis inversion (cy - y * scale) so map is not upside down
     const project = (x: number, y: number, z: number, cx: number, cy: number, cameraDist: number) => {
       const scale = cameraDist / (cameraDist - z)
       return {
         x: cx + x * scale,
-        y: cy + y * scale,
+        y: cy - y * scale,
         z: z
       }
     }
@@ -358,8 +359,8 @@ export function HeroGlobe() {
       
       ctx.clearRect(0, 0, width, height)
       
-      // Radius set to 0.27 to prevent clipping
-      const R = Math.min(width, height) * 0.27
+      // Radius increased to 0.33 (from 0.27) to fit the Hero Column size beautifully
+      const R = Math.min(width, height) * 0.33
       const cameraDist = R * 2.5
       
       // Smooth cursor parallax lerp
@@ -379,7 +380,7 @@ export function HeroGlobe() {
       const lock5Angle = time * -1.8 + 5.1
       
       interface DrawSegment {
-        type: "globe-line" | "continent-line" | "orbit-line" | "trail-line"
+        type: "continent-line" | "orbit-line" | "trail-line"
         z: number
         x1: number
         y1: number
@@ -400,118 +401,9 @@ export function HeroGlobe() {
       type Drawable = DrawSegment | DrawLock
       const drawList: Drawable[] = []
       
-      // 1. Generate Latitude grid lines
-      const latCount = 7
-      const lonSegments = 36
-      for (let i = 0; i < latCount; i++) {
-        const lat = -Math.PI / 2 + ((i + 1) / (latCount + 1)) * Math.PI
-        const r = R * Math.cos(lat)
-        const y = R * Math.sin(lat)
-        
-        for (let j = 0; j < lonSegments; j++) {
-          const theta1 = (j / lonSegments) * 2 * Math.PI
-          const theta2 = ((j + 1) / lonSegments) * 2 * Math.PI
-          
-          const p1_local: Point3D = { x: r * Math.sin(theta1), y: y, z: r * Math.cos(theta1) }
-          const p2_local: Point3D = { x: r * Math.sin(theta2), y: y, z: r * Math.cos(theta2) }
-          
-          let p1 = rotateY(p1_local, -globeAngle)
-          let p2 = rotateY(p2_local, -globeAngle)
-          
-          p1 = rotateZ(p1, TILT_RAD)
-          p2 = rotateZ(p2, TILT_RAD)
-          
-          p1 = rotateY(p1, curMouseX * 0.35)
-          p1 = rotateX(p1, curMouseY * 0.35)
-          p2 = rotateY(p2, curMouseX * 0.35)
-          p2 = rotateX(p2, curMouseY * 0.35)
-          
-          const proj1 = project(p1.x, p1.y, p1.z, cx, cy, cameraDist)
-          const proj2 = project(p2.x, p2.y, p2.z, cx, cy, cameraDist)
-          
-          const zAvg = (proj1.z + proj2.z) / 2
-          const normZ = zAvg / R
-          
-          let opacity = 0
-          if (normZ >= 0) {
-            opacity = 0.08 + 0.14 * normZ // subtle front grid
-          } else {
-            opacity = 0.04 + 0.05 * (1 + normZ) // faint back grid
-          }
-          
-          drawList.push({
-            type: "globe-line",
-            z: zAvg,
-            x1: proj1.x,
-            y1: proj1.y,
-            x2: proj2.x,
-            y2: proj2.y,
-            color: `rgba(255, 255, 255, ${opacity})`,
-            lineWidth: 0.75
-          })
-        }
-      }
+      // Note: Latitudes and Longitudes loops have been fully removed to leave a clean world map outlines globe
       
-      // 2. Generate Longitude grid lines
-      const lonCount = 10
-      const latSegments = 20
-      for (let i = 0; i < lonCount; i++) {
-        const lon = (i / lonCount) * 2 * Math.PI
-        
-        for (let j = 0; j < latSegments; j++) {
-          const lat1 = -Math.PI / 2 + (j / latSegments) * Math.PI
-          const lat2 = -Math.PI / 2 + ((j + 1) / latSegments) * Math.PI
-          
-          const p1_local: Point3D = {
-            x: R * Math.cos(lat1) * Math.sin(lon),
-            y: R * Math.sin(lat1),
-            z: R * Math.cos(lat1) * Math.cos(lon)
-          }
-          
-          const p2_local: Point3D = {
-            x: R * Math.cos(lat2) * Math.sin(lon),
-            y: R * Math.sin(lat2),
-            z: R * Math.cos(lat2) * Math.cos(lon)
-          }
-          
-          let p1 = rotateY(p1_local, -globeAngle)
-          let p2 = rotateY(p2_local, -globeAngle)
-          
-          p1 = rotateZ(p1, TILT_RAD)
-          p2 = rotateZ(p2, TILT_RAD)
-          
-          p1 = rotateY(p1, curMouseX * 0.35)
-          p1 = rotateX(p1, curMouseY * 0.35)
-          p2 = rotateY(p2, curMouseX * 0.35)
-          p2 = rotateX(p2, curMouseY * 0.35)
-          
-          const proj1 = project(p1.x, p1.y, p1.z, cx, cy, cameraDist)
-          const proj2 = project(p2.x, p2.y, p2.z, cx, cy, cameraDist)
-          
-          const zAvg = (proj1.z + proj2.z) / 2
-          const normZ = zAvg / R
-          
-          let opacity = 0
-          if (normZ >= 0) {
-            opacity = 0.08 + 0.14 * normZ
-          } else {
-            opacity = 0.04 + 0.05 * (1 + normZ)
-          }
-          
-          drawList.push({
-            type: "globe-line",
-            z: zAvg,
-            x1: proj1.x,
-            y1: proj1.y,
-            x2: proj2.x,
-            y2: proj2.y,
-            color: `rgba(255, 255, 255, ${opacity})`,
-            lineWidth: 0.75
-          })
-        }
-      }
-      
-      // 3. Generate Decent, Accurate World Map Outline wrapping beautifully
+      // 1. Generate Accurate World Map Outline wrapping beautifully
       const unitContinentSegments = unitContinentSegmentsRef.current
       unitContinentSegments.forEach((seg) => {
         const p1_local: Point3D = {
@@ -545,7 +437,7 @@ export function HeroGlobe() {
         
         let opacity = 0
         if (normZ >= 0) {
-          opacity = 0.32 + 0.53 * normZ // High-fidelity bright continents
+          opacity = 0.35 + 0.53 * normZ // High-fidelity bright continents
         } else {
           opacity = 0.12 + 0.20 * (1 + normZ) // Translucent back continent curves
         }
@@ -562,7 +454,7 @@ export function HeroGlobe() {
         })
       })
       
-      // 4. Render 5 Spiral Orbit Paths & Open Padlocks
+      // 2. Render 5 Spiral Orbit Paths & Open Padlocks
       // All orbits revolve around the exact same 23.5-degree polar axis
       const addSpiralOrbitAndLock = (
         orbitRadius: number,
@@ -720,13 +612,12 @@ export function HeroGlobe() {
         6.5
       )
       
-      // 5. Painter's Algorithm Depth Sort (furthest to closest)
+      // 3. Painter's Algorithm Depth Sort (furthest to closest)
       drawList.sort((a, b) => a.z - b.z)
       
-      // 6. Render Drawables
+      // 4. Render Drawables
       drawList.forEach((el) => {
         if (
-          el.type === "globe-line" ||
           el.type === "continent-line" ||
           el.type === "orbit-line" ||
           el.type === "trail-line"
