@@ -1023,10 +1023,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
       if (isDeDomain || isLocalDeSim) {
         // Option A: Automatically intercept `.de` / `localhost.de` access,
-        // set preferred language to German, and redirect to the unified .com / localhost domain
+        // set preferred language to German, and redirect to the unified .org / localhost domain
         localStorage.setItem("scholarly-open-language", "de")
         
-        const targetHost = isLocalDeSim ? "localhost" : "scholarlyopen.com"
+        const targetHost = isLocalDeSim ? "localhost" : "scholarlyopen.org"
         const protocol = isLocalDeSim ? "http" : "https"
         
         window.location.replace(`${protocol}://${targetHost}${port}${pathname}${search}`)
