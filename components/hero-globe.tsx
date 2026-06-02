@@ -8,9 +8,146 @@ interface Point3D {
   z: number;
 }
 
+interface UnitSegment {
+  p1: Point3D;
+  p2: Point3D;
+}
+
+// 1. High-fidelity Continent Polygon Coordinates (lat/lon in degrees)
+const NORTH_AMERICA = [
+  { lat: 70, lon: -160 }, { lat: 70, lon: -120 }, { lat: 80, lon: -80 },
+  { lat: 60, lon: -60 }, { lat: 45, lon: -60 }, { lat: 25, lon: -80 },
+  { lat: 20, lon: -90 }, { lat: 15, lon: -95 }, { lat: 20, lon: -105 },
+  { lat: 30, lon: -115 }, { lat: 45, lon: -125 }, { lat: 60, lon: -140 },
+  { lat: 65, lon: -168 }, { lat: 70, lon: -160 }
+]
+
+const SOUTH_AMERICA = [
+  { lat: 12, lon: -72 }, { lat: 5, lon: -50 }, { lat: -5, lon: -35 },
+  { lat: -20, lon: -40 }, { lat: -35, lon: -55 }, { lat: -55, lon: -68 },
+  { lat: -40, lon: -75 }, { lat: -20, lon: -70 }, { lat: 0, lon: -80 },
+  { lat: 12, lon: -72 }
+]
+
+const GREENLAND = [
+  { lat: 80, lon: -60 }, { lat: 83, lon: -30 }, { lat: 70, lon: -20 },
+  { lat: 60, lon: -45 }, { lat: 70, lon: -55 }, { lat: 80, lon: -60 }
+]
+
+const AFRICA = [
+  { lat: 37, lon: 10 }, { lat: 30, lon: 32 }, { lat: 12, lon: 43 },
+  { lat: 5, lon: 51 }, { lat: -34, lon: 20 }, { lat: -15, lon: 12 },
+  { lat: 5, lon: 10 }, { lat: 5, lon: -8 }, { lat: 15, lon: -17 },
+  { lat: 30, lon: -10 }, { lat: 35, lon: -2 }, { lat: 37, lon: 10 }
+]
+
+const EURASIA = [
+  { lat: 70, lon: 15 }, { lat: 60, lon: 30 }, { lat: 70, lon: 60 },
+  { lat: 75, lon: 100 }, { lat: 70, lon: 170 }, { lat: 60, lon: 160 },
+  { lat: 40, lon: 140 }, { lat: 35, lon: 120 }, { lat: 22, lon: 115 },
+  { lat: 20, lon: 105 }, { lat: 10, lon: 100 }, { lat: 15, lon: 95 },
+  { lat: 20, lon: 90 }, { lat: 10, lon: 80 }, { lat: 25, lon: 65 },
+  { lat: 12, lon: 43 }, { lat: 25, lon: 35 }, { lat: 35, lon: 35 },
+  { lat: 40, lon: 25 }, { lat: 40, lon: 15 }, { lat: 36, lon: -5 },
+  { lat: 43, lon: -10 }, { lat: 50, lon: -2 }, { lat: 60, lon: 5 },
+  { lat: 70, lon: 15 }
+]
+
+const AUSTRALIA = [
+  { lat: -12, lon: 130 }, { lat: -10, lon: 142 }, { lat: -25, lon: 153 },
+  { lat: -38, lon: 145 }, { lat: -35, lon: 115 }, { lat: -22, lon: 113 },
+  { lat: -12, lon: 130 }
+]
+
+const UNITED_KINGDOM = [
+  { lat: 58, lon: -5 }, { lat: 55, lon: -2 }, { lat: 50, lon: -5 },
+  { lat: 50, lon: 1 }, { lat: 54, lon: -1 }, { lat: 58, lon: -5 }
+]
+
+const JAPAN = [
+  { lat: 45, lon: 142 }, { lat: 35, lon: 140 }, { lat: 31, lon: 130 },
+  { lat: 35, lon: 135 }, { lat: 40, lon: 140 }, { lat: 45, lon: 142 }
+]
+
+const CONTINENTS = [
+  NORTH_AMERICA,
+  SOUTH_AMERICA,
+  GREENLAND,
+  AFRICA,
+  EURASIA,
+  AUSTRALIA,
+  UNITED_KINGDOM,
+  JAPAN
+]
+
+// 2. Helper to subdivide large segment steps along sphere curves to map beautifully
+function subdivideSegment(
+  v1: { lat: number; lon: number },
+  v2: { lat: number; lon: number },
+  maxStep = 4
+) {
+  const dist = Math.hypot(v2.lat - v1.lat, v2.lon - v1.lon)
+  const steps = Math.max(1, Math.ceil(dist / maxStep))
+  const subSegments: { lat: number; lon: number }[] = []
+  
+  for (let s = 0; s <= steps; s++) {
+    const t = s / steps
+    let lon1 = v1.lon
+    let lon2 = v2.lon
+    let dLon = lon2 - lon1
+    if (dLon > 180) {
+      lon2 -= 360
+    } else if (dLon < -180) {
+      lon2 += 360
+    }
+    
+    const lat = v1.lat + (v2.lat - v1.lat) * t
+    const lon = lon1 + (lon2 - lon1) * t
+    subSegments.push({ lat, lon })
+  }
+  return subSegments
+}
+
 export function HeroGlobe() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const unitContinentSegmentsRef = useRef<UnitSegment[]>([])
+  
+  // 3. Precompute subdivided unit continent outlines on mount to keep rendering at 60 FPS
+  useEffect(() => {
+    const segments: UnitSegment[] = []
+    
+    CONTINENTS.forEach((poly) => {
+      for (let i = 0; i < poly.length - 1; i++) {
+        const subPoints = subdivideSegment(poly[i], poly[i + 1])
+        
+        for (let j = 0; j < subPoints.length - 1; j++) {
+          const pt1 = subPoints[j]
+          const pt2 = subPoints[j + 1]
+          
+          const lat1 = pt1.lat * Math.PI / 180
+          const lon1 = pt1.lon * Math.PI / 180
+          const p1: Point3D = {
+            x: Math.cos(lat1) * Math.sin(lon1),
+            y: Math.sin(lat1),
+            z: Math.cos(lat1) * Math.cos(lon1)
+          }
+          
+          const lat2 = pt2.lat * Math.PI / 180
+          const lon2 = pt2.lon * Math.PI / 180
+          const p2: Point3D = {
+            x: Math.cos(lat2) * Math.sin(lon2),
+            y: Math.sin(lat2),
+            z: Math.cos(lat2) * Math.cos(lon2)
+          }
+          
+          segments.push({ p1, p2 })
+        }
+      }
+    })
+    
+    unitContinentSegmentsRef.current = segments
+  }, [])
   
   useEffect(() => {
     const container = containerRef.current
@@ -23,7 +160,7 @@ export function HeroGlobe() {
     let animationId: number
     let isDestroyed = false
     
-    // Interactive mouse parallax variables
+    // Parallax mouse variables
     let targetMouseX = 0
     let targetMouseY = 0
     let curMouseX = 0
@@ -106,7 +243,7 @@ export function HeroGlobe() {
       }
     }
     
-    // Draw highly-detailed open padlock swung open to show visual gap
+    // Draw unlocked padlock swung WIDE open (55 degrees) to show undeniable visual gap
     const drawLock = (context: CanvasRenderingContext2D, cx: number, cy: number, size: number) => {
       context.save()
       context.translate(cx, cy)
@@ -131,11 +268,11 @@ export function HeroGlobe() {
       context.fill()
       context.stroke()
       
-      // Open / Unlocked Shackle (Swung open by 25 degrees on the left hinge)
+      // Open / Unlocked Shackle (Swung open by 55 degrees on the left hinge)
       context.save()
       const leftX = -w * 0.24
       context.translate(leftX, bodyY - h / 2)
-      context.rotate(25 * Math.PI / 180) // Swing open realistic padlock!
+      context.rotate(55 * Math.PI / 180) // Rotate shackle far out and open!
       
       context.beginPath()
       context.moveTo(0, 0)
@@ -183,7 +320,7 @@ export function HeroGlobe() {
       const lock5Angle = time * -1.8 + 5.1
       
       interface DrawSegment {
-        type: "globe-line" | "orbit-line" | "trail-line"
+        type: "globe-line" | "continent-line" | "orbit-line" | "trail-line"
         z: number
         x1: number
         y1: number
@@ -204,8 +341,8 @@ export function HeroGlobe() {
       type Drawable = DrawSegment | DrawLock
       const drawList: Drawable[] = []
       
-      // 1. Generate Globe Latitude segments
-      const latCount = 9
+      // 1. Generate Latitude grid lines
+      const latCount = 7
       const lonSegments = 36
       for (let i = 0; i < latCount; i++) {
         const lat = -Math.PI / 2 + ((i + 1) / (latCount + 1)) * Math.PI
@@ -238,9 +375,9 @@ export function HeroGlobe() {
           
           let opacity = 0
           if (normZ >= 0) {
-            opacity = 0.28 + 0.47 * normZ // Front: Bright white
+            opacity = 0.08 + 0.14 * normZ // Very subtle front latitude lines
           } else {
-            opacity = 0.12 + 0.16 * (1 + normZ) // Back: Translucent/faint white
+            opacity = 0.04 + 0.05 * (1 + normZ) // Faint back latitude lines
           }
           
           drawList.push({
@@ -251,14 +388,14 @@ export function HeroGlobe() {
             x2: proj2.x,
             y2: proj2.y,
             color: `rgba(255, 255, 255, ${opacity})`,
-            lineWidth: normZ >= 0 ? 1.05 : 0.8
+            lineWidth: 0.75
           })
         }
       }
       
-      // 2. Generate Globe Longitude segments
-      const lonCount = 12
-      const latSegments = 24
+      // 2. Generate Longitude grid lines
+      const lonCount = 10
+      const latSegments = 20
       for (let i = 0; i < lonCount; i++) {
         const lon = (i / lonCount) * 2 * Math.PI
         
@@ -297,9 +434,9 @@ export function HeroGlobe() {
           
           let opacity = 0
           if (normZ >= 0) {
-            opacity = 0.28 + 0.47 * normZ
+            opacity = 0.08 + 0.14 * normZ
           } else {
-            opacity = 0.12 + 0.16 * (1 + normZ)
+            opacity = 0.04 + 0.05 * (1 + normZ)
           }
           
           drawList.push({
@@ -310,12 +447,66 @@ export function HeroGlobe() {
             x2: proj2.x,
             y2: proj2.y,
             color: `rgba(255, 255, 255, ${opacity})`,
-            lineWidth: normZ >= 0 ? 1.05 : 0.8
+            lineWidth: 0.75
           })
         }
       }
       
-      // 3. Render 5 Spiral Orbit Paths & Open Padlocks
+      // 3. Generate Decent/Accurate World Map Outlines wrapping around 3D curves
+      const unitContinentSegments = unitContinentSegmentsRef.current
+      unitContinentSegments.forEach((seg) => {
+        const p1_local: Point3D = {
+          x: seg.p1.x * R,
+          y: seg.p1.y * R,
+          z: seg.p1.z * R
+        }
+        
+        const p2_local: Point3D = {
+          x: seg.p2.x * R,
+          y: seg.p2.y * R,
+          z: seg.p2.z * R
+        }
+        
+        // Spin clockwise
+        let p1 = rotateY(p1_local, -globeAngle)
+        let p2 = rotateY(p2_local, -globeAngle)
+        
+        // Axial tilt
+        p1 = rotateZ(p1, TILT_RAD)
+        p2 = rotateZ(p2, TILT_RAD)
+        
+        // Mouse tilting
+        p1 = rotateY(p1, curMouseX * 0.35)
+        p1 = rotateX(p1, curMouseY * 0.35)
+        p2 = rotateY(p2, curMouseX * 0.35)
+        p2 = rotateX(p2, curMouseY * 0.35)
+        
+        const proj1 = project(p1.x, p1.y, p1.z, cx, cy, cameraDist)
+        const proj2 = project(p2.x, p2.y, p2.z, cx, cy, cameraDist)
+        
+        const zAvg = (proj1.z + proj2.z) / 2
+        const normZ = zAvg / R
+        
+        let opacity = 0
+        if (normZ >= 0) {
+          opacity = 0.28 + 0.47 * normZ // Front: Bright white, highly recognizable continent contours
+        } else {
+          opacity = 0.12 + 0.16 * (1 + normZ) // Back: Soft translucent white contours
+        }
+        
+        drawList.push({
+          type: "continent-line",
+          z: zAvg,
+          x1: proj1.x,
+          y1: proj1.y,
+          x2: proj2.x,
+          y2: proj2.y,
+          color: `rgba(255, 255, 255, ${opacity})`,
+          lineWidth: normZ >= 0 ? 1.25 : 0.85 // Brighter and thicker outlines
+        })
+      })
+      
+      // 4. Render 5 Spiral Orbit Paths & Open Padlocks
       // All orbits revolve around the exact same 23.5-degree polar axis
       const addSpiralOrbitAndLock = (
         orbitRadius: number,
@@ -473,12 +664,17 @@ export function HeroGlobe() {
         6.5
       )
       
-      // 3. Painter's Algorithm Depth Sort (furthest to closest)
+      // 5. Painter's Algorithm Depth Sort (furthest to closest)
       drawList.sort((a, b) => a.z - b.z)
       
-      // 4. Render Drawables
+      // 6. Render Drawables
       drawList.forEach((el) => {
-        if (el.type === "globe-line" || el.type === "orbit-line" || el.type === "trail-line") {
+        if (
+          el.type === "globe-line" ||
+          el.type === "continent-line" ||
+          el.type === "orbit-line" ||
+          el.type === "trail-line"
+        ) {
           ctx.beginPath()
           ctx.moveTo(el.x1, el.y1)
           ctx.lineTo(el.x2, el.y2)
