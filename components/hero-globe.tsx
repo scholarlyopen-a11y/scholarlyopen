@@ -14,6 +14,60 @@ interface UnitSegment {
 }
 
 // 1. High-fidelity Continent Polygon Coordinates (lat/lon in degrees)
+// Split Europe and Asia into separate closed contours to completely solve missing details
+const EUROPE = [
+  { lat: 36, lon: -6 },   // Gibraltar
+  { lat: 37, lon: -9 },   // Portugal SW
+  { lat: 42, lon: -9 },   // Spain NW
+  { lat: 43, lon: -2 },   // Bay of Biscay
+  { lat: 48, lon: -5 },   // France West
+  { lat: 50, lon: 1 },    // English Channel
+  { lat: 53, lon: 5 },    // Netherlands
+  { lat: 54, lon: 8 },    // Denmark West
+  { lat: 57, lon: 8 },    // Denmark North
+  { lat: 55, lon: 12 },   // Copenhagen
+  { lat: 56, lon: 16 },   // Sweden South
+  { lat: 59, lon: 18 },   // Stockholm
+  { lat: 63, lon: 20 },   // Gulf of Bothnia West
+  { lat: 65, lon: 24 },   // Northern Sweden
+  { lat: 60, lon: 27 },   // Helsinki
+  { lat: 59, lon: 30 },   // St Petersburg
+  { lat: 54, lon: 20 },   // Poland/Prussia
+  { lat: 45, lon: 13 },   // Venice / Italy North
+  { lat: 40, lon: 18 },   // Italy South-East
+  { lat: 38, lon: 16 },   // Italy Toe
+  { lat: 40, lon: 14 },   // Naples
+  { lat: 44, lon: 8 },    // Genoa
+  { lat: 43, lon: 5 },    // Marseille
+  { lat: 41, lon: 2 },    // Barcelona
+  { lat: 37, lon: -2 },   // Malaga Spain
+  { lat: 36, lon: -6 }    // Close at Gibraltar
+]
+
+const ASIA = [
+  { lat: 70, lon: 30 },   // Murmansk
+  { lat: 75, lon: 60 },   // Novaya Zemlya coast
+  { lat: 76, lon: 95 },   // Taymyr
+  { lat: 72, lon: 120 },  // Lena Delta
+  { lat: 70, lon: 170 },  // Chukotka
+  { lat: 65, lon: 180 },  // Bering Strait
+  { lat: 60, lon: 160 },  // Kamchatka
+  { lat: 43, lon: 132 },  // Vladivostok
+  { lat: 35, lon: 120 },  // China East
+  { lat: 22, lon: 114 },  // Hong Kong
+  { lat: 20, lon: 105 },  // Indochina
+  { lat: 6, lon: 102 },   // Malaya
+  { lat: 10, lon: 80 },   // India South
+  { lat: 25, lon: 67 },   // Pakistan
+  { lat: 12, lon: 43 },   // Yemen
+  { lat: 28, lon: 34 },   // Sinai
+  { lat: 35, lon: 36 },   // Turkey / Syria
+  { lat: 41, lon: 29 },   // Istanbul
+  { lat: 45, lon: 34 },   // Black Sea North
+  { lat: 50, lon: 30 },   // Russia / Ukraine
+  { lat: 70, lon: 30 }    // Close at Murmansk
+]
+
 const NORTH_AMERICA = [
   { lat: 72, lon: -168 }, { lat: 70, lon: -145 }, { lat: 60, lon: -140 },
   { lat: 55, lon: -165 }, { lat: 52, lon: -175 }, { lat: 50, lon: -180 },
@@ -63,34 +117,6 @@ const AFRICA = [
   { lat: 37, lon: 5 }, { lat: 37, lon: 10 }
 ]
 
-const EURASIA = [
-  { lat: 36, lon: -6 }, { lat: 37, lon: -9 }, { lat: 42, lon: -9 },
-  { lat: 43, lon: -1 }, { lat: 48, lon: -5 }, { lat: 50, lon: 2 },
-  { lat: 53, lon: 5 }, { lat: 54, lon: 8 }, { lat: 57, lon: 8 },
-  { lat: 55, lon: 12 }, { lat: 56, lon: 16 }, { lat: 59, lon: 18 },
-  { lat: 63, lon: 20 }, { lat: 65, lon: 24 }, { lat: 60, lon: 27 },
-  { lat: 59, lon: 30 }, { lat: 64, lon: 38 }, { lat: 68, lon: 39 },
-  { lat: 70, lon: 28 }, { lat: 68, lon: 15 }, { lat: 62, lon: 5 },
-  { lat: 58, lon: 6 }, { lat: 60, lon: 30 }, { lat: 67, lon: 45 },
-  { lat: 70, lon: 60 }, { lat: 73, lon: 72 }, { lat: 76, lon: 95 },
-  { lat: 72, lon: 120 }, { lat: 70, lon: 140 }, { lat: 70, lon: 170 },
-  { lat: 65, lon: 180 }, { lat: 60, lon: 165 }, { lat: 56, lon: 163 },
-  { lat: 51, lon: 156 }, { lat: 46, lon: 142 }, { lat: 43, lon: 132 },
-  { lat: 38, lon: 125 }, { lat: 35, lon: 129 }, { lat: 37, lon: 120 },
-  { lat: 31, lon: 122 }, { lat: 22, lon: 114 }, { lat: 21, lon: 108 },
-  { lat: 10, lon: 104 }, { lat: 6, lon: 102 }, { lat: 10, lon: 98 },
-  { lat: 16, lon: 96 }, { lat: 22, lon: 90 }, { lat: 16, lon: 81 },
-  { lat: 8, lon: 77 }, { lat: 19, lon: 72 }, { lat: 25, lon: 67 },
-  { lat: 25, lon: 58 }, { lat: 27, lon: 50 }, { lat: 12, lon: 43 },
-  { lat: 28, lon: 34 }, { lat: 31, lon: 34 }, { lat: 35, lon: 36 },
-  { lat: 36, lon: 30 }, { lat: 40, lon: 26 }, { lat: 41, lon: 29 },
-  { lat: 44, lon: 34 }, { lat: 46, lon: 30 }, { lat: 41, lon: 22 },
-  { lat: 38, lon: 23 }, { lat: 40, lon: 18 }, { lat: 45, lon: 13 },
-  { lat: 41, lon: 15 }, { lat: 38, lon: 16 }, { lat: 40, lon: 14 },
-  { lat: 44, lon: 10 }, { lat: 43, lon: 6 }, { lat: 43, lon: 3 },
-  { lat: 41, lon: 2 }, { lat: 39, lon: -1 }, { lat: 36, lon: -6 }
-]
-
 const AUSTRALIA = [
   { lat: -12, lon: 131 }, { lat: -11, lon: 136 }, { lat: -12, lon: 136 },
   { lat: -15, lon: 136 }, { lat: -14, lon: 141 }, { lat: -11, lon: 142 },
@@ -123,11 +149,12 @@ const JAPAN = [
 ]
 
 const CONTINENTS = [
+  EUROPE,
+  ASIA,
   NORTH_AMERICA,
   SOUTH_AMERICA,
   GREENLAND,
   AFRICA,
-  EURASIA,
   AUSTRALIA,
   UNITED_KINGDOM,
   JAPAN
@@ -165,6 +192,15 @@ export function HeroGlobe() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const unitContinentSegmentsRef = useRef<UnitSegment[]>([])
+  
+  // Dragging states
+  const dragAngleXRef = useRef(0)
+  const dragAngleYRef = useRef(0)
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const startYRef = useRef(0)
+  const startDragAngleXRef = useRef(0)
+  const startDragAngleYRef = useRef(0)
   
   // Precompute subdivided unit segments once on mount
   useEffect(() => {
@@ -219,21 +255,69 @@ export function HeroGlobe() {
     let curMouseX = 0
     let curMouseY = 0
     
+    // Desktop Mouse Drag Event Listeners
+    const handleMouseDown = (e: MouseEvent) => {
+      isDraggingRef.current = true
+      startXRef.current = e.clientX
+      startYRef.current = e.clientY
+      startDragAngleXRef.current = dragAngleXRef.current
+      startDragAngleYRef.current = dragAngleYRef.current
+    }
+    
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect()
       const x = e.clientX - rect.left - rect.width / 2
       const y = e.clientY - rect.top - rect.height / 2
       targetMouseX = x / (rect.width / 2)
       targetMouseY = y / (rect.height / 2)
+      
+      if (isDraggingRef.current) {
+        const dx = e.clientX - startXRef.current
+        const dy = e.clientY - startYRef.current
+        // Drag angle sensitivity maps pixels to radians
+        dragAngleXRef.current = startDragAngleXRef.current + dx * 0.007
+        dragAngleYRef.current = startDragAngleYRef.current - dy * 0.007 // Invert dy so dragging up tilts poles up
+        // Clamp pitch to prevent flipping the Earth upside down
+        dragAngleYRef.current = Math.max(-1.1, Math.min(1.1, dragAngleYRef.current))
+      }
     }
     
-    const handleMouseLeave = () => {
-      targetMouseX = 0
-      targetMouseY = 0
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
     }
     
+    // Mobile Touch Drag Event Listeners
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        isDraggingRef.current = true
+        startXRef.current = e.touches[0].clientX
+        startYRef.current = e.touches[0].clientY
+        startDragAngleXRef.current = dragAngleXRef.current
+        startDragAngleYRef.current = dragAngleYRef.current
+      }
+    }
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDraggingRef.current && e.touches.length > 0) {
+        const dx = e.touches[0].clientX - startXRef.current
+        const dy = e.touches[0].clientY - startYRef.current
+        dragAngleXRef.current = startDragAngleXRef.current + dx * 0.007
+        dragAngleYRef.current = startDragAngleYRef.current - dy * 0.007
+        dragAngleYRef.current = Math.max(-1.1, Math.min(1.1, dragAngleYRef.current))
+      }
+    }
+    
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false
+    }
+    
+    container.addEventListener("mousedown", handleMouseDown)
     container.addEventListener("mousemove", handleMouseMove)
-    container.addEventListener("mouseleave", handleMouseLeave)
+    window.addEventListener("mouseup", handleMouseUp)
+    
+    container.addEventListener("touchstart", handleTouchStart, { passive: true })
+    container.addEventListener("touchmove", handleTouchMove, { passive: true })
+    container.addEventListener("touchend", handleTouchEnd)
     
     // Canvas resizing
     const resizeCanvas = () => {
@@ -359,8 +443,9 @@ export function HeroGlobe() {
       
       ctx.clearRect(0, 0, width, height)
       
-      // Radius increased to 0.33 to fit the Hero Column size beautifully
-      const R = Math.min(width, height) * 0.33
+      // Radius adjusted to 0.30 (from 0.33) to completely fit inside the Hero box column limits
+      // This leaves a clean 10% outer margin inside the canvas bounds so the padlocks are never cut off
+      const R = Math.min(width, height) * 0.30
       const cameraDist = R * 2.5
       
       // Smooth cursor parallax lerp
@@ -369,10 +454,16 @@ export function HeroGlobe() {
       
       const time = performance.now() * 0.001
       
-      // Clockwise rotation (Atmospheric planetary spin matching premium hero standards)
-      const globeAngle = time * 0.03
+      // Accumulate automatic rotation when NOT actively dragging
+      if (!isDraggingRef.current) {
+        dragAngleXRef.current -= 0.0007 // Clockwise slow automatic rotation
+      }
       
-      // Standard atmospheric glides (3x slower, following universal hero visual standards)
+      // Compute actual rotation values
+      const globeAngle = dragAngleXRef.current
+      const dragY = dragAngleYRef.current
+      
+      // Angles for 5 locks (speed optimized gracefully)
       const lock1Angle = time * -0.5
       const lock2Angle = time * -0.7 + 1.2
       const lock3Angle = time * -0.4 + 2.5
@@ -416,12 +507,19 @@ export function HeroGlobe() {
           z: seg.p2.z * R
         }
         
-        let p1 = rotateY(p1_local, -globeAngle)
-        let p2 = rotateY(p2_local, -globeAngle)
+        // Spin around polar axis (globeAngle)
+        let p1 = rotateY(p1_local, globeAngle)
+        let p2 = rotateY(p2_local, globeAngle)
         
+        // Fixed axial tilt (Z-rotation)
         p1 = rotateZ(p1, TILT_RAD)
         p2 = rotateZ(p2, TILT_RAD)
         
+        // Pitch manually dragged (X-rotation)
+        p1 = rotateX(p1, dragY)
+        p2 = rotateX(p2, dragY)
+        
+        // Mouse tilting parallax (Yaw/Pitch)
         p1 = rotateY(p1, curMouseX * 0.35)
         p1 = rotateX(p1, curMouseY * 0.35)
         p2 = rotateY(p2, curMouseX * 0.35)
@@ -453,7 +551,7 @@ export function HeroGlobe() {
       })
       
       // 2. Render 5 Spiral Orbit Paths & Open Padlocks
-      // All orbits revolve around the exact same 23.5-degree polar axis
+      // All orbits revolve in sync with the Earth's camera yaw, pitch, and axial tilt parameters
       const addSpiralOrbitAndLock = (
         orbitRadius: number,
         lockAngle: number,
@@ -488,9 +586,13 @@ export function HeroGlobe() {
             z: orbitRadius * cosLat2 * Math.cos(a2)
           }
           
-          // 23.5-degree axial tilt alignment
+          // 23.5-degree axial tilt alignment (matches the globe axis)
           let p1 = rotateZ(p1_local, TILT_RAD)
           let p2 = rotateZ(p2_local, TILT_RAD)
+          
+          // Manual camera pitch (dragY)
+          p1 = rotateX(p1, dragY)
+          p2 = rotateX(p2, dragY)
           
           // Mouse tilts
           p1 = rotateY(p1, curMouseX * 0.35)
@@ -543,6 +645,7 @@ export function HeroGlobe() {
         }
         
         let lock_tilted = rotateZ(lock_local, TILT_RAD)
+        lock_tilted = rotateX(lock_tilted, dragY) // In sync with drag
         lock_tilted = rotateY(lock_tilted, curMouseX * 0.35)
         lock_tilted = rotateX(lock_tilted, curMouseY * 0.35)
         
@@ -651,8 +754,13 @@ export function HeroGlobe() {
       isDestroyed = true
       cancelAnimationFrame(animationId)
       window.removeEventListener("resize", resizeCanvas)
+      container.removeEventListener("mousedown", handleMouseDown)
       container.removeEventListener("mousemove", handleMouseMove)
-      container.removeEventListener("mouseleave", handleMouseLeave)
+      window.removeEventListener("mouseup", handleMouseUp)
+      
+      container.removeEventListener("touchstart", handleTouchStart)
+      container.removeEventListener("touchmove", handleTouchMove)
+      container.removeEventListener("touchend", handleTouchEnd)
     }
   }, [])
   
