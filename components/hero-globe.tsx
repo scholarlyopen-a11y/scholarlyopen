@@ -13,60 +13,113 @@ interface UnitSegment {
   p2: Point3D;
 }
 
-// 1. High-fidelity Continent Polygon Coordinates (lat/lon in degrees)
+// 1. High-fidelity continent outlines (lat/lon in degrees) for a decent, recognizable world map
 const NORTH_AMERICA = [
-  { lat: 70, lon: -160 }, { lat: 70, lon: -120 }, { lat: 80, lon: -80 },
-  { lat: 60, lon: -60 }, { lat: 45, lon: -60 }, { lat: 25, lon: -80 },
-  { lat: 20, lon: -90 }, { lat: 15, lon: -95 }, { lat: 20, lon: -105 },
-  { lat: 30, lon: -115 }, { lat: 45, lon: -125 }, { lat: 60, lon: -140 },
-  { lat: 65, lon: -168 }, { lat: 70, lon: -160 }
+  { lat: 72, lon: -168 }, { lat: 70, lon: -145 }, { lat: 60, lon: -140 },
+  { lat: 55, lon: -165 }, { lat: 52, lon: -175 }, { lat: 50, lon: -180 },
+  { lat: 48, lon: -125 }, { lat: 38, lon: -123 }, { lat: 30, lon: -115 },
+  { lat: 24, lon: -110 }, { lat: 22, lon: -105 }, { lat: 16, lon: -95 },
+  { lat: 15, lon: -90 }, { lat: 10, lon: -83 }, { lat: 9, lon: -79 },
+  { lat: 10, lon: -74 }, { lat: 15, lon: -82 }, { lat: 20, lon: -87 },
+  { lat: 25, lon: -80 }, { lat: 28, lon: -82 }, { lat: 25, lon: -97 },
+  { lat: 28, lon: -96 }, { lat: 30, lon: -85 }, { lat: 33, lon: -78 },
+  { lat: 38, lon: -75 }, { lat: 43, lon: -70 }, { lat: 47, lon: -65 },
+  { lat: 48, lon: -53 }, { lat: 52, lon: -55 }, { lat: 58, lon: -62 },
+  { lat: 60, lon: -64 }, { lat: 64, lon: -75 }, { lat: 68, lon: -78 },
+  { lat: 73, lon: -95 }, { lat: 78, lon: -105 }, { lat: 80, lon: -120 },
+  { lat: 75, lon: -140 }, { lat: 72, lon: -168 }
 ]
 
 const SOUTH_AMERICA = [
-  { lat: 12, lon: -72 }, { lat: 5, lon: -50 }, { lat: -5, lon: -35 },
-  { lat: -20, lon: -40 }, { lat: -35, lon: -55 }, { lat: -55, lon: -68 },
-  { lat: -40, lon: -75 }, { lat: -20, lon: -70 }, { lat: 0, lon: -80 },
-  { lat: 12, lon: -72 }
+  { lat: 12, lon: -72 }, { lat: 9, lon: -60 }, { lat: 5, lon: -52 },
+  { lat: 0, lon: -48 }, { lat: -5, lon: -35 }, { lat: -10, lon: -36 },
+  { lat: -20, lon: -40 }, { lat: -28, lon: -48 }, { lat: -35, lon: -55 },
+  { lat: -42, lon: -62 }, { lat: -50, lon: -65 }, { lat: -55, lon: -67 },
+  { lat: -54, lon: -73 }, { lat: -48, lon: -75 }, { lat: -40, lon: -74 },
+  { lat: -30, lon: -72 }, { lat: -20, lon: -70 }, { lat: -12, lon: -78 },
+  { lat: -5, lon: -81 }, { lat: 0, lon: -80 }, { lat: 5, lon: -77 },
+  { lat: 9, lon: -79 }, { lat: 12, lon: -72 }
 ]
 
 const GREENLAND = [
-  { lat: 80, lon: -60 }, { lat: 83, lon: -30 }, { lat: 70, lon: -20 },
-  { lat: 60, lon: -45 }, { lat: 70, lon: -55 }, { lat: 80, lon: -60 }
+  { lat: 78, lon: -73 }, { lat: 82, lon: -60 }, { lat: 83, lon: -40 },
+  { lat: 83, lon: -20 }, { lat: 80, lon: -12 }, { lat: 75, lon: -18 },
+  { lat: 70, lon: -22 }, { lat: 65, lon: -35 }, { lat: 60, lon: -43 },
+  { lat: 60, lon: -47 }, { lat: 65, lon: -53 }, { lat: 70, lon: -54 },
+  { lat: 75, lon: -58 }, { lat: 78, lon: -73 }
 ]
 
 const AFRICA = [
-  { lat: 37, lon: 10 }, { lat: 30, lon: 32 }, { lat: 12, lon: 43 },
-  { lat: 5, lon: 51 }, { lat: -34, lon: 20 }, { lat: -15, lon: 12 },
-  { lat: 5, lon: 10 }, { lat: 5, lon: -8 }, { lat: 15, lon: -17 },
-  { lat: 30, lon: -10 }, { lat: 35, lon: -2 }, { lat: 37, lon: 10 }
+  { lat: 37, lon: 10 }, { lat: 36, lon: 15 }, { lat: 32, lon: 15 },
+  { lat: 31, lon: 25 }, { lat: 31, lon: 34 }, { lat: 27, lon: 34 },
+  { lat: 22, lon: 37 }, { lat: 12, lon: 43 }, { lat: 11, lon: 48 },
+  { lat: 5, lon: 51 }, { lat: -5, lon: 40 }, { lat: -10, lon: 40 },
+  { lat: -20, lon: 35 }, { lat: -25, lon: 33 }, { lat: -34, lon: 20 },
+  { lat: -33, lon: 18 }, { lat: -20, lon: 13 }, { lat: -12, lon: 13 },
+  { lat: -5, lon: 12 }, { lat: 0, lon: 9 }, { lat: 5, lon: 9 },
+  { lat: 5, lon: 0 }, { lat: 6, lon: -8 }, { lat: 12, lon: -16 },
+  { lat: 15, lon: -17 }, { lat: 20, lon: -16 }, { lat: 25, lon: -15 },
+  { lat: 30, lon: -10 }, { lat: 35, lon: -6 }, { lat: 35, lon: 0 },
+  { lat: 37, lon: 5 }, { lat: 37, lon: 10 }
 ]
 
 const EURASIA = [
-  { lat: 70, lon: 15 }, { lat: 60, lon: 30 }, { lat: 70, lon: 60 },
-  { lat: 75, lon: 100 }, { lat: 70, lon: 170 }, { lat: 60, lon: 160 },
-  { lat: 40, lon: 140 }, { lat: 35, lon: 120 }, { lat: 22, lon: 115 },
-  { lat: 20, lon: 105 }, { lat: 10, lon: 100 }, { lat: 15, lon: 95 },
-  { lat: 20, lon: 90 }, { lat: 10, lon: 80 }, { lat: 25, lon: 65 },
-  { lat: 12, lon: 43 }, { lat: 25, lon: 35 }, { lat: 35, lon: 35 },
-  { lat: 40, lon: 25 }, { lat: 40, lon: 15 }, { lat: 36, lon: -5 },
-  { lat: 43, lon: -10 }, { lat: 50, lon: -2 }, { lat: 60, lon: 5 },
-  { lat: 70, lon: 15 }
+  { lat: 36, lon: -6 }, { lat: 37, lon: -9 }, { lat: 42, lon: -9 },
+  { lat: 43, lon: -1 }, { lat: 48, lon: -5 }, { lat: 50, lon: 2 },
+  { lat: 53, lon: 5 }, { lat: 54, lon: 8 }, { lat: 57, lon: 8 },
+  { lat: 55, lon: 12 }, { lat: 56, lon: 16 }, { lat: 59, lon: 18 },
+  { lat: 63, lon: 20 }, { lat: 65, lon: 24 }, { lat: 60, lon: 27 },
+  { lat: 59, lon: 30 }, { lat: 64, lon: 38 }, { lat: 68, lon: 39 },
+  { lat: 70, lon: 28 }, { lat: 68, lon: 15 }, { lat: 62, lon: 5 },
+  { lat: 58, lon: 6 }, { lat: 60, lon: 30 }, { lat: 67, lon: 45 },
+  { lat: 70, lon: 60 }, { lat: 73, lon: 72 }, { lat: 76, lon: 95 },
+  { lat: 72, lon: 120 }, { lat: 70, lon: 140 }, { lat: 70, lon: 170 },
+  { lat: 65, lon: 180 }, { lat: 60, lon: 165 }, { lat: 56, lon: 163 },
+  { lat: 51, lon: 156 }, { lat: 46, lon: 142 }, { lat: 43, lon: 132 },
+  { lat: 38, lon: 125 }, { lat: 35, lon: 129 }, { lat: 37, lon: 120 },
+  { lat: 31, lon: 122 }, { lat: 22, lon: 114 }, { lat: 21, lon: 108 },
+  { lat: 10, lon: 104 }, { lat: 6, lon: 102 }, { lat: 10, lon: 98 },
+  { lat: 16, lon: 96 }, { lat: 22, lon: 90 }, { lat: 16, lon: 81 },
+  { lat: 8, lon: 77 }, { lat: 19, lon: 72 }, { lat: 25, lon: 67 },
+  { lat: 25, lon: 58 }, { lat: 27, lon: 50 }, { lat: 12, lon: 43 },
+  { lat: 28, lon: 34 }, { lat: 31, lon: 34 }, { lat: 35, lon: 36 },
+  { lat: 36, lon: 30 }, { lat: 40, lon: 26 }, { lat: 41, lon: 29 },
+  { lat: 44, lon: 34 }, { lat: 46, lon: 30 }, { lat: 41, lon: 22 },
+  { lat: 38, lon: 23 }, { lat: 40, lon: 18 }, { lat: 45, lon: 13 },
+  { lat: 41, lon: 15 }, { lat: 38, lon: 16 }, { lat: 40, lon: 14 },
+  { lat: 44, lon: 10 }, { lat: 43, lon: 6 }, { lat: 43, lon: 3 },
+  { lat: 41, lon: 2 }, { lat: 39, lon: -1 }, { lat: 36, lon: -6 }
 ]
 
 const AUSTRALIA = [
-  { lat: -12, lon: 130 }, { lat: -10, lon: 142 }, { lat: -25, lon: 153 },
-  { lat: -38, lon: 145 }, { lat: -35, lon: 115 }, { lat: -22, lon: 113 },
-  { lat: -12, lon: 130 }
+  { lat: -12, lon: 131 }, { lat: -11, lon: 136 }, { lat: -12, lon: 136 },
+  { lat: -15, lon: 136 }, { lat: -14, lon: 141 }, { lat: -11, lon: 142 },
+  { lat: -15, lon: 145 }, { lat: -20, lon: 148 }, { lat: -25, lon: 153 },
+  { lat: -30, lon: 153 }, { lat: -35, lon: 150 }, { lat: -38, lon: 147 },
+  { lat: -38, lon: 144 }, { lat: -35, lon: 138 }, { lat: -37, lon: 139 },
+  { lat: -35, lon: 136 }, { lat: -33, lon: 132 }, { lat: -32, lon: 125 },
+  { lat: -35, lon: 118 }, { lat: -34, lon: 115 }, { lat: -32, lon: 115 },
+  { lat: -28, lon: 114 }, { lat: -25, lon: 113 }, { lat: -22, lon: 114 },
+  { lat: -20, lon: 118 }, { lat: -17, lon: 122 }, { lat: -15, lon: 125 },
+  { lat: -14, lon: 129 }, { lat: -12, lon: 131 }
 ]
 
 const UNITED_KINGDOM = [
-  { lat: 58, lon: -5 }, { lat: 55, lon: -2 }, { lat: 50, lon: -5 },
-  { lat: 50, lon: 1 }, { lat: 54, lon: -1 }, { lat: 58, lon: -5 }
+  { lat: 58.5, lon: -4.5 }, { lat: 57.5, lon: -2.0 }, { lat: 56.0, lon: -2.5 },
+  { lat: 54.0, lon: -0.5 }, { lat: 52.5, lon: 1.5 }, { lat: 51.0, lon: 1.3 },
+  { lat: 50.0, lon: -5.0 }, { lat: 52.0, lon: -5.0 }, { lat: 53.0, lon: -4.5 },
+  { lat: 54.5, lon: -3.5 }, { lat: 55.0, lon: -5.0 }, { lat: 56.5, lon: -6.0 },
+  { lat: 57.5, lon: -6.0 }, { lat: 58.5, lon: -4.5 }
 ]
 
 const JAPAN = [
-  { lat: 45, lon: 142 }, { lat: 35, lon: 140 }, { lat: 31, lon: 130 },
-  { lat: 35, lon: 135 }, { lat: 40, lon: 140 }, { lat: 45, lon: 142 }
+  { lat: 45.5, lon: 142.0 }, { lat: 44.0, lon: 145.0 }, { lat: 43.0, lon: 145.5 },
+  { lat: 42.0, lon: 141.0 }, { lat: 41.5, lon: 142.0 }, { lat: 40.0, lon: 142.0 },
+  { lat: 36.0, lon: 140.5 }, { lat: 35.0, lon: 139.5 }, { lat: 33.5, lon: 136.0 },
+  { lat: 33.0, lon: 132.0 }, { lat: 32.5, lon: 130.0 }, { lat: 33.5, lon: 130.0 },
+  { lat: 34.5, lon: 133.0 }, { lat: 35.5, lon: 135.0 }, { lat: 37.5, lon: 137.5 },
+  { lat: 38.5, lon: 139.0 }, { lat: 41.0, lon: 140.0 }, { lat: 42.0, lon: 140.0 },
+  { lat: 43.5, lon: 140.5 }, { lat: 45.5, lon: 142.0 }
 ]
 
 const CONTINENTS = [
@@ -80,11 +133,11 @@ const CONTINENTS = [
   JAPAN
 ]
 
-// 2. Helper to subdivide large segment steps along sphere curves to map beautifully
+// Subdivide long polygon edges to wrap smoothly around sphere curvature
 function subdivideSegment(
   v1: { lat: number; lon: number },
   v2: { lat: number; lon: number },
-  maxStep = 4
+  maxStep = 3.5
 ) {
   const dist = Math.hypot(v2.lat - v1.lat, v2.lon - v1.lon)
   const steps = Math.max(1, Math.ceil(dist / maxStep))
@@ -113,7 +166,7 @@ export function HeroGlobe() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const unitContinentSegmentsRef = useRef<UnitSegment[]>([])
   
-  // 3. Precompute subdivided unit continent outlines on mount to keep rendering at 60 FPS
+  // Precompute subdivided unit segments once on mount
   useEffect(() => {
     const segments: UnitSegment[] = []
     
@@ -182,7 +235,7 @@ export function HeroGlobe() {
     container.addEventListener("mousemove", handleMouseMove)
     container.addEventListener("mouseleave", handleMouseLeave)
     
-    // Resize handler to match device pixel ratio for sharp rendering
+    // Canvas resizing
     const resizeCanvas = () => {
       if (isDestroyed) return
       const rect = container.getBoundingClientRect()
@@ -202,7 +255,7 @@ export function HeroGlobe() {
     window.addEventListener("resize", resizeCanvas)
     
     // 3D rotations helper constants
-    const TILT_RAD = 23.5 * Math.PI / 180 // Earth's 23.5-degree axial tilt
+    const TILT_RAD = 23.5 * Math.PI / 180 // Earth's axial tilt
     
     const rotateY = (p: Point3D, angle: number): Point3D => {
       const cos = Math.cos(angle)
@@ -243,7 +296,7 @@ export function HeroGlobe() {
       }
     }
     
-    // Draw unlocked padlock swung WIDE open (55 degrees) to show undeniable visual gap
+    // Draw lock perfectly UPRIGHT (billboard style) with keyhole slot centered so it doesn't look like a shopping bag
     const drawLock = (context: CanvasRenderingContext2D, cx: number, cy: number, size: number) => {
       context.save()
       context.translate(cx, cy)
@@ -257,10 +310,10 @@ export function HeroGlobe() {
       const h = size * 0.65
       const bodyY = size * 0.15
       
-      // Padlock base (body)
+      // Padlock Body
       context.beginPath()
       if (context.roundRect) {
-        context.roundRect(-w / 2, bodyY - h / 2, w, h, 2)
+        context.roundRect(-w / 2, bodyY - h / 2, w, h, 2.5)
       } else {
         context.rect(-w / 2, bodyY - h / 2, w, h)
       }
@@ -268,22 +321,28 @@ export function HeroGlobe() {
       context.fill()
       context.stroke()
       
-      // Open / Unlocked Shackle (Swung open by 55 degrees on the left hinge)
-      context.save()
-      const leftX = -w * 0.24
-      context.translate(leftX, bodyY - h / 2)
-      context.rotate(55 * Math.PI / 180) // Rotate shackle far out and open!
-      
+      // keyhole slot (circle + slot underneath)
       context.beginPath()
-      context.moveTo(0, 0)
-      context.lineTo(0, -w * 0.55 + w * 0.24)
-      context.arc(w * 0.24, -w * 0.55 + w * 0.24, w * 0.24, Math.PI, 0, false)
-      context.lineTo(w * 0.48, -w * 0.55 + w * 0.38)
-      
-      context.strokeStyle = "#facc15"
+      context.arc(0, bodyY - w * 0.04, w * 0.08, 0, Math.PI * 2)
+      context.moveTo(0, bodyY - w * 0.04)
+      context.lineTo(0, bodyY + w * 0.14)
+      context.lineWidth = 1.45
       context.stroke()
-      context.restore()
       
+      // Standard open shackle (connected left, looping over, cut short on the right leaving a large gap)
+      // Drawn perfectly vertical, no crooked rotation
+      context.beginPath()
+      context.lineWidth = 1.8
+      const leftX = -w * 0.26
+      const rightX = w * 0.26
+      const topY = bodyY - h / 2 - w * 0.55
+      
+      context.moveTo(leftX, bodyY - h / 2)
+      context.lineTo(leftX, topY + w * 0.26)
+      context.arc(0, topY + w * 0.26, w * 0.26, Math.PI, 0, false)
+      context.lineTo(rightX, topY + w * 0.35)
+      
+      context.stroke()
       context.restore()
     }
     
@@ -299,7 +358,7 @@ export function HeroGlobe() {
       
       ctx.clearRect(0, 0, width, height)
       
-      // Radius set to 0.27 to leave plenty of canvas bounds for 5 orbiting padlocks and mouse parallax
+      // Radius set to 0.27 to prevent clipping
       const R = Math.min(width, height) * 0.27
       const cameraDist = R * 2.5
       
@@ -309,10 +368,10 @@ export function HeroGlobe() {
       
       const time = performance.now() * 0.001
       
-      // West-to-East clockwise rotation
+      // Clockwise rotation
       const globeAngle = time * 0.06
       
-      // Angles for 5 unlocked padlocks moving at different speeds (all clockwise matching Earth)
+      // Angles for 5 locks
       const lock1Angle = time * -1.5
       const lock2Angle = time * -2.1 + 1.2
       const lock3Angle = time * -1.2 + 2.5
@@ -375,9 +434,9 @@ export function HeroGlobe() {
           
           let opacity = 0
           if (normZ >= 0) {
-            opacity = 0.08 + 0.14 * normZ // Very subtle front latitude lines
+            opacity = 0.08 + 0.14 * normZ // subtle front grid
           } else {
-            opacity = 0.04 + 0.05 * (1 + normZ) // Faint back latitude lines
+            opacity = 0.04 + 0.05 * (1 + normZ) // faint back grid
           }
           
           drawList.push({
@@ -452,7 +511,7 @@ export function HeroGlobe() {
         }
       }
       
-      // 3. Generate Decent/Accurate World Map Outlines wrapping around 3D curves
+      // 3. Generate Decent, Accurate World Map Outline wrapping beautifully
       const unitContinentSegments = unitContinentSegmentsRef.current
       unitContinentSegments.forEach((seg) => {
         const p1_local: Point3D = {
@@ -467,15 +526,12 @@ export function HeroGlobe() {
           z: seg.p2.z * R
         }
         
-        // Spin clockwise
         let p1 = rotateY(p1_local, -globeAngle)
         let p2 = rotateY(p2_local, -globeAngle)
         
-        // Axial tilt
         p1 = rotateZ(p1, TILT_RAD)
         p2 = rotateZ(p2, TILT_RAD)
         
-        // Mouse tilting
         p1 = rotateY(p1, curMouseX * 0.35)
         p1 = rotateX(p1, curMouseY * 0.35)
         p2 = rotateY(p2, curMouseX * 0.35)
@@ -489,9 +545,9 @@ export function HeroGlobe() {
         
         let opacity = 0
         if (normZ >= 0) {
-          opacity = 0.28 + 0.47 * normZ // Front: Bright white, highly recognizable continent contours
+          opacity = 0.32 + 0.53 * normZ // High-fidelity bright continents
         } else {
-          opacity = 0.12 + 0.16 * (1 + normZ) // Back: Soft translucent white contours
+          opacity = 0.12 + 0.20 * (1 + normZ) // Translucent back continent curves
         }
         
         drawList.push({
@@ -502,7 +558,7 @@ export function HeroGlobe() {
           x2: proj2.x,
           y2: proj2.y,
           color: `rgba(255, 255, 255, ${opacity})`,
-          lineWidth: normZ >= 0 ? 1.25 : 0.85 // Brighter and thicker outlines
+          lineWidth: normZ >= 0 ? 1.35 : 0.85
         })
       })
       
