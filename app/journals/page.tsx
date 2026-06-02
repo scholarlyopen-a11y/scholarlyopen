@@ -20,6 +20,7 @@ const journals = [
     descriptionKey: "journals.bio.description",
     icon: Leaf,
     href: "/journals/biology",
+    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.chem.title",

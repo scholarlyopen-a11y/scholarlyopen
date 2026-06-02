@@ -52,6 +52,7 @@ export default function HomePage() {
       href: "/journals/biology",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
+      iconColor: "text-green-500",
     },
     {
       title: t("journals.chem.title"),

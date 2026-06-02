@@ -94,7 +94,7 @@ export function JournalPage({
       text: "text-emerald-950",
       subtext: "text-emerald-900/80",
       buttonOutline: "border-emerald-300 bg-emerald-100/30 text-emerald-900 hover:bg-emerald-100/60",
-      iconBg: "bg-emerald-950/10 text-emerald-900",
+      iconBg: "bg-green-500/10 text-green-600",
       badge: "bg-emerald-900/10 text-emerald-900 border-emerald-900/25 shadow-none hover:bg-emerald-900/20"
     },
     "chemistry": {
