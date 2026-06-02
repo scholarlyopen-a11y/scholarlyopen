@@ -359,7 +359,7 @@ export function HeroGlobe() {
       
       ctx.clearRect(0, 0, width, height)
       
-      // Radius increased to 0.33 (from 0.27) to fit the Hero Column size beautifully
+      // Radius increased to 0.33 to fit the Hero Column size beautifully
       const R = Math.min(width, height) * 0.33
       const cameraDist = R * 2.5
       
@@ -369,15 +369,15 @@ export function HeroGlobe() {
       
       const time = performance.now() * 0.001
       
-      // Clockwise rotation
-      const globeAngle = time * 0.06
+      // Clockwise rotation (Atmospheric planetary spin matching premium hero standards)
+      const globeAngle = time * 0.03
       
-      // Angles for 5 locks
-      const lock1Angle = time * -1.5
-      const lock2Angle = time * -2.1 + 1.2
-      const lock3Angle = time * -1.2 + 2.5
-      const lock4Angle = time * -2.7 + 3.8
-      const lock5Angle = time * -1.8 + 5.1
+      // Standard atmospheric glides (3x slower, following universal hero visual standards)
+      const lock1Angle = time * -0.5
+      const lock2Angle = time * -0.7 + 1.2
+      const lock3Angle = time * -0.4 + 2.5
+      const lock4Angle = time * -0.9 + 3.8
+      const lock5Angle = time * -0.6 + 5.1
       
       interface DrawSegment {
         type: "continent-line" | "orbit-line" | "trail-line"
@@ -400,8 +400,6 @@ export function HeroGlobe() {
       
       type Drawable = DrawSegment | DrawLock
       const drawList: Drawable[] = []
-      
-      // Note: Latitudes and Longitudes loops have been fully removed to leave a clean world map outlines globe
       
       // 1. Generate Accurate World Map Outline wrapping beautifully
       const unitContinentSegments = unitContinentSegmentsRef.current
@@ -562,51 +560,51 @@ export function HeroGlobe() {
         })
       }
       
-      // Lock 1: Largest padlock, fast spiral orbit
+      // Lock 1: Largest padlock, slow spiral orbit
       addSpiralOrbitAndLock(
         R * 1.15,
         lock1Angle,
-        -1.5,
+        -0.5,
         0.20,
         55 * Math.PI / 180,
         18.0
       )
       
-      // Lock 2: Medium-large padlock, very fast spiral orbit
+      // Lock 2: Medium-large padlock, steady spiral orbit
       addSpiralOrbitAndLock(
         R * 1.21,
         lock2Angle,
-        -2.1,
+        -0.7,
         0.16,
         45 * Math.PI / 180,
         14.5
       )
       
-      // Lock 3: Medium-small padlock, moderate speed
+      // Lock 3: Medium-small padlock, slow glide speed
       addSpiralOrbitAndLock(
         R * 1.27,
         lock3Angle,
-        -1.2,
+        -0.4,
         0.24,
         35 * Math.PI / 180,
         11.5
       )
       
-      // Lock 4: Small padlock, extremely fast spiral orbit
+      // Lock 4: Small padlock, slightly swifter spiral orbit
       addSpiralOrbitAndLock(
         R * 1.33,
         lock4Angle,
-        -2.7,
+        -0.9,
         0.13,
         60 * Math.PI / 180,
         9.0
       )
       
-      // Lock 5: Tiny padlock, steady speed, narrow spiral latitude
+      // Lock 5: Tiny padlock, steady glide speed, narrow spiral latitude
       addSpiralOrbitAndLock(
         R * 1.09,
         lock5Angle,
-        -1.8,
+        -0.6,
         0.30,
         25 * Math.PI / 180,
         6.5
