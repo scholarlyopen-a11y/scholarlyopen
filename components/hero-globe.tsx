@@ -11,50 +11,103 @@ interface Point3D {
 // Preset circles (metaballs) representing the continents for a procedurally mapped dotted world map
 // Coordinates are in degrees (lon: -180 to 180, lat: -90 to 90)
 const LAND_CIRCLES = [
-  { lon: -40, lat: 72, radius: 12 },   // Greenland
+  // Greenland
+  { lon: -40, lat: 72, radius: 12 },   
+  { lon: -55, lat: 78, radius: 8 },
+  { lon: -30, lat: 70, radius: 7 },
+  
+  // North America
   { lon: -100, lat: 52, radius: 23 },  // Canada
-  { lon: -120, lat: 60, radius: 18 },  // Alaska/NW Canada
+  { lon: -125, lat: 60, radius: 17 },  // Alaska/NW Canada
   { lon: -75, lat: 46, radius: 11 },   // Eastern Canada
+  { lon: -140, lat: 62, radius: 10 },  // Aleutians / West Alaska
   { lon: -95, lat: 38, radius: 16 },   // USA Central
-  { lon: -112, lat: 39, radius: 13 },  // USA West
+  { lon: -115, lat: 38, radius: 13 },  // USA West
   { lon: -82, lat: 34, radius: 12 },   // USA East
-  { lon: -90, lat: 19, radius: 6 },    // Mexico/Central America
-  { lon: -80, lat: 9, radius: 4 },     // Panama/Colombia connector
-  { lon: -62, lat: -6, radius: 19 },   // South America North (Amazon)
-  { lon: -52, lat: -10, radius: 14 },  // South America East (Brazil)
-  { lon: -68, lat: -25, radius: 15 },  // South America Mid
-  { lon: -71, lat: -42, radius: 9 },   // South America South (Chile/Argentina)
-  { lon: 14, lat: 22, radius: 17 },    // Africa Northwest (Sahara)
-  { lon: 28, lat: 25, radius: 13 },    // Africa Northeast (Egypt/Libya)
-  { lon: 22, lat: 7, radius: 19 },     // Africa Central
-  { lon: 32, lat: -2, radius: 14 },    // Africa East
-  { lon: 24, lat: -19, radius: 13 },   // Africa South
+  { lon: -120, lat: 45, radius: 11 },
+  { lon: -75, lat: 40, radius: 8 },
+  { lon: -102, lat: 24, radius: 9 },   // Mexico
+  { lon: -90, lat: 19, radius: 6 },    // Central America
+  { lon: -84, lat: 12, radius: 4 },
+  { lon: -80, lat: 9, radius: 3 },     // Panama
+  { lon: -72, lat: 19, radius: 4 },    // Caribbean
+  { lon: -64, lat: 14, radius: 3 },
+  { lon: -80, lat: 22, radius: 4 },
+  
+  // South America
+  { lon: -62, lat: -6, radius: 19 },   // Brazil North/Amazon
+  { lon: -52, lat: -10, radius: 14 },  // Brazil East
+  { lon: -72, lat: -4, radius: 12 },   // Peru/Ecuador
+  { lon: -68, lat: -22, radius: 15 },  // Bolivia/Paraguay
+  { lon: -58, lat: -20, radius: 13 },
+  { lon: -70, lat: -38, radius: 12 },  // Chile/Argentina
+  { lon: -68, lat: -48, radius: 9 },   // Patagonia
+  
+  // Africa
+  { lon: 14, lat: 22, radius: 17 },    // Sahara West
+  { lon: 2, lat: 20, radius: 13 },
+  { lon: -8, lat: 16, radius: 11 },
+  { lon: 10, lat: 12, radius: 14 },
+  { lon: 28, lat: 25, radius: 13 },    // Sahara East
+  { lon: 32, lat: 20, radius: 10 },
+  { lon: 22, lat: 7, radius: 19 },     // Central Africa
+  { lon: 30, lat: -2, radius: 14 },    // East Africa
+  { lon: 16, lat: -4, radius: 13 },
+  { lon: 24, lat: -20, radius: 13 },   // South Africa
+  { lon: 28, lat: -28, radius: 10 },
   { lon: 47, lat: -19, radius: 6 },    // Madagascar
-  { lon: 16, lat: 51, radius: 12 },    // Europe Central
-  { lon: 1, lat: 46, radius: 8 },      // France/Spain
-  { lon: 32, lat: 58, radius: 13 },    // Europe East (Ukraine/Western Russia)
-  { lon: 12, lat: 62, radius: 9 },     // Scandinavia (Norway/Sweden)
-  { lon: 24, lat: 65, radius: 8 },     // Scandinavia (Finland/North Sweden)
+  { lon: 49, lat: -14, radius: 4 },
+  
+  // Europe
+  { lon: 16, lat: 51, radius: 11 },    // Central Europe
+  { lon: 8, lat: 48, radius: 9 },
+  { lon: -1, lat: 43, radius: 7 },     // Spain/Portugal
+  { lon: -5, lat: 40, radius: 6 },
+  { lon: 32, lat: 58, radius: 13 },    // Eastern Europe
+  { lon: 42, lat: 52, radius: 11 },
+  { lon: 28, lat: 50, radius: 10 },
+  { lon: 12, lat: 62, radius: 9 },     // Scandinavia
+  { lon: 24, lat: 66, radius: 8 },
+  { lon: 16, lat: 57, radius: 6 },
   { lon: -4, lat: 55, radius: 5 },     // United Kingdom
-  { lon: 90, lat: 60, radius: 26 },    // Siberia Central
-  { lon: 65, lat: 58, radius: 25 },    // Urals / Western Siberia
-  { lon: 130, lat: 62, radius: 19 },   // Russia Far East
-  { lon: 82, lat: 36, radius: 17 },    // Central Asia (Kazakhstan/Xinjiang)
-  { lon: 44, lat: 22, radius: 11 },    // Saudi Arabia
+  { lon: -8, lat: 53, radius: 4 },     // Ireland
+  { lon: 13, lat: 42, radius: 4 },     // Italy
+  { lon: 22, lat: 38, radius: 3 },     // Greece
+  
+  // Asia
+  { lon: 90, lat: 60, radius: 26 },    // Siberia
+  { lon: 65, lat: 58, radius: 25 },
+  { lon: 115, lat: 62, radius: 22 },
+  { lon: 140, lat: 64, radius: 18 },
+  { lon: 155, lat: 65, radius: 13 },
+  { lon: 82, lat: 36, radius: 17 },    // Central Asia
+  { lon: 68, lat: 35, radius: 13 },
+  { lon: 55, lat: 32, radius: 10 },
+  { lon: 44, lat: 22, radius: 11 },    // Middle East (Saudi)
+  { lon: 52, lat: 18, radius: 8 },
   { lon: 112, lat: 36, radius: 20 },   // China East
-  { lon: 122, lat: 48, radius: 15 },   // Northeast China / Manchuria
+  { lon: 122, lat: 48, radius: 15 },
+  { lon: 104, lat: 28, radius: 12 },
   { lon: 77, lat: 21, radius: 11 },    // India
-  { lon: 102, lat: 16, radius: 9 },     // Indochina (Thailand/Vietnam)
-  { lon: 114, lat: -1, radius: 7 },    // Indonesia (Borneo)
-  { lon: 120, lat: -6, radius: 5 },    // Indonesia (Java/Sumatra)
-  { lon: 122, lat: 11, radius: 5 },    // Philippines
+  { lon: 74, lat: 14, radius: 7 },
+  { lon: 102, lat: 16, radius: 9 },     // Southeast Asia
+  { lon: 106, lat: 11, radius: 6 },
   { lon: 138, lat: 36, radius: 6 },    // Japan
-  { lon: 134, lat: -24, radius: 15 },  // Australia Central
-  { lon: 144, lat: -30, radius: 10 },  // Australia Southeast
-  { lon: 120, lat: -21, radius: 8 }    // Australia Northwest
+  { lon: 142, lat: 41, radius: 5 },
+  { lon: 114, lat: -1, radius: 7 },    // Indonesia (Borneo)
+  { lon: 120, lat: -6, radius: 5 },    // Java/Sumatra
+  { lon: 122, lat: 11, radius: 5 },    // Philippines
+  
+  // Australia
+  { lon: 134, lat: -24, radius: 15 },  
+  { lon: 144, lat: -30, radius: 10 },  
+  { lon: 148, lat: -34, radius: 6 },
+  { lon: 120, lat: -21, radius: 8 },
+  { lon: 146, lat: -42, radius: 3 },   // Tasmania
+  { lon: 172, lat: -41, radius: 5 }    // New Zealand
 ]
 
-// Query function to check if a lat/lon point lies on land
+// Check if a point lies on land using the high-fidelity metaballs centers
 function checkIsLand(lat: number, lon: number): boolean {
   for (let i = 0; i < LAND_CIRCLES.length; i++) {
     const c = LAND_CIRCLES[i]
@@ -71,15 +124,15 @@ export function HeroGlobe() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const unitDotsRef = useRef<Point3D[]>([])
   
-  // 1. Generate uniform unit sphere dots for the world map outline once upon mount
+  // Generate uniform unit sphere dots once when component mounts
   useEffect(() => {
     const dots: Point3D[] = []
-    const step = 4.2 // Grid sampling step in degrees for balanced density
+    const step = 4.0 // High resolution grid step size in degrees
     
     for (let lat = -80; lat <= 80; lat += step) {
       const latRad = lat * Math.PI / 180
       const cosLat = Math.cos(latRad)
-      // Adjust longitude sample step size based on latitude to prevent polar clustering
+      // Adjust longitude density based on latitude to prevent polar clustering
       const lonStep = step / cosLat
       
       for (let lon = -180; lon < 180; lon += lonStep) {
@@ -106,7 +159,7 @@ export function HeroGlobe() {
     let animationId: number
     let isDestroyed = false
     
-    // Interactive mouse parallax variables
+    // Parallax mouse variables
     let targetMouseX = 0
     let targetMouseY = 0
     let curMouseX = 0
@@ -128,7 +181,7 @@ export function HeroGlobe() {
     container.addEventListener("mousemove", handleMouseMove)
     container.addEventListener("mouseleave", handleMouseLeave)
     
-    // Canvas resizing keeping device pixel ratio sharp
+    // Resize handler to match device pixel ratio for sharp rendering
     const resizeCanvas = () => {
       if (isDestroyed) return
       const rect = container.getBoundingClientRect()
@@ -147,8 +200,8 @@ export function HeroGlobe() {
     resizeCanvas()
     window.addEventListener("resize", resizeCanvas)
     
-    // 3D Matrix Transformations
-    const TILT_RAD = 23.5 * Math.PI / 180 // 23.5 degrees Earth tilt
+    // 3D rotations helper constants
+    const TILT_RAD = 23.5 * Math.PI / 180 // Earth's 23.5-degree axial tilt
     
     const rotateY = (p: Point3D, angle: number): Point3D => {
       const cos = Math.cos(angle)
@@ -189,7 +242,7 @@ export function HeroGlobe() {
       }
     }
     
-    // Draw vector padlock
+    // Draw highly-detailed open padlock swung open to show visual gap
     const drawLock = (context: CanvasRenderingContext2D, cx: number, cy: number, size: number) => {
       context.save()
       context.translate(cx, cy)
@@ -203,7 +256,7 @@ export function HeroGlobe() {
       const h = size * 0.65
       const bodyY = size * 0.15
       
-      // Base
+      // Padlock base (body)
       context.beginPath()
       if (context.roundRect) {
         context.roundRect(-w / 2, bodyY - h / 2, w, h, 2)
@@ -214,22 +267,26 @@ export function HeroGlobe() {
       context.fill()
       context.stroke()
       
-      // Unlocked Shackle (Leaves a visual gap)
-      context.beginPath()
+      // Open / Unlocked Shackle (Swung open by 25 degrees on the left hinge)
+      context.save()
       const leftX = -w * 0.24
-      const rightX = w * 0.24
-      const topY = bodyY - h / 2 - w * 0.55
+      context.translate(leftX, bodyY - h / 2)
+      context.rotate(25 * Math.PI / 180) // Swing open realistic padlock!
       
-      context.moveTo(leftX, bodyY - h / 2)
-      context.lineTo(leftX, topY + w * 0.24)
-      context.arc(0, topY + w * 0.24, w * 0.24, Math.PI, 0, false)
-      context.lineTo(rightX, topY + w * 0.38)
+      context.beginPath()
+      context.moveTo(0, 0)
+      context.lineTo(0, -w * 0.55 + w * 0.24)
+      context.arc(w * 0.24, -w * 0.55 + w * 0.24, w * 0.24, Math.PI, 0, false)
+      context.lineTo(w * 0.48, -w * 0.55 + w * 0.38)
       
+      context.strokeStyle = "#facc15"
       context.stroke()
+      context.restore()
+      
       context.restore()
     }
     
-    // Render loop tick
+    // Tick frame rendering
     const tick = () => {
       if (isDestroyed || !canvas || !ctx) return
       
@@ -241,20 +298,25 @@ export function HeroGlobe() {
       
       ctx.clearRect(0, 0, width, height)
       
-      // Radius scaled down to 0.28 (from 0.36) to prevent clipping when padlocks orbit and mouse tilts
-      const R = Math.min(width, height) * 0.28
+      // Radius set to 0.27 to leave plenty of canvas bounds for 5 orbiting padlocks and mouse parallax
+      const R = Math.min(width, height) * 0.27
       const cameraDist = R * 2.5
       
-      // Smooth cursor parallax lerping
+      // Smooth cursor parallax lerp
       curMouseX += (targetMouseX - curMouseX) * 0.08
       curMouseY += (targetMouseY - curMouseY) * 0.08
       
       const time = performance.now() * 0.001
       
-      // Clockwise West-to-East spins
+      // West-to-East clockwise rotation
       const globeAngle = time * 0.06
-      const lock1Angle = time * -1.8  // Fast spiral 1 (clockwise)
-      const lock2Angle = time * -2.4  // Super fast spiral 2 (clockwise)
+      
+      // Angles for 5 unlocked padlocks moving at different speeds (all clockwise matching Earth)
+      const lock1Angle = time * -1.5
+      const lock2Angle = time * -2.1 + 1.2
+      const lock3Angle = time * -1.2 + 2.5
+      const lock4Angle = time * -2.7 + 3.8
+      const lock5Angle = time * -1.8 + 5.1
       
       interface DrawDot {
         type: "dot"
@@ -287,7 +349,7 @@ export function HeroGlobe() {
       type Drawable = DrawDot | DrawSegment | DrawLock
       const drawList: Drawable[] = []
       
-      // 1. Render Dotted World Map Globe
+      // 1. Render Cyan/Light Blue Dotted World Map Globe (Like Group 189)
       const unitDots = unitDotsRef.current
       unitDots.forEach((ud) => {
         const p_local: Point3D = {
@@ -296,13 +358,13 @@ export function HeroGlobe() {
           z: ud.z * R
         }
         
-        // Spin West-to-East (negative angle for clockwise spin)
+        // Spin clockwise
         let p = rotateY(p_local, -globeAngle)
         
-        // Tilt Earth axis by 23.5-degrees
+        // Axial tilt
         p = rotateZ(p, TILT_RAD)
         
-        // Parallax cursor yaw/pitch
+        // Mouse tilting
         p = rotateY(p, curMouseX * 0.35)
         p = rotateX(p, curMouseY * 0.35)
         
@@ -311,43 +373,48 @@ export function HeroGlobe() {
         const normZ = proj.z / R
         let opacity = 0
         if (normZ >= 0) {
-          opacity = 0.34 + 0.56 * normZ // Front side dots are bright white
+          opacity = 0.35 + 0.55 * normZ // Front: Bright glowing cyan/blue
         } else {
-          opacity = 0.12 + 0.22 * (1 + normZ) // Back side dots are faded
+          opacity = 0.12 + 0.23 * (1 + normZ) // Back: Soft translucent cyan/blue
         }
         
         const scale = cameraDist / (cameraDist - proj.z)
+        
+        // Volumetric Halftone Shading size calculation: front dots are larger, back dots are tiny
+        // This beautifully maps the shaded volume contours of Group 189
+        const size = (0.9 + 1.8 * Math.max(0, normZ)) * scale
         
         drawList.push({
           type: "dot",
           z: proj.z,
           x: proj.x,
           y: proj.y,
-          size: 1.5 * scale,
-          color: `rgba(255, 255, 255, ${opacity})`
+          size: size,
+          // Gorgeous Sky Blue/Cyan color matching Group 189
+          color: `rgba(56, 189, 248, ${opacity})` 
         })
       })
       
-      // 2. Render Spiral Orbit Paths & Padlocks
-      // Spiral revolves around the Earth's tilted axial polar coordinates
+      // 2. Render 5 Spiral Orbit Paths & Open Padlocks
+      // All orbits revolve around the exact same 23.5-degree polar axis
       const addSpiralOrbitAndLock = (
         orbitRadius: number,
         lockAngle: number,
         speed: number,
         oscillationFreq: number,
-        maxLatRad: number
+        maxLatRad: number,
+        baseLockSize: number
       ) => {
-        const segments = 100
-        const trailLength = 1.2 // Trail length in radians (~69 degrees)
+        const segments = 90
+        const trailLength = 1.25 // Length of trailing shooting star trail
         const direction = speed >= 0 ? 1 : -1
         
-        // Generate spiral coordinates behind lock for one complete revolution
         for (let j = 0; j < segments; j++) {
           const angleDiff = (j / segments) * 2 * Math.PI
           const a1 = lockAngle - direction * angleDiff
           const a2 = lockAngle - direction * ((j + 1) / segments) * 2 * Math.PI
           
-          // Spiral oscillation: latitude travels dynamically up & down between polar lines
+          // Spiral oscillation in local coordinates
           const lat1 = Math.sin(a1 * oscillationFreq) * maxLatRad
           const cosLat1 = Math.cos(lat1)
           const p1_local: Point3D = {
@@ -364,11 +431,11 @@ export function HeroGlobe() {
             z: orbitRadius * cosLat2 * Math.cos(a2)
           }
           
-          // Tilts: Share the EXACT SAME 23.5-degree axial tilt as the dotted world map!
+          // 23.5-degree axial tilt alignment
           let p1 = rotateZ(p1_local, TILT_RAD)
           let p2 = rotateZ(p2_local, TILT_RAD)
           
-          // Mouse parallax yaw/pitch
+          // Mouse tilts
           p1 = rotateY(p1, curMouseX * 0.35)
           p1 = rotateX(p1, curMouseY * 0.35)
           p2 = rotateY(p2, curMouseX * 0.35)
@@ -380,7 +447,7 @@ export function HeroGlobe() {
           const zAvg = (proj1.z + proj2.z) / 2
           
           if (angleDiff < trailLength) {
-            // Tapered trail (shooting star)
+            // Bright fading yellow trail
             const opacityMultiplier = 1.0 - angleDiff / trailLength
             drawList.push({
               type: "trail-line",
@@ -390,12 +457,12 @@ export function HeroGlobe() {
               x2: proj2.x,
               y2: proj2.y,
               color: `rgba(250, 204, 21, ${opacityMultiplier * 0.95})`,
-              lineWidth: 1.0 + 3.0 * opacityMultiplier
+              lineWidth: 0.8 + 2.8 * opacityMultiplier
             })
           } else {
-            // Faint background spiral path
+            // Very faint background spiral path
             const normZ = zAvg / orbitRadius
-            const baseOpacity = normZ >= 0 ? 0.22 + 0.18 * normZ : 0.12 + 0.1 * (1 + normZ)
+            const baseOpacity = normZ >= 0 ? 0.20 + 0.16 * normZ : 0.10 + 0.08 * (1 + normZ)
             drawList.push({
               type: "orbit-line",
               z: zAvg,
@@ -403,8 +470,8 @@ export function HeroGlobe() {
               y1: proj1.y,
               x2: proj2.x,
               y2: proj2.y,
-              color: `rgba(250, 204, 21, ${baseOpacity * 0.75})`,
-              lineWidth: 0.8
+              color: `rgba(250, 204, 21, ${baseOpacity * 0.6})`,
+              lineWidth: 0.75
             })
           }
         }
@@ -425,7 +492,7 @@ export function HeroGlobe() {
         const lockProj = project(lock_tilted.x, lock_tilted.y, lock_tilted.z, cx, cy, cameraDist)
         
         const scale = cameraDist / (cameraDist - lockProj.z)
-        const lockSize = 14.5 * scale
+        const lockSize = baseLockSize * scale
         
         drawList.push({
           type: "lock",
@@ -436,22 +503,54 @@ export function HeroGlobe() {
         })
       }
       
-      // Orbit 1: Spanning up to 55-degrees latitude, fast clockwise spiral
+      // Lock 1: Largest padlock, fast spiral orbit
       addSpiralOrbitAndLock(
-        R * 1.22,
+        R * 1.15,
         lock1Angle,
-        -1.8,
-        0.22, // Oscillates up and down slowly over rotation
-        55 * Math.PI / 180
+        -1.5,
+        0.20,
+        55 * Math.PI / 180,
+        18.0
       )
       
-      // Orbit 2: Spanning up to 45-degrees latitude, super fast reverse-phase clockwise spiral
+      // Lock 2: Medium-large padlock, very fast spiral orbit
       addSpiralOrbitAndLock(
-        R * 1.28,
+        R * 1.21,
         lock2Angle,
-        -2.4,
-        0.18,
-        45 * Math.PI / 180
+        -2.1,
+        0.16,
+        45 * Math.PI / 180,
+        14.5
+      )
+      
+      // Lock 3: Medium-small padlock, moderate speed
+      addSpiralOrbitAndLock(
+        R * 1.27,
+        lock3Angle,
+        -1.2,
+        0.24,
+        35 * Math.PI / 180,
+        11.5
+      )
+      
+      // Lock 4: Small padlock, extremely fast spiral orbit
+      addSpiralOrbitAndLock(
+        R * 1.33,
+        lock4Angle,
+        -2.7,
+        0.13,
+        60 * Math.PI / 180,
+        9.0
+      )
+      
+      // Lock 5: Tiny padlock, steady speed, narrow spiral latitude
+      addSpiralOrbitAndLock(
+        R * 1.09,
+        lock5Angle,
+        -1.8,
+        0.30,
+        25 * Math.PI / 180,
+        6.5
       )
       
       // 3. Painter's Algorithm Depth Sort (furthest to closest)
@@ -474,13 +573,13 @@ export function HeroGlobe() {
         } else if (el.type === "lock") {
           const size = el.size
           
-          // Soft golden aura glow
-          const glow = ctx.createRadialGradient(el.x, el.y, 1, el.x, el.y, size * 1.4)
+          // Soft glowing golden halo under locks
+          const glow = ctx.createRadialGradient(el.x, el.y, 1, el.x, el.y, size * 1.45)
           glow.addColorStop(0, "rgba(250, 204, 21, 0.45)")
           glow.addColorStop(1, "rgba(250, 204, 21, 0)")
           ctx.fillStyle = glow
           ctx.beginPath()
-          ctx.arc(el.x, el.y, size * 1.4, 0, Math.PI * 2)
+          ctx.arc(el.x, el.y, size * 1.45, 0, Math.PI * 2)
           ctx.fill()
           
           drawLock(ctx, el.x, el.y, size)
