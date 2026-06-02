@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect } from "react"
 import { ArrowRight, FileText, Image, Table, BookOpen, Download, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -78,6 +79,12 @@ const fileFormats = [
 export default function AuthorGuidelinesPage() {
   const { t } = useLanguage()
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.title = `${t("nav.authorGuidelines")} | Scholarly Open`
+    }
+  }, [t])
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -91,10 +98,10 @@ export default function AuthorGuidelinesPage() {
                 {t("nav.authorGuidelines")}
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Comprehensive instructions for preparing your manuscript for submission to {t("brand.name")} journals. Following these guidelines will help ensure a smooth review process across social sciences, medical, and other discipline-specific journals.
+                {t("guidelines.heroSubtitle")}
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Button asChild>
+                <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/95 font-semibold">
                   <Link href="/submit">
                     {t("nav.submitManuscript")}
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -103,7 +110,7 @@ export default function AuthorGuidelinesPage() {
                 <Button variant="outline" asChild>
                   <a href="#" download>
                     <Download className="mr-2 h-4 w-4" />
-                    Download Template
+                    {t("guidelines.downloadTemplate")}
                   </a>
                 </Button>
               </div>
@@ -115,44 +122,44 @@ export default function AuthorGuidelinesPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-3xl">
-              <h2 className="text-3xl font-bold tracking-tight">Before You Submit</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{t("guidelines.beforeSubmit")}</h2>
               <p className="mt-4 text-muted-foreground">
-                Please ensure your submission meets these requirements before submitting.
+                {t("guidelines.beforeSubmitSub")}
               </p>
               <div className="mt-8 space-y-4">
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold">Original Work</h3>
+                    <h3 className="font-semibold">{t("guidelines.originalWork")}</h3>
                     <p className="text-sm text-muted-foreground">
-                      The manuscript must be original and not under consideration elsewhere. Plagiarism checks will be performed.
+                      {t("guidelines.originalWorkDesc")}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
                   <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold">Author Agreement</h3>
+                    <h3 className="font-semibold">{t("guidelines.authorAgreement")}</h3>
                     <p className="text-sm text-muted-foreground">
-                      All authors must agree to the submission and meet ICMJE authorship criteria.
+                      {t("guidelines.authorAgreementDesc")}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
                   <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold">Ethics Approval</h3>
+                    <h3 className="font-semibold">{t("guidelines.ethicsApproval")}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Research involving human subjects or animals must have appropriate ethics approval.
+                      {t("guidelines.ethicsApprovalDesc")}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
                   <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold">Conflict of Interest</h3>
+                    <h3 className="font-semibold">{t("guidelines.conflictOfInterest")}</h3>
                     <p className="text-sm text-muted-foreground">
-                      All potential conflicts of interest must be disclosed in the manuscript.
+                      {t("guidelines.conflictOfInterestDesc")}
                     </p>
                   </div>
                 </div>

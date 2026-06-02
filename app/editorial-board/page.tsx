@@ -1,115 +1,121 @@
-import { Metadata } from "next"
+"use client"
+
+import { useEffect } from "react"
 import Link from "next/link"
 import { Mail, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-
-export const metadata: Metadata = {
-  title: "Editorial Board | Scholarly Open",
-  description: "Meet our distinguished editorial board members who ensure the highest standards of scholarly publishing.",
-}
-
-const editorInChief = {
-  name: "Prof. Dr. Maria Schmidt",
-  role: "Editor-in-Chief",
-  affiliation: "European University Institute",
-  specialization: "Social Sciences & Research Methodology",
-  email: "editorial-board@scholarlyopen.org",
-}
-
-const seniorEditors = [
-  {
-    name: "Prof. Dr. Hans Weber",
-    role: "Senior Editor, Social Sciences",
-    affiliation: "Heidelberg University, Germany",
-    specialization: "Political Science & International Relations",
-  },
-  {
-    name: "Prof. Dr. Elena Rossi",
-    role: "Senior Editor, Archaeology",
-    affiliation: "University of Rome La Sapienza, Italy",
-    specialization: "Classical Archaeology & Cultural Heritage",
-  },
-  {
-    name: "Prof. Dr. James Thompson",
-    role: "Senior Editor, Medical Sciences",
-    affiliation: "University of Oxford, United Kingdom",
-    specialization: "Public Health & Epidemiology",
-  },
-]
-
-const editorialBoard = {
-  socialSciences: [
-    {
-      name: "Dr. Anna Kowalski",
-      affiliation: "Jagiellonian University, Poland",
-      specialization: "Sociology & Social Policy",
-    },
-    {
-      name: "Prof. Dr. Pierre Dubois",
-      affiliation: "Sorbonne University, France",
-      specialization: "Economics & Development Studies",
-    },
-    {
-      name: "Dr. Sarah Chen",
-      affiliation: "National University of Singapore",
-      specialization: "Psychology & Behavioral Sciences",
-    },
-    {
-      name: "Prof. Dr. Carlos Martinez",
-      affiliation: "Autonomous University of Madrid, Spain",
-      specialization: "Anthropology & Migration Studies",
-    },
-  ],
-  archaeology: [
-    {
-      name: "Prof. Dr. Michael Brown",
-      affiliation: "University of Cambridge, United Kingdom",
-      specialization: "Prehistoric Archaeology",
-    },
-    {
-      name: "Dr. Yuki Tanaka",
-      affiliation: "University of Tokyo, Japan",
-      specialization: "Archaeological Science & Dating Methods",
-    },
-    {
-      name: "Prof. Dr. Fatima Al-Hassan",
-      affiliation: "American University of Beirut, Lebanon",
-      specialization: "Near Eastern Archaeology",
-    },
-    {
-      name: "Dr. Lars Andersson",
-      affiliation: "Uppsala University, Sweden",
-      specialization: "Medieval Archaeology",
-    },
-  ],
-  medicalSciences: [
-    {
-      name: "Prof. Dr. Lisa Mueller",
-      affiliation: "Charité - Universitätsmedizin Berlin, Germany",
-      specialization: "Clinical Medicine & Diagnostics",
-    },
-    {
-      name: "Dr. Raj Patel",
-      affiliation: "All India Institute of Medical Sciences, India",
-      specialization: "Infectious Diseases",
-    },
-    {
-      name: "Prof. Dr. Emily Williams",
-      affiliation: "Harvard Medical School, USA",
-      specialization: "Biomedical Research",
-    },
-    {
-      name: "Dr. Kim Soo-Jin",
-      affiliation: "Seoul National University, South Korea",
-      specialization: "Pharmaceutical Sciences",
-    },
-  ],
-}
+import { useLanguage } from "@/lib/language-context"
 
 export default function EditorialBoardPage() {
+  const { t } = useLanguage()
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.title = `${t("editorial.title")} | Scholarly Open`
+    }
+  }, [t])
+
+  const editorInChief = {
+    name: "Prof. Dr. Maria Schmidt",
+    role: t("editorial.editorInChief.role"),
+    affiliation: "European University Institute",
+    specialization: t("editorial.editorInChief.specialization"),
+    email: "editorial-board@scholarlyopen.org",
+  }
+
+  const seniorEditors = [
+    {
+      name: "Prof. Dr. Hans Weber",
+      role: t("editorial.senior1.role"),
+      affiliation: "Heidelberg University, Germany",
+      specialization: t("editorial.senior1.specialization"),
+    },
+    {
+      name: "Prof. Dr. Elena Rossi",
+      role: t("editorial.senior2.role"),
+      affiliation: "University of Rome La Sapienza, Italy",
+      specialization: t("editorial.senior2.specialization"),
+    },
+    {
+      name: "Prof. Dr. James Thompson",
+      role: t("editorial.senior3.role"),
+      affiliation: "University of Oxford, United Kingdom",
+      specialization: t("editorial.senior3.specialization"),
+    },
+  ]
+
+  const editorialBoard = {
+    socialSciences: [
+      {
+        name: "Dr. Anna Kowalski",
+        affiliation: "Jagiellonian University, Poland",
+        specialization: t("editorial.member.soc1.specialization"),
+      },
+      {
+        name: "Prof. Dr. Pierre Dubois",
+        affiliation: "Sorbonne University, France",
+        specialization: t("editorial.member.soc2.specialization"),
+      },
+      {
+        name: "Dr. Sarah Chen",
+        affiliation: "National University of Singapore",
+        specialization: t("editorial.member.soc3.specialization"),
+      },
+      {
+        name: "Prof. Dr. Carlos Martinez",
+        affiliation: "Autonomous University of Madrid, Spain",
+        specialization: t("editorial.member.soc4.specialization"),
+      },
+    ],
+    archaeology: [
+      {
+        name: "Prof. Dr. Michael Brown",
+        affiliation: "University of Cambridge, United Kingdom",
+        specialization: t("editorial.member.arc1.specialization"),
+      },
+      {
+        name: "Dr. Yuki Tanaka",
+        affiliation: "University of Tokyo, Japan",
+        specialization: t("editorial.member.arc2.specialization"),
+      },
+      {
+        name: "Prof. Dr. Fatima Al-Hassan",
+        affiliation: "American University of Beirut, Lebanon",
+        specialization: t("editorial.member.arc3.specialization"),
+      },
+      {
+        name: "Dr. Lars Andersson",
+        affiliation: "Uppsala University, Sweden",
+        specialization: t("editorial.member.arc4.specialization"),
+      },
+    ],
+    medicalSciences: [
+      {
+        name: "Prof. Dr. Lisa Mueller",
+        affiliation: "Charité - Universitätsmedizin Berlin, Germany",
+        specialization: t("editorial.member.med1.specialization"),
+      },
+      {
+        name: "Dr. Raj Patel",
+        affiliation: "All India Institute of Medical Sciences, India",
+        specialization: t("editorial.member.med2.specialization"),
+      },
+      {
+        name: "Prof. Dr. Emily Williams",
+        affiliation: "Harvard Medical School, USA",
+        specialization: t("editorial.member.med3.specialization"),
+      },
+      {
+        name: "Dr. Kim Soo-Jin",
+        affiliation: "Seoul National University, South Korea",
+        specialization: t("editorial.member.med4.specialization"),
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -120,10 +126,10 @@ export default function EditorialBoardPage() {
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
             <div className="max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-                Editorial Board
+                {t("editorial.title")}
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Our distinguished editorial board comprises leading scholars from renowned institutions worldwide, ensuring the highest standards of peer review and editorial excellence.
+                {t("editorial.subtitle")}
               </p>
             </div>
           </div>
@@ -133,7 +139,7 @@ export default function EditorialBoardPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
-              <h2 className="text-3xl font-bold tracking-tight">Editor-in-Chief</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{t("editorial.editorInChief")}</h2>
             </div>
             <Card className="max-w-2xl">
               <CardHeader>
@@ -166,9 +172,9 @@ export default function EditorialBoardPage() {
         <section className="py-16 lg:py-24 bg-muted/30">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
-              <h2 className="text-3xl font-bold tracking-tight">Senior Editors</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{t("editorial.seniorEditors")}</h2>
               <p className="mt-4 text-muted-foreground">
-                Our senior editors lead the editorial direction for each of our core disciplines.
+                {t("editorial.seniorEditorsSubtitle")}
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
@@ -197,15 +203,15 @@ export default function EditorialBoardPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
-              <h2 className="text-3xl font-bold tracking-tight">Editorial Board Members</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{t("editorial.boardMembers")}</h2>
               <p className="mt-4 text-muted-foreground">
-                Our editorial board members bring diverse expertise from institutions around the world.
+                {t("editorial.boardMembersSubtitle")}
               </p>
             </div>
 
             {/* Social Sciences */}
             <div className="mb-12">
-              <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-border">Social Sciences</h3>
+              <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-border">{t("editorial.discipline.socialSciences")}</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {editorialBoard.socialSciences.map((member) => (
                   <div key={member.name} className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
@@ -226,7 +232,7 @@ export default function EditorialBoardPage() {
 
             {/* Archaeology */}
             <div className="mb-12">
-              <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-border">Archaeology</h3>
+              <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-border">{t("editorial.discipline.archaeology")}</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {editorialBoard.archaeology.map((member) => (
                   <div key={member.name} className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
@@ -247,7 +253,7 @@ export default function EditorialBoardPage() {
 
             {/* Medical Sciences */}
             <div>
-              <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-border">Medical Sciences</h3>
+              <h3 className="text-xl font-semibold mb-6 pb-2 border-b border-border">{t("editorial.discipline.medicalSciences")}</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {editorialBoard.medicalSciences.map((member) => (
                   <div key={member.name} className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
@@ -273,15 +279,15 @@ export default function EditorialBoardPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Join Our Editorial Team
+                {t("editorial.joinTeam")}
               </h2>
               <p className="mt-4 text-lg text-secondary-foreground/80">
-                We are always looking for distinguished scholars to join our editorial board. If you are interested in contributing to the advancement of open scholarship, we would love to hear from you.
+                {t("editorial.joinTeamSubtitle")}
               </p>
               <div className="mt-8">
                 <Button size="lg" variant="secondary" asChild>
                   <Link href="/contact">
-                    Express Interest
+                    {t("editorial.expressInterest")}
                     <ExternalLink className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

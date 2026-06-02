@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Mail, MapPin, Phone, Clock, Send, Building, User, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,71 +9,79 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-
-const contactInfo = [
-  {
-    icon: Mail,
-    title: "Email",
-    details: [
-      { label: "General Inquiries", value: "info@scholarlyopen.org" },
-      { label: "Editorial Office", value: "editorial@scholarlyopen.org" },
-      { label: "Submissions", value: "submissions@scholarlyopen.org" },
-    ],
-  },
-  {
-    icon: MapPin,
-    title: "Location",
-    details: [
-      { label: "Address", value: "Am Gonsenheim 49a, 55122 Mainz, Germany" },
-      { label: "Headquarters", value: "Scholarly Open i.G." },
-    ],
-  },
-  {
-    icon: Phone,
-    title: "Phone",
-    details: [
-      { label: "Main Office", value: "+49 15228080302" },
-    ],
-  },
-  {
-    icon: Clock,
-    title: "Office Hours",
-    details: [
-      { label: "Monday - Friday", value: "9:00 - 17:00 CET" },
-      { label: "Saturday - Sunday", value: "Closed" },
-    ],
-  },
-]
-
-const departments = [
-  {
-    name: "Editorial Office",
-    email: "editorial@scholarlyopen.org",
-    description: "For manuscript-related inquiries, peer review questions, and editorial decisions.",
-  },
-  {
-    name: "Author Support",
-    email: "author-support@scholarlyopen.org",
-    description: "For submission assistance, formatting questions, and author guidelines.",
-  },
-  {
-    name: "Finance & APCs",
-    email: "finance@scholarlyopen.org",
-    description: "For invoices, payment inquiries, and APC waiver requests.",
-  },
-  {
-    name: "Technical Support",
-    email: "technical-support@scholarlyopen.org",
-    description: "For website issues, submission system problems, and technical questions.",
-  },
-]
+import { useLanguage } from "@/lib/language-context"
 
 export default function ContactPage() {
+  const { t } = useLanguage()
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [testingMail, setTestingMail] = useState(false)
   const [testMessage, setTestMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.title = `${t("contact.heroTitle")} | Scholarly Open`
+    }
+  }, [t])
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      title: "Email",
+      details: [
+        { label: t("contact.info.general"), value: "info@scholarlyopen.org" },
+        { label: t("contact.info.editorial"), value: "editorial@scholarlyopen.org" },
+        { label: t("contact.info.submissions"), value: "submissions@scholarlyopen.org" },
+      ],
+    },
+    {
+      icon: MapPin,
+      title: t("contact.info.address"),
+      details: [
+        { label: t("contact.info.address"), value: "Am Gonsenheim 49a, 55122 Mainz, Germany" },
+        { label: t("contact.info.headquarters"), value: "Scholarly Open i.G." },
+      ],
+    },
+    {
+      icon: Phone,
+      title: t("contact.info.phone"),
+      details: [
+        { label: t("contact.info.phone"), value: "+49 15228080302" },
+      ],
+    },
+    {
+      icon: Clock,
+      title: t("contact.info.hours"),
+      details: [
+        { label: t("contact.info.weekday"), value: "9:00 - 17:00 CET" },
+        { label: t("contact.info.weekend"), value: t("contact.info.weekendVal") },
+      ],
+    },
+  ]
+
+  const departments = [
+    {
+      name: t("contact.info.editorial"),
+      email: "editorial@scholarlyopen.org",
+      description: t("contact.dept1.desc"),
+    },
+    {
+      name: t("nav.forAuthors"),
+      email: "author-support@scholarlyopen.org",
+      description: t("contact.dept2.desc"),
+    },
+    {
+      name: t("contact.dept3.name"),
+      email: "finance@scholarlyopen.org",
+      description: t("contact.dept3.desc"),
+    },
+    {
+      name: t("contact.dept4.name"),
+      email: "technical-support@scholarlyopen.org",
+      description: t("contact.dept4.desc"),
+    },
+  ]
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -124,10 +132,10 @@ export default function ContactPage() {
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
             <div className="max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-                Contact Us
+                {t("contact.heroTitle")}
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Have questions about submitting your research, our peer review process, or open access policies? Our team is here to help.
+                {t("contact.heroSubtitle")}
               </p>
             </div>
           </div>
@@ -137,8 +145,8 @@ export default function ContactPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {contactInfo.map((item) => (
-                <Card key={item.title}>
+              {contactInfo.map((item, index) => (
+                <Card key={index}>
                   <CardHeader>
                     <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                       <item.icon className="h-6 w-6 text-primary" />
@@ -147,8 +155,8 @@ export default function ContactPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {item.details.map((detail, index) => (
-                        <div key={index} className="text-sm">
+                      {item.details.map((detail, idx) => (
+                        <div key={idx} className="text-sm">
                           {detail.label && (
                             <span className="text-muted-foreground">{detail.label}: </span>
                           )}
@@ -176,9 +184,9 @@ export default function ContactPage() {
         <section className="py-16 lg:py-24 bg-muted/30">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
-              <h2 className="text-3xl font-bold tracking-tight">Department Contacts</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{t("contact.deptsTitle")}</h2>
               <p className="mt-4 text-muted-foreground">
-                For faster response, please contact the appropriate department directly.
+                {t("contact.deptsSub")}
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
@@ -204,36 +212,36 @@ export default function ContactPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight">Send Us a Message</h2>
+                <h2 className="text-3xl font-bold tracking-tight">{t("contact.form.title")}</h2>
                 <p className="mt-4 text-muted-foreground">
-                  Fill out the form below and we will get back to you within 1-2 business days.
+                  {t("contact.form.subtitle")}
                 </p>
                 <div className="mt-8 p-6 rounded-lg bg-muted/50 border border-border">
-                  <h3 className="font-semibold mb-4">Before contacting us, you might find answers in:</h3>
+                  <h3 className="font-semibold mb-4">{t("contact.form.faqHeader")}</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li>
                       <Link href="/author-guidelines" className="text-primary font-medium hover:text-primary/80 hover:underline">
-                        Author Guidelines
+                        {t("nav.authorGuidelines")}
                       </Link>
-                      {" "}- Manuscript preparation and submission requirements
+                      {" "}- {t("about.time3.desc")}
                     </li>
                     <li>
                       <Link href="/apc-fees" className="text-primary font-medium hover:text-primary/80 hover:underline">
-                        APC & Fees
+                        {t("nav.apcFees")}
                       </Link>
-                      {" "}- Pricing, waivers, and payment information
+                      {" "}- {t("contact.dept3.desc")}
                     </li>
                     <li>
                       <Link href="/peer-review" className="text-primary font-medium hover:text-primary/80 hover:underline">
-                        Peer Review Process
+                        {t("nav.peerReview")}
                       </Link>
-                      {" "}- How we review manuscripts
+                      {" "}- {t("nav.peerReview")}
                     </li>
                     <li>
                       <Link href="/open-access" className="text-primary font-medium hover:text-primary/80 hover:underline">
-                        Open Access Policy
+                        {t("nav.openAccess")}
                       </Link>
-                      {" "}- Licensing and author rights
+                      {" "}- {t("oaModels.gold.description")}
                     </li>
                   </ul>
                 </div>
@@ -250,9 +258,9 @@ export default function ContactPage() {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Contact Form</CardTitle>
+                  <CardTitle>{t("contact.form.cardTitle")}</CardTitle>
                   <CardDescription>
-                    All fields marked with * are required.
+                    {t("contact.form.cardSub")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -261,16 +269,16 @@ export default function ContactPage() {
                       <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                         <Send className="h-8 w-8 text-primary" />
                       </div>
-                      <h3 className="text-xl font-semibold mb-2">Message Sent</h3>
+                      <h3 className="text-xl font-semibold mb-2">{t("contact.form.sentTitle")}</h3>
                       <p className="text-muted-foreground">
-                        Thank you for contacting us. We will respond within 1-2 business days.
+                        {t("contact.form.sentDesc")}
                       </p>
                       <Button 
                         variant="outline" 
                         className="mt-6"
                         onClick={() => setSubmitted(false)}
                       >
-                        Send Another Message
+                        {t("contact.form.sentButton")}
                       </Button>
                     </div>
                   ) : (
@@ -278,16 +286,16 @@ export default function ContactPage() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <label htmlFor="name" className="text-sm font-medium">
-                            Full Name *
+                            {t("contact.form.labelName")}
                           </label>
                           <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="name" name="name" placeholder="Your name" className="pl-10" required />
+                            <Input id="name" name="name" placeholder={t("contact.form.labelName").replace(" *", "")} className="pl-10" required />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <label htmlFor="email" className="text-sm font-medium">
-                            Email Address *
+                            {t("contact.form.labelEmail")}
                           </label>
                           <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -298,17 +306,17 @@ export default function ContactPage() {
                       
                       <div className="space-y-2">
                         <label htmlFor="affiliation" className="text-sm font-medium">
-                          Institution / Organization
+                          {t("contact.form.labelAffiliation")}
                         </label>
                         <div className="relative">
                           <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input id="affiliation" name="affiliation" placeholder="Your institution (optional)" className="pl-10" />
+                          <Input id="affiliation" name="affiliation" placeholder={t("contact.form.labelAffiliation")} className="pl-10" />
                         </div>
                       </div>
                       
                       <div className="space-y-2">
                         <label htmlFor="subject" className="text-sm font-medium">
-                          Subject *
+                          {t("contact.form.labelSubject")}
                         </label>
                         <select 
                           id="subject" 
@@ -316,27 +324,27 @@ export default function ContactPage() {
                           className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                           required
                         >
-                          <option value="">Select a subject</option>
-                          <option value="submission">Manuscript Submission</option>
-                          <option value="review">Peer Review Status</option>
-                          <option value="apc">APC / Payment</option>
-                          <option value="technical">Technical Issue</option>
-                          <option value="editorial">Editorial Board</option>
-                          <option value="partnership">Partnership / Collaboration</option>
-                          <option value="other">Other</option>
+                          <option value="">{t("contact.form.optDefault")}</option>
+                          <option value="submission">{t("contact.form.optSubmission")}</option>
+                          <option value="review">{t("contact.form.optReview")}</option>
+                          <option value="apc">{t("contact.form.optAPC")}</option>
+                          <option value="technical">{t("contact.form.optTechnical")}</option>
+                          <option value="editorial">{t("contact.form.optEditorial")}</option>
+                          <option value="partnership">{t("contact.form.optPartner")}</option>
+                          <option value="other">{t("contact.form.optOther")}</option>
                         </select>
                       </div>
                       
                       <div className="space-y-2">
                         <label htmlFor="message" className="text-sm font-medium">
-                          Message *
+                          {t("contact.form.labelMessage")}
                         </label>
                         <div className="relative">
                           <MessageSquare className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Textarea 
                             id="message" 
                             name="message"
-                            placeholder="Please describe your inquiry in detail..." 
+                            placeholder={t("contact.form.labelMessage").replace(" *", "")} 
                             rows={6}
                             className="pl-10"
                             required 
@@ -347,11 +355,11 @@ export default function ContactPage() {
                       <div className="flex items-start gap-3">
                         <input type="checkbox" id="privacy" name="privacy" value="true" className="mt-1" required />
                         <label htmlFor="privacy" className="text-sm text-muted-foreground">
-                          I have read and agree to the{" "}
+                          {t("contact.form.privacyRead")}{" "}
                           <Link href="/privacy" className="text-primary hover:underline">
-                            Privacy Policy
+                            {t("footer.privacy")}
                           </Link>
-                          . I consent to the processing of my personal data for the purpose of handling my inquiry.
+                          . {t("contact.form.privacyConsent")}
                         </label>
                       </div>
                       
@@ -362,7 +370,7 @@ export default function ContactPage() {
                       )}
                       <Button type="submit" size="lg" className="w-full" disabled={submitting}>
                         <Send className="mr-2 h-4 w-4" />
-                        {submitting ? "Sending..." : "Send Message"}
+                        {submitting ? t("contact.form.buttonSending") : t("contact.form.buttonSend")}
                       </Button>
                     </form>
                   )}
@@ -376,15 +384,15 @@ export default function ContactPage() {
         <section className="py-16 lg:py-24 bg-muted/30">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="text-3xl font-bold tracking-tight">Global Reach</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{t("contact.map.title")}</h2>
               <p className="mt-4 text-muted-foreground">
-                Scholarly Open serves researchers worldwide, connecting scholars across all continents.
+                {t("contact.map.subtitle")}
               </p>
             </div>
             <div className="aspect-video rounded-lg bg-muted border border-border flex items-center justify-center">
               <div className="text-center p-8">
                 <MapPin className="h-16 w-16 mx-auto text-primary/20" />
-                <p className="mt-4 font-semibold">Based in Mainz, Germany</p>
+                <p className="mt-4 font-semibold">{t("contact.map.basedIn")}</p>
                 <p className="text-sm text-muted-foreground">Am Gonsenheim 49a, 55122 Mainz, Germany</p>
               </div>
             </div>
@@ -396,4 +404,3 @@ export default function ContactPage() {
     </div>
   )
 }
-
