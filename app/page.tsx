@@ -60,6 +60,7 @@ export default function HomePage() {
       href: "/journals/chemistry",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
+      iconColor: "text-yellow-500",
     },
     {
       title: t("journals.med.title"),
@@ -176,7 +177,7 @@ export default function HomePage() {
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                       <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        <journal.icon className="h-6 w-6 text-primary" />
+                        <journal.icon className={`h-6 w-6 ${journal.iconColor || "text-primary"}`} />
                       </div>
                       <Badge className={journal.typeColor}>{journal.type}</Badge>
                     </div>

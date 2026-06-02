@@ -41,7 +41,7 @@ export default function ChemistryPage() {
       title="Scholarly Open: Chemistry"
       description="Research in chemical sciences, materials, catalysis, and sustainable chemical technologies."
       heroDescription="A Gold Open Access journal focused on FAIR chemical research that supports sustainable innovation and materials discovery."
-      heroIcon={<Beaker className="h-8 w-8" />}
+      heroIcon={<Beaker className="h-8 w-8 text-yellow-500" />}
       scopeAreas={[
         "Catalysis and reaction engineering",
         "Materials chemistry",

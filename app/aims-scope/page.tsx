@@ -58,7 +58,7 @@ const disciplines = [
       "Catalysis and Reaction Mechanisms",
       "Environmental Chemistry",
     ],
-    color: "chart-3",
+    color: "yellow",
   },
   {
     icon: Microscope,
@@ -214,12 +214,14 @@ export default function AimsScopePage() {
                         discipline.color === 'primary' ? 'bg-primary/10' :
                         discipline.color === 'accent' ? 'bg-accent/10' :
                         discipline.color === 'secondary' ? 'bg-secondary/10' :
+                        discipline.color === 'yellow' ? 'bg-yellow-500/10' :
                         'bg-chart-3/20'
                       }`}>
                         <discipline.icon className={`h-6 w-6 ${
                           discipline.color === 'primary' ? 'text-primary' :
                           discipline.color === 'accent' ? 'text-accent' :
                           discipline.color === 'secondary' ? 'text-secondary' :
+                          discipline.color === 'yellow' ? 'text-yellow-500' :
                           'text-foreground'
                         }`} />
                       </div>
@@ -240,6 +242,7 @@ export default function AimsScopePage() {
                             discipline.color === 'primary' ? 'bg-primary' :
                             discipline.color === 'accent' ? 'bg-accent' :
                             discipline.color === 'secondary' ? 'bg-secondary' :
+                            discipline.color === 'yellow' ? 'bg-yellow-500' :
                             'bg-chart-3'
                           }`} />
                           {area}

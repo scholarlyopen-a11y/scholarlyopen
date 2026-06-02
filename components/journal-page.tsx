@@ -103,7 +103,7 @@ export function JournalPage({
       text: "text-amber-950",
       subtext: "text-amber-900/80",
       buttonOutline: "border-amber-400 bg-amber-100/30 text-amber-950 hover:bg-amber-100/60",
-      iconBg: "bg-amber-950/10 text-amber-900",
+      iconBg: "bg-yellow-500/10 text-yellow-600",
       badge: "bg-amber-900/10 text-amber-900 border-amber-950/20 shadow-none hover:bg-amber-900/20"
     },
     "medicine": {

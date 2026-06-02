@@ -26,6 +26,7 @@ const journals = [
     descriptionKey: "journals.chem.description",
     icon: Beaker,
     href: "/journals/chemistry",
+    iconColor: "text-yellow-500",
   },
   {
     titleKey: "journals.med.title",
@@ -81,7 +82,7 @@ export default function JournalsIndexPage() {
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                       <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        <journal.icon className="h-6 w-6 text-primary" />
+                        <journal.icon className={`h-6 w-6 ${journal.iconColor || "text-primary"}`} />
                       </div>
                       <Badge className="bg-accent text-accent-foreground">Gold OA</Badge>
                     </div>
