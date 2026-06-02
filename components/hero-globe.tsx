@@ -423,9 +423,30 @@ export function HeroGlobe() {
         y: number
         size: number
       }
+
+      interface DrawCircle {
+        type: "globe-border"
+        z: number
+        x: number
+        y: number
+        r: number
+        color: string
+        lineWidth: number
+      }
       
-      type Drawable = DrawSegment | DrawLock
+      type Drawable = DrawSegment | DrawLock | DrawCircle
       const drawList: Drawable[] = []
+
+      // Add a subtle, thin white borderline to give the globe a glassy round shape silhouette
+      drawList.push({
+        type: "globe-border",
+        z: 0,
+        x: cx,
+        y: cy,
+        r: R,
+        color: "rgba(255, 255, 255, 0.10)",
+        lineWidth: 0.75
+      })
       
       // 1. Generate Accurate World Map Outline wrapping beautifully
       const unitContinentSegments = unitContinentSegmentsRef.current
@@ -668,6 +689,12 @@ export function HeroGlobe() {
           ctx.fill()
           
           drawLock(ctx, el.x, el.y, size)
+        } else if (el.type === "globe-border") {
+          ctx.beginPath()
+          ctx.arc(el.x, el.y, el.r, 0, Math.PI * 2)
+          ctx.strokeStyle = el.color
+          ctx.lineWidth = el.lineWidth
+          ctx.stroke()
         }
       })
       
