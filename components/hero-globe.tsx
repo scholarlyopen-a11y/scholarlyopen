@@ -8,145 +8,9 @@ interface Point3D {
   z: number;
 }
 
-// Preset circles (metaballs) representing the continents for a procedurally mapped dotted world map
-// Coordinates are in degrees (lon: -180 to 180, lat: -90 to 90)
-const LAND_CIRCLES = [
-  // Greenland
-  { lon: -40, lat: 72, radius: 12 },   
-  { lon: -55, lat: 78, radius: 8 },
-  { lon: -30, lat: 70, radius: 7 },
-  
-  // North America
-  { lon: -100, lat: 52, radius: 23 },  // Canada
-  { lon: -125, lat: 60, radius: 17 },  // Alaska/NW Canada
-  { lon: -75, lat: 46, radius: 11 },   // Eastern Canada
-  { lon: -140, lat: 62, radius: 10 },  // Aleutians / West Alaska
-  { lon: -95, lat: 38, radius: 16 },   // USA Central
-  { lon: -115, lat: 38, radius: 13 },  // USA West
-  { lon: -82, lat: 34, radius: 12 },   // USA East
-  { lon: -120, lat: 45, radius: 11 },
-  { lon: -75, lat: 40, radius: 8 },
-  { lon: -102, lat: 24, radius: 9 },   // Mexico
-  { lon: -90, lat: 19, radius: 6 },    // Central America
-  { lon: -84, lat: 12, radius: 4 },
-  { lon: -80, lat: 9, radius: 3 },     // Panama
-  { lon: -72, lat: 19, radius: 4 },    // Caribbean
-  { lon: -64, lat: 14, radius: 3 },
-  { lon: -80, lat: 22, radius: 4 },
-  
-  // South America
-  { lon: -62, lat: -6, radius: 19 },   // Brazil North/Amazon
-  { lon: -52, lat: -10, radius: 14 },  // Brazil East
-  { lon: -72, lat: -4, radius: 12 },   // Peru/Ecuador
-  { lon: -68, lat: -22, radius: 15 },  // Bolivia/Paraguay
-  { lon: -58, lat: -20, radius: 13 },
-  { lon: -70, lat: -38, radius: 12 },  // Chile/Argentina
-  { lon: -68, lat: -48, radius: 9 },   // Patagonia
-  
-  // Africa
-  { lon: 14, lat: 22, radius: 17 },    // Sahara West
-  { lon: 2, lat: 20, radius: 13 },
-  { lon: -8, lat: 16, radius: 11 },
-  { lon: 10, lat: 12, radius: 14 },
-  { lon: 28, lat: 25, radius: 13 },    // Sahara East
-  { lon: 32, lat: 20, radius: 10 },
-  { lon: 22, lat: 7, radius: 19 },     // Central Africa
-  { lon: 30, lat: -2, radius: 14 },    // East Africa
-  { lon: 16, lat: -4, radius: 13 },
-  { lon: 24, lat: -20, radius: 13 },   // South Africa
-  { lon: 28, lat: -28, radius: 10 },
-  { lon: 47, lat: -19, radius: 6 },    // Madagascar
-  { lon: 49, lat: -14, radius: 4 },
-  
-  // Europe
-  { lon: 16, lat: 51, radius: 11 },    // Central Europe
-  { lon: 8, lat: 48, radius: 9 },
-  { lon: -1, lat: 43, radius: 7 },     // Spain/Portugal
-  { lon: -5, lat: 40, radius: 6 },
-  { lon: 32, lat: 58, radius: 13 },    // Eastern Europe
-  { lon: 42, lat: 52, radius: 11 },
-  { lon: 28, lat: 50, radius: 10 },
-  { lon: 12, lat: 62, radius: 9 },     // Scandinavia
-  { lon: 24, lat: 66, radius: 8 },
-  { lon: 16, lat: 57, radius: 6 },
-  { lon: -4, lat: 55, radius: 5 },     // United Kingdom
-  { lon: -8, lat: 53, radius: 4 },     // Ireland
-  { lon: 13, lat: 42, radius: 4 },     // Italy
-  { lon: 22, lat: 38, radius: 3 },     // Greece
-  
-  // Asia
-  { lon: 90, lat: 60, radius: 26 },    // Siberia
-  { lon: 65, lat: 58, radius: 25 },
-  { lon: 115, lat: 62, radius: 22 },
-  { lon: 140, lat: 64, radius: 18 },
-  { lon: 155, lat: 65, radius: 13 },
-  { lon: 82, lat: 36, radius: 17 },    // Central Asia
-  { lon: 68, lat: 35, radius: 13 },
-  { lon: 55, lat: 32, radius: 10 },
-  { lon: 44, lat: 22, radius: 11 },    // Middle East (Saudi)
-  { lon: 52, lat: 18, radius: 8 },
-  { lon: 112, lat: 36, radius: 20 },   // China East
-  { lon: 122, lat: 48, radius: 15 },
-  { lon: 104, lat: 28, radius: 12 },
-  { lon: 77, lat: 21, radius: 11 },    // India
-  { lon: 74, lat: 14, radius: 7 },
-  { lon: 102, lat: 16, radius: 9 },     // Southeast Asia
-  { lon: 106, lat: 11, radius: 6 },
-  { lon: 138, lat: 36, radius: 6 },    // Japan
-  { lon: 142, lat: 41, radius: 5 },
-  { lon: 114, lat: -1, radius: 7 },    // Indonesia (Borneo)
-  { lon: 120, lat: -6, radius: 5 },    // Java/Sumatra
-  { lon: 122, lat: 11, radius: 5 },    // Philippines
-  
-  // Australia
-  { lon: 134, lat: -24, radius: 15 },  
-  { lon: 144, lat: -30, radius: 10 },  
-  { lon: 148, lat: -34, radius: 6 },
-  { lon: 120, lat: -21, radius: 8 },
-  { lon: 146, lat: -42, radius: 3 },   // Tasmania
-  { lon: 172, lat: -41, radius: 5 }    // New Zealand
-]
-
-// Check if a point lies on land using the high-fidelity metaballs centers
-function checkIsLand(lat: number, lon: number): boolean {
-  for (let i = 0; i < LAND_CIRCLES.length; i++) {
-    const c = LAND_CIRCLES[i]
-    let dLon = Math.abs(lon - c.lon)
-    if (dLon > 180) dLon = 360 - dLon
-    const dist = Math.hypot(lat - c.lat, dLon)
-    if (dist < c.radius) return true
-  }
-  return false
-}
-
 export function HeroGlobe() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const unitDotsRef = useRef<Point3D[]>([])
-  
-  // Generate uniform unit sphere dots once when component mounts
-  useEffect(() => {
-    const dots: Point3D[] = []
-    const step = 4.0 // High resolution grid step size in degrees
-    
-    for (let lat = -80; lat <= 80; lat += step) {
-      const latRad = lat * Math.PI / 180
-      const cosLat = Math.cos(latRad)
-      // Adjust longitude density based on latitude to prevent polar clustering
-      const lonStep = step / cosLat
-      
-      for (let lon = -180; lon < 180; lon += lonStep) {
-        if (checkIsLand(lat, lon)) {
-          dots.push({
-            x: cosLat * Math.sin(lon * Math.PI / 180),
-            y: Math.sin(latRad),
-            z: cosLat * Math.cos(lon * Math.PI / 180)
-          })
-        }
-      }
-    }
-    unitDotsRef.current = dots
-  }, [])
   
   useEffect(() => {
     const container = containerRef.current
@@ -159,7 +23,7 @@ export function HeroGlobe() {
     let animationId: number
     let isDestroyed = false
     
-    // Parallax mouse variables
+    // Interactive mouse parallax variables
     let targetMouseX = 0
     let targetMouseY = 0
     let curMouseX = 0
@@ -318,17 +182,8 @@ export function HeroGlobe() {
       const lock4Angle = time * -2.7 + 3.8
       const lock5Angle = time * -1.8 + 5.1
       
-      interface DrawDot {
-        type: "dot"
-        z: number
-        x: number
-        y: number
-        size: number
-        color: string
-      }
-      
       interface DrawSegment {
-        type: "orbit-line" | "trail-line"
+        type: "globe-line" | "orbit-line" | "trail-line"
         z: number
         x1: number
         y1: number
@@ -346,56 +201,121 @@ export function HeroGlobe() {
         size: number
       }
       
-      type Drawable = DrawDot | DrawSegment | DrawLock
+      type Drawable = DrawSegment | DrawLock
       const drawList: Drawable[] = []
       
-      // 1. Render Cyan/Light Blue Dotted World Map Globe (Like Group 189)
-      const unitDots = unitDotsRef.current
-      unitDots.forEach((ud) => {
-        const p_local: Point3D = {
-          x: ud.x * R,
-          y: ud.y * R,
-          z: ud.z * R
+      // 1. Generate Globe Latitude segments
+      const latCount = 9
+      const lonSegments = 36
+      for (let i = 0; i < latCount; i++) {
+        const lat = -Math.PI / 2 + ((i + 1) / (latCount + 1)) * Math.PI
+        const r = R * Math.cos(lat)
+        const y = R * Math.sin(lat)
+        
+        for (let j = 0; j < lonSegments; j++) {
+          const theta1 = (j / lonSegments) * 2 * Math.PI
+          const theta2 = ((j + 1) / lonSegments) * 2 * Math.PI
+          
+          const p1_local: Point3D = { x: r * Math.sin(theta1), y: y, z: r * Math.cos(theta1) }
+          const p2_local: Point3D = { x: r * Math.sin(theta2), y: y, z: r * Math.cos(theta2) }
+          
+          let p1 = rotateY(p1_local, -globeAngle)
+          let p2 = rotateY(p2_local, -globeAngle)
+          
+          p1 = rotateZ(p1, TILT_RAD)
+          p2 = rotateZ(p2, TILT_RAD)
+          
+          p1 = rotateY(p1, curMouseX * 0.35)
+          p1 = rotateX(p1, curMouseY * 0.35)
+          p2 = rotateY(p2, curMouseX * 0.35)
+          p2 = rotateX(p2, curMouseY * 0.35)
+          
+          const proj1 = project(p1.x, p1.y, p1.z, cx, cy, cameraDist)
+          const proj2 = project(p2.x, p2.y, p2.z, cx, cy, cameraDist)
+          
+          const zAvg = (proj1.z + proj2.z) / 2
+          const normZ = zAvg / R
+          
+          let opacity = 0
+          if (normZ >= 0) {
+            opacity = 0.28 + 0.47 * normZ // Front: Bright white
+          } else {
+            opacity = 0.12 + 0.16 * (1 + normZ) // Back: Translucent/faint white
+          }
+          
+          drawList.push({
+            type: "globe-line",
+            z: zAvg,
+            x1: proj1.x,
+            y1: proj1.y,
+            x2: proj2.x,
+            y2: proj2.y,
+            color: `rgba(255, 255, 255, ${opacity})`,
+            lineWidth: normZ >= 0 ? 1.05 : 0.8
+          })
         }
-        
-        // Spin clockwise
-        let p = rotateY(p_local, -globeAngle)
-        
-        // Axial tilt
-        p = rotateZ(p, TILT_RAD)
-        
-        // Mouse tilting
-        p = rotateY(p, curMouseX * 0.35)
-        p = rotateX(p, curMouseY * 0.35)
-        
-        const proj = project(p.x, p.y, p.z, cx, cy, cameraDist)
-        
-        const normZ = proj.z / R
-        let opacity = 0
-        if (normZ >= 0) {
-          opacity = 0.35 + 0.55 * normZ // Front: Bright glowing cyan/blue
-        } else {
-          opacity = 0.12 + 0.23 * (1 + normZ) // Back: Soft translucent cyan/blue
-        }
-        
-        const scale = cameraDist / (cameraDist - proj.z)
-        
-        // Volumetric Halftone Shading size calculation: front dots are larger, back dots are tiny
-        // This beautifully maps the shaded volume contours of Group 189
-        const size = (0.9 + 1.8 * Math.max(0, normZ)) * scale
-        
-        drawList.push({
-          type: "dot",
-          z: proj.z,
-          x: proj.x,
-          y: proj.y,
-          size: size,
-          // Gorgeous Sky Blue/Cyan color matching Group 189
-          color: `rgba(56, 189, 248, ${opacity})` 
-        })
-      })
+      }
       
-      // 2. Render 5 Spiral Orbit Paths & Open Padlocks
+      // 2. Generate Globe Longitude segments
+      const lonCount = 12
+      const latSegments = 24
+      for (let i = 0; i < lonCount; i++) {
+        const lon = (i / lonCount) * 2 * Math.PI
+        
+        for (let j = 0; j < latSegments; j++) {
+          const lat1 = -Math.PI / 2 + (j / latSegments) * Math.PI
+          const lat2 = -Math.PI / 2 + ((j + 1) / latSegments) * Math.PI
+          
+          const p1_local: Point3D = {
+            x: R * Math.cos(lat1) * Math.sin(lon),
+            y: R * Math.sin(lat1),
+            z: R * Math.cos(lat1) * Math.cos(lon)
+          }
+          
+          const p2_local: Point3D = {
+            x: R * Math.cos(lat2) * Math.sin(lon),
+            y: R * Math.sin(lat2),
+            z: R * Math.cos(lat2) * Math.cos(lon)
+          }
+          
+          let p1 = rotateY(p1_local, -globeAngle)
+          let p2 = rotateY(p2_local, -globeAngle)
+          
+          p1 = rotateZ(p1, TILT_RAD)
+          p2 = rotateZ(p2, TILT_RAD)
+          
+          p1 = rotateY(p1, curMouseX * 0.35)
+          p1 = rotateX(p1, curMouseY * 0.35)
+          p2 = rotateY(p2, curMouseX * 0.35)
+          p2 = rotateX(p2, curMouseY * 0.35)
+          
+          const proj1 = project(p1.x, p1.y, p1.z, cx, cy, cameraDist)
+          const proj2 = project(p2.x, p2.y, p2.z, cx, cy, cameraDist)
+          
+          const zAvg = (proj1.z + proj2.z) / 2
+          const normZ = zAvg / R
+          
+          let opacity = 0
+          if (normZ >= 0) {
+            opacity = 0.28 + 0.47 * normZ
+          } else {
+            opacity = 0.12 + 0.16 * (1 + normZ)
+          }
+          
+          drawList.push({
+            type: "globe-line",
+            z: zAvg,
+            x1: proj1.x,
+            y1: proj1.y,
+            x2: proj2.x,
+            y2: proj2.y,
+            color: `rgba(255, 255, 255, ${opacity})`,
+            lineWidth: normZ >= 0 ? 1.05 : 0.8
+          })
+        }
+      }
+      
+      // 3. Render 5 Spiral Orbit Paths & Open Padlocks
       // All orbits revolve around the exact same 23.5-degree polar axis
       const addSpiralOrbitAndLock = (
         orbitRadius: number,
@@ -558,12 +478,7 @@ export function HeroGlobe() {
       
       // 4. Render Drawables
       drawList.forEach((el) => {
-        if (el.type === "dot") {
-          ctx.beginPath()
-          ctx.arc(el.x, el.y, el.size, 0, Math.PI * 2)
-          ctx.fillStyle = el.color
-          ctx.fill()
-        } else if (el.type === "orbit-line" || el.type === "trail-line") {
+        if (el.type === "globe-line" || el.type === "orbit-line" || el.type === "trail-line") {
           ctx.beginPath()
           ctx.moveTo(el.x1, el.y1)
           ctx.lineTo(el.x2, el.y2)
