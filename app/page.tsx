@@ -124,9 +124,6 @@ export default function HomePage() {
           <div className="relative mx-auto max-w-7xl px-4 py-20 lg:px-8 lg:py-28">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
-                <span className="inline-flex items-center rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground mb-6">
-                  {t("brand.tagline")}
-                </span>
                 <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl text-primary-foreground text-balance">
                   {t("hero.title")}
                 </h1>

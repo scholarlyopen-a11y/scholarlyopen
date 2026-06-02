@@ -32,7 +32,7 @@ export const translations = {
     
     // Brand
     "brand.name": "Scholarly Open",
-    "brand.tagline": "Where Research Meets FAIR Principles",
+    "brand.tagline": "Unbound. Transparent. Accessible.",
     "brand.description": "An international open-access publisher dedicated to advancing knowledge through rigorous peer review and open access.",
     
     // Hero Section
@@ -523,7 +523,7 @@ export const translations = {
     
     // Brand
     "brand.name": "Scholarly Open",
-    "brand.tagline": "Wo Forschung auf FAIR-Prinzipien trifft",
+    "brand.tagline": "Ungebunden. Transparent. Zugänglich.",
     "brand.description": "Ein internationaler Open-Access-Verlag, der sich der Förderung von Wissen durch rigoroses Peer-Review und offenen Zugang verschrieben hat.",
     
     // Hero Section

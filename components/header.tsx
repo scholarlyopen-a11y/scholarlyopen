@@ -65,8 +65,14 @@ export function Header() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-3">
-            <div className="flex h-14 w-[210px] shrink-0 items-center sm:h-16 sm:w-[260px] lg:h-18 lg:w-[280px] xl:w-[340px]">
+            <div className="flex h-14 w-[210px] shrink-0 items-center sm:h-16 sm:w-[260px] lg:h-18 lg:w-[280px] xl:w-[320px]">
               <LogoSO variant="lockup" className="h-full w-auto object-contain" priority />
+            </div>
+            <div className="hidden xl:flex items-center gap-3">
+              <span className="h-6 w-px bg-white/20" />
+              <span className="text-[11px] font-semibold tracking-wider text-white/80 select-none whitespace-nowrap">
+                {t("brand.tagline")}
+              </span>
             </div>
           </Link>
         </div>
