@@ -44,6 +44,7 @@ export default function HomePage() {
       href: "/journals/social-sciences",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
+      iconColor: "text-amber-500",
     },
     {
       title: t("journals.bio.title"),
@@ -70,6 +71,7 @@ export default function HomePage() {
       href: "/journals/medicine",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
+      iconColor: "text-rose-500",
     },
     {
       title: t("journals.ds.title"),
@@ -78,6 +80,7 @@ export default function HomePage() {
       href: "/journals/data-science",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
+      iconColor: "text-blue-500",
     },
     {
       title: t("journals.eng.title"),
@@ -86,6 +89,7 @@ export default function HomePage() {
       href: "/journals/engineering",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
+      iconColor: "text-slate-500",
     },
     {
       title: t("journals.env.title"),
@@ -94,6 +98,7 @@ export default function HomePage() {
       href: "/journals/environmental-science",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
+      iconColor: "text-lime-500",
     },
   ]
 

@@ -14,6 +14,7 @@ const journals = [
     descriptionKey: "journals.ss.description",
     icon: Users,
     href: "/journals/social-sciences",
+    iconColor: "text-amber-500",
   },
   {
     titleKey: "journals.bio.title",
@@ -34,24 +35,28 @@ const journals = [
     descriptionKey: "journals.med.description",
     icon: Heart,
     href: "/journals/medicine",
+    iconColor: "text-rose-500",
   },
   {
     titleKey: "journals.ds.title",
     descriptionKey: "journals.ds.description",
     icon: Brain,
     href: "/journals/data-science",
+    iconColor: "text-blue-500",
   },
   {
     titleKey: "journals.eng.title",
     descriptionKey: "journals.eng.description",
     icon: Settings,
     href: "/journals/engineering",
+    iconColor: "text-slate-500",
   },
   {
     titleKey: "journals.env.title",
     descriptionKey: "journals.env.description",
     icon: Globe,
     href: "/journals/environmental-science",
+    iconColor: "text-lime-500",
   },
 ]
 
