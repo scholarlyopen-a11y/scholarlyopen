@@ -8,6 +8,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/language-context"
+import { HeroGlobe } from "@/components/hero-globe"
 
 export default function HomePage() {
   const { t } = useLanguage()
@@ -136,6 +137,9 @@ export default function HomePage() {
                     <Link href="/about">{t("hero.cta.learn")}</Link>
                   </Button>
                 </div>
+              </div>
+              <div className="flex items-center justify-center relative">
+                <HeroGlobe />
               </div>
             </div>
           </div>
