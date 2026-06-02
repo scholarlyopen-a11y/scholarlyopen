@@ -64,13 +64,10 @@ export function Header() {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
         <div className="flex lg:flex-1">
-          <Link href="/" className="-m-1.5 p-1.5 flex flex-col items-start gap-0.5 justify-center">
-            <div className="flex h-14 w-[210px] shrink-0 items-center sm:h-16 sm:w-[260px] lg:h-18 lg:w-[280px]">
+          <Link href="/" className="-m-1.5 p-1.5 flex items-center">
+            <div className="flex h-14 w-[210px] shrink-0 items-center sm:h-16 sm:w-[260px] lg:h-18 lg:w-[280px] xl:w-[340px]">
               <LogoSO variant="lockup" className="h-full w-auto object-contain" priority />
             </div>
-            <span className="text-[9px] sm:text-[10px] lg:text-[11px] font-semibold tracking-widest text-white/80 select-none whitespace-nowrap lowercase pl-1">
-              {t("brand.tagline")}
-            </span>
           </Link>
         </div>
 
