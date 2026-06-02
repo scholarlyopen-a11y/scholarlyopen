@@ -65,7 +65,7 @@ export function Header() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-3">
-            <div className="flex h-16 w-[250px] shrink-0 items-center sm:h-20 sm:w-[330px] lg:w-[360px]">
+            <div className="flex h-14 w-[210px] shrink-0 items-center sm:h-16 sm:w-[260px] lg:h-18 lg:w-[280px] xl:w-[340px]">
               <LogoSO variant="lockup" className="h-full w-auto object-contain" priority />
             </div>
           </Link>
@@ -105,7 +105,7 @@ export function Header() {
             item.children ? (
               <DropdownMenu key={item.name}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-sm font-medium text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1.5 lg:px-2 xl:px-3">
+                  <Button variant="ghost" className="text-xs xl:text-sm font-medium text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1 lg:px-1.5 xl:px-3">
                     {item.name}
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
@@ -150,7 +150,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-1.5 lg:px-2 xl:px-3 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
+                className="px-1 lg:px-1.5 xl:px-3 py-2 text-xs xl:text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
               >
                 {item.name}
               </Link>
@@ -158,11 +158,11 @@ export function Header() {
           )}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-3">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-2 xl:gap-3">
           {/* Language Toggle Desktop */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10">
+              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-1.5 xl:px-3">
                 <Globe className="h-4 w-4 mr-1" />
                 {language.toUpperCase()}
               </Button>
@@ -177,7 +177,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="secondary" asChild className="bg-secondary text-secondary-foreground border border-secondary/60 shadow-sm hover:bg-secondary/90">
+          <Button variant="secondary" asChild className="bg-secondary text-secondary-foreground border border-secondary/60 shadow-sm hover:bg-secondary/90 text-xs xl:text-sm px-2.5 py-1.5 xl:px-4 xl:py-2">
             <Link href="/submit">{t("nav.submitManuscript")}</Link>
           </Button>
         </div>

@@ -228,11 +228,11 @@ export default function MedicalResearchReviewPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <Tabs defaultValue="about" className="space-y-8">
-              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="articles">{t("articles.title")}</TabsTrigger>
-                <TabsTrigger value="editorial">{t("nav.editorialBoard")}</TabsTrigger>
-                <TabsTrigger value="submit">Submit</TabsTrigger>
+              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none">
+                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">About</TabsTrigger>
+                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("articles.title")}</TabsTrigger>
+                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("nav.editorialBoard")}</TabsTrigger>
+                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">Submit</TabsTrigger>
               </TabsList>
               
               {/* About Tab */}
