@@ -14,7 +14,6 @@ interface UnitSegment {
 }
 
 // 1. High-fidelity Continent Polygon Coordinates (lat/lon in degrees)
-// Split Europe and Asia into separate closed contours to completely solve missing details
 const EUROPE = [
   { lat: 36, lon: -6 },   // Gibraltar
   { lat: 37, lon: -9 },   // Portugal SW
@@ -193,15 +192,6 @@ export function HeroGlobe() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const unitContinentSegmentsRef = useRef<UnitSegment[]>([])
   
-  // Dragging states
-  const dragAngleXRef = useRef(0)
-  const dragAngleYRef = useRef(0)
-  const isDraggingRef = useRef(false)
-  const startXRef = useRef(0)
-  const startYRef = useRef(0)
-  const startDragAngleXRef = useRef(0)
-  const startDragAngleYRef = useRef(0)
-  
   // Precompute subdivided unit segments once on mount
   useEffect(() => {
     const segments: UnitSegment[] = []
@@ -255,69 +245,21 @@ export function HeroGlobe() {
     let curMouseX = 0
     let curMouseY = 0
     
-    // Desktop Mouse Drag Event Listeners
-    const handleMouseDown = (e: MouseEvent) => {
-      isDraggingRef.current = true
-      startXRef.current = e.clientX
-      startYRef.current = e.clientY
-      startDragAngleXRef.current = dragAngleXRef.current
-      startDragAngleYRef.current = dragAngleYRef.current
-    }
-    
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect()
       const x = e.clientX - rect.left - rect.width / 2
       const y = e.clientY - rect.top - rect.height / 2
       targetMouseX = x / (rect.width / 2)
       targetMouseY = y / (rect.height / 2)
-      
-      if (isDraggingRef.current) {
-        const dx = e.clientX - startXRef.current
-        const dy = e.clientY - startYRef.current
-        // Drag angle sensitivity maps pixels to radians
-        dragAngleXRef.current = startDragAngleXRef.current + dx * 0.007
-        dragAngleYRef.current = startDragAngleYRef.current - dy * 0.007 // Invert dy so dragging up tilts poles up
-        // Clamp pitch to prevent flipping the Earth upside down
-        dragAngleYRef.current = Math.max(-1.1, Math.min(1.1, dragAngleYRef.current))
-      }
     }
     
-    const handleMouseUp = () => {
-      isDraggingRef.current = false
+    const handleMouseLeave = () => {
+      targetMouseX = 0
+      targetMouseY = 0
     }
     
-    // Mobile Touch Drag Event Listeners
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        isDraggingRef.current = true
-        startXRef.current = e.touches[0].clientX
-        startYRef.current = e.touches[0].clientY
-        startDragAngleXRef.current = dragAngleXRef.current
-        startDragAngleYRef.current = dragAngleYRef.current
-      }
-    }
-    
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isDraggingRef.current && e.touches.length > 0) {
-        const dx = e.touches[0].clientX - startXRef.current
-        const dy = e.touches[0].clientY - startYRef.current
-        dragAngleXRef.current = startDragAngleXRef.current + dx * 0.007
-        dragAngleYRef.current = startDragAngleYRef.current - dy * 0.007
-        dragAngleYRef.current = Math.max(-1.1, Math.min(1.1, dragAngleYRef.current))
-      }
-    }
-    
-    const handleTouchEnd = () => {
-      isDraggingRef.current = false
-    }
-    
-    container.addEventListener("mousedown", handleMouseDown)
     container.addEventListener("mousemove", handleMouseMove)
-    window.addEventListener("mouseup", handleMouseUp)
-    
-    container.addEventListener("touchstart", handleTouchStart, { passive: true })
-    container.addEventListener("touchmove", handleTouchMove, { passive: true })
-    container.addEventListener("touchend", handleTouchEnd)
+    container.addEventListener("mouseleave", handleMouseLeave)
     
     // Canvas resizing
     const resizeCanvas = () => {
@@ -443,8 +385,7 @@ export function HeroGlobe() {
       
       ctx.clearRect(0, 0, width, height)
       
-      // Radius adjusted to 0.30 (from 0.33) to completely fit inside the Hero box column limits
-      // This leaves a clean 10% outer margin inside the canvas bounds so the padlocks are never cut off
+      // Radius adjusted to 0.30 to completely fit inside the Hero box column limits
       const R = Math.min(width, height) * 0.30
       const cameraDist = R * 2.5
       
@@ -454,14 +395,8 @@ export function HeroGlobe() {
       
       const time = performance.now() * 0.001
       
-      // Accumulate automatic rotation when NOT actively dragging
-      if (!isDraggingRef.current) {
-        dragAngleXRef.current -= 0.0007 // Clockwise slow automatic rotation
-      }
-      
-      // Compute actual rotation values
-      const globeAngle = dragAngleXRef.current
-      const dragY = dragAngleYRef.current
+      // West-to-East Clockwise Rotation
+      const globeAngle = time * 0.03
       
       // Angles for 5 locks (speed optimized gracefully)
       const lock1Angle = time * -0.5
@@ -507,17 +442,13 @@ export function HeroGlobe() {
           z: seg.p2.z * R
         }
         
-        // Spin around polar axis (globeAngle)
-        let p1 = rotateY(p1_local, globeAngle)
-        let p2 = rotateY(p2_local, globeAngle)
+        // Spin around polar axis
+        let p1 = rotateY(p1_local, -globeAngle)
+        let p2 = rotateY(p2_local, -globeAngle)
         
         // Fixed axial tilt (Z-rotation)
         p1 = rotateZ(p1, TILT_RAD)
         p2 = rotateZ(p2, TILT_RAD)
-        
-        // Pitch manually dragged (X-rotation)
-        p1 = rotateX(p1, dragY)
-        p2 = rotateX(p2, dragY)
         
         // Mouse tilting parallax (Yaw/Pitch)
         p1 = rotateY(p1, curMouseX * 0.35)
@@ -590,10 +521,6 @@ export function HeroGlobe() {
           let p1 = rotateZ(p1_local, TILT_RAD)
           let p2 = rotateZ(p2_local, TILT_RAD)
           
-          // Manual camera pitch (dragY)
-          p1 = rotateX(p1, dragY)
-          p2 = rotateX(p2, dragY)
-          
           // Mouse tilts
           p1 = rotateY(p1, curMouseX * 0.35)
           p1 = rotateX(p1, curMouseY * 0.35)
@@ -645,7 +572,6 @@ export function HeroGlobe() {
         }
         
         let lock_tilted = rotateZ(lock_local, TILT_RAD)
-        lock_tilted = rotateX(lock_tilted, dragY) // In sync with drag
         lock_tilted = rotateY(lock_tilted, curMouseX * 0.35)
         lock_tilted = rotateX(lock_tilted, curMouseY * 0.35)
         
@@ -754,20 +680,15 @@ export function HeroGlobe() {
       isDestroyed = true
       cancelAnimationFrame(animationId)
       window.removeEventListener("resize", resizeCanvas)
-      container.removeEventListener("mousedown", handleMouseDown)
       container.removeEventListener("mousemove", handleMouseMove)
-      window.removeEventListener("mouseup", handleMouseUp)
-      
-      container.removeEventListener("touchstart", handleTouchStart)
-      container.removeEventListener("touchmove", handleTouchMove)
-      container.removeEventListener("touchend", handleTouchEnd)
+      container.removeEventListener("mouseleave", handleMouseLeave)
     }
   }, [])
   
   return (
     <div 
       ref={containerRef}
-      className="relative w-full aspect-square max-w-[460px] mx-auto flex items-center justify-center select-none cursor-grab active:cursor-grabbing overflow-visible"
+      className="relative w-full aspect-square max-w-[460px] mx-auto flex items-center justify-center select-none cursor-default overflow-visible"
     >
       <canvas 
         ref={canvasRef}
