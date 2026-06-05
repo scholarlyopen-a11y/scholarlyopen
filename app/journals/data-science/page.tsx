@@ -33,6 +33,16 @@ const sampleArticles: Article[] = [
     publishedDate: "2025-03-09",
     articleType: "methodology",
   },
+  {
+    id: "ds-2025-004",
+    title: "Bringing Citations and Usage Metrics Together to Make Data Count",
+    authors: ["Dr. Helena Cousijn", "Patricia Cruse", "Daniella Lowenberg"],
+    abstract: "This paper presents the framework and initial outcomes of the Make Data Count initiative, establishing standard metrics for tracking data citations, views, and downloads across repositories.",
+    keywords: ["Open data", "Data citation", "Metadata quality", "Scientometrics"],
+    doi: "10.12345/ds.2025.004",
+    publishedDate: "2025-04-12",
+    articleType: "methodology",
+  },
 ]
 
 export default function DataSciencePage() {
@@ -51,6 +61,7 @@ export default function DataSciencePage() {
         "Computational science",
         "Decision support systems",
         "Reproducible data workflows",
+        "Open data, metadata, and scientific metrics",
       ]}
       sectionTopics={[
         "Machine Learning",
@@ -62,6 +73,7 @@ export default function DataSciencePage() {
         "NLP",
         "Computer Vision",
         "Reproducible Workflows",
+        "Open Data, Metadata & Metrics",
       ]}
       mainHighlights={[
         { title: "Ethical AI", description: "Supports data science that is transparent, accountable, and fair." },

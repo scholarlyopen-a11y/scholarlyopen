@@ -87,7 +87,7 @@ const disciplines = [
       "Reproducible Research",
       "Big Data Systems",
       "Ethics in Data Science",
-      "Open Data and FAIR Practices",
+      "Open Data, Metadata & Metrics",
       "Computational Methods",
     ],
     color: "primary",
