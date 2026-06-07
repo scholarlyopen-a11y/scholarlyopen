@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Mail, MapPin, Phone, Clock, Send, Building, User, MessageSquare } from "lucide-react"
+import { Mail, MapPin, Phone, Clock, Send, Building, User, MessageSquare, BookOpen, CreditCard, Wrench, ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,10 +18,17 @@ export default function ContactPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [testingMail, setTestingMail] = useState(false)
   const [testMessage, setTestMessage] = useState<string | null>(null)
+  const [subject, setSubject] = useState("")
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       document.title = `${t("contact.heroTitle")} | Scholarly Open`
+      
+      const params = new URLSearchParams(window.location.search)
+      const sub = params.get("subject")
+      if (sub) {
+        setSubject(sub)
+      }
     }
   }, [t])
 
@@ -65,21 +72,31 @@ export default function ContactPage() {
       name: t("contact.info.editorial"),
       email: "editorial@scholarlyopen.org",
       description: t("contact.dept1.desc"),
+      icon: BookOpen,
     },
     {
       name: t("nav.forAuthors"),
       email: "author-support@scholarlyopen.org",
       description: t("contact.dept2.desc"),
+      icon: User,
     },
     {
       name: t("contact.dept3.name"),
       email: "finance@scholarlyopen.org",
       description: t("contact.dept3.desc"),
+      icon: CreditCard,
     },
     {
       name: t("contact.dept4.name"),
       email: "technical-support@scholarlyopen.org",
       description: t("contact.dept4.desc"),
+      icon: Wrench,
+    },
+    {
+      name: t("contact.dept5.name"),
+      email: "ethics@scholarlyopen.org",
+      description: t("contact.dept5.desc"),
+      icon: ShieldAlert,
     },
   ]
 
@@ -97,6 +114,7 @@ export default function ContactPage() {
         throw new Error(json?.error || "Failed to send message.")
       }
       setSubmitted(true)
+      setSubject("")
       form.reset()
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Failed to send message.")
@@ -148,7 +166,7 @@ export default function ContactPage() {
               {contactInfo.map((item, index) => (
                 <Card key={index}>
                   <CardHeader>
-                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
                       <item.icon className="h-6 w-6 text-primary" />
                     </div>
                     <CardTitle className="text-lg">{item.title}</CardTitle>
@@ -189,14 +207,19 @@ export default function ContactPage() {
                 {t("contact.deptsSub")}
               </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {departments.map((dept) => (
-                <div key={dept.name} className="p-6 rounded-lg bg-background border border-border">
-                  <h3 className="font-semibold text-lg">{dept.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-2">{dept.description}</p>
+                <div key={dept.name} className="p-6 rounded-lg bg-background border border-border flex flex-col justify-between">
+                  <div>
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
+                      <dept.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-lg">{dept.name}</h3>
+                    <p className="text-sm text-muted-foreground mt-2">{dept.description}</p>
+                  </div>
                   <a 
                     href={`mailto:${dept.email}`}
-                    className="inline-flex items-center text-sm text-primary hover:underline mt-4"
+                    className="inline-flex items-center text-sm text-primary hover:underline mt-4 self-start"
                   >
                     <Mail className="h-4 w-4 mr-2" />
                     {dept.email}
@@ -236,6 +259,12 @@ export default function ContactPage() {
                         {t("nav.peerReview")}
                       </Link>
                       {" "}- {t("nav.peerReview")}
+                    </li>
+                    <li>
+                      <Link href="/publication-ethics" className="text-primary font-medium hover:text-primary/80 hover:underline">
+                        {t("nav.publicationEthics")}
+                      </Link>
+                      {" "}- {t("contact.faq.ethicsDesc")}
                     </li>
                     <li>
                       <Link href="/open-access" className="text-primary font-medium hover:text-primary/80 hover:underline">
@@ -321,6 +350,8 @@ export default function ContactPage() {
                         <select 
                           id="subject" 
                           name="subject"
+                          value={subject}
+                          onChange={(e) => setSubject(e.target.value)}
                           className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                           required
                         >
@@ -330,6 +361,7 @@ export default function ContactPage() {
                           <option value="apc">{t("contact.form.optAPC")}</option>
                           <option value="technical">{t("contact.form.optTechnical")}</option>
                           <option value="editorial">{t("contact.form.optEditorial")}</option>
+                          <option value="ethics">{t("contact.form.optEthics")}</option>
                           <option value="partnership">{t("contact.form.optPartner")}</option>
                           <option value="other">{t("contact.form.optOther")}</option>
                         </select>
@@ -391,7 +423,9 @@ export default function ContactPage() {
             </div>
             <div className="aspect-video rounded-lg bg-muted border border-border flex items-center justify-center">
               <div className="text-center p-8">
-                <MapPin className="h-16 w-16 mx-auto text-primary/20" />
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
+                  <MapPin className="h-8 w-8 text-primary" />
+                </div>
                 <p className="mt-4 font-semibold">{t("contact.map.basedIn")}</p>
                 <p className="text-sm text-muted-foreground">Am Gonsenheim 49a, 55122 Mainz, Germany</p>
               </div>

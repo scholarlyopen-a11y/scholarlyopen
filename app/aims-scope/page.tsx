@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, Brain, Leaf, Beaker, Microscope, Settings, Globe, CheckCircle } from "lucide-react"
+import { ArrowRight, Brain, Leaf, Beaker, Microscope, Settings, Globe, CheckCircle, Stethoscope, Cpu, Sprout, Library } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -13,18 +13,18 @@ export const metadata: Metadata = {
 
 const disciplines = [
   {
-    icon: Brain,
-    title: "Social Sciences",
-    description: "Our social sciences journal publishes research that advances understanding of human society, behavior, and institutions.",
+    icon: Library,
+    title: "Social Sciences & Humanities",
+    description: "Our social sciences and humanities journal publishes research that advances understanding of human society, history, culture, behavior, and institutions.",
     areas: [
       "Sociology and Social Policy",
+      "History, Philosophy, and Ethics",
+      "Literature and Cultural Studies",
+      "Linguistics and Language Studies",
       "Political Science and International Relations",
       "Economics and Development Studies",
       "Psychology and Behavioral Sciences",
-      "Anthropology and Cultural Studies",
-      "Education and Pedagogy",
       "Communication and Media Studies",
-      "Law and Legal Studies",
     ],
     color: "primary",
   },
@@ -61,7 +61,7 @@ const disciplines = [
     color: "yellow",
   },
   {
-    icon: Microscope,
+    icon: Stethoscope,
     title: "Medicine",
     description: "Our medical journal publishes research that improves human health through clinical, translational, and public health studies.",
     areas: [
@@ -77,7 +77,7 @@ const disciplines = [
     color: "accent",
   },
   {
-    icon: Settings,
+    icon: Cpu,
     title: "Data Science",
     description: "Our data science journal publishes research on AI, analytics, and FAIR data practices.",
     areas: [
@@ -93,7 +93,7 @@ const disciplines = [
     color: "primary",
   },
   {
-    icon: Globe,
+    icon: Sprout,
     title: "Environmental Science",
     description: "Our environmental science journal publishes research on ecosystems, sustainability, and climate resilience.",
     areas: [
@@ -167,7 +167,7 @@ export default function AimsScopePage() {
                 Aims & Scope
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Scholarly Open is dedicated to publishing impactful research across Social Sciences, Medicine, Environmental Science, Biology, Chemistry, Data Science, and Engineering, serving the global scholarly community through open access.
+                Scholarly Open is dedicated to publishing impactful research across Social Sciences & Humanities, Medicine, Environmental Science, Biology, Chemistry, Data Science, and Engineering, serving the global scholarly community through open access.
               </p>
             </div>
           </div>
@@ -185,7 +185,9 @@ export default function AimsScopePage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {aims.map((aim) => (
                 <div key={aim.title} className="flex gap-4">
-                  <CheckCircle className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary mt-0.5">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{aim.title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">{aim.description}</p>
@@ -210,22 +212,8 @@ export default function AimsScopePage() {
                 <Card key={discipline.title} className="overflow-hidden">
                   <CardHeader className="bg-background">
                     <div className="flex items-start gap-4">
-                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
-                        discipline.color === 'primary' ? 'bg-primary/10' :
-                        discipline.color === 'accent' ? 'bg-accent/10' :
-                        discipline.color === 'secondary' ? 'bg-secondary/10' :
-                        discipline.color === 'yellow' ? 'bg-yellow-500/10' :
-                        discipline.color === 'green' ? 'bg-green-500/10' :
-                        'bg-chart-3/20'
-                      }`}>
-                        <discipline.icon className={`h-6 w-6 ${
-                          discipline.color === 'primary' ? 'text-primary' :
-                          discipline.color === 'accent' ? 'text-accent' :
-                          discipline.color === 'secondary' ? 'text-secondary' :
-                          discipline.color === 'yellow' ? 'text-yellow-500' :
-                          discipline.color === 'green' ? 'text-green-500' :
-                          'text-foreground'
-                        }`} />
+                      <div className="h-12 w-12 rounded-full flex items-center justify-center bg-primary/10 text-primary shrink-0">
+                        <discipline.icon className="h-6 w-6 text-primary" />
                       </div>
                       <div>
                         <CardTitle className="text-2xl">{discipline.title}</CardTitle>
@@ -320,13 +308,13 @@ export default function AimsScopePage() {
                 If your research falls within our scope, we invite you to submit your manuscript for consideration.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" asChild>
+                <Button size="lg" asChild>
                   <Link href="/submit">
                     Submit Manuscript
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
+                <Button size="lg" variant="outline" asChild>
                   <Link href="/author-guidelines">Author Guidelines</Link>
                 </Button>
               </div>

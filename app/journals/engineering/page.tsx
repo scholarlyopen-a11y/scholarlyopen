@@ -41,7 +41,7 @@ export default function EngineeringPage() {
       title="Scholarly Open: Engineering"
       description="Applied engineering research across infrastructure, energy, robotics, and systems innovation."
       heroDescription="A Gold Open Access journal publishing FAIR engineering research that supports sustainable systems and technological progress."
-      heroIcon={<Settings className="h-8 w-8" />}
+      heroIcon={<Settings className="h-8 w-8 text-primary" />}
       scopeAreas={[
         "Infrastructure and civil engineering",
         "Energy systems",

@@ -37,7 +37,7 @@ export const translations = {
     
     // Hero Section
     "hero.title": "Advancing Knowledge Through Open Access",
-    "hero.subtitle": "Scholarly Open is an international open-access publisher committed to disseminating high-quality research in Artificial Intelligence, Clinical Medicine, Environmental Science, Data Science, Engineering, and Social Sciences through Gold open access.",
+    "hero.subtitle": "Scholarly Open is an international open-access publisher committed to disseminating high-quality research in Artificial Intelligence, Clinical Medicine, Environmental Science, Data Science, Engineering, and Social Sciences & Humanities through Gold open access.",
     "hero.cta.submit": "Submit Your Research",
     "hero.cta.learn": "Learn More",
     
@@ -63,8 +63,8 @@ export const translations = {
     "journals.eng.description": "Applied engineering research across infrastructure, energy, robotics, and systems innovation.",
     "journals.env.title": "Scholarly Open: Environmental Science",
     "journals.env.description": "Interdisciplinary research in climate science, sustainability, ecosystems, and environmental policy.",
-    "journals.ss.title": "Scholarly Open: Social Sciences",
-    "journals.ss.description": "Research in society, behavior, policy, and interdisciplinary social science inquiry.",
+    "journals.ss.title": "Scholarly Open: Social Sciences & Humanities",
+    "journals.ss.description": "Research in society, culture, behavior, policy, and interdisciplinary social science and humanities inquiry.",
     
     // Features
     "features.title": "Why Publish With Us",
@@ -109,10 +109,10 @@ export const translations = {
     
     // Compliance
     "compliance.title": "Compliance & Standards",
-    "compliance.doaj": "DOAJ Compliant",
-    "compliance.cope": "Open Access Standards",
-    "compliance.crossref": "CrossRef Registered",
-    "compliance.ccby": "CC BY 4.0",
+    "compliance.doaj": "DOAJ Guidelines",
+    "compliance.cope": "Publication Ethics (COPE)",
+    "compliance.crossref": "CrossRef Member",
+    "compliance.ccby": "CC BY 4.0 License",
     "compliance.issn": "ISSN Registered",
     "compliance.oaspa": "OASPA Member",
     
@@ -127,12 +127,12 @@ export const translations = {
     "editorial.joinTeam": "Join Our Editorial Team",
     "editorial.joinTeamSubtitle": "We are always looking for distinguished scholars to join our editorial board. If you are interested in contributing to the advancement of open access, we would love to hear from you.",
     "editorial.expressInterest": "Express Interest",
-    "editorial.discipline.socialSciences": "Social Sciences",
+    "editorial.discipline.socialSciences": "Social Sciences & Humanities",
     "editorial.discipline.archaeology": "Archaeology",
     "editorial.discipline.medicalSciences": "Medical Sciences",
     "editorial.editorInChief.role": "Editor-in-Chief",
     "editorial.editorInChief.specialization": "Social Sciences & Research Methodology",
-    "editorial.senior1.role": "Senior Editor, Social Sciences",
+    "editorial.senior1.role": "Senior Editor, Social Sciences & Humanities",
     "editorial.senior1.specialization": "Political Science & International Relations",
     "editorial.senior2.role": "Senior Editor, Archaeology",
     "editorial.senior2.specialization": "Classical Archaeology & Cultural Heritage",
@@ -246,10 +246,13 @@ export const translations = {
     "contact.dept3.desc": "For invoices, payment inquiries, and APC waiver requests.",
     "contact.dept4.name": "Technical Support",
     "contact.dept4.desc": "For website issues, submission system problems, and technical questions.",
+    "contact.dept5.name": "Research Integrity & Ethics",
+    "contact.dept5.desc": "For reporting ethical concerns, plagiarism allegations, or publication integrity issues.",
 
     "contact.form.title": "Send Us a Message",
     "contact.form.subtitle": "Fill out the form below and we will get back to you within 1-2 business days.",
     "contact.form.faqHeader": "Before contacting us, you might find answers in:",
+    "contact.faq.ethicsDesc": "COPE compliance, research integrity guidelines, and ethics reporting.",
     "contact.form.cardTitle": "Contact Form",
     "contact.form.cardSub": "All fields marked with * are required.",
     "contact.form.sentTitle": "Message Sent",
@@ -268,6 +271,7 @@ export const translations = {
     "contact.form.optAPC": "APC / Payment",
     "contact.form.optTechnical": "Technical Issue",
     "contact.form.optEditorial": "Editorial Board",
+    "contact.form.optEthics": "Research Integrity & Ethics Concerns",
     "contact.form.optPartner": "Partnership / Collaboration",
     "contact.form.optOther": "Other",
     
@@ -282,7 +286,7 @@ export const translations = {
 
     // Guidelines Page Extra
     "guidelines.heroTitle": "Author Guidelines",
-    "guidelines.heroSubtitle": "Comprehensive instructions for preparing your manuscript for submission to Scholarly Open journals. Following these guidelines will help ensure a smooth review process across social sciences, medical, and other discipline-specific journals.",
+    "guidelines.heroSubtitle": "Comprehensive instructions for preparing your manuscript for submission to Scholarly Open journals. Following these guidelines will help ensure a smooth review process across social sciences & humanities, medical, and other discipline-specific journals.",
     "guidelines.downloadTemplate": "Download Template",
     "guidelines.beforeSubmit": "Before You Submit",
     "guidelines.beforeSubmitSub": "Please ensure your submission meets these requirements before submitting.",
@@ -528,7 +532,7 @@ export const translations = {
     
     // Hero Section
     "hero.title": "Wissen fördern durch Open Access",
-    "hero.subtitle": "Scholarly Open ist ein internationaler Open-Access-Verlag, der sich der Verbreitung hochwertiger Forschung in den Bereichen Künstliche Intelligenz, Klinische Medizin, Umweltwissenschaften, Data Science, Ingenieurwesen und Sozialwissenschaften durch Gold-Open-Access verschrieben hat.",
+    "hero.subtitle": "Scholarly Open ist ein internationaler Open-Access-Verlag, der sich der Verbreitung hochwertiger Forschung in den Bereichen Künstliche Intelligenz, Klinische Medizin, Umweltwissenschaften, Data Science, Ingenieurwesen und Sozial- & Geisteswissenschaften durch Gold-Open-Access verschrieben hat.",
     "hero.cta.submit": "Ihre Forschung einreichen",
     "hero.cta.learn": "Mehr erfahren",
     
@@ -554,8 +558,8 @@ export const translations = {
     "journals.eng.description": "Angewandte Ingenieurswissenschaften in Infrastruktur, Energie, Robotik und Systeminnovation.",
     "journals.env.title": "Scholarly Open: Environmental Science",
     "journals.env.description": "Interdisziplinäre Forschung zu Klima, Nachhaltigkeit, Ökosystemen und Umweltpolitik.",
-    "journals.ss.title": "Scholarly Open: Social Sciences",
-    "journals.ss.description": "Forschung zu Gesellschaft, Verhalten, Politik und interdisziplinären Sozialwissenschaften.",
+    "journals.ss.title": "Scholarly Open: Social Sciences & Humanities",
+    "journals.ss.description": "Forschung zu Gesellschaft, Kultur, Verhalten, Politik sowie interdisziplinären Sozial- und Geisteswissenschaften.",
     
     // Features
     "features.title": "Warum bei uns veröffentlichen",
@@ -600,10 +604,10 @@ export const translations = {
     
     // Compliance
     "compliance.title": "Compliance & Standards",
-    "compliance.doaj": "DOAJ-konform",
-    "compliance.cope": "Open-Access-Standards",
-    "compliance.crossref": "CrossRef-registriert",
-    "compliance.ccby": "CC BY 4.0",
+    "compliance.doaj": "DOAJ-Richtlinien",
+    "compliance.cope": "Publikationsethik (COPE)",
+    "compliance.crossref": "CrossRef-Mitglied",
+    "compliance.ccby": "CC-BY-4.0-Lizenz",
     "compliance.issn": "ISSN-registriert",
     "compliance.oaspa": "OASPA-Mitglied",
     
@@ -618,12 +622,12 @@ export const translations = {
     "editorial.joinTeam": "Werden Sie Teil unseres Redaktionsteams",
     "editorial.joinTeamSubtitle": "Wir suchen stets angesehene Wissenschaftler für unseren Redaktionsbeirat. Wenn Sie an der Förderung offenen Zugangs interessiert sind, würden wir gerne von Ihnen hören.",
     "editorial.expressInterest": "Interesse bekunden",
-    "editorial.discipline.socialSciences": "Sozialwissenschaften",
+    "editorial.discipline.socialSciences": "Sozial- & Geisteswissenschaften",
     "editorial.discipline.archaeology": "Archäologie",
     "editorial.discipline.medicalSciences": "Medizinische Wissenschaften",
     "editorial.editorInChief.role": "Chefredakteurin",
     "editorial.editorInChief.specialization": "Sozialwissenschaften & Forschungsmethodik",
-    "editorial.senior1.role": "Leitender Redakteur, Sozialwissenschaften",
+    "editorial.senior1.role": "Leitender Redakteur, Sozial- & Geisteswissenschaften",
     "editorial.senior1.specialization": "Politikwissenschaft & Internationale Beziehungen",
     "editorial.senior2.role": "Leitende Redakteurin, Archäologie",
     "editorial.senior2.specialization": "Klassische Archäologie & Kulturerbe",
@@ -735,10 +739,13 @@ export const translations = {
     "contact.dept3.desc": "Für Rechnungen, Zahlungsanfragen und Anträge auf APC-Erlass.",
     "contact.dept4.name": "Technischer Support",
     "contact.dept4.desc": "Für Website-Probleme, Störungen des Einreichungssystems und technische Fragen.",
+    "contact.dept5.name": "Forschungsintegrität & Ethik",
+    "contact.dept5.desc": "Zur Meldung von ethischen Bedenken, Plagiatsvorwürfen oder Fragen der Publikationsintegrität.",
 
     "contact.form.title": "Senden Sie uns eine Nachricht",
     "contact.form.subtitle": "Füllen Sie das folgende Formular aus und wir werden uns innerhalb von 1-2 Werktagen bei Ihnen melden.",
     "contact.form.faqHeader": "Bevor Sie uns kontaktieren, finden Sie Antworten möglicherweise in:",
+    "contact.faq.ethicsDesc": "Einhaltung von COPE-Richtlinien, Standards zur Forschungsintegrität und Meldung ethischer Bedenken.",
     "contact.form.cardTitle": "Kontaktformular",
     "contact.form.cardSub": "Alle mit * gekennzeichneten Felder sind Pflichtfelder.",
     "contact.form.sentTitle": "Nachricht gesendet",
@@ -757,6 +764,7 @@ export const translations = {
     "contact.form.optAPC": "APC / Zahlung",
     "contact.form.optTechnical": "Technisches Problem",
     "contact.form.optEditorial": "Redaktionsbeirat",
+    "contact.form.optEthics": "Fragen zur Forschungsintegrität & Ethik",
     "contact.form.optPartner": "Partnerschaft / Zusammenarbeit",
     "contact.form.optOther": "Sonstiges",
     
@@ -771,7 +779,7 @@ export const translations = {
 
     // Guidelines Page Extra
     "guidelines.heroTitle": "Autorenrichtlinien",
-    "guidelines.heroSubtitle": "Umfassende Anweisungen zur Vorbereitung Ihres Manuskripts für die Einreichung bei den Zeitschriften von Scholarly Open. Die Einhaltung dieser Richtlinien trägt zu einem reibungslosen Begutachtungsprozess in den Sozialwissenschaften, der Medizin und anderen fachspezifischen Zeitschriften bei.",
+    "guidelines.heroSubtitle": "Umfassende Anweisungen zur Vorbereitung Ihres Manuskripts für die Einreichung bei den Zeitschriften von Scholarly Open. Die Einhaltung dieser Richtlinien trägt zu einem reibungslosen Begutachtungsprozess in den Sozial- & Geisteswissenschaften, der Medizin und anderen fachspezifischen Zeitschriften bei.",
     "guidelines.downloadTemplate": "Vorlage herunterladen",
     "guidelines.beforeSubmit": "Vor der Einreichung",
     "guidelines.beforeSubmitSub": "Bitte stellen Sie vor der Einreichung sicher, dass Ihre Arbeit diesen Anforderungen entspricht.",

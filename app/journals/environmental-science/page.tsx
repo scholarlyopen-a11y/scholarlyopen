@@ -1,4 +1,4 @@
-import { Globe } from "lucide-react"
+import { Sprout } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import type { Article } from "@/components/article-card"
 
@@ -41,7 +41,7 @@ export default function EnvironmentalSciencePage() {
       title="Scholarly Open: Environmental Science"
       description="Interdisciplinary research in climate science, sustainability, ecosystems, and environmental policy."
       heroDescription="A Gold Open Access journal dedicated to FAIR environmental research that supports climate action, stewardship, and sustainable development."
-      heroIcon={<Globe className="h-8 w-8" />}
+      heroIcon={<Sprout className="h-8 w-8 text-primary" />}
       scopeAreas={[
         "Climate science and adaptation",
         "Sustainability and circular economy",

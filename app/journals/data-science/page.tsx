@@ -1,4 +1,4 @@
-import { Brain } from "lucide-react"
+import { Cpu } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import type { Article } from "@/components/article-card"
 
@@ -51,7 +51,7 @@ export default function DataSciencePage() {
       title="Scholarly Open: Data Science"
       description="Data-driven research, AI-enabled analytics, statistical methods, and computational science."
       heroDescription="A Gold Open Access journal advancing FAIR data science research with strong emphasis on transparency, ethics, and practical impact."
-      heroIcon={<Brain className="h-8 w-8" />}
+      heroIcon={<Cpu className="h-8 w-8 text-primary" />}
       scopeAreas={[
         "Machine learning and AI",
         "Big data analytics",

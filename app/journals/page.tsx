@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Globe, Users, Leaf, Beaker, Heart, Brain, Settings } from "lucide-react"
+import { ArrowRight, Globe, Users, Leaf, Beaker, Heart, Brain, Settings, Stethoscope, Cpu, Sprout, Library } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +12,7 @@ const journals = [
   {
     titleKey: "journals.ss.title",
     descriptionKey: "journals.ss.description",
-    icon: Users,
+    icon: Library,
     href: "/journals/social-sciences",
     iconColor: "text-amber-500",
   },
@@ -33,14 +33,14 @@ const journals = [
   {
     titleKey: "journals.med.title",
     descriptionKey: "journals.med.description",
-    icon: Heart,
+    icon: Stethoscope,
     href: "/journals/medicine",
     iconColor: "text-rose-500",
   },
   {
     titleKey: "journals.ds.title",
     descriptionKey: "journals.ds.description",
-    icon: Brain,
+    icon: Cpu,
     href: "/journals/data-science",
     iconColor: "text-blue-500",
   },
@@ -54,7 +54,7 @@ const journals = [
   {
     titleKey: "journals.env.title",
     descriptionKey: "journals.env.description",
-    icon: Globe,
+    icon: Sprout,
     href: "/journals/environmental-science",
     iconColor: "text-lime-500",
   },
@@ -87,8 +87,8 @@ export default function JournalsIndexPage() {
                 <Card key={journal.href} className="border-border hover:border-primary/50 transition-colors">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
-                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        <journal.icon className={`h-6 w-6 ${journal.iconColor || "text-primary"}`} />
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <journal.icon className="h-6 w-6 text-primary" />
                       </div>
                       <Badge className="bg-accent text-accent-foreground">Gold OA</Badge>
                     </div>

@@ -113,7 +113,7 @@ export default function OpenAccessPage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {benefits.map((benefit) => (
                 <div key={benefit.title} className="bg-background rounded-lg border border-border p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
                     <benefit.icon className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-semibold">{benefit.title}</h3>
@@ -173,7 +173,9 @@ export default function OpenAccessPage() {
                 <div className="space-y-4">
                   <div className="p-4 rounded-lg bg-background border-2 border-primary">
                     <div className="flex items-center gap-2 mb-2">
-                      <Scale className="h-5 w-5 text-primary" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                        <Scale className="h-4 w-4 text-primary" />
+                      </div>
                       <h4 className="font-semibold">CC BY 4.0 (Default)</h4>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -182,7 +184,9 @@ export default function OpenAccessPage() {
                   </div>
                   <div className="p-4 rounded-lg bg-background border border-border">
                     <div className="flex items-center gap-2 mb-2">
-                      <Scale className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                        <Scale className="h-4 w-4 text-primary" />
+                      </div>
                       <h4 className="font-semibold">CC BY-NC 4.0</h4>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -191,7 +195,9 @@ export default function OpenAccessPage() {
                   </div>
                   <div className="p-4 rounded-lg bg-background border border-border">
                     <div className="flex items-center gap-2 mb-2">
-                      <Scale className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                        <Scale className="h-4 w-4 text-primary" />
+                      </div>
                       <h4 className="font-semibold">CC BY-NC-ND 4.0</h4>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -280,13 +286,13 @@ export default function OpenAccessPage() {
                 Join the open access movement and make your research freely available to the world.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" asChild>
+                <Button size="lg" asChild>
                   <Link href="/submit">
                     Submit Your Research
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
+                <Button size="lg" variant="outline" asChild>
                   <Link href="/apc-fees">View APC Information</Link>
                 </Button>
               </div>

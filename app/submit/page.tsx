@@ -81,9 +81,9 @@ export default function SubmitPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">
                   2
                 </div>
-                <h3 className="mt-4 font-semibold">Register</h3>
+                <h3 className="mt-4 font-semibold">Details</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Create an account or log in to our submission system
+                  Provide corresponding author information and manuscript metadata
                 </p>
               </div>
               <div className="text-center">
@@ -92,16 +92,16 @@ export default function SubmitPage() {
                 </div>
                 <h3 className="mt-4 font-semibold">Upload</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Submit your manuscript and supporting files
+                  Upload your manuscript file (.docx, .doc, or .pdf)
                 </p>
               </div>
               <div className="text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">
                   4
                 </div>
-                <h3 className="mt-4 font-semibold">Track</h3>
+                <h3 className="mt-4 font-semibold">Submit</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Monitor your submission through the review process
+                  Submit the form to send your research to our editorial office
                 </p>
               </div>
             </div>
@@ -120,7 +120,9 @@ export default function SubmitPage() {
                 <div className="space-y-3">
                   {checklist.map((item, index) => (
                     <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-background border border-border">
-                      <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0 mt-0.5">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      </div>
                       <span className="text-sm">{item}</span>
                     </div>
                   ))}
@@ -130,7 +132,9 @@ export default function SubmitPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-primary" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                        <AlertCircle className="h-4 w-4 text-primary" />
+                      </div>
                       Important Information
                     </CardTitle>
                   </CardHeader>
@@ -244,7 +248,7 @@ export default function SubmitPage() {
                           required
                         >
                           <option value="">Select a discipline</option>
-                          <option value="social-sciences">Social Sciences Open</option>
+                          <option value="social-sciences">Social Sciences & Humanities</option>
                           <option value="biology">Biology</option>
                           <option value="chemistry">Chemistry</option>
                           <option value="medicine">Medicine</option>

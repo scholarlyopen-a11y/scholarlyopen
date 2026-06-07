@@ -42,7 +42,7 @@ const manuscriptSections = [
   {
     title: "References",
     items: [
-      "APA 7th edition for social sciences and most journals",
+      "APA 7th edition for social sciences & humanities and most journals",
       "AMA style or ICMJE recommendations for medical submissions",
       "Other discipline-appropriate guidelines where noted",
     ],
@@ -128,7 +128,9 @@ export default function AuthorGuidelinesPage() {
               </p>
               <div className="mt-8 space-y-4">
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                  <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary mt-0.5">
+                    <AlertCircle className="h-4 w-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t("guidelines.originalWork")}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -137,7 +139,9 @@ export default function AuthorGuidelinesPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-                  <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary mt-0.5">
+                    <AlertCircle className="h-4 w-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t("guidelines.authorAgreement")}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -146,7 +150,9 @@ export default function AuthorGuidelinesPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-                  <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary mt-0.5">
+                    <AlertCircle className="h-4 w-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t("guidelines.ethicsApproval")}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -155,7 +161,9 @@ export default function AuthorGuidelinesPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-                  <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary mt-0.5">
+                    <AlertCircle className="h-4 w-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t("guidelines.conflictOfInterest")}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -211,7 +219,7 @@ export default function AuthorGuidelinesPage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {fileFormats.map((format) => (
                 <div key={format.title} className="p-6 rounded-lg border border-border">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
                     <format.icon className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-semibold">{format.title}</h3>
@@ -309,7 +317,7 @@ export default function AuthorGuidelinesPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl font-bold tracking-tight">Reference Style</h2>
               <p className="mt-4 text-muted-foreground mb-8">
-                Use APA 7th edition citation style for social sciences and most journals, and AMA style or ICMJE recommendations for medical submissions. Always follow the journal-specific instructions for final formatting.
+                Use APA 7th edition citation style for social sciences & humanities and most journals, and AMA style or ICMJE recommendations for medical submissions. Always follow the journal-specific instructions for final formatting.
               </p>
               
               <div className="space-y-6">
@@ -349,13 +357,13 @@ export default function AuthorGuidelinesPage() {
                 Once your manuscript is prepared according to these guidelines, you can submit through our online system.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" asChild>
+                <Button size="lg" asChild>
                   <Link href="/submit">
                     {t("nav.submitManuscript")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
+                <Button size="lg" variant="outline" asChild>
                   <Link href="/contact">{t("nav.contact")}</Link>
                 </Button>
               </div>

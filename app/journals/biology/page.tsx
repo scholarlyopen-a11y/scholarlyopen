@@ -41,7 +41,7 @@ export default function BiologyPage() {
       title="Scholarly Open: Biology"
       description="Experimental and translational biology spanning molecular, cellular, and systems research."
       heroDescription="A Gold Open Access journal showcasing FAIR biological research with strong links to reproducibility and translational impact."
-      heroIcon={<Leaf className="h-8 w-8 text-green-500" />}
+      heroIcon={<Leaf className="h-8 w-8 text-primary" />}
       scopeAreas={[
         "Molecular and cellular biology",
         "Systems biology and physiology",

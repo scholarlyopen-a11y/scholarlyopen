@@ -166,7 +166,7 @@ export default function PublicationEthicsPage() {
               {principles.map((principle) => (
                 <Card key={principle.title}>
                   <CardHeader>
-                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
                       <principle.icon className="h-6 w-6 text-primary" />
                     </div>
                     <CardTitle>{principle.title}</CardTitle>
@@ -298,8 +298,8 @@ export default function PublicationEthicsPage() {
                 If you have concerns about the ethical conduct of any work published by or submitted to our journals, please contact us. All reports are treated confidentially.
               </p>
               <div className="mt-8">
-                <Button size="lg" variant="secondary" asChild>
-                  <Link href="/contact">
+                <Button size="lg" variant="default" asChild>
+                  <Link href="/contact?subject=ethics">
                     Contact Ethics Team
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Lock, Zap, Leaf, Heart, Settings } from "lucide-react"
+import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Unlock, Leaf, Heart, Settings, Stethoscope, Cpu, Sprout, Library } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -15,7 +15,7 @@ export default function HomePage() {
 
   const features = [
     {
-      icon: Globe,
+      icon: Unlock,
       title: t("features.openAccess.title"),
       description: t("features.openAccess.description"),
     },
@@ -40,7 +40,7 @@ export default function HomePage() {
     {
       title: t("journals.ss.title"),
       description: t("journals.ss.description"),
-      icon: Users,
+      icon: Library,
       href: "/journals/social-sciences",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
@@ -67,7 +67,7 @@ export default function HomePage() {
     {
       title: t("journals.med.title"),
       description: t("journals.med.description"),
-      icon: Heart,
+      icon: Stethoscope,
       href: "/journals/medicine",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
@@ -76,7 +76,7 @@ export default function HomePage() {
     {
       title: t("journals.ds.title"),
       description: t("journals.ds.description"),
-      icon: Brain,
+      icon: Cpu,
       href: "/journals/data-science",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
@@ -94,7 +94,7 @@ export default function HomePage() {
     {
       title: t("journals.env.title"),
       description: t("journals.env.description"),
-      icon: Globe,
+      icon: Sprout,
       href: "/journals/environmental-science",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
@@ -131,7 +131,7 @@ export default function HomePage() {
                   {t("hero.subtitle")}
                 </p>
                 <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
+                  <Button size="lg" variant="accent" asChild className="font-semibold">
                     <Link href="/submit">
                       {t("hero.cta.submit")}
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -179,8 +179,8 @@ export default function HomePage() {
                 <Card key={journal.title} className="relative overflow-hidden border-border hover:border-primary/50 transition-colors group">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
-                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        <journal.icon className={`h-6 w-6 ${journal.iconColor || "text-primary"}`} />
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <journal.icon className="h-6 w-6 text-primary" />
                       </div>
                       <Badge className={journal.typeColor}>{journal.type}</Badge>
                     </div>
@@ -241,8 +241,8 @@ export default function HomePage() {
                 </p>
                 <div className="mt-8 space-y-6">
                   <div className="flex gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{background: 'var(--primary-foreground)'}}>
-                      <Lock className="h-5 w-5" />
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Unlock className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold">{t("oaModels.gold.title")}</h3>
@@ -252,8 +252,10 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
-                      <Zap className="h-5 w-5" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <div className="h-5 w-5 rounded-full border-2 border-primary flex items-center justify-center text-[9px] font-bold tracking-tighter select-none leading-none">
+                        CC
+                      </div>
                     </div>
                     <div>
                       <h3 className="font-semibold">{t("oaModels.hybrid.title")}</h3>
@@ -264,7 +266,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <Button variant="secondary" asChild className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold">
+                  <Button variant="accent" asChild className="font-semibold">
                     <Link href="/open-access">
                       {t("oaModels.learnMore")}
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -296,13 +298,13 @@ export default function HomePage() {
                 {t("cta.subtitle")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
+                <Button size="lg" asChild>
                   <Link href="/submit">
                     {t("cta.submit")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-primary bg-background text-foreground hover:bg-primary/10 hover:text-foreground">
+                <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                   <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
                 </Button>
               </div>

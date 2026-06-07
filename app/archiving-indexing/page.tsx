@@ -120,28 +120,36 @@ export default function ArchivingIndexingPage() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="p-6 rounded-lg bg-primary/5 border border-primary/20">
-                  <Globe className="h-8 w-8 text-primary mb-4" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4 shrink-0">
+                    <Globe className="h-6 w-6 text-primary" />
+                  </div>
                   <h3 className="font-semibold">Global Access</h3>
                   <p className="text-sm text-muted-foreground mt-2">
                     Content indexed in major international databases for worldwide discovery
                   </p>
                 </div>
                 <div className="p-6 rounded-lg bg-muted/50 border border-border">
-                  <Shield className="h-8 w-8 text-muted-foreground mb-4" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4 shrink-0">
+                    <Shield className="h-6 w-6 text-primary" />
+                  </div>
                   <h3 className="font-semibold">Secure Preservation</h3>
                   <p className="text-sm text-muted-foreground mt-2">
                     Multiple redundant archives ensure content survives any single point of failure
                   </p>
                 </div>
                 <div className="p-6 rounded-lg bg-muted/50 border border-border">
-                  <Database className="h-8 w-8 text-muted-foreground mb-4" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4 shrink-0">
+                    <Database className="h-6 w-6 text-primary" />
+                  </div>
                   <h3 className="font-semibold">Persistent IDs</h3>
                   <p className="text-sm text-muted-foreground mt-2">
                     DOIs and other identifiers ensure permanent, reliable citation links
                   </p>
                 </div>
                 <div className="p-6 rounded-lg bg-muted/50 border border-border">
-                  <Archive className="h-8 w-8 text-muted-foreground mb-4" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4 shrink-0">
+                    <Archive className="h-6 w-6 text-primary" />
+                  </div>
                   <h3 className="font-semibold">Format Preservation</h3>
                   <p className="text-sm text-muted-foreground mt-2">
                     Articles archived in multiple formats including XML, PDF, and HTML
@@ -235,7 +243,7 @@ export default function ArchivingIndexingPage() {
             <div className="grid gap-6 md:grid-cols-3">
               {identifiers.map((item) => (
                 <div key={item.title} className="bg-background rounded-lg border border-border p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
                     <item.icon className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-semibold text-lg">{item.title}</h3>

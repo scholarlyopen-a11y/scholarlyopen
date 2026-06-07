@@ -9,15 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        default: 'bg-primary text-primary-foreground shadow-sm hover:shadow-md hover:bg-primary-mid active:bg-primary-dark hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm',
         destructive:
-          'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+          'bg-destructive text-white shadow-sm hover:shadow-md hover:bg-destructive/90 active:bg-destructive/80 hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:
-          'border border-primary text-primary bg-transparent hover:bg-primary/10 hover:text-primary focus-visible:ring-primary/20 dark:border-primary/60',
+          'border border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground active:bg-primary-mid hover:-translate-y-0.5 active:translate-y-0 focus-visible:ring-primary/20 dark:border-primary/60',
         secondary:
-          'bg-primary text-primary-foreground hover:bg-primary/90',
+          'bg-secondary text-secondary-foreground shadow-sm hover:shadow-md hover:bg-secondary-foreground/10 active:bg-secondary-foreground/15 hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm',
+        accent:
+          'bg-accent text-accent-foreground shadow-sm hover:shadow-md hover:bg-accent/90 active:bg-accent/80 hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm',
         ghost:
-          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+          'hover:bg-primary/10 hover:text-primary active:bg-primary/20',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

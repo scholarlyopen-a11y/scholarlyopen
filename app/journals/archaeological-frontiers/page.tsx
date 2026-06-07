@@ -181,8 +181,8 @@ export default function ArchaeologicalFrontiersPage() {
                 Scholarly Open Journal of Clinical Medicine
               </h1>
               <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-accent-foreground/10 px-4 py-3 ring-1 ring-accent-foreground/15">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent-foreground/20">
-                  <Landmark className="h-8 w-8" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Landmark className="h-8 w-8 text-primary" />
                 </div>
                 <div className="min-w-0">
                   <Badge className="bg-accent-foreground/20 text-accent-foreground border-0">{t("nav.goldOA")}</Badge>
@@ -200,7 +200,7 @@ export default function ArchaeologicalFrontiersPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-accent-foreground/30 bg-accent-foreground/5 text-accent-foreground hover:bg-accent-foreground/10 hover:text-accent-foreground">
+              <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                 <Link href="/author-guidelines">Author Guidelines</Link>
               </Button>
             </div>
@@ -225,11 +225,11 @@ export default function ArchaeologicalFrontiersPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <Tabs defaultValue="about" className="space-y-8">
-              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none">
-                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">About</TabsTrigger>
-                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("articles.title")}</TabsTrigger>
-                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("nav.editorialBoard")}</TabsTrigger>
-                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">Submit</TabsTrigger>
+              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none gap-1 sm:gap-1.5 lg:gap-2">
+                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">About</TabsTrigger>
+                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("articles.title")}</TabsTrigger>
+                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.editorialBoard")}</TabsTrigger>
+                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">Submit</TabsTrigger>
               </TabsList>
               
               {/* About Tab */}
@@ -269,8 +269,8 @@ export default function ArchaeologicalFrontiersPage() {
                     {keyFeatures.map((feature) => (
                       <Card key={feature.title} className="text-center border-border">
                         <CardHeader>
-                          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
-                            <feature.icon className="h-7 w-7 text-accent" />
+                          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                            <feature.icon className="h-7 w-7 text-primary" />
                           </div>
                           <CardTitle className="mt-4 text-base">{feature.title}</CardTitle>
                         </CardHeader>
@@ -311,7 +311,9 @@ export default function ArchaeologicalFrontiersPage() {
                 <div className="grid gap-6 md:grid-cols-3">
                   <Card className="border-border">
                     <CardHeader>
-                      <FileText className="h-8 w-8 text-accent mb-2" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
                       <CardTitle>Research Articles</CardTitle>
                       <CardDescription>
                         Original excavation reports, survey findings, and analytical studies presenting new data.
@@ -320,7 +322,9 @@ export default function ArchaeologicalFrontiersPage() {
                   </Card>
                   <Card className="border-border">
                     <CardHeader>
-                      <BookOpen className="h-8 w-8 text-accent mb-2" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                        <BookOpen className="h-6 w-6 text-primary" />
+                      </div>
                       <CardTitle>Synthesis Papers</CardTitle>
                       <CardDescription>
                         Comprehensive reviews synthesizing regional or thematic archaeological knowledge.
@@ -329,7 +333,9 @@ export default function ArchaeologicalFrontiersPage() {
                   </Card>
                   <Card className="border-border">
                     <CardHeader>
-                      <Award className="h-8 w-8 text-accent mb-2" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                        <Award className="h-6 w-6 text-primary" />
+                      </div>
                       <CardTitle>Methods & Data Papers</CardTitle>
                       <CardDescription>
                         Papers presenting new methods, techniques, or significant datasets for reuse.
@@ -345,7 +351,7 @@ export default function ArchaeologicalFrontiersPage() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild>
+                  <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                     <Link href="/author-guidelines">{t("nav.authorGuidelines")}</Link>
                   </Button>
                 </div>

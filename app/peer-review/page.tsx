@@ -120,7 +120,9 @@ export default function PeerReviewPage() {
                     {/* Content */}
                     <div className="flex-1 pb-8">
                       <div className="flex items-center gap-3 mb-2">
-                        <step.icon className="h-5 w-5 text-primary" />
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                          <step.icon className="h-4 w-4 text-primary" />
+                        </div>
                         <h3 className="text-xl font-semibold">{step.title}</h3>
                       </div>
                       <p className="text-muted-foreground">{step.description}</p>
@@ -170,7 +172,7 @@ export default function PeerReviewPage() {
                 </p>
                 <div className="mt-8 space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                       <span className="text-sm font-bold text-primary">1-2</span>
                     </div>
                     <div>
@@ -179,7 +181,7 @@ export default function PeerReviewPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                       <span className="text-sm font-bold text-primary">4-6</span>
                     </div>
                     <div>
@@ -188,7 +190,7 @@ export default function PeerReviewPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                       <span className="text-sm font-bold text-primary">1-2</span>
                     </div>
                     <div>
@@ -197,7 +199,7 @@ export default function PeerReviewPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                       <span className="text-sm font-bold text-primary">2-3</span>
                     </div>
                     <div>

@@ -220,9 +220,18 @@ export function JournalPage({
         >
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
             <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl text-balance">{title}</h1>
+              <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl text-balance">
+                {title === "Scholarly Open: Social Sciences & Humanities" ? (
+                  <>
+                    Scholarly Open: Social Sciences
+                    <br />& Humanities
+                  </>
+                ) : (
+                  title
+                )}
+              </h1>
               <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-black/5 px-4 py-3 ring-1 ring-black/10 backdrop-blur-sm">
-                <div className={`flex h-14 w-14 items-center justify-center rounded-xl ${currentBrandTheme.iconBg}`}>
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                   {heroIcon}
                 </div>
                 <div className="min-w-0">
@@ -233,13 +242,13 @@ export function JournalPage({
             </div>
             <p className={`mt-6 text-xl max-w-3xl leading-relaxed ${theme.subtext}`}>{heroDescription}</p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-md shadow-accent/15">
+              <Button size="lg" variant="accent" asChild className="font-semibold shadow-md shadow-accent/15">
                 <Link href="/submit">
                   {t("cta.submit")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className={`transition-all duration-300 ${theme.buttonOutline}`}>
+              <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                 <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
               </Button>
             </div>
@@ -264,11 +273,11 @@ export function JournalPage({
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <Tabs defaultValue="about" className="space-y-8">
-              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none">
-                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("nav.about")}</TabsTrigger>
-                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("articles.title")}</TabsTrigger>
-                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("nav.editorialBoard")}</TabsTrigger>
-                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("nav.submitManuscript")}</TabsTrigger>
+              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none gap-1 sm:gap-1.5 lg:gap-2">
+                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.about")}</TabsTrigger>
+                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("articles.title")}</TabsTrigger>
+                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.editorialBoard")}</TabsTrigger>
+                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.submitManuscript")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="about" className="space-y-12">
@@ -339,10 +348,10 @@ export function JournalPage({
                     {t("journal.submitText")}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                    <Button size="lg" variant="accent" asChild>
                       <Link href="/submit">{t("journal.startSubmission")}</Link>
                     </Button>
-                    <Button size="lg" variant="outline" asChild className="border-primary/20 bg-background text-foreground hover:bg-primary/10 hover:text-foreground">
+                    <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                       <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
                     </Button>
                   </div>

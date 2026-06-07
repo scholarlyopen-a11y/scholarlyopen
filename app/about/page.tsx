@@ -132,7 +132,7 @@ export default function AboutPage() {
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {values.map((value) => (
                 <div key={value.title} className="bg-background rounded-lg border border-border p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <value.icon className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">{value.title}</h3>
@@ -195,7 +195,9 @@ export default function AboutPage() {
               </div>
               <div className="aspect-video rounded-lg bg-muted border border-border flex items-center justify-center">
                 <div className="text-center p-8">
-                  <Globe className="h-16 w-16 mx-auto text-primary/20" />
+                  <div className="flex h-24 w-24 mx-auto items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Globe className="h-12 w-12 text-primary" />
+                  </div>
                   <p className="mt-4 text-sm text-muted-foreground">{t("oaModels.fromMainz")}</p>
                 </div>
               </div>
@@ -214,7 +216,7 @@ export default function AboutPage() {
                 {t("about.communitySub")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" asChild className="bg-primary text-primary-foreground hover:bg-primary-dark font-semibold">
+                <Button size="lg" asChild className="font-semibold">
                   <Link href="/submit">
                     {t("about.communitySubmit")}
                     <ArrowRight className="ml-2 h-4 w-4" />

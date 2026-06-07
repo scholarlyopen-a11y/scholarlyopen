@@ -26,7 +26,7 @@ function safeText(value: unknown, max = 5000) {
 function journalLabel(value: string) {
   switch (value) {
     case "social-sciences":
-      return "Social Sciences Open"
+      return "Social Sciences & Humanities"
     case "biology":
       return "Biology"
     case "chemistry":

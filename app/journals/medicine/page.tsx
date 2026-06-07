@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react"
+import { Stethoscope } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import type { Article } from "@/components/article-card"
 
@@ -41,7 +41,7 @@ export default function MedicinePage() {
       title="Scholarly Open: Medicine"
       description="Clinical research, translational medicine, and healthcare innovations that advance patient outcomes."
       heroDescription="A Gold Open Access journal supporting FAIR clinical research and innovation across medicine, public health, and clinical systems."
-      heroIcon={<Heart className="h-8 w-8" />}
+      heroIcon={<Stethoscope className="h-8 w-8 text-primary" />}
       scopeAreas={[
         "Clinical medicine and therapy",
         "Public health and epidemiology",

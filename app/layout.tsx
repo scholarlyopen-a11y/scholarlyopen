@@ -17,7 +17,7 @@ const sourceSerif = Source_Serif_4({
 export const metadata: Metadata = {
   metadataBase: new URL('https://scholarlyopen.org'),
   title: 'Scholarly Open | Open Access Scholarly Publishing',
-  description: 'Scholarly Open is an international open-access publisher committed to advancing research across Biology, Chemistry, Medicine, Data Science, Engineering, Environmental Science, and Social Sciences with FAIR-aligned open access.',
+  description: 'Scholarly Open is an international open-access publisher committed to advancing research across Biology, Chemistry, Medicine, Data Science, Engineering, Environmental Science, and Social Sciences & Humanities with FAIR-aligned open access.',
   generator: 'v0.app',
   keywords: ['open access', 'academic publishing', 'peer review', 'international', 'DOAJ', 'COPE', 'CrossRef', 'DOI', 'scholarly publishing', 'Scholarly Open'],
   icons: {

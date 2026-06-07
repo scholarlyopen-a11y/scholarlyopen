@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, BookOpen, Users, Shield, Microscope, FileText, Award, CheckCircle2, Stethoscope, FlaskRound } from "lucide-react"
+import { ArrowRight, BookOpen, Users, Unlock, Microscope, FileText, Award, CheckCircle2, Stethoscope, FlaskRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -150,7 +150,7 @@ export default function MedicalResearchReviewPage() {
 
   const keyFeatures = [
     {
-      icon: Shield,
+      icon: Unlock,
       title: "Hybrid Open Access",
       description: "Choose subscription or open access publication with APC for immediate free access.",
     },
@@ -184,8 +184,8 @@ export default function MedicalResearchReviewPage() {
                 Scholarly Open Advances in Sustainability
               </h1>
               <div className="flex w-fit shrink-0 items-center gap-3 rounded-2xl bg-background/10 px-4 py-3 ring-1 ring-background/15">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary">
-                  <Microscope className="h-8 w-8 text-secondary-foreground" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Microscope className="h-8 w-8 text-primary" />
                 </div>
                 <div className="min-w-0">
                   <Badge className="bg-secondary text-secondary-foreground border-0">Gold OA</Badge>
@@ -203,7 +203,7 @@ export default function MedicalResearchReviewPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-background/30 bg-background/10 text-background hover:bg-background/20 hover:text-background">
+              <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                 <Link href="/author-guidelines">Author Guidelines</Link>
               </Button>
             </div>
@@ -228,11 +228,11 @@ export default function MedicalResearchReviewPage() {
         <section className="py-16 lg:py-24">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <Tabs defaultValue="about" className="space-y-8">
-              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none">
-                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">About</TabsTrigger>
-                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("articles.title")}</TabsTrigger>
-                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">{t("nav.editorialBoard")}</TabsTrigger>
-                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm px-3 py-1.5">Submit</TabsTrigger>
+              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none gap-1 sm:gap-1.5 lg:gap-2">
+                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">About</TabsTrigger>
+                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("articles.title")}</TabsTrigger>
+                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.editorialBoard")}</TabsTrigger>
+                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">Submit</TabsTrigger>
               </TabsList>
               
               {/* About Tab */}
@@ -272,7 +272,7 @@ export default function MedicalResearchReviewPage() {
                     <Card className="border-primary bg-primary/5">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Shield className="h-5 w-5 text-primary" />
+                          <Unlock className="h-5 w-5 text-primary" />
                           Open Access
                         </CardTitle>
                       </CardHeader>
@@ -344,7 +344,9 @@ export default function MedicalResearchReviewPage() {
                 <div className="grid gap-6 md:grid-cols-3">
                   <Card className="border-border">
                     <CardHeader>
-                      <FileText className="h-8 w-8 text-primary mb-2" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
                       <CardTitle>Original Research</CardTitle>
                       <CardDescription>
                         Clinical trials, observational studies, laboratory research, and translational studies with novel findings.
@@ -353,7 +355,9 @@ export default function MedicalResearchReviewPage() {
                   </Card>
                   <Card className="border-border">
                     <CardHeader>
-                      <BookOpen className="h-8 w-8 text-primary mb-2" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                        <BookOpen className="h-6 w-6 text-primary" />
+                      </div>
                       <CardTitle>Systematic Reviews</CardTitle>
                       <CardDescription>
                         Systematic reviews and meta-analyses following PRISMA guidelines, synthesizing clinical evidence.
@@ -362,7 +366,9 @@ export default function MedicalResearchReviewPage() {
                   </Card>
                   <Card className="border-border">
                     <CardHeader>
-                      <Award className="h-8 w-8 text-primary mb-2" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                        <Award className="h-6 w-6 text-primary" />
+                      </div>
                       <CardTitle>Case Reports</CardTitle>
                       <CardDescription>
                         Instructive case reports and case series highlighting unusual presentations or novel treatments.
@@ -378,7 +384,7 @@ export default function MedicalResearchReviewPage() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild>
+                  <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                     <Link href="/author-guidelines">{t("nav.authorGuidelines")}</Link>
                   </Button>
                 </div>

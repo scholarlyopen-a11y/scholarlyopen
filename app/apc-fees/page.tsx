@@ -10,7 +10,7 @@ import { useLanguage } from "@/lib/language-context"
 
 const apcDetails = [
   {
-    journal: "Social Sciences Journal",
+    journal: "Social Sciences & Humanities Journal",
     regularAPC: "1,200",
     currency: "EUR",
     includes: [
@@ -52,7 +52,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Medical Research Review",
+    journal: "Medicine Journal",
     regularAPC: "2,200",
     currency: "EUR",
     includes: [
@@ -166,7 +166,9 @@ export default function APCFeesPage() {
             <div className="grid gap-6 md:grid-cols-3">
               <div className="p-6 rounded-lg bg-primary/5 border border-primary/20">
                 <div className="flex items-center gap-2 text-primary font-semibold">
-                  <Info className="h-5 w-5" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                    <Info className="h-4 w-4 text-primary" />
+                  </div>
                   When is the APC charged?
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
@@ -175,7 +177,9 @@ export default function APCFeesPage() {
               </div>
               <div className="p-6 rounded-lg bg-muted/50 border border-border">
                 <div className="flex items-center gap-2 font-semibold">
-                  <Info className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                    <Info className="h-4 w-4 text-primary" />
+                  </div>
                   What does the APC cover?
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
@@ -184,7 +188,9 @@ export default function APCFeesPage() {
               </div>
               <div className="p-6 rounded-lg bg-muted/50 border border-border">
                 <div className="flex items-center gap-2 font-semibold">
-                  <Info className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                    <Info className="h-4 w-4 text-primary" />
+                  </div>
                   Who pays the APC?
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
@@ -343,20 +349,22 @@ export default function APCFeesPage() {
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
             <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Questions About Fees?
+                {t("apc.questionsTitle")}
               </h2>
               <p className="mt-4 text-lg text-secondary-foreground/80">
-                Our team is happy to discuss payment options, waivers, or institutional agreements.
+                {t("apc.questionsDesc")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" asChild>
-                  <Link href="/contact">
-                    {t("nav.contact")}
+                <Button size="lg" asChild>
+                  <Link href="/submit">
+                    {t("nav.submitManuscript")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="border-secondary/60 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 hover:text-secondary-foreground">
-                  <Link href="/submit">{t("nav.submitManuscript")}</Link>
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/contact">
+                    {t("nav.contact")}
+                  </Link>
                 </Button>
               </div>
             </div>

@@ -33,6 +33,8 @@ function subjectLabel(value: string) {
       return "Technical Issue"
     case "editorial":
       return "Editorial Board"
+    case "ethics":
+      return "Research Integrity & Ethics Concerns"
     case "partnership":
       return "Partnership / Collaboration"
     default:
