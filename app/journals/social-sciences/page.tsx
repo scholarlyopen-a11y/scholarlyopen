@@ -1,4 +1,4 @@
-import { Speech } from "lucide-react"
+import { UsersRound } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import type { Article } from "@/components/article-card"
 
@@ -41,7 +41,7 @@ export default function SocialSciencesPage() {
       title="Scholarly Open: Social Sciences & Humanities"
       description="Research exploring social systems, history, culture, behavior, and societal change through rigorous interdisciplinary scholarship."
       heroDescription="A Gold Open Access journal committed to FAIR social science and humanities research, inclusive scholarship, and evidence-based policy impact."
-      heroIcon={<Speech className="h-8 w-8 text-primary" />}
+      heroIcon={<UsersRound className="h-8 w-8 text-primary" />}
       scopeAreas={[
         "Social policy, governance, and law",
         "Historical analyses and cultural heritage",

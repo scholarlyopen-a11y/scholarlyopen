@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Unlock, Leaf, Heart, Settings, Stethoscope, Cpu, Sprout, Speech } from "lucide-react"
+import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Unlock, Leaf, Heart, Settings, Stethoscope, Cpu, Sprout, UsersRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -40,7 +40,7 @@ export default function HomePage() {
     {
       title: t("journals.ss.title"),
       description: t("journals.ss.description"),
-      icon: Speech,
+      icon: UsersRound,
       href: "/journals/social-sciences",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",

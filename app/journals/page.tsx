@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Globe, Users, Leaf, Beaker, Heart, Brain, Settings, Stethoscope, Cpu, Sprout, Speech } from "lucide-react"
+import { ArrowRight, Globe, Users, Leaf, Beaker, Heart, Brain, Settings, Stethoscope, Cpu, Sprout, UsersRound } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +12,7 @@ const journals = [
   {
     titleKey: "journals.ss.title",
     descriptionKey: "journals.ss.description",
-    icon: Speech,
+    icon: UsersRound,
     href: "/journals/social-sciences",
     iconColor: "text-amber-500",
   },

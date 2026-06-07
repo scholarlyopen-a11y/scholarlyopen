@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, Brain, Leaf, Beaker, Microscope, Settings, Globe, CheckCircle, Stethoscope, Cpu, Sprout, Speech } from "lucide-react"
+import { ArrowRight, Brain, Leaf, Beaker, Microscope, Settings, Globe, CheckCircle, Stethoscope, Cpu, Sprout, UsersRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 const disciplines = [
   {
-    icon: Speech,
+    icon: UsersRound,
     title: "Social Sciences & Humanities",
     description: "Our social sciences and humanities journal publishes research that advances understanding of human society, history, culture, behavior, and institutions.",
     areas: [
