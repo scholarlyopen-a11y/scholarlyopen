@@ -72,7 +72,7 @@ export function Footer() {
 
   const footerLinks = {
     journals: [
-      { name: t("journals.ss.title"), href: "/journals/social-sciences" },
+      { name: t("journals.ss.title"), href: "/journals/social-sciences-humanities" },
       { name: t("journals.bio.title"), href: "/journals/biology" },
       { name: t("journals.chem.title"), href: "/journals/chemistry" },
       { name: t("journals.med.title"), href: "/journals/medicine" },

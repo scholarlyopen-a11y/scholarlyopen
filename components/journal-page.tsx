@@ -160,7 +160,7 @@ export function JournalPage({
       iconBg: "bg-lime-950/10 text-lime-900",
       badge: "bg-lime-900/10 text-lime-900 border-[#C5D37E]/25 shadow-none hover:bg-lime-900/20"
     },
-    "social-sciences": {
+    "social-sciences-humanities": {
       bgColor: "#F5E6CC", // light brown (caramel)
       border: "border-[#EEDCB8]",
       text: "text-amber-950",

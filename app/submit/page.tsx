@@ -248,7 +248,7 @@ export default function SubmitPage() {
                           required
                         >
                           <option value="">Select a discipline</option>
-                          <option value="social-sciences">Social Sciences & Humanities</option>
+                          <option value="social-sciences-humanities">Social Sciences & Humanities</option>
                           <option value="biology">Biology</option>
                           <option value="chemistry">Chemistry</option>
                           <option value="medicine">Medicine</option>

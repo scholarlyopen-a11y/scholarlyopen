@@ -41,7 +41,7 @@ export default function HomePage() {
       title: t("journals.ss.title"),
       description: t("journals.ss.description"),
       icon: UsersRound,
-      href: "/journals/social-sciences",
+      href: "/journals/social-sciences-humanities",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
       iconColor: "text-amber-500",

@@ -13,7 +13,7 @@ const journals = [
     titleKey: "journals.ss.title",
     descriptionKey: "journals.ss.description",
     icon: UsersRound,
-    href: "/journals/social-sciences",
+    href: "/journals/social-sciences-humanities",
     iconColor: "text-amber-500",
   },
   {

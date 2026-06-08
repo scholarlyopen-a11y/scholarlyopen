@@ -70,7 +70,7 @@ export default function SocialSciencesPage() {
         { title: "Fair and Open Research", description: "FAIR-friendly publication standards that support reuse and transparency." },
       ]}
       sampleArticles={sampleArticles}
-      journalSlug="social-sciences"
+      journalSlug="social-sciences-humanities"
     />
   )
 }

@@ -20,7 +20,7 @@ export function Header() {
   const { language, setLanguage, t } = useLanguage()
 
   const journals = [
-    { name: t("journals.ss.title"), href: "/journals/social-sciences", type: "Gold OA" },
+    { name: t("journals.ss.title"), href: "/journals/social-sciences-humanities", type: "Gold OA" },
     { name: t("journals.bio.title"), href: "/journals/biology", type: "Gold OA" },
     { name: t("journals.chem.title"), href: "/journals/chemistry", type: "Gold OA" },
     { name: t("journals.med.title"), href: "/journals/medicine", type: "Gold OA" },
