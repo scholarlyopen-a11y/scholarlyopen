@@ -177,10 +177,6 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="accent" asChild className="text-xs xl:text-sm px-2.5 py-1.5 xl:px-4 xl:py-2 transition-all font-semibold shadow-xs">
-            <Link href="/editorial360">Sign In to editorial360</Link>
-          </Button>
-          
           <Button variant="secondary" asChild className="bg-secondary text-secondary-foreground border border-secondary/60 shadow-sm hover:bg-secondary/90 text-xs xl:text-sm px-2.5 py-1.5 xl:px-4 xl:py-2">
             <Link href="/submit">{t("nav.submitManuscript")}</Link>
           </Button>
@@ -241,11 +237,6 @@ export function Header() {
               <Button asChild className="w-full">
                 <Link href="/submit" onClick={() => setMobileMenuOpen(false)}>
                   {t("nav.submitManuscript")}
-                </Link>
-              </Button>
-              <Button variant="accent" asChild className="w-full font-semibold shadow-xs">
-                <Link href="/editorial360" onClick={() => setMobileMenuOpen(false)}>
-                  Sign In to editorial360
                 </Link>
               </Button>
             </div>

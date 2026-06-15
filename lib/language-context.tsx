@@ -49,7 +49,7 @@ export const translations = {
     
     // Journals Section
     "journals.title": "Our Journals",
-    "journals.subtitle": "We publish high-quality research across seven peer-reviewed journals, all offering Gold open access.",
+    "journals.subtitle": "We publish high-quality research across our core disciplines and our new Emerging Frontiers Series, all offering Gold open access.",
     "journals.viewJournal": "View Journal",
     "journals.bio.title": "Scholarly Open: Biology",
     "journals.bio.description": "Experimental and translational biology spanning molecular, cellular, and systems research.",
@@ -65,6 +65,18 @@ export const translations = {
     "journals.env.description": "Interdisciplinary research in climate science, sustainability, ecosystems, and environmental policy.",
     "journals.ss.title": "Scholarly Open: Social Sciences & Humanities",
     "journals.ss.description": "Research in society, culture, behavior, policy, and interdisciplinary social science and humanities inquiry.",
+    "journals.clinical-ai.title": "Scholarly Open: Clinical AI & Digital Health",
+    "journals.clinical-ai.description": "Clinical applications of machine learning, digital health systems, and computational diagnostics.",
+    "journals.ai-safety.title": "Scholarly Open: AI Safety & Governance",
+    "journals.ai-safety.description": "Research on AI alignment, safety evaluations, policy frameworks, and algorithmic governance.",
+    "journals.decarbonization.title": "Scholarly Open: Decarbonization & Carbon Tech",
+    "journals.decarbonization.description": "Engineered climate solutions, carbon capture, utilization, storage, and net-zero technologies.",
+    "journals.quantum-engineering.title": "Scholarly Open: Quantum Engineering",
+    "journals.quantum-engineering.description": "Translation of quantum science into practical hardware, cryptography, and application architectures.",
+    "journals.synthetic-biology.title": "Scholarly Open: Synthetic Biology & Bio-Design",
+    "journals.synthetic-biology.description": "De novo bio-design, CRISPR therapeutics, cell-free biomanufacturing, and metabolic pathways.",
+    "journals.space-resources.title": "Scholarly Open: Space Resources & Orbital Economy",
+    "journals.space-resources.description": "In-situ lunar/asteroid resource utilization, space logistics, orbital debris, and space law.",
     
     // Features
     "features.title": "Why Publish With Us",
@@ -544,7 +556,7 @@ export const translations = {
     
     // Journals Section
     "journals.title": "Unsere Zeitschriften",
-    "journals.subtitle": "Wir veröffentlichen hochwertige Forschung in sieben peer-reviewed Zeitschriften mit vollständigem Gold-Open-Access.",
+    "journals.subtitle": "Wir veröffentlichen hochwertige Forschung in unseren Kerndisziplinen und unserer neuen Serie 'Emerging Frontiers' mit vollständigem Gold-Open-Access.",
     "journals.viewJournal": "Zeitschrift ansehen",
     "journals.bio.title": "Scholarly Open: Biology",
     "journals.bio.description": "Experimentelle und translationale Biologie von molekularer bis systemischer Ebene.",
@@ -560,6 +572,18 @@ export const translations = {
     "journals.env.description": "Interdisziplinäre Forschung zu Klima, Nachhaltigkeit, Ökosystemen und Umweltpolitik.",
     "journals.ss.title": "Scholarly Open: Social Sciences & Humanities",
     "journals.ss.description": "Forschung zu Gesellschaft, Kultur, Verhalten, Politik sowie interdisziplinären Sozial- und Geisteswissenschaften.",
+    "journals.clinical-ai.title": "Scholarly Open: Clinical AI & Digital Health",
+    "journals.clinical-ai.description": "Klinische Anwendungen des maschinellen Lernens, digitale Gesundheitssysteme und computergestützte Diagnostik.",
+    "journals.ai-safety.title": "Scholarly Open: AI Safety & Governance",
+    "journals.ai-safety.description": "Forschung zu KI-Ausrichtung, Sicherheitsbewertungen, politischen Rahmenbedingungen und algorithmischer Governance.",
+    "journals.decarbonization.title": "Scholarly Open: Decarbonization & Carbon Tech",
+    "journals.decarbonization.description": "Klimatechnische Lösungen, CO2-Abscheidung, -Nutzung, -Speicherung und Netto-Null-Technologien.",
+    "journals.quantum-engineering.title": "Scholarly Open: Quantum Engineering",
+    "journals.quantum-engineering.description": "Umsetzung der Quantenwissenschaft in praktische Hardware, Kryptographie und Anwendungsarchitekturen.",
+    "journals.synthetic-biology.title": "Scholarly Open: Synthetic Biology & Bio-Design",
+    "journals.synthetic-biology.description": "De-novo-Biodesign, CRISPR-Therapeutika, zellfreie Biomanufaktur und Stoffwechselwege.",
+    "journals.space-resources.title": "Scholarly Open: Space Resources & Orbital Economy",
+    "journals.space-resources.description": "In-situ-Nutzung von Mond- und Asteroidenressourcen, Weltraumlogistik, Weltraummüll und Weltraumrecht.",
     
     // Features
     "features.title": "Warum bei uns veröffentlichen",
