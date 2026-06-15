@@ -204,7 +204,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="secondary" asChild className="bg-secondary text-secondary-foreground border border-secondary/60 shadow-sm hover:bg-secondary/90 text-xs xl:text-sm px-2.5 py-1.5 xl:px-4 xl:py-2">
+          <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1.5 xl:px-4 xl:py-2">
             <Link href="/submit">{t("nav.submitManuscript")}</Link>
           </Button>
         </div>
@@ -274,7 +274,7 @@ export function Header() {
               )
             )}
             <div className="pt-4 flex flex-col gap-2">
-              <Button asChild className="w-full">
+              <Button variant="accent" asChild className="w-full border border-accent/60">
                 <Link href="/submit" onClick={() => setMobileMenuOpen(false)}>
                   {t("nav.submitManuscript")}
                 </Link>
