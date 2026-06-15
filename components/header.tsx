@@ -11,6 +11,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import { useLanguage } from "@/lib/language-context"
 import { LogoSO } from "./logo-so"
@@ -19,20 +23,29 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { language, setLanguage, t } = useLanguage()
 
-  const journals = [
-    { name: t("journals.ss.title"), href: "/journals/social-sciences-humanities", type: "Gold OA" },
-    { name: t("journals.bio.title"), href: "/journals/biology", type: "Gold OA" },
-    { name: t("journals.chem.title"), href: "/journals/chemistry", type: "Gold OA" },
-    { name: t("journals.med.title"), href: "/journals/medicine", type: "Gold OA" },
-    { name: t("journals.ds.title"), href: "/journals/data-science", type: "Gold OA" },
-    { name: t("journals.eng.title"), href: "/journals/engineering", type: "Gold OA" },
-    { name: t("journals.env.title"), href: "/journals/environmental-science", type: "Gold OA" },
+  const coreJournals = [
+    { name: t("journals.ss.title"), href: "/journals/social-sciences-humanities" },
+    { name: t("journals.bio.title"), href: "/journals/biology" },
+    { name: t("journals.chem.title"), href: "/journals/chemistry" },
+    { name: t("journals.med.title"), href: "/journals/medicine" },
+    { name: t("journals.ds.title"), href: "/journals/data-science" },
+    { name: t("journals.eng.title"), href: "/journals/engineering" },
+    { name: t("journals.env.title"), href: "/journals/environmental-science" },
+  ]
+
+  const frontiersJournals = [
+    { name: t("journals.clinical-ai.title"), href: "/journals/clinical-ai" },
+    { name: t("journals.ai-safety.title"), href: "/journals/ai-safety" },
+    { name: t("journals.decarbonization.title"), href: "/journals/decarbonization" },
+    { name: t("journals.quantum-engineering.title"), href: "/journals/quantum-engineering" },
+    { name: t("journals.synthetic-biology.title"), href: "/journals/synthetic-biology" },
+    { name: t("journals.space-resources.title"), href: "/journals/space-resources" },
   ]
 
   const navigation = [
     { name: t("nav.home"), href: "/" },
     { name: t("nav.about"), href: "/about" },
-    { name: t("nav.journals"), href: "#", children: journals, isJournals: true },
+    { name: t("nav.journals"), href: "#", children: [], isJournals: true },
     {
       name: t("nav.forAuthors"),
       href: "#",
@@ -113,27 +126,41 @@ export function Header() {
                 <DropdownMenuContent align="start" className="w-56">
                   {item.isJournals ? (
                     <>
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">{t("nav.goldOA")}</DropdownMenuLabel>
-                      {item.children.filter(j => j.type === "Gold OA").map((child) => (
-                        <DropdownMenuItem key={child.name} asChild>
-                          <Link href={child.href} className="w-full cursor-pointer">
-                            {child.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                      {item.children.some(j => j.type === "Hybrid OA") && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel className="text-xs text-muted-foreground">{t("nav.hybridOA")}</DropdownMenuLabel>
-                          {item.children.filter(j => j.type === "Hybrid OA").map((child) => (
-                            <DropdownMenuItem key={child.name} asChild>
-                              <Link href={child.href} className="w-full cursor-pointer">
-                                {child.name}
-                              </Link>
-                            </DropdownMenuItem>
-                          ))}
-                        </>
-                      )}
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-xs">
+                          Core Series
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent className="w-64">
+                            {coreJournals.map((child) => (
+                              <DropdownMenuItem key={child.name} asChild>
+                                <Link href={child.href} className="w-full cursor-pointer text-xs">
+                                  {child.name}
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+                      
+                      <DropdownMenuSeparator />
+                      
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-xs">
+                          Emerging Frontiers
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent className="w-64">
+                            {frontiersJournals.map((child) => (
+                              <DropdownMenuItem key={child.name} asChild>
+                                <Link href={child.href} className="w-full cursor-pointer text-xs">
+                                  {child.name}
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
                     </>
                   ) : (
                     item.children.map((child) => (
@@ -193,33 +220,46 @@ export function Header() {
                   <span className="block px-3 py-2 text-sm font-semibold text-foreground">
                     {item.name}
                   </span>
-                  {item.isJournals && (
-                    <span className="block px-6 py-1 text-xs text-muted-foreground font-medium">{t("nav.goldOA")}</span>
-                  )}
-                  {item.children.filter(c => !item.isJournals || ("type" in c && c.type === "Gold OA")).map((child) => (
-                    <Link
-                      key={child.name}
-                      href={child.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-6 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                    >
-                      {child.name}
-                    </Link>
-                  ))}
-                  {item.isJournals && item.children.some(c => "type" in c && c.type === "Hybrid OA") && (
-                    <>
-                      <span className="block px-6 py-1 text-xs text-muted-foreground font-medium mt-2">{t("nav.hybridOA")}</span>
-                      {item.children.filter(c => "type" in c && c.type === "Hybrid OA").map((child) => (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block px-6 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                        >
-                          {child.name}
-                        </Link>
-                      ))}
-                    </>
+                  {item.isJournals ? (
+                    <div className="space-y-4 pt-1">
+                      <div>
+                        <span className="block px-6 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Core Series</span>
+                        {coreJournals.map((child) => (
+                          <Link
+                            key={child.name}
+                            href={child.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block px-8 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                          >
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                      <div>
+                        <span className="block px-6 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Emerging Frontiers</span>
+                        {frontiersJournals.map((child) => (
+                          <Link
+                            key={child.name}
+                            href={child.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block px-8 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                          >
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    item.children.map((child) => (
+                      <Link
+                        key={child.name}
+                        href={child.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-6 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        {child.name}
+                      </Link>
+                    ))
                   )}
                 </div>
               ) : (

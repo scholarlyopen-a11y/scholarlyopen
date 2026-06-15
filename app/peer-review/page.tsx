@@ -113,8 +113,8 @@ export default function PeerReviewPage() {
                 {steps.map((step, index) => (
                   <div key={step.number} className="relative flex gap-6">
                     {/* Step indicator */}
-                    <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-4 border-background" style={{background: 'var(--primary-foreground)'}}>
-                      <span className="text-white font-bold">{step.number}</span>
+                    <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-4 border-background bg-primary/10 text-primary">
+                      <span className="text-primary font-bold text-lg">{step.number}</span>
                     </div>
                     
                     {/* Content */}

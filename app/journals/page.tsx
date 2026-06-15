@@ -67,42 +67,42 @@ const frontiersJournals = [
     descriptionKey: "journals.clinical-ai.description",
     icon: HeartPulse,
     href: "/journals/clinical-ai",
-    iconColor: "text-indigo-500",
+    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.ai-safety.title",
     descriptionKey: "journals.ai-safety.description",
     icon: Shield,
     href: "/journals/ai-safety",
-    iconColor: "text-purple-500",
+    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.decarbonization.title",
     descriptionKey: "journals.decarbonization.description",
     icon: Wind,
     href: "/journals/decarbonization",
-    iconColor: "text-teal-500",
+    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.quantum-engineering.title",
     descriptionKey: "journals.quantum-engineering.description",
     icon: Atom,
     href: "/journals/quantum-engineering",
-    iconColor: "text-cyan-500",
+    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.synthetic-biology.title",
     descriptionKey: "journals.synthetic-biology.description",
     icon: Dna,
     href: "/journals/synthetic-biology",
-    iconColor: "text-emerald-500",
+    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.space-resources.title",
     descriptionKey: "journals.space-resources.description",
     icon: Rocket,
     href: "/journals/space-resources",
-    iconColor: "text-sky-500",
+    iconColor: "text-green-500",
   },
 ]
 
@@ -168,10 +168,7 @@ export default function JournalsIndexPage() {
                           <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                             <journal.icon className={`h-6 w-6 ${journal.iconColor}`} />
                           </div>
-                          <div className="flex gap-1.5">
-                            <Badge className="bg-primary/20 text-primary border-primary/30 font-semibold">Frontiers</Badge>
-                            <Badge className="bg-accent text-accent-foreground font-semibold">Gold OA</Badge>
-                          </div>
+                          <Badge className="bg-accent text-accent-foreground font-semibold">Gold OA</Badge>
                         </div>
                         <CardTitle className="mt-4 text-xl font-bold">{t(journal.titleKey)}</CardTitle>
                         <CardDescription className="mt-2 text-sm text-muted-foreground leading-normal">{t(journal.descriptionKey)}</CardDescription>

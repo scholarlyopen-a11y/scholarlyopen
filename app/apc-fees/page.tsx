@@ -291,9 +291,23 @@ export default function APCFeesPage() {
             <div className="max-w-2xl mb-12">
               <h2 className="text-3xl font-bold tracking-tight">Current APC Rates</h2>
               <p className="mt-4 text-muted-foreground">
-                Our APCs vary by discipline to reflect the different costs and services involved. These rates apply across our portfolio of seven Scholarly Open journals.
+                Our APCs vary by discipline to reflect the different costs and services involved. These rates apply across our portfolio of 13 Scholarly Open journals.
               </p>
             </div>
+
+            {/* Launch Promotion Banner */}
+            <div className="mb-10 p-5 rounded-xl border border-primary/20 bg-primary/5 text-slate-800 dark:text-slate-200 flex items-start gap-4 shadow-sm">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Info className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-base text-primary">Special Launch Promotion</h4>
+                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                  To celebrate our portfolio expansion and support early scholarship, the Article Processing Charges (APCs) for the <strong>first 10 accepted articles</strong> in <em>each</em> of our 13 journals will be <strong>fully waived (100% discount)</strong>. No code or waiver request is needed; this promotion is automatically applied upon manuscript acceptance.
+                </p>
+              </div>
+            </div>
+
             <div className="grid gap-6 lg:grid-cols-3">
               {apcDetails.map((item) => (
                 <Card key={item.journal} className="relative overflow-hidden">

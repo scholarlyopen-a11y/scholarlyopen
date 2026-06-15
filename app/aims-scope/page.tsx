@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, Brain, Leaf, Beaker, Microscope, Settings, Globe, CheckCircle, Stethoscope, Cpu, Sprout, UsersRound } from "lucide-react"
+import { ArrowRight, Brain, Leaf, Beaker, Microscope, Settings, Globe, CheckCircle, Stethoscope, Cpu, Sprout, UsersRound, HeartPulse, Shield, Wind, Atom, Dna, Rocket } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -124,6 +124,97 @@ const disciplines = [
     ],
     color: "chart-3",
   },
+  {
+    icon: HeartPulse,
+    title: "Clinical AI & Digital Health",
+    description: "Our Clinical AI and Digital Health journal publishes research on clinical machine learning, digital therapeutics, and medical diagnostic integrations.",
+    areas: [
+      "Machine learning in medical imaging and diagnostics",
+      "Clinical decision support systems (CDSS)",
+      "Large language models (LLMs) in clinical workflows",
+      "Wearable devices and remote patient monitoring",
+      "Digital therapeutics and mobile health (mHealth)",
+      "Biomedical signal processing and telemetry",
+      "AI ethics, bias, and regulatory compliance in healthcare",
+      "Epidemiological modeling and public health informatics",
+    ],
+    color: "green",
+  },
+  {
+    icon: Shield,
+    title: "AI Safety & Governance",
+    description: "Our AI Safety and Governance journal publishes research on AI alignment, mechanistic interpretability, safety evaluations, and international policy.",
+    areas: [
+      "AI alignment methodology and reinforcement learning from human feedback (RLHF)",
+      "Scalable oversight, reward hacking, and specification gaming",
+      "Mechanistic interpretability and model probing",
+      "Evals and safety benchmarking for frontier models",
+      "Cybersecurity, jailbreaking, and model robustness",
+      "Global AI policy, treaties, and governance frameworks",
+      "Societal impacts, misuse prevention, and structural AI risks",
+    ],
+    color: "primary",
+  },
+  {
+    icon: Wind,
+    title: "Decarbonization & Carbon Tech",
+    description: "Our Decarbonization and Carbon Tech journal publishes research on engineered climate solutions, carbon capture, hydrogen economy, and net-zero industrial systems.",
+    areas: [
+      "Carbon capture technologies (flue gas and direct air capture)",
+      "Carbon utilization and conversion (fuels, chemicals, materials)",
+      "Carbon storage and mineralization (geological, ocean, soils)",
+      "Hydrogen production (green, blue), storage, and transport",
+      "Industrial electrification and high-temperature heat decarbonization",
+      "Lifecycle carbon accounting, greenhouse gas auditing, and LCA protocols",
+      "Climate engineering policy, carbon markets, and regulatory compliance",
+    ],
+    color: "accent",
+  },
+  {
+    icon: Atom,
+    title: "Quantum Engineering",
+    description: "Our Quantum Engineering journal publishes research on solid-state qubits, cryogenic control systems, error correction, and quantum compiler architectures.",
+    areas: [
+      "Design and fabrication of solid-state, trapped-ion, and photonic qubits",
+      "Cryogenic and control electronics for quantum processors",
+      "Quantum error correction (QEC) protocols and physical integration",
+      "Quantum compilers, classical-quantum hybrid software stacks",
+      "Quantum key distribution (QKD) and post-quantum network hardware",
+      "High-sensitivity quantum sensors and metrology instruments",
+      "Application-layer algorithms and NISQ-era hardware co-design",
+    ],
+    color: "chart-3",
+  },
+  {
+    icon: Dna,
+    title: "Synthetic Biology & Bio-Design",
+    description: "Our Synthetic Biology and Bio-Design journal publishes research on de novo genome design, CRISPR diagnostics, cell-free biomanufacturing, and bio-computing.",
+    areas: [
+      "De novo design of synthetic genomes, circuits, and metabolic networks",
+      "CRISPR-Cas systems and precision genome editing innovations",
+      "Cell-free transcription-translation (TX-TL) and biomanufacturing platforms",
+      "Directed evolution and automated high-throughput strain selection",
+      "DNA-based data storage and bio-computational logic gates",
+      "Biosensors and diagnostics using engineered cells or enzymes",
+      "Bioethics, biosecurity, and safety guidelines for synthetic organisms",
+    ],
+    color: "green",
+  },
+  {
+    icon: Rocket,
+    title: "Space Resources & Orbital Economy",
+    description: "Our Space Resources and Orbital Economy journal publishes research on off-world resource extraction (ISRU), regolith construction, space logistics, and space law.",
+    areas: [
+      "In-situ resource utilization (ISRU) on the Moon, Mars, and asteroids",
+      "Regolith processing, excavation, and sintering for space construction",
+      "Extraction of lunar water ice and propellant manufacturing",
+      "Space logistics, orbital refueling, and transportation architectures",
+      "Orbital debris tracking, remediation, and recycling systems",
+      "Space economics, commercialization models, and risk management",
+      "International space law, policy frameworks, and planetary protection",
+    ],
+    color: "yellow",
+  },
 ]
 
 const aims = [
@@ -167,7 +258,7 @@ export default function AimsScopePage() {
                 Aims & Scope
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Scholarly Open is dedicated to publishing impactful research across Social Sciences & Humanities, Medicine, Environmental Science, Biology, Chemistry, Data Science, and Engineering, serving the global scholarly community through open access.
+                Scholarly Open is dedicated to publishing impactful research across our 13 journals (comprising our 7 Core Series and 6 Emerging Frontiers Series), serving the global scholarly community through open access.
               </p>
             </div>
           </div>
@@ -204,7 +295,7 @@ export default function AimsScopePage() {
             <div className="max-w-2xl mb-12">
               <h2 className="text-3xl font-bold tracking-tight">Research Areas</h2>
               <p className="mt-4 text-muted-foreground">
-                We publish peer-reviewed research across seven scholarly disciplines, covering a wide range of specialized areas and interdisciplinary topics.
+                We publish peer-reviewed research across thirteen scholarly disciplines spanning our Core and Emerging Frontiers portfolios, covering a wide range of specialized areas and interdisciplinary topics.
               </p>
             </div>
             <div className="space-y-12">
