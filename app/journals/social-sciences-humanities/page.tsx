@@ -1,6 +1,7 @@
 import { UsersRound } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import type { Article } from "@/components/article-card"
+import type { EditorMember } from "@/components/journal-editorial-board"
 
 const sampleArticles: Article[] = [
   {
@@ -12,6 +13,7 @@ const sampleArticles: Article[] = [
     doi: "10.12345/ss.2025.001",
     publishedDate: "2025-01-10",
     articleType: "research",
+    section: "Political Science & Public Policy",
   },
   {
     id: "ss-2025-002",
@@ -22,6 +24,7 @@ const sampleArticles: Article[] = [
     doi: "10.12345/ss.2025.002",
     publishedDate: "2025-02-28",
     articleType: "review",
+    section: "Sociology",
   },
   {
     id: "ss-2025-003",
@@ -32,7 +35,79 @@ const sampleArticles: Article[] = [
     doi: "10.12345/ss.2025.003",
     publishedDate: "2025-03-21",
     articleType: "research",
+    section: "Economics & Development Studies",
   },
+]
+
+const editorInChief: EditorMember = {
+  id: "ed-eic-001",
+  name: "Prof. Dr. Jane Doe",
+  role: "Editor-in-Chief",
+  affiliation: "Technical University of Munich, Germany",
+  specialization: "AI Ethics, Governance, and Research Methodology",
+  email: "jane.doe@scholarlyopen.org",
+  orcid: "0000-0002-1234-5678",
+  assignedSections: ["Political Science & Public Policy", "Sociology"],
+  expertise: ["AI Governance", "Data Privacy", "Responsible Tech"],
+  totalReviews: 124,
+  avgScore: 4.7,
+  acceptedRate: 89,
+  ethicsFlags: 7,
+  badges: ["Gold Editor", "Rapid Decision Maker"]
+}
+
+const associateEditors: EditorMember[] = [
+  {
+    id: "ed-assoc-001",
+    name: "Dr. Sofia Martínez",
+    role: "Associate Editor",
+    affiliation: "Sorbonne University, France",
+    specialization: "Sociology & Social Policy",
+    orcid: "0000-0003-9876-5432",
+    assignedSections: ["Sociology"],
+    expertise: ["Migration", "Social Justice", "Labor Markets"],
+    totalReviews: 42,
+    avgScore: 4.9,
+    acceptedRate: 75,
+    ethicsFlags: 0,
+    badges: ["FAIR Champion"]
+  },
+  {
+    id: "ed-assoc-002",
+    name: "Prof. Dr. James Thompson",
+    role: "Associate Editor",
+    affiliation: "University of Oxford, UK",
+    specialization: "Political Science & Public Administration",
+    orcid: "0000-0001-5678-4321",
+    assignedSections: ["Political Science & Public Policy"],
+    expertise: ["Public Participation", "Democratic Governance", "Urban Policy"],
+    totalReviews: 88,
+    avgScore: 4.5,
+    acceptedRate: 80,
+    ethicsFlags: 2,
+    badges: ["Fast Reviewer"]
+  }
+]
+
+const editorialBoard: EditorMember[] = [
+  {
+    id: "ed-board-001",
+    name: "Dr. Anna Kowalski",
+    role: "Board Member",
+    affiliation: "Jagiellonian University, Poland",
+    specialization: "History & Cultural Heritage",
+    assignedSections: ["History & Archaeology"],
+    expertise: ["Cultural Studies", "Digital Humanities"],
+  },
+  {
+    id: "ed-board-002",
+    name: "Prof. Dr. Carlos Martinez",
+    role: "Board Member",
+    affiliation: "Autonomous University of Madrid, Spain",
+    specialization: "Economics & Development",
+    assignedSections: ["Economics & Development Studies"],
+    expertise: ["Globalization", "Development Studies"],
+  }
 ]
 
 export default function SocialSciencesPage() {
@@ -71,6 +146,9 @@ export default function SocialSciencesPage() {
       ]}
       sampleArticles={sampleArticles}
       journalSlug="social-sciences-humanities"
+      editorInChief={editorInChief}
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

@@ -16,6 +16,7 @@ export interface Article {
   doi: string
   publishedDate: string
   articleType: "research" | "review" | "methodology"
+  section?: string
   pdfUrl?: string
   isOpenAccess?: boolean
 }

@@ -2,15 +2,36 @@
 
 import { Mail } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useLanguage } from "@/lib/language-context"
 
 export interface EditorMember {
+  id?: string
   name: string
   role: string
   affiliation: string
   specialization: string
   email?: string
   orcid?: string
+  assignedSections?: string[]
+  expertise?: string[]
+  totalReviews?: number
+  avgScore?: number
+  acceptedRate?: number
+  ethicsFlags?: number
+  reviewTimeAvg?: number
+  highQualityRatio?: number
+  percentile?: number
+  badges?: string[]
 }
 
 interface JournalEditorialBoardProps {
@@ -23,44 +44,121 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   
   return (
-    <Card className={featured ? "border-primary/30" : "border-border"}>
-      <CardHeader>
+    <Card className={`border-border hover:border-primary/30 transition-all shadow-xs relative flex flex-col justify-between h-full bg-card ${
+      featured ? "ring-1 ring-primary/45 bg-secondary/5" : ""
+    }`}>
+      <CardHeader className="pb-3">
         <div className="flex items-start gap-4">
-          <div className={`h-14 w-14 rounded-full flex items-center justify-center shrink-0 ${
-            featured ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-          }`}>
-            <span className="text-lg font-bold">{initials}</span>
+          <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+            <span className="text-base">{initials}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-base">{editor.name}</CardTitle>
-            <CardDescription className="text-sm font-medium text-primary mt-0.5">
+            <CardTitle className="text-base font-semibold text-foreground">{editor.name}</CardTitle>
+            <CardDescription className="text-xs font-semibold text-muted-foreground mt-0.5 uppercase tracking-wider">
               {editor.role}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <p className="text-sm text-muted-foreground">{editor.affiliation}</p>
-        <p className="text-sm text-accent mt-1">{editor.specialization}</p>
-        {editor.email && (
-          <a 
-            href={`mailto:${editor.email}`}
-            className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground mt-2 transition-colors"
-          >
-            <Mail className="h-3 w-3 mr-1" />
-            {editor.email}
-          </a>
-        )}
-        {editor.orcid && (
-          <a 
-            href={`https://orcid.org/${editor.orcid}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-xs text-muted-foreground hover:text-foreground mt-1 transition-colors"
-          >
-            ORCID: {editor.orcid}
-          </a>
-        )}
+      
+      <CardContent className="pt-0 flex-1 flex flex-col justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">{editor.affiliation}</p>
+        </div>
+        
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full mt-4 text-xs font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
+              View Editorial Profile
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-border bg-background">
+            <DialogHeader>
+              <div className="flex items-center gap-4 border-b border-border pb-4">
+                <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+                  <span className="text-lg">{initials}</span>
+                </div>
+                <div className="min-w-0 text-left">
+                  <DialogTitle className="text-lg font-bold text-foreground">{editor.name}</DialogTitle>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{editor.role}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{editor.affiliation}</p>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-4 pt-2">
+              <div>
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Specialization</h4>
+                <p className="text-sm text-foreground">{editor.specialization}</p>
+              </div>
+
+              {editor.assignedSections && editor.assignedSections.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Assigned Sections</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {editor.assignedSections.map(sec => (
+                      <Badge key={sec} variant="outline" className="bg-secondary/15 text-secondary-foreground border-secondary/30 text-[11px] px-2 py-0.5 font-normal">
+                        {sec}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {editor.expertise && editor.expertise.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Areas of Expertise</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {editor.expertise.map(exp => (
+                      <Badge key={exp} variant="outline" className="bg-accent/10 text-accent-foreground border-accent/25 text-[11px] px-2 py-0.5 font-normal">
+                        {exp}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {editor.badges && editor.badges.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Recognitions</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {editor.badges.map(b => (
+                      <Badge key={b} variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] px-2 py-0.5 font-semibold uppercase tracking-wider">
+                        {b}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="border-t border-border pt-4 flex flex-col gap-2">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact Information</h4>
+                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-1">
+                  {editor.email && (
+                    <a 
+                      href={`mailto:${editor.email}`}
+                      className="inline-flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Mail className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      {editor.email}
+                    </a>
+                  )}
+                  {editor.orcid && (
+                    <a 
+                      href={`https://orcid.org/${editor.orcid}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <span className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-sm text-[8px] font-bold h-3.5 px-1 mr-1.5">ID</span>
+                      ORCID: {editor.orcid}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
@@ -70,16 +168,117 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   
   return (
-    <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-        <span className="text-sm font-semibold text-primary">{initials}</span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm">{editor.name}</h4>
-        <p className="text-xs text-muted-foreground">{editor.affiliation}</p>
-        <p className="text-xs text-accent mt-0.5">{editor.specialization}</p>
-      </div>
-    </div>
+    <Dialog>
+      <DialogTrigger asChild>
+        <button className="flex items-start text-left w-full gap-4 p-4 rounded-lg bg-muted/20 hover:bg-muted/40 border border-border hover:border-primary/30 transition-all cursor-pointer">
+          <div className="h-10 w-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 font-bold">
+            <span className="text-sm">{initials}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center flex-wrap gap-2">
+              <h4 className="font-semibold text-sm text-foreground">{editor.name}</h4>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">{editor.affiliation}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 italic">{editor.specialization}</p>
+            {editor.expertise && editor.expertise.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {editor.expertise.slice(0, 3).map(exp => (
+                  <Badge key={exp} variant="outline" className="text-[9px] px-1.5 py-0 bg-accent/10 text-accent-foreground border-accent/20">
+                    {exp}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-border bg-background">
+        <DialogHeader>
+          <div className="flex items-center gap-4 border-b border-border pb-4">
+            <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+              <span className="text-lg">{initials}</span>
+            </div>
+            <div className="min-w-0 text-left">
+              <DialogTitle className="text-lg font-bold text-foreground">{editor.name}</DialogTitle>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{editor.role}</p>
+              <p className="text-xs text-muted-foreground mt-1">{editor.affiliation}</p>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-4 pt-2">
+          <div>
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Specialization</h4>
+            <p className="text-sm text-foreground">{editor.specialization}</p>
+          </div>
+
+          {editor.assignedSections && editor.assignedSections.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Assigned Sections</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {editor.assignedSections.map(sec => (
+                  <Badge key={sec} variant="outline" className="bg-secondary/15 text-secondary-foreground border-secondary/30 text-[11px] px-2 py-0.5 font-normal">
+                    {sec}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {editor.expertise && editor.expertise.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Areas of Expertise</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {editor.expertise.map(exp => (
+                  <Badge key={exp} variant="outline" className="bg-accent/10 text-accent-foreground border-accent/25 text-[11px] px-2 py-0.5 font-normal">
+                    {exp}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {editor.badges && editor.badges.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Recognitions</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {editor.badges.map(b => (
+                  <Badge key={b} variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] px-2 py-0.5 font-semibold uppercase tracking-wider">
+                    {b}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="border-t border-border pt-4 flex flex-col gap-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact Information</h4>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 mt-1">
+              {editor.email && (
+                <a 
+                  href={`mailto:${editor.email}`}
+                  className="inline-flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Mail className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                  {editor.email}
+                </a>
+              )}
+              {editor.orcid && (
+                <a 
+                  href={`https://orcid.org/${editor.orcid}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <span className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-sm text-[8px] font-bold h-3.5 px-1 mr-1.5">ID</span>
+                  ORCID: {editor.orcid}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

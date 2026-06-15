@@ -6,12 +6,12 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ArticleList, type Article } from "@/components/article-card"
-import { JournalEditorialBoard } from "@/components/journal-editorial-board"
+import { JournalEditorialBoard, type EditorMember } from "@/components/journal-editorial-board"
 import { useLanguage } from "@/lib/language-context"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 interface JournalPageProps {
   title: string
@@ -23,6 +23,9 @@ interface JournalPageProps {
   sampleArticles: Article[]
   journalSlug: string
   mainHighlights: { title: string; description: string }[]
+  editorInChief?: EditorMember
+  associateEditors?: EditorMember[]
+  editorialBoard?: EditorMember[]
 }
 
 const placeholderEditorInChief = {
@@ -84,8 +87,13 @@ export function JournalPage({
   sampleArticles,
   journalSlug,
   mainHighlights,
+  editorInChief = placeholderEditorInChief,
+  associateEditors = placeholderAssociateEditors,
+  editorialBoard = placeholderEditorialBoard,
 }: JournalPageProps) {
   const { t } = useLanguage()
+
+
 
   const brandThemes: Record<string, { bgColor: string; border: string; text: string; subtext: string; buttonOutline: string; iconBg: string; badge: string }> = {
     "biology": {
@@ -108,24 +116,6 @@ export function JournalPage({
     },
     "medicine": {
       bgColor: "#FFEBEB", // very light red
-      border: "border-[#FAD2D2]",
-      text: "text-rose-950",
-      subtext: "text-rose-900/80",
-      buttonOutline: "border-rose-300 bg-rose-100/30 text-rose-900 hover:bg-rose-100/60",
-      iconBg: "bg-rose-900/10 text-rose-800",
-      badge: "bg-rose-900/10 text-rose-900 border-rose-900/25 shadow-none hover:bg-rose-900/20"
-    },
-    "applied-health-sciences": {
-      bgColor: "#FFEBEB",
-      border: "border-[#FAD2D2]",
-      text: "text-rose-950",
-      subtext: "text-rose-900/80",
-      buttonOutline: "border-rose-300 bg-rose-100/30 text-rose-900 hover:bg-rose-100/60",
-      iconBg: "bg-rose-900/10 text-rose-800",
-      badge: "bg-rose-900/10 text-rose-900 border-rose-900/25 shadow-none hover:bg-rose-900/20"
-    },
-    "medical-research-review": {
-      bgColor: "#FFEBEB",
       border: "border-[#FAD2D2]",
       text: "text-rose-950",
       subtext: "text-rose-900/80",
@@ -170,15 +160,6 @@ export function JournalPage({
       badge: "bg-amber-900/10 text-amber-900 border-amber-900/25 shadow-none hover:bg-amber-900/20"
     },
     "social-sciences-open": {
-      bgColor: "#F5E6CC",
-      border: "border-[#EEDCB8]",
-      text: "text-amber-950",
-      subtext: "text-amber-900/80",
-      buttonOutline: "border-amber-300 bg-amber-100/30 text-amber-900 hover:bg-amber-100/60",
-      iconBg: "bg-amber-900/10 text-amber-800",
-      badge: "bg-amber-900/10 text-amber-900 border-amber-900/25 shadow-none hover:bg-amber-900/20"
-    },
-    "archaeological-frontiers": {
       bgColor: "#F5E6CC",
       border: "border-[#EEDCB8]",
       text: "text-amber-950",
@@ -269,86 +250,129 @@ export function JournalPage({
           </div>
         </section>
 
-        {/* Content Section with Tabs */}
-        <section className="py-16 lg:py-24">
+        {/* Tabbed Layout Container */}
+        <section className="py-12 lg:py-16">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <Tabs defaultValue="about" className="space-y-8">
-              <TabsList className="flex w-full overflow-x-auto whitespace-nowrap lg:inline-flex lg:w-auto bg-muted p-1 h-auto select-none scrollbar-none gap-1 sm:gap-1.5 lg:gap-2">
-                <TabsTrigger value="about" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.about")}</TabsTrigger>
-                <TabsTrigger value="articles" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("articles.title")}</TabsTrigger>
-                <TabsTrigger value="editorial" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.editorialBoard")}</TabsTrigger>
-                <TabsTrigger value="submit" className="flex-1 lg:flex-none text-xs sm:text-sm lg:text-base px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 font-semibold">{t("nav.submitManuscript")}</TabsTrigger>
-              </TabsList>
+            <Tabs defaultValue="about" className="w-full">
+              <div className="flex justify-center border-b border-border pb-6 mb-8">
+                <TabsList className="bg-muted/80 p-1.5 rounded-xl flex flex-wrap justify-center gap-1.5 sm:gap-2 h-auto w-full max-w-3xl">
+                  <TabsTrigger 
+                    value="about" 
+                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                  >
+                    {t("nav.aimsScope")}
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="articles" 
+                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                  >
+                    {t("articles.title")}
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="editorial" 
+                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                  >
+                    {t("nav.editorialBoard")}
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="submit" 
+                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                  >
+                    {t("nav.submitManuscript")}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-              <TabsContent value="about" className="space-y-12">
-                <div className="grid gap-12 lg:grid-cols-2">
+              {/* About & Scope Content */}
+              <TabsContent value="about" className="space-y-16 focus-visible:outline-none animate-in fade-in duration-300">
+                {/* About Section */}
+                <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl font-bold tracking-tight mb-6">{t("journal.about")}</h2>
-                    <div className="prose prose-lg text-muted-foreground">
+                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.about")}</h2>
+                    <div className="prose prose-lg text-muted-foreground max-w-none space-y-4">
                       <p>{description}</p>
-                      <p>
-                        {t("journal.aboutText")}
-                      </p>
+                      <p>{t("journal.aboutText")}</p>
                     </div>
                   </div>
-                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight mb-6">{t("journal.scope")}</h2>
-                    <ul className="grid gap-3">
-                      {scopeAreas.map((area) => (
-                        <li key={area} className="flex items-center gap-3">
-                          <span className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">•</span>
-                          <span className="text-muted-foreground">{area}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-12">
-                  <h3 className="text-xl font-semibold mb-6">{t("journal.sections")}</h3>
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {sectionTopics.map((topic) => (
-                      <Card key={topic} className="border-border">
-                        <CardContent className="text-sm text-muted-foreground">{topic}</CardContent>
+                  
+                  {/* Highlights Grid */}
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {mainHighlights.map((highlight) => (
+                      <Card key={highlight.title} className="border-border">
+                        <CardHeader>
+                          <CardTitle className="text-lg">{highlight.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <CardDescription>{highlight.description}</CardDescription>
+                        </CardContent>
                       </Card>
                     ))}
                   </div>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {mainHighlights.map((highlight) => (
-                    <Card key={highlight.title} className="border-border">
-                      <CardHeader>
-                        <CardTitle className="text-lg">{highlight.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <CardDescription>{highlight.description}</CardDescription>
-                      </CardContent>
-                    </Card>
-                  ))}
+                {/* Scope & Sections */}
+                <div className="pt-12 border-t border-border space-y-10">
+                  <div className="grid gap-12 lg:grid-cols-2">
+                    <div>
+                      <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.scope")}</h2>
+                      <ul className="grid gap-3">
+                        {scopeAreas.map((area) => (
+                          <li key={area} className="flex items-center gap-3">
+                            <span className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold shrink-0">•</span>
+                            <span className="text-muted-foreground">{area}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.sections")}</h3>
+                      <div className="grid gap-3 sm:grid-cols-1">
+                        {sectionTopics.map((topic) => (
+                          <Card key={topic} className="border-border bg-slate-50/50 dark:bg-slate-900/30">
+                            <CardContent className="py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{topic}</CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="articles" className="space-y-12">
-                <ArticleList articles={sampleArticles} journalSlug={journalSlug} />
+              {/* Articles Content */}
+              <TabsContent value="articles" className="focus-visible:outline-none animate-in fade-in duration-300">
+                <div className="space-y-8">
+                  <div>
+                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">{t("articles.title")}</h2>
+                    <p className="text-muted-foreground mb-6">Explore the latest high-impact peer-reviewed research articles published open-access in this journal.</p>
+                  </div>
+                  <ArticleList articles={sampleArticles} journalSlug={journalSlug} />
+                </div>
               </TabsContent>
 
-              <TabsContent value="editorial" className="space-y-12">
-                <JournalEditorialBoard
-                  editorInChief={placeholderEditorInChief}
-                  associateEditors={placeholderAssociateEditors}
-                  editorialBoard={placeholderEditorialBoard}
-                />
+              {/* Editorial Board Content */}
+              <TabsContent value="editorial" className="focus-visible:outline-none animate-in fade-in duration-300">
+                <div className="space-y-8">
+                  <div>
+                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">{t("nav.editorialBoard")}</h2>
+                    <p className="text-muted-foreground mb-6">Our distinguished editorial board members are leading experts in their fields, overseeing our rigorous peer review and ensuring high publication standards.</p>
+                  </div>
+                  <JournalEditorialBoard
+                    editorInChief={editorInChief}
+                    associateEditors={associateEditors}
+                    editorialBoard={editorialBoard}
+                  />
+                </div>
               </TabsContent>
 
-              <TabsContent value="submit" className="space-y-12">
-                <div className="rounded-3xl border border-border bg-muted/50 p-8">
+              {/* Submit Content */}
+              <TabsContent value="submit" className="focus-visible:outline-none animate-in fade-in duration-300">
+                <div className="rounded-3xl border border-border bg-muted/40 p-8 lg:p-12">
                   <h2 className="text-3xl font-bold tracking-tight mb-4">{t("journal.submitTo")} {title}</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <p className="text-muted-foreground text-lg mb-8 max-w-2xl">
                     {t("journal.submitText")}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Button size="lg" variant="accent" asChild>
+                    <Button size="lg" variant="accent" asChild className="font-semibold shadow-md shadow-accent/15">
                       <Link href="/submit">{t("journal.startSubmission")}</Link>
                     </Button>
                     <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
