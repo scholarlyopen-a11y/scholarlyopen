@@ -39,39 +39,8 @@ const sampleArticles: Article[] = [
   },
 ]
 
-const editorInChief: EditorMember = {
-  id: "ed-eic-001",
-  name: "Prof. Dr. Jane Doe",
-  role: "Editor-in-Chief",
-  affiliation: "Technical University of Munich, Germany",
-  specialization: "AI Ethics, Governance, and Research Methodology",
-  email: "jane.doe@scholarlyopen.org",
-  orcid: "0000-0002-1234-5678",
-  assignedSections: ["Political Science & Public Policy", "Sociology"],
-  expertise: ["AI Governance", "Data Privacy", "Responsible Tech"],
-  totalReviews: 124,
-  avgScore: 4.7,
-  acceptedRate: 89,
-  ethicsFlags: 7,
-  badges: ["Gold Editor", "Rapid Decision Maker"]
-}
 
 const associateEditors: EditorMember[] = [
-  {
-    id: "ed-assoc-001",
-    name: "Dr. Sofia Martínez",
-    role: "Associate Editor",
-    affiliation: "Sorbonne University, France",
-    specialization: "Sociology & Social Policy",
-    orcid: "0000-0003-9876-5432",
-    assignedSections: ["Sociology"],
-    expertise: ["Migration", "Social Justice", "Labor Markets"],
-    totalReviews: 42,
-    avgScore: 4.9,
-    acceptedRate: 75,
-    ethicsFlags: 0,
-    badges: ["FAIR Champion"]
-  },
   {
     id: "ed-assoc-002",
     name: "Prof. Dr. James Thompson",
@@ -146,7 +115,6 @@ export default function SocialSciencesPage() {
       ]}
       sampleArticles={sampleArticles}
       journalSlug="social-sciences-humanities"
-      editorInChief={editorInChief}
       associateEditors={associateEditors}
       editorialBoard={editorialBoard}
     />
