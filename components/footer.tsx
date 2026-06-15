@@ -149,6 +149,8 @@ export function Footer() {
       { name: t("nav.openAccess"), href: "/open-access" },
       { name: t("nav.publicationEthics"), href: "/publication-ethics" },
       { name: t("footer.archiving"), href: "/archiving-indexing" },
+      { name: t("footer.privacy"), href: "/privacy" },
+      { name: t("footer.impressum"), href: "/impressum" },
     ],
   }
 
@@ -304,22 +306,14 @@ export function Footer() {
 
         <div className="mt-12 border-t border-[var(--primary-foreground)]/20 pt-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-3 text-sm text-white/60">
+            <div className="text-sm text-white/60">
               <p>
                 &copy; {new Date().getFullYear()} {t("footer.copyright")}
               </p>
-              <div className="flex flex-wrap items-center gap-3 text-white/60 text-xs">
-                <CcByLogo />
-                <span>{t("footer.ccbyStatement")}</span>
-              </div>
             </div>
-            <div className="flex items-center gap-6 text-sm text-white/60">
-              <Link href="/privacy" className="hover:text-white transition-colors">
-                {t("footer.privacy")}
-              </Link>
-              <Link href="/impressum" className="hover:text-white transition-colors">
-                {t("footer.impressum")}
-              </Link>
+            <div className="flex flex-wrap items-center gap-3 text-white/60 text-xs">
+              <CcByLogo />
+              <span>{t("footer.ccbyStatement")}</span>
             </div>
           </div>
         </div>
