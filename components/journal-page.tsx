@@ -318,28 +318,28 @@ export function JournalPage({
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <Tabs defaultValue="about" className="w-full">
               <div className="flex justify-center border-b border-border pb-6 mb-8">
-                <TabsList className="bg-muted/80 p-1.5 rounded-xl flex flex-wrap justify-center gap-1.5 sm:gap-2 h-auto w-full max-w-3xl">
+                <TabsList className="grid grid-cols-2 md:grid-cols-4 bg-muted/80 p-1.5 rounded-xl gap-2 h-auto w-full max-w-3xl">
                   <TabsTrigger 
                     value="about" 
-                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
                   >
                     {t("nav.aimsScope")}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="articles" 
-                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
                   >
                     {t("articles.title")}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="editorial" 
-                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
                   >
                     {t("nav.editorialBoard")}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="submit" 
-                    className="flex-1 min-w-[120px] py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5"
+                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
                   >
                     {t("nav.submitManuscript")}
                   </TabsTrigger>
