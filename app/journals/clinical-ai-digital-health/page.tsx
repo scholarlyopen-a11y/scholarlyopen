@@ -57,7 +57,7 @@ export default function ClinicalAIPage() {
         { title: "Interdisciplinary Focus", description: "Bridges the gap between computer science innovators and practicing clinicians." },
       ]}
       sampleArticles={sampleArticles}
-      journalSlug="clinical-ai"
+      journalSlug="clinical-ai-digital-health"
     />
   )
 }

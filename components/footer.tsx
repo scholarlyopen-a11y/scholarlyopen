@@ -127,12 +127,12 @@ export function Footer() {
       { name: t("journals.env.title"), href: "/journals/environmental-science" },
     ],
     frontiersJournals: [
-      { name: t("journals.clinical-ai.title"), href: "/journals/clinical-ai" },
-      { name: t("journals.ai-safety.title"), href: "/journals/ai-safety" },
-      { name: t("journals.decarbonization.title"), href: "/journals/decarbonization" },
+      { name: t("journals.clinical-ai.title"), href: "/journals/clinical-ai-digital-health" },
+      { name: t("journals.ai-safety.title"), href: "/journals/ai-safety-governance" },
+      { name: t("journals.decarbonization.title"), href: "/journals/decarbonization-carbon-tech" },
       { name: t("journals.quantum-engineering.title"), href: "/journals/quantum-engineering" },
-      { name: t("journals.synthetic-biology.title"), href: "/journals/synthetic-biology" },
-      { name: t("journals.space-resources.title"), href: "/journals/space-resources" },
+      { name: t("journals.synthetic-biology.title"), href: "/journals/synthetic-biology-bio-design" },
+      { name: t("journals.space-resources.title"), href: "/journals/space-resources-orbital-economy" },
     ],
     forAuthors: [
       { name: t("nav.authorGuidelines"), href: "/author-guidelines" },

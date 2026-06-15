@@ -55,7 +55,7 @@ export default function AISafetyPage() {
         { title: "Fast-Track Review", description: "Ensures rapid publication cycles to keep pace with state-of-the-art AI advancements." },
       ]}
       sampleArticles={sampleArticles}
-      journalSlug="ai-safety"
+      journalSlug="ai-safety-governance"
     />
   )
 }

@@ -56,7 +56,7 @@ export default function DecarbonizationPage() {
         { title: "Cross-Sector Bridge", description: "Connects chemical engineers, environmental scientists, and climate policymakers." },
       ]}
       sampleArticles={sampleArticles}
-      journalSlug="decarbonization"
+      journalSlug="decarbonization-carbon-tech"
     />
   )
 }

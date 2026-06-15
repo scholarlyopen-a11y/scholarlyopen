@@ -166,7 +166,7 @@ export function JournalPage({
       iconBg: "bg-amber-900/10 text-amber-800",
       badge: "bg-amber-900/10 text-amber-900 border-amber-900/25 shadow-none hover:bg-amber-900/20"
     },
-    "clinical-ai": {
+    "clinical-ai-digital-health": {
       bgColor: "#EEF2FF", // very light indigo
       border: "border-[#C7D2FE]",
       text: "text-indigo-950",
@@ -175,7 +175,7 @@ export function JournalPage({
       iconBg: "bg-indigo-500/10 text-indigo-600",
       badge: "bg-indigo-900/10 text-indigo-900 border-indigo-900/25 shadow-none hover:bg-indigo-900/20"
     },
-    "ai-safety": {
+    "ai-safety-governance": {
       bgColor: "#F5F3FF", // very light purple
       border: "border-[#DDD6FE]",
       text: "text-purple-950",
@@ -184,7 +184,7 @@ export function JournalPage({
       iconBg: "bg-purple-500/10 text-purple-600",
       badge: "bg-purple-900/10 text-purple-900 border-purple-900/25 shadow-none hover:bg-purple-900/20"
     },
-    "decarbonization": {
+    "decarbonization-carbon-tech": {
       bgColor: "#F0FDFA", // very light teal
       border: "border-[#CCFBF1]",
       text: "text-teal-950",
@@ -202,7 +202,7 @@ export function JournalPage({
       iconBg: "bg-cyan-500/10 text-cyan-600",
       badge: "bg-cyan-900/10 text-cyan-900 border-cyan-900/25 shadow-none hover:bg-cyan-900/20"
     },
-    "synthetic-biology": {
+    "synthetic-biology-bio-design": {
       bgColor: "#F0FDF4", // very light emerald
       border: "border-[#DCFCE7]",
       text: "text-emerald-950",
@@ -211,7 +211,7 @@ export function JournalPage({
       iconBg: "bg-emerald-500/10 text-emerald-600",
       badge: "bg-emerald-900/10 text-emerald-900 border-emerald-900/25 shadow-none hover:bg-emerald-900/20"
     },
-    "space-resources": {
+    "space-resources-orbital-economy": {
       bgColor: "#F0F9FF", // very light sky blue
       border: "border-[#E0F2FE]",
       text: "text-sky-950",

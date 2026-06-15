@@ -55,7 +55,7 @@ export default function SpaceResourcesPage() {
         { title: "Open Flight Data", description: "Encourages the sharing of orbital telemetry, simulated environmental datasets, and regolith mechanical specs." },
       ]}
       sampleArticles={sampleArticles}
-      journalSlug="space-resources"
+      journalSlug="space-resources-orbital-economy"
     />
   )
 }

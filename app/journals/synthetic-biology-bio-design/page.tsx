@@ -56,7 +56,7 @@ export default function SyntheticBiologyPage() {
         { title: "Rapid Turnaround", description: "Efficient and expert peer review by active bio-design practitioners." },
       ]}
       sampleArticles={sampleArticles}
-      journalSlug="synthetic-biology"
+      journalSlug="synthetic-biology-bio-design"
     />
   )
 }
