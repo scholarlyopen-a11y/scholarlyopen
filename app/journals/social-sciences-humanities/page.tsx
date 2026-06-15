@@ -1,7 +1,7 @@
 import { UsersRound } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import type { Article } from "@/components/article-card"
-import type { EditorMember } from "@/components/journal-editorial-board"
+
 
 const sampleArticles: Article[] = [
   {
@@ -40,45 +40,6 @@ const sampleArticles: Article[] = [
 ]
 
 
-const associateEditors: EditorMember[] = [
-  {
-    id: "ed-assoc-002",
-    name: "Prof. Dr. James Thompson",
-    role: "Associate Editor",
-    affiliation: "University of Oxford, UK",
-    specialization: "Political Science & Public Administration",
-    orcid: "0000-0001-5678-4321",
-    assignedSections: ["Political Science & Public Policy"],
-    expertise: ["Public Participation", "Democratic Governance", "Urban Policy"],
-    totalReviews: 88,
-    avgScore: 4.5,
-    acceptedRate: 80,
-    ethicsFlags: 2,
-    badges: ["Fast Reviewer"]
-  }
-]
-
-const editorialBoard: EditorMember[] = [
-  {
-    id: "ed-board-001",
-    name: "Dr. Anna Kowalski",
-    role: "Board Member",
-    affiliation: "Jagiellonian University, Poland",
-    specialization: "History & Cultural Heritage",
-    assignedSections: ["History & Archaeology"],
-    expertise: ["Cultural Studies", "Digital Humanities"],
-  },
-  {
-    id: "ed-board-002",
-    name: "Prof. Dr. Carlos Martinez",
-    role: "Board Member",
-    affiliation: "Autonomous University of Madrid, Spain",
-    specialization: "Economics & Development",
-    assignedSections: ["Economics & Development Studies"],
-    expertise: ["Globalization", "Development Studies"],
-  }
-]
-
 export default function SocialSciencesPage() {
   return (
     <JournalPage
@@ -115,8 +76,6 @@ export default function SocialSciencesPage() {
       ]}
       sampleArticles={sampleArticles}
       journalSlug="social-sciences-humanities"
-      associateEditors={associateEditors}
-      editorialBoard={editorialBoard}
     />
   )
 }
