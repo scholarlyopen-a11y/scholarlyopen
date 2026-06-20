@@ -40,7 +40,8 @@ const associateEditors = [
     ],
     expertise: [
       "Polymer Chemistry",
-      "Sustainable Dyeing",
+      "Green Chemistry",
+      "Sustainable Processing",
       "Molecular Modeling (DFT)",
       "Solar Cells (DSSCs)",
       "Surface Chemistry"
