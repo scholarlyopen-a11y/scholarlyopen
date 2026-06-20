@@ -27,7 +27,7 @@ const sampleArticles: Article[] = [
 
 const associateEditors = [
   {
-    name: "Dr. Mohamed Ramadan Eletmany",
+    name: "Mohamed Ramadan Eletmany",
     role: "Associate Editor",
     affiliation: "South Valley University, Egypt",
     specialization: "Polymer chemistry, sustainable textile dyeing, molecular modeling (DFT), and surface modifications.",
