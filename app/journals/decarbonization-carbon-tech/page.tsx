@@ -25,6 +25,30 @@ const sampleArticles: Article[] = [
   },
 ]
 
+const associateEditors = [
+  {
+    name: "Dr. Mohamed Ramadan Eletmany",
+    role: "Associate Editor",
+    affiliation: "South Valley University, Egypt",
+    specialization: "Polymer chemistry, sustainable textile dyeing, molecular modeling (DFT), and surface modifications.",
+    email: "mohamed.eletmany@sci.svu.edu.eg",
+    orcid: "0000-0003-4868-4678",
+    imageUrl: "/images/editors/mohamed-eletmany.jpg",
+    assignedSections: [
+      "Carbon Utilization & Conversion",
+      "Industrial Decarbonization"
+    ],
+    expertise: [
+      "Polymer Chemistry",
+      "Sustainable Dyeing",
+      "Molecular Modeling (DFT)",
+      "Solar Cells (DSSCs)",
+      "Surface Chemistry"
+    ],
+    badges: ["Founding Member"]
+  }
+]
+
 export default function DecarbonizationPage() {
   return (
     <JournalPage
@@ -57,6 +81,7 @@ export default function DecarbonizationPage() {
       ]}
       sampleArticles={sampleArticles}
       journalSlug="decarbonization-carbon-tech"
+      associateEditors={associateEditors}
     />
   )
 }

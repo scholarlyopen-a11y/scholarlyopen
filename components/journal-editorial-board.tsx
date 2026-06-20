@@ -20,6 +20,7 @@ export interface EditorMember {
   role: string
   affiliation: string
   specialization: string
+  imageUrl?: string
   email?: string
   orcid?: string
   assignedSections?: string[]
@@ -49,9 +50,17 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
     }`}>
       <CardHeader className="pb-3">
         <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
-            <span className="text-base">{initials}</span>
-          </div>
+          {editor.imageUrl ? (
+            <img 
+              src={editor.imageUrl} 
+              alt={editor.name} 
+              className="h-12 w-12 rounded-full object-cover shrink-0 border border-border" 
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+              <span className="text-base">{initials}</span>
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <CardTitle className="text-base font-semibold text-foreground">{editor.name}</CardTitle>
             <CardDescription className="text-xs font-semibold text-muted-foreground mt-0.5 uppercase tracking-wider">
@@ -75,9 +84,17 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
           <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-border bg-background">
             <DialogHeader>
               <div className="flex items-center gap-4 border-b border-border pb-4">
-                <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
-                  <span className="text-lg">{initials}</span>
-                </div>
+                {editor.imageUrl ? (
+                  <img 
+                    src={editor.imageUrl} 
+                    alt={editor.name} 
+                    className="h-14 w-14 rounded-full object-cover shrink-0 border border-border" 
+                  />
+                ) : (
+                  <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+                    <span className="text-lg">{initials}</span>
+                  </div>
+                )}
                 <div className="min-w-0 text-left">
                   <DialogTitle className="text-lg font-bold text-foreground">{editor.name}</DialogTitle>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{editor.role}</p>
@@ -171,9 +188,17 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
     <Dialog>
       <DialogTrigger asChild>
         <button className="flex items-start text-left w-full gap-4 p-4 rounded-lg bg-muted/20 hover:bg-muted/40 border border-border hover:border-primary/30 transition-all cursor-pointer">
-          <div className="h-10 w-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 font-bold">
-            <span className="text-sm">{initials}</span>
-          </div>
+          {editor.imageUrl ? (
+            <img 
+              src={editor.imageUrl} 
+              alt={editor.name} 
+              className="h-10 w-10 rounded-full object-cover shrink-0 border border-border" 
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 font-bold">
+              <span className="text-sm">{initials}</span>
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center flex-wrap gap-2">
               <h4 className="font-semibold text-sm text-foreground">{editor.name}</h4>
@@ -195,9 +220,17 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-border bg-background">
         <DialogHeader>
           <div className="flex items-center gap-4 border-b border-border pb-4">
-            <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
-              <span className="text-lg">{initials}</span>
-            </div>
+            {editor.imageUrl ? (
+              <img 
+                src={editor.imageUrl} 
+                alt={editor.name} 
+                className="h-14 w-14 rounded-full object-cover shrink-0 border border-border" 
+              />
+            ) : (
+              <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+                <span className="text-lg">{initials}</span>
+              </div>
+            )}
             <div className="min-w-0 text-left">
               <DialogTitle className="text-lg font-bold text-foreground">{editor.name}</DialogTitle>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{editor.role}</p>
