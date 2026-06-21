@@ -1,9 +1,11 @@
 "use client"
 
-import { Mail } from "lucide-react"
+import { Mail, ExternalLink } from "lucide-react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { slugify } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
@@ -127,9 +129,11 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Areas of Expertise</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {editor.expertise.map(exp => (
-                      <Badge key={exp} variant="outline" className="bg-accent/10 text-accent-foreground border-accent/25 text-[11px] px-2 py-0.5 font-normal">
-                        {exp}
-                      </Badge>
+                      <Link href={`/topics/${slugify(exp)}`} key={exp}>
+                        <Badge variant="outline" className="bg-accent/10 text-accent-foreground border-accent/25 text-[11px] px-2 py-0.5 font-normal hover:bg-accent/20 transition-colors cursor-pointer">
+                          {exp}
+                        </Badge>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -173,6 +177,17 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                   )}
                 </div>
               </div>
+
+              {editor.slug && (
+                <div className="border-t border-border pt-4 mt-4">
+                  <Button size="sm" className="w-full text-xs font-semibold" asChild>
+                    <Link href={`/editors/${editor.slug}`}>
+                      View Full Profile Page
+                      <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -263,9 +278,11 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Areas of Expertise</h4>
               <div className="flex flex-wrap gap-1.5">
                 {editor.expertise.map(exp => (
-                  <Badge key={exp} variant="outline" className="bg-accent/10 text-accent-foreground border-accent/25 text-[11px] px-2 py-0.5 font-normal">
-                    {exp}
-                  </Badge>
+                  <Link href={`/topics/${slugify(exp)}`} key={exp}>
+                    <Badge variant="outline" className="bg-accent/10 text-accent-foreground border-accent/25 text-[11px] px-2 py-0.5 font-normal hover:bg-accent/20 transition-colors cursor-pointer">
+                      {exp}
+                    </Badge>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -309,6 +326,17 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
               )}
             </div>
           </div>
+
+          {editor.slug && (
+            <div className="border-t border-border pt-4 mt-4 w-full">
+              <Button size="sm" className="w-full text-xs font-semibold" asChild>
+                <Link href={`/editors/${editor.slug}`}>
+                  View Full Profile Page
+                  <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

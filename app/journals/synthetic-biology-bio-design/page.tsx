@@ -1,29 +1,6 @@
 import { Dna } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
-import type { Article } from "@/components/article-card"
-
-const sampleArticles: Article[] = [
-  {
-    id: "syn-2026-001",
-    title: "Enzymatic Synthesis of Bio-Polyesters in Cell-Free Systems: Optimizing Yield and Crystallinity",
-    authors: ["Dr. Hannah Schmidt", "Prof. Jean-Marc Petit"],
-    abstract: "This article introduces a cell-free enzymatic cascade for producing sustainable polyesters, bypassing cellular toxicity limits and optimizing polymer length.",
-    keywords: ["Cell-Free Systems", "Enzymatic Synthesis", "Bio-Polyesters", "Biomaterials"],
-    doi: "10.12345/syn.2026.001",
-    publishedDate: "2026-03-05",
-    articleType: "research",
-  },
-  {
-    id: "syn-2026-002",
-    title: "Precision Gene Editing of Senescent Human Fibroblasts via CRISPR-Cas12a Ribonucleoproteins",
-    authors: ["Dr. Clara Vanhoutte", "Dr. Alexander Thorne"],
-    abstract: "We evaluate transfection parameters for editing senescent cells in vitro, achieving high target-site accuracy with zero off-target insertions.",
-    keywords: ["CRISPR-Cas12a", "Cellular Senescence", "Gene Editing", "Senolytics"],
-    doi: "10.12345/syn.2026.002",
-    publishedDate: "2026-05-12",
-    articleType: "research",
-  },
-]
+import { articles } from "@/lib/data/articles"
 
 export default function SyntheticBiologyPage() {
   return (
@@ -55,7 +32,7 @@ export default function SyntheticBiologyPage() {
         { title: "Industry & Translation", description: "Bridges basic synthetic biology and industrial biomanufacturing applications." },
         { title: "Rapid Turnaround", description: "Efficient and expert peer review by active bio-design practitioners." },
       ]}
-      sampleArticles={sampleArticles}
+      sampleArticles={articles.filter(a => a.journalSlug === "synthetic-biology-bio-design")}
       journalSlug="synthetic-biology-bio-design"
     />
   )

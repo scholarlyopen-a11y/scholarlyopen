@@ -11,7 +11,6 @@ import { Footer } from "@/components/footer"
 import { ArticleList, type Article } from "@/components/article-card"
 import { JournalEditorialBoard, type EditorMember } from "@/components/journal-editorial-board"
 import { useLanguage } from "@/lib/language-context"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 interface JournalPageProps {
   title: string
@@ -232,7 +231,7 @@ export function JournalPage({
     badge: "bg-slate-950/10 text-slate-950 border-slate-900/15 shadow-none hover:bg-slate-950/20"
   }
 
-  const currentBrandTheme = brandThemes[journalSlug] || defaultTheme
+  const currentBrandTheme = brandThemes["biology"]
 
   const stats = [
     { label: "Average Review Time", value: "4-8 weeks" },
@@ -257,20 +256,20 @@ export function JournalPage({
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1">
-        {/* Dynamic Branded Header - Styled in Pista Green (Biology Theme) */}
+        {/* Dynamic Branded Header - Styled in correct custom brand colors */}
         <section 
-          className={`relative overflow-hidden ${brandThemes['biology'].text} border-b ${brandThemes['biology'].border}`}
-          style={{ backgroundColor: brandThemes['biology'].bgColor }}
+          className={`relative overflow-hidden ${currentBrandTheme.text} border-b ${currentBrandTheme.border}`}
+          style={{ backgroundColor: currentBrandTheme.bgColor }}
         >
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
             <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-4xl flex flex-col gap-1">
                 {subtitle && (
-                  <span className={`text-xs font-bold uppercase tracking-widest ${brandThemes['biology'].subtext} opacity-85`}>
+                  <span className={`text-xs font-bold uppercase tracking-widest ${currentBrandTheme.subtext} opacity-85`}>
                     {subtitle}
                   </span>
                 )}
-                <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-balance leading-tight">
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl text-balance leading-tight">
                   {mainTitle}
                 </h1>
               </div>
@@ -280,11 +279,11 @@ export function JournalPage({
                 </div>
                 <div className="min-w-0">
                   <Badge className="bg-accent text-accent-foreground border-0 font-bold shadow-none">Gold OA</Badge>
-                  <div className={`mt-2 whitespace-nowrap text-sm ${brandThemes['biology'].subtext}`}>ISSN: requested</div>
+                  <div className={`mt-2 whitespace-nowrap text-sm ${currentBrandTheme.subtext}`}>ISSN: requested</div>
                 </div>
               </div>
             </div>
-            <p className={`mt-6 text-xl max-w-3xl leading-relaxed ${brandThemes['biology'].subtext}`}>{heroDescription}</p>
+            <p className={`mt-4 text-base sm:text-lg max-w-3xl leading-relaxed ${currentBrandTheme.subtext}`}>{heroDescription}</p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button size="lg" variant="accent" asChild className="font-semibold shadow-md shadow-accent/15">
                 <Link href="/submit">
@@ -313,144 +312,106 @@ export function JournalPage({
           </div>
         </section>
 
-        {/* Tabbed Layout Container */}
-        <section className="py-12 lg:py-16">
-          <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <Tabs defaultValue="about" className="w-full">
-              <div className="flex justify-center border-b border-border pb-6 mb-8">
-                <TabsList className="grid grid-cols-2 md:grid-cols-4 bg-muted/80 p-1.5 rounded-xl gap-2 h-auto w-full max-w-3xl">
-                  <TabsTrigger 
-                    value="about" 
-                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
-                  >
-                    {t("nav.aimsScope")}
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="articles" 
-                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
-                  >
-                    {t("articles.title")}
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="editorial" 
-                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
-                  >
-                    {t("nav.editorialBoard")}
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="submit" 
-                    className="h-11 md:h-9 py-2 px-1 rounded-lg text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted-foreground/5 text-center leading-tight whitespace-normal md:whitespace-nowrap"
-                  >
-                    {t("nav.submitManuscript")}
-                  </TabsTrigger>
-                </TabsList>
+        {/* Main Content Layout - Scrollable Sections */}
+        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 space-y-24">
+          
+          {/* Section 1: Aims & Scope */}
+          <section className="space-y-12 animate-in fade-in duration-300">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.about")}</h2>
+              <div className="prose prose-lg text-muted-foreground max-w-none space-y-4">
+                <p>{description}</p>
+                <p>{t("journal.aboutText")}</p>
               </div>
+            </div>
+            
+            {/* Highlights Grid */}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {mainHighlights.map((highlight) => (
+                <Card key={highlight.title} className="border-border hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{highlight.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription>{highlight.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-              {/* About & Scope Content */}
-              <TabsContent value="about" className="space-y-16 focus-visible:outline-none animate-in fade-in duration-300">
-                {/* About Section */}
-                <div className="space-y-8">
-                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.about")}</h2>
-                    <div className="prose prose-lg text-muted-foreground max-w-none space-y-4">
-                      <p>{description}</p>
-                      <p>{t("journal.aboutText")}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Highlights Grid */}
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {mainHighlights.map((highlight) => (
-                      <Card key={highlight.title} className="border-border">
-                        <CardHeader>
-                          <CardTitle className="text-lg">{highlight.title}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <CardDescription>{highlight.description}</CardDescription>
-                        </CardContent>
-                      </Card>
+            {/* Scope Areas & Sections Topics */}
+            <div className="pt-12 border-t border-border space-y-10">
+              <div className="grid gap-12 lg:grid-cols-2">
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.scope")}</h3>
+                  <ul className="grid gap-3">
+                    {scopeAreas.map((area) => (
+                      <li key={area} className="flex items-center gap-3">
+                        <span className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold shrink-0">•</span>
+                        <span className="text-muted-foreground">{area}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.sections")}</h3>
+                  <div className="flex flex-wrap gap-2.5">
+                    {sectionTopics.map((topic) => (
+                      <Badge 
+                        key={topic} 
+                        variant="secondary" 
+                        className="bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-sm font-medium px-4 py-2 rounded-full border border-slate-200/50 dark:border-slate-700/50 shadow-sm transition-all duration-300 hover:scale-[1.02] cursor-default"
+                      >
+                        {topic}
+                      </Badge>
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
 
-                {/* Scope & Sections */}
-                <div className="pt-12 border-t border-border space-y-10">
-                  <div className="grid gap-12 lg:grid-cols-2">
-                    <div>
-                      <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.scope")}</h2>
-                      <ul className="grid gap-3">
-                        {scopeAreas.map((area) => (
-                          <li key={area} className="flex items-center gap-3">
-                            <span className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold shrink-0">•</span>
-                            <span className="text-muted-foreground">{area}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.sections")}</h3>
-                      <div className="flex flex-wrap gap-2.5">
-                        {sectionTopics.map((topic) => (
-                          <Badge 
-                            key={topic} 
-                            variant="secondary" 
-                            className="bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-sm font-medium px-4 py-2 rounded-full border border-slate-200/50 dark:border-slate-700/50 shadow-sm transition-all duration-300 hover:scale-[1.02] cursor-default"
-                          >
-                            {topic}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
+          {/* Section 2: Editorial Board */}
+          <section className="pt-16 border-t border-border space-y-10 animate-in fade-in duration-300">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">{t("nav.editorialBoard")}</h2>
+              <p className="text-muted-foreground">Our distinguished editorial board members are leading experts in their fields, overseeing our rigorous peer review and ensuring high publication standards.</p>
+            </div>
+            <JournalEditorialBoard
+              editorInChief={editorInChief}
+              associateEditors={associateEditors}
+              editorialBoard={editorialBoard}
+            />
+          </section>
 
-              {/* Articles Content */}
-              <TabsContent value="articles" className="focus-visible:outline-none animate-in fade-in duration-300">
-                <div className="space-y-8">
-                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">{t("articles.title")}</h2>
-                    <p className="text-muted-foreground mb-6">Explore the latest high-impact peer-reviewed research articles published open-access in this journal.</p>
-                  </div>
-                  <ArticleList articles={sampleArticles} journalSlug={journalSlug} />
-                </div>
-              </TabsContent>
+          {/* Section 3: Latest Articles */}
+          <section className="pt-16 border-t border-border space-y-10 animate-in fade-in duration-300">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">{t("articles.title")}</h2>
+              <p className="text-muted-foreground">Explore the latest high-impact peer-reviewed research articles published open-access in this journal.</p>
+            </div>
+            <ArticleList articles={sampleArticles} journalSlug={journalSlug} />
+          </section>
 
-              {/* Editorial Board Content */}
-              <TabsContent value="editorial" className="focus-visible:outline-none animate-in fade-in duration-300">
-                <div className="space-y-8">
-                  <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">{t("nav.editorialBoard")}</h2>
-                    <p className="text-muted-foreground mb-6">Our distinguished editorial board members are leading experts in their fields, overseeing our rigorous peer review and ensuring high publication standards.</p>
-                  </div>
-                  <JournalEditorialBoard
-                    editorInChief={editorInChief}
-                    associateEditors={associateEditors}
-                    editorialBoard={editorialBoard}
-                  />
-                </div>
-              </TabsContent>
+          {/* Section 4: Manuscript Submission CTA */}
+          <section className="pt-16 border-t border-border animate-in fade-in duration-300">
+            <div className="rounded-3xl border border-border bg-muted/40 p-8 lg:p-12">
+              <h2 className="text-3xl font-bold tracking-tight mb-4">{t("journal.submitTo")} {mainTitle}</h2>
+              <p className="text-muted-foreground text-lg mb-8 max-w-2xl">
+                {t("journal.submitText")}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" variant="accent" asChild className="font-semibold shadow-md shadow-accent/15">
+                  <Link href="/submit">{t("journal.startSubmission")}</Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                  <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
+                </Button>
+              </div>
+            </div>
+          </section>
 
-              {/* Submit Content */}
-              <TabsContent value="submit" className="focus-visible:outline-none animate-in fade-in duration-300">
-                <div className="rounded-3xl border border-border bg-muted/40 p-8 lg:p-12">
-                  <h2 className="text-3xl font-bold tracking-tight mb-4">{t("journal.submitTo")} {mainTitle}</h2>
-                  <p className="text-muted-foreground text-lg mb-8 max-w-2xl">
-                    {t("journal.submitText")}
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Button size="lg" variant="accent" asChild className="font-semibold shadow-md shadow-accent/15">
-                      <Link href="/submit">{t("journal.startSubmission")}</Link>
-                    </Button>
-                    <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                      <Link href="/author-guidelines">{t("cta.guidelines")}</Link>
-                    </Button>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </section>
+        </div>
       </main>
       <Footer />
     </div>

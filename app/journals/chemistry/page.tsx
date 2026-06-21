@@ -1,39 +1,6 @@
 import { Beaker } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
-import type { Article } from "@/components/article-card"
-
-const sampleArticles: Article[] = [
-  {
-    id: "chem-2025-001",
-    title: "Catalytic Conversion of Biomass-Derived Feedstocks into Sustainable Chemicals",
-    authors: ["Dr. Elena Novak", "Prof. Martin Klein"],
-    abstract: "This work presents an efficient catalytic process for transforming biomass-derived substrates into value-added chemicals with reduced energy consumption.",
-    keywords: ["Catalysis", "Sustainable chemistry", "Biomass", "Green chemistry"],
-    doi: "10.12345/chem.2025.001",
-    publishedDate: "2025-01-30",
-    articleType: "research",
-  },
-  {
-    id: "chem-2025-002",
-    title: "Nanostructured Materials for Next-Generation Energy Storage",
-    authors: ["Dr. Aisha Khatri", "Dr. Peter van Dijk"],
-    abstract: "We design and characterize nanostructured electrode materials that enable enhanced charge density and lifetime in high-performance energy storage devices.",
-    keywords: ["Nanomaterials", "Energy storage", "Materials chemistry", "Nanotechnology"],
-    doi: "10.12345/chem.2025.002",
-    publishedDate: "2025-02-18",
-    articleType: "research",
-  },
-  {
-    id: "chem-2025-003",
-    title: "Computational Chemistry for Predicting Reaction Pathways in Sustainable Synthesis",
-    authors: ["Prof. Dr. Mei Lin", "Dr. Christoph Bauer"],
-    abstract: "This article evaluates computational modeling methods to predict reaction mechanisms and optimize routes for sustainable synthetic chemistry.",
-    keywords: ["Computational chemistry", "Reaction mechanisms", "Sustainability", "Modeling"],
-    doi: "10.12345/chem.2025.002",
-    publishedDate: "2025-03-12",
-    articleType: "review",
-  },
-]
+import { articles } from "@/lib/data/articles"
 
 export default function ChemistryPage() {
   return (
@@ -68,7 +35,7 @@ export default function ChemistryPage() {
         { title: "Data-Driven Results", description: "Encourages detailed data reporting for reproducibility." },
         { title: "Cross-Disciplinary Research", description: "Connects chemistry with biology, engineering, and environmental science." },
       ]}
-      sampleArticles={sampleArticles}
+      sampleArticles={articles.filter(a => a.journalSlug === "chemistry")}
       journalSlug="chemistry"
     />
   )

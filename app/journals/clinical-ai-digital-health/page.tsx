@@ -1,29 +1,6 @@
 import { HeartPulse } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
-import type { Article } from "@/components/article-card"
-
-const sampleArticles: Article[] = [
-  {
-    id: "clai-2026-001",
-    title: "Clinical Validation of an AI Diagnostic Tool for Automated Mammography in Diverse Patient Cohorts",
-    authors: ["Dr. Sarah Jenkins", "Prof. Kenji Takahashi"],
-    abstract: "This study validates a deep learning diagnostic system for mammography screening, showing robust sensitivity and specificity across multicenter datasets.",
-    keywords: ["Artificial Intelligence", "Mammography", "Breast Cancer", "Clinical Validation"],
-    doi: "10.12345/clai.2026.001",
-    publishedDate: "2026-04-12",
-    articleType: "research",
-  },
-  {
-    id: "clai-2026-002",
-    title: "Integrating LLM Copilots in Electronic Health Record Workflows: A Randomized Usability Trial",
-    authors: ["Dr. Maya Lin", "Dr. David Vance"],
-    abstract: "We evaluate the impact of LLM-assisted documentation in EHR systems, showing substantial reductions in administrative burden and high clinician satisfaction.",
-    keywords: ["Large Language Models", "EHR", "Clinical Workflow", "Usability"],
-    doi: "10.12345/clai.2026.002",
-    publishedDate: "2026-05-18",
-    articleType: "research",
-  },
-]
+import { articles } from "@/lib/data/articles"
 
 export default function ClinicalAIPage() {
   return (
@@ -56,7 +33,7 @@ export default function ClinicalAIPage() {
         { title: "Open & Auditable Code", description: "Encourages authors to share code, weights, and replication scripts for transparency." },
         { title: "Interdisciplinary Focus", description: "Bridges the gap between computer science innovators and practicing clinicians." },
       ]}
-      sampleArticles={sampleArticles}
+      sampleArticles={articles.filter(a => a.journalSlug === "clinical-ai-digital-health")}
       journalSlug="clinical-ai-digital-health"
     />
   )

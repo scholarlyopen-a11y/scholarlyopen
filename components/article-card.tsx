@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/language-context"
+import { slugify } from "@/lib/utils"
 
 export interface Article {
   id: string
@@ -64,9 +65,11 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
         
         <div className="flex flex-wrap gap-1.5 mb-4">
           {article.keywords.slice(0, 4).map((keyword) => (
-            <Badge key={keyword} variant="secondary" className="text-xs">
-              {keyword}
-            </Badge>
+            <Link href={`/topics/${slugify(keyword)}`} key={keyword}>
+              <Badge variant="secondary" className="text-xs hover:bg-secondary/70 transition-colors cursor-pointer">
+                {keyword}
+              </Badge>
+            </Link>
           ))}
         </div>
         

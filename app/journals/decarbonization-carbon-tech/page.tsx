@@ -1,56 +1,10 @@
 import { Wind } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
-import type { Article } from "@/components/article-card"
-
-const sampleArticles: Article[] = [
-  {
-    id: "dec-2026-001",
-    title: "Enhancing CO2 Adsorption Capacity in Metal-Organic Frameworks via Amine Functionalization",
-    authors: ["Dr. Lucas Mercier", "Prof. Sophie Dubois"],
-    abstract: "This study presents a novel synthesis method for functionalized MOFs, showing a 35% increase in carbon dioxide capture capacity under ambient flue gas conditions.",
-    keywords: ["Metal-Organic Frameworks", "Carbon Capture", "Adsorption", "Materials Science"],
-    doi: "10.12345/dec.2026.001",
-    publishedDate: "2026-02-15",
-    articleType: "research",
-  },
-  {
-    id: "dec-2026-002",
-    title: "Lifecycle Carbon Accounting of Offshore Kelp Sinking for Marine Carbon Dioxide Removal",
-    authors: ["Dr. Ryan O'Connor", "Dr. Yuki Sato"],
-    abstract: "We conduct a cradle-to-grave lifecycle assessment of kelp aquaculture and deep-sea deposition, verifying net carbon removal efficiency and cost-per-ton metrics.",
-    keywords: ["Ocean Carbon Dioxide Removal", "Lifecycle Assessment", "Kelp Aquaculture", "Climate Tech"],
-    doi: "10.12345/dec.2026.002",
-    publishedDate: "2026-05-10",
-    articleType: "research",
-  },
-]
-
-const associateEditors = [
-  {
-    name: "Mohamed Ramadan Eletmany",
-    role: "Associate Editor",
-    affiliation: "South Valley University, Egypt",
-    specialization: "Polymer chemistry, sustainable textile dyeing, molecular modeling (DFT), and surface modifications.",
-    email: "mohamed.eletmany@sci.svu.edu.eg",
-    orcid: "0000-0003-4868-4678",
-    imageUrl: "/images/editors/mohamed-eletmany.jpg",
-    assignedSections: [
-      "Carbon Utilization & Conversion",
-      "Industrial Decarbonization"
-    ],
-    expertise: [
-      "Polymer Chemistry",
-      "Green Chemistry",
-      "Sustainable Processing",
-      "Molecular Modeling (DFT)",
-      "Solar Cells (DSSCs)",
-      "Surface Chemistry"
-    ],
-    badges: ["Founding Member"]
-  }
-]
+import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function DecarbonizationPage() {
+  const associateEditors = editors.filter(e => e.journalSlug === "decarbonization-carbon-tech")
   return (
     <JournalPage
       title="Scholarly Open: Decarbonization & Carbon Tech"
@@ -80,7 +34,7 @@ export default function DecarbonizationPage() {
         { title: "Rigorous LCA Audit", description: "Requires detailed lifecycle carbon footprint analysis for all experimental engineering submissions." },
         { title: "Cross-Sector Bridge", description: "Connects chemical engineers, environmental scientists, and climate policymakers." },
       ]}
-      sampleArticles={sampleArticles}
+      sampleArticles={articles.filter(a => a.journalSlug === "decarbonization-carbon-tech")}
       journalSlug="decarbonization-carbon-tech"
       associateEditors={associateEditors}
     />

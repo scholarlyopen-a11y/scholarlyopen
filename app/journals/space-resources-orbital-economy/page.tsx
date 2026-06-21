@@ -1,29 +1,6 @@
 import { Rocket } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
-import type { Article } from "@/components/article-card"
-
-const sampleArticles: Article[] = [
-  {
-    id: "sr-2026-001",
-    title: "Microwave Sintering of Lunar Regolith Simulant under Vacuum Conditions for Construction",
-    authors: ["Dr. Evelyn Stone", "Prof. Marcus Vance"],
-    abstract: "This paper evaluates microwave heating parameters to sinter JSC-1A lunar simulant in high vacuum, assessing compressive strength for lunar habitat building.",
-    keywords: ["Lunar Regolith", "Microwave Sintering", "Lunar Construction", "ISRU"],
-    doi: "10.12345/sr.2026.001",
-    publishedDate: "2026-04-02",
-    articleType: "research",
-  },
-  {
-    id: "sr-2026-002",
-    title: "Legal Frameworks for Asteroid Mining: Resolving Ownership of Space-Derived Resources",
-    authors: ["Dr. Claire D'Amboise", "Prof. Richard Alvarez"],
-    abstract: "We analyze international space law under the Artemis Accords, proposing a multilateral licensing framework to regulate property rights on asteroid minerals.",
-    keywords: ["Space Law", "Artemis Accords", "Asteroid Mining", "Property Rights"],
-    doi: "10.12345/sr.2026.002",
-    publishedDate: "2026-05-20",
-    articleType: "research",
-  },
-]
+import { articles } from "@/lib/data/articles"
 
 export default function SpaceResourcesPage() {
   return (
@@ -54,7 +31,7 @@ export default function SpaceResourcesPage() {
         { title: "Policy & Tech Integration", description: "Bridges state-of-the-art space systems engineering with international space law and diplomacy." },
         { title: "Open Flight Data", description: "Encourages the sharing of orbital telemetry, simulated environmental datasets, and regolith mechanical specs." },
       ]}
-      sampleArticles={sampleArticles}
+      sampleArticles={articles.filter(a => a.journalSlug === "space-resources-orbital-economy")}
       journalSlug="space-resources-orbital-economy"
     />
   )

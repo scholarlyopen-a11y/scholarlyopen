@@ -1,29 +1,6 @@
 import { Atom } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
-import type { Article } from "@/components/article-card"
-
-const sampleArticles: Article[] = [
-  {
-    id: "qe-2026-001",
-    title: "Reducing Decoherence in Silicon-Based Spin Qubits via Isotopic Purification",
-    authors: ["Dr. Thomas Sterling", "Prof. Mei-Ling Zhou"],
-    abstract: "This paper demonstrates a fabrication method for silicon-28 spin qubits that reduces environmental spin noise and yields a twofold increase in coherence time.",
-    keywords: ["Spin Qubits", "Decoherence", "Silicon Nanotechnology", "Quantum Hardware"],
-    doi: "10.12345/qe.2026.001",
-    publishedDate: "2026-03-22",
-    articleType: "research",
-  },
-  {
-    id: "qe-2026-002",
-    title: "A Scalable Compiler Architecture for Topological Quantum Computers",
-    authors: ["Dr. Fiona MacLeod", "Dr. Alan Turing Jr."],
-    abstract: "We present a software-level compilation stack that translates logical quantum gates into braiding trajectories, optimizing topological error-correcting codes.",
-    keywords: ["Quantum Compiler", "Topological Quantum Computing", "Error Correction", "Software Stack"],
-    doi: "10.12345/qe.2026.002",
-    publishedDate: "2026-04-30",
-    articleType: "research",
-  },
-]
+import { articles } from "@/lib/data/articles"
 
 export default function QuantumEngineeringPage() {
   return (
@@ -54,7 +31,7 @@ export default function QuantumEngineeringPage() {
         { title: "Co-Design Paradigm", description: "Bridges hardware, control theory, and compiler layers for full-stack optimization." },
         { title: "FAIR Quantum Data", description: "Supports deposition of raw calibration data, pulse sequences, and hardware schematics." },
       ]}
-      sampleArticles={sampleArticles}
+      sampleArticles={articles.filter(a => a.journalSlug === "quantum-engineering")}
       journalSlug="quantum-engineering"
     />
   )

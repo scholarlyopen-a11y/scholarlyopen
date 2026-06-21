@@ -1,29 +1,6 @@
 import { Shield } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
-import type { Article } from "@/components/article-card"
-
-const sampleArticles: Article[] = [
-  {
-    id: "ais-2026-001",
-    title: "Eliciting Latent Knowledge: Probing Internal Representations of Large Language Models",
-    authors: ["Dr. Evelyn Vance", "Dr. Charles Zhang"],
-    abstract: "This paper introduces a probing framework to extract factual beliefs and latent reasoning paths from LLMs, addressing hallucination and alignment.",
-    keywords: ["AI Alignment", "Latent Knowledge", "Probing", "Transparency"],
-    doi: "10.12345/ais.2026.001",
-    publishedDate: "2026-03-10",
-    articleType: "research",
-  },
-  {
-    id: "ais-2026-002",
-    title: "Evaluating Multi-Agent Coordination under Conflict: A Safety Benchmarking Sandbox",
-    authors: ["Prof. Julian Alistair", "Dr. Hana Tanaka"],
-    abstract: "We present a sandbox environment to evaluate coordination and negotiation safety in multi-agent networks, outlining systemic risks.",
-    keywords: ["Multi-Agent Systems", "Safety Benchmark", "Coordination", "Governance"],
-    doi: "10.12345/ais.2026.002",
-    publishedDate: "2026-05-02",
-    articleType: "research",
-  },
-]
+import { articles } from "@/lib/data/articles"
 
 export default function AISafetyPage() {
   return (
@@ -54,7 +31,7 @@ export default function AISafetyPage() {
         { title: "Policy & Technical Synergy", description: "Publishes both technical safety research and policy/governance frameworks." },
         { title: "Fast-Track Review", description: "Ensures rapid publication cycles to keep pace with state-of-the-art AI advancements." },
       ]}
-      sampleArticles={sampleArticles}
+      sampleArticles={articles.filter(a => a.journalSlug === "ai-safety-governance")}
       journalSlug="ai-safety-governance"
     />
   )
