@@ -1,8 +1,10 @@
 import { Stethoscope } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function MedicinePage() {
+  const associateEditors = editors.filter(e => e.journalSlug === "medicine")
   return (
     <JournalPage
       title="Scholarly Open: Medicine"
@@ -18,6 +20,7 @@ export default function MedicinePage() {
         "Health policy and equity",
         "Medical technology",
         "Translational research",
+        "Surgery and transplant medicine",
       ]}
       sectionTopics={[
         "Cardiology",
@@ -32,6 +35,7 @@ export default function MedicinePage() {
         "Medical Imaging",
         "Emergency Medicine",
         "Pharmacology",
+        "Organ Transplantation",
       ]}
       mainHighlights={[
         { title: "Patient-Centered Research", description: "Work that improves clinical outcomes and healthcare delivery." },
@@ -40,6 +44,7 @@ export default function MedicinePage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "medicine")}
       journalSlug="medicine"
+      associateEditors={associateEditors}
     />
   )
 }

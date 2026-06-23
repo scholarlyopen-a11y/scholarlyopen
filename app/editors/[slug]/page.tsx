@@ -70,6 +70,7 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
   // Get articles published in this editor's journal
   const relatedArticles = articles.filter(a => a.journalSlug === editor.journalSlug)
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  const lastName = editor.name.split(',')[0].trim().split(' ').pop()
 
   const welcomeMessage = editor.welcomeMessage || `Welcoming submissions in ${editor.specialization}.`
   
@@ -438,13 +439,13 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
               {/* Manuscript Submission CTA */}
               <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-primary/5 p-8 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
                 <div className="space-y-2.5 text-center md:text-left">
-                  <h3 className="text-lg font-bold text-foreground">Submit Your Research to Dr. Eletmany</h3>
+                  <h3 className="text-lg font-bold text-foreground">Submit Your Research to Dr. {lastName}</h3>
                   <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
-                    Dr. Eletmany is welcoming original submissions and proposal reviews in polymer science, sustainable dyeing technologies, and DFT modeling. Submit now to receive high-quality peer review and rapid publication.
+                    Dr. {lastName} is welcoming original submissions and proposal reviews in {editor.specialization.toLowerCase()}. Submit now to receive high-quality peer review and rapid publication.
                   </p>
                 </div>
                 <Button asChild className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2.5 rounded-xl shadow-xs transition-all hover:scale-[1.02] cursor-pointer">
-                  <a href="mailto:submit@scholarlyopen.org?subject=Manuscript Submission Proposal - Decarbonization">
+                  <a href={`mailto:submit@scholarlyopen.org?subject=Manuscript Submission Proposal - ${editor.journalSlug}`}>
                     <Send className="h-4 w-4 mr-2" />
                     Propose Manuscript
                   </a>
@@ -468,10 +469,10 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                 {/* Direct submissions status message (Realistic Mock Clean State) */}
                 <div className="p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/10 text-center space-y-2">
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Dr. Eletmany joined our board as a founding Associate Editor in 2026.
+                    Dr. {lastName} joined our board as a founding {editor.role} in 2026.
                   </p>
                   <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">
-                    While he is actively coordinating upcoming peer reviews, his handled manuscripts will appear here once publication rounds conclude.
+                    While the editorial board is actively coordinating upcoming peer reviews, handled manuscripts will appear here once publication rounds conclude.
                   </p>
                 </div>
               </section>

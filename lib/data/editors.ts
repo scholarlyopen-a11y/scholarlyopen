@@ -127,6 +127,116 @@ Dr. Mohamed has participated in several national and international research proj
       }
     ]
 
-  }
+  },
+  {
+    slug: "weihua-gong",
+    name: "Weihua Gong, M.D., Ph.D.",
+    role: "Associate Editor",
+    affiliation: "Shanghai Jiao Tong University School of Medicine, China",
+    specialization: "Gastrointestinal tumors, organ transplantation",
+    email: "126010@sh9hospital.org.cn",
+    orcid: "0000-0002-0213-7313",
+    imageUrl: "/images/editors/weihua-gong.jpg",
+    assignedSections: [
+      "Gastrointestinal Oncology",
+      "Organ Transplantation & Surgery"
+    ],
+    expertise: [
+      "GI surgeries",
+      "Gastrointestinal Tumors",
+      "Organ Transplantation",
+      "General Surgery",
+      "Gastric Cancer",
+      "Translational Medicine"
+    ],
+    badges: ["Founding Member"],
+    journalSlug: "medicine",
+    welcomeMessage: "I am pleased to welcome submissions that explore innovative approaches in gastrointestinal surgery, clinical oncology, and organ transplantation. Scholarly Open: Medicine is committed to advancing clinical practice and translational research to improve patient care globally.",
+    stats: [
+      { label: "Status", value: "Accepting Submissions", description: "Ready to assign reviewers" },
+      { label: "Avg. Turnaround", value: "28 Days", description: "From submission to initial decision" },
+      { label: "Review Standard", value: "Rigorous Double-Blind", description: "Ensuring clinical excellence" }
+    ],
+    timeline: [
+      {
+        year: "1999",
+        title: "M.D. in Clinical Medicine",
+        description: "Nankai University, Tianjin, China.",
+        type: "education"
+      },
+      {
+        year: "2008",
+        title: "Ph.D. in Medical Sciences",
+        description: "Charité-University Berlin, Germany (Magna Cum Laude).",
+        type: "education"
+      },
+      {
+        year: "2009-2012",
+        title: "Research Fellow in Transplantation",
+        description: "Beth Israel Deaconess Medical Center, Harvard Medical School, Boston, USA.",
+        type: "career"
+      },
+      {
+        year: "2021",
+        title: "Appointed Professor",
+        description: "Zhejiang University School of Medicine, China.",
+        type: "career"
+      },
+      {
+        year: "2023",
+        title: "Chief Physician",
+        description: "Second Affiliated Hospital of Zhejiang University School of Medicine, China.",
+        type: "career"
+      },
+      {
+        year: "2026",
+        title: "Chair of General Surgery",
+        description: "Department of General Surgery, Shanghai Ninth People's Hospital, Shanghai Jiao Tong University School of Medicine, China.",
+        type: "career"
+      },
+      {
+        year: "2026",
+        title: "Joined Scholarly Open",
+        description: "Appointed as Associate Editor for Medicine, overseeing clinical medicine, surgery, and transplantation.",
+        type: "milestone"
+      }
+    ],
+    biography: `Dr. Weihua Gong, M.D., Ph.D., is a highly distinguished surgeon and researcher who currently serves as the Chair of the Department of General Surgery at the Shanghai Ninth People's Hospital, affiliated with the Shanghai Jiao Tong University School of Medicine. Previously, he was a Professor and Chief Physician at the Second Affiliated Hospital of Zhejiang University School of Medicine, where he also served as the Vice-chairman of the Department of Surgery and the Division of GI Surgery.
 
+Dr. Gong completed his M.D. and Master of Clinical Science at Nankai University in China, and earned his Ph.D. (Magna Cum Laude) from Charité-University Berlin (a joint school of Berlin Free University and Humboldt University) in Germany in 2008. He completed postdoctoral training and research fellowships at the Department of Surgery, University of California, Los Angeles (UCLA) and the Transplant Institute at Beth Israel Deaconess Medical Center, Harvard Medical School in Boston.
+
+With over two decades of clinical and research experience, Dr. Gong has established himself as a leading authority in gastrointestinal tumors, organ transplantation, and GI surgeries. He is the Principal Investigator for numerous major research grants, including several from the National Natural Science Foundation of China (NSFC) and the Zhejiang Province Leading Earth Goose Program. He has authored or co-authored over 100 research papers in leading international journals (such as Autophagy, J Thorac Cardiovasc Surg, Transplantation, and Cancer Research) and has edited several books on gastric cancer, transplant medicine, and surgical cases. Dr. Gong is also an active member of professional bodies like the Chinese Surgeon Association and the International Gastric Cancer Association (IGCA).`,
+    personalPublications: [
+      {
+        title: "Dual-Positive Gastric Cancer Co-expressing AFP and CEA: An Aggressive Subtype Defined by Unique Clinical and Biological Profiles",
+        journal: "Clinical and Experimental Medicine",
+        year: "2026",
+        link: "https://doi.org/10.1007/s10238-026-02175-7"
+      },
+      {
+        title: "Suppression of fibroblastic activity prolongs cardiac transplant survival through targeting their ATG5 expression",
+        journal: "Journal of Thoracic and Cardiovascular Surgery",
+        year: "2026",
+        link: "https://doi.org/10.1016/j.jtcvs.2026.03.593"
+      },
+      {
+        title: "Helicobacter pylori reversing the landscape of neoadjuvant immunotherapy for microsatellite stable gastric cancer: a multicenter cohort study",
+        journal: "BMC Medicine",
+        year: "2025",
+        link: "https://doi.org/10.1186/s12916-025-04047-5"
+      },
+      {
+        title: "Measuring lysosome damage and lysophagy in vivo",
+        journal: "Autophagy",
+        year: "2026",
+        link: "https://doi.org/10.1080/15548627.2025.2608974"
+      },
+      {
+        title: "Evolution of HER2 expression after neoadjuvant therapy in locally advanced gastric cancer",
+        journal: "iScience",
+        year: "2025",
+        link: "https://doi.org/10.1016/j.isci.2025.112710"
+      }
+    ]
+  }
 ]
