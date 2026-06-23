@@ -175,7 +175,13 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
 
                 {/* Identity */}
                 <div className="space-y-2.5">
-                  <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{editor.name}</h1>
+                  <h1 className={`${
+                    editor.name.length > 25 
+                      ? "text-xl lg:text-lg xl:text-xl" 
+                      : "text-2xl lg:text-xl xl:text-2xl"
+                  } font-bold tracking-tight text-slate-900 dark:text-slate-50`}>
+                    {editor.name}
+                  </h1>
                   <div className="flex justify-center gap-2 flex-wrap">
                     <Badge className="bg-primary/10 text-primary border-0 font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5">
                       {editor.role}
