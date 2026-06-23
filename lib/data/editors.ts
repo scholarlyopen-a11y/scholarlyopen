@@ -38,7 +38,7 @@ export interface EditorMember {
 export const editors: EditorMember[] = [
   {
     slug: "mohamed-eletmany",
-    name: "Mohamed Ramadan Eletmany",
+    name: "Mohamed R. Eletmany, Ph.D.",
     role: "Associate Editor",
     affiliation: "South Valley University, Egypt",
     specialization: "Polymer chemistry, sustainable textile dyeing, molecular modeling (DFT), and surface modifications.",
