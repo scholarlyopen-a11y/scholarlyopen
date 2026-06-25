@@ -136,14 +136,14 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
         <div className="border-b border-slate-200/60 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md sticky top-14 z-40">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <Link 
-              href="/editorial-board" 
+              href={`/journals/${editor.journalSlug}`} 
               className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors gap-2 group"
             >
               <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Editorial Board
+              Back to Journal
             </Link>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-              <span>Editorial Board</span>
+              <span>Journal</span>
               <ChevronRight className="h-3 w-3" />
               <span className="text-foreground font-semibold">{editor.name}</span>
             </div>
