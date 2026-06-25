@@ -183,7 +183,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
                                 <img 
                                   src={editor.imageUrl} 
                                   alt={editor.name} 
-                                  className="h-12 w-12 rounded-full object-cover object-top border border-border shrink-0"
+                                  className="h-12 w-12 rounded-full object-cover object-top shrink-0"
                                 />
                               ) : (
                                 <div className="h-12 w-12 rounded-full bg-secondary text-secondary-foreground font-bold flex items-center justify-center shrink-0">
