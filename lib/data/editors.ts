@@ -42,7 +42,7 @@ export const editors: EditorMember[] = [
     role: "Associate Editor",
     affiliation: "South Valley University, Egypt",
     specialization: "Polymer chemistry, sustainable textile dyeing, molecular modeling (DFT), and surface modifications.",
-    email: "mohamed.eletmany@sci.svu.edu.eg",
+    email: "editor.dcct@scholarlyopen.org",
     orcid: "0000-0003-4868-4678",
     researchGate: "https://www.researchgate.net/profile/Mohamed-Eletmany",
     googleScholar: "https://scholar.google.com.eg/citations?user=tP25O2kAAAAJ&hl=ar",
@@ -134,7 +134,7 @@ Dr. Mohamed has participated in several national and international research proj
     role: "Associate Editor",
     affiliation: "Shanghai Jiao Tong University School of Medicine, China",
     specialization: "Gastrointestinal tumors, organ transplantation",
-    email: "126010@sh9hospital.org.cn",
+    email: "editor.med@scholarlyopen.org",
     orcid: "0000-0002-0213-7313",
     imageUrl: "/images/editors/weihua-gong.jpg",
     assignedSections: [
