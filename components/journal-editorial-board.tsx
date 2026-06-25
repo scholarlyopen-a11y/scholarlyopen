@@ -56,10 +56,10 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
             <img 
               src={editor.imageUrl} 
               alt={editor.name} 
-              className="h-12 w-12 rounded-xl object-cover object-top shrink-0 border border-border" 
+              className="h-12 w-12 rounded-full object-cover object-top shrink-0" 
             />
           ) : (
-            <div className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+            <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
               <span className="text-base">{initials}</span>
             </div>
           )}
@@ -90,10 +90,10 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                   <img 
                     src={editor.imageUrl} 
                     alt={editor.name} 
-                    className="h-14 w-14 rounded-xl object-cover object-top shrink-0 border border-border" 
+                    className="h-14 w-14 rounded-full object-cover object-top shrink-0" 
                   />
                 ) : (
-                  <div className="h-14 w-14 rounded-xl flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+                  <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
                     <span className="text-lg">{initials}</span>
                   </div>
                 )}
@@ -207,10 +207,10 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
             <img 
               src={editor.imageUrl} 
               alt={editor.name} 
-              className="h-10 w-10 rounded-xl object-cover object-top shrink-0 border border-border" 
+              className="h-10 w-10 rounded-full object-cover object-top shrink-0" 
             />
           ) : (
-            <div className="h-10 w-10 rounded-xl bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 font-bold">
+            <div className="h-10 w-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 font-bold">
               <span className="text-sm">{initials}</span>
             </div>
           )}
@@ -239,10 +239,10 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
               <img 
                 src={editor.imageUrl} 
                 alt={editor.name} 
-                className="h-14 w-14 rounded-xl object-cover object-top shrink-0 border border-border" 
+                className="h-14 w-14 rounded-full object-cover object-top shrink-0" 
               />
             ) : (
-              <div className="h-14 w-14 rounded-xl flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+              <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
                 <span className="text-lg">{initials}</span>
               </div>
             )}

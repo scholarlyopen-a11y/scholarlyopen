@@ -164,10 +164,10 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                     <img 
                       src={editor.imageUrl} 
                       alt={editor.name} 
-                      className="relative h-36 w-32 rounded-2xl object-cover object-top border-2 border-white dark:border-slate-800 shadow-md ring-4 ring-accent/25 group-hover:ring-accent/50 transition-all duration-300"
+                      className="relative h-32 w-32 rounded-full object-cover object-top" 
                     />
                   ) : (
-                    <div className="relative h-36 w-32 rounded-2xl bg-secondary text-secondary-foreground font-bold flex items-center justify-center text-4xl shadow-inner border-2 border-white dark:border-slate-800 ring-4 ring-accent/25 group-hover:ring-accent/50 transition-all duration-300">
+                    <div className="relative h-32 w-32 rounded-full bg-secondary text-secondary-foreground font-bold flex items-center justify-center text-4xl shadow-inner">
                       {initials}
                     </div>
                   )}
