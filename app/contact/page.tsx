@@ -94,7 +94,7 @@ export default function ContactPage() {
     },
     {
       name: t("contact.dept5.name"),
-      email: "ethics@scholarlyopen.org",
+      email: "ethics-support@scholarlyopen.org",
       description: t("contact.dept5.desc"),
       icon: ShieldAlert,
     },
