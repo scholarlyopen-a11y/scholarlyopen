@@ -451,7 +451,7 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                   </p>
                 </div>
                 <Button asChild className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2.5 rounded-xl shadow-xs transition-all hover:scale-[1.02] cursor-pointer">
-                  <a href={`mailto:submit@scholarlyopen.org?subject=Manuscript Submission Proposal - ${editor.journalSlug}`}>
+                  <a href={`mailto:submissions@scholarlyopen.org?subject=Manuscript Submission Proposal - ${editor.journalSlug}`}>
                     <Send className="h-4 w-4 mr-2" />
                     Propose Manuscript
                   </a>
