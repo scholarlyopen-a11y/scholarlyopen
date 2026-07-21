@@ -1,0 +1,26 @@
+# Scholarly Open — Author Submission Checklist & Toolkit
+
+Before submitting your manuscript to Scholarly Open journals, please verify that your submission complies with all the following guidelines:
+
+## 1. Originality & Ethics
+- [ ] The manuscript is original, has not been published previously, and is not currently under consideration by any other journal.
+- [ ] All authors meet the 4 ICMJE criteria for authorship.
+- [ ] Plagiarism screening: Text overlap complies with standard academic thresholds (<15% total overlap, <3% from a single source).
+- [ ] Ethics Approval: Research involving human subjects or animals includes explicit ethics committee approval numbers and informed consent statements.
+
+## 2. Artificial Intelligence (AI) Disclosure
+- [ ] Generative AI tools (e.g. ChatGPT, Claude) are NOT listed as authors.
+- [ ] If AI was used for language editing, literature synthesis, or coding, an "AI & Assisted Technologies Disclosure" statement is included in the manuscript notes.
+
+## 3. Open Data & FAIR Principles
+- [ ] Raw underlying data, code scripts, and analytical workflows are deposited in a FAIR-compliant repository (e.g. Zenodo, Dryad, Figshare).
+- [ ] A Data Availability Statement is included in the manuscript with a direct DOI link.
+
+## 4. Format & Figures
+- [ ] Text is double-spaced, 12pt font, with continuous line numbers.
+- [ ] Figures are provided in high resolution (minimum 300 DPI for photos, 600 DPI for line drawings).
+- [ ] References follow standard APA/Vancouver citation style with active DOI links.
+
+---
+Scholarly Open Access Portal — Unbound. Transparent. Accessible.
+Contact: editorial@scholarlyopen.org | https://scholarlyopen.org

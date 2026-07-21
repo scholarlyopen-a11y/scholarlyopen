@@ -200,11 +200,11 @@ export default function PeerReviewPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
-                      <span className="text-sm font-bold text-primary">2-3</span>
+                      <span className="text-sm font-bold text-primary">2-5</span>
                     </div>
                     <div>
                       <h4 className="font-medium">Production</h4>
-                      <p className="text-sm text-muted-foreground">Weeks from acceptance to online publication</p>
+                      <p className="text-sm text-muted-foreground">Days from acceptance to online publication</p>
                     </div>
                   </div>
                 </div>

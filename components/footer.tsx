@@ -139,6 +139,7 @@ export function Footer() {
       { name: t("nav.submitManuscript"), href: "/submit" },
       { name: t("nav.apcFees"), href: "/apc-fees" },
       { name: t("nav.peerReview"), href: "/peer-review" },
+      { name: t("nav.trainings"), href: "/trainings" },
     ],
     aboutUs: [
       { name: t("nav.about"), href: "/about" },

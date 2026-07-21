@@ -1,0 +1,50 @@
+# Scholarly Open — Official Manuscript Structure Template
+
+[Title of Article: Capitalize First Letter of Each Major Word]
+
+First Author Name 1*, Second Author Name 2, Third Author Name 3
+1 Department of Science, University Name, City, Country (Email: author1@univ.edu)
+2 Department of Medicine, Research Institute, City, Country
+* Corresponding Author: author1@univ.edu
+
+---
+
+ABSTRACT
+Background: State the context and primary objective of the study.
+Methods: Describe the experimental or analytical methodology clearly.
+Results: Summarize key findings with specific quantitative data where applicable.
+Conclusions: State main conclusions and scientific or practical implications.
+Keywords: Keyword 1; Keyword 2; Keyword 3; Keyword 4 (3 to 6 keywords)
+
+---
+
+1. INTRODUCTION
+Provide relevant background context, highlight gaps in existing literature, and state the primary hypothesis and rationale of the study.
+
+2. MATERIALS AND METHODS
+2.1 Experimental Design
+Describe the methodologies, instruments, statistical tests, and sampling protocols in sufficient detail to permit replication.
+2.2 Ethics Approval
+State ethics committee approval details, protocol numbers, and subject consent protocols.
+
+3. RESULTS
+3.1 Subsection 1
+Present findings logically with reference to tables and high-resolution figures (minimum 300 DPI).
+
+4. DISCUSSION
+Interpret results in light of prior research, address limitations, and discuss practical or theoretical implications.
+
+5. CONCLUSIONS
+Summarize the core impact of the study.
+
+ACKNOWLEDGMENTS & FUNDING
+State grant numbers and funding body support.
+
+DATA AVAILABILITY STATEMENT
+The underlying datasets generated during this study are openly available in the Zenodo repository at https://doi.org/10.5281/zenodo.example.
+
+AI DISCLOSURE STATEMENT
+Generative AI tools were used solely for grammatical editing and language polishing. The authors retain full responsibility for the scientific content and integrity of this manuscript.
+
+REFERENCES
+1. Author AB, Author CD. Title of article. Journal Name. 2026;15(2):100-110. https://doi.org/10.1000/example

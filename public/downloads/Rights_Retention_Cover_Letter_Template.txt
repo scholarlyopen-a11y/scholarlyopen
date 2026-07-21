@@ -1,0 +1,24 @@
+# Scholarly Open — Rights Retention Strategy (RRS) Cover Letter Template
+
+To: Editorial Office / Editor-in-Chief
+Date: [Insert Date]
+Manuscript Title: [Insert Title]
+Authors: [Insert Authors]
+
+Dear Editor,
+
+Please find enclosed our manuscript entitled "[Insert Title]" for consideration for publication in [Insert Journal Name].
+
+RIGHTS RETENTION STRATEGY (RRS) NOTICE:
+For the purpose of open access, the author has applied a Creative Commons Attribution (CC BY 4.0) license to any Author Accepted Manuscript (AAM) version arising from this submission. 
+
+Under our funder's Open Access Mandate (Plan S / Horizon Europe / DFG / OSTP), this submission maintains immediate open access rights without embargo upon acceptance.
+
+DATA AVAILABILITY:
+All raw datasets supporting the findings of this study have been formatted according to FAIR principles and deposited in the open repository [Repository Name, e.g. Zenodo] with DOI [Insert DOI / Link].
+
+Sincerely,
+
+[Corresponding Author Name]
+[Institutional Affiliation]
+[Email Address]
