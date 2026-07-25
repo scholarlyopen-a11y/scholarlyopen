@@ -1,4 +1,5 @@
 export const runtime = "nodejs"
+// Force clean Vercel build to load updated environment variables
 
 import nodemailer from "nodemailer"
 
