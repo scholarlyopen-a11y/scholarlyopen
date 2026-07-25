@@ -209,7 +209,7 @@ export default function TrainingsPage() {
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md mb-4 text-accent">
                 <GraduationCap className="h-4 w-4" /> {t("trainings.hero.badge")}
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
                 {t("trainings.hero.title")}
               </h1>
               <p className="mt-3 text-sm sm:text-base text-white/85 leading-relaxed">
