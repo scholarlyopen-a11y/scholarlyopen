@@ -98,6 +98,11 @@ Registration Date: ${new Date().toISOString()}
     })
 
     // Send confirmation to the user
+    console.log("DIAGNOSTIC - smtpFrom:", smtpFrom)
+    console.log("DIAGNOSTIC - email (user):", email)
+    const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "info@scholarlyopen.org"
+    console.log("DIAGNOSTIC - adminRecipient:", adminRecipient)
+
     await transporter.sendMail({
       from: smtpFrom,
       to: email,
@@ -106,7 +111,6 @@ Registration Date: ${new Date().toISOString()}
     })
 
     // Send notification to admin
-    const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "info@scholarlyopen.org"
     await transporter.sendMail({
       from: smtpFrom,
       to: adminRecipient,
