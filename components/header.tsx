@@ -46,7 +46,6 @@ export function Header() {
     { name: t("nav.home"), href: "/" },
     { name: t("nav.about"), href: "/about" },
     { name: t("nav.journals"), href: "#", children: [], isJournals: true },
-    { name: t("nav.trainings"), href: "/trainings" },
     {
       name: t("nav.forAuthors"),
       href: "#",
@@ -66,6 +65,7 @@ export function Header() {
         { name: t("nav.openAccess"), href: "/open-access" },
       ],
     },
+    { name: t("nav.trainings"), href: "/trainings" },
     { name: t("nav.contact"), href: "/contact" },
   ]
 

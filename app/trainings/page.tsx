@@ -14,7 +14,6 @@ import {
   ArrowRight, 
   GraduationCap, 
   BadgeCheck, 
-  Send,
   Linkedin,
   X,
   Search
@@ -37,72 +36,96 @@ interface Course {
   highlights: string[]
 }
 
-const courses: Course[] = [
+const getLocalizedCourses = (t: (key: string) => string): Course[] => [
   {
     id: "ai-writing",
-    title: "Generative AI for Scientific Writing & Literature Review",
-    badge: "Trending 2026",
+    title: t("trainings.course.ai-writing.title"),
+    badge: t("trainings.course.ai-writing.badge"),
     icon: Sparkles,
-    category: "AI & Tools",
-    duration: "2 Hours",
-    date: "Monthly Live",
-    description: "Master AI tools (ChatGPT, Scite, Elicit) for research synthesis while maintaining integrity and publisher compliance.",
-    highlights: ["Prompting techniques", "Avoiding AI hallucinations", "Journal disclosure rules"],
+    category: t("trainings.course.ai-writing.category"),
+    duration: t("trainings.course.ai-writing.duration"),
+    date: t("trainings.course.ai-writing.date"),
+    description: t("trainings.course.ai-writing.description"),
+    highlights: [
+      t("trainings.course.ai-writing.h1"),
+      t("trainings.course.ai-writing.h2"),
+      t("trainings.course.ai-writing.h3")
+    ],
   },
   {
     id: "grant-writing",
-    title: "Persuasive Grant Writing & Proposal Strategy",
-    badge: "Grants & Funding",
+    title: t("trainings.course.grant-writing.title"),
+    badge: t("trainings.course.grant-writing.badge"),
     icon: FileText,
-    category: "Funding",
-    duration: "3 Hours",
-    date: "Bi-Weekly",
-    description: "Structure compelling narratives, work packages, and budgets for ERC, Horizon Europe, and national funding.",
-    highlights: ["Impact & Excellence sections", "Risk management", "Reviewer rubrics"],
+    category: t("trainings.course.grant-writing.category"),
+    duration: t("trainings.course.grant-writing.duration"),
+    date: t("trainings.course.grant-writing.date"),
+    description: t("trainings.course.grant-writing.description"),
+    highlights: [
+      t("trainings.course.grant-writing.h1"),
+      t("trainings.course.grant-writing.h2"),
+      t("trainings.course.grant-writing.h3")
+    ],
   },
   {
-    id: "high-impact",
-    title: "Publishing in High-Impact Journals & Avoiding Desk Rejections",
-    badge: "Top Requested",
-    icon: BookOpen,
-    category: "Publishing",
-    duration: "2.5 Hours",
-    date: "Monthly",
-    description: "Learn journal selection, persuasive cover letter drafting, and structuring papers to pass initial editor screening.",
-    highlights: ["Cover letter drafting", "Avoiding desk rejection flags", "Journal matching"],
-  },
-  {
-    id: "peer-review",
-    title: "Navigating Peer Review & Protecting Scientific Claims",
-    badge: "Author Control",
+    id: "ethics-integrity",
+    title: t("trainings.course.ethics-integrity.title"),
+    badge: t("trainings.course.ethics-integrity.badge"),
     icon: ShieldCheck,
-    category: "Peer Review",
-    duration: "2 Hours",
-    date: "Bi-Monthly",
-    description: "Craft professional response letters, address tough reviewer comments, and defend your core methodology.",
-    highlights: ["Response letter tables", "Declining unreasonable requests", "Reviewer ethics"],
+    category: t("trainings.course.ethics-integrity.category"),
+    duration: t("trainings.course.ethics-integrity.duration"),
+    date: t("trainings.course.ethics-integrity.date"),
+    description: t("trainings.course.ethics-integrity.description"),
+    highlights: [
+      t("trainings.course.ethics-integrity.h1"),
+      t("trainings.course.ethics-integrity.h2"),
+      t("trainings.course.ethics-integrity.h3")
+    ],
   },
   {
-    id: "visibility",
-    title: "Building an Online Researcher Profile & Citation Impact",
-    badge: "Visibility",
-    icon: Award,
-    category: "Career",
-    duration: "1.5 Hours",
-    date: "On-Demand",
-    description: "Maximize paper reach and citations using LinkedIn for Academics, ORCID, Altmetrics, and graphical abstracts.",
-    highlights: ["LinkedIn & ORCID setup", "Graphical abstracts", "Altmetric tracking"],
+    id: "peer-rebuttals",
+    title: t("trainings.course.peer-rebuttals.title"),
+    badge: t("trainings.course.peer-rebuttals.badge"),
+    icon: BookOpen,
+    category: t("trainings.course.peer-rebuttals.category"),
+    duration: t("trainings.course.peer-rebuttals.duration"),
+    date: t("trainings.course.peer-rebuttals.date"),
+    description: t("trainings.course.peer-rebuttals.description"),
+    highlights: [
+      t("trainings.course.peer-rebuttals.h1"),
+      t("trainings.course.peer-rebuttals.h2"),
+      t("trainings.course.peer-rebuttals.h3")
+    ],
   },
   {
-    id: "open-science",
-    title: "Open Science, Data Sovereignty & Rights Retention",
-    badge: "Open Access",
+    id: "fair-metadata",
+    title: t("trainings.course.fair-metadata.title"),
+    badge: t("trainings.course.fair-metadata.badge"),
     icon: Database,
-    category: "Open Science",
-    duration: "2 Hours",
-    date: "Monthly",
-    description: "Retain copyright under Plan S CC-BY strategy, build FAIR Data Management Plans, and use open repositories.",
-    highlights: ["Plan S CC-BY retention", "FAIR data compliance", "Zenodo deposition"],
+    category: t("trainings.course.fair-metadata.category"),
+    duration: t("trainings.course.fair-metadata.duration"),
+    date: t("trainings.course.fair-metadata.date"),
+    description: t("trainings.course.fair-metadata.description"),
+    highlights: [
+      t("trainings.course.fair-metadata.h1"),
+      t("trainings.course.fair-metadata.h2"),
+      t("trainings.course.fair-metadata.h3")
+    ],
+  },
+  {
+    id: "authorship-rights",
+    title: t("trainings.course.authorship-rights.title"),
+    badge: t("trainings.course.authorship-rights.badge"),
+    icon: Award,
+    category: t("trainings.course.authorship-rights.category"),
+    duration: t("trainings.course.authorship-rights.duration"),
+    date: t("trainings.course.authorship-rights.date"),
+    description: t("trainings.course.authorship-rights.description"),
+    highlights: [
+      t("trainings.course.authorship-rights.h1"),
+      t("trainings.course.authorship-rights.h2"),
+      t("trainings.course.authorship-rights.h3")
+    ],
   },
 ]
 
@@ -113,7 +136,9 @@ export default function TrainingsPage() {
   const [includeCert, setIncludeCert] = useState(true)
   const [regSuccess, setRegSuccess] = useState(false)
 
-  const filteredCourses = courses.filter(c => 
+  const localizedCourses = getLocalizedCourses(t)
+
+  const filteredCourses = localizedCourses.filter(c => 
     c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.category.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -133,39 +158,18 @@ export default function TrainingsPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md mb-4 text-accent">
-                <GraduationCap className="h-4 w-4" /> Scholarly Open Academy
+                <GraduationCap className="h-4 w-4" /> {t("trainings.hero.badge")}
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Online Trainings & Masterclasses
+                {t("trainings.hero.title")}
               </h1>
               <p className="mt-3 text-sm sm:text-base text-white/85 leading-relaxed">
-                Practical, concise workshops empowering researchers with AI tools, grant writing skills, and open science control.
+                {t("trainings.hero.subtitle")}
               </p>
             </div>
           </div>
         </section>
 
-        {/* €50 Verified Certificate Bar */}
-        <section className="py-6 bg-muted/40 border-b">
-          <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="rounded-xl bg-card border p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-primary/10 p-2.5 text-primary shrink-0">
-                  <BadgeCheck className="h-6 w-6" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold">Earn an Official Verified Certificate (€50)</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Optional digital credential with unique verification ID for CVs and LinkedIn.
-                  </p>
-                </div>
-              </div>
-              <a href="#courses" className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap">
-                Browse Courses <ArrowRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-        </section>
 
         {/* Course Catalog Section */}
         <section id="courses" className="py-12">
@@ -177,7 +181,7 @@ export default function TrainingsPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search courses..."
+                placeholder={t("trainings.search.placeholder")}
                 className="w-full rounded-full border bg-card pl-10 pr-4 py-2 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -217,14 +221,13 @@ export default function TrainingsPage() {
                         ))}
                       </div>
 
-                      <div className="pt-3 mt-auto flex items-center justify-between border-t text-xs">
-                        <span className="text-muted-foreground text-[11px]">{course.date}</span>
+                      <div className="pt-3 mt-auto flex items-center justify-end border-t text-xs">
                         <Button 
                           onClick={() => { setModalCourse(course); setRegSuccess(false); }}
                           size="sm" 
                           className="h-8 text-xs font-semibold px-3"
                         >
-                          Enroll Free
+                          {t("trainings.enroll.free")}
                         </Button>
                       </div>
                     </CardContent>
@@ -241,16 +244,16 @@ export default function TrainingsPage() {
             <div className="rounded-xl border bg-card p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
                 <div className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded mb-2">
-                  <Linkedin className="h-3 w-3" /> Guest Speakers Needed
+                  <Linkedin className="h-3 w-3" /> {t("trainings.speaker.badge")}
                 </div>
-                <h3 className="text-lg font-bold">Join as a Masterclass Trainer</h3>
+                <h3 className="text-lg font-bold">{t("trainings.speaker.title")}</h3>
                 <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                  Are you an expert in open science, grant writing, or peer review? Connect with our team to lead live sessions.
+                  {t("trainings.speaker.desc")}
                 </p>
               </div>
               <Button asChild variant="outline" className="shrink-0 text-xs gap-1.5">
                 <Link href="/contact">
-                  Apply to Teach <ArrowRight className="h-3.5 w-3.5" />
+                  {t("trainings.speaker.cta")} <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
             </div>
@@ -269,35 +272,34 @@ export default function TrainingsPage() {
             {regSuccess ? (
               <div className="text-center py-4 space-y-3">
                 <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
-                <h3 className="text-lg font-bold">Registration Confirmed</h3>
-                <p className="text-xs text-muted-foreground">Access details sent to your email.</p>
-                <Button onClick={() => setModalCourse(null)} size="sm" className="w-full">Close</Button>
+                <h3 className="text-lg font-bold">{t("trainings.modal.title.confirmed")}</h3>
+                <p className="text-xs text-muted-foreground">{t("trainings.modal.desc.confirmed")}</p>
+                <Button onClick={() => setModalCourse(null)} size="sm" className="w-full">{t("trainings.modal.button.close")}</Button>
               </div>
             ) : (
               <form onSubmit={(e) => { e.preventDefault(); setRegSuccess(true); }} className="space-y-3 text-xs">
                 <h3 className="text-base font-bold">{modalCourse.title}</h3>
-                <p className="text-muted-foreground text-[11px]">{modalCourse.duration} • {modalCourse.date}</p>
+                <p className="text-muted-foreground text-[11px]">{modalCourse.duration}</p>
 
                 <div>
-                  <label className="block font-semibold mb-1">Full Name *</label>
-                  <input type="text" required placeholder="Dr. Jane Doe" className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" />
+                  <label className="block font-semibold mb-1">{t("trainings.modal.field.name")}</label>
+                  <input type="text" required placeholder={t("trainings.modal.placeholder.name")} className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" />
                 </div>
 
                 <div>
-                  <label className="block font-semibold mb-1">Email *</label>
-                  <input type="email" required placeholder="researcher@univ.edu" className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" />
+                  <label className="block font-semibold mb-1">{t("trainings.modal.field.email")}</label>
+                  <input type="email" required placeholder={t("trainings.modal.placeholder.email")} className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" />
                 </div>
 
                 <div className="rounded border bg-muted/30 p-2.5 flex items-center gap-2">
                   <input type="checkbox" id="cert-toggle" checked={includeCert} onChange={(e) => setIncludeCert(e.target.checked)} />
                   <label htmlFor="cert-toggle" className="cursor-pointer text-[11px]">
-                    Include Verified Digital Certificate (€50)
+                    {t("trainings.modal.field.cert")}
                   </label>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <span className="font-bold">Total: {includeCert ? "€50" : "FREE"}</span>
-                  <Button type="submit" size="sm">Register Now</Button>
+                <div className="flex justify-end pt-2 border-t">
+                  <Button type="submit" size="sm">{t("trainings.modal.button.register")}</Button>
                 </div>
               </form>
             )}
