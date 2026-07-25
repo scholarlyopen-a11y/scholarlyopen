@@ -602,6 +602,17 @@ export const translations = {
     "trainings.course.authorship-rights.h2": "Rights retention templates",
     "trainings.course.authorship-rights.h3": "Creative Commons licensing",
 
+    // Learning Resources
+    "trainings.resources.title": "Learning Resources & Handouts",
+    "trainings.resources.subtitle": "Download practical checklists, manuscript templates, and cover letters to support your scientific writing and submission workflow.",
+    "trainings.resources.checklist.title": "Author Submission Checklist",
+    "trainings.resources.checklist.desc": "Verify formatting, ethical disclosures, citation structures, and metadata readiness before submitting your manuscript.",
+    "trainings.resources.rights.title": "Rights Retention Cover Letter",
+    "trainings.resources.rights.desc": "Template for authors to state rights retention and comply with funder mandates like Plan S under Creative Commons.",
+    "trainings.resources.template.title": "Manuscript Formatting Template",
+    "trainings.resources.template.desc": "A standard Microsoft Word & LaTeX layout guide to format sections, figures, citations, and reference structures.",
+    "trainings.resources.download": "Download File",
+
     // Language Toggle
     "language.en": "English",
     "language.de": "Deutsch",
@@ -1194,6 +1205,17 @@ export const translations = {
     "trainings.course.authorship-rights.h1": "Ausrichtung an CRediT-Taxonomie",
     "trainings.course.authorship-rights.h2": "Vorlagen zum Rechtevorhalt",
     "trainings.course.authorship-rights.h3": "Creative-Commons-Lizenzierung",
+
+    // Learning Resources
+    "trainings.resources.title": "Lernressourcen & Handouts",
+    "trainings.resources.subtitle": "Laden Sie praktische Checklisten, Manuskriptvorlagen und Anschreiben herunter, um Ihr wissenschaftliches Schreiben und Ihren Einreichungsprozess zu unterstützen.",
+    "trainings.resources.checklist.title": "Autoren-Checkliste für die Einreichung",
+    "trainings.resources.checklist.desc": "Überprüfen Sie Formatierung, ethische Offenlegungen, Zitierstrukturen und Metadaten-Bereitschaft vor dem Einreichen Ihres Manuskripts.",
+    "trainings.resources.rights.title": "Rechtevorhalt Anschreiben",
+    "trainings.resources.rights.desc": "Vorlage für Autoren zur Erklärung des Rechtevorhalts und zur Einhaltung von Richtlinien wie Plan S unter Creative Commons.",
+    "trainings.resources.template.title": "Manuskript-Formatierungsvorlage",
+    "trainings.resources.template.desc": "Eine Standard-Microsoft-Word- & LaTeX-Layoutanleitung zur Formatierung von Abschnitten, Abbildungen, Zitaten und Referenzstrukturen.",
+    "trainings.resources.download": "Datei herunterladen",
 
     // Language Toggle
     "language.en": "English",

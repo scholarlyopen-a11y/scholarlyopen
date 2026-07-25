@@ -16,7 +16,9 @@ import {
   BadgeCheck, 
   Linkedin,
   X,
-  Search
+  Search,
+  Download,
+  AlertCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -135,6 +137,53 @@ export default function TrainingsPage() {
   const [modalCourse, setModalCourse] = useState<Course | null>(null)
   const [includeCert, setIncludeCert] = useState(true)
   const [regSuccess, setRegSuccess] = useState(false)
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState("")
+
+  const openModal = (course: Course) => {
+    setModalCourse(course)
+    setRegSuccess(false)
+    setName("")
+    setEmail("")
+    setIsSubmitting(false)
+    setSubmitError("")
+  }
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!modalCourse) return
+
+    setIsSubmitting(true)
+    setSubmitError("")
+
+    try {
+      const response = await fetch("/api/register-webinar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          courseTitle: modalCourse.title,
+          includeCert,
+        }),
+      })
+
+      const data = await response.json()
+      if (response.ok && data.ok) {
+        setRegSuccess(true)
+      } else {
+        setSubmitError(data.error || "Something went wrong. Please try again.")
+      }
+    } catch (err) {
+      setSubmitError("Failed to connect to the email server. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const localizedCourses = getLocalizedCourses(t)
 
@@ -223,9 +272,9 @@ export default function TrainingsPage() {
 
                       <div className="pt-3 mt-auto flex items-center justify-end border-t text-xs">
                         <Button 
-                          onClick={() => { setModalCourse(course); setRegSuccess(false); }}
+                          onClick={() => openModal(course)}
                           size="sm" 
-                          className="h-8 text-xs font-semibold px-3"
+                          className="h-8 text-xs font-semibold px-3 cursor-pointer"
                         >
                           {t("trainings.enroll.free")}
                         </Button>
@@ -259,6 +308,86 @@ export default function TrainingsPage() {
             </div>
           </div>
         </section>
+
+        {/* Learning Resources & Handouts Section */}
+        <section className="py-12 bg-muted/10 border-t">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-10">
+              <h2 className="text-3xl font-bold tracking-tight">{t("trainings.resources.title")}</h2>
+              <p className="text-sm text-muted-foreground mt-2">
+                {t("trainings.resources.subtitle")}
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {/* Resource 1 */}
+              <Card className="flex flex-col h-full bg-card border shadow-xs hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="rounded-lg bg-primary/10 p-2.5 text-primary w-fit mb-3">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-base font-bold leading-snug">
+                    {t("trainings.resources.checklist.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col flex-grow text-xs text-muted-foreground">
+                  <p className="flex-grow">{t("trainings.resources.checklist.desc")}</p>
+                  <div className="pt-4 mt-auto">
+                    <Button asChild variant="outline" size="sm" className="w-full text-xs gap-1.5 h-9 font-medium cursor-pointer">
+                      <a href="/downloads/Scholarly_Open_Author_Checklist.txt" download>
+                        <Download className="h-3.5 w-3.5" /> {t("trainings.resources.download")}
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Resource 2 */}
+              <Card className="flex flex-col h-full bg-card border shadow-xs hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="rounded-lg bg-primary/10 p-2.5 text-primary w-fit mb-3">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-base font-bold leading-snug">
+                    {t("trainings.resources.rights.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col flex-grow text-xs text-muted-foreground">
+                  <p className="flex-grow">{t("trainings.resources.rights.desc")}</p>
+                  <div className="pt-4 mt-auto">
+                    <Button asChild variant="outline" size="sm" className="w-full text-xs gap-1.5 h-9 font-medium cursor-pointer">
+                      <a href="/downloads/Rights_Retention_Cover_Letter_Template.txt" download>
+                        <Download className="h-3.5 w-3.5" /> {t("trainings.resources.download")}
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Resource 3 */}
+              <Card className="flex flex-col h-full bg-card border shadow-xs hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="rounded-lg bg-primary/10 p-2.5 text-primary w-fit mb-3">
+                    <BookOpen className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-base font-bold leading-snug">
+                    {t("trainings.resources.template.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col flex-grow text-xs text-muted-foreground">
+                  <p className="flex-grow">{t("trainings.resources.template.desc")}</p>
+                  <div className="pt-4 mt-auto">
+                    <Button asChild variant="outline" size="sm" className="w-full text-xs gap-1.5 h-9 font-medium cursor-pointer">
+                      <a href="/downloads/Scholarly_Open_Manuscript_Template.txt" download>
+                        <Download className="h-3.5 w-3.5" /> {t("trainings.resources.download")}
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Enrollment Modal */}
@@ -277,18 +406,39 @@ export default function TrainingsPage() {
                 <Button onClick={() => setModalCourse(null)} size="sm" className="w-full">{t("trainings.modal.button.close")}</Button>
               </div>
             ) : (
-              <form onSubmit={(e) => { e.preventDefault(); setRegSuccess(true); }} className="space-y-3 text-xs">
+              <form onSubmit={handleRegisterSubmit} className="space-y-3 text-xs">
                 <h3 className="text-base font-bold">{modalCourse.title}</h3>
                 <p className="text-muted-foreground text-[11px]">{modalCourse.duration}</p>
 
+                {submitError && (
+                  <div className="rounded bg-destructive/10 text-destructive p-2.5 text-[11px] flex items-center gap-1.5 border border-destructive/20">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+
                 <div>
                   <label className="block font-semibold mb-1">{t("trainings.modal.field.name")}</label>
-                  <input type="text" required placeholder={t("trainings.modal.placeholder.name")} className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" />
+                  <input 
+                    type="text" 
+                    required 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={t("trainings.modal.placeholder.name")} 
+                    className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" 
+                  />
                 </div>
 
                 <div>
                   <label className="block font-semibold mb-1">{t("trainings.modal.field.email")}</label>
-                  <input type="email" required placeholder={t("trainings.modal.placeholder.email")} className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" />
+                  <input 
+                    type="email" 
+                    required 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t("trainings.modal.placeholder.email")} 
+                    className="w-full rounded border bg-background px-2.5 py-1.5 text-xs" 
+                  />
                 </div>
 
                 <div className="rounded border bg-muted/30 p-2.5 flex items-center gap-2">
@@ -299,7 +449,9 @@ export default function TrainingsPage() {
                 </div>
 
                 <div className="flex justify-end pt-2 border-t">
-                  <Button type="submit" size="sm">{t("trainings.modal.button.register")}</Button>
+                  <Button type="submit" size="sm" disabled={isSubmitting} className="cursor-pointer">
+                    {isSubmitting ? "Registering..." : t("trainings.modal.button.register")}
+                  </Button>
                 </div>
               </form>
             )}
