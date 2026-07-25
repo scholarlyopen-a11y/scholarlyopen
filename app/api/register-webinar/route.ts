@@ -90,6 +90,9 @@ Registration Date: ${new Date().toISOString()}
         user: smtpUser,
         pass: smtpPass,
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     })
 
     // Send confirmation to the user
