@@ -6,6 +6,7 @@ import nodemailer from "nodemailer"
 function requiredEnv(name: string) {
   const value = process.env[name]
   if (!value) {
+    console.error(`DIAGNOSTIC: Environment variable ${name} is missing or undefined!`)
     throw new Error(`Missing ${name}`)
   }
   return value
