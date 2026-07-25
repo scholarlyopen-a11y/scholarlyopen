@@ -212,3 +212,10 @@
     var(--cta-gradient-end) 100%
   );
 }
+
+@layer utilities {
+  .journal-hero-title {
+    @apply text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl text-balance leading-tight;
+  }
+}
+

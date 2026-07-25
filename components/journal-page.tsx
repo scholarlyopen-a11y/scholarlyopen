@@ -269,7 +269,7 @@ export function JournalPage({
                     {subtitle}
                   </span>
                 )}
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl text-balance leading-tight">
+                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-balance leading-tight">
                   {mainTitle}
                 </h1>
               </div>
@@ -283,7 +283,7 @@ export function JournalPage({
                 </div>
               </div>
             </div>
-            <p className={`mt-4 text-base sm:text-lg max-w-3xl leading-relaxed ${currentBrandTheme.subtext}`}>{heroDescription}</p>
+            <p className={`mt-2 text-base sm:text-lg max-w-3xl leading-relaxed ${currentBrandTheme.subtext}`}>{heroDescription}</p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button size="lg" variant="accent" asChild className="font-semibold shadow-md shadow-accent/15">
                 <Link href="/submit">
