@@ -106,9 +106,10 @@ export async function POST(request: Request) {
     }
   })
 
+  const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "info@scholarlyopen.org"
   await transporter.sendMail({
     from: smtpFrom,
-    to: recipient,
+    to: adminRecipient,
     replyTo: email,
     subject: mailSubject,
     text,

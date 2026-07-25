@@ -106,9 +106,10 @@ Registration Date: ${new Date().toISOString()}
     })
 
     // Send notification to admin
+    const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "info@scholarlyopen.org"
     await transporter.sendMail({
       from: smtpFrom,
-      to: recipient,
+      to: adminRecipient,
       subject: `New Webinar Registration: ${courseTitle}`,
       text: adminDetails,
     })
