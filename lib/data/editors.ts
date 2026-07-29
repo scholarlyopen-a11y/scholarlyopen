@@ -348,12 +348,6 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
         link: "https://doi.org/10.1371/journal.pone.0012181"
       },
       {
-        title: "Identification of Kynurenine Aminotransferase III, a Novel Member of a Phylogenetically Conserved KAT Family between C. elegans and Human",
-        journal: "Gene",
-        year: "2006",
-        link: "https://www.sciencedirect.com/science/article/abs/pii/S0378111905006426?via%3Dihub"
-      },
-      {
         title: "Joint mouse-human phenome-wide association to test gene function and disease risk",
         journal: "Nature Communications",
         year: "2016",
@@ -363,7 +357,7 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
         title: "Using Yeast Tools to Dissect the Action of Anticancer Drugs: Mechanisms of Enzyme Inhibition and Cell Killing by Agents Targeting Topoisomerases",
         journal: "Yeast as a Tool in Cancer Research (Springer)",
         year: "2007",
-        link: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2718919/"
+        link: "https://link.springer.com/chapter/10.1007/978-1-4020-5963-6_16"
       },
       {
         title: "A promoter polymorphism in the Per3 gene is associated with alcohol and stress response",
