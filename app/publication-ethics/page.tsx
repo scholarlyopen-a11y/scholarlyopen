@@ -15,10 +15,7 @@ import {
   UserX, 
   UserCheck,
   Sparkles,
-  CheckCircle2,
-  Lock,
-  FileCheck2,
-  Award
+  CheckCircle2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,13 +26,6 @@ export const metadata: Metadata = {
   title: "Publication Ethics & Integrity Policies | Scholarly Open",
   description: "Our commitment to publication ethics, COPE guidelines, ICMJE authorship standards, and modern research integrity policies including AI disclosure and paper mill prevention.",
 }
-
-const keyMetrics = [
-  { label: "COPE Core Practices", value: "100% Aligned", icon: Shield },
-  { label: "Authorship Standards", value: "ICMJE Compliant", icon: Award },
-  { label: "Plagiarism & AI Checks", value: "Automated Verification", icon: FileCheck2 },
-  { label: "Peer Review Model", value: "Double-Blind", icon: Lock },
-]
 
 const principles = [
   {
@@ -159,23 +149,8 @@ export default function PublicationEthicsPage() {
               </h1>
               
               <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-3xl font-normal">
-                Scholarly Open is committed to upholding world-class editorial integrity. Our framework integrates guidelines from the <strong>Committee on Publication Ethics (COPE)</strong> and <strong>ICMJE</strong> to safeguard research credibility and support author prestige.
+                Scholarly Open is committed to upholding world-class editorial integrity. Our framework integrates guidelines from the <strong>Committee on Publication Ethics (COPE)</strong> and the <strong>International Committee of Medical Journal Editors (ICMJE)</strong> to safeguard research credibility and support author prestige.
               </p>
-
-              {/* Metric Pill Grid */}
-              <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl">
-                {keyMetrics.map((metric, idx) => (
-                  <div key={idx} className="p-4 rounded-xl bg-card border border-border/80 shadow-xs flex items-center gap-3">
-                    <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                      <metric.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground font-medium">{metric.label}</div>
-                      <div className="text-sm font-bold text-foreground">{metric.value}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </section>
