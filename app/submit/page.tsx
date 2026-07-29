@@ -29,7 +29,7 @@ export default function SubmitPage() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const recipient = "submissions@scholarlyopen.org"
+  const recipient = "scholarlyopen@gmail.com"
 
   const submitToEditorialOffice = async (formData: FormData) => {
     const response = await fetch("/api/submit", { method: "POST", body: formData })
@@ -162,8 +162,8 @@ export default function SubmitPage() {
                       <h4 className="font-semibold">Need Help?</h4>
                       <p className="text-sm text-muted-foreground mt-1">
                         Contact our editorial office at{" "}
-                        <a href="mailto:submissions@scholarlyopen.org" className="text-primary hover:underline">
-                          submissions@scholarlyopen.org
+                        <a href="mailto:scholarlyopen@gmail.com" className="text-primary hover:underline">
+                          scholarlyopen@gmail.com
                         </a>
                       </p>
                     </div>
@@ -247,14 +247,24 @@ export default function SubmitPage() {
                           className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm"
                           required
                         >
-                          <option value="">Select a discipline</option>
-                          <option value="social-sciences-humanities">Social Sciences & Humanities</option>
-                          <option value="biology">Biology</option>
-                          <option value="chemistry">Chemistry</option>
-                          <option value="medicine">Medicine</option>
-                          <option value="data-science">Data Science</option>
-                          <option value="engineering">Engineering</option>
-                          <option value="environmental-science">Environmental Science</option>
+                          <option value="">Select a discipline / journal</option>
+                          <optgroup label="Core Series">
+                            <option value="social-sciences-humanities">Social Sciences & Humanities</option>
+                            <option value="biology">Biology</option>
+                            <option value="chemistry">Chemistry</option>
+                            <option value="medicine">Medicine</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="environmental-science">Environmental Science</option>
+                          </optgroup>
+                          <optgroup label="Emerging Frontiers Series">
+                            <option value="clinical-ai-digital-health">Clinical AI & Digital Health</option>
+                            <option value="ai-safety-governance">AI Safety & Governance</option>
+                            <option value="decarbonization-carbon-tech">Decarbonization & Carbon Tech</option>
+                            <option value="quantum-engineering">Quantum Engineering</option>
+                            <option value="synthetic-biology-bio-design">Synthetic Biology & Bio-Design</option>
+                            <option value="space-resources-orbital-economy">Space Resources & Orbital Economy</option>
+                          </optgroup>
                         </select>
                       </div>
                     </div>

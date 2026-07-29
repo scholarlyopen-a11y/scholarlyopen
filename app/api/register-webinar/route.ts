@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.CONTACT_TO ?? "info@scholarlyopen.org"
+    recipient = process.env.TRAINING_TO ?? process.env.CONTACT_TO ?? "training@scholarlyopen.org"
   } catch (err) {
     // Graceful fallback for local development if SMTP keys are not configured.
     console.warn("SMTP credentials are not configured. Registration will be simulated locally.")
@@ -58,7 +58,7 @@ Include Certificate of Completion: ${includeCert ? "Yes (Free)" : "No"}
 
 Meeting details (Zoom / Google Meet link) will be emailed to you 24 hours prior to the live session.
 
-If you have any questions, please contact our support team at info@scholarlyopen.org.
+If you have any questions, please contact our support team at training@scholarlyopen.org.
 
 Best regards,
 The Scholarly Open Team
@@ -79,7 +79,7 @@ Registration Date: ${new Date().toISOString()}
     // If SMTP is NOT configured, simulate the email sending to the terminal console
     if (!smtpHost || !smtpUser || !smtpPass || !smtpFrom) {
       console.log("\n[SIMULATED EMAIL SENT TO USER (" + email + ")]:\n", registrationDetails)
-      console.log("\n[SIMULATED EMAIL SENT TO ADMIN (" + (recipient || "info@scholarlyopen.org") + ")]:\n", adminDetails)
+      console.log("\n[SIMULATED EMAIL SENT TO ADMIN (" + (recipient || "training@scholarlyopen.org") + ")]:\n", adminDetails)
       return Response.json({ ok: true, simulated: true })
     }
 
@@ -105,7 +105,7 @@ Registration Date: ${new Date().toISOString()}
     })
 
     // Send notification to admin
-    const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "info@scholarlyopen.org"
+    const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "training@scholarlyopen.org"
     await transporter.sendMail({
       from: smtpFrom,
       to: adminRecipient,

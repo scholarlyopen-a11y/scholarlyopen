@@ -40,8 +40,20 @@ function journalLabel(value: string) {
       return "Engineering"
     case "environmental-science":
       return "Environmental Science"
+    case "clinical-ai-digital-health":
+      return "Clinical AI & Digital Health"
+    case "ai-safety-governance":
+      return "AI Safety & Governance"
+    case "decarbonization-carbon-tech":
+      return "Decarbonization & Carbon Tech"
+    case "quantum-engineering":
+      return "Quantum Engineering"
+    case "synthetic-biology-bio-design":
+      return "Synthetic Biology & Bio-Design"
+    case "space-resources-orbital-economy":
+      return "Space Resources & Orbital Economy"
     default:
-      return "Unspecified"
+      return value || "Unspecified"
   }
 }
 
@@ -59,7 +71,7 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.SUBMISSIONS_TO ?? "submissions@scholarlyopen.org"
+    recipient = process.env.SUBMISSIONS_TO ?? "scholarlyopen@gmail.com"
   } catch (err) {
     return Response.json(
       {
