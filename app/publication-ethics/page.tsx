@@ -1,22 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { 
-  ArrowRight, 
-  Shield, 
-  Users, 
-  FileText, 
-  AlertTriangle, 
-  Scale, 
-  Eye, 
-  Bot, 
-  ShieldAlert, 
-  ImageOff, 
-  Link2Off, 
-  UserX, 
-  UserCheck,
-  Sparkles,
-  CheckCircle2
-} from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -29,32 +13,26 @@ export const metadata: Metadata = {
 
 const principles = [
   {
-    icon: Shield,
     title: "Research Integrity",
     description: "All published research must be conducted ethically and transparently in accordance with global standards. Data must be accurately recorded and presented without fabrication or falsification.",
   },
   {
-    icon: Users,
     title: "ICMJE Authorship Criteria",
     description: "All listed authors must make substantial contributions to conception, data acquisition, or analysis, and approve the final manuscript. Ghost, gift, or commercial broker authorship is strictly prohibited.",
   },
   {
-    icon: FileText,
     title: "Originality & Novelty",
     description: "Submissions must present original research not published or under consideration elsewhere. Textual and conceptual plagiarism in any form is unacceptable.",
   },
   {
-    icon: AlertTriangle,
     title: "Competing Interests",
     description: "All financial, commercial, personal, or institutional conflicts of interest that could influence or be perceived to influence the research must be fully disclosed upon submission.",
   },
   {
-    icon: Scale,
     title: "Double-Blind Peer Review",
     description: "Peer review is conducted objectively, rigorously, and confidentially by qualified experts. Reviewers must declare competing interests and recuse themselves when appropriate.",
   },
   {
-    icon: Eye,
     title: "Scholarly Transparency",
     description: "Editorial decisions are based purely on academic merit and scientific quality. We maintain clear, COPE-aligned procedures for post-publication corrections, errata, and retractions.",
   },
@@ -62,37 +40,31 @@ const principles = [
 
 const modernSafeguards = [
   {
-    icon: Bot,
     title: "AI-Assisted Technologies & LLMs",
     description: "Generative AI tools (e.g. ChatGPT, Claude, Copilot) cannot meet ICMJE authorship criteria and cannot be credited as authors. Authors are welcome to use AI for language refinement, formatting, or coding provided it is declared in the manuscript. Authors remain 100% accountable for all content.",
     badge: "COPE & ICMJE Standard",
   },
   {
-    icon: ShieldAlert,
     title: "Paper Mill & Systematic Misconduct",
     description: "We enforce multi-factor pre-screening using automated submission pattern analysis, metadata verification, and institutional network checks to prevent paper mill manuscripts, fake datasets, or commercialized submission fraud.",
     badge: "Zero Tolerance",
   },
   {
-    icon: ImageOff,
     title: "Digital Image Forensics & Raw Data",
     description: "Figures undergo pre-publication pixel-level forensic screening to detect duplication, selective enhancement, or synthetic generation. Authors must retain and provide raw, unedited data (e.g., uncut gel scans, original microscopic fields) upon editorial request.",
     badge: "Forensic Screening",
   },
   {
-    icon: Link2Off,
     title: "Bibliometric & Citation Integrity",
     description: "Citations are cross-validated against Crossref and PubMed databases to filter out hallucinated AI references. We prohibit manipulative citation practices, including forced editor/reviewer citations or journal citation cartels.",
     badge: "Automated Validation",
   },
   {
-    icon: UserX,
     title: "Authorship Trading & Broker Safeguards",
     description: "Changes to authorship lists post-acceptance are strictly controlled and require written consent from all original authors and institutional verification. Commercial authorship brokers or paid position assignments result in immediate manuscript retraction.",
     badge: "ICMJE Standard",
   },
   {
-    icon: UserCheck,
     title: "Peer Reviewer Identity Verification",
     description: "To prevent compromised review rings or reciprocal reviewer pools, peer reviewers undergo institutional identity verification. Reviewers are prohibited from using unverified AI tools to write peer review reports.",
     badge: "Verified Identity",
@@ -135,7 +107,6 @@ export default function PublicationEthicsPage() {
       <main className="flex-1">
         {/* Aesthetic Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background border-b border-border py-16 lg:py-24">
-          <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
           <div className="mx-auto max-w-7xl px-4 lg:px-8 relative z-10">
             <div className="max-w-5xl">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
@@ -180,13 +151,10 @@ export default function PublicationEthicsPage() {
                 </div>
               </div>
               
-              {/* Styled Card */}
-              <div className="relative rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 p-8 border border-border shadow-sm">
-                <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
-                  <Shield className="h-32 w-32 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold mb-6 flex items-center gap-2.5 text-foreground">
-                  <CheckCircle2 className="h-5 w-5 text-primary" /> Core Governance Pillars
+              {/* Clean Card */}
+              <div className="rounded-2xl bg-card p-8 border border-border shadow-xs">
+                <h3 className="text-xl font-bold mb-6 text-foreground">
+                  Core Governance Pillars
                 </h3>
                 <ul className="space-y-4 text-sm text-muted-foreground">
                   <li className="flex items-start gap-3">
@@ -219,7 +187,7 @@ export default function PublicationEthicsPage() {
           </div>
         </section>
 
-        {/* Modern Integrity Safeguards Grid */}
+        {/* Modern Integrity Safeguards Grid (Clean Minimalist Cards - No Icons) */}
         <section className="py-16 lg:py-24 bg-muted/20 border-b border-border">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-3xl mb-12">
@@ -232,17 +200,14 @@ export default function PublicationEthicsPage() {
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {modernSafeguards.map((item) => (
-                <Card key={item.title} className="relative flex flex-col justify-between overflow-hidden border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300">
+                <Card key={item.title} className="relative flex flex-col justify-between border-border bg-card hover:border-primary/40 transition-colors">
                   <CardHeader>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                        <item.icon className="h-6 w-6 text-primary" />
-                      </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <CardTitle className="text-lg font-bold leading-snug">{item.title}</CardTitle>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full shrink-0 mt-0.5">
                         {item.badge}
                       </span>
                     </div>
-                    <CardTitle className="text-lg font-bold">{item.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="flex-1">
                     <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
@@ -256,27 +221,22 @@ export default function PublicationEthicsPage() {
         {/* AI Statement Guidelines Box */}
         <section className="py-16 lg:py-20 border-b border-border bg-background">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="max-w-4xl mx-auto rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-background p-8 shadow-sm">
-              <div className="flex items-start gap-4">
-                <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary mt-1">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground">How to Declare AI Assistance in Your Manuscript</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    Scholarly Open supports the transparent use of AI tools (such as ChatGPT, Grammarly, or Claude) for language refinement, copyediting, or coding assistance. Authors should include a brief statement in the <strong>Methods</strong>, <strong>Acknowledgements</strong>, or a dedicated <strong>AI Statement</strong> section prior to publication:
-                  </p>
-                  
-                  <div className="mt-4 p-4 rounded-xl bg-muted/60 border border-border text-xs text-foreground font-mono leading-relaxed relative">
-                    <span className="text-muted-foreground select-none">&quot;</span>Statement on AI Use: During the preparation of this manuscript, the author(s) utilized [Tool Name, Version] to [describe purpose, e.g., improve manuscript readability and syntax]. The author(s) reviewed and edited all generated content and assume full responsibility for the scientific integrity and factual accuracy of the published text.<span className="text-muted-foreground select-none">&quot;</span>
-                  </div>
+            <div className="max-w-4xl mx-auto rounded-2xl border border-primary/20 bg-card p-8 shadow-xs">
+              <div>
+                <h3 className="text-xl font-bold text-foreground">How to Declare AI Assistance in Your Manuscript</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Scholarly Open supports the transparent use of AI tools (such as ChatGPT, Grammarly, or Claude) for language refinement, copyediting, or coding assistance. Authors should include a brief statement in the <strong>Methods</strong>, <strong>Acknowledgements</strong>, or a dedicated <strong>AI Statement</strong> section prior to publication:
+                </p>
+                
+                <div className="mt-4 p-4 rounded-xl bg-muted/60 border border-border text-xs text-foreground font-mono leading-relaxed relative">
+                  <span className="text-muted-foreground select-none">&quot;</span>Statement on AI Use: During the preparation of this manuscript, the author(s) utilized [Tool Name, Version] to [describe purpose, e.g., improve manuscript readability and syntax]. The author(s) reviewed and edited all generated content and assume full responsibility for the scientific integrity and factual accuracy of the published text.<span className="text-muted-foreground select-none">&quot;</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Core Principles */}
+        {/* Core Principles (No Icons) */}
         <section className="py-16 lg:py-24 bg-muted/30 border-b border-border">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
@@ -290,10 +250,7 @@ export default function PublicationEthicsPage() {
               {principles.map((principle) => (
                 <Card key={principle.title} className="border-border bg-card">
                   <CardHeader>
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 text-primary">
-                      <principle.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg font-bold">{principle.title}</CardTitle>
+                    <CardTitle className="text-lg font-bold mb-2">{principle.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground leading-relaxed">{principle.description}</p>
@@ -304,7 +261,7 @@ export default function PublicationEthicsPage() {
           </div>
         </section>
 
-        {/* Responsibilities */}
+        {/* Stakeholder Responsibilities */}
         <section className="py-16 lg:py-24 border-b border-border bg-background">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="max-w-2xl mb-12">
@@ -316,9 +273,7 @@ export default function PublicationEthicsPage() {
             </div>
             <div className="grid gap-8 lg:grid-cols-3">
               <div className="p-6 rounded-2xl border border-border bg-card shadow-2xs">
-                <h3 className="text-xl font-bold mb-4 text-foreground flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" /> Authors
-                </h3>
+                <h3 className="text-xl font-bold mb-4 text-foreground">Authors</h3>
                 <ul className="space-y-3">
                   {responsibilities.authors.map((item, index) => (
                     <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground">
@@ -329,9 +284,7 @@ export default function PublicationEthicsPage() {
                 </ul>
               </div>
               <div className="p-6 rounded-2xl border border-border bg-card shadow-2xs">
-                <h3 className="text-xl font-bold mb-4 text-foreground flex items-center gap-2">
-                  <Scale className="h-5 w-5 text-accent" /> Peer Reviewers
-                </h3>
+                <h3 className="text-xl font-bold mb-4 text-foreground">Peer Reviewers</h3>
                 <ul className="space-y-3">
                   {responsibilities.reviewers.map((item, index) => (
                     <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground">
@@ -342,9 +295,7 @@ export default function PublicationEthicsPage() {
                 </ul>
               </div>
               <div className="p-6 rounded-2xl border border-border bg-card shadow-2xs">
-                <h3 className="text-xl font-bold mb-4 text-foreground flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-chart-3" /> Editors
-                </h3>
+                <h3 className="text-xl font-bold mb-4 text-foreground">Editors</h3>
                 <ul className="space-y-3">
                   {responsibilities.editors.map((item, index) => (
                     <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground">
