@@ -192,7 +192,7 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                       </Badge>
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground font-medium px-4">{editor.affiliation}</p>
+                  <p className="text-sm text-muted-foreground font-medium px-4 whitespace-pre-line">{editor.affiliation}</p>
                 </div>
 
                 <div className="w-full border-t border-slate-100 dark:border-slate-800/60" />

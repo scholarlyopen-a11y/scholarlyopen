@@ -4,7 +4,9 @@ import { articles } from "@/lib/data/articles"
 import { editors } from "@/lib/data/editors"
 
 export default function MedicinePage() {
-  const associateEditors = editors.filter(e => e.journalSlug === "medicine")
+  const associateEditors = editors.filter(e => e.journalSlug === "medicine" && (e.role === "Associate Editor" || e.role === "Editor-in-Chief"))
+  const editorialBoard = editors.filter(e => e.journalSlug === "medicine" && e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Medicine"
@@ -44,7 +46,8 @@ export default function MedicinePage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "medicine")}
       journalSlug="medicine"
-      associateEditors={associateEditors}
+      associateEditors={associateEditors.length > 0 ? associateEditors : undefined}
+      editorialBoard={editorialBoard.length > 0 ? editorialBoard : undefined}
     />
   )
 }

@@ -238,5 +238,140 @@ With over two decades of clinical and research experience, Dr. Gong has establis
         link: "https://doi.org/10.1016/j.isci.2025.112710"
       }
     ]
+  },
+  {
+    slug: "sam-lee",
+    name: "Sam Lee, M.D., Ph.D.",
+    role: "Editorial Board Member",
+    affiliation: "College of Doctoral Studies\nGrand Canyon University, USA",
+    specialization: "Healthcare Administration, Operations and Management; Health Services Research; Medicine & Evidence-Based Medicine",
+    email: "editor.med@scholarlyopen.org",
+    orcid: "0009-0009-6801-4031",
+    assignedSections: [
+      "Healthcare Administration & Quality",
+      "Evidence-Based Medicine",
+      "Health Services Research",
+      "Clinical Operations & Analytics"
+    ],
+    expertise: [
+      "Hospital Quality Improvement",
+      "Patient Safety",
+      "Predictive Analytics",
+      "Healthcare Data Analytics",
+      "Artificial Intelligence in Healthcare",
+      "Cancer Research",
+      "Neuroscience",
+      "Quantitative Research"
+    ],
+    badges: ["Founding Member"],
+    journalSlug: "medicine",
+    welcomeMessage: "As an Editorial Board Member for Scholarly Open: Medicine, I am dedicated to advancing evidence-based healthcare, health outcomes research, and healthcare quality improvement. I welcome high-impact research evaluating clinical effectiveness, healthcare operations, predictive analytics, and evidence synthesis.",
+    stats: [
+      { label: "Status", value: "Accepting Submissions", description: "Ready to review manuscripts" },
+      { label: "Avg. Turnaround", value: "21 Days", description: "From assignment to review completion" },
+      { label: "Review Standard", value: "Rigorous Double-Blind", description: "Ensuring evidence-based standards" }
+    ],
+    timeline: [
+      {
+        year: "1995",
+        title: "M.Sc. in Surgery",
+        description: "Shanghai Jiao Tong University School of Medicine (SJTUSM), Shanghai, China. Awarded Outstanding Master's Thesis Award.",
+        type: "education"
+      },
+      {
+        year: "1998",
+        title: "Ph.D. in Surgery (Medical Sciences)",
+        description: "Shanghai Jiao Tong University School of Medicine (SJTUSM), Shanghai, China. Awarded Ph.D. Candidate Scholarship & NSFC Grant.",
+        type: "education"
+      },
+      {
+        year: "1998-2000",
+        title: "General Surgeon & Assistant Professor",
+        description: "Shanghai Institute of Digestive Surgery, Shanghai Ruijin Hospital. Over 10 years of clinical surgical practice.",
+        type: "career"
+      },
+      {
+        year: "2000-2002",
+        title: "NIH Postdoctoral Fellow",
+        description: "National Institutes of Health (NIH), Bethesda, MD, USA. U.S.–China Exchange Scholar in cancer biology and epigenetics.",
+        type: "career"
+      },
+      {
+        year: "2002-2005",
+        title: "NIH Research Scholar Fellowship",
+        description: "Eunice Kennedy Shriver National Institute of Child Health and Human Development (NICHD), NIH, Bethesda, MD, USA.",
+        type: "career"
+      },
+      {
+        year: "2005-2007",
+        title: "Research Associate in Molecular Pharmacology",
+        description: "St. Jude Children's Research Hospital, Memphis, TN, USA. Investigated anticancer agent mechanisms targeting topoisomerases.",
+        type: "career"
+      },
+      {
+        year: "2007-2016",
+        title: "Research Associate in Genetics & Neurobiology",
+        description: "University of Tennessee Health Science Center (UTHSC), Memphis, TN, USA. Created BXD mouse brain RNA-seq dataset for UCSC Genome Browser.",
+        type: "career"
+      },
+      {
+        year: "2023-Present",
+        title: "Founder & Chief EBM Scientist",
+        description: "Applied Clinical EBM Institute (ACEI), Honolulu, HI, USA. Leading quantitative health services research and evidence synthesis.",
+        type: "career"
+      },
+      {
+        year: "2024-Present",
+        title: "DHA Candidate & Principal Investigator",
+        description: "College of Doctoral Studies, Grand Canyon University, Phoenix, AZ / Honolulu, HI, USA.",
+        type: "education"
+      },
+      {
+        year: "2026",
+        title: "Joined Scholarly Open",
+        description: "Appointed as Editorial Board Member for Scholarly Open: Medicine.",
+        type: "milestone"
+      }
+    ],
+    biography: `Dr. Sam Lee, MD, PhD, DHA Candidate, is an accomplished physician-scientist, healthcare administrator, and evidence-based medicine researcher with over 30 years of clinical, academic, and biomedical research experience across the United States, China, and international healthcare systems. He currently serves as Principal Investigator at Grand Canyon University and is the Founder and Chief EBM Scientist at the Applied Clinical EBM Institute (ACEI) in Honolulu, Hawaii.
+
+Currently a Doctor of Health Administration (DHA) candidate at the College of Doctoral Studies, Grand Canyon University (Phoenix, AZ / Honolulu, HI), Dr. Lee's doctoral research focuses on hospital-level organizational factors associated with risk-standardized mortality rates among U.S. acute care hospitals using publicly available CMS datasets.
+
+Dr. Lee earned his M.D. equivalent and completed surgical specialization at Shanghai Ruijin Hospital, affiliated with Shanghai Jiao Tong University School of Medicine (SJTUSM), practicing as a licensed General Surgeon for over ten years. He holds a Master of Science (M.Sc.) and a Ph.D. in Surgery (Medical Sciences) from SJTUSM. He conducted postdoctoral biomedical research as an NIH Postdoctoral Fellow and Research Scholar at the National Institutes of Health (NIH / NICHD / NIAID) in Bethesda, MD, and served as a Research Associate at St. Jude Children's Research Hospital and the University of Tennessee Health Science Center (UTHSC).
+
+His broad research portfolio spans evidence-based medicine (EBM), health services research, quantitative data analysis, healthcare quality improvement, cancer biology, epigenetics, and neurogenomics. Dr. Lee co-discovered Kynurenine Aminotransferase III (KAT III) and pioneered the first publicly searchable RNA-seq transcriptomic dataset for BXD mouse brains in the UCSC Genome Browser.`,
+    personalPublications: [
+      {
+        title: "A transposon in COMT generates mRNA variants and causes widespread expression and behavioral differences among mice",
+        journal: "PLoS ONE",
+        year: "2010",
+        link: "https://doi.org/10.1371/journal.pone.0012181"
+      },
+      {
+        title: "Identification of Kynurenine Aminotransferase III, a Novel Member of a Phylogenetically Conserved KAT Family between C. elegans and Human",
+        journal: "Gene",
+        year: "2006",
+        link: "https://www.sciencedirect.com/science/article/abs/pii/S0378111905006426?via%3Dihub"
+      },
+      {
+        title: "Joint mouse-human phenome-wide association to test gene function and disease risk",
+        journal: "Nature Communications",
+        year: "2016",
+        link: "https://doi.org/10.1038/ncomms10464"
+      },
+      {
+        title: "Using Yeast Tools to Dissect the Action of Anticancer Drugs: Mechanisms of Enzyme Inhibition and Cell Killing by Agents Targeting Topoisomerases",
+        journal: "Yeast as a Tool in Cancer Research (Springer)",
+        year: "2007",
+        link: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2718919/"
+      },
+      {
+        title: "A promoter polymorphism in the Per3 gene is associated with alcohol and stress response",
+        journal: "Translational Psychiatry",
+        year: "2012",
+        link: "https://www.nature.com/articles/tp201273"
+      }
+    ]
   }
 ]
+

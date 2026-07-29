@@ -74,7 +74,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
       
       <CardContent className="pt-0 flex-1 flex flex-col justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">{editor.affiliation}</p>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">{editor.affiliation}</p>
         </div>
         
         <Dialog>
@@ -100,7 +100,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                 <div className="min-w-0 text-left">
                   <DialogTitle className="text-lg font-bold text-foreground">{editor.name}</DialogTitle>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{editor.role}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{editor.affiliation}</p>
+                  <p className="text-xs text-muted-foreground mt-1 whitespace-pre-line">{editor.affiliation}</p>
                 </div>
               </div>
             </DialogHeader>
@@ -218,17 +218,7 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
             <div className="flex items-center flex-wrap gap-2">
               <h4 className="font-semibold text-sm text-foreground">{editor.name}</h4>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">{editor.affiliation}</p>
-            <p className="text-xs text-muted-foreground mt-0.5 italic">{editor.specialization}</p>
-            {editor.expertise && editor.expertise.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1.5">
-                {editor.expertise.slice(0, 3).map(exp => (
-                  <Badge key={exp} variant="outline" className="text-[9px] px-1.5 py-0 bg-accent/10 text-accent-foreground border-accent/20">
-                    {exp}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-line">{editor.affiliation}</p>
           </div>
         </button>
       </DialogTrigger>
@@ -249,7 +239,7 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
             <div className="min-w-0 text-left">
               <DialogTitle className="text-lg font-bold text-foreground">{editor.name}</DialogTitle>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{editor.role}</p>
-              <p className="text-xs text-muted-foreground mt-1">{editor.affiliation}</p>
+              <p className="text-xs text-muted-foreground mt-1 whitespace-pre-line">{editor.affiliation}</p>
             </div>
           </div>
         </DialogHeader>
@@ -345,40 +335,51 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
 
 export function JournalEditorialBoard({ 
   editorInChief, 
-  associateEditors, 
-  editorialBoard 
+  associateEditors = [], 
+  editorialBoard = [] 
 }: JournalEditorialBoardProps) {
   const { t } = useLanguage()
-  
+
+  const displayEic = editorInChief || {
+    name: "Position open",
+    role: "Editor-in-Chief",
+    affiliation: "Under formation",
+    specialization: "Currently appointing",
+  }
+
   return (
     <div className="space-y-12">
       {/* Editor-in-Chief */}
       <div>
         <h3 className="text-xl font-semibold mb-6">{t("editorial.editorInChief")}</h3>
         <div className="max-w-md">
-          <EditorCard editor={editorInChief} featured />
+          <EditorCard editor={displayEic} featured />
         </div>
       </div>
       
       {/* Associate Editors */}
-      <div>
-        <h3 className="text-xl font-semibold mb-6">{t("editorial.seniorEditors")}</h3>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {associateEditors.map((editor, index) => (
-            <EditorCard key={`${editor.role}-${index}`} editor={editor} />
-          ))}
+      {associateEditors.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-6">{t("editorial.seniorEditors")}</h3>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {associateEditors.map((editor, index) => (
+              <EditorCard key={`${editor.role}-${index}`} editor={editor} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       
       {/* Editorial Board */}
-      <div>
-        <h3 className="text-xl font-semibold mb-6">{t("editorial.boardMembers")}</h3>
-        <div className="grid gap-3 md:grid-cols-2">
-          {editorialBoard.map((editor, index) => (
-            <BoardMemberRow key={`${editor.role}-${index}`} editor={editor} />
-          ))}
+      {editorialBoard.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-6">{t("editorial.boardMembers")}</h3>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {editorialBoard.map((editor, index) => (
+              <EditorCard key={`${editor.role}-${index}`} editor={editor} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
