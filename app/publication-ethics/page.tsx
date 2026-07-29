@@ -158,27 +158,27 @@ export default function PublicationEthicsPage() {
                 </h3>
                 <ul className="space-y-3.5 text-sm text-muted-foreground">
                   <li className="flex items-start gap-3">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                     <span><strong className="text-foreground font-medium">Allegations Management:</strong> Confidential, flowchart-guided investigations.</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                     <span><strong className="text-foreground font-medium">Contributorship & Authorship:</strong> Strict ICMJE criteria preventing guest/ghost authorship.</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                     <span><strong className="text-foreground font-medium">Appeals & Inquiries:</strong> Open, fair appeal channels for all editorial outcomes.</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                     <span><strong className="text-foreground font-medium">Conflict Disclosure:</strong> Comprehensive competing interest declarations.</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                     <span><strong className="text-foreground font-medium">Data Reproducibility:</strong> Open data protocols and code availability requirements.</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                     <span><strong className="text-foreground font-medium">Record Preservation:</strong> Formal errata, corrigenda, and retraction procedures.</span>
                   </li>
                 </ul>
@@ -273,7 +273,7 @@ export default function PublicationEthicsPage() {
                 <ul className="space-y-3">
                   {responsibilities.authors.map((item, index) => (
                     <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                      <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -284,7 +284,7 @@ export default function PublicationEthicsPage() {
                 <ul className="space-y-3">
                   {responsibilities.reviewers.map((item, index) => (
                     <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-accent shrink-0 mt-2" />
+                      <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -295,7 +295,7 @@ export default function PublicationEthicsPage() {
                 <ul className="space-y-3">
                   {responsibilities.editors.map((item, index) => (
                     <li key={index} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-chart-3 shrink-0 mt-2" />
+                      <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
                       <span>{item}</span>
                     </li>
                   ))}
