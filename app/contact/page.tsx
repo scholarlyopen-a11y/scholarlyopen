@@ -39,7 +39,7 @@ export default function ContactPage() {
       details: [
         { label: t("contact.info.general"), value: "info@scholarlyopen.org" },
         { label: t("contact.info.editorial"), value: "editorial@scholarlyopen.org" },
-        { label: t("contact.info.submissions"), value: "submissions@scholarlyopen.org" },
+        { label: t("contact.info.submissions"), value: "scholarlyopen@gmail.com" },
       ],
     },
     {
