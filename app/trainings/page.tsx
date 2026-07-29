@@ -205,14 +205,14 @@ export default function TrainingsPage() {
           }}
         >
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="max-w-2xl">
+            <div className="max-w-5xl">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md mb-4 text-accent">
                 <GraduationCap className="h-4 w-4" /> {t("trainings.hero.badge")}
               </div>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white whitespace-nowrap">
                 {t("trainings.hero.title")}
               </h1>
-              <p className="mt-3 text-sm sm:text-base text-white/85 leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-white/85 leading-relaxed max-w-2xl">
                 {t("trainings.hero.subtitle")}
               </p>
             </div>
