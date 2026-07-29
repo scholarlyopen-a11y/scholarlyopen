@@ -10,7 +10,7 @@ import { useLanguage } from "@/lib/language-context"
 
 const apcDetails = [
   {
-    journal: "Social Sciences & Humanities Journal",
+    titleKey: "journals.ss.title",
     regularAPC: "1,200",
     currency: "EUR",
     includes: [
@@ -24,7 +24,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Biology Journal",
+    titleKey: "journals.bio.title",
     regularAPC: "1,450",
     currency: "EUR",
     includes: [
@@ -38,7 +38,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Chemistry Journal",
+    titleKey: "journals.chem.title",
     regularAPC: "1,450",
     currency: "EUR",
     includes: [
@@ -52,7 +52,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Medicine Journal",
+    titleKey: "journals.med.title",
     regularAPC: "2,200",
     currency: "EUR",
     includes: [
@@ -66,7 +66,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Data Science Journal",
+    titleKey: "journals.ds.title",
     regularAPC: "1,350",
     currency: "EUR",
     includes: [
@@ -80,7 +80,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Engineering Journal",
+    titleKey: "journals.eng.title",
     regularAPC: "1,350",
     currency: "EUR",
     includes: [
@@ -94,7 +94,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Environmental Science Journal",
+    titleKey: "journals.env.title",
     regularAPC: "1,300",
     currency: "EUR",
     includes: [
@@ -108,7 +108,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Clinical AI & Digital Health Journal",
+    titleKey: "journals.clinical-ai.title",
     regularAPC: "2,000",
     currency: "EUR",
     includes: [
@@ -122,7 +122,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "AI Safety & Governance Journal",
+    titleKey: "journals.ai-safety.title",
     regularAPC: "1,500",
     currency: "EUR",
     includes: [
@@ -136,7 +136,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Decarbonization & Carbon Tech Journal",
+    titleKey: "journals.decarbonization.title",
     regularAPC: "1,600",
     currency: "EUR",
     includes: [
@@ -150,7 +150,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Quantum Engineering Journal",
+    titleKey: "journals.quantum-engineering.title",
     regularAPC: "1,650",
     currency: "EUR",
     includes: [
@@ -164,7 +164,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Synthetic Biology & Bio-Design Journal",
+    titleKey: "journals.synthetic-biology.title",
     regularAPC: "1,700",
     currency: "EUR",
     includes: [
@@ -178,7 +178,7 @@ const apcDetails = [
     ],
   },
   {
-    journal: "Space Resources & Orbital Economy Journal",
+    titleKey: "journals.space-resources.title",
     regularAPC: "1,550",
     currency: "EUR",
     includes: [
@@ -310,9 +310,9 @@ export default function APCFeesPage() {
 
             <div className="grid gap-6 lg:grid-cols-3">
               {apcDetails.map((item) => (
-                <Card key={item.journal} className="relative overflow-hidden">
+                <Card key={item.titleKey} className="relative overflow-hidden">
                   <CardHeader>
-                    <CardTitle>{item.journal}</CardTitle>
+                    <CardTitle>{t(item.titleKey)}</CardTitle>
                     <div className="mt-4">
                       <span className="text-4xl font-bold">{item.currency} {item.regularAPC}</span>
                       <span className="text-muted-foreground ml-2">per article</span>
