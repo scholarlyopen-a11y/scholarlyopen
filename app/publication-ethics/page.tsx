@@ -158,8 +158,7 @@ export default function PublicationEthicsPage() {
                 <Shield className="h-4 w-4 text-primary" /> Research Integrity & Governance Standards
               </div>
               
-              {/* Main Heading forced to 1 Line on Medium/Large screens */}
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-foreground whitespace-nowrap overflow-x-auto scrollbar-none pb-1">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
                 Publication Ethics & Integrity Policies
               </h1>
               
