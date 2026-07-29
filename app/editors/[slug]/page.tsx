@@ -371,6 +371,12 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                   <div className="flex items-center gap-2 border-l-4 border-accent pl-3">
                     <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">Selected Publications</h2>
                   </div>
+                  {editor.publicationsNote && (
+                    <p className="text-xs text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-slate-900/70 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800/60 italic leading-relaxed">
+                      <span className="font-semibold not-italic text-slate-800 dark:text-slate-200 mr-1">Author Name Note:</span>
+                      {editor.publicationsNote}
+                    </p>
+                  )}
                   <div className="space-y-4">
                     {editor.personalPublications.map((pub, idx) => (
                       <div key={idx} className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-900/40 hover:bg-slate-50 dark:hover:bg-slate-900/85 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300 flex flex-col justify-between gap-3 group">

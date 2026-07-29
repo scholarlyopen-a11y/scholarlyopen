@@ -33,6 +33,7 @@ export interface EditorMember {
     doi?: string
     link?: string
   }[]
+  publicationsNote?: string
 }
 
 export const editors: EditorMember[] = [
@@ -340,6 +341,7 @@ Currently a Doctor of Health Administration (DHA) candidate at the College of Do
 Dr. Lee earned his M.D. equivalent and completed surgical specialization at Shanghai Ruijin Hospital, affiliated with Shanghai Jiao Tong University School of Medicine (SJTUSM), practicing as a licensed General Surgeon for over ten years. He holds a Master of Science (M.Sc.) and a Ph.D. in Surgery (Medical Sciences) from SJTUSM. He conducted postdoctoral biomedical research as an NIH Postdoctoral Fellow and Research Scholar at the National Institutes of Health (NIH / NICHD / NIAID) in Bethesda, MD, and served as a Research Associate at St. Jude Children's Research Hospital and the University of Tennessee Health Science Center (UTHSC).
 
 His broad research portfolio spans evidence-based medicine (EBM), health services research, quantitative data analysis, healthcare quality improvement, cancer biology, epigenetics, and neurogenomics. Dr. Lee co-discovered Kynurenine Aminotransferase III (KAT III) and pioneered the first publicly searchable RNA-seq transcriptomic dataset for BXD mouse brains in the UCSC Genome Browser.`,
+    publicationsNote: "Due to a legal name change, publications appear under my former name ZhengSheng Li and are indexed as Li, Z. or Li, D. Both names refer to the same author.",
     personalPublications: [
       {
         title: "A transposon in COMT generates mRNA variants and causes widespread expression and behavioral differences among mice",
