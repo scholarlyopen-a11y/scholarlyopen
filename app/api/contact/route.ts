@@ -56,7 +56,8 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.CONTACT_TO ?? "info@scholarlyopen.org"
+    const envContact = process.env.INFO_TO ?? process.env.CONTACT_TO
+    recipient = (envContact && !envContact.includes("training@scholarlyopen.org")) ? envContact : "info@scholarlyopen.org"
   } catch (err) {
     return Response.json(
       { ok: false, error: err instanceof Error ? err.message : "Email service not configured." },
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
     }
   })
 
-  const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "info@scholarlyopen.org"
+  const adminRecipient = (recipient && recipient.trim() !== "" && !recipient.includes("training@scholarlyopen.org")) ? recipient.trim() : "info@scholarlyopen.org"
   await transporter.sendMail({
     from: smtpFrom,
     to: adminRecipient,

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.TRAINING_TO ?? process.env.CONTACT_TO ?? "training@scholarlyopen.org"
+    recipient = process.env.TRAINING_TO ?? "training@scholarlyopen.org"
   } catch (err) {
     // Graceful fallback for local development if SMTP keys are not configured.
     console.warn("SMTP credentials are not configured. Registration will be simulated locally.")
