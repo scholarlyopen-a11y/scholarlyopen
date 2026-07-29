@@ -198,7 +198,7 @@ export function Footer() {
             <p className="mt-4 text-sm text-white/70 leading-relaxed">
               {t("brand.description")}
             </p>
-            <div className="mt-6 space-y-3 text-xs text-white/70">
+            <div className="mt-6 space-y-3 text-sm text-white/70">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
                 <a href="mailto:info@scholarlyopen.org" className="break-all hover:text-white transition-colors">

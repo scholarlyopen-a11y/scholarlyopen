@@ -125,7 +125,7 @@ export default function PeerReviewPage() {
                         </div>
                         <h3 className="text-xl font-semibold">{step.title}</h3>
                       </div>
-                      <p className="text-muted-foreground">{step.description}</p>
+                      <p className="text-base text-muted-foreground leading-relaxed">{step.description}</p>
                       
                       {/* Connector arrow for non-last items */}
                       {index < steps.length - 1 && (

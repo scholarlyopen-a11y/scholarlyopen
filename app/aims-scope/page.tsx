@@ -280,8 +280,8 @@ export default function AimsScopePage() {
                     <CheckCircle className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">{aim.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{aim.description}</p>
+                    <h3 className="text-base font-semibold text-foreground">{aim.title}</h3>
+                    <p className="mt-1.5 text-base text-muted-foreground leading-relaxed">{aim.description}</p>
                   </div>
                 </div>
               ))}

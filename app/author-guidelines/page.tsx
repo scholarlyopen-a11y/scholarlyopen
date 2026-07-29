@@ -192,10 +192,10 @@ export default function AuthorGuidelinesPage() {
                     <CardTitle>{section.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2">
+                    <ul className="space-y-2.5">
                       {section.items.map((item, index) => (
-                        <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                        <li key={index} className="flex items-start gap-2.5 text-base text-muted-foreground leading-relaxed">
+                          <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2.5" />
                           {item}
                         </li>
                       ))}

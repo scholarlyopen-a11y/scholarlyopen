@@ -72,8 +72,8 @@ export default function SubmitPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">
                   1
                 </div>
-                <h3 className="mt-4 font-semibold">Prepare</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <h3 className="mt-4 font-semibold text-base sm:text-lg text-foreground">Prepare</h3>
+                <p className="mt-2 text-base text-muted-foreground leading-relaxed">
                   Format your manuscript according to our Author Guidelines
                 </p>
               </div>
@@ -81,8 +81,8 @@ export default function SubmitPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">
                   2
                 </div>
-                <h3 className="mt-4 font-semibold">Details</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <h3 className="mt-4 font-semibold text-base sm:text-lg text-foreground">Details</h3>
+                <p className="mt-2 text-base text-muted-foreground leading-relaxed">
                   Provide corresponding author information and manuscript metadata
                 </p>
               </div>
@@ -90,8 +90,8 @@ export default function SubmitPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">
                   3
                 </div>
-                <h3 className="mt-4 font-semibold">Upload</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <h3 className="mt-4 font-semibold text-base sm:text-lg text-foreground">Upload</h3>
+                <p className="mt-2 text-base text-muted-foreground leading-relaxed">
                   Upload your manuscript file (.docx, .doc, or .pdf)
                 </p>
               </div>
@@ -99,8 +99,8 @@ export default function SubmitPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">
                   4
                 </div>
-                <h3 className="mt-4 font-semibold">Submit</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <h3 className="mt-4 font-semibold text-base sm:text-lg text-foreground">Submit</h3>
+                <p className="mt-2 text-base text-muted-foreground leading-relaxed">
                   Submit the form to send your research to our editorial office
                 </p>
               </div>

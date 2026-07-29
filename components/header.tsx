@@ -114,28 +114,28 @@ export function Header() {
           </button>
         </div>
 
-        <div className="hidden lg:flex lg:gap-x-0.5 xl:gap-x-1">
+        <div className="hidden lg:flex lg:gap-x-1 xl:gap-x-1.5">
           {navigation.map((item) =>
             item.children ? (
               <DropdownMenu key={item.name}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-xs xl:text-sm font-medium text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1 lg:px-1.5 xl:px-3">
+                  <Button variant="ghost" className="text-sm xl:text-base font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-2 xl:px-3 py-2">
                     {item.name}
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuContent align="start" className="w-60">
                   {item.isJournals ? (
                     <>
                       <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-xs">
+                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
                           Core Series
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent className="w-64">
                             {coreJournals.map((child) => (
                               <DropdownMenuItem key={child.name} asChild>
-                                <Link href={child.href} className="w-full cursor-pointer text-xs">
+                                <Link href={child.href} className="w-full cursor-pointer text-sm">
                                   {child.name}
                                 </Link>
                               </DropdownMenuItem>
@@ -147,14 +147,14 @@ export function Header() {
                       <DropdownMenuSeparator />
                       
                       <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-xs">
+                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
                           Emerging Frontiers
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent className="w-64">
                             {frontiersJournals.map((child) => (
                               <DropdownMenuItem key={child.name} asChild>
-                                <Link href={child.href} className="w-full cursor-pointer text-xs">
+                                <Link href={child.href} className="w-full cursor-pointer text-sm">
                                   {child.name}
                                 </Link>
                               </DropdownMenuItem>
@@ -166,7 +166,7 @@ export function Header() {
                   ) : (
                     item.children.map((child) => (
                       <DropdownMenuItem key={child.name} asChild>
-                        <Link href={child.href} className="w-full cursor-pointer">
+                        <Link href={child.href} className="w-full cursor-pointer text-sm">
                           {child.name}
                         </Link>
                       </DropdownMenuItem>
@@ -178,7 +178,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-1 lg:px-1.5 xl:px-3 py-2 text-xs xl:text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
+                className="px-2 xl:px-3 py-2 text-sm xl:text-base font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
               >
                 {item.name}
               </Link>
@@ -190,8 +190,8 @@ export function Header() {
           {/* Language Toggle Desktop */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-1.5 xl:px-3">
-                <Globe className="h-4 w-4 mr-1" />
+              <Button variant="ghost" size="sm" className="text-sm font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 px-2 xl:px-3">
+                <Globe className="h-4 w-4 mr-1.5" />
                 {language.toUpperCase()}
               </Button>
             </DropdownMenuTrigger>

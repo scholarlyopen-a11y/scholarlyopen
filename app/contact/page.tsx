@@ -174,19 +174,19 @@ export default function ContactPage() {
                   <CardContent>
                     <div className="space-y-2">
                       {item.details.map((detail, idx) => (
-                        <div key={idx} className="text-sm">
+                        <div key={idx} className="text-base">
                           {detail.label && (
                             <span className="text-muted-foreground">{detail.label}: </span>
                           )}
                           {detail.value.includes('@') ? (
                             <a 
                               href={`mailto:${detail.value}`} 
-                              className="text-primary hover:underline"
+                              className="text-primary hover:underline font-medium"
                             >
                               {detail.value}
                             </a>
                           ) : (
-                            <span className="text-foreground">{detail.value}</span>
+                            <span className="text-foreground font-medium">{detail.value}</span>
                           )}
                         </div>
                       ))}

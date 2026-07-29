@@ -255,29 +255,29 @@ export default function APCFeesPage() {
                   </div>
                   When is the APC charged?
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
+                <p className="mt-3 text-base text-muted-foreground leading-relaxed">
                   APCs are only charged after your manuscript has been accepted for publication following peer review. There are no submission or review fees.
                 </p>
               </div>
               <div className="p-6 rounded-lg bg-muted/50 border border-border">
-                <div className="flex items-center gap-2 font-semibold">
+                <div className="flex items-center gap-2 font-semibold text-foreground">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
                     <Info className="h-4 w-4 text-primary" />
                   </div>
                   What does the APC cover?
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
+                <p className="mt-3 text-base text-muted-foreground leading-relaxed">
                   The APC covers peer review management, copyediting, typesetting, DOI registration, hosting, archiving, and ongoing accessibility.
                 </p>
               </div>
               <div className="p-6 rounded-lg bg-muted/50 border border-border">
-                <div className="flex items-center gap-2 font-semibold">
+                <div className="flex items-center gap-2 font-semibold text-foreground">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
                     <Info className="h-4 w-4 text-primary" />
                   </div>
                   Who pays the APC?
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
+                <p className="mt-3 text-base text-muted-foreground leading-relaxed">
                   APCs can be paid by authors, their institutions, research funders, or through institutional agreements. Many funders allow APCs as legitimate research costs.
                 </p>
               </div>
