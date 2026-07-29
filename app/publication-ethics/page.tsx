@@ -154,10 +154,6 @@ export default function PublicationEthicsPage() {
           <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
           <div className="mx-auto max-w-7xl px-4 lg:px-8 relative z-10">
             <div className="max-w-5xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold uppercase tracking-wider mb-6 shadow-sm">
-                <Shield className="h-4 w-4 text-primary" /> Research Integrity & Governance Standards
-              </div>
-              
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
                 Publication Ethics & Integrity Policies
               </h1>
