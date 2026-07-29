@@ -66,42 +66,36 @@ const modernSafeguards = [
     title: "AI-Assisted Technologies & LLMs",
     description: "Generative AI tools (e.g. ChatGPT, Claude, Copilot) cannot meet ICMJE authorship criteria and cannot be credited as authors. Authors are welcome to use AI for language refinement, formatting, or coding provided it is declared in the manuscript. Authors remain 100% accountable for all content.",
     badge: "COPE & ICMJE Standard",
-    color: "from-blue-500/10 to-indigo-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400",
   },
   {
     icon: ShieldAlert,
     title: "Paper Mill & Systematic Misconduct",
     description: "We enforce multi-factor pre-screening using automated submission pattern analysis, metadata verification, and institutional network checks to prevent paper mill manuscripts, fake datasets, or commercialized submission fraud.",
     badge: "Zero Tolerance",
-    color: "from-red-500/10 to-rose-500/10 border-red-500/20 text-red-600 dark:text-red-400",
   },
   {
     icon: ImageOff,
     title: "Digital Image Forensics & Raw Data",
     description: "Figures undergo pre-publication pixel-level forensic screening to detect duplication, selective enhancement, or synthetic generation. Authors must retain and provide raw, unedited data (e.g., uncut gel scans, original microscopic fields) upon editorial request.",
     badge: "Forensic Screening",
-    color: "from-amber-500/10 to-orange-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400",
   },
   {
     icon: Link2Off,
     title: "Bibliometric & Citation Integrity",
     description: "Citations are cross-validated against Crossref and PubMed databases to filter out hallucinated AI references. We prohibit manipulative citation practices, including forced editor/reviewer citations or journal citation cartels.",
     badge: "Automated Validation",
-    color: "from-emerald-500/10 to-teal-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400",
   },
   {
     icon: UserX,
     title: "Authorship Trading & Broker Safeguards",
     description: "Changes to authorship lists post-acceptance are strictly controlled and require written consent from all original authors and institutional verification. Commercial authorship brokers or paid position assignments result in immediate manuscript retraction.",
     badge: "ICMJE Standard",
-    color: "from-purple-500/10 to-violet-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400",
   },
   {
     icon: UserCheck,
     title: "Peer Reviewer Identity Verification",
     description: "To prevent compromised review rings or reciprocal reviewer pools, peer reviewers undergo institutional identity verification. Reviewers are prohibited from using unverified AI tools to write peer review reports.",
     badge: "Verified Identity",
-    color: "from-sky-500/10 to-cyan-500/10 border-sky-500/20 text-sky-600 dark:text-sky-400",
   },
 ]
 
@@ -241,8 +235,8 @@ export default function PublicationEthicsPage() {
                 <Card key={item.title} className="relative flex flex-col justify-between overflow-hidden border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${item.color} border flex items-center justify-center`}>
-                        <item.icon className="h-6 w-6" />
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                        <item.icon className="h-6 w-6 text-primary" />
                       </div>
                       <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
                         {item.badge}
