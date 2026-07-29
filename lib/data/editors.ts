@@ -365,7 +365,7 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
         title: "A promoter polymorphism in the Per3 gene is associated with alcohol and stress response",
         journal: "Translational Psychiatry",
         year: "2012",
-        link: "https://www.nature.com/articles/tp201273"
+        link: "https://www.nature.com/articles/tp201171"
       }
     ]
   }
