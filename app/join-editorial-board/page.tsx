@@ -90,6 +90,12 @@ export default function JoinEditorialBoardPage() {
       desc: t("join.roleEBMDesc") 
     },
     { 
+      id: "reviewer", 
+      value: "Reviewer",
+      title: t("join.roleReviewer"), 
+      desc: t("join.roleReviewerDesc") 
+    },
+    { 
       id: "eceb", 
       value: "Early Career Editorial Board",
       title: t("join.roleECEB"), 
@@ -273,8 +279,15 @@ export default function JoinEditorialBoardPage() {
                           </label>
                           <div className="relative">
                             <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="cvUrl" name="cvUrl" type="url" placeholder="https://orcid.org/0000-0000-0000-0000" className="pl-10" required />
+                            <Input id="cvUrl" name="cvUrl" type="url" placeholder="https://orcid.org/0000-0000-0000-0000" className="pl-10" />
                           </div>
+                          <p className="text-xs text-muted-foreground text-center my-2 uppercase font-medium tracking-wider">
+                            — {t("join.form.or")} —
+                          </p>
+                          <label htmlFor="cvFile" className="text-sm font-semibold">
+                            {t("join.form.labelCVFile")}
+                          </label>
+                          <Input id="cvFile" name="cvFile" type="file" accept=".pdf,.doc,.docx" className="cursor-pointer file:text-sm file:font-semibold file:bg-primary/10 file:text-primary file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-4 hover:file:bg-primary/20" />
                         </div>
                         
                         <div className="flex items-start gap-3 pt-2">

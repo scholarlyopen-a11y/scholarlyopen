@@ -53,6 +53,8 @@ export async function POST(request: Request) {
   const expertise = safeText(formData.get("expertise"), 5000)
   const cvUrl = safeText(formData.get("cvUrl"), 500)
   const privacy = safeText(formData.get("privacy"), 10)
+  
+  const cvFile = formData.get("cvFile") as File | null
 
   if (!fullName || !email || !role || !journal || !expertise) {
     return Response.json({ ok: false, error: "Missing required fields." }, { status: 400 })
@@ -77,6 +79,16 @@ export async function POST(request: Request) {
     expertise,
   ].join("\n")
 
+  const attachments = []
+  if (cvFile && cvFile.size > 0) {
+    const arrayBuffer = await cvFile.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    attachments.push({
+      filename: cvFile.name,
+      content: buffer,
+    })
+  }
+
   const transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
@@ -97,6 +109,7 @@ export async function POST(request: Request) {
     replyTo: email,
     subject: mailSubject,
     text,
+    attachments,
   })
 
   return Response.json({ ok: true })
