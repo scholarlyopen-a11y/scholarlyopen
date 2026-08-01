@@ -388,6 +388,25 @@ export default function TrainingsPage() {
             </div>
           </div>
         </section>
+
+        {/* Call for Trainers Section */}
+        <section className="py-14 bg-muted/20 border-t border-border">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8 text-center max-w-3xl">
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Join Scholarly Open Academy</span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-2">Become a Masterclass Instructor</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
+              Are you an experienced researcher, editor, peer reviewer, or academic communicator? Join our global panel of instructors conducting masterclasses on AI in research, grant writing, scientific publishing, and data analysis.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
+              <Button size="default" variant="default" asChild>
+                <a href="mailto:training@scholarlyopen.org?subject=Trainer%20Application%20-%20Scholarly%20Open%20Academy">
+                  Apply as a Trainer
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Enrollment Modal */}

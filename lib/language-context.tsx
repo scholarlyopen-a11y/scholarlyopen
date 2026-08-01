@@ -31,24 +31,24 @@ export const translations = {
     "nav.openAccess": "Open Access Policy",
     "nav.goldOA": "Gold Open Access",
     "nav.hybridOA": "Hybrid Open Access",
-    
+
     // Brand
     "brand.name": "Scholarly Open",
     "brand.tagline": "Unbound. Transparent. Accessible.",
     "brand.description": "A Gold Open Access academic publishing and research training platform dedicated to advancing knowledge and research integrity.",
-    
+
     // Hero Section
     "hero.title": "Advancing Knowledge Through Open Access",
     "hero.subtitle": "Scholarly Open is a Gold Open Access publishing and research training platform. We publish peer-reviewed, high-quality journals across key disciplines and host open-access training sessions to educate the global scientific community on research integrity and workflows.",
     "hero.cta.submit": "Submit Your Research",
     "hero.cta.learn": "Learn More",
-    
+
     // Stats
     "stats.openAccess": "Open Access",
     "stats.journals": "Journals",
     "stats.reach": "Reach",
     "stats.guidelines": "Guidelines",
-    
+
     // Journals Section
     "journals.title": "Our Journals",
     "journals.subtitle": "We publish high-quality research across our core disciplines and our new Emerging Frontiers Series, all offering Gold open access.",
@@ -79,7 +79,7 @@ export const translations = {
     "journals.synthetic-biology.description": "De novo bio-design, CRISPR therapeutics, cell-free biomanufacturing, and metabolic pathways.",
     "journals.space-resources.title": "Scholarly Open: Space Resources & Orbital Economy",
     "journals.space-resources.description": "In-situ lunar/asteroid resource utilization, space logistics, orbital debris, and space law.",
-    
+
     // Features
     "features.title": "Why Publish With Us",
     "features.subtitle": "We combine academic rigor with modern publishing practices to maximize the impact of your research.",
@@ -91,7 +91,7 @@ export const translations = {
     "features.rapidPublication.description": "Efficient editorial process with fast turnaround from submission to publication.",
     "features.editorialBoard.title": "International Editorial Board",
     "features.editorialBoard.description": "Distinguished scholars from leading institutions across the globe.",
-    
+
     // Open Access Models
     "oaModels.title": "Open Access Publishing",
     "oaModels.subtitle": "Publishing Model",
@@ -103,13 +103,13 @@ export const translations = {
     "oaModels.learnMore": "Learn About Our OA Policy",
     "oaModels.accessible": "Making research accessible to all",
     "oaModels.fromMainz": "Connecting researchers worldwide",
-    
+
     // CTA Section
     "cta.title": "Ready to Share Your Research?",
     "cta.subtitle": "Join researchers worldwide who trust Scholarly Open to publish their work with integrity and impact.",
     "cta.submit": "Submit Manuscript",
     "cta.guidelines": "Author Guidelines",
-    
+
     // Footer
     "footer.journals": "Journals",
     "footer.forAuthors": "For Authors",
@@ -120,7 +120,7 @@ export const translations = {
     "footer.privacy": "Privacy Policy",
     "footer.impressum": "Impressum",
     "footer.archiving": "Archiving & Indexing",
-    
+
     // Compliance
     "compliance.title": "Compliance & Standards",
     "compliance.doaj": "DOAJ Guidelines",
@@ -129,7 +129,7 @@ export const translations = {
     "compliance.ccby": "CC BY 4.0 License",
     "compliance.issn": "ISSN Registered",
     "compliance.oaspa": "OASPA Member",
-    
+
     // Editorial Board
     "editorial.title": "Editorial Board",
     "editorial.subtitle": "Our distinguished editorial board comprises leading scholars from renowned institutions worldwide, ensuring the highest standards of peer review and editorial excellence.",
@@ -141,6 +141,34 @@ export const translations = {
     "editorial.joinTeam": "Join Our Editorial Team",
     "editorial.joinTeamSubtitle": "We are always looking for distinguished scholars to join our editorial board. If you are interested in contributing to the advancement of open access, we would love to hear from you.",
     "editorial.expressInterest": "Express Interest",
+
+    // Join Editorial Board Form
+    "join.heroTitle": "Join Our Editorial Board",
+    "join.heroSubtitle": "We are looking for dedicated scholars to help shape the future of open access publishing.",
+    "join.roleEIC": "Editor-in-Chief (EIC)",
+    "join.roleEICDesc": "Overseeing the journal's strategic direction, managing the editorial board, making final decisions on manuscripts, and maintaining the journal's quality and scope.",
+    "join.roleAE": "Associate Editor",
+    "join.roleAEDesc": "Handling the peer review process for assigned manuscripts, selecting appropriate reviewers, and making recommendations to the EIC based on reviewer reports.",
+    "join.roleEBM": "Editorial Board Member",
+    "join.roleEBMDesc": "Advising on journal policy, acting as an ambassador for the journal, occasionally reviewing papers in their expertise, and encouraging submissions from colleagues.",
+    "join.roleReviewer": "Reviewer",
+    "join.roleReviewerDesc": "Providing timely, objective, and constructive feedback on manuscripts, helping editors make informed decisions, and maintaining the confidentiality of the review process.",
+
+    "join.form.title": "Application Form",
+    "join.form.subtitle": "Please provide your details below and we will review your application.",
+    "join.form.labelName": "Full Name *",
+    "join.form.labelEmail": "Email Address *",
+    "join.form.labelAffiliation": "Institution / Affiliation *",
+    "join.form.labelRole": "Role Applied For *",
+    "join.form.labelJournal": "Journal of Interest *",
+    "join.form.labelExpertise": "Area of Expertise *",
+    "join.form.labelCV": "Link to CV / Academic Profile",
+    "join.form.submit": "Submit Application",
+    "join.form.submitting": "Submitting...",
+    "join.form.successTitle": "Application Received",
+    "join.form.successDesc": "Thank you for your interest in joining our editorial board. We will review your application and get back to you shortly.",
+    "join.form.successButton": "Submit Another Application",
+
     "editorial.discipline.socialSciences": "Social Sciences & Humanities",
     "editorial.discipline.archaeology": "Archaeology",
     "editorial.discipline.medicalSciences": "Medical Sciences",
@@ -164,15 +192,15 @@ export const translations = {
     "editorial.member.med2.specialization": "Infectious Diseases",
     "editorial.member.med3.specialization": "Biomedical Research",
     "editorial.member.med4.specialization": "Pharmaceutical Sciences",
-    
+
     // About Page
     "about.title": "About Scholarly Open",
     "about.subtitle": "Scholarly Open is an international open-access publisher dedicated to advancing knowledge through rigorous peer review and open access.",
-    
+
     // Contact
     "contact.title": "Contact Us",
     "contact.subtitle": "Get in touch with our editorial team.",
-    
+
     // Articles
     "articles.title": "Articles",
     "articles.latest": "Latest Articles",
@@ -187,7 +215,7 @@ export const translations = {
     "articles.fullText": "Full Text",
     "articles.pdf": "Download PDF",
     "articles.cite": "Cite",
-    
+
     // Journal Page
     "journal.about": "About the Journal",
     "journal.aboutText": "Scholarly Open publishes highly relevant and FAIR-aligned research across our journals. We focus on transparent processes, rapid dissemination, and strong author support.",
@@ -196,7 +224,7 @@ export const translations = {
     "journal.submitTo": "Submit to",
     "journal.submitText": "Please review our author guidelines and prepare your manuscript according to our submission requirements. We welcome original research, reviews, and methodological contributions that support FAIR scholarship.",
     "journal.startSubmission": "Start Submission",
-    
+
     // About Page Content
     "about.heroTitle": "About Scholarly Open",
     "about.heroSubtitle": "We are a Gold Open Access publishing and research training platform committed to advancing scholarly communication and equipping researchers with modern academic skills and ethical publishing workflows.",
@@ -208,7 +236,7 @@ export const translations = {
     "about.visionTitle": "A More Open Future",
     "about.visionP1": "We envision a transparent, accessible, and ethical research ecosystem where publication barriers are removed and all scientists have the skills and resources to publish with complete integrity.",
     "about.visionP2": "Through continuous innovation in publishing technology and processes, we strive to create a sustainable and equitable publishing ecosystem that serves the global research community.",
-    
+
     "about.valuesTitle": "Our Core Values",
     "about.valuesSub": "These principles guide everything we do at Scholarly Open.",
     "about.value1.title": "Integrity",
@@ -237,7 +265,7 @@ export const translations = {
     "about.communityTitle": "Join Our Community",
     "about.communitySub": "Whether as an author, reviewer, or editorial board member, we welcome your participation in advancing open scholarship.",
     "about.communitySubmit": "Submit Your Research",
-    
+
     // Contact Page Content
     "contact.heroTitle": "Contact Us",
     "contact.heroSubtitle": "Have questions about submitting your research, our peer review process, or open access policies? Our team is here to help.",
@@ -251,7 +279,7 @@ export const translations = {
     "contact.info.weekday": "Monday - Friday",
     "contact.info.weekend": "Saturday - Sunday",
     "contact.info.weekendVal": "Closed",
-    
+
     "contact.deptsTitle": "Department Contacts",
     "contact.deptsSub": "For faster response, please contact the appropriate department directly.",
     "contact.dept1.desc": "For manuscript-related inquiries, peer review questions, and editorial decisions.",
@@ -272,13 +300,13 @@ export const translations = {
     "contact.form.sentTitle": "Message Sent",
     "contact.form.sentDesc": "Thank you for contacting us. We will respond within 1-2 business days.",
     "contact.form.sentButton": "Send Another Message",
-    
+
     "contact.form.labelName": "Full Name *",
     "contact.form.labelEmail": "Email Address *",
     "contact.form.labelAffiliation": "Institution / Organization",
     "contact.form.labelSubject": "Subject *",
     "contact.form.labelMessage": "Message *",
-    
+
     "contact.form.optDefault": "Select a subject",
     "contact.form.optSubmission": "Manuscript Submission",
     "contact.form.optReview": "Peer Review Status",
@@ -288,12 +316,12 @@ export const translations = {
     "contact.form.optEthics": "Research Integrity & Ethics Concerns",
     "contact.form.optPartner": "Partnership / Collaboration",
     "contact.form.optOther": "Other",
-    
+
     "contact.form.privacyConsent": "I consent to the processing of my personal data for the purpose of handling my inquiry.",
     "contact.form.privacyRead": "I have read and agree to the",
     "contact.form.buttonSend": "Send Message",
     "contact.form.buttonSending": "Sending...",
-    
+
     "contact.map.title": "Global Reach",
     "contact.map.subtitle": "Scholarly Open serves researchers worldwide, connecting scholars across all continents.",
     "contact.map.basedIn": "Based in Mainz, Germany",
@@ -613,6 +641,35 @@ export const translations = {
     "trainings.resources.template.desc": "A standard Microsoft Word & LaTeX layout guide to format sections, figures, citations, and reference structures.",
     "trainings.resources.download": "Download File",
 
+    // Join Editorial Board
+    "join.heroTitle": "Join Our Editorial Board",
+    "join.heroSubtitle": "We are seeking distinguished academics to help shape the future of scholarly publishing. Apply to join our editorial team and support rigorous, transparent open access research.",
+    "join.roleEIC": "Editor-in-Chief",
+    "join.roleEICDesc": "As Editor-in-Chief, you will guide the strategic and editorial direction of the journal.<br/><br/>Key responsibilities include:<ul><li>Overseeing the peer-review process and making final decisions on manuscript acceptance.</li><li>Collaborating with the internal editorial office to uphold strict ethical standards and academic integrity.</li><li>Leading journal development initiatives and proposing new strategic directions.</li><li>Serving as the primary ambassador for the journal within the academic community.</li><li>Encouraging high-quality submissions and contributing your own scholarly work where appropriate.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Term & Benefits:</p><ul><li>Initial 2-year appointment.</li><li>25% discount on Article Processing Charges (APCs) for your own submissions.</li><li>Full academic independence and recognition on the journal page.</li></ul>",
+    "join.roleAE": "Associate Editor",
+    "join.roleAEDesc": "Associate Editors support the Editor-in-Chief by managing the peer-review process for assigned manuscripts.<br/><br/>Your duties include:<ul><li>Managing the peer review process, including identifying and inviting qualified reviewers.</li><li>Evaluating reviewer reports and making detailed editorial recommendations.</li><li>Upholding ethical standards and academic integrity in all decisions.</li><li>Promoting the journal and encouraging high-quality submissions within your network.</li><li>Mentoring Early Career Editorial Board members through transparent co-reviewing.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Term & Benefits:</p><ul><li>Initial 2-year appointment.</li><li>25% discount on Article Processing Charges (APCs) for your own submissions.</li><li>Full academic independence and recognition on the journal page.</li></ul>",
+    "join.roleEBM": "Editorial Board Member",
+    "join.roleEBMDesc": "Editorial Board Members play a vital role in maintaining the journal's academic rigor and strategic direction.<br/><br/>Responsibilities include:<ul><li>Providing expert, timely reviews for submitted manuscripts within your field.</li><li>Upholding ethical standards and academic integrity in all decisions.</li><li>Supporting the journal’s scope, quality, and strategic development.</li><li>Promoting the journal and encouraging high-quality submissions through academic and social networks.</li><li>Contributing your own high-quality scholarly work where appropriate.</li><li>Mentoring young scientists in the peer-review process.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Term & Benefits:</p><ul><li>Initial 2-year appointment.</li><li>25% discount on Article Processing Charges (APCs) for your own submissions.</li><li>Full academic independence and recognition on the journal page.</li></ul>",
+    "join.roleECEB": "Early Career Editorial Board",
+    "join.roleECEBDesc": "The Early Career Editorial Board (ECEB) is a dedicated pathway for young scientists (post-docs and junior faculty) to gain hands-on experience in scholarly publishing.<br/><br/>Responsibilities include:<ul><li>Learning the peer-review process by formally co-reviewing manuscripts alongside experienced Senior Editors.</li><li>Building your academic network and gaining behind-the-scenes insight into journal operations.</li><li>Promoting the journal among your peer groups and institution.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Term & Benefits:</p><ul><li>1-year renewable appointment.</li><li>25% discount on Article Processing Charges (APCs) for your own submissions.</li><li>Direct pathway to becoming a full Editorial Board Member.</li><li>Official recognition on the journal page.</li></ul>",
+    "join.roleReviewer": "Reviewer",
+    "join.roleReviewerDesc": "Reviewers form the foundation of our peer-review process.<br/><br/>Your primary responsibilities include:<ul><li>Providing rigorous, objective, and constructive feedback on manuscripts.</li><li>Evaluating the methodology, originality, and ethical compliance of the research.</li><li>Assisting editors in making informed, timely decisions.</li><li><i>Note: Active and highly-rated reviewers may be invited to join the Editorial Board.</i></li></ul>",
+    "join.form.title": "Application Form",
+    "join.form.subtitle": "Submit your interest below. Our editorial office will review your application and get in touch.",
+    "join.form.ediStatement": "Scholarly Open is committed to diversity, equity, and inclusion across our editorial boards. We actively encourage applications from researchers of all backgrounds, genders, and geographic regions.",
+    "join.form.labelName": "Full Name",
+    "join.form.labelEmail": "Academic Email",
+    "join.form.labelAffiliation": "Institution / Affiliation",
+    "join.form.labelRole": "Role Applied For",
+    "join.form.labelJournal": "Journal of Interest",
+    "join.form.labelExpertise": "Areas of Expertise",
+    "join.form.labelCV": "ORCID iD or Institutional Profile",
+    "join.form.submit": "Submit Application",
+    "join.form.submitting": "Submitting...",
+    "join.form.successTitle": "Application Received",
+    "join.form.successDesc": "Thank you for your interest. Our team will review your application and contact you shortly.",
+    "join.form.successButton": "Submit Another Application",
+
     // Language Toggle
     "language.en": "English",
     "language.de": "Deutsch",
@@ -637,24 +694,24 @@ export const translations = {
     "nav.openAccess": "Open-Access-Richtlinie",
     "nav.goldOA": "Gold Open Access",
     "nav.hybridOA": "Hybrid Open Access",
-    
+
     // Brand
     "brand.name": "Scholarly Open",
     "brand.tagline": "Ungebunden. Transparent. Zugänglich.",
     "brand.description": "Eine Gold-Open-Access-Plattform für wissenschaftliche Publikationen und Forschungsschulungen, die sich der Förderung von Wissen und der Integrität in der Forschung verschrieben hat.",
-    
+
     // Hero Section
     "hero.title": "Wissen fördern durch Open Access",
     "hero.subtitle": "Scholarly Open ist eine Gold-Open-Access-Publikations- und Forschungsschulungsplattform. Wir veröffentlichen begutachtete, hochwertige Zeitschriften in allen Kerndisziplinen und bieten kostenfreie Schulungen an, um die weltweite wissenschaftliche Gemeinschaft in Forschungsintegrität und Arbeitsabläufen weiterzubilden.",
     "hero.cta.submit": "Ihre Forschung einreichen",
     "hero.cta.learn": "Mehr erfahren",
-    
+
     // Stats
     "stats.openAccess": "Open Access",
     "stats.journals": "Zeitschriften",
     "stats.reach": "Reichweite",
     "stats.guidelines": "Richtlinien",
-    
+
     // Journals Section
     "journals.title": "Unsere Zeitschriften",
     "journals.subtitle": "Wir veröffentlichen hochwertige Forschung in unseren Kerndisziplinen und unserer neuen Serie 'Emerging Frontiers' mit vollständigem Gold-Open-Access.",
@@ -685,7 +742,7 @@ export const translations = {
     "journals.synthetic-biology.description": "De-novo-Biodesign, CRISPR-Therapeutika, zellfreie Biomanufaktur und Stoffwechselwege.",
     "journals.space-resources.title": "Scholarly Open: Space Resources & Orbital Economy",
     "journals.space-resources.description": "In-situ-Nutzung von Mond- und Asteroidenressourcen, Weltraumlogistik, Weltraummüll und Weltraumrecht.",
-    
+
     // Features
     "features.title": "Warum bei uns veröffentlichen",
     "features.subtitle": "Wir verbinden akademische Strenge mit modernen Publikationspraktiken, um die Wirkung Ihrer Forschung zu maximieren.",
@@ -697,7 +754,7 @@ export const translations = {
     "features.rapidPublication.description": "Effizienter Redaktionsprozess mit schneller Bearbeitung von der Einreichung bis zur Veröffentlichung.",
     "features.editorialBoard.title": "Internationaler Redaktionsbeirat",
     "features.editorialBoard.description": "Angesehene Wissenschaftler von führenden Institutionen weltweit.",
-    
+
     // Open Access Models
     "oaModels.title": "Open-Access-Veröffentlichung",
     "oaModels.subtitle": "Publikationsmodell",
@@ -709,13 +766,13 @@ export const translations = {
     "oaModels.learnMore": "Mehr über unsere OA-Richtlinie",
     "oaModels.accessible": "Forschung für alle zugänglich machen",
     "oaModels.fromMainz": "Forscher weltweit verbinden",
-    
+
     // CTA Section
     "cta.title": "Bereit, Ihre Forschung zu teilen?",
     "cta.subtitle": "Schließen Sie sich Forschern weltweit an, die Scholarly Open vertrauen, um ihre Arbeit mit Integrität und Wirkung zu veröffentlichen.",
     "cta.submit": "Manuskript einreichen",
     "cta.guidelines": "Autorenrichtlinien",
-    
+
     // Footer
     "footer.journals": "Zeitschriften",
     "footer.forAuthors": "Für Autoren",
@@ -726,7 +783,7 @@ export const translations = {
     "footer.privacy": "Datenschutz",
     "footer.impressum": "Impressum",
     "footer.archiving": "Archivierung & Indexierung",
-    
+
     // Compliance
     "compliance.title": "Compliance & Standards",
     "compliance.doaj": "DOAJ-Richtlinien",
@@ -735,7 +792,7 @@ export const translations = {
     "compliance.ccby": "CC-BY-4.0-Lizenz",
     "compliance.issn": "ISSN-registriert",
     "compliance.oaspa": "OASPA-Mitglied",
-    
+
     // Editorial Board
     "editorial.title": "Redaktionsbeirat",
     "editorial.subtitle": "Unser angesehener Redaktionsbeirat besteht aus führenden Wissenschaftlern renommierter Institutionen weltweit und gewährleistet höchste Standards bei Peer-Review und redaktioneller Exzellenz.",
@@ -747,6 +804,37 @@ export const translations = {
     "editorial.joinTeam": "Werden Sie Teil unseres Redaktionsteams",
     "editorial.joinTeamSubtitle": "Wir suchen stets angesehene Wissenschaftler für unseren Redaktionsbeirat. Wenn Sie an der Förderung offenen Zugangs interessiert sind, würden wir gerne von Ihnen hören.",
     "editorial.expressInterest": "Interesse bekunden",
+
+    // Join Editorial Board Form
+    "join.heroTitle": "Werden Sie Teil unseres Redaktionsbeirats",
+    "join.heroSubtitle": "Wir suchen engagierte Wissenschaftler, um die Zukunft des Open-Access-Publizierens mitzugestalten.",
+    "join.roleEIC": "Chefredakteur (EIC)",
+    "join.roleEICDesc": "Als Chefredakteur leiten Sie die strategische und redaktionelle Ausrichtung der Zeitschrift.<br/><br/>Zu den Hauptaufgaben gehören:<ul><li>Überwachung des Peer-Review-Prozesses und endgültige Entscheidung über die Annahme von Manuskripten.</li><li>Enge Zusammenarbeit mit dem internen Redaktionsbüro zur Wahrung höchster ethischer Standards und wissenschaftlicher Integrität.</li><li>Leitung von Initiativen zur Weiterentwicklung der Zeitschrift und Vorschlag neuer strategischer Ausrichtungen.</li><li>Tätigkeit als Hauptbotschafter der Zeitschrift in der akademischen Gemeinschaft.</li><li>Ermutigung zu qualitativ hochwertigen Einreichungen und gegebenenfalls Einreichung eigener Arbeiten.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Amtszeit & Vorteile:</p><ul><li>Initiale Ernennung für 2 Jahre.</li><li>25% Rabatt auf Article Processing Charges (APCs) für eigene Einreichungen.</li><li>Volle akademische Unabhängigkeit und Nennung auf der Zeitschriftenseite.</li></ul>",
+    "join.roleAE": "Mitherausgeber (Associate Editor)",
+    "join.roleAEDesc": "Mitherausgeber unterstützen den Chefredakteur bei der Leitung des Peer-Review-Prozesses für zugewiesene Manuskripte.<br/><br/>Zu Ihren Aufgaben gehören:<ul><li>Leitung des Peer-Review-Prozesses, einschließlich der Identifizierung und Einladung qualifizierter Gutachter.</li><li>Bewertung von Gutachten und Abgabe detaillierter redaktioneller Empfehlungen.</li><li>Wahrung ethischer Standards und akademischer Integrität bei allen Entscheidungen.</li><li>Förderung der Zeitschrift und Ermutigung zu qualitativ hochwertigen Einreichungen in Ihrem Netzwerk.</li><li>Mentoring von Mitgliedern des Early Career Editorial Boards durch transparentes Co-Reviewing.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Amtszeit & Vorteile:</p><ul><li>Initiale Ernennung für 2 Jahre.</li><li>25% Rabatt auf Article Processing Charges (APCs) für eigene Einreichungen.</li><li>Volle akademische Unabhängigkeit und Nennung auf der Zeitschriftenseite.</li></ul>",
+    "join.roleEBM": "Mitglied des Redaktionsbeirats (Editorial Board Member)",
+    "join.roleEBMDesc": "Mitglieder des Redaktionsbeirats spielen eine wesentliche Rolle bei der Aufrechterhaltung der akademischen Strenge und strategischen Ausrichtung der Zeitschrift.<br/><br/>Zu den Verantwortlichkeiten gehört es:<ul><li>Fachkundige, zeitnahe Gutachten für eingereichte Manuskripte in Ihrem Fachgebiet zu erstellen.</li><li>Wahrung ethischer Standards und akademischer Integrität bei allen Entscheidungen.</li><li>Unterstützung von Umfang, Qualität und strategischer Entwicklung der Zeitschrift.</li><li>Förderung der Zeitschrift und Ermutigung zu qualitativ hochwertigen Einreichungen durch akademische und soziale Netzwerke.</li><li>Gegebenenfalls Einreichung eigener qualitativ hochwertiger wissenschaftlicher Arbeiten.</li><li>Mentoring von Nachwuchswissenschaftlern im Peer-Review-Prozess.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Amtszeit & Vorteile:</p><ul><li>Initiale Ernennung für 2 Jahre.</li><li>25% Rabatt auf Article Processing Charges (APCs) für eigene Einreichungen.</li><li>Volle akademische Unabhängigkeit und Nennung auf der Zeitschriftenseite.</li></ul>",
+    "join.roleECEB": "Early Career Editorial Board",
+    "join.roleECEBDesc": "Das Early Career Editorial Board (ECEB) bietet Nachwuchswissenschaftlern (Post-Docs und Junior-Fakultät) die Möglichkeit, praktische Erfahrungen im wissenschaftlichen Publizieren zu sammeln.<br/><br/>Zu den Aufgaben gehören:<ul><li>Erlernen des Peer-Review-Prozesses durch formelles Co-Reviewing von Manuskripten gemeinsam mit erfahrenen Redakteuren.</li><li>Aufbau eines akademischen Netzwerks und Gewinnung von Einblicken in die Abläufe der Zeitschrift.</li><li>Förderung der Zeitschrift in Ihren Peer-Gruppen und Institutionen.</li></ul><p class=\"mt-4 font-semibold text-foreground\">Amtszeit & Vorteile:</p><ul><li>Auf 1 Jahr befristete, verlängerbare Amtszeit.</li><li>25% Rabatt auf Article Processing Charges (APCs) für eigene Einreichungen.</li><li>Direkter Weg zur ordentlichen Mitgliedschaft im Redaktionsbeirat.</li><li>Offizielle Nennung auf der Zeitschriftenseite.</li></ul>",
+    "join.roleReviewer": "Gutachter (Reviewer)",
+    "join.roleReviewerDesc": "Gutachter bilden das Fundament unseres Peer-Review-Prozesses.<br/><br/>Zu Ihren Hauptaufgaben gehören:<ul><li>Rigoroses, objektives und konstruktives Feedback zu Manuskripten zu geben.</li><li>Bewertung von Methodik, Originalität und ethischer Konformität der Forschung.</li><li>Unterstützung der Redakteure bei fundierten und zeitnahen Entscheidungen.</li><li><i>Hinweis: Aktive und exzellent bewertete Gutachter können in den Redaktionsbeirat eingeladen werden.</i></li></ul>",
+
+    "join.form.title": "Bewerbungsformular",
+    "join.form.subtitle": "Bitte geben Sie unten Ihre Daten ein, wir werden Ihre Bewerbung prüfen.",
+    "join.form.ediStatement": "Scholarly Open setzt sich für Vielfalt, Chancengleichheit und Inklusion in unseren Redaktionsbeiräten ein. Wir ermutigen ausdrücklich Forscherinnen und Forscher aller Hintergründe, Geschlechter und geografischen Regionen zur Bewerbung.",
+    "join.form.labelName": "Vollständiger Name *",
+    "join.form.labelEmail": "E-Mail-Adresse *",
+    "join.form.labelAffiliation": "Institution / Zugehörigkeit *",
+    "join.form.labelRole": "Angestrebte Position *",
+    "join.form.labelJournal": "Zeitschrift von Interesse *",
+    "join.form.labelExpertise": "Fachgebiet *",
+    "join.form.labelCV": "ORCID iD oder institutionelles Profil",
+    "join.form.submit": "Bewerbung absenden",
+    "join.form.submitting": "Wird gesendet...",
+    "join.form.successTitle": "Bewerbung erhalten",
+    "join.form.successDesc": "Vielen Dank für Ihr Interesse an einer Mitarbeit in unserem Redaktionsbeirat. Wir werden Ihre Bewerbung prüfen und uns in Kürze bei Ihnen melden.",
+    "join.form.successButton": "Weitere Bewerbung absenden",
+
     "editorial.discipline.socialSciences": "Sozial- & Geisteswissenschaften",
     "editorial.discipline.archaeology": "Archäologie",
     "editorial.discipline.medicalSciences": "Medizinische Wissenschaften",
@@ -770,19 +858,19 @@ export const translations = {
     "editorial.member.med2.specialization": "Infektionskrankheiten",
     "editorial.member.med3.specialization": "Biomedizinische Forschung",
     "editorial.member.med4.specialization": "Pharmazeutische Wissenschaften",
-    
+
     // About Page
     "about.title": "Über Scholarly Open",
     "about.subtitle": "Scholarly Open ist ein internationaler Open-Access-Verlag, der sich der Förderung von Wissen durch rigoroses Peer-Review und offenen Zugang verschrieben hat.",
-    
+
     // Contact
     "contact.title": "Kontaktieren Sie uns",
     "contact.subtitle": "Nehmen Sie Kontakt mit unserem Redaktionsteam auf.",
-    
+
     // Articles
     "articles.title": "Artikel",
-    "articles.latest": "Neueste Artikel",    "articles.sampleTitle": "Beispielartikel",
-    "articles.sampleNote": "Diese Artikelangaben dienen als illustrative Beispiele für den Start unserer Zeitschriften.",    "articles.viewAll": "Alle Artikel anzeigen",
+    "articles.latest": "Neueste Artikel", "articles.sampleTitle": "Beispielartikel",
+    "articles.sampleNote": "Diese Artikelangaben dienen als illustrative Beispiele für den Start unserer Zeitschriften.", "articles.viewAll": "Alle Artikel anzeigen",
     "articles.readMore": "Weiterlesen",
     "articles.published": "Veröffentlicht",
     "articles.doi": "DOI",
@@ -791,7 +879,7 @@ export const translations = {
     "articles.fullText": "Volltext",
     "articles.pdf": "PDF herunterladen",
     "articles.cite": "Zitieren",
-    
+
     // Journal Page
     "journal.about": "Über diese Zeitschrift",
     "journal.aboutText": "Scholarly Open veröffentlicht hochrelevante und FAIR-konforme Forschung in allen unseren Zeitschriften. Wir konzentrieren uns auf transparente Prozesse, schnelle Verbreitung und starke Unterstützung für Autoren.",
@@ -800,7 +888,7 @@ export const translations = {
     "journal.submitTo": "Einreichen bei",
     "journal.submitText": "Bitte lesen Sie unsere Autorenrichtlinien und bereiten Sie Ihr Manuskript gemäß unseren Einreichungsanforderungen vor. Wir begrüßen Originalarbeiten, Reviews und methodische Beiträge, die das FAIR-Wissenschaftsprinzip unterstützen.",
     "journal.startSubmission": "Einreichung starten",
-    
+
     // About Page Content
     "about.heroTitle": "Über Scholarly Open",
     "about.heroSubtitle": "Wir sind eine Gold-Open-Access-Publikations- und Forschungsschulungsplattform, die sich der Förderung der wissenschaftlichen Kommunikation verschrieben hat und Forschenden moderne akademische Fähigkeiten sowie ethische Publikationsabläufe vermittelt.",
@@ -812,7 +900,7 @@ export const translations = {
     "about.visionTitle": "Eine offenere Zukunft",
     "about.visionP1": "Wir stellen uns ein transparentes, zugängliches und ethisches Forschungs-Ökosystem vor, in dem Publikationsbarrieren abgebaut werden und alle Forschenden das Wissen und die Werkzeuge besitzen, um mit uneingeschränkter Integrität zu publizieren.",
     "about.visionP2": "Durch kontinuierliche Innovation bei Publikationstechnologien und -prozessen streben wir danach, ein nachhaltiges und gerechtes Publikations-Ökosystem zu schaffen, das der globalen Forschungsgemeinschaft dient.",
-    
+
     "about.valuesTitle": "Unsere Grundwerte",
     "about.valuesSub": "Diese Prinzipien leiten alles, was wir bei Scholarly Open tun.",
     "about.value1.title": "Integrität",
@@ -841,7 +929,7 @@ export const translations = {
     "about.communityTitle": "Treten Sie unserer Gemeinschaft bei",
     "about.communitySub": "Ob als Autor, Gutachter oder Mitglied des Redaktionsbeirats – wir begrüßen Ihre Teilnahme an der Förderung der offenen Wissenschaft.",
     "about.communitySubmit": "Ihre Forschung einreichen",
-    
+
     // Contact Page Content
     "contact.heroTitle": "Kontaktieren Sie uns",
     "contact.heroSubtitle": "Haben Sie Fragen zur Einreichung Ihrer Forschung, zu unserem Peer-Review-Verfahren oder zu unseren Open-Access-Richtlinien? Unser Team hilft Ihnen gerne weiter.",
@@ -855,7 +943,7 @@ export const translations = {
     "contact.info.weekday": "Montag - Freitag",
     "contact.info.weekend": "Samstag - Sonntag",
     "contact.info.weekendVal": "Geschlossen",
-    
+
     "contact.deptsTitle": "Abteilungskontakte",
     "contact.deptsSub": "Für eine schnellere Antwort wenden Sie sich bitte direkt an die entsprechende Abteilung.",
     "contact.dept1.desc": "Für manuskriptbezogene Anfragen, Fragen zum Peer-Review und redaktionelle Entscheidungen.",
@@ -876,13 +964,13 @@ export const translations = {
     "contact.form.sentTitle": "Nachricht gesendet",
     "contact.form.sentDesc": "Vielen Dank für Ihre Kontaktaufnahme. Wir werden Ihnen innerhalb von 1-2 Werktagen antworten.",
     "contact.form.sentButton": "Eine weitere Nachricht senden",
-    
+
     "contact.form.labelName": "Vollständiger Name *",
     "contact.form.labelEmail": "E-Mail-Adresse *",
     "contact.form.labelAffiliation": "Institution / Organisation",
     "contact.form.labelSubject": "Betreff *",
     "contact.form.labelMessage": "Nachricht *",
-    
+
     "contact.form.optDefault": "Wählen Sie einen Betreff",
     "contact.form.optSubmission": "Manuskript-Einreichung",
     "contact.form.optReview": "Status der Peer-Review",
@@ -892,12 +980,12 @@ export const translations = {
     "contact.form.optEthics": "Fragen zur Forschungsintegrität & Ethik",
     "contact.form.optPartner": "Partnerschaft / Zusammenarbeit",
     "contact.form.optOther": "Sonstiges",
-    
+
     "contact.form.privacyConsent": "Ich willige in die Verarbeitung meiner personenbezogenen Daten zum Zwecke der Bearbeitung meiner Anfrage ein.",
     "contact.form.privacyRead": "Ich habe die",
     "contact.form.buttonSend": "Nachricht senden",
     "contact.form.buttonSending": "Wird gesendet...",
-    
+
     "contact.map.title": "Globale Reichweite",
     "contact.map.subtitle": "Scholarly Open dient Forschern weltweit und verbindet Wissenschaftler über alle Kontinente hinweg.",
     "contact.map.basedIn": "Sitz in Mainz, Deutschland",
@@ -1232,7 +1320,7 @@ const defaultT = (key: string): string => {
 // Default context value for SSR
 const defaultContextValue: LanguageContextType = {
   language: "en",
-  setLanguage: () => {},
+  setLanguage: () => { },
   t: defaultT,
 }
 
@@ -1255,10 +1343,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         // Option A: Automatically intercept `.de` / `localhost.de` access,
         // set preferred language to German, and redirect to the unified .org / localhost domain
         localStorage.setItem("scholarly-open-language", "de")
-        
+
         const targetHost = isLocalDeSim ? "localhost" : "scholarlyopen.org"
         const protocol = isLocalDeSim ? "http" : "https"
-        
+
         window.location.replace(`${protocol}://${targetHost}${port}${pathname}${search}`)
       } else {
         const stored = localStorage.getItem("scholarly-open-language") as Language

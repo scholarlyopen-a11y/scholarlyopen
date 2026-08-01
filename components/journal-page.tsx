@@ -382,6 +382,21 @@ export function JournalPage({
               associateEditors={associateEditors}
               editorialBoard={editorialBoard}
             />
+
+            <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t("editorial.joinTeam")}</h3>
+                <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+                  {t("editorial.joinTeamSubtitle")}
+                </p>
+              </div>
+              <Button size="lg" asChild className="shrink-0 font-semibold w-full sm:w-auto">
+                <Link href={`/join-editorial-board?journal=${journalSlug}`}>
+                  {t("editorial.expressInterest")}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </section>
 
           {/* Section 3: Latest Articles */}
