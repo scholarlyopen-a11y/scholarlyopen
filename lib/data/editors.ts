@@ -694,9 +694,9 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
   },
   {
     slug: "william-harrison",
-    name: "William Harrison, Ph.D.",
-    role: "Associate Editor",
-    affiliation: "Professor of Political Science, Fairmont State University",
+    name: "William H. Harrison, Ph.D",
+    role: "Editorial Board Member",
+    affiliation: "College of Liberal Arts,\nFairmont State University, USA",
     specialization: "International Relations, Political Psychology, and American Government",
     imageUrl: "/images/editors/william-harrison.jpg",
     journalSlug: "social-sciences-humanities",
