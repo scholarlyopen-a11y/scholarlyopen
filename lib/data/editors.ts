@@ -369,6 +369,38 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
         link: "https://www.nature.com/articles/tp201171"
       }
     ]
+  },
+  {
+    slug: "open-position-assoc-med-1",
+    name: "Position open",
+    role: "Associate Editor",
+    affiliation: "Under formation",
+    specialization: "Currently appointing",
+    journalSlug: "medicine"
+  },
+  {
+    slug: "open-position-assoc-med-2",
+    name: "Position open",
+    role: "Associate Editor",
+    affiliation: "Under formation",
+    specialization: "Currently appointing",
+    journalSlug: "medicine"
+  },
+  {
+    slug: "open-position-board-med-1",
+    name: "Position open",
+    role: "Editorial Board Member",
+    affiliation: "Under formation",
+    specialization: "Currently appointing",
+    journalSlug: "medicine"
+  },
+  {
+    slug: "open-position-board-med-2",
+    name: "Position open",
+    role: "Editorial Board Member",
+    affiliation: "Under formation",
+    specialization: "Currently appointing",
+    journalSlug: "medicine"
   }
 ]
 
