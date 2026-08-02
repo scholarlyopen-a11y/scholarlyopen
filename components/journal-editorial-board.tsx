@@ -47,7 +47,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   
   return (
-    <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-start text-left p-2 ${
+    <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center p-2 ${
       featured ? "bg-secondary/5 rounded-2xl p-4" : ""
     }`}>
       <div className="w-full flex justify-center">
@@ -64,7 +64,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         )}
       </div>
       
-      <div className="flex flex-col items-start w-full">
+      <div className="flex flex-col items-center w-full">
         <h4 className="text-base font-bold text-foreground mt-2 mb-0.5">{editor.name}</h4>
         <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed mb-3">{editor.affiliation}</p>
         
