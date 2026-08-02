@@ -56,7 +56,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
             <img 
               src={editor.imageUrl} 
               alt={editor.name} 
-              className="h-12 w-12 rounded-full object-cover object-center shrink-0 mix-blend-multiply dark:mix-blend-normal bg-white" 
+              className="h-12 w-12 rounded-full object-cover object-center shrink-0 bg-slate-200 dark:bg-slate-800 ring-1 ring-slate-900/10 shadow-sm" 
             />
           ) : (
             <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
@@ -90,7 +90,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                   <img 
                     src={editor.imageUrl} 
                     alt={editor.name} 
-                    className="h-14 w-14 rounded-full object-cover object-center shrink-0 mix-blend-multiply dark:mix-blend-normal bg-white" 
+                    className="h-14 w-14 rounded-full object-cover object-center shrink-0 bg-slate-200 dark:bg-slate-800 ring-1 ring-slate-900/10 shadow-sm" 
                   />
                 ) : (
                   <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
@@ -207,7 +207,7 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
             <img 
               src={editor.imageUrl} 
               alt={editor.name} 
-              className="h-10 w-10 rounded-full object-cover object-center shrink-0 mix-blend-multiply dark:mix-blend-normal bg-white" 
+              className="h-10 w-10 rounded-full object-cover object-center shrink-0 bg-slate-200 dark:bg-slate-800 ring-1 ring-slate-900/10 shadow-sm" 
             />
           ) : (
             <div className="h-10 w-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 font-bold">
@@ -229,7 +229,7 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
               <img 
                 src={editor.imageUrl} 
                 alt={editor.name} 
-                className="h-14 w-14 rounded-full object-cover object-center shrink-0 mix-blend-multiply dark:mix-blend-normal bg-white" 
+                className="h-14 w-14 rounded-full object-cover object-center shrink-0 bg-slate-200 dark:bg-slate-800 ring-1 ring-slate-900/10 shadow-sm" 
               />
             ) : (
               <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
@@ -383,5 +383,6 @@ export function JournalEditorialBoard({
     </div>
   )
 }
+
 
 
