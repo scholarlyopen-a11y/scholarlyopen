@@ -698,6 +698,11 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
     role: "Editorial Board Member",
     affiliation: "College of Liberal Arts\nFairmont State University, USA",
     specialization: "International Relations, Political Psychology, and American Government",
+    assignedSections: [
+      "International Relations",
+      "Political Psychology",
+      "American Government"
+    ],
     expertise: [
       "Disproportionate voting power",
       "Religious Influence",
