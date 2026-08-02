@@ -162,6 +162,183 @@ interface JournalInfo {
   editorInChief: string
 }
 
+
+// Role Profile & Gamification Data Definitions
+interface ProfileMetric {
+  label: string
+  value: string
+  subtext: string
+  icon: any
+  color: string
+}
+
+interface RoleProfileData {
+  name: string
+  initials: string
+  title: string
+  affiliation: string
+  orcid: string
+  level: string
+  levelNum: number
+  rankNum: number
+  activeTaskCount: string
+  interests: string[]
+  badges: string[]
+  nextBadgeTitle: string
+  nextBadgeGoal: string
+  progressPercent: number
+  metrics: ProfileMetric[]
+}
+
+function getRoleProfileData(role: UserRole): RoleProfileData {
+  switch (role) {
+    case "author":
+      return {
+        name: "Jane Doe",
+        initials: "JD",
+        title: "Senior Researcher, AI Ethics",
+        affiliation: "Institute for Ethical AI, Cambridge, MA",
+        orcid: "0000-1234-5678",
+        level: "Level 4 Principal Author",
+        levelNum: 4,
+        rankNum: 14,
+        activeTaskCount: "3 Active Submissions",
+        interests: ["AI Ethics", "Machine Learning", "Data Privacy", "Autonomous Systems"],
+        badges: ["Quality Contributor", "Fast Responder", "Ethics Verified"],
+        nextBadgeTitle: "Integrity Champion",
+        nextBadgeGoal: "Complete 3 more ethics disclosures & revisions to unlock!",
+        progressPercent: 75,
+        metrics: [
+          { label: "Turnaround Speed", value: "4.5 Days", subtext: "Top 10% Revision Speed", icon: Clock, color: "text-amber-500" },
+          { label: "Acceptance Rate", value: "88%", subtext: "Verified High Rigor", icon: CheckCircle2, color: "text-emerald-500" },
+          { label: "Completed Papers", value: "12 Published", subtext: "120 Total Citations", icon: FileText, color: "text-[#0b99ff]" },
+          { label: "Active Submissions", value: "3 Active", subtext: "1 Under Review", icon: Target, color: "text-indigo-500" },
+          { label: "Peer Percentile", value: "Top 10%", subtext: "Level 4 Author Rank", icon: Trophy, color: "text-purple-500" }
+        ]
+      }
+    case "reviewer":
+      return {
+        name: "Dr. Evelyn Vane",
+        initials: "EV",
+        title: "Senior Peer Reviewer & Associate Professor",
+        affiliation: "Dept of Computer Science & AI Systems",
+        orcid: "0000-0002-1825-0097",
+        level: "Level 5 Master Reviewer",
+        levelNum: 5,
+        rankNum: 8,
+        activeTaskCount: "2 Active Reviews Assigned",
+        interests: ["Renewable Energy", "Machine Learning", "Neural Networks", "Optimization"],
+        badges: ["Precision Reviewer", "Fast Responder", "Top 10% Rank", "Double-Blind Legend"],
+        nextBadgeTitle: "Reviewer Master",
+        nextBadgeGoal: "Complete 3 more double-blind reviews to unlock!",
+        progressPercent: 82,
+        metrics: [
+          { label: "Review Turnaround", value: "3.2 Days", subtext: "Top 5% Speed Rank", icon: Clock, color: "text-emerald-500" },
+          { label: "Review Quality", value: "94%", subtext: "Editor Rigor Score", icon: Star, color: "text-amber-500" },
+          { label: "Completed Reviews", value: "42 Reviews", subtext: "Across 4 Journals", icon: CheckSquare, color: "text-[#0b99ff]" },
+          { label: "Active Load", value: "2 Assigned", subtext: "1 In Progress", icon: Activity, color: "text-[#0b99ff]" },
+          { label: "Reviewer Percentile", value: "Top 5%", subtext: "Level 5 Reviewer Rank", icon: Trophy, color: "text-[#0b99ff]" }
+        ]
+      }
+    case "editor":
+      return {
+        name: "Prof. Aris Thorne",
+        initials: "AT",
+        title: "Managing Editor & Professor of Political Science",
+        affiliation: "School of Public Policy & International Affairs",
+        orcid: "0000-0003-9182-4410",
+        level: "Level 5 Managing Editor",
+        levelNum: 5,
+        rankNum: 3,
+        activeTaskCount: "4 Manuscripts Under Evaluation",
+        interests: ["International Relations", "Political Psychology", "American Government", "Policy Analysis"],
+        badges: ["Master Moderator", "Fast Decisioner", "High Rigor Editor", "Editorial Fellow"],
+        nextBadgeTitle: "Editorial Board Chair",
+        nextBadgeGoal: "Process 5 more manuscript decisions this cycle!",
+        progressPercent: 90,
+        metrics: [
+          { label: "Decision Latency", value: "12.4 Days", subtext: "Sub-to-Decision Speed", icon: Zap, color: "text-amber-500" },
+          { label: "Decision Accuracy", value: "96%", subtext: "Board Audit Score", icon: ShieldCheck, color: "text-emerald-500" },
+          { label: "Papers Handled", value: "86 Papers", subtext: "Lifetime Portfolio", icon: BookOpen, color: "text-[#0b99ff]" },
+          { label: "Queue Load", value: "4 Assigned", subtext: "2 Awaiting Assignment", icon: Layers, color: "text-indigo-500" },
+          { label: "Editor Percentile", value: "Top 3%", subtext: "Level 5 Managing Rank", icon: Trophy, color: "text-purple-500" }
+        ]
+      }
+    case "jm":
+      return {
+        name: "Sarah Jenkins, M.S.",
+        initials: "SJ",
+        title: "Journal Operations Manager & Quality Desk Lead",
+        affiliation: "Scholarly Open Central Editorial Desk",
+        orcid: "0000-0001-5524-8891",
+        level: "Level 6 Operations Lead",
+        levelNum: 6,
+        rankNum: 1,
+        activeTaskCount: "2 Pending Moderation Tasks",
+        interests: ["Publication Ethics", "Peer Review Moderation", "Journal Analytics", "COI Security"],
+        badges: ["Operations Maestro", "Rigor Guardian", "Zero Backlog", "Safety Officer"],
+        nextBadgeTitle: "Chief Operations Fellow",
+        nextBadgeGoal: "Audit 10 more reviewer feedback packages!",
+        progressPercent: 65,
+        metrics: [
+          { label: "Moderation Time", value: "1.8 Days", subtext: "Redaction & Release", icon: Clock, color: "text-emerald-500" },
+          { label: "Safety Clearance", value: "99.2%", subtext: "COI & Redaction Rigor", icon: ShieldCheck, color: "text-emerald-500" },
+          { label: "Reviews Moderated", value: "312 Items", subtext: "All Journals Managed", icon: MessageSquare, color: "text-[#0b99ff]" },
+          { label: "Active Queue", value: "2 Pending", subtext: "Vetting Required", icon: MessageSquareOff, color: "text-orange-500" },
+          { label: "Manager Rank", value: "Top 1%", subtext: "Level 6 Operations Lead", icon: Trophy, color: "text-[#0b99ff]" }
+        ]
+      }
+    case "ria":
+      return {
+        name: "Dr. Marcus Vance",
+        initials: "MV",
+        title: "Research Integrity Advisor & Forensics Analyst",
+        affiliation: "Center for Publication Ethics & Algorithmic Audit",
+        orcid: "0000-0004-7711-2093",
+        level: "Level 5 Integrity Specialist",
+        levelNum: 5,
+        rankNum: 2,
+        activeTaskCount: "2 Active Forensics Alerts",
+        interests: ["AI Content Indexing", "Plagiarism Forensics", "Figure Duplication", "COI Verification"],
+        badges: ["Forensic Hawk", "Plagiarism Shield", "AI Auditor", "Rigor Specialist"],
+        nextBadgeTitle: "Master Forensics Officer",
+        nextBadgeGoal: "Resolve 4 more flagged integrity alerts!",
+        progressPercent: 70,
+        metrics: [
+          { label: "Alert Resolution", value: "0.9 Days", subtext: "Forensics Audit Speed", icon: Zap, color: "text-emerald-500" },
+          { label: "Detection Precision", value: "99.8%", subtext: "Similarity Index Precision", icon: Cpu, color: "text-indigo-500" },
+          { label: "Audits Completed", value: "148 Audits", subtext: "Cross-Journal Index", icon: ShieldAlert, color: "text-rose-500" },
+          { label: "Active Alerts", value: "2 Flagged", subtext: "Under Forensic Inspection", icon: AlertTriangle, color: "text-amber-500" },
+          { label: "Integrity Rank", value: "Top 2%", subtext: "Level 5 Specialist Rank", icon: Trophy, color: "text-purple-500" }
+        ]
+      }
+    default:
+      return {
+        name: "System Administrator",
+        initials: "SA",
+        title: "Chief Platform Architect & Node Admin",
+        affiliation: "Scholarly Open Infrastructure Group",
+        orcid: "0000-0000-0000-0001",
+        level: "Level 10 System Superuser",
+        levelNum: 10,
+        rankNum: 1,
+        activeTaskCount: "All Workspace Nodes Active",
+        interests: ["Node Operations", "User Registry", "Security Protocols", "Workflow Schema"],
+        badges: ["System Architect", "Security Master", "Uptime Champion"],
+        nextBadgeTitle: "Infrastructure Master",
+        nextBadgeGoal: "Maintain 99.99% Uptime across 320 prerendered routes!",
+        progressPercent: 98,
+        metrics: [
+          { label: "Node Uptime", value: "99.99%", subtext: "Zero Downtime Recorded", icon: Zap, color: "text-emerald-500" },
+          { label: "Node Security", value: "100%", subtext: "Verified Permissions Schema", icon: Lock, color: "text-[#0b99ff]" },
+          { label: "Workspace Actions", value: "1.4k Logged", subtext: "System Audit Logs", icon: Settings, color: "text-purple-500" },
+          { label: "Security Breaches", value: "0 Incidents", subtext: "All Systems Secure", icon: ShieldCheck, color: "text-emerald-500" },
+          { label: "System Rank", value: "Top 1%", subtext: "Level 10 Superuser", icon: Trophy, color: "text-amber-500" }
+        ]
+      }
+  }
+}
+
 export default function Editorial360Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")
