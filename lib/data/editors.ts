@@ -698,6 +698,12 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
     role: "Editorial Board Member",
     affiliation: "College of Liberal Arts\nFairmont State University, USA",
     specialization: "International Relations, Political Psychology, and American Government",
+    expertise: [
+      "Disproportionate voting power",
+      "Religious Influence",
+      "In-Group/Out-group dichotomy",
+      "Non-Governmental Organizations"
+    ],
     imageUrl: "/images/editors/william-harrison.jpg",
     journalSlug: "social-sciences-humanities",
     orcid: "0009-0003-5885-0112",
