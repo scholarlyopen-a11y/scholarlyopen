@@ -54,10 +54,10 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         <img 
           src={editor.imageUrl} 
           alt={editor.name} 
-          className="h-32 w-32 rounded-full object-cover object-center shrink-0 ring-4 ring-slate-900/5 shadow-md mb-5" 
+          className="h-32 w-32 rounded-full object-cover object-center shrink-0 mb-5" 
         />
       ) : (
-        <div className="h-32 w-32 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold mb-5 shadow-md">
+        <div className="h-32 w-32 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold mb-5">
           <span className="text-4xl">{initials}</span>
         </div>
       )}
@@ -218,7 +218,7 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
               <img 
                 src={editor.imageUrl} 
                 alt={editor.name} 
-                className="h-14 w-14 rounded-full object-cover object-center shrink-0 ring-1 ring-slate-900/10 shadow-sm" 
+                className="h-14 w-14 rounded-full object-cover object-center shrink-0" 
               />
             ) : (
               <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
