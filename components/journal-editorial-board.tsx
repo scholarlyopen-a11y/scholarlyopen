@@ -68,7 +68,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full text-xs font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
+            <Button variant="outline" size="sm" className="w-auto px-6 text-xs font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
               View Editorial Profile
             </Button>
           </DialogTrigger>
