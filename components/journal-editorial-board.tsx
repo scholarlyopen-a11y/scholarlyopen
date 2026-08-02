@@ -50,17 +50,19 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
     <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-start text-left p-2 ${
       featured ? "bg-secondary/5 rounded-2xl p-4" : ""
     }`}>
-      {editor.imageUrl ? (
-        <img 
-          src={editor.imageUrl} 
-          alt={editor.name} 
-          className="h-24 w-24 rounded-full object-cover object-center shrink-0" 
-        />
-      ) : (
-        <div className="h-24 w-24 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
-          <span className="text-3xl">{initials}</span>
-        </div>
-      )}
+      <div className="w-full flex justify-center">
+        {editor.imageUrl ? (
+          <img 
+            src={editor.imageUrl} 
+            alt={editor.name} 
+            className="h-24 w-24 rounded-full object-cover object-center shrink-0" 
+          />
+        ) : (
+          <div className="h-24 w-24 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+            <span className="text-3xl">{initials}</span>
+          </div>
+        )}
+      </div>
       
       <div className="flex flex-col items-start w-full">
         <h4 className="text-base font-bold text-foreground mt-2 mb-0.5">{editor.name}</h4>
