@@ -54,21 +54,21 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         <img 
           src={editor.imageUrl} 
           alt={editor.name} 
-          className="h-32 w-32 rounded-full object-cover object-center shrink-0" 
+          className="h-24 w-24 rounded-full object-cover object-center shrink-0" 
         />
       ) : (
-        <div className="h-32 w-32 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
-          <span className="text-4xl">{initials}</span>
+        <div className="h-24 w-24 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
+          <span className="text-3xl">{initials}</span>
         </div>
       )}
       
       <div className="flex flex-col items-center w-full">
-        <h4 className="text-lg font-bold text-foreground -mt-2 mb-1">{editor.name}</h4>
-        <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed mb-4">{editor.affiliation}</p>
+        <h4 className="text-base font-bold text-foreground -mt-1 mb-1">{editor.name}</h4>
+        <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed mb-3">{editor.affiliation}</p>
         
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="w-auto px-6 text-xs font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
+            <Button variant="outline" size="sm" className="w-auto h-8 px-4 text-[11px] font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
               View Editorial Profile
             </Button>
           </DialogTrigger>
