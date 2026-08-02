@@ -7,6 +7,7 @@ export interface EditorMember {
   imageUrl?: string
   email?: string
   orcid?: string
+  linkedin?: string
   researchGate?: string
   googleScholar?: string
   biography?: string
@@ -695,29 +696,20 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
     slug: "william-harrison",
     name: "William Harrison, Ph.D.",
     role: "Associate Editor",
-    affiliation: "Associate Professor of Political Science, Fairmont State University",
+    affiliation: "Professor of Political Science, Fairmont State University",
     specialization: "International Relations, Political Psychology, and American Government",
-    image: "/images/editors/Bill-Harrison.jpg",
+    imageUrl: "/images/editors/william-harrison.jpg",
     journalSlug: "social-sciences-humanities",
     orcid: "0009-0003-5885-0112",
-    bio: [
-      "Dr. William Harrison is an Associate Professor of Political Science at Fairmont State University.",
-      "His research focuses on the disproportionate voting power in the United States, religious influence on international and American politics, in-group/out-group dichotomy, and non-governmental organizations.",
-      "His dissertation explored 'Foreign Christian Influence on Developing World Domestic Social Policy', analyzing whether foreign groups are more able to influence policy in countries with lower state capacity."
+    linkedin: "https://www.linkedin.com/in/william-harrison-ph-d-08444117/",
+    biography: "Dr. William Harrison is a Professor of Political Science at Fairmont State University. His research focuses on the disproportionate voting power in the United States, religious influence on international and American politics, in-group/out-group dichotomy, and non-governmental organizations. His dissertation explored 'Foreign Christian Influence on Developing World Domestic Social Policy', analyzing whether foreign groups are more able to influence policy in countries with lower state capacity.",
+    timeline: [
+      { year: "2012", title: "Ph.D., Political Science", description: "West Virginia University", type: "education" },
+      { year: "2010", title: "M.A., Political Science", description: "West Virginia University", type: "education" },
+      { year: "2002", title: "M.A., International Relations", description: "Alliant International University", type: "education" },
+      { year: "1995", title: "B.A., Political Science", description: "New York University", type: "education" }
     ],
-    education: [
-      "Ph.D., West Virginia University, Political Science, 2012",
-      "M.A., West Virginia University, Political Science, 2010",
-      "M.A., Alliant International University, International Relations, 2002",
-      "B.A., New York University, Political Science, 1995"
-    ],
-    experience: [
-      "Associate Professor of Political Science, Fairmont State University",
-      "Adjunct Professor: American Government, Pierpont Community and Technical College, 2012",
-      "Graduate Instructor & Teaching Assistant, West Virginia University, 2007-2009",
-      "Research Assistant, West Virginia University, 2006-2010"
-    ],
-    publications: [
+    personalPublications: [
       {
         title: "Is the West Wobbling on its Democratic Pedestal",
         journal: "Two Day Hybrid International Conference on Democracy, Governance, and Sustainability",
