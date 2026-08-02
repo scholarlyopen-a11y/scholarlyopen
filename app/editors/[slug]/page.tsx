@@ -298,13 +298,6 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                 ))}
               </div>
 
-              {/* Specialization Scope */}
-              <section className="bg-white/50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-1.5">
-                  <Activity className="h-4 w-4" /> Focus Domain
-                </h3>
-                <p className="text-base text-foreground font-medium leading-relaxed">{editor.specialization}</p>
-              </section>
 
               {/* Editorial Mandate / Assigned Sections & Expertise */}
               <div className="space-y-6">
