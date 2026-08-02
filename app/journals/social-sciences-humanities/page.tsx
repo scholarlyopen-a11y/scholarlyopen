@@ -1,9 +1,14 @@
 import { UsersRound } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 
 export default function SocialSciencesPage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "social-sciences-humanities")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Social Sciences & Humanities"
@@ -39,6 +44,8 @@ export default function SocialSciencesPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "social-sciences-humanities")}
       journalSlug="social-sciences-humanities"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

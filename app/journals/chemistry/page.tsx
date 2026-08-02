@@ -1,8 +1,13 @@
 import { Beaker } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function ChemistryPage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "chemistry")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Chemistry"
@@ -37,6 +42,8 @@ export default function ChemistryPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "chemistry")}
       journalSlug="chemistry"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

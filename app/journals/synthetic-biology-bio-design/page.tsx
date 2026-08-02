@@ -1,8 +1,13 @@
 import { Dna } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function SyntheticBiologyPage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "synthetic-biology-bio-design")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Synthetic Biology & Bio-Design"
@@ -34,6 +39,8 @@ export default function SyntheticBiologyPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "synthetic-biology-bio-design")}
       journalSlug="synthetic-biology-bio-design"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

@@ -1,8 +1,13 @@
 import { Shield } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function AISafetyPage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "ai-safety-governance")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: AI Safety & Governance"
@@ -33,6 +38,8 @@ export default function AISafetyPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "ai-safety-governance")}
       journalSlug="ai-safety-governance"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

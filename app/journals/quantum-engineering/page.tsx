@@ -1,8 +1,13 @@
 import { Atom } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function QuantumEngineeringPage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "quantum-engineering")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Quantum Engineering"
@@ -33,6 +38,8 @@ export default function QuantumEngineeringPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "quantum-engineering")}
       journalSlug="quantum-engineering"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

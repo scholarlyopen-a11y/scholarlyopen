@@ -1,8 +1,13 @@
 import { Cpu } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function DataSciencePage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "data-science")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Data Science"
@@ -39,6 +44,8 @@ export default function DataSciencePage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "data-science")}
       journalSlug="data-science"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

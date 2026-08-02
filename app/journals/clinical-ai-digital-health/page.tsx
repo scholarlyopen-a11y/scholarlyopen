@@ -1,8 +1,13 @@
 import { HeartPulse } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function ClinicalAIPage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "clinical-ai-digital-health")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Clinical AI & Digital Health"
@@ -35,6 +40,8 @@ export default function ClinicalAIPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "clinical-ai-digital-health")}
       journalSlug="clinical-ai-digital-health"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

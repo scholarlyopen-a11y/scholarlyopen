@@ -1,8 +1,13 @@
 import { Rocket } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function SpaceResourcesPage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "space-resources-orbital-economy")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Space Resources & Orbital Economy"
@@ -33,6 +38,8 @@ export default function SpaceResourcesPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "space-resources-orbital-economy")}
       journalSlug="space-resources-orbital-economy"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail, ExternalLink } from "lucide-react"
+import { Mail, ExternalLink, ArrowRight, Quote, Award } from "lucide-react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -47,7 +47,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   
   return (
-    <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center p-2 ${
+    <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center p-2 -ml-32 ${
       featured ? "bg-secondary/5 rounded-2xl p-4" : ""
     }`}>
       <div className="w-full flex justify-center">
@@ -68,12 +68,19 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         <h4 className="text-base font-bold text-foreground mt-2 mb-0.5">{editor.name}</h4>
         <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed mb-3">{editor.affiliation}</p>
         
-        <Dialog>
-          <DialogTrigger asChild>
+        {editor.name === "Position Open" ? (
+          <Link href="/join-editorial-board" className="w-auto">
             <Button variant="outline" size="sm" className="w-auto h-8 px-4 text-[11px] font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
-              View Editorial Profile
+              Apply Now
             </Button>
-          </DialogTrigger>
+          </Link>
+        ) : (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="w-auto h-8 px-4 text-[11px] font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
+                View Editorial Profile
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-border bg-background">
             <DialogHeader>
               <div className="flex items-center gap-4 border-b border-border pb-4">
@@ -182,6 +189,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
             </div>
           </DialogContent>
         </Dialog>
+        )}
       </div>
     </Card>
   )

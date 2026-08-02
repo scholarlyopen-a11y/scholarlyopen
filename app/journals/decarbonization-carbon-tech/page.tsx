@@ -4,7 +4,10 @@ import { articles } from "@/lib/data/articles"
 import { editors } from "@/lib/data/editors"
 
 export default function DecarbonizationPage() {
-  const associateEditors = editors.filter(e => e.journalSlug === "decarbonization-carbon-tech")
+  const journalEditors = editors.filter(e => e.journalSlug === "decarbonization-carbon-tech")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Decarbonization & Carbon Tech"
@@ -37,6 +40,7 @@ export default function DecarbonizationPage() {
       sampleArticles={articles.filter(a => a.journalSlug === "decarbonization-carbon-tech")}
       journalSlug="decarbonization-carbon-tech"
       associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }

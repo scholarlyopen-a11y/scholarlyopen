@@ -1,8 +1,13 @@
 import { Sprout } from "lucide-react"
 import { JournalPage } from "@/components/journal-page"
 import { articles } from "@/lib/data/articles"
+import { editors } from "@/lib/data/editors"
 
 export default function EnvironmentalSciencePage() {
+  const journalEditors = editors.filter(e => e.journalSlug === "environmental-science")
+  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
+  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+
   return (
     <JournalPage
       title="Scholarly Open: Environmental Science"
@@ -36,6 +41,8 @@ export default function EnvironmentalSciencePage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "environmental-science")}
       journalSlug="environmental-science"
+      associateEditors={associateEditors}
+      editorialBoard={editorialBoard}
     />
   )
 }
