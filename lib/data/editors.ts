@@ -248,7 +248,7 @@ With over two decades of clinical and research experience, Dr. Gong has establis
     specialization: "Healthcare Administration, Operations and Management; Health Services Research; Medicine & Evidence-Based Medicine",
     email: "editor.med@scholarlyopen.org",
     orcid: "0009-0009-6801-4031",
-    imageUrl: "/images/editors/sam-lee-transparent.png",
+    imageUrl: "/images/editors/sam-lee-v2.jpg",
     assignedSections: [
       "Healthcare Administration & Quality",
       "Evidence-Based Medicine",

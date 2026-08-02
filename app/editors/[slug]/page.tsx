@@ -164,7 +164,7 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                     <img 
                       src={editor.imageUrl} 
                       alt={editor.name} 
-                      className="relative h-32 w-32 rounded-full object-cover object-center bg-slate-200 dark:bg-slate-800 ring-1 ring-slate-900/10 shadow-sm" 
+                      className="relative h-32 w-32 rounded-full object-cover object-center ring-1 ring-slate-900/10 shadow-sm" 
                     />
                   ) : (
                     <div className="relative h-32 w-32 rounded-full bg-secondary text-secondary-foreground font-bold flex items-center justify-center text-4xl shadow-inner">
