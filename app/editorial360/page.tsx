@@ -83,13 +83,23 @@ interface ActiveReview {
   recommendation?: string
 }
 
+// Co-Review Invitation mock data
+interface CoReviewInvitation {
+  id: string
+  paperId: string
+  title: string
+  journal: string
+  inviterName: string
+  status: "Pending Disclosure" | "Cleared" | "Flagged"
+}
+
 // Integrity Alert mock data
 interface IntegrityAlert {
   id: string
   paperId: string
   title: string
   journal: string
-  type: "Plagiarism Match" | "AI Content Index" | "Figure Duplication"
+  type: "Plagiarism Match" | "AI Content Index" | "Figure Duplication" | "Co-Reviewer COI Check"
   score: string
   detail: string
   severity: "info" | "warning" | "critical"
@@ -111,6 +121,7 @@ interface ReviewFeedback {
   id: string
   paperId: string
   reviewerName: string
+  coReviewerName?: string
   originality: number
   methodology: number
   clarity: number
@@ -398,6 +409,29 @@ export default function Editorial360Page() {
   const [isForensicsOpen, setIsForensicsOpen] = useState(false)
   const [activeAlertId, setActiveAlertId] = useState("")
 
+  // Co-Reviewing States
+  const [coReviewInvitations, setCoReviewInvitations] = useState<CoReviewInvitation[]>([
+    {
+      id: "COREV-1",
+      paperId: "REV-2026-12",
+      title: "Climate Adaptation Strategies in Coastal Communities",
+      journal: "Social Sciences & Humanities",
+      inviterName: "Dr. Evelyn Vane",
+      status: "Pending Disclosure"
+    }
+  ])
+  const [isInviteCoReviewerOpen, setIsInviteCoReviewerOpen] = useState(false)
+  const [inviteCoRevPaperId, setInviteCoRevPaperId] = useState("")
+  const [coRevName, setCoRevName] = useState("")
+  const [coRevEmail, setCoRevEmail] = useState("")
+  const [coRevAffiliation, setCoRevAffiliation] = useState("")
+
+  const [isCoRevDisclosureOpen, setIsCoRevDisclosureOpen] = useState(false)
+  const [activeCoRevId, setActiveCoRevId] = useState("")
+  const [coRevConfidentiality, setCoRevConfidentiality] = useState(false)
+  const [coRevNoCOI, setCoRevNoCOI] = useState(false)
+  const [isCoRevAcknowledged, setIsCoRevAcknowledged] = useState(false)
+
   // Moderation Dialog states
   const [isModerationOpen, setIsModerationOpen] = useState(false)
   const [moderatingReviewId, setModeratingReviewId] = useState("")
@@ -590,9 +624,56 @@ export default function Editorial360Page() {
     setActiveReviews(prev => [...prev, newActRev])
     setReviewInvitations(prev => prev.filter(i => i.id !== invId))
   }
-
   const handleDeclineReviewInvitation = (invId: string) => {
     setReviewInvitations(prev => prev.filter(i => i.id !== invId))
+  }
+
+  const handleInviteCoReviewer = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!coRevName || !coRevEmail || !coRevAffiliation) return
+    const newInv: CoReviewInvitation = {
+      id: `COREV-${Math.floor(Math.random() * 1000)}`,
+      paperId: inviteCoRevPaperId,
+      title: "Manuscript Under Review",
+      journal: "Engineering & Applied Sciences",
+      inviterName: "User",
+      status: "Pending Disclosure"
+    }
+    setCoReviewInvitations(prev => [...prev, newInv])
+    setIsInviteCoReviewerOpen(false)
+    setCoRevName("")
+    setCoRevEmail("")
+    setCoRevAffiliation("")
+  }
+
+  const handleSubmitCoRevDisclosure = () => {
+    if (!coRevConfidentiality || !coRevNoCOI) return
+    
+    const isFlagged = coRevEmail.includes("author-institution.edu")
+    
+    if (isFlagged) {
+      setCoReviewInvitations(prev => prev.map(inv => 
+        inv.id === activeCoRevId ? { ...inv, status: "Flagged" } : inv
+      ))
+      const newAlert: IntegrityAlert = {
+        id: `ALT-${Math.floor(Math.random() * 1000)}`,
+        paperId: "REV-2026-12", 
+        title: "Climate Adaptation Strategies",
+        journal: "Social Sciences",
+        type: "Co-Reviewer COI Check",
+        score: "Match",
+        detail: `Co-Reviewer ${coRevEmail} institutional domain matches an author.`,
+        severity: "critical",
+        status: "Flagged"
+      }
+      setIntegrityAlerts(prev => [...prev, newAlert])
+    } else {
+      setCoReviewInvitations(prev => prev.map(inv => 
+        inv.id === activeCoRevId ? { ...inv, status: "Cleared" } : inv
+      ))
+      setIsCoRevAcknowledged(true)
+    }
+    setIsCoRevDisclosureOpen(false)
   }
 
   const handleSubmitReviewScorecard = () => {
@@ -612,6 +693,7 @@ export default function Editorial360Page() {
         id: `REV-FB-${Math.floor(Math.random() * 1000) + 200}`,
         paperId: paperId,
         reviewerName: "Dr. Evelyn Vane", // Active reviewer
+        coReviewerName: isCoRevAcknowledged ? "Dr. Alex Johnson (Co-Reviewer)" : undefined,
         originality: scoreOriginality,
         methodology: scoreMethodology,
         clarity: scoreClarity,
@@ -3118,6 +3200,138 @@ export default function Editorial360Page() {
                   )
                 })()}
               </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* 9. REVIEWER: INVITE CO-REVIEWER MODAL */}
+          <Dialog open={isInviteCoReviewerOpen} onOpenChange={setIsInviteCoReviewerOpen}>
+            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-md transition-colors">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-[#0b99ff]" />
+                  Invite Co-Reviewer
+                </DialogTitle>
+                <DialogDescription className="text-slate-500 dark:text-slate-400">
+                  Formally invite a colleague or Early Career Researcher to co-review this manuscript. They must pass a COI check before accessing the paper.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={handleInviteCoReviewer} className="space-y-4 py-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Co-Reviewer Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={coRevName}
+                    onChange={(e) => setCoRevName(e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    placeholder="e.g. Dr. Alex Johnson"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Institutional Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={coRevEmail}
+                    onChange={(e) => setCoRevEmail(e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    placeholder="a.johnson@university.edu"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Primary Affiliation</label>
+                  <input
+                    type="text"
+                    required
+                    value={coRevAffiliation}
+                    onChange={(e) => setCoRevAffiliation(e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    placeholder="e.g. Department of Engineering, State University"
+                  />
+                </div>
+
+                <DialogFooter className="pt-2">
+                  <Button 
+                    type="button" 
+                    onClick={() => setIsInviteCoReviewerOpen(false)}
+                    variant="ghost" 
+                    className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold cursor-pointer"
+                  >
+                    Send Secure Invitation
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* 10. CO-REVIEWER: MANDATORY ETHICS DISCLOSURE MODAL */}
+          <Dialog open={isCoRevDisclosureOpen} onOpenChange={setIsCoRevDisclosureOpen}>
+            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-md transition-colors">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-purple-600" />
+                  Mandatory Ethics & COI Disclosure
+                </DialogTitle>
+                <DialogDescription className="text-slate-500 dark:text-slate-400">
+                  Before accessing the manuscript abstract and files, you must agree to the confidentiality terms and declare no Conflicts of Interest.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-2">
+                <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded space-y-4">
+                  <div className="flex items-start gap-3">
+                    <input 
+                      id="corev-confidentiality" 
+                      type="checkbox" 
+                      checked={coRevConfidentiality}
+                      onChange={(e) => setCoRevConfidentiality(e.target.checked)}
+                      className="h-4 w-4 mt-0.5 text-purple-600 focus:ring-purple-600 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded cursor-pointer"
+                    />
+                    <label htmlFor="corev-confidentiality" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer font-medium leading-relaxed">
+                      <strong>Confidentiality Agreement:</strong> I agree to keep all unpublished manuscript data strictly confidential and will not use it for personal research until publication.
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <input 
+                      id="corev-nocoi" 
+                      type="checkbox" 
+                      checked={coRevNoCOI}
+                      onChange={(e) => setCoRevNoCOI(e.target.checked)}
+                      className="h-4 w-4 mt-0.5 text-purple-600 focus:ring-purple-600 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded cursor-pointer"
+                    />
+                    <label htmlFor="corev-nocoi" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer font-medium leading-relaxed">
+                      <strong>Conflict of Interest (COI) Declaration:</strong> I declare that I have no financial, institutional, or personal relationship with the authors that could bias my review.
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button 
+                  onClick={() => setIsCoRevDisclosureOpen(false)}
+                  variant="ghost" 
+                  className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
+                >
+                  Decline Invitation
+                </Button>
+                <Button 
+                  onClick={handleSubmitCoRevDisclosure}
+                  disabled={!coRevConfidentiality || !coRevNoCOI}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold cursor-pointer"
+                >
+                  Agree & Request Access
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
 
