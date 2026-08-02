@@ -133,7 +133,7 @@ Dr. Mohamed has participated in several national and international research proj
     slug: "weihua-gong",
     name: "Weihua Gong, M.D., Ph.D.",
     role: "Associate Editor",
-    affiliation: "Shanghai Jiao Tong University School of Medicine, China",
+    affiliation: "Shanghai Jiao Tong\nUniversity School of Medicine, China",
     specialization: "Gastrointestinal tumors, organ transplantation",
     email: "editor.med@scholarlyopen.org",
     orcid: "0000-0002-0213-7313",
@@ -369,38 +369,6 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
         link: "https://www.nature.com/articles/tp201171"
       }
     ]
-  },
-  {
-    slug: "open-position-assoc-med-1",
-    name: "Position open",
-    role: "Associate Editor",
-    affiliation: "Under formation",
-    specialization: "Currently appointing",
-    journalSlug: "medicine"
-  },
-  {
-    slug: "open-position-assoc-med-2",
-    name: "Position open",
-    role: "Associate Editor",
-    affiliation: "Under formation",
-    specialization: "Currently appointing",
-    journalSlug: "medicine"
-  },
-  {
-    slug: "open-position-board-med-1",
-    name: "Position open",
-    role: "Editorial Board Member",
-    affiliation: "Under formation",
-    specialization: "Currently appointing",
-    journalSlug: "medicine"
-  },
-  {
-    slug: "open-position-board-med-2",
-    name: "Position open",
-    role: "Editorial Board Member",
-    affiliation: "Under formation",
-    specialization: "Currently appointing",
-    journalSlug: "medicine"
   }
 ]
 

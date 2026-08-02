@@ -47,39 +47,28 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   
   return (
-    <Card className={`border-border hover:border-primary/30 transition-all shadow-xs relative flex flex-col justify-between h-full bg-card ${
-      featured ? "ring-1 ring-primary/45 bg-secondary/5" : ""
+    <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center h-full p-2 ${
+      featured ? "bg-secondary/5 rounded-2xl p-4" : ""
     }`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start gap-4">
-          {editor.imageUrl ? (
-            <img 
-              src={editor.imageUrl} 
-              alt={editor.name} 
-              className="h-12 w-12 rounded-full object-cover object-center shrink-0 ring-1 ring-slate-900/10 shadow-sm" 
-            />
-          ) : (
-            <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
-              <span className="text-base">{initials}</span>
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-base font-semibold text-foreground">{editor.name}</CardTitle>
-            <CardDescription className="text-xs font-semibold text-muted-foreground mt-0.5 uppercase tracking-wider">
-              {editor.role}
-            </CardDescription>
-          </div>
+      {editor.imageUrl ? (
+        <img 
+          src={editor.imageUrl} 
+          alt={editor.name} 
+          className="h-32 w-32 rounded-full object-cover object-center shrink-0 ring-4 ring-slate-900/5 shadow-md mb-5" 
+        />
+      ) : (
+        <div className="h-32 w-32 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold mb-5 shadow-md">
+          <span className="text-4xl">{initials}</span>
         </div>
-      </CardHeader>
+      )}
       
-      <CardContent className="pt-0 flex-1 flex flex-col justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground whitespace-pre-line">{editor.affiliation}</p>
-        </div>
+      <div className="flex flex-col items-center flex-1 w-full">
+        <h4 className="text-lg font-bold text-foreground mb-1">{editor.name}</h4>
+        <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed mb-6 flex-1">{editor.affiliation}</p>
         
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full mt-4 text-xs font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
+            <Button variant="outline" size="sm" className="w-full text-xs font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
               View Editorial Profile
             </Button>
           </DialogTrigger>
@@ -191,7 +180,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
             </div>
           </DialogContent>
         </Dialog>
-      </CardContent>
+      </div>
     </Card>
   )
 }
