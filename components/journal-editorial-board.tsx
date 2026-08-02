@@ -63,7 +63,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
       )}
       
       <div className="flex flex-col items-center w-full">
-        <h4 className="text-lg font-bold text-foreground mb-1">{editor.name}</h4>
+        <h4 className="text-lg font-bold text-foreground -mt-2 mb-1">{editor.name}</h4>
         <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed mb-4">{editor.affiliation}</p>
         
         <Dialog>
