@@ -303,7 +303,7 @@ export default function APCFeesPage() {
               <div>
                 <h4 className="font-semibold text-base text-primary">Special Launch Promotion</h4>
                 <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                  To celebrate our portfolio expansion and support early scholarship, the Article Processing Charges (APCs) for the <strong>first 10 accepted articles</strong> in <em>each</em> of our 13 journals will be <strong>fully waived (100% discount)</strong>. No code or waiver request is needed; this promotion is automatically applied upon manuscript acceptance.
+                  To celebrate our portfolio expansion and support early scholarship, Article Processing Charges (APCs) for the <strong>first 10 accepted articles</strong> in <em>each</em> of our 13 journals will be <strong>fully waived (100% discount)</strong> for authors without institutional or grant APC funding. If your research is supported by a grant or institution with dedicated publication funding, we ask that you utilize those funds so launch waivers remain available for unfunded researchers.
                 </p>
               </div>
             </div>
