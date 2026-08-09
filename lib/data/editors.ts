@@ -420,12 +420,124 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
     journalSlug: "medicine",
   },
   {
-    slug: "position-open-med-ebm-1",
-    name: "Position Open",
+    slug: "justice-kofi-boakye-appiah",
+    name: "Justice Kofi Boakye-Appiah, M.D., Ph.D.",
     role: "Editorial Board Member",
-    affiliation: "Seeking qualified experts in clinical medicine and surgery.",
-    specialization: "Medicine & Health Sciences",
+    affiliation: "Exploratory Medicine and Pharmacology,\nEli Lilly and Company, USA",
+    specialization: "Obesity and chronic weight management",
+    email: "editor.med@scholarlyopen.org",
+    orcid: "0000-0002-5741-5165",
+    linkedin: "https://www.linkedin.com/in/justice-kofi-boakye-appiah-md-phd-2a54baa1",
+    googleScholar: "https://scholar.google.com/citations?user=fKlSDgQAAAAJ&hl=en",
+    imageUrl: "/images/editors/justice-kofi-boakye-appiah.jpg",
     journalSlug: "medicine",
+    assignedSections: [
+      "Obesity & Chronic Weight Management",
+      "Cardiometabolic Health & Endocrinology",
+      "Clinical Pharmacology & Exploratory Medicine"
+    ],
+    expertise: [
+      "Obesity and chronic weight management",
+      "Cardiometabolic Health",
+      "Clinical Pharmacology",
+      "GLP-1 Therapeutics",
+      "Vaccinology & Infectious Diseases",
+      "Translational Medicine"
+    ],
+    badges: ["Founding Member"],
+    welcomeMessage: "As an Editorial Board Member for Scholarly Open: Medicine, I am committed to advancing translational research, clinical pharmacology, and evidence-based interventions in cardiometabolic health and chronic weight management to improve global patient outcomes.",
+    stats: [
+      { label: "Status", value: "Accepting Submissions", description: "Ready to review manuscripts" },
+      { label: "Avg. Turnaround", value: "21 Days", description: "From assignment to review completion" },
+      { label: "Review Standard", value: "Rigorous Double-Blind", description: "Ensuring clinical excellence" }
+    ],
+    timeline: [
+      {
+        year: "2011",
+        title: "BSc. Human Biology",
+        description: "School of Medical Sciences, Kwame Nkrumah University of Science and Technology (KNUST), Kumasi, Ghana.",
+        type: "education"
+      },
+      {
+        year: "2014",
+        title: "MD (Bachelor of Medicine, Bachelor of Surgery)",
+        description: "Kwame Nkrumah University of Science and Technology (KNUST), Kumasi, Ghana.",
+        type: "education"
+      },
+      {
+        year: "2014-2016",
+        title: "Physician Research Scientist / Sub-Investigator",
+        description: "Kumasi Center for Collaborative Research into Tropical Medicine (KCCR), Ghana.",
+        type: "career"
+      },
+      {
+        year: "2020",
+        title: "PhD in Infection and Immunity",
+        description: "Institute for Infection and Immunity, St George's University of London, UK.",
+        type: "education"
+      },
+      {
+        year: "2020-2021",
+        title: "Clinical Research Fellow / Sub-Investigator",
+        description: "COVID-19 Vaccines & Therapeutics Clinical Trials, NIHR / University College London Hospital, UK.",
+        type: "career"
+      },
+      {
+        year: "2021-2024",
+        title: "Associate Director, Vaccines Clinical R&D",
+        description: "Pfizer. Lead clinician and Medical Monitor for Phase 1, 2/3 pediatric and adult COVID-19 vaccine candidates.",
+        type: "career"
+      },
+      {
+        year: "2024-Present",
+        title: "Senior Director, Clinical Pharmacologist",
+        description: "Exploratory Medicine and Pharmacology (E.M.P), Eli Lilly and Company, USA. Leading early-phase human studies in cardiometabolic health and obesity.",
+        type: "career"
+      },
+      {
+        year: "2025",
+        title: "Postgraduate Certificate in Clinical Pharmacology",
+        description: "Postgraduate Certificate in Clinical Pharmacology, Drug Development and Regulation, Tufts University, USA.",
+        type: "education"
+      },
+      {
+        year: "2026",
+        title: "Joined Scholarly Open",
+        description: "Appointed as Editorial Board Member for Scholarly Open: Medicine.",
+        type: "milestone"
+      }
+    ],
+    biography: `Dr. Justice Kofi Boakye-Appiah, M.D., Ph.D., is a physician-scientist and Senior Director, Clinical Pharmacologist in Exploratory Medicine and Pharmacology (E.M.P) at Eli Lilly and Company. He possesses broad expertise spanning pre-clinical, translational, early, and late Phase drug development, with a primary focus on cardiometabolic health (including obesity, diabetes, and liver disease) as well as infectious diseases, immunology, and vaccinology.
+
+At Eli Lilly and Company, Dr. Boakye-Appiah leads early-phase (Clinical Pharmacology) human studies to establish safety, mechanism of action, and proof of concept for novel drug candidates, including GLP-1 based compounds and first-in-class siRNA molecules within the cardiometabolic portfolio. Prior to joining Eli Lilly, he served as Associate Director of Vaccines Clinical Research and Development at Pfizer, where he led research and development teams as Lead Clinician and Medical Monitor for pivotal Phase 1, 2, and 3 COVID-19 vaccine clinical trials, including the pediatric BNT162b2 Omicron vaccine.
+
+Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame Nkrumah University of Science and Technology (KNUST) in Ghana, and completed his Ph.D. in Infection and Immunity at St George's University of London. He also holds a Postgraduate Certificate in Clinical Pharmacology, Drug Development and Regulation from Tufts University. His research has been published in premier international medical journals, including The Lancet, PLoS Neglected Tropical Diseases, and the Journal of the Pediatric Infectious Diseases Society.`,
+    personalPublications: [
+      {
+        title: "A composite subunit vaccine confers full protection against Buruli ulcer disease in the mouse footpad model of Mycobacterium ulcerans infection",
+        journal: "PLoS Neglected Tropical Diseases",
+        year: "2025",
+        link: "https://doi.org/10.1371/journal.pntd.0012710"
+      },
+      {
+        title: "Bivalent Omicron BA.4/BA.5 BNT162b2 Vaccine in 6-Month- to <12-Year-Olds",
+        journal: "Journal of the Pediatric Infectious Diseases Society",
+        year: "2024",
+        link: "https://doi.org/10.1093/jpids/piae062"
+      },
+      {
+        title: "Rifampicin and clarithromycin (extended release) versus rifampicin and streptomycin for limited Buruli ulcer lesions: a randomised, open-label, non-inferiority phase 3 trial",
+        journal: "The Lancet",
+        year: "2020",
+        link: "https://doi.org/10.1016/S0140-6736(20)30047-7"
+      },
+      {
+        title: "High prevalence of multidrug-resistant tuberculosis among patients with rifampicin resistance using gene Xpert mycobacterium tuberculosis/rifampicin in Ghana",
+        journal: "International Journal of Mycobacteriology",
+        year: "2016",
+        link: "https://www.sciencedirect.com/science/article/pii/S2212553116300024"
+      }
+    ]
   },
   {
     slug: "position-open-med-ebm-2",

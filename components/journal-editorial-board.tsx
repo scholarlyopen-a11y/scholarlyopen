@@ -47,7 +47,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   
   return (
-    <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center p-2 -ml-32 ${
+    <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center p-2 ${
       featured ? "bg-secondary/5 rounded-2xl p-4" : ""
     }`}>
       <div className="w-full flex justify-center">
