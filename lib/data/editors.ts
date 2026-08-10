@@ -946,18 +946,6 @@ Dr. Chamberland’s published research focuses on gender and the professionaliza
 Dr. Chamberland earned her Ph.D. in History from the University of California, Davis, her M.A. from Concordia University in Montreal, and her B.A. from the University of New Brunswick. Her research has been widely published in leading journals such as Social History of Medicine, History of Education Quarterly, Sixteenth Century Journal, and Journal of the History of Medicine and Allied Sciences.`,
     personalPublications: [
       {
-        title: "Inclusivity and Neuro-divergence in the History Classroom",
-        journal: "American Historical Association Gateways to Completion Teaching Reflection Series",
-        year: "2023",
-        link: "https://www.historians.org/research-and-publications/publications-with-aha/teaching-reflection-series"
-      },
-      {
-        title: "An Enchanting Witchcraft: Gaming, Masculinity, and the Pathology of Addiction in Early Modern London",
-        journal: "The Casino Games and Classic Card Games Reader (Bloomsbury)",
-        year: "2021",
-        link: "https://www.bloomsbury.com/us/casino-card-and-betting-game-reader-9781501370618/"
-      },
-      {
         title: "The Booke and Arte: Surgical Education and Social Disciplining in Early Modern London",
         journal: "History of Education Quarterly",
         year: "2013",
