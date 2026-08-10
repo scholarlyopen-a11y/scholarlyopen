@@ -948,28 +948,32 @@ Dr. Chamberland earned her Ph.D. in History from the University of California, D
       {
         title: "An Enchanting Witchcraft: Gaming, Masculinity, and the Pathology of Addiction in Early Modern London",
         journal: "The Casino Games and Classic Card Games Reader (Bloomsbury)",
-        year: "2021"
+        year: "2021",
+        link: "https://www.bloomsbury.com/us/casino-card-and-betting-game-reader-9781501370618/"
       },
       {
         title: "The Booke and Arte: Surgical Education and Social Disciplining in Early Modern London",
         journal: "History of Education Quarterly",
-        year: "2013"
+        year: "2013",
+        link: "https://doi.org/10.1111/hoeq.12001"
       },
       {
         title: "Partners or Practitioners: Women and the Management of Surgical Households in Early Modern London",
         journal: "Social History of Medicine",
         year: "2011",
-        link: "https://doi.org/10.1093/shm/hkq102"
+        link: "https://doi.org/10.1093/shm/hkq057"
       },
       {
         title: "Between the Hall and the Market: William Clowes and Surgical Self-Fashioning in Elizabethan London",
         journal: "Sixteenth Century Journal",
-        year: "2010"
+        year: "2010",
+        link: "https://doi.org/10.1086/scj27867638"
       },
       {
         title: "Honor, Brotherhood, and the Corporate Ethos of the London Barber-Surgeons' Company, 1570–1640",
         journal: "Journal of the History of Medicine and Allied Sciences",
-        year: "2009"
+        year: "2009",
+        link: "https://doi.org/10.1093/jhmas/jrp008"
       }
     ]
   },
