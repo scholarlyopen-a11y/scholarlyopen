@@ -946,12 +946,6 @@ Dr. Chamberland’s published research focuses on gender and the professionaliza
 Dr. Chamberland earned her Ph.D. in History from the University of California, Davis, her M.A. from Concordia University in Montreal, and her B.A. from the University of New Brunswick. Her research has been widely published in leading journals such as Social History of Medicine, History of Education Quarterly, Sixteenth Century Journal, and Journal of the History of Medicine and Allied Sciences.`,
     personalPublications: [
       {
-        title: "The Booke and Arte: Surgical Education and Social Disciplining in Early Modern London",
-        journal: "History of Education Quarterly",
-        year: "2013",
-        link: "https://doi.org/10.1111/hoeq.12001"
-      },
-      {
         title: "Partners or Practitioners: Women and the Management of Surgical Households in Early Modern London",
         journal: "Social History of Medicine",
         year: "2011",
@@ -967,7 +961,7 @@ Dr. Chamberland earned her Ph.D. in History from the University of California, D
         title: "Honor, Brotherhood, and the Corporate Ethos of the London Barber-Surgeons' Company, 1570–1640",
         journal: "Journal of the History of Medicine and Allied Sciences",
         year: "2009",
-        link: "https://doi.org/10.1093/jhmas/jrp008"
+        link: "https://academic.oup.com/jhmas/article-abstract/64/3/300/750429"
       }
     ]
   },
