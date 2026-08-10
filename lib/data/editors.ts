@@ -909,19 +909,19 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     ],
     timeline: [
       {
-        year: "BA",
+        year: "1995",
         title: "B.A. in History",
         description: "University of New Brunswick, Canada.",
         type: "education"
       },
       {
-        year: "MA",
+        year: "1997",
         title: "M.A. in History",
         description: "Concordia University, Montreal, Canada.",
         type: "education"
       },
       {
-        year: "PhD",
+        year: "2004",
         title: "Ph.D. in History",
         description: "University of California, Davis, USA.",
         type: "education"
