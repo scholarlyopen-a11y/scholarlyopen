@@ -878,12 +878,100 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     journalSlug: "social-sciences-humanities",
   },
   {
-    slug: "position-open-social-sciences-humanities-ebm-1",
-    name: "Position Open",
+    slug: "celeste-chamberland",
+    name: "Celeste Chamberland, Ph.D.",
     role: "Editorial Board Member",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
+    affiliation: "Professor of History & Program Director\nRoosevelt University, USA",
+    specialization: "Early Modern Europe and the History of Medicine",
+    email: "editor.ssh@scholarlyopen.org",
+    orcid: "0009-0004-3810-5163",
+    googleScholar: "https://scholar.google.com/citations?user=IlUtNqcAAAAJ&hl=en",
+    imageUrl: "/images/editors/celeste-chamberland.jpg",
     journalSlug: "social-sciences-humanities",
+    assignedSections: [
+      "History of Medicine & Surgery",
+      "Early Modern European History",
+      "Gender, Race & Cultural History"
+    ],
+    expertise: [
+      "History of Surgery",
+      "Sixteenth-century England",
+      "Gender Studies",
+      "History of Addiction",
+      "Drugs and Pharmacy"
+    ],
+    badges: ["Founding Member"],
+    welcomeMessage: "As an Editorial Board Member for Scholarly Open: Social Sciences & Humanities, I am committed to supporting rigorous interdisciplinary research that explores historical perspectives on medicine, society, gender, and culture to deepen our understanding of the human condition.",
+    stats: [
+      { label: "Status", value: "Accepting Submissions", description: "Ready to review manuscripts" },
+      { label: "Avg. Turnaround", value: "21 Days", description: "From assignment to review completion" },
+      { label: "Review Standard", value: "Rigorous Double-Blind", description: "Ensuring academic excellence" }
+    ],
+    timeline: [
+      {
+        year: "BA",
+        title: "B.A. in History",
+        description: "University of New Brunswick, Canada.",
+        type: "education"
+      },
+      {
+        year: "MA",
+        title: "M.A. in History",
+        description: "Concordia University, Montreal, Canada.",
+        type: "education"
+      },
+      {
+        year: "PhD",
+        title: "Ph.D. in History",
+        description: "University of California, Davis, USA.",
+        type: "education"
+      },
+      {
+        year: "Career",
+        title: "Professor of History & Program Director",
+        description: "Director of History and International Studies Programs, Roosevelt University, Chicago, IL, USA.",
+        type: "career"
+      },
+      {
+        year: "2026",
+        title: "Joined Scholarly Open",
+        description: "Appointed as Editorial Board Member for Scholarly Open: Social Sciences & Humanities.",
+        type: "milestone"
+      }
+    ],
+    biography: `Dr. Celeste Chamberland, Ph.D., is a Professor of History and Program Director for the History and International Studies Programs at Roosevelt University in Chicago. She is a scholar of the history of medicine, early modern Europe, and the Atlantic world, with a specialized emphasis on gender, race, and cultural history.
+
+Dr. Chamberland’s published research focuses on gender and the professionalization of surgery, as well as the history of mental illness in the sixteenth and seventeenth centuries. Her current research interests explore the relationship between masculinity, medical moralizing, and the proto-medicalization of addiction within the context of emergent global capitalism. She teaches courses spanning world history, the history of public health, medical racism, drugs in world history, epidemics, and gender and power in the Atlantic world.
+
+Dr. Chamberland earned her Ph.D. in History from the University of California, Davis, her M.A. from Concordia University in Montreal, and her B.A. from the University of New Brunswick. Her research has been widely published in leading journals such as Social History of Medicine, History of Education Quarterly, Sixteenth Century Journal, and Journal of the History of Medicine and Allied Sciences.`,
+    personalPublications: [
+      {
+        title: "An Enchanting Witchcraft: Gaming, Masculinity, and the Pathology of Addiction in Early Modern London",
+        journal: "The Casino Games and Classic Card Games Reader (Bloomsbury)",
+        year: "2021"
+      },
+      {
+        title: "The Booke and Arte: Surgical Education and Social Disciplining in Early Modern London",
+        journal: "History of Education Quarterly",
+        year: "2013"
+      },
+      {
+        title: "Partners or Practitioners: Women and the Management of Surgical Households in Early Modern London",
+        journal: "Social History of Medicine",
+        year: "2011",
+        link: "https://doi.org/10.1093/shm/hkq102"
+      },
+      {
+        title: "Between the Hall and the Market: William Clowes and Surgical Self-Fashioning in Elizabethan London",
+        journal: "Sixteenth Century Journal",
+        year: "2010"
+      },
+      {
+        title: "Honor, Brotherhood, and the Corporate Ethos of the London Barber-Surgeons' Company, 1570–1640",
+        journal: "Journal of the History of Medicine and Allied Sciences",
+        year: "2009"
+      }
+    ]
   },
   {
     slug: "position-open-social-sciences-humanities-ebm-2",
