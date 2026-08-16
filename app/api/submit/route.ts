@@ -89,11 +89,12 @@ export async function POST(request: Request) {
   const authorEmail = safeText(formData.get("email"), 200)
   const affiliation = safeText(formData.get("affiliation"), 240)
   const discipline = safeText(formData.get("discipline"), 80)
+  const articleType = safeText(formData.get("articleType"), 100)
   const title = safeText(formData.get("title"), 240)
   const abstract = safeText(formData.get("abstract"), 12000)
   const agreed = safeText(formData.get("agreed"), 10)
 
-  if (!firstName || !lastName || !authorEmail || !affiliation || !discipline || !title || !abstract) {
+  if (!firstName || !lastName || !authorEmail || !affiliation || !discipline || !articleType || !title || !abstract) {
     return Response.json({ ok: false, error: "Missing required fields." }, { status: 400 })
   }
 
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "File too large (max 25MB)." }, { status: 413 })
   }
 
-  const subject = `Manuscript submission: ${title} (${journalLabel(discipline)})`
+  const subject = `Manuscript submission: [${articleType}] ${title} (${journalLabel(discipline)})`
 
   const text = [
     `Submission request via Scholarly Open website`,
@@ -122,6 +123,7 @@ export async function POST(request: Request) {
     ``,
     `Manuscript`,
     `- Target journal: ${journalLabel(discipline)}`,
+    `- Article Type: ${articleType}`,
     `- Title: ${title}`,
     `- Abstract:`,
     abstract,

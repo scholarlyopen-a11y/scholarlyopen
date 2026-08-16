@@ -268,6 +268,63 @@ export default function SubmitPage() {
                         </select>
                       </div>
                     </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="articleType" className="text-sm font-medium">
+                        Article Category / Type *
+                      </label>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <select
+                          id="articleType"
+                          name="articleType"
+                          className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm"
+                          required
+                        >
+                          <option value="">Select article type</option>
+                          <optgroup label="Research-based Articles">
+                            <option value="Original Research">Original Research</option>
+                            <option value="Brief Research Report">Brief Research Report</option>
+                            <option value="Research Protocols">Research Protocols</option>
+                            <option value="Research Clinical Trials Protocol">Research Clinical Trials Protocol</option>
+                            <option value="Research Letter">Research Letter</option>
+                            <option value="Observational Study">Observational Study</option>
+                            <option value="Study Protocol / Data Article">Study Protocol / Data Article</option>
+                          </optgroup>
+                          <optgroup label="Review-based Articles">
+                            <option value="Review">Review</option>
+                            <option value="Book Review">Book Review</option>
+                            <option value="Mini Review">Mini Review</option>
+                            <option value="Systematic Review">Systematic Review & Meta-Analysis</option>
+                            <option value="Scoping Review">Scoping Review</option>
+                          </optgroup>
+                          <optgroup label="Case-based Articles">
+                            <option value="Case Report">Case Report</option>
+                            <option value="Case Series">Case Series</option>
+                            <option value="Technical Report">Technical Report</option>
+                            <option value="Letter to the Editor (related to case study/series)">Letter to the Editor (related to case study/series)</option>
+                            <option value="Clinical Image / Video Article">Clinical Image / Video Article</option>
+                          </optgroup>
+                          <optgroup label="Short Type Articles & Communications">
+                            <option value="Editorial">Editorial</option>
+                            <option value="Letter to the Editor">Letter to the Editor</option>
+                            <option value="Commentary">Commentary</option>
+                            <option value="Hypothesis">Hypothesis</option>
+                            <option value="Opinion">Opinion</option>
+                            <option value="Perspective Article">Perspective Article</option>
+                            <option value="Short Communication">Short Communication</option>
+                            <option value="Illustrations">Illustrations</option>
+                            <option value="Conference Proceedings">Conference Proceedings</option>
+                            <option value="Announcements">Announcements</option>
+                          </optgroup>
+                          <optgroup label="Other Types">
+                            <option value="Method / Software Article">Method / Software Article</option>
+                            <option value="Erratum / Corrigendum / Reply">Erratum / Corrigendum / Reply</option>
+                            <option value="Other">Other Article Type</option>
+                          </optgroup>
+                        </select>
+                      </div>
+                    </div>
                     
                     <div className="space-y-2">
                       <label htmlFor="title" className="text-sm font-medium">
@@ -340,8 +397,9 @@ export default function SubmitPage() {
                       <label htmlFor="agreement" className="text-sm text-muted-foreground">
                         I confirm that I have read and agree to the{" "}
                         <Link href="/author-guidelines" className="text-primary hover:underline">{t("nav.authorGuidelines")}</Link>,{" "}
-                        <Link href="/publication-ethics" className="text-primary hover:underline">{t("nav.publicationEthics")}</Link>, and{" "}
-                        <Link href="/open-access" className="text-primary hover:underline">{t("nav.openAccess")}</Link>.
+                        <Link href="/publication-ethics" className="text-primary hover:underline">{t("nav.publicationEthics")}</Link>,{" "}
+                        <Link href="/open-access" className="text-primary hover:underline">{t("nav.openAccess")}</Link>, and{" "}
+                        <Link href="/apc-fees" className="text-primary hover:underline">{t("nav.apcFees")}</Link>.
                         I confirm that all authors have agreed to this submission.
                       </label>
                     </div>

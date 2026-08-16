@@ -41,7 +41,15 @@ import {
   Inbox,
   Archive,
   MessageSquareOff,
-  MessageSquare
+  MessageSquare,
+  Lightbulb,
+  Clock,
+  Star,
+  Flag,
+  Award,
+  TrendingUp,
+  Link2,
+  Linkedin
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -339,6 +347,229 @@ function getRoleProfileData(role: UserRole): RoleProfileData {
   }
 }
 
+interface UserProfileHeaderProps {
+  role: UserRole
+}
+
+function UserProfileHeaderCard({ role }: UserProfileHeaderProps) {
+  const getRoleConfig = (role: UserRole) => {
+    switch (role) {
+      case "jm":
+        return {
+          photo: "/images/manager-photo.png",
+          name: "Sarah Jenkins, M.S.",
+          title: "Journal Operations Manager & Quality Desk Lead",
+          interestsLabel: "Operational Scope",
+          interests: "Publication Ethics, Peer Review Moderation, COI Security",
+          alertText: "Safety Moderation Notice: Audit reviewer comments for inflammatory language or direct PII before releasing to authors.",
+          alertIcon: Lightbulb,
+          metricsTitle: "Operations & Moderation Metrics",
+          metrics: [
+            { icon: Clock, value: "1.8 days", label: "AVG MODERATION TIME" },
+            { icon: ShieldCheck, value: "99.2%", label: "SAFETY CLEARANCE RATE" },
+            { icon: MessageSquare, value: "312", label: "REVIEWS MODERATED" },
+            { icon: MessageSquareOff, value: "2", label: "PENDING IN MODERATION" },
+            { icon: TrendingUp, value: "Top 1%", label: "OPERATIONS RANK" }
+          ]
+        }
+      case "editor":
+        return {
+          photo: "/images/editor-photo.png",
+          name: "Prof. Aris Thorne",
+          title: "Managing Editor & Professor of Political Science",
+          interestsLabel: "Editorial Scope",
+          interests: "Public Policy, International Relations, Governance Systems",
+          alertText: "Editorial Guideline: Ensure at least two double-blind peer evaluations are received before logging final decision.",
+          alertIcon: Lightbulb,
+          metricsTitle: "Editorial Portfolio Metrics",
+          metrics: [
+            { icon: Clock, value: "12.4 days", label: "DECISION LATENCY (AVG)" },
+            { icon: ShieldCheck, value: "96%", label: "BOARD AUDIT SCORE" },
+            { icon: FileText, value: "86", label: "PAPERS HANDLED" },
+            { icon: Inbox, value: "4", label: "ACTIVE QUEUE LOAD" },
+            { icon: TrendingUp, value: "Top 3%", label: "EDITOR PERCENTILE" }
+          ]
+        }
+      case "reviewer":
+        return {
+          photo: "/images/reviewer-photo.png",
+          name: "Dr. Alex Johnson",
+          title: "Senior Researcher, AI Ethics",
+          interestsLabel: "Research Interests",
+          interests: "AI Bias, Data Privacy, Algorithmic Fairness",
+          alertText: "Watch for AI artifacts in both text and visuals: vague language, inconsistent formatting, missing scale bars...",
+          alertIcon: Lightbulb,
+          metricsTitle: "Reviewer Metrics",
+          metrics: [
+            { icon: Clock, value: "3 days", label: "TIME TO COMPLETE (AVG)" },
+            { icon: Star, value: "95%", label: "REVIEWS RATED HIGH QUALITY" },
+            { icon: Flag, value: "7", label: "INTEGRITY FLAGS RAISED" },
+            { icon: Award, value: "3", label: "BADGES EARNED" },
+            { icon: TrendingUp, value: "Top 12%", label: "PERCENTILE SCORE" }
+          ]
+        }
+      case "author":
+        return {
+          photo: "/images/author-photo.png",
+          name: "Jane Doe",
+          title: "Senior Researcher & Principal Author",
+          interestsLabel: "Research Focus",
+          interests: "Machine Learning, Data Privacy, Autonomous Systems",
+          alertText: "Author Tip: Ensure ORCID iD is verified to automatically sync published articles with CrossRef and Scopus.",
+          alertIcon: Lightbulb,
+          metricsTitle: "Author Performance Metrics",
+          metrics: [
+            { icon: Clock, value: "4.5 days", label: "REVISION TURNAROUND" },
+            { icon: Star, value: "88%", label: "ACCEPTANCE RIGOR RATE" },
+            { icon: FileText, value: "12", label: "PUBLISHED PAPERS" },
+            { icon: CheckSquare, value: "3", label: "ACTIVE SUBMISSIONS" },
+            { icon: TrendingUp, value: "Top 10%", label: "AUTHOR PERCENTILE" }
+          ]
+        }
+      case "ria":
+        return {
+          photo: "/images/ria-photo.png",
+          name: "Dr. Marcus Vance",
+          title: "Research Integrity Advisor & Forensics Analyst",
+          interestsLabel: "Forensics Specialization",
+          interests: "Image Duplication, AI Content Forensics, COI Verification",
+          alertText: "Integrity Alert: Algorithmic detection flagged figure duplication and high AI content index in active queue.",
+          alertIcon: Lightbulb,
+          metricsTitle: "Forensics & Integrity Metrics",
+          metrics: [
+            { icon: Clock, value: "0.9 days", label: "ALERT RESOLUTION TIME" },
+            { icon: Cpu, value: "99.8%", label: "DETECTION PRECISION" },
+            { icon: ShieldAlert, value: "148", label: "FORENSIC AUDITS" },
+            { icon: AlertTriangle, value: "2", label: "FLAGGED ALERTS" },
+            { icon: TrendingUp, value: "Top 2%", label: "INTEGRITY RANK" }
+          ]
+        }
+      case "admin":
+      default:
+        return {
+          photo: "/images/admin-photo.png",
+          name: "System Administrator",
+          title: "Chief Platform Architect & Node Admin",
+          interestsLabel: "System Scope",
+          interests: "Node Operations, User Security Registry, Workflow Schema",
+          alertText: "System Status: All 320 prerendered workspace nodes online. 99.99% system uptime maintained across regional clusters.",
+          alertIcon: Lightbulb,
+          metricsTitle: "System & Architecture Metrics",
+          metrics: [
+            { icon: Cpu, value: "99.99%", label: "NODE UPTIME" },
+            { icon: Lock, value: "100%", label: "SECURITY SCHEMAS" },
+            { icon: Settings, value: "1.4k", label: "SYSTEM ACTIONS LOGGED" },
+            { icon: ShieldCheck, value: "0", label: "SECURITY BREACHES" },
+            { icon: TrendingUp, value: "Top 1%", label: "SUPERUSER RANK" }
+          ]
+        }
+    }
+  }
+
+  const config = getRoleConfig(role)
+
+  return (
+    <div className="space-y-3">
+      {/* Top Alert Banner */}
+      <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-900/50 rounded-xl p-2.5 text-xs text-sky-800 dark:text-sky-300 font-medium flex items-center gap-2.5 shadow-xs">
+        <config.alertIcon className="h-4 w-4 text-[#0b99ff] shrink-0" />
+        <span>{config.alertText}</span>
+      </div>
+
+      {/* Intact Executive Profile Wallet Card */}
+      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4.5 sm:p-5 transition-colors overflow-hidden relative">
+        <div className="flex flex-col lg:flex-row items-stretch gap-6 lg:gap-8">
+          
+          {/* Left Block: Bio & Identity */}
+          <div className="flex-1 flex flex-col justify-between space-y-4 pr-0 lg:pr-6 lg:border-r border-slate-200/70 dark:border-slate-800/80">
+            <div className="flex items-start gap-4">
+              <div className="relative shrink-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-[#0b99ff]/30 shadow-md bg-slate-100 dark:bg-slate-900">
+                  <img 
+                    src={config.photo} 
+                    alt={config.name} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute top-0 left-0 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-950 shadow-xs" title="Active on Platform" />
+              </div>
+
+              <div className="space-y-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    {config.name}
+                  </h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                    VERIFIED
+                  </span>
+                </div>
+                
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                  {config.title}
+                </p>
+
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-0.5 line-clamp-2">
+                  <strong className="text-slate-700 dark:text-slate-300 font-bold">{config.interestsLabel}:</strong> {config.interests}
+                </p>
+              </div>
+            </div>
+
+            {/* Social Links & Action Button Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-900">
+              <div className="flex items-center gap-4 text-xs font-bold text-[#0b99ff]">
+                <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-1 hover:underline">
+                  <Link2 className="h-3.5 w-3.5" /> ORCID
+                </a>
+                <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-1 hover:underline">
+                  <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+                </a>
+              </div>
+
+              <Button 
+                variant="ghost"
+                className="bg-sky-50 hover:bg-sky-100 text-[#0b99ff] dark:bg-sky-950/60 dark:hover:bg-sky-900/80 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60 text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
+              >
+                View Full Profile
+              </Button>
+            </div>
+          </div>
+
+          {/* Right Block: Metrics Grid Wallet */}
+          <div className="lg:w-[58%] flex flex-col justify-between space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                {config.metricsTitle}
+              </h4>
+              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Updated Live</span>
+            </div>
+
+            {/* 5 Compact Metric Wallet Boxes */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-center h-full">
+              {config.metrics.map((m, idx) => {
+                const IconComp = m.icon
+                return (
+                  <div 
+                    key={idx} 
+                    className="bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800 rounded-xl p-2.5 flex flex-col items-center justify-center space-y-0.5 hover:border-[#0b99ff]/40 transition-all shadow-2xs"
+                  >
+                    <IconComp className="h-4 w-4 text-[#0b99ff]" />
+                    <div className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+                      {m.value}
+                    </div>
+                    <div className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-tight line-clamp-2">
+                      {m.label}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
+}
+
 export default function Editorial360Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")
@@ -544,17 +775,27 @@ export default function Editorial360Page() {
   ]
 
   const [journals, setJournals] = useState<JournalInfo[]>([
-    { name: "Engineering & Applied Sciences", code: "EAS", submissions: 142, latency: 22, status: "Active", editorInChief: "Prof. Clara Zhang" },
-    { name: "Social Sciences & Humanities", code: "SSH", submissions: 98, latency: 26, status: "Active", editorInChief: "Prof. Aris Thorne" },
-    { name: "Social Sciences Open", code: "SSO", submissions: 54, latency: 24, status: "Active", editorInChief: "Dr. Evelyn Vane" },
-    { name: "Data Science", code: "DS", submissions: 48, latency: 18, status: "Active", editorInChief: "Dr. Marcus Vance" }
+    { name: "Scholarly Open: Engineering & Applied Sciences", code: "EAS", submissions: 142, latency: 22, status: "Active", editorInChief: "Prof. Clara Zhang" },
+    { name: "Scholarly Open: Social Sciences & Humanities", code: "SSH", submissions: 98, latency: 26, status: "Active", editorInChief: "Prof. Aris Thorne" },
+    { name: "Scholarly Open: Social Sciences Open", code: "SSO", submissions: 54, latency: 24, status: "Active", editorInChief: "Dr. Evelyn Vane" },
+    { name: "Scholarly Open: Biology", code: "BIO", submissions: 62, latency: 20, status: "Active", editorInChief: "Dr. Helen Vance" },
+    { name: "Scholarly Open: Chemistry", code: "CHEM", submissions: 75, latency: 21, status: "Active", editorInChief: "Prof. Robert Lang" },
+    { name: "Scholarly Open: Medicine", code: "MED", submissions: 110, latency: 25, status: "Active", editorInChief: "Dr. Sarah Jenkins" },
+    { name: "Scholarly Open: Data Science & Analytics", code: "DSA", submissions: 48, latency: 18, status: "Active", editorInChief: "Dr. Marcus Vance" },
+    { name: "Scholarly Open: Environmental Science", code: "ENV", submissions: 43, latency: 19, status: "Active", editorInChief: "Prof. David Miller" },
+    { name: "Scholarly Open: Clinical AI & Digital Health", code: "CAI", submissions: 89, latency: 15, status: "Active", editorInChief: "Dr. Alex Johnson" },
+    { name: "Scholarly Open: AI Safety & Governance", code: "AIS", submissions: 94, latency: 16, status: "Active", editorInChief: "Dr. Marcus Vance" },
+    { name: "Scholarly Open: Decarbonization & Carbon Tech", code: "DCT", submissions: 37, latency: 23, status: "Active", editorInChief: "Prof. Clara Zhang" },
+    { name: "Scholarly Open: Quantum Engineering", code: "QE", submissions: 29, latency: 17, status: "Active", editorInChief: "Prof. Aris Thorne" },
+    { name: "Scholarly Open: Synthetic Biology & Bio-Design", code: "SBD", submissions: 51, latency: 20, status: "Active", editorInChief: "Dr. Evelyn Vane" },
+    { name: "Scholarly Open: Space Resources & Orbital Economy", code: "SRE", submissions: 33, latency: 28, status: "Active", editorInChief: "Prof. David Miller" }
   ])
 
   // Dialog and Wizard control states
   const [isSubmitWizardOpen, setIsSubmitWizardOpen] = useState(false)
   const [submitStep, setSubmitStep] = useState(1)
   const [newTitle, setNewTitle] = useState("")
-  const [newJournal, setNewJournal] = useState("Engineering & Applied Sciences")
+  const [newJournal, setNewJournal] = useState("Scholarly Open: Engineering & Applied Sciences")
   const [newAbstract, setNewAbstract] = useState("")
   const [newKeywords, setNewKeywords] = useState("")
 
@@ -573,6 +814,26 @@ export default function Editorial360Page() {
   const [decisionPaperId, setDecisionPaperId] = useState("")
   const [decisionType, setDecisionType] = useState<"Accepted" | "Rejected" | "Revision Required">("Accepted")
   const [decisionNote, setDecisionNote] = useState("")
+
+  // Morressier-inspired Stage Filter & Search States
+  const [manuscriptSearch, setManuscriptSearch] = useState("")
+  const [manuscriptStageFilter, setManuscriptStageFilter] = useState<"all" | "inbox" | "review" | "revision" | "decided">("all")
+
+  const filteredManuscripts = manuscripts.filter((m) => {
+    const matchesSearch =
+      m.title.toLowerCase().includes(manuscriptSearch.toLowerCase()) ||
+      m.id.toLowerCase().includes(manuscriptSearch.toLowerCase()) ||
+      m.journal.toLowerCase().includes(manuscriptSearch.toLowerCase()) ||
+      m.reviewers.some((r) => r.toLowerCase().includes(manuscriptSearch.toLowerCase()))
+
+    if (!matchesSearch) return false
+
+    if (manuscriptStageFilter === "inbox") return m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.reviewers.length === 0
+    if (manuscriptStageFilter === "review") return m.status === "Under Review"
+    if (manuscriptStageFilter === "revision") return m.status === "Revision Required"
+    if (manuscriptStageFilter === "decided") return m.status === "Accepted" || m.status === "Rejected"
+    return true
+  })
 
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false)
   const [reviewPaperId, setReviewPaperId] = useState("")
@@ -1571,47 +1832,47 @@ export default function Editorial360Page() {
 
             {/* Main scrollable body workspace content */}
             <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-100/50 dark:bg-slate-900/60 transition-colors">
-              <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
+              <div className="max-w-7xl mx-auto space-y-4 animate-in fade-in duration-300">
                 
                 {/* Banner Status Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
                   <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                      {role === "jm" && "Journal Management Console"}
-                      {role === "editor" && "Editorial Decision Matrix"}
-                      {role === "reviewer" && "Peer Review Board Panel"}
-                      {role === "author" && "Author Manuscript Workspace"}
-                      {role === "ria" && "Research Integrity Forensics Center"}
-                      {role === "admin" && "Administrative System Console"}
+                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                      {role === "jm" && "Journal Operations"}
+                      {role === "editor" && "Editorial Desk"}
+                      {role === "reviewer" && "Review Center"}
+                      {role === "author" && "My Submissions"}
+                      {role === "ria" && "Integrity Desk"}
+                      {role === "admin" && "Admin Console"}
                     </h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                      {role === "jm" && "Redact peer reviewer comments, manage author releases, and audit journal archives."}
-                      {role === "editor" && "Monitor incoming submissions, assign reviewer pools, and post final manuscript decisions."}
-                      {role === "reviewer" && "Review assigned submissions, complete evaluations metrics, and sign recommendation logs."}
-                      {role === "author" && "Track submission stages, respond to evaluations, and upload manuscript drafts."}
-                      {role === "ria" && "Audit algorithmic similarity index logs, investigate AI content warnings, and review figure reuse flags."}
-                      {role === "admin" && "Manage institutional nodes, review permissions schema, and user directory registries."}
-                    </p>
                   </div>
+
+                  {/* Header Actions & DE|EN Language Toggle */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 text-xs font-bold bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs">EN</span>
+                      <span className="px-1.5 py-0.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">DE</span>
+                    </div>
                   
-                  {role === "author" && (
-                    <Button 
-                      onClick={() => setIsSubmitWizardOpen(true)}
-                      className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg cursor-pointer"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Submit New Manuscript
-                    </Button>
-                  )}
-                  {role === "admin" && (
-                    <Button 
-                      onClick={() => setIsInviteUserOpen(true)}
-                      className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg cursor-pointer"
-                    >
-                      <UserPlus className="h-4 w-4" />
-                      Invite Workspace User
-                    </Button>
-                  )}
+                    {role === "author" && (
+                      <Button 
+                        onClick={() => setIsSubmitWizardOpen(true)}
+                        className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg cursor-pointer"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Submit New Manuscript
+                      </Button>
+                    )}
+                    {role === "admin" && (
+                      <Button 
+                        onClick={() => setIsInviteUserOpen(true)}
+                        className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg cursor-pointer"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        Invite Workspace User
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {/* ========================================================= */}
@@ -1621,6 +1882,7 @@ export default function Editorial360Page() {
                 {/* ================= 1. JOURNAL MANAGER (JM) ================= */}
                 {role === "jm" && (
                   <div className="space-y-6">
+                    <UserProfileHeaderCard role="jm" />
                     {/* JM Stats */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
@@ -1811,6 +2073,7 @@ export default function Editorial360Page() {
                 {/* ================= 2. EDITOR WORKSPACE ================= */}
                 {role === "editor" && (
                   <div className="space-y-6">
+                    <UserProfileHeaderCard role="editor" />
                     {/* Editor Metrics */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
@@ -1897,11 +2160,83 @@ export default function Editorial360Page() {
                       </Card>
                     )}
 
+                    {/* Morressier-Inspired Stage Filter Pills & Search Bar */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-1">
+                      <div className="flex flex-wrap items-center gap-1.5 bg-slate-200/60 dark:bg-slate-900/80 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <button
+                          onClick={() => setManuscriptStageFilter("all")}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                            manuscriptStageFilter === "all"
+                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          ALL ({manuscripts.length})
+                        </button>
+                        <button
+                          onClick={() => setManuscriptStageFilter("inbox")}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                            manuscriptStageFilter === "inbox"
+                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          INBOX ({manuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.reviewers.length === 0).length})
+                        </button>
+                        <button
+                          onClick={() => setManuscriptStageFilter("review")}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                            manuscriptStageFilter === "review"
+                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          IN PEER REVIEW ({manuscripts.filter(m => m.status === "Under Review").length})
+                        </button>
+                        <button
+                          onClick={() => setManuscriptStageFilter("revision")}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                            manuscriptStageFilter === "revision"
+                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          REVISIONS ({manuscripts.filter(m => m.status === "Revision Required").length})
+                        </button>
+                        <button
+                          onClick={() => setManuscriptStageFilter("decided")}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                            manuscriptStageFilter === "decided"
+                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          DECIDED ({manuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected").length})
+                        </button>
+                      </div>
+
+                      <div className="relative w-full sm:w-72">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search Title, ID, Journal..."
+                          value={manuscriptSearch}
+                          onChange={(e) => setManuscriptSearch(e.target.value)}
+                          className="pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b99ff] w-full text-slate-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
                     {/* Editorial Inbox Table */}
                     <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-                      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white">Manuscript Pipeline Queue</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Assign reviewer pools and log academic publication decisions.</p>
+                      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900 dark:text-white">Manuscript Pipeline Queue</h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Assign reviewer pools and log academic publication decisions.</p>
+                        </div>
+                        <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-1 rounded-full border border-[#0b99ff]/20">
+                          {filteredManuscripts.length} Manuscripts Shown
+                        </span>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse text-xs">
@@ -1910,12 +2245,13 @@ export default function Editorial360Page() {
                               <th className="px-5 py-3">ID / Submission Date</th>
                               <th className="px-5 py-3">Manuscript Details</th>
                               <th className="px-5 py-3">Assigned Reviewers</th>
+                              <th className="px-5 py-3">Assignment Status</th>
                               <th className="px-5 py-3">Integrity Flags</th>
                               <th className="px-5 py-3 text-right">Actions</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200 dark:divide-slate-850 font-medium">
-                            {manuscripts.map((m) => (
+                            {filteredManuscripts.map((m) => (
                               <tr key={m.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
                                 <td className="px-5 py-4 whitespace-nowrap">
                                   <div className="font-bold text-slate-900 dark:text-white">{m.id}</div>
@@ -1938,6 +2274,15 @@ export default function Editorial360Page() {
                                       ))
                                     )}
                                   </div>
+                                </td>
+                                <td className="px-5 py-4 whitespace-nowrap">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                    m.reviewers.length >= 2 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
+                                    m.reviewers.length === 1 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" :
+                                    "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                                  }`}>
+                                    {m.reviewers.length >= 2 ? "Fully Assigned" : m.reviewers.length === 1 ? "Partly Assigned" : "Unassigned"}
+                                  </span>
                                 </td>
                                 <td className="px-5 py-4 whitespace-nowrap">
                                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -1990,43 +2335,7 @@ export default function Editorial360Page() {
                 {/* ================= 3. REVIEWER WORKSPACE ================= */}
                 {role === "reviewer" && (
                   <div className="space-y-6">
-                    {/* Reviewer Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending Review Invites</CardTitle>
-                          <Bell className="h-4 w-4 text-orange-500 " />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">{reviewInvitations.length}</div>
-                          <span className="text-[10px] text-orange-500 dark:text-orange-400 font-semibold block mt-1">Awaiting invitation response</span>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Review Tasks</CardTitle>
-                          <FileText className="h-4 w-4 text-[#0b99ff]" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {activeReviews.filter(r => r.status === "In Progress").length}
-                          </div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Under investigation scorecard</span>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Completed Assessments</CardTitle>
-                          <Check className="h-4 w-4 text-green-500" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">14</div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Thank you for your academic service</span>
-                        </CardContent>
-                      </Card>
-                    </div>
+                    <UserProfileHeaderCard role="reviewer" />
 
                     {/* Pending Review Invitations */}
                     {reviewInvitations.length > 0 && (
@@ -2129,6 +2438,7 @@ export default function Editorial360Page() {
                 {/* ================= 4. AUTHOR WORKSPACE ================= */}
                 {role === "author" && (
                   <div className="space-y-6">
+                    <UserProfileHeaderCard role="author" />
                     {/* Author stats */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
@@ -2268,18 +2578,19 @@ export default function Editorial360Page() {
                 {/* ================= 5. RESEARCH INTEGRITY ADVISOR (QC Admin) ================= */}
                 {role === "ria" && (
                   <div className="space-y-6">
+                    <UserProfileHeaderCard role="ria" />
                     {/* QC Admin Stats */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Flagged Cases</CardTitle>
-                          <AlertTriangle className="h-4 w-4 text-red-500 " />
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">
                             {integrityAlerts.filter(a => a.status === "Flagged").length}
                           </div>
-                          <span className="text-[10px] text-red-500 dark:text-red-400 font-semibold block mt-1">Requires forensic investigation</span>
+                          <span className="text-[10px] text-red-500 dark:text-red-400 font-semibold block mt-1">Requires technical review</span>
                         </CardContent>
                       </Card>
                       
@@ -2290,7 +2601,7 @@ export default function Editorial360Page() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">156</div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Checked on automated ingest</span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Verified on automated ingest</span>
                         </CardContent>
                       </Card>
 
@@ -2312,7 +2623,7 @@ export default function Editorial360Page() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">4.8s</div>
-                          <span className="text-[10px] text-slate-550 dark:text-slate-405 block mt-1">Sub-second checksum parsing</span>
+                          <span className="text-[10px] text-slate-555 dark:text-slate-405 block mt-1">Sub-second checksum parsing</span>
                         </CardContent>
                       </Card>
                     </div>
@@ -2352,8 +2663,7 @@ export default function Editorial360Page() {
                               <p className="text-xs text-slate-600 dark:text-slate-400 max-w-2xl">{alert.detail}</p>
                               
                               <div className="flex items-center gap-3 pt-1 text-[11px]">
-                                <span className="text-[#0b99ff] font-bold flex items-center gap-1">
-                                  <ShieldAlert className="h-3.5 w-3.5" />
+                                <span className="text-[#0b99ff] font-bold">
                                   {alert.type}: {alert.score}
                                 </span>
                                 <span className="text-slate-300 dark:text-slate-700">|</span>
@@ -2375,8 +2685,8 @@ export default function Editorial360Page() {
                                   </Button>
                                 </>
                               ) : (
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold italic flex items-center gap-1">
-                                  <Check className="h-4 w-4 text-green-500" /> Resolved ({alert.status})
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold italic">
+                                  Resolved ({alert.status})
                                 </span>
                               )}
                             </div>
@@ -2390,6 +2700,7 @@ export default function Editorial360Page() {
                 {/* ================= 6. ADMIN SYSTEM WORKSPACE ================= */}
                 {role === "admin" && (
                   <div className="space-y-6">
+                    <UserProfileHeaderCard role="admin" />
                     {/* Admin stats */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
@@ -2706,10 +3017,24 @@ export default function Editorial360Page() {
                       onChange={(e) => setNewJournal(e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                     >
-                      <option>Engineering & Applied Sciences</option>
-                      <option>Social Sciences & Humanities</option>
-                      <option>Social Sciences Open</option>
-                      <option>Data Science</option>
+                      <optgroup label="Core Disciplinary Series">
+                        <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering & Applied Sciences</option>
+                        <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences & Humanities</option>
+                        <option value="Scholarly Open: Social Sciences Open">Scholarly Open: Social Sciences Open</option>
+                        <option value="Scholarly Open: Biology">Scholarly Open: Biology</option>
+                        <option value="Scholarly Open: Chemistry">Scholarly Open: Chemistry</option>
+                        <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
+                        <option value="Scholarly Open: Environmental Science">Scholarly Open: Environmental Science</option>
+                      </optgroup>
+                      <optgroup label="Emerging Frontiers Series">
+                        <option value="Scholarly Open: Data Science & Analytics">Scholarly Open: Data Science & Analytics</option>
+                        <option value="Scholarly Open: Clinical AI & Digital Health">Scholarly Open: Clinical AI & Digital Health</option>
+                        <option value="Scholarly Open: AI Safety & Governance">Scholarly Open: AI Safety & Governance</option>
+                        <option value="Scholarly Open: Decarbonization & Carbon Tech">Scholarly Open: Decarbonization & Carbon Tech</option>
+                        <option value="Scholarly Open: Quantum Engineering">Scholarly Open: Quantum Engineering</option>
+                        <option value="Scholarly Open: Synthetic Biology & Bio-Design">Scholarly Open: Synthetic Biology & Bio-Design</option>
+                        <option value="Scholarly Open: Space Resources & Orbital Economy">Scholarly Open: Space Resources & Orbital Economy</option>
+                      </optgroup>
                     </select>
                   </div>
                   <div className="space-y-1.5">

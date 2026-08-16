@@ -11,6 +11,13 @@ import { useLanguage } from "@/lib/language-context"
 
 const coreJournals = [
   {
+    titleKey: "journals.eng.title",
+    descriptionKey: "journals.eng.description",
+    icon: Settings,
+    href: "/journals/engineering",
+    iconColor: "text-slate-500",
+  },
+  {
     titleKey: "journals.ss.title",
     descriptionKey: "journals.ss.description",
     icon: UsersRound,
@@ -39,20 +46,6 @@ const coreJournals = [
     iconColor: "text-rose-500",
   },
   {
-    titleKey: "journals.ds.title",
-    descriptionKey: "journals.ds.description",
-    icon: Cpu,
-    href: "/journals/data-science",
-    iconColor: "text-blue-500",
-  },
-  {
-    titleKey: "journals.eng.title",
-    descriptionKey: "journals.eng.description",
-    icon: Settings,
-    href: "/journals/engineering",
-    iconColor: "text-slate-500",
-  },
-  {
     titleKey: "journals.env.title",
     descriptionKey: "journals.env.description",
     icon: Sprout,
@@ -62,6 +55,13 @@ const coreJournals = [
 ]
 
 const frontiersJournals = [
+  {
+    titleKey: "journals.ds.title",
+    descriptionKey: "journals.ds.description",
+    icon: Cpu,
+    href: "/journals/data-science",
+    iconColor: "text-blue-500",
+  },
   {
     titleKey: "journals.clinical-ai.title",
     descriptionKey: "journals.clinical-ai.description",
