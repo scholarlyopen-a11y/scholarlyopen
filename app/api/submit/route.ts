@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     smtpUser = requiredEnv("SMTP_USER")
     smtpPass = requiredEnv("SMTP_PASS")
     smtpFrom = requiredEnv("SMTP_FROM")
-    recipient = process.env.SUBMISSIONS_TO ?? "scholarlyopen@gmail.com"
+    recipient = process.env.SUBMISSIONS_TO ?? "info@scholarlyopen.org"
   } catch (err) {
     return Response.json(
       {

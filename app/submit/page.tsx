@@ -29,7 +29,7 @@ export default function SubmitPage() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const recipient = "scholarlyopen@gmail.com"
+  const recipient = "info@scholarlyopen.org"
 
   const submitToEditorialOffice = async (formData: FormData) => {
     const response = await fetch("/api/submit", { method: "POST", body: formData })
@@ -162,8 +162,8 @@ export default function SubmitPage() {
                       <h4 className="font-semibold">Need Help?</h4>
                       <p className="text-sm text-muted-foreground mt-1">
                         Contact our editorial office at{" "}
-                        <a href="mailto:scholarlyopen@gmail.com" className="text-primary hover:underline">
-                          scholarlyopen@gmail.com
+                        <a href="mailto:info@scholarlyopen.org" className="text-primary hover:underline">
+                          info@scholarlyopen.org
                         </a>
                       </p>
                     </div>
