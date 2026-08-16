@@ -12,6 +12,7 @@ const apcDetails = [
   {
     titleKey: "journals.ss.title",
     regularAPC: "1,200",
+    launchAPC: "600",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -26,6 +27,7 @@ const apcDetails = [
   {
     titleKey: "journals.bio.title",
     regularAPC: "1,450",
+    launchAPC: "725",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -40,6 +42,7 @@ const apcDetails = [
   {
     titleKey: "journals.chem.title",
     regularAPC: "1,450",
+    launchAPC: "725",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -54,6 +57,7 @@ const apcDetails = [
   {
     titleKey: "journals.med.title",
     regularAPC: "2,200",
+    launchAPC: "1,100",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -68,6 +72,7 @@ const apcDetails = [
   {
     titleKey: "journals.ds.title",
     regularAPC: "1,350",
+    launchAPC: "675",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -82,6 +87,7 @@ const apcDetails = [
   {
     titleKey: "journals.eng.title",
     regularAPC: "1,350",
+    launchAPC: "675",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -96,6 +102,7 @@ const apcDetails = [
   {
     titleKey: "journals.env.title",
     regularAPC: "1,300",
+    launchAPC: "650",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -110,6 +117,7 @@ const apcDetails = [
   {
     titleKey: "journals.clinical-ai.title",
     regularAPC: "2,000",
+    launchAPC: "1,000",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -124,6 +132,7 @@ const apcDetails = [
   {
     titleKey: "journals.ai-safety.title",
     regularAPC: "1,500",
+    launchAPC: "750",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -138,6 +147,7 @@ const apcDetails = [
   {
     titleKey: "journals.decarbonization.title",
     regularAPC: "1,600",
+    launchAPC: "800",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -152,6 +162,7 @@ const apcDetails = [
   {
     titleKey: "journals.quantum-engineering.title",
     regularAPC: "1,650",
+    launchAPC: "825",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -166,6 +177,7 @@ const apcDetails = [
   {
     titleKey: "journals.synthetic-biology.title",
     regularAPC: "1,700",
+    launchAPC: "850",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -180,6 +192,7 @@ const apcDetails = [
   {
     titleKey: "journals.space-resources.title",
     regularAPC: "1,550",
+    launchAPC: "775",
     currency: "EUR",
     includes: [
       "Full Gold open access publication",
@@ -301,9 +314,9 @@ export default function APCFeesPage() {
                 <Info className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h4 className="font-semibold text-base text-primary">Special Launch Promotion</h4>
+                <h4 className="font-semibold text-base text-primary">Inaugural 50% Launch Discount</h4>
                 <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                  To celebrate our portfolio expansion and support early scholarship, Article Processing Charges (APCs) for the <strong>first 10 accepted articles</strong> in <em>each</em> of our 13 journals will be <strong>fully waived (100% discount)</strong> for authors without institutional or grant APC funding. If your research is supported by a grant or institution with dedicated publication funding, we ask that you utilize those funds so launch waivers remain available for unfunded researchers.
+                  To celebrate our portfolio launch and support early scholarship, all manuscripts accepted in 2026 receive an inaugural <strong>50% Launch Discount</strong> on standard Article Processing Charges (APCs). Authors without institutional or grant funding can additionally apply for discretionary fee waivers.
                 </p>
               </div>
             </div>
@@ -312,10 +325,16 @@ export default function APCFeesPage() {
               {apcDetails.map((item) => (
                 <Card key={item.titleKey} className="relative overflow-hidden">
                   <CardHeader>
-                    <CardTitle>{t(item.titleKey)}</CardTitle>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">{item.currency} {item.regularAPC}</span>
-                      <span className="text-muted-foreground ml-2">per article</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-lg leading-snug">{t(item.titleKey)}</CardTitle>
+                      <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full shrink-0 uppercase">
+                        50% OFF
+                      </span>
+                    </div>
+                    <div className="mt-4 flex items-baseline gap-2 flex-wrap">
+                      <span className="text-3xl font-bold text-primary">{item.currency} {item.launchAPC}</span>
+                      <span className="text-sm text-muted-foreground line-through">{item.currency} {item.regularAPC}</span>
+                      <span className="text-xs text-muted-foreground ml-auto">per article</span>
                     </div>
                   </CardHeader>
                   <CardContent>
