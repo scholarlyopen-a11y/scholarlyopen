@@ -110,8 +110,8 @@ const disciplines = [
   },
   {
     icon: Settings,
-    title: "Engineering",
-    description: "Our engineering journal publishes research on sustainable systems, infrastructure, and applied technology.",
+    title: "Engineering & Applied Sciences",
+    description: "Our engineering and applied sciences journal publishes research on sustainable systems, infrastructure, applied physics, materials, and technology innovation.",
     areas: [
       "Civil and Structural Engineering",
       "Electrical and Mechanical Systems",

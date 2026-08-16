@@ -37,7 +37,7 @@ function journalLabel(value: string) {
     case "data-science":
       return "Data Science"
     case "engineering":
-      return "Engineering"
+      return "Engineering & Applied Sciences"
     case "environmental-science":
       return "Environmental Science"
     case "clinical-ai-digital-health":

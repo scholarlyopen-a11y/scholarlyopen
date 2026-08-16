@@ -254,7 +254,7 @@ export default function SubmitPage() {
                             <option value="chemistry">Chemistry</option>
                             <option value="medicine">Medicine</option>
                             <option value="data-science">Data Science</option>
-                            <option value="engineering">Engineering</option>
+                            <option value="engineering">Engineering & Applied Sciences</option>
                             <option value="environmental-science">Environmental Science</option>
                           </optgroup>
                           <optgroup label="Emerging Frontiers Series">

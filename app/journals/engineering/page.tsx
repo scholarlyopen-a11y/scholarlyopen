@@ -10,9 +10,9 @@ export default function EngineeringPage() {
 
   return (
     <JournalPage
-      title="Scholarly Open: Engineering"
-      description="Applied engineering research across infrastructure, energy, robotics, and systems innovation."
-      heroDescription="A Gold Open Access journal publishing FAIR engineering research that supports sustainable systems and technological progress."
+      title="Scholarly Open: Engineering & Applied Sciences"
+      description="Applied engineering and technology research across infrastructure, energy, robotics, materials, and systems innovation."
+      heroDescription="A Gold Open Access journal publishing FAIR engineering and applied science research that supports sustainable systems and technological progress."
       heroIcon={<Settings className="h-8 w-8 text-primary" />}
       scopeAreas={[
         "Infrastructure and civil engineering",
