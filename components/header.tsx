@@ -199,7 +199,7 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-2.5 py-1.5 text-xs xl:text-sm font-semibold shrink-0 cursor-pointer flex items-center">
-                <Globe className="h-4 w-4 mr-1.5 text-accent" />
+                <Globe className="h-4 w-4 mr-1.5 opacity-90" />
                 {language.toUpperCase()}
                 <ChevronDown className="ml-1 h-3 w-3 opacity-70" />
               </Button>
@@ -207,13 +207,13 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-36">
               <DropdownMenuItem 
                 onClick={() => setLanguage("en")} 
-                className={`cursor-pointer text-sm font-medium ${language === "en" ? "bg-accent/10 text-accent font-bold" : ""}`}
+                className={`cursor-pointer text-sm font-medium ${language === "en" ? "bg-muted font-bold" : ""}`}
               >
                 {t("language.en")}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => setLanguage("de")} 
-                className={`cursor-pointer text-sm font-medium ${language === "de" ? "bg-accent/10 text-accent font-bold" : ""}`}
+                className={`cursor-pointer text-sm font-medium ${language === "de" ? "bg-muted font-bold" : ""}`}
               >
                 {t("language.de")}
               </DropdownMenuItem>
