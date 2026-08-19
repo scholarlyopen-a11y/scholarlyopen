@@ -189,33 +189,35 @@ export default function SubmitPage() {
                 </p>
               </div>
 
-              {/* International Publisher Standard Notice */}
-              <div className="mb-8 rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-                    <User className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="font-bold text-base text-foreground">Recommended: Author Account Registration in Editorial360</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      In accordance with top international publisher standards (Elsevier, Springer Nature, Wiley, Frontiers), registering an author account connects your <strong>ORCID iD</strong>, verifies institutional affiliation, and provides a persistent dashboard to track peer review, manage co-authors, and upload revisions.
-                    </p>
-                    <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                      <Button asChild variant="default" size="sm">
-                        <Link href="/editorial360?mode=register&role=author">
-                          Register Author Account in Editorial360
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" size="sm">
-                        <Link href="/editorial360?mode=login&role=author">
-                          Sign In to Existing Account
-                        </Link>
-                      </Button>
+              {/* International Publisher Standard Notice (localhost only) */}
+              {process.env.NODE_ENV === "development" && (
+                <div className="mb-8 rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
+                      <User className="h-5 w-5" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-base text-foreground">Recommended: Author Account Registration in Editorial360</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        In accordance with top international publisher standards (Elsevier, Springer Nature, Wiley, Frontiers), registering an author account connects your <strong>ORCID iD</strong>, verifies institutional affiliation, and provides a persistent dashboard to track peer review, manage co-authors, and upload revisions.
+                      </p>
+                      <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                        <Button asChild variant="default" size="sm">
+                          <Link href="/editorial360?mode=register&role=author">
+                            Register Author Account in Editorial360
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                          <Link href="/editorial360?mode=login&role=author">
+                            Sign In to Existing Account
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
               
               <Card>
                 <CardHeader>
@@ -495,16 +497,18 @@ export default function SubmitPage() {
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
                           An automated confirmation email has been dispatched to your email address with full submission details.
-                          You can track your peer-review status, view assigned editors, and manage revisions anytime in Editorial360.
+                          Our editorial office will conduct an initial quality check and assign a handling editor.
                         </p>
-                        <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                          <Button asChild variant="default" className="w-full sm:w-auto">
-                            <Link href={`/editorial360?manuscriptId=${trackingId || ""}&role=author`}>
-                              Track in Editorial360 Workspace
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
+                        {process.env.NODE_ENV === "development" && (
+                          <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                            <Button asChild variant="default" className="w-full sm:w-auto">
+                              <Link href={`/editorial360?manuscriptId=${trackingId || ""}&role=author`}>
+                                Track in Editorial360 Workspace (Localhost Preview)
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                     {status === "error" && (

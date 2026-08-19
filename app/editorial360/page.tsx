@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { notFound } from "next/navigation"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { useLanguage } from "@/lib/language-context"
@@ -558,6 +559,10 @@ function UserProfileHeaderCard({ role }: UserProfileHeaderProps) {
 }
 
 export default function Editorial360Page() {
+  if (process.env.NODE_ENV === "production") {
+    notFound()
+  }
+
   const { language, setLanguage } = useLanguage()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")

@@ -16,7 +16,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/author-guidelines',
     '/contact',
     '/editorial-board',
-    '/editorial360',
     '/impressum',
     '/journals',
     '/open-access',
