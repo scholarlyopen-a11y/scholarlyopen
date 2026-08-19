@@ -15,6 +15,7 @@ export default function BiologyPage() {
       heroDescription="A Gold Open Access journal showcasing FAIR biological research with strong links to reproducibility and translational impact."
       heroIcon={<Leaf className="h-8 w-8 text-primary" />}
       scopeAreas={[
+        "Biochemistry and structural biology",
         "Molecular and cellular biology",
         "Systems biology and physiology",
         "Genomics and proteomics",
@@ -25,6 +26,7 @@ export default function BiologyPage() {
         "Conservation biology",
       ]}
       sectionTopics={[
+        "Biochemistry",
         "Molecular Biology",
         "Cell Biology",
         "Genetics & Genomics",

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, BookOpen } from "lucide-react"
+import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, BookOpen, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -28,14 +28,18 @@ export default function SubmitPage() {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [trackingId, setTrackingId] = useState<string | null>(null)
 
   const recipient = "info@scholarlyopen.org"
 
   const submitToEditorialOffice = async (formData: FormData) => {
     const response = await fetch("/api/submit", { method: "POST", body: formData })
-    const json = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null
+    const json = (await response.json().catch(() => null)) as { ok?: boolean; trackingId?: string; error?: string } | null
     if (!response.ok || !json?.ok) {
       throw new Error(json?.error || "Submission failed.")
+    }
+    if (json.trackingId) {
+      setTrackingId(json.trackingId)
     }
   }
 
@@ -181,15 +185,43 @@ export default function SubmitPage() {
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tight">Start Your Submission</h2>
                 <p className="mt-4 text-muted-foreground">
-                  Please provide your contact information to begin the submission process.
+                  Follow international publisher standards by registering an author account in Editorial360 or complete the submission details below.
                 </p>
+              </div>
+
+              {/* International Publisher Standard Notice */}
+              <div className="mb-8 rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-base text-foreground">Recommended: Author Account Registration in Editorial360</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      In accordance with top international publisher standards (Elsevier, Springer Nature, Wiley, Frontiers), registering an author account connects your <strong>ORCID iD</strong>, verifies institutional affiliation, and provides a persistent dashboard to track peer review, manage co-authors, and upload revisions.
+                    </p>
+                    <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                      <Button asChild variant="default" size="sm">
+                        <Link href="/editorial360?mode=register&role=author">
+                          Register Author Account in Editorial360
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm">
+                        <Link href="/editorial360?mode=login&role=author">
+                          Sign In to Existing Account
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Corresponding Author Information</CardTitle>
+                  <CardTitle>Direct Corresponding Author Submission</CardTitle>
                   <CardDescription>
-                    The corresponding author will receive all communications regarding the manuscript.
+                    Alternatively, fill in the corresponding author details below to start your submission.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -265,6 +297,25 @@ export default function SubmitPage() {
                             <option value="synthetic-biology-bio-design">Synthetic Biology & Bio-Design</option>
                             <option value="space-resources-orbital-economy">Space Resources & Orbital Economy</option>
                           </optgroup>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="submissionStage" className="text-sm font-medium">
+                        Submission Type / Stage *
+                      </label>
+                      <div className="relative">
+                        <Layers className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <select
+                          id="submissionStage"
+                          name="submissionStage"
+                          className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm"
+                          required
+                        >
+                          <option value="">Select submission type</option>
+                          <option value="Initial Submission">Initial Submission</option>
+                          <option value="Revised Submission">Revised Submission</option>
                         </select>
                       </div>
                     </div>
@@ -430,11 +481,30 @@ export default function SubmitPage() {
                     </Button>
 
                     {status === "success" && (
-                      <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm">
-                        <p className="font-medium">Submitted.</p>
-                        <p className="mt-1 text-muted-foreground">
-                          Your manuscript has been emailed to the editorial office. You will be contacted at the email address you provided.
+                      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-6 text-sm space-y-4">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <div>
+                            <p className="font-semibold text-base text-foreground">Manuscript Successfully Submitted!</p>
+                            {trackingId && (
+                              <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                                Tracking ID: <span className="font-bold text-foreground">{trackingId}</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                          An automated confirmation email has been dispatched to your email address with full submission details.
+                          You can track your peer-review status, view assigned editors, and manage revisions anytime in Editorial360.
                         </p>
+                        <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                          <Button asChild variant="default" className="w-full sm:w-auto">
+                            <Link href={`/editorial360?manuscriptId=${trackingId || ""}&role=author`}>
+                              Track in Editorial360 Workspace
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     )}
                     {status === "error" && (

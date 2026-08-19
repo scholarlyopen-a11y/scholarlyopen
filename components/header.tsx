@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
-import { Menu, X, ChevronDown, Globe } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Menu, X, ChevronDown, Globe, Sun, Moon } from "lucide-react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,6 +23,12 @@ import { LogoSO } from "./logo-so"
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { language, setLanguage, t } = useLanguage()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const coreJournals = [
     { name: t("journals.ss.title"), href: "/journals/social-sciences-humanities" },
@@ -114,14 +121,14 @@ export function Header() {
           </button>
         </div>
 
-        <div className="hidden lg:flex lg:gap-x-1 xl:gap-x-1.5">
+        <div className="hidden lg:flex lg:gap-x-0.5 xl:gap-x-1 items-center">
           {navigation.map((item) =>
             item.children ? (
               <DropdownMenu key={item.name}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-sm xl:text-base font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-2 xl:px-3 py-2">
+                  <Button variant="ghost" className="text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1.5 xl:px-2.5 py-1.5">
                     {item.name}
-                    <ChevronDown className="ml-1 h-4 w-4" />
+                    <ChevronDown className="ml-1 h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-60">
@@ -178,7 +185,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-2 xl:px-3 py-2 text-sm xl:text-base font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
+                className="px-1.5 xl:px-2.5 py-1.5 text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
               >
                 {item.name}
               </Link>
@@ -186,27 +193,37 @@ export function Header() {
           )}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-2 xl:gap-3">
-          {/* Language Toggle Desktop */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-sm font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 px-2 xl:px-3">
-                <Globe className="h-4 w-4 mr-1.5" />
-                {language.toUpperCase()}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setLanguage("en")} className={language === "en" ? "bg-muted" : ""}>
-                {t("language.en")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage("de")} className={language === "de" ? "bg-muted" : ""}>
-                {t("language.de")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-2.5 xl:gap-3 shrink-0">
+
+          {/* Frameless Minimalist Text Link (EN | DE) */}
+          <div className="flex items-center gap-1 text-xs font-medium text-[var(--primary-foreground)] select-none px-0.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setLanguage("en")}
+              className={`transition-all cursor-pointer ${
+                language === "en"
+                  ? "font-extrabold text-white underline decoration-accent decoration-2 underline-offset-4"
+                  : "opacity-70 hover:opacity-100"
+              }`}
+            >
+              EN
+            </button>
+            <span className="opacity-40 font-light">|</span>
+            <button
+              type="button"
+              onClick={() => setLanguage("de")}
+              className={`transition-all cursor-pointer ${
+                language === "de"
+                  ? "font-extrabold text-white underline decoration-accent decoration-2 underline-offset-4"
+                  : "opacity-70 hover:opacity-100"
+              }`}
+            >
+              DE
+            </button>
+          </div>
           
-          <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1.5 xl:px-4 xl:py-2">
-            <Link href="/submit">{t("nav.submitManuscript")}</Link>
+          <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1.5 xl:px-3.5 xl:py-2 whitespace-nowrap shrink-0">
+            <Link href="/editorial360?mode=login&action=submit">{t("nav.submitManuscript")}</Link>
           </Button>
         </div>
       </nav>
@@ -276,7 +293,7 @@ export function Header() {
             )}
             <div className="pt-4 flex flex-col gap-2">
               <Button variant="accent" asChild className="w-full border border-accent/60">
-                <Link href="/submit" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/editorial360?mode=login&action=submit" onClick={() => setMobileMenuOpen(false)}>
                   {t("nav.submitManuscript")}
                 </Link>
               </Button>

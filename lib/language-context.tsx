@@ -674,6 +674,25 @@ export const translations = {
     "join.form.successDesc": "Thank you for your interest. Our team will review your application and contact you shortly.",
     "join.form.successButton": "Submit Another Application",
 
+    // Editorial360 Dashboard
+    "editorial.submissions": "Submissions",
+    "editorial.inbox": "Inbox",
+    "editorial.inAssessment": "In Assessment",
+    "editorial.inPeerReview": "In Peer Review",
+    "editorial.onHold": "On Hold",
+    "editorial.done": "Done",
+    "editorial.boardView": "Board View",
+    "editorial.tableView": "Table View",
+    "editorial.submitNew": "Submit New Manuscript",
+    "editorial.assign": "Assign",
+    "editorial.decision": "Decision",
+    "editorial.manager": "Journal Manager",
+    "editorial.editor": "Managing Editor",
+    "editorial.reviewer": "Expert Reviewer",
+    "editorial.author": "Principal Author",
+    "editorial.ria": "Integrity Advisor",
+    "editorial.admin": "System Admin",
+
     // Language Toggle
     "language.en": "English",
     "language.de": "Deutsch",
@@ -1312,6 +1331,25 @@ export const translations = {
     "trainings.resources.template.title": "Manuskript-Formatierungsvorlage",
     "trainings.resources.template.desc": "Eine Standard-Microsoft-Word- & LaTeX-Layoutanleitung zur Formatierung von Abschnitten, Abbildungen, Zitaten und Referenzstrukturen.",
     "trainings.resources.download": "Datei herunterladen",
+
+    // Editorial360 Dashboard
+    "editorial.submissions": "Einreichungen",
+    "editorial.inbox": "Eingang",
+    "editorial.inAssessment": "In Bewertung",
+    "editorial.inPeerReview": "Im Peer-Review",
+    "editorial.onHold": "Pausiert",
+    "editorial.done": "Abgeschlossen",
+    "editorial.boardView": "Board-Ansicht",
+    "editorial.tableView": "Tabellen-Ansicht",
+    "editorial.submitNew": "Neues Manuskript einreichen",
+    "editorial.assign": "Zuweisen",
+    "editorial.decision": "Entscheidung",
+    "editorial.manager": "Zeitschriften-Manager",
+    "editorial.editor": "Redakteur",
+    "editorial.reviewer": "Gutachter",
+    "editorial.author": "Autor",
+    "editorial.ria": "Integritäts-Berater",
+    "editorial.admin": "System-Admin",
 
     // Language Toggle
     "language.en": "English",

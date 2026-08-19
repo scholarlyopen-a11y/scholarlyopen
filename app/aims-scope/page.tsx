@@ -33,6 +33,7 @@ const disciplines = [
     title: "Biology",
     description: "Our biology journal publishes research on living systems, ecology, and biological innovations.",
     areas: [
+      "Biochemistry and Structural Biology",
       "Molecular and Cellular Biology",
       "Ecology and Evolution",
       "Genetics and Genomics",

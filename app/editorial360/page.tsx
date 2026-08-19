@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useTheme } from "next-themes"
+import { useLanguage } from "@/lib/language-context"
 import { 
   ShieldCheck, 
   Mail, 
@@ -28,6 +29,7 @@ import {
   RefreshCw, 
   X, 
   ChevronRight, 
+  ChevronDown, 
   FileCheck, 
   ThumbsUp, 
   UserPlus,
@@ -48,8 +50,13 @@ import {
   Flag,
   Award,
   TrendingUp,
+  Target,
+  Trophy,
+  Upload,
   Link2,
-  Linkedin
+  Linkedin,
+  Activity,
+  CheckCircle2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -465,112 +472,93 @@ function UserProfileHeaderCard({ role }: UserProfileHeaderProps) {
         }
     }
   }
-
   const config = getRoleConfig(role)
 
   return (
-    <div className="space-y-3">
-      {/* Top Alert Banner */}
-      <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-900/50 rounded-xl p-2.5 text-xs text-sky-800 dark:text-sky-300 font-medium flex items-center gap-2.5 shadow-xs">
-        <config.alertIcon className="h-4 w-4 text-[#0b99ff] shrink-0" />
-        <span>{config.alertText}</span>
-      </div>
+    <div className="bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xs transition-all">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Block: Avatar & Bio */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="w-20 h-20 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 font-bold text-2xl overflow-hidden shadow-xs">
+            {config.photo ? (
+              <img src={config.photo} alt={config.name} className="w-full h-full object-cover" />
+            ) : (
+              <span>{config.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
+            )}
+          </div>
 
-      {/* Intact Executive Profile Wallet Card */}
-      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4.5 sm:p-5 transition-colors overflow-hidden relative">
-        <div className="flex flex-col lg:flex-row items-stretch gap-6 lg:gap-8">
-          
-          {/* Left Block: Bio & Identity */}
-          <div className="flex-1 flex flex-col justify-between space-y-4 pr-0 lg:pr-6 lg:border-r border-slate-200/70 dark:border-slate-800/80">
-            <div className="flex items-start gap-4">
-              <div className="relative shrink-0">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-[#0b99ff]/30 shadow-md bg-slate-100 dark:bg-slate-900">
-                  <img 
-                    src={config.photo} 
-                    alt={config.name} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="absolute top-0 left-0 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-950 shadow-xs" title="Active on Platform" />
-              </div>
+          <div className="space-y-1">
+            <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              {config.name}
+            </h3>
+            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              {config.title}
+            </p>
+          </div>
 
-              <div className="space-y-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    {config.name}
-                  </h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
-                    VERIFIED
-                  </span>
-                </div>
-                
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                  {config.title}
-                </p>
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            <strong className="text-slate-800 dark:text-slate-200 font-bold">{config.interestsLabel}:</strong> {config.interests}
+          </p>
+        </div>
 
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-0.5 line-clamp-2">
-                  <strong className="text-slate-700 dark:text-slate-300 font-bold">{config.interestsLabel}:</strong> {config.interests}
-                </p>
+        {/* Right Block: Contributor Recognition & Badges & Metrics */}
+        <div className="lg:col-span-7 space-y-5 lg:pl-6 lg:border-l border-slate-100 dark:border-slate-900">
+          <div>
+            <h4 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              Contributor Recognition
+            </h4>
+            
+            <div className="mt-3 space-y-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Badges Earned
+              </span>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 dark:bg-sky-950/60 text-[#0b99ff] border border-sky-200/60 dark:border-sky-800/60 inline-flex items-center gap-1.5 shadow-2xs">
+                  <Star className="h-3.5 w-3.5 text-sky-500" />
+                  Quality Contributor
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 dark:bg-sky-950/60 text-[#0b99ff] border border-sky-200/60 dark:border-sky-800/60 inline-flex items-center gap-1.5 shadow-2xs">
+                  <Award className="h-3.5 w-3.5 text-sky-500" />
+                  Fast Responder
+                </span>
               </div>
             </div>
 
-            {/* Social Links & Action Button Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-900">
-              <div className="flex items-center gap-4 text-xs font-bold text-[#0b99ff]">
-                <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-1 hover:underline">
-                  <Link2 className="h-3.5 w-3.5" /> ORCID
-                </a>
-                <a href="#" onClick={(e) => e.preventDefault()} className="flex items-center gap-1 hover:underline">
-                  <Linkedin className="h-3.5 w-3.5" /> LinkedIn
-                </a>
+            <div className="mt-5 space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                <span>Next Badge: Integrity Champion</span>
+                <span className="text-emerald-600 dark:text-emerald-400">70%</span>
               </div>
+              
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-emerald-500 h-full w-[70%] rounded-full transition-all duration-500" />
+              </div>
+              
+              <p className="text-xs text-slate-400 font-medium">
+                Complete 3 more ethics reviews to unlock!
+              </p>
+            </div>
 
+            <div className="pt-3">
               <Button 
-                variant="ghost"
-                className="bg-sky-50 hover:bg-sky-100 text-[#0b99ff] dark:bg-sky-950/60 dark:hover:bg-sky-900/80 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60 text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
+                onClick={() => onExploreBadges && onExploreBadges()}
+                type="button"
+                className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white text-xs font-bold py-2.5 px-5 rounded-xl shadow-md cursor-pointer transition-all"
               >
-                View Full Profile
+                Explore Badges
               </Button>
             </div>
           </div>
-
-          {/* Right Block: Metrics Grid Wallet */}
-          <div className="lg:w-[58%] flex flex-col justify-between space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                {config.metricsTitle}
-              </h4>
-              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Updated Live</span>
-            </div>
-
-            {/* 5 Compact Metric Wallet Boxes */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-center h-full">
-              {config.metrics.map((m, idx) => {
-                const IconComp = m.icon
-                return (
-                  <div 
-                    key={idx} 
-                    className="bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800 rounded-xl p-2.5 flex flex-col items-center justify-center space-y-0.5 hover:border-[#0b99ff]/40 transition-all shadow-2xs"
-                  >
-                    <IconComp className="h-4 w-4 text-[#0b99ff]" />
-                    <div className="text-base font-black text-slate-900 dark:text-white tracking-tight">
-                      {m.value}
-                    </div>
-                    <div className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-tight line-clamp-2">
-                      {m.label}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
         </div>
-      </Card>
+
+      </div>
     </div>
   )
 }
 
 export default function Editorial360Page() {
+  const { language, setLanguage } = useLanguage()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")
   const [role, setRole] = useState<UserRole>("jm")
@@ -593,10 +581,33 @@ export default function Editorial360Page() {
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const urlRole = params.get("role") as UserRole
+      const urlMode = params.get("mode") as "login" | "register"
+      if (urlRole && ["admin", "author", "reviewer", "editor", "ria", "jm"].includes(urlRole)) {
+        setRole(urlRole)
+        setRegRole(urlRole === "reviewer" ? "reviewer" : "author")
+      }
+      if (urlMode && ["login", "register"].includes(urlMode)) {
+        setMode(urlMode)
+      }
+    }
   }, [])
 
   // Mock Databases in state for interactivity
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([
+    {
+      id: "SOMED-26-RW01",
+      title: "Clinical Evaluation of AI-Driven Diagnostic Imaging in Cardiovascular Medicine",
+      journal: "Scholarly Open: Medicine",
+      status: "Awaiting Initial Check",
+      date: "2026-08-18",
+      reviewers: [],
+      integrityStatus: "Clean",
+      plagiarismScore: 5,
+      aiScore: 12
+    },
     {
       id: "MS-2026-081",
       title: "Machine Learning Approaches in Renewable Energy Forecasting",
@@ -796,6 +807,7 @@ export default function Editorial360Page() {
   const [submitStep, setSubmitStep] = useState(1)
   const [newTitle, setNewTitle] = useState("")
   const [newJournal, setNewJournal] = useState("Scholarly Open: Engineering & Applied Sciences")
+  const [newSubmissionStage, setNewSubmissionStage] = useState("Initial Submission")
   const [newAbstract, setNewAbstract] = useState("")
   const [newKeywords, setNewKeywords] = useState("")
 
@@ -818,6 +830,7 @@ export default function Editorial360Page() {
   // Morressier-inspired Stage Filter & Search States
   const [manuscriptSearch, setManuscriptSearch] = useState("")
   const [manuscriptStageFilter, setManuscriptStageFilter] = useState<"all" | "inbox" | "review" | "revision" | "decided">("all")
+  const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban")
 
   const filteredManuscripts = manuscripts.filter((m) => {
     const matchesSearch =
@@ -880,17 +893,102 @@ export default function Editorial360Page() {
   const [autoIntegrity, setAutoIntegrity] = useState(true)
   const [orcidRequired, setOrcidRequired] = useState(false)
 
-  // Active sub-page tab for JM / Editor
-  const [activeJmTab, setActiveJmTab] = useState<"moderation" | "archives" | "users">("moderation")
+  // Active sub-page tab for JM / Editor / Author
+  const [activeJmTab, setActiveJmTab] = useState<"board" | "moderation" | "archives" | "users">("board")
+  const [activeAuthorTab, setActiveAuthorTab] = useState<"dashboard" | "submissions" | "scorecard" | "plagiarism" | "feedback" | "recognition" | "career">("dashboard")
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+
+  // Interactive Plagiarism Scan States
+  const [selectedScanPaperId, setSelectedScanPaperId] = useState<string>("SOMED-26-RW01")
+  const [isScanningPlagiarism, setIsScanningPlagiarism] = useState<boolean>(false)
+  const [scanProgress, setScanProgress] = useState<number>(0)
+  const [scanCompletedSuccess, setScanCompletedSuccess] = useState<boolean>(false)
+
+  const handleRunPlagiarismScan = () => {
+    setIsScanningPlagiarism(true)
+    setScanProgress(15)
+    setScanCompletedSuccess(false)
+    
+    const timer = setInterval(() => {
+      setScanProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer)
+          setIsScanningPlagiarism(false)
+          setScanCompletedSuccess(true)
+          return 100
+        }
+        return prev + 25
+      })
+    }, 350)
+  }
+
+  // Interactive Readiness Scorecard Upload States
+  const [scorecardFileName, setScorecardFileName] = useState<string>("")
+  const [isAuditingScorecard, setIsAuditingScorecard] = useState<boolean>(false)
+  const [scorecardAuditProgress, setScorecardAuditProgress] = useState<number>(0)
+  const [isFigureFixed, setIsFigureFixed] = useState<boolean>(false)
+
+  // Interactive Author Modals & Search States
+  const [isBadgeModalOpen, setIsBadgeModalOpen] = useState<boolean>(false)
+  const [isManuscriptDetailsOpen, setIsManuscriptDetailsOpen] = useState<boolean>(false)
+  const [selectedManuscriptDetails, setSelectedManuscriptDetails] = useState<Manuscript | null>(null)
+  
+  // Feedback Portal Submission States
+  const [authorResponseText, setAuthorResponseText] = useState<string>("")
+  const [isSubmittingResponse, setIsSubmittingResponse] = useState<boolean>(false)
+  const [responseSubmittedSuccess, setResponseSubmittedSuccess] = useState<boolean>(false)
+
+  // ORCID Sync State
+  const [isOrcidSyncing, setIsOrcidSyncing] = useState<boolean>(false)
+  const [orcidLastSynced, setOrcidLastSynced] = useState<string>("2026-08-18 19:45 UTC")
+
+  const handleSyncOrcid = () => {
+    setIsOrcidSyncing(true)
+    setTimeout(() => {
+      setIsOrcidSyncing(false)
+      setOrcidLastSynced("Synced Just Now ✓")
+    }, 1200)
+  }
+
+  const handleScorecardFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      setScorecardFileName(file.name)
+      setIsAuditingScorecard(true)
+      setScorecardAuditProgress(20)
+      
+      const timer = setInterval(() => {
+        setScorecardAuditProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(timer)
+            setIsAuditingScorecard(false)
+            return 100
+          }
+          return prev + 20
+        })
+      }, 300)
+    }
+  }
 
   const roles: { id: UserRole; label: string; placeholder: string }[] = [
     { id: "jm", label: "Journal Manager", placeholder: "manager@scholarlyopen.org" },
     { id: "editor", label: "Editor", placeholder: "editor@scholarlyopen.org" },
     { id: "reviewer", label: "Reviewer", placeholder: "reviewer@scholarlyopen.org" },
     { id: "author", label: "Author", placeholder: "author@scholarlyopen.org" },
-    { id: "ria", label: "QC Admin", placeholder: "ria@scholarlyopen.org" },
+    { id: "ria", label: "RIA (Research Integrity Advisor)", placeholder: "ria@scholarlyopen.org" },
     { id: "admin", label: "Admin", placeholder: "admin@scholarlyopen.org" },
   ]
+
+  // First-Time Author Profile Builder States
+  const [isAuthorProfileSetupOpen, setIsAuthorProfileSetupOpen] = useState(false)
+  const [isAuthorProfileCompleted, setIsAuthorProfileCompleted] = useState(false)
+  const [profFullName, setProfFullName] = useState("Dr. Evelyn Vane")
+  const [profRank, setProfRank] = useState("Senior Researcher & Faculty Lead")
+  const [profInstitution, setProfInstitution] = useState("Institute of Advanced Medical Sciences")
+  const [profCountry, setProfCountry] = useState("United States")
+  const [profOrcid, setProfOrcid] = useState("0000-0002-1825-0097")
+  const [profSpecialization, setProfSpecialization] = useState("Cardiology, Clinical AI, Diagnostic Imaging")
+  const [profReviewOptIn, setProfReviewOptIn] = useState(true)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -907,6 +1005,36 @@ export default function Editorial360Page() {
       setLoading(false)
       setIsLoggedIn(true)
       setSuccess("Successfully authenticated into the Editorial360 workspace.")
+      if (role === "author" && !isAuthorProfileCompleted) {
+        setIsAuthorProfileSetupOpen(true)
+      } else if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search)
+        if (params.get("action") === "submit") {
+          setIsSubmitWizardOpen(true)
+        }
+      }
+    }, 1000)
+  }
+
+  const handleSsoLogin = (providerName: string) => {
+    setLoading(true)
+    setError("")
+    setSuccess(`Connecting to ${providerName}...`)
+
+    setTimeout(() => {
+      setLoading(false)
+      setIsLoggedIn(true)
+      setRole("author")
+      setEmail(`author.${providerName.toLowerCase().replace(/[^a-z0-9]/g, "")}@scholarlyopen.org`)
+      setSuccess(`Authenticated via ${providerName}! Please complete your author profile.`)
+      if (!isAuthorProfileCompleted) {
+        setIsAuthorProfileSetupOpen(true)
+      } else if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search)
+        if (params.get("action") === "submit") {
+          setIsSubmitWizardOpen(true)
+        }
+      }
     }, 1000)
   }
 
@@ -1239,23 +1367,59 @@ export default function Editorial360Page() {
           <main className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0b99ff]/5 via-transparent to-transparent">
             <div className="w-full max-w-md space-y-8 animate-in fade-in duration-300">
               
-              {/* Brand Logo Header */}
+              {/* Login Container Header */}
               <div className="flex flex-col items-center text-center">
-                <div className="flex h-14 w-auto items-center justify-center mb-5 hover:scale-105 transition-all">
+                {/* Light Font EN | DE Language Switcher Above Login */}
+                <div className="flex items-center justify-center gap-1.5 text-xs font-light text-slate-400 select-none mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setLanguage("en")}
+                    className={`transition-colors cursor-pointer ${
+                      language === "en"
+                        ? "font-semibold text-[#0b99ff]"
+                        : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
+                    }`}
+                  >
+                    EN
+                  </button>
+                  <span className="text-slate-300 dark:text-slate-700 font-light">|</span>
+                  <button
+                    type="button"
+                    onClick={() => setLanguage("de")}
+                    className={`transition-colors cursor-pointer ${
+                      language === "de"
+                        ? "font-semibold text-[#0b99ff]"
+                        : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
+                    }`}
+                  >
+                    DE
+                  </button>
+                </div>
+
+                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">
+                  {mode === "login" 
+                    ? (language === "de" ? "Anmelden" : "Login") 
+                    : (language === "de" ? "Konto erstellen" : "Create account")}
+                </h1>
+
+                <div className="flex h-10 w-auto items-center justify-center my-2 hover:scale-105 transition-all">
                   <img 
                     src="/editorial360.svg" 
-                    alt="editorial360 Logo" 
+                    alt="Editorial360" 
                     className="h-full w-auto object-contain" 
                   />
                 </div>
-                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                  {mode === "login" ? "Workspace Sign In" : "Register Workspace Account"}
-                </h1>
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-sm font-medium">
-                  {mode === "login" 
-                    ? "Access the secure peer review workspace to manage editorial operations."
-                    : "Create a verified account to submit papers or evaluate manuscripts."
-                  }
+                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  {language === "de" ? "Oder " : "Or "}
+                  <button
+                    type="button"
+                    onClick={() => toggleMode(mode === "login" ? "register" : "login")}
+                    className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
+                  >
+                    {mode === "login" 
+                      ? (language === "de" ? "Neues Konto erstellen" : "Create account") 
+                      : (language === "de" ? "Mit bestehendem Konto anmelden" : "Sign in to existing account")}
+                  </button>
                 </p>
               </div>
 
@@ -1263,142 +1427,203 @@ export default function Editorial360Page() {
               <Card className="border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden relative transition-all">
                 <div className="h-1.5 w-full bg-[#0b99ff]" />
                 
-                <CardHeader className="space-y-1 px-6 pt-6 pb-4">
-                  <CardTitle className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                    <ShieldCheck className="h-5 w-5 text-[#0b99ff]" />
-                    {mode === "login" ? "Security Portal" : "Account Setup"}
-                  </CardTitle>
-                  <CardDescription className="text-slate-500 dark:text-slate-400">
-                    {mode === "login" 
-                      ? "Select your portal role and enter your credentials."
-                      : "Reviewers and Authors can register. Managers/Editors are manually assigned."
-                    }
-                  </CardDescription>
-                </CardHeader>
-                
                 {mode === "login" ? (
                   // ================= LOGIN FORM =================
-                  <form onSubmit={handleLogin}>
+                  <form onSubmit={handleLogin} className="pt-6">
                     <CardContent className="space-y-4 px-6 py-2">
                       {error && (
-                        <div className="flex items-center gap-2.5 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 text-sm border border-red-200 dark:border-red-900/30 animate-in fade-in duration-200">
-                          <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
-                          <span>{error}</span>
+                        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 text-xs font-medium border border-red-200 dark:border-red-900/30">
+                          {error}
                         </div>
                       )}
                       {success && (
-                        <div className="flex items-center gap-2.5 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 text-sm border border-green-200 dark:border-green-900/30 animate-in fade-in duration-200">
-                          <Check className="h-4 w-4 shrink-0 text-green-600" />
-                          <span>{success}</span>
+                        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 text-xs font-medium border border-green-200 dark:border-green-900/30">
+                          {success}
                         </div>
                       )}
 
-                      {/* Dropdown Role Selector */}
-                      <div className="space-y-1.5">
-                        <label htmlFor="role-select" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Access Portal Role
+                      {/* Role Select Dropdown */}
+                      <div className="space-y-1">
+                        <label htmlFor="role-select" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          {language === "de" ? "Rolle auswählen" : "Select Role"}
                         </label>
                         <select
                           id="role-select"
                           value={role}
                           onChange={(e) => handleRoleChange(e.target.value as UserRole)}
-                          className="w-full px-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all cursor-pointer font-medium"
+                          className="w-full px-3.5 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all cursor-pointer font-medium"
                         >
                           {roles.map((r) => (
                             <option key={r.id} value={r.id}>
-                              {r.label}
+                              {language === "de"
+                                ? (r.id === "jm" ? "Zeitschriften-Manager" : r.id === "editor" ? "Redakteur" : r.id === "reviewer" ? "Gutachter" : r.id === "author" ? "Autor" : r.id === "ria" ? "RIA (Integritätsberater)" : "Administrator")
+                                : r.label}
                             </option>
                           ))}
                         </select>
                       </div>
                       
-                      {/* Email address field */}
-                      <div className="space-y-1.5">
-                        <label htmlFor="email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Email address
+                      {/* Email Address */}
+                      <div className="space-y-1">
+                        <label htmlFor="email" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          {language === "de" ? "E-Mail-Adresse" : "Email"}
                         </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
-                            <Mail className="h-4 w-4" />
-                          </div>
-                          <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
-                            placeholder="editor@scholarlyopen.org"
-                          />
-                        </div>
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full px-3.5 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                          placeholder={language === "de" ? "E-Mail-Adresse eingeben" : "Email address"}
+                        />
                       </div>
 
-                      {/* Password field */}
-                      <div className="space-y-1.5">
+                      {/* Password */}
+                      <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <label htmlFor="password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Password
+                          <label htmlFor="password" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {language === "de" ? "Passwort" : "Password"}
                           </label>
                           <Link
                             href="#"
-                            className="text-xs font-semibold text-[#0b99ff] hover:underline"
+                            className="text-xs text-[#0b99ff] hover:underline"
                           >
-                            Forgot password?
+                            {language === "de" ? "Passwort vergessen?" : "Forgot email or password?"}
                           </Link>
                         </div>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
-                            <Lock className="h-4 w-4" />
-                          </div>
-                          <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete="current-password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
-                            placeholder="••••••••"
-                          />
-                        </div>
+                        <input
+                          id="password"
+                          name="password"
+                          type="password"
+                          autoComplete="current-password"
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full px-3.5 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                          placeholder={language === "de" ? "Passwort eingeben" : "Password"}
+                        />
                       </div>
 
-                      {/* Remember Session checkbox */}
-                      <div className="flex items-center pt-1">
+                      {/* Remember me */}
+                      <div className="flex items-center pt-0.5">
                         <input
                           id="remember-me"
                           name="remember-me"
                           type="checkbox"
                           defaultChecked
-                          className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer bg-white dark:bg-slate-900"
+                          className="h-4 w-4 rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
                         />
-                        <label htmlFor="remember-me" className="ml-2 block text-xs font-semibold text-slate-500 dark:text-slate-400 select-none cursor-pointer">
-                          Remember my session on this device
+                        <label htmlFor="remember-me" className="ml-2 block text-xs text-slate-600 dark:text-slate-400 select-none cursor-pointer">
+                          {language === "de" ? "Angemeldet bleiben" : "Remember me"}
                         </label>
                       </div>
                     </CardContent>
                     
-                    <CardFooter className="flex flex-col gap-3.5 px-6 pb-6 pt-3">
+                    <CardFooter className="flex flex-col gap-3 px-6 pb-6 pt-2">
                       <Button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold py-2 rounded-md shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                        className="w-full bg-[#0066a2] hover:bg-[#005588] text-white font-bold py-2.5 rounded-md shadow transition-all active:scale-[0.98] cursor-pointer text-sm"
                       >
-                        {loading ? `Authenticating ${role.toUpperCase()}...` : `Sign In as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
+                        {loading 
+                          ? (language === "de" ? "Wird authentifiziert..." : "Authenticating...") 
+                          : (language === "de" ? "Anmelden" : "Login")}
                       </Button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSuccess(language === "de" ? "Magic-Link wurde per E-Mail gesendet!" : "Magic sign-in link sent to your email!")}
+                        className="w-full text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0b99ff] py-1.5 transition-all text-center cursor-pointer"
+                      >
+                        {language === "de" ? "Mit Direktlink anmelden" : "Switch to login with link"}
+                      </button>
                       
-                      <div className="text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        Need access to publish or review?{" "}
-                        <button 
-                          type="button" 
-                          onClick={() => toggleMode("register")}
-                          className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
-                        >
-                          Register Workspace Account
-                        </button>
+                      {/* PeerJ-Inspired SSO Social Bar */}
+                      <div className="w-full pt-1">
+                        <div className="relative flex py-1.5 items-center">
+                          <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                          <span className="flex-shrink mx-3 text-xs text-slate-400 font-medium">Or sign in with</span>
+                          <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                        </div>
+
+                        <div className="grid grid-cols-6 gap-2 pt-2">
+                          {/* Apple */}
+                          <button
+                            type="button"
+                            title="Sign in with Apple"
+                            onClick={() => handleSsoLogin("Apple")}
+                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-sm cursor-pointer"
+                          >
+                            <svg className="w-4 h-4 fill-current" viewBox="0 0 170 170">
+                              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.34.13-9.14-1.9-14.4-6.1-3.69-3.04-7.69-7.85-12.01-14.44-6.3-9.59-11.25-20.35-14.85-32.28-3.6-11.93-5.4-23.32-5.4-34.17 0-15.84 4.11-28.79 12.33-38.86 8.22-10.07 18.52-15.19 30.9-15.35 4.93 0 10.15 1.15 15.67 3.44 5.52 2.29 9.39 3.44 11.61 3.44 1.95 0 5.86-1.15 11.73-3.44 5.87-2.29 10.83-3.34 14.89-3.16 10.74.52 19.64 4.54 26.7 12.06 7.06 7.52 11.39 16.59 13 27.21-11.3 6.84-16.81 16.32-16.53 28.45.28 10.66 4.31 19.46 12.09 26.4 3.73 3.34 8.01 5.92 12.84 7.74-2.73 7.84-6.4 15.67-11.01 23.49zM119.22 31.86c0-6.72 2.45-13.16 7.35-19.32 4.9-6.16 11.08-9.88 18.54-11.16.63 7.15-1.63 13.88-6.78 20.19-5.15 6.31-11.45 9.94-18.9 10.89-.06-.2-.11-.4-.21-.6z"/>
+                            </svg>
+                          </button>
+                          
+                          {/* ORCID / Facebook */}
+                          <button
+                            type="button"
+                            title="Sign in with ORCID"
+                            onClick={() => handleSsoLogin("ORCID iD")}
+                            className="flex items-center justify-center h-10 rounded-md border border-emerald-300 dark:border-emerald-800 bg-[#A6CE39] text-white hover:opacity-90 transition-all shadow-sm cursor-pointer"
+                          >
+                            <span className="font-bold text-xs tracking-tighter">iD</span>
+                          </button>
+
+                          {/* GitHub */}
+                          <button
+                            type="button"
+                            title="Sign in with GitHub"
+                            onClick={() => handleSsoLogin("GitHub")}
+                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-[#24292e] text-white hover:bg-[#1b1f23] transition-all shadow-sm cursor-pointer"
+                          >
+                            <svg className="w-4 h-4 fill-current" viewBox="0 0 16 16">
+                              <path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                          </button>
+
+                          {/* Google */}
+                          <button
+                            type="button"
+                            title="Sign in with Google"
+                            onClick={() => handleSsoLogin("Google")}
+                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-white transition-all shadow-sm cursor-pointer"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24">
+                              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                            </svg>
+                          </button>
+
+                          {/* Microsoft */}
+                          <button
+                            type="button"
+                            title="Sign in with Microsoft"
+                            onClick={() => handleSsoLogin("Microsoft")}
+                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900 transition-all shadow-sm cursor-pointer"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 23 23">
+                              <path fill="#f35325" d="M1 1h10v10H1z"/>
+                              <path fill="#81bc06" d="M12 1h10v10H12z"/>
+                              <path fill="#05a6f0" d="M1 12h10v10H1z"/>
+                              <path fill="#ffba08" d="M12 12h10v10H12z"/>
+                            </svg>
+                          </button>
+
+                          {/* LinkedIn */}
+                          <button
+                            type="button"
+                            title="Sign in with LinkedIn"
+                            onClick={() => handleSsoLogin("LinkedIn")}
+                            className="flex items-center justify-center h-10 rounded-md border border-blue-200 dark:border-blue-900 bg-[#0077b5] text-white hover:opacity-90 transition-all shadow-sm cursor-pointer"
+                          >
+                            <Linkedin className="w-4 h-4 fill-current" />
+                          </button>
+                        </div>
                       </div>
                     </CardFooter>
                   </form>
@@ -1588,28 +1813,35 @@ export default function Editorial360Page() {
               </span>
             </div>
 
-            {/* Quick Switch Panel (The Floating Tool) */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full px-1.5 py-1 gap-1 max-w-full overflow-x-auto shadow-inner transition-colors">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 px-2 uppercase tracking-wide hidden md:inline">
-                Simulate Role:
-              </span>
-              {(["jm", "editor", "reviewer", "author", "ria", "admin"] as UserRole[]).map((r) => (
+            {/* Theme, Language & User Actions */}
+            <div className="flex items-center gap-2.5">
+              {/* Light Minimal EN | DE Language Switcher */}
+              <div className="flex items-center gap-1 text-xs font-semibold text-slate-400 select-none">
                 <button
-                  key={r}
-                  onClick={() => handleQuickSwitch(r)}
-                  className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-all tracking-wide cursor-pointer ${
-                    role === r 
-                      ? "bg-[#0b99ff] text-white shadow-sm ring-1 ring-white/10" 
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+                  type="button"
+                  onClick={() => setLanguage("en")}
+                  className={`transition-colors cursor-pointer ${
+                    language === "en"
+                      ? "font-bold text-[#0b99ff]"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                   }`}
                 >
-                  {r === "jm" ? "Manager" : r}
+                  EN
                 </button>
-              ))}
-            </div>
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+                <button
+                  type="button"
+                  onClick={() => setLanguage("de")}
+                  className={`transition-colors cursor-pointer ${
+                    language === "de"
+                      ? "font-bold text-[#0b99ff]"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  }`}
+                >
+                  DE
+                </button>
+              </div>
 
-            {/* Theme & User Actions */}
-            <div className="flex items-center gap-3">
               {/* Light/Dark Toggle */}
               <Button
                 variant="ghost"
@@ -1628,97 +1860,303 @@ export default function Editorial360Page() {
               
               <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-800" />
 
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0b99ff]/50 text-white font-extrabold text-xs shadow-md uppercase">
-                  {role.substring(0, 2)}
-                </div>
-                <div className="hidden lg:flex flex-col text-left">
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">
-                    {role === "jm" ? "Journal Manager" : role === "editor" ? "Managing Editor" : role === "reviewer" ? "Expert Reviewer" : role === "author" ? "Principal Author" : role === "ria" ? "Integrity Advisor" : "System Admin"}
-                  </span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                    {email}
-                  </span>
-                </div>
-              </div>
+              {/* Modern User Round Avatar Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2.5 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-900 transition-all cursor-pointer select-none"
+                >
+                  <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#005588] text-white font-black text-xs shadow-md uppercase ring-2 ring-white dark:ring-slate-900">
+                    {role === "author" ? "EV" : role === "jm" ? "SJ" : role === "editor" ? "AT" : role === "reviewer" ? "MV" : "SO"}
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-950" />
+                  </div>
+                  <div className="hidden lg:flex flex-col text-left pr-1">
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                      {role === "author" ? profFullName : role === "jm" ? "Dr. Sarah Jenkins" : role === "editor" ? "Prof. Aris Thorne" : role === "reviewer" ? "Dr. Marcus Vance" : "Editorial360 Admin"}
+                    </span>
+                    <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                      {role === "jm" ? "Journal Manager" : role === "editor" ? "Managing Editor" : role === "reviewer" ? "Expert Reviewer" : role === "author" ? "Principal Author" : role === "ria" ? "Integrity Advisor" : "System Admin"}
+                    </span>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400 hidden lg:block" />
+                </button>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setIsLoggedIn(false)
-                  setSuccess("You have been securely signed out.")
-                }}
-                className="text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 p-2 h-auto cursor-pointer"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+                {/* Interactive User Profile Dropdown Popover */}
+                {isUserMenuOpen && (
+                  <div 
+                    className="absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-2xl p-4 z-50 animate-in fade-in duration-200"
+                  >
+                    {/* User Header */}
+                    <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-slate-900">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#005588] text-white font-black text-sm shadow-md uppercase">
+                        {role === "author" ? "EV" : role === "jm" ? "SJ" : role === "editor" ? "AT" : role === "reviewer" ? "MV" : "SO"}
+                      </div>
+                      <div className="space-y-0.5 overflow-hidden text-left">
+                        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                          {role === "author" ? profFullName : role === "jm" ? "Dr. Sarah Jenkins" : role === "editor" ? "Prof. Aris Thorne" : role === "reviewer" ? "Dr. Marcus Vance" : "Editorial360 Admin"}
+                        </h4>
+                        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{email}</p>
+                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                          {role === "jm" ? "Journal Operations Lead" : role === "editor" ? "Managing Editor" : role === "reviewer" ? "Expert Reviewer" : role === "author" ? "Verified Author (ORCID Synced)" : role === "ria" ? "Research Integrity Advisor" : "System Admin"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* User Details & ORCID */}
+                    <div className="py-3 space-y-2 text-xs text-left border-b border-slate-100 dark:border-slate-900">
+                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                        <span className="font-semibold">Institution:</span>
+                        <span className="font-bold text-slate-900 dark:text-slate-200 truncate max-w-[170px]">{profInstitution}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                        <span className="font-semibold">ORCID iD:</span>
+                        <span className="font-mono text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                          <Check className="h-3 w-3" /> {profOrcid}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                        <span className="font-semibold">Domain:</span>
+                        <span className="font-bold text-slate-900 dark:text-slate-200 truncate max-w-[170px]">{profSpecialization}</span>
+                      </div>
+                    </div>
+
+                    {/* Quick Action Links */}
+                    <div className="py-2 space-y-1 text-left">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          setIsAuthorProfileSetupOpen(true)
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
+                      >
+                        <User className="h-4 w-4 text-[#0b99ff]" />
+                        Edit Researcher Profile
+                      </button>
+
+                      {role === "author" && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false)
+                            setIsSubmitWizardOpen(true)
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
+                        >
+                          <Plus className="h-4 w-4 text-emerald-500" />
+                          Submit New Manuscript
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Sign Out Button */}
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-900">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          setIsLoggedIn(false)
+                          setSuccess("You have been securely signed out.")
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out of Editorial360
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </header>
 
-          <div className="flex-1 flex overflow-hidden">
-            
-            {/* Sidebar Navigation */}
-            <aside className="w-64 bg-slate-50 dark:bg-slate-950/80 border-r border-slate-200 dark:border-slate-800/80 p-5 flex flex-col justify-between hidden md:flex shrink-0 transition-colors">
-              <div className="space-y-6">
+          <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+            {/* Responsive Left Sidebar Navigation Tabs */}
+            <aside className="w-full md:w-64 bg-white dark:bg-slate-950 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-4 md:p-5 flex flex-col justify-between shrink-0 transition-colors">
+              <div className="space-y-4 md:space-y-6">
                 
-                {/* Active Workspace Info */}
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-extrabold text-slate-400 dark:text-slate-500 tracking-widest block">
+                {/* Active Journal Node Info */}
+                <div className="space-y-1 hidden sm:block">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider block">
                     Institutional Node
                   </span>
-                  <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-lg transition-colors">
+                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-2.5 rounded-xl transition-colors">
                     <BookOpen className="h-4 w-4 text-[#0b99ff]" />
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
                       scholarlyopen.org
                     </span>
                   </div>
                 </div>
 
-                {/* Sidebar Navigation Links */}
-                <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase font-extrabold text-slate-400 dark:text-slate-500 tracking-widest block mb-2 px-1">
-                    Workspace Nav
+                {/* Left Navigation Links matching screenshot */}
+                <div className="flex md:flex-col items-center md:items-stretch gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider hidden md:block mb-2 px-1">
+                    Navigation
                   </span>
                   
-                  {/* Journal Manager Sidebar tabs */}
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (role === "author") setActiveAuthorTab("dashboard")
+                      else setActiveJmTab("board")
+                    }}
+                    className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                      (role === "author" ? activeAuthorTab === "dashboard" : activeJmTab === "board")
+                        ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <LayoutDashboard className="h-4 w-4" />
+                      {role === "author" ? "Author Dashboard" : role === "jm" ? "Journal Manager" : role === "editor" ? "Editorial Desk" : role === "reviewer" ? "Reviewer Center" : "Overview Hub"}
+                    </span>
+                  </button>
+
+                  {role === "author" && (
+                    <>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAuthorTab("submissions")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAuthorTab === "submissions"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <FileText className="h-4 w-4" />
+                        Submission Manager
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAuthorTab("scorecard")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAuthorTab === "scorecard"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <CheckSquare className="h-4 w-4" />
+                        Readiness Scorecard
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAuthorTab("plagiarism")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAuthorTab === "plagiarism"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <Search className="h-4 w-4" />
+                        Plagiarism Scan
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAuthorTab("feedback")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAuthorTab === "feedback"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                        Feedback Portal
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAuthorTab("recognition")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAuthorTab === "recognition"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <Award className="h-4 w-4" />
+                        Contributor Recognition
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAuthorTab("career")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAuthorTab === "career"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <TrendingUp className="h-4 w-4" />
+                        Career Dashboard
+                      </button>
+                    </>
+                  )}
+
                   {role === "jm" && (
                     <>
                       <button 
+                        type="button"
+                        onClick={() => setActiveJmTab("board")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "board"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        Submissions Kanban Board
+                      </button>
+
+                      <button 
+                        type="button"
                         onClick={() => setActiveJmTab("moderation")}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-lg transition-all border ${
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "moderation"
-                            ? "bg-[#0b99ff]/10 text-[#0b99ff] border-[#0b99ff]/20"
-                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-transparent"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
-                          <Inbox className="h-4 w-4" />
-                          Review Moderation Desk
+                          <Users className="h-4 w-4" />
+                          Assign Reviewers & Workloads
                         </span>
-                        {reviews.filter(r => r.status === "Pending Moderation").length > 0 && (
-                          <span className="h-2 w-2 rounded-full bg-red-500 " />
-                        )}
                       </button>
+
                       <button 
-                        onClick={() => setActiveJmTab("archives")}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-lg transition-all border ${
-                          activeJmTab === "archives"
-                            ? "bg-[#0b99ff]/10 text-[#0b99ff] border-[#0b99ff]/20"
-                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-transparent"
+                        type="button"
+                        onClick={() => setActiveJmTab("checks")}
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "checks"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
-                          <Archive className="h-4 w-4" />
-                          Communication Archives
+                          <CheckSquare className="h-4 w-4" />
+                          Publishing Checks & Pre-Flight
                         </span>
                       </button>
+
                       <button 
+                        type="button"
+                        onClick={() => setActiveJmTab("analytics")}
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "analytics"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <BarChart3 className="h-4 w-4" />
+                          Portfolio & Integrity Analytics
+                        </span>
+                      </button>
+
+                      <button 
+                        type="button"
                         onClick={() => setActiveJmTab("users")}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-lg transition-all border ${
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "users"
-                            ? "bg-[#0b99ff]/10 text-[#0b99ff] border-[#0b99ff]/20"
-                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-transparent"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
@@ -1726,113 +2164,37 @@ export default function Editorial360Page() {
                           Reviewer Registry
                         </span>
                       </button>
-                    </>
-                  )}
 
-                  {/* Other Roles navigation list */}
-                  {role !== "jm" && (
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-lg bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
-                      <span className="flex items-center gap-2.5">
-                        <LayoutDashboard className="h-4 w-4" />
-                        Overview Hub
-                      </span>
-                      <ChevronRight className="h-3 w-3" />
-                    </button>
-                  )}
-
-                  {role === "admin" && (
-                    <>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                        <Users className="h-4 w-4" />
-                        Workspace Registry
-                      </button>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                        <Sliders className="h-4 w-4" />
-                        Journal Schema
-                      </button>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                        <Settings className="h-4 w-4" />
-                        Workflow Config
-                      </button>
-                    </>
-                  )}
-
-                  {role === "author" && (
-                    <>
                       <button 
-                        onClick={() => setIsSubmitWizardOpen(true)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                        type="button"
+                        onClick={() => setActiveJmTab("archives")}
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "archives"
+                            ? "bg-sky-500/10 text-[#0b99ff] border border-sky-500/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        }`}
                       >
-                        <Plus className="h-4 w-4 text-[#0b99ff]" />
-                        Submit New Paper
-                      </button>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                        <FileCheck className="h-4 w-4" />
-                        Co-Authorship Invites
+                        <span className="flex items-center gap-2.5">
+                          <Archive className="h-4 w-4" />
+                          Communication Archives
+                        </span>
                       </button>
                     </>
                   )}
-
-                  {role === "reviewer" && (
-                    <>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                        <CheckSquare className="h-4 w-4" />
-                        Pending Requests
-                      </button>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                        <ThumbsUp className="h-4 w-4" />
-                        Review History
-                      </button>
-                    </>
-                  )}
-
-                  {role === "editor" && (
-                    <>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 text-[#0b99ff] bg-[#0b99ff]/5 border border-[#0b99ff]/10">
-                        <FileText className="h-4 w-4" />
-                        Manuscript Queue
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setActiveJmTab("users")
-                          // Swap role temporarily to JM to access registry list
-                          setRole("jm")
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                      >
-                        <Users className="h-4 w-4" />
-                        Reviewer Database
-                      </button>
-                    </>
-                  )}
-
-                  {role === "ria" && (
-                    <>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 text-[#0b99ff] bg-[#0b99ff]/5 border border-[#0b99ff]/10">
-                        <ShieldAlert className="h-4 w-4" />
-                        Integrity Alerts
-                      </button>
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
-                        <Cpu className="h-4 w-4" />
-                        AI Analytics
-                      </button>
-                    </>
-                  )}
-
                 </div>
               </div>
 
               {/* Sidebar Footer */}
-              <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800/80">
-                <div className="flex items-center gap-2 px-1 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">
-                  <span>Version 4.2.2-stable</span>
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 px-1 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                  <span>Editorial360 v4.2</span>
                 </div>
               </div>
             </aside>
 
             {/* Main scrollable body workspace content */}
             <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-100/50 dark:bg-slate-900/60 transition-colors">
-              <div className="max-w-7xl mx-auto space-y-4 animate-in fade-in duration-300">
+              <div className="max-w-[1600px] mx-auto space-y-6 animate-in fade-in duration-300">
                 
                 {/* Banner Status Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -1847,12 +2209,8 @@ export default function Editorial360Page() {
                     </h2>
                   </div>
 
-                  {/* Header Actions & DE|EN Language Toggle */}
+                  {/* Header Actions */}
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 text-xs font-bold bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <span className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs">EN</span>
-                      <span className="px-1.5 py-0.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">DE</span>
-                    </div>
                   
                     {role === "author" && (
                       <Button 
@@ -1883,67 +2241,51 @@ export default function Editorial360Page() {
                 {role === "jm" && (
                   <div className="space-y-6">
                     <UserProfileHeaderCard role="jm" />
-                    {/* JM Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending Moderation</CardTitle>
-                          <MessageSquareOff className="h-4 w-4 text-orange-500 " />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {reviews.filter(r => r.status === "Pending Moderation").length}
-                          </div>
-                          <span className="text-[10px] text-orange-500 dark:text-orange-400 font-semibold block mt-1">
-                            Awaiting safety vetting release
-                          </span>
-                        </CardContent>
-                      </Card>
+                    {/* JM Sleek Stat Summary Bar */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xs">
+                      <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-slate-900">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending Moderation</span>
+                          <MessageSquareOff className="h-4 w-4 text-orange-500" />
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">
+                          {reviews.filter(r => r.status === "Pending Moderation").length}
+                        </div>
+                        <span className="text-[10px] text-orange-500 font-medium block">Awaiting safety vetting release</span>
+                      </div>
 
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Reviewers</CardTitle>
+                      <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-slate-900">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Reviewers</span>
                           <Users className="h-4 w-4 text-[#0b99ff]" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {users.filter(u => u.role === "reviewer").length}
-                          </div>
-                          <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold block mt-1">
-                            Verified peer evaluation pool
-                          </span>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">
+                          {users.filter(u => u.role === "reviewer").length}
+                        </div>
+                        <span className="text-[10px] text-emerald-500 font-medium block">Verified peer evaluation pool</span>
+                      </div>
 
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Registered Papers</CardTitle>
+                      <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-slate-900">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Registered Papers</span>
                           <FileText className="h-4 w-4 text-slate-400" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {manuscripts.length}
-                          </div>
-                          <span className="text-[10px] text-slate-400 font-medium block mt-1">
-                            Total submissions logged
-                          </span>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">
+                          {manuscripts.length}
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-medium block">Total submissions logged</span>
+                      </div>
 
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Decided Volume</CardTitle>
-                          <Check className="h-4 w-4 text-green-500" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {manuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected").length}
-                          </div>
-                          <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold block mt-1">
-                            Decisions posted to archives
-                          </span>
-                        </CardContent>
-                      </Card>
+                      <div className="space-y-1 pl-0 lg:pl-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Decided Volume</span>
+                          <Check className="h-4 w-4 text-emerald-500" />
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">
+                          {manuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected").length}
+                        </div>
+                        <span className="text-[10px] text-emerald-500 font-medium block">Decisions posted to archives</span>
+                      </div>
                     </div>
 
                     {/* JM Tabbed content views */}
@@ -2074,57 +2416,49 @@ export default function Editorial360Page() {
                 {role === "editor" && (
                   <div className="space-y-6">
                     <UserProfileHeaderCard role="editor" />
-                    {/* Editor Metrics */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Awaiting Assigning</CardTitle>
-                          <Bell className="h-4 w-4 text-orange-500 " />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {manuscripts.filter(m => m.status === "Awaiting Initial Check").length}
-                          </div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Pending peer-review assignments</span>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Review Process</CardTitle>
+                    {/* Editor Sleek Stat Summary Bar */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xs">
+                      <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-slate-900">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Awaiting Assigning</span>
+                          <Bell className="h-4 w-4 text-orange-500" />
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">
+                          {manuscripts.filter(m => m.status === "Awaiting Initial Check").length}
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-medium block">Pending peer-review assignments</span>
+                      </div>
+
+                      <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-slate-900">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Review Process</span>
                           <FileText className="h-4 w-4 text-[#0b99ff]" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {manuscripts.filter(m => m.status === "Under Review" || m.status === "Revision Under Evaluation").length}
-                          </div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Currently in reviewer hands</span>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">
+                          {manuscripts.filter(m => m.status === "Under Review" || m.status === "Revision Under Evaluation").length}
+                        </div>
+                        <span className="text-[10px] text-[#0b99ff] font-medium block">Currently in reviewer hands</span>
+                      </div>
 
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending Moderation Desk</CardTitle>
-                          <MessageSquareOff className="h-4 w-4 text-amber-500 " />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {reviews.filter(r => r.status === "Pending Moderation").length}
-                          </div>
-                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block mt-1">Comments needing vetting</span>
-                        </CardContent>
-                      </Card>
+                      <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-slate-900">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending Moderation Desk</span>
+                          <MessageSquareOff className="h-4 w-4 text-amber-500" />
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">
+                          {reviews.filter(r => r.status === "Pending Moderation").length}
+                        </div>
+                        <span className="text-[10px] text-amber-500 font-medium block">Comments needing vetting</span>
+                      </div>
 
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Avg Turnaround Latency</CardTitle>
+                      <div className="space-y-1 pl-0 lg:pl-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Avg Turnaround Latency</span>
                           <ClockWidget />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">24.2d</div>
-                          <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold block mt-1">Below target of 25.0 days</span>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white">24.2d</div>
+                        <span className="text-[10px] text-emerald-500 font-medium block">Below target of 25.0 days</span>
+                      </div>
                     </div>
 
                     {/* Reviews pending release desk in Editor view */}
@@ -2159,176 +2493,6 @@ export default function Editorial360Page() {
                         </div>
                       </Card>
                     )}
-
-                    {/* Morressier-Inspired Stage Filter Pills & Search Bar */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-1">
-                      <div className="flex flex-wrap items-center gap-1.5 bg-slate-200/60 dark:bg-slate-900/80 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                        <button
-                          onClick={() => setManuscriptStageFilter("all")}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            manuscriptStageFilter === "all"
-                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          ALL ({manuscripts.length})
-                        </button>
-                        <button
-                          onClick={() => setManuscriptStageFilter("inbox")}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            manuscriptStageFilter === "inbox"
-                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          INBOX ({manuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.reviewers.length === 0).length})
-                        </button>
-                        <button
-                          onClick={() => setManuscriptStageFilter("review")}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            manuscriptStageFilter === "review"
-                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          IN PEER REVIEW ({manuscripts.filter(m => m.status === "Under Review").length})
-                        </button>
-                        <button
-                          onClick={() => setManuscriptStageFilter("revision")}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            manuscriptStageFilter === "revision"
-                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          REVISIONS ({manuscripts.filter(m => m.status === "Revision Required").length})
-                        </button>
-                        <button
-                          onClick={() => setManuscriptStageFilter("decided")}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            manuscriptStageFilter === "decided"
-                              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          DECIDED ({manuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected").length})
-                        </button>
-                      </div>
-
-                      <div className="relative w-full sm:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                        <input
-                          type="text"
-                          placeholder="Search Title, ID, Journal..."
-                          value={manuscriptSearch}
-                          onChange={(e) => setManuscriptSearch(e.target.value)}
-                          className="pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b99ff] w-full text-slate-900 dark:text-white"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Editorial Inbox Table */}
-                    <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-                      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
-                        <div>
-                          <h3 className="text-base font-bold text-slate-900 dark:text-white">Manuscript Pipeline Queue</h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Assign reviewer pools and log academic publication decisions.</p>
-                        </div>
-                        <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-1 rounded-full border border-[#0b99ff]/20">
-                          {filteredManuscripts.length} Manuscripts Shown
-                        </span>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-xs">
-                          <thead>
-                            <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase">
-                              <th className="px-5 py-3">ID / Submission Date</th>
-                              <th className="px-5 py-3">Manuscript Details</th>
-                              <th className="px-5 py-3">Assigned Reviewers</th>
-                              <th className="px-5 py-3">Assignment Status</th>
-                              <th className="px-5 py-3">Integrity Flags</th>
-                              <th className="px-5 py-3 text-right">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-200 dark:divide-slate-850 font-medium">
-                            {filteredManuscripts.map((m) => (
-                              <tr key={m.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
-                                <td className="px-5 py-4 whitespace-nowrap">
-                                  <div className="font-bold text-slate-900 dark:text-white">{m.id}</div>
-                                  <div className="text-[10px] text-slate-400">{m.date}</div>
-                                </td>
-                                <td className="px-5 py-4 max-w-xs">
-                                  <div className="font-bold text-slate-900 dark:text-white line-clamp-1">{m.title}</div>
-                                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">{m.journal}</div>
-                                </td>
-                                <td className="px-5 py-4">
-                                  <div className="space-y-1">
-                                    {m.reviewers.length === 0 ? (
-                                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold italic">Unassigned</span>
-                                    ) : (
-                                      m.reviewers.map((rev, idx) => (
-                                        <div key={idx} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                                          <div className="h-1.5 w-1.5 rounded-full bg-[#0b99ff]" />
-                                          {rev}
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="px-5 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                    m.reviewers.length >= 2 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
-                                    m.reviewers.length === 1 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" :
-                                    "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
-                                  }`}>
-                                    {m.reviewers.length >= 2 ? "Fully Assigned" : m.reviewers.length === 1 ? "Partly Assigned" : "Unassigned"}
-                                  </span>
-                                </td>
-                                <td className="px-5 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                    m.integrityStatus === "Clean" ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20" :
-                                    m.integrityStatus === "Flagged" ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 " :
-                                    "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700"
-                                  }`}>
-                                    {m.integrityStatus}
-                                  </span>
-                                </td>
-                                <td className="px-5 py-4 text-right whitespace-nowrap space-x-1.5">
-                                  {m.status !== "Accepted" && m.status !== "Rejected" && (
-                                    <>
-                                      <Button 
-                                        onClick={() => {
-                                          setAssignPaperId(m.id)
-                                          setIsAssignReviewOpen(true)
-                                        }}
-                                        size="sm"
-                                        className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold cursor-pointer"
-                                      >
-                                        Assign
-                                      </Button>
-                                      
-                                      <Button 
-                                        onClick={() => {
-                                          setDecisionPaperId(m.id)
-                                          setIsDecisionOpen(true)
-                                        }}
-                                        size="sm"
-                                        className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs cursor-pointer"
-                                      >
-                                        Decision
-                                      </Button>
-                                    </>
-                                  )}
-                                  {(m.status === "Accepted" || m.status === "Rejected") && (
-                                    <span className="text-slate-400 dark:text-slate-500 font-semibold italic text-xs pr-4">Processed</span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </Card>
                   </div>
                 )}
 
@@ -2436,144 +2600,648 @@ export default function Editorial360Page() {
                 )}
 
                 {/* ================= 4. AUTHOR WORKSPACE ================= */}
-                {role === "author" && (
-                  <div className="space-y-6">
-                    <UserProfileHeaderCard role="author" />
-                    {/* Author stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Submissions</CardTitle>
-                          <FileText className="h-4 w-4 text-[#0b99ff]" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">5</div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">3 papers successfully published</span>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Under Evaluation</CardTitle>
-                          <RefreshCw className="h-4 w-4 text-[#0b99ff] animate-spin" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">1</div>
-                          <span className="text-[10px] text-[#0b99ff] font-semibold block mt-1">In peer review evaluation</span>
-                        </CardContent>
-                      </Card>
+                {role === "author" && (() => {
+                  // Deduplicate manuscripts array by ID and Title to guarantee clean unique list
+                  const uniqueManuscripts = Array.from(
+                    new Map(manuscripts.map(m => [m.id ? m.id : m.title, m])).values()
+                  )
 
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Revisions Required</CardTitle>
-                          <AlertTriangle className="h-4 w-4 text-orange-500 " />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">1</div>
-                          <span className="text-[10px] text-orange-500 dark:text-orange-400 font-semibold block mt-1">Needs correction response</span>
-                        </CardContent>
-                      </Card>
+                  return (
+                    <div className="space-y-6">
+                      <UserProfileHeaderCard 
+                        role="author" 
+                        onExploreBadges={() => setIsBadgeModalOpen(true)} 
+                      />
 
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Co-Authorship Invites</CardTitle>
-                          <Users className="h-4 w-4 text-slate-400" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">0</div>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-1">Zero pending affiliations</span>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Author Manuscripts Table */}
-                    <div className="flex flex-col xl:flex-row gap-6">
-                      <div className="flex-1 w-full xl:w-2/3">
-                    <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors h-full">
-                      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
-                        <div>
-                          <h3 className="text-base font-bold text-slate-900 dark:text-white">My Scholarly Manuscripts</h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage and track the validation pipeline for your research papers.</p>
+                      {/* Author Sleek Stat Summary Bar */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xs">
+                        <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-slate-900">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Submissions</span>
+                            <FileText className="h-4 w-4 text-[#0b99ff]" />
+                          </div>
+                          <div className="text-2xl font-black text-slate-900 dark:text-white">
+                            {uniqueManuscripts.length}
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-medium block">
+                            {uniqueManuscripts.filter(m => m.status === "Accepted").length} papers successfully published
+                          </span>
                         </div>
-                        <Button 
-                          onClick={() => setIsSubmitWizardOpen(true)}
-                          size="sm"
-                          className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white text-xs font-bold cursor-pointer"
-                        >
-                          Submit Paper
-                        </Button>
+
+                        <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-slate-900">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Under Evaluation</span>
+                            <RefreshCw className="h-4 w-4 text-[#0b99ff]" />
+                          </div>
+                          <div className="text-2xl font-black text-slate-900 dark:text-white">
+                            {uniqueManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check").length}
+                          </div>
+                          <span className="text-[10px] text-[#0b99ff] font-medium block">In active evaluation pipeline</span>
+                        </div>
+
+                        <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-slate-900">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Revisions Required</span>
+                            <AlertTriangle className="h-4 w-4 text-orange-500" />
+                          </div>
+                          <div className="text-2xl font-black text-slate-900 dark:text-white">
+                            {uniqueManuscripts.filter(m => m.status === "Revision Required").length}
+                          </div>
+                          <span className="text-[10px] text-orange-500 font-medium block">Needs correction response</span>
+                        </div>
+
+                        <div className="space-y-1 pl-0 lg:pl-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Co-Authorship Invites</span>
+                            <Users className="h-4 w-4 text-slate-400" />
+                          </div>
+                          <div className="text-2xl font-black text-slate-900 dark:text-white">0</div>
+                          <span className="text-[10px] text-slate-400 font-medium block">Zero pending affiliations</span>
+                        </div>
                       </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-xs">
-                          <thead>
-                            <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase">
-                              <th className="px-5 py-3">ID / Submission Date</th>
-                              <th className="px-5 py-3">Manuscript Details</th>
-                              <th className="px-5 py-3">Target Journal</th>
-                              <th className="px-5 py-3">Pipeline Status</th>
-                              <th className="px-5 py-3 text-right">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-200 dark:divide-slate-850 font-medium">
-                            {manuscripts.map((m) => (
-                              <tr key={m.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
-                                <td className="px-5 py-4 whitespace-nowrap">
-                                  <div className="font-bold text-slate-900 dark:text-white">{m.id}</div>
-                                  <div className="text-[10px] text-slate-400">{m.date}</div>
-                                </td>
-                                <td className="px-5 py-4 max-w-sm">
-                                  <div className="font-bold text-slate-900 dark:text-white line-clamp-1 hover:line-clamp-none transition-all cursor-pointer">
-                                    {m.title}
-                                  </div>
-                                </td>
-                                <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                                  {m.journal}
-                                </td>
-                                <td className="px-5 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                    m.status === "Accepted" ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20" :
-                                    m.status === "Revision Required" ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" :
-                                    m.status === "Under Review" ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20" :
-                                    "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
-                                  }`}>
-                                    {m.status}
+
+                      {/* 1. OVERVIEW DASHBOARD VIEW */}
+                      {(activeAuthorTab === "dashboard" || activeAuthorTab === "submissions") && (
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                          
+                          {/* Submission Manager Table */}
+                          <div className={activeAuthorTab === "submissions" ? "xl:col-span-12" : "xl:col-span-8"}>
+                            <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors h-full">
+                              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
+                                <div>
+                                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Submission Manager</h3>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage and track the validation pipeline for your research papers.</p>
+                                </div>
+                              </div>
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse text-xs">
+                                  <thead>
+                                    <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase">
+                                      <th className="px-5 py-3">ID / Submission Date</th>
+                                      <th className="px-5 py-3">Manuscript Details</th>
+                                      <th className="px-5 py-3">Target Journal</th>
+                                      <th className="px-5 py-3">Pipeline Status</th>
+                                      <th className="px-5 py-3 text-right">Actions</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-200 dark:divide-slate-850 font-medium">
+                                    {uniqueManuscripts.map((m) => (
+                                      <tr key={m.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
+                                        <td className="px-5 py-4 whitespace-nowrap">
+                                          <div className="font-bold text-slate-900 dark:text-white">{m.id}</div>
+                                          <div className="text-[10px] text-slate-400">{m.date}</div>
+                                        </td>
+                                        <td className="px-5 py-4 max-w-sm">
+                                          <div className="font-bold text-slate-900 dark:text-white line-clamp-1 hover:line-clamp-none transition-all cursor-pointer">
+                                            {m.title}
+                                          </div>
+                                        </td>
+                                        <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                                          {m.journal}
+                                        </td>
+                                        <td className="px-5 py-4 whitespace-nowrap">
+                                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                            m.status === "Accepted" ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20" :
+                                            m.status === "Revision Required" ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" :
+                                            m.status === "Under Review" ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20" :
+                                            "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                                          }`}>
+                                            {m.status}
+                                          </span>
+                                        </td>
+                                        <td className="px-5 py-4 text-right whitespace-nowrap">
+                                          {m.status === "Revision Required" ? (
+                                            <Button 
+                                              onClick={() => {
+                                                setRevisionPaperId(m.id)
+                                                setIsRevisionDialogOpen(true)
+                                              }}
+                                              size="sm"
+                                              className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs cursor-pointer"
+                                            >
+                                              Submit Revision
+                                            </Button>
+                                          ) : (
+                                            <Button 
+                                              onClick={() => {
+                                                setSelectedManuscriptDetails(m)
+                                                setIsManuscriptDetailsOpen(true)
+                                              }}
+                                              variant="ghost" 
+                                              size="sm"
+                                              className="text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white cursor-pointer"
+                                            >
+                                              View Details
+                                            </Button>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </Card>
+                          </div>
+
+                          {/* Submission Readiness Scorecard Card */}
+                          {activeAuthorTab === "dashboard" && (
+                            <div className="xl:col-span-4">
+                              <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                                  <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                                    <CheckSquare className="h-4 w-4 text-[#0b99ff]" />
+                                    Submission Readiness Scorecard
+                                  </h3>
+                                  <span className="text-xs font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    80% Ready
                                   </span>
-                                </td>
-                                <td className="px-5 py-4 text-right whitespace-nowrap">
-                                  {m.status === "Revision Required" ? (
-                                    <Button 
-                                      onClick={() => {
-                                        setRevisionPaperId(m.id)
-                                        setIsRevisionDialogOpen(true)
-                                      }}
-                                      size="sm"
-                                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs cursor-pointer"
-                                    >
-                                      Submit Revision
-                                    </Button>
-                                  ) : (
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm"
-                                      className="text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white cursor-pointer"
-                                    >
-                                      View Details
-                                    </Button>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </Card>
-                      </div>
-                      <div className="w-full xl:w-1/3 min-w-[300px]">
-                        <AuthorCareerMetrics />
-                      </div>
+                                </div>
+
+                                <div className="space-y-3 text-xs">
+                                  <div className="flex items-start gap-2.5 p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                    <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                                    <div>
+                                      <span className="font-bold text-slate-800 dark:text-slate-200">Metadata & Authorship Complete</span>
+                                      <p className="text-[10px] text-slate-400">All co-author ORCIDs & affiliations verified</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-start gap-2.5 p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                    <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                                    <div>
+                                      <span className="font-bold text-slate-800 dark:text-slate-200">Ethics & COI Declaration Signed</span>
+                                      <p className="text-[10px] text-slate-400">Institutional ethics clearance verified</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-start gap-2.5 p-2 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40">
+                                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                                    <div>
+                                      <span className="font-bold text-amber-900 dark:text-amber-200">References & Figures Formatting</span>
+                                      <p className="text-[10px] text-amber-700 dark:text-amber-400">Ensure vector figures meet 300 DPI target</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </Card>
+                            </div>
+                          )}
+
+                        </div>
+                      )}
+
+                      {/* 2. READINESS SCORECARD TAB VIEW */}
+                      {activeAuthorTab === "scorecard" && (
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                            <div>
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <CheckSquare className="h-5 w-5 text-[#0b99ff]" />
+                                Submission Readiness Scorecard
+                              </h3>
+                              <p className="text-xs text-slate-500 mt-1">Pre-submission manuscript compliance check before editorial review.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className={`text-sm font-black px-3 py-1 rounded-full border ${
+                                isFigureFixed 
+                                  ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200" 
+                                  : "text-amber-600 bg-amber-50 dark:bg-amber-950/60 border-amber-200"
+                              }`}>
+                                {isFigureFixed ? "5 / 5 Checklist Items Passed (100% Ready)" : "4 / 5 Checklist Items Passed (80% Ready)"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Pre-Submission Draft File Upload Dropzone */}
+                          <div className="space-y-3">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                              Upload Draft File for Pre-Submission Audit
+                            </h4>
+
+                            <label className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all text-center group">
+                              <input 
+                                type="file" 
+                                onChange={handleScorecardFileUpload}
+                                accept=".pdf,.docx,.doc,.tex,.zip"
+                                className="hidden" 
+                              />
+                              <Upload className="h-8 w-8 text-[#0b99ff] mb-2 group-hover:scale-110 transition-transform" />
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                {scorecardFileName ? `Uploaded: ${scorecardFileName}` : "Click to Browse or Drag & Drop Manuscript File (.pdf, .docx, .tex)"}
+                              </span>
+                              <span className="text-[10px] text-slate-400 mt-1">
+                                Runs automated compliance check for figures (300 DPI), references (APA7), ethics, and metadata.
+                              </span>
+                            </label>
+
+                            {/* Live Audit Simulation Banner */}
+                            {isAuditingScorecard && (
+                              <div className="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 space-y-2 animate-in fade-in">
+                                <div className="flex items-center justify-between text-xs font-bold text-[#0b99ff]">
+                                  <span>Auditing manuscript figures, references, and metadata compliance...</span>
+                                  <span>{scorecardAuditProgress}%</span>
+                                </div>
+                                <div className="w-full bg-sky-200 dark:bg-sky-900 rounded-full h-2 overflow-hidden">
+                                  <div className="bg-[#0b99ff] h-full transition-all duration-300 rounded-full" style={{ width: `${scorecardAuditProgress}%` }} />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Interactive Scorecard Checklist Items */}
+                          <div className="space-y-4 pt-2">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                              Automated Checklist Audit Log
+                            </h4>
+
+                            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Check className="h-5 w-5 text-emerald-500 shrink-0" />
+                                <div>
+                                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Authorship & Affiliations Verification</h4>
+                                  <p className="text-xs text-slate-500">All co-authors listed with valid ORCID IDs and institutional affiliations.</p>
+                                </div>
+                              </div>
+                              <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg">Verified</span>
+                            </div>
+
+                            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Check className="h-5 w-5 text-emerald-500 shrink-0" />
+                                <div>
+                                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Ethics & Conflict of Interest Statement</h4>
+                                  <p className="text-xs text-slate-500">Ethics board approval reference number attached.</p>
+                                </div>
+                              </div>
+                              <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg">Verified</span>
+                            </div>
+
+                            {/* Conditional Figure Quality Warning vs Verified */}
+                            {isFigureFixed ? (
+                              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <Check className="h-5 w-5 text-emerald-500 shrink-0" />
+                                  <div>
+                                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Figure & Table Quality Standard</h4>
+                                    <p className="text-xs text-slate-500">High-resolution vector figures verified (300 DPI print standard compliant).</p>
+                                  </div>
+                                </div>
+                                <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg">Fixed & Verified</span>
+                              </div>
+                            ) : (
+                              <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+                                  <div>
+                                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">Figure & Table Quality Standard</h4>
+                                    <p className="text-xs text-amber-700 dark:text-amber-400">Figure 2 resolution is 150 DPI (Minimum 300 DPI recommended for print production).</p>
+                                  </div>
+                                </div>
+                                <Button 
+                                  onClick={() => {
+                                    setIsFigureFixed(true)
+                                    alert("High-resolution 300 DPI vector figure uploaded! Quality standard passed.")
+                                  }}
+                                  size="sm" 
+                                  className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold cursor-pointer shrink-0"
+                                >
+                                  Upload 300 DPI Figure
+                                </Button>
+                              </div>
+                            )}
+
+                            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Check className="h-5 w-5 text-emerald-500 shrink-0" />
+                                <div>
+                                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Data Availability Statement</h4>
+                                  <p className="text-xs text-slate-500">Public repository DOI provided for supporting dataset.</p>
+                                </div>
+                              </div>
+                              <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg">Verified</span>
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+
+                      {/* 3. PLAGIARISM SCAN TAB VIEW */}
+                      {activeAuthorTab === "plagiarism" && (() => {
+                        const selectedPaper = uniqueManuscripts.find(m => m.id === selectedScanPaperId) || uniqueManuscripts[0] || manuscripts[0]
+                        const plagiarismVal = selectedPaper?.plagiarismScore || 5.2
+
+                        return (
+                          <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                              <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                  <Search className="h-5 w-5 text-[#0b99ff]" />
+                                  Plagiarism & Text Similarity Scan
+                                </h3>
+                                <p className="text-xs text-slate-500 mt-1">Crossref & iThenticate automated manuscript text similarity verification report.</p>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-3">
+                                {/* Manuscript Selector Dropdown */}
+                                <select 
+                                  value={selectedScanPaperId}
+                                  onChange={(e) => {
+                                    setSelectedScanPaperId(e.target.value)
+                                    setScanCompletedSuccess(false)
+                                  }}
+                                  className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 outline-none"
+                                >
+                                  {uniqueManuscripts.map(m => (
+                                    <option key={m.id} value={m.id}>
+                                      {m.id}: {m.title.slice(0, 35)}...
+                                    </option>
+                                  ))}
+                                </select>
+
+                                <Button 
+                                  onClick={handleRunPlagiarismScan}
+                                  disabled={isScanningPlagiarism}
+                                  size="sm" 
+                                  className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white text-xs font-bold cursor-pointer disabled:opacity-50"
+                                >
+                                  {isScanningPlagiarism ? "Scanning Text..." : "Run New Similarity Check"}
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Live Scanning Progress Overlay Banner */}
+                            {isScanningPlagiarism && (
+                              <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 space-y-2 animate-in fade-in">
+                                <div className="flex items-center justify-between text-xs font-bold text-[#0b99ff]">
+                                  <span>Scanning manuscript against 120M+ Crossref & PubMed articles...</span>
+                                  <span>{scanProgress}%</span>
+                                </div>
+                                <div className="w-full bg-sky-200 dark:bg-sky-900 rounded-full h-2 overflow-hidden">
+                                  <div className="bg-[#0b99ff] h-full transition-all duration-300 rounded-full" style={{ width: `${scanProgress}%` }} />
+                                </div>
+                              </div>
+                            )}
+
+                            {scanCompletedSuccess && (
+                              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-between">
+                                <span className="flex items-center gap-2">
+                                  <Check className="h-4 w-4 text-emerald-600" />
+                                  Similarity check completed successfully. 0 integrity flags detected.
+                                </span>
+                                <span className="text-[10px] text-emerald-600 uppercase font-extrabold">Verified Clean</span>
+                              </div>
+                            )}
+
+                            {/* Summary Metrics Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className={`p-4 rounded-xl border space-y-1 ${
+                                plagiarismVal > 15 
+                                  ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800" 
+                                  : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800"
+                              }`}>
+                                <span className={`text-xs font-bold uppercase ${plagiarismVal > 15 ? "text-rose-600" : "text-emerald-600"}`}>Overall Similarity Index</span>
+                                <div className={`text-3xl font-black ${plagiarismVal > 15 ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>{plagiarismVal}%</div>
+                                <span className={`text-[10px] font-medium ${plagiarismVal > 15 ? "text-rose-600" : "text-emerald-600"}`}>
+                                  {plagiarismVal > 15 ? "High Similarity (Needs Review)" : "Clean (Threshold < 15%)"}
+                                </span>
+                              </div>
+
+                              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase">Selected Manuscript</span>
+                                <div className="text-sm font-bold text-slate-900 dark:text-white truncate">{selectedPaper.title}</div>
+                                <span className="text-[10px] text-[#0b99ff] font-semibold">{selectedPaper.journal}</span>
+                              </div>
+
+                              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase">Scan Timestamp</span>
+                                <div className="text-sm font-bold text-slate-900 dark:text-white">2026-08-18 19:45 UTC</div>
+                                <span className="text-[10px] text-emerald-600 font-medium">Crossref Similarity Check API v3</span>
+                              </div>
+                            </div>
+
+                            {/* Matched Source Repository Breakdown Table */}
+                            <div className="space-y-3 pt-2">
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center justify-between">
+                                <span>Matched Database Sources</span>
+                                <span className="text-xs text-slate-400 font-normal">Crossref & iThenticate Index</span>
+                              </h4>
+
+                              <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                                <table className="w-full text-left text-xs">
+                                  <thead className="bg-slate-100 dark:bg-slate-900 text-slate-500 font-bold uppercase border-b border-slate-200 dark:border-slate-800">
+                                    <tr>
+                                      <th className="px-4 py-2.5">Source Repository</th>
+                                      <th className="px-4 py-2.5">Publication Type</th>
+                                      <th className="px-4 py-2.5">Match %</th>
+                                      <th className="px-4 py-2.5 text-right">Status</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100 dark:divide-slate-850 font-medium text-slate-700 dark:text-slate-300">
+                                    <tr>
+                                      <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">PubMed Central Open Access Repository</td>
+                                      <td className="px-4 py-3 text-slate-500">Journal Article</td>
+                                      <td className="px-4 py-3 font-bold text-[#0b99ff]">2.1%</td>
+                                      <td className="px-4 py-3 text-right"><span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Permitted Reference</span></td>
+                                    </tr>
+                                    <tr>
+                                      <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">IEEE Xplore Digital Library Database</td>
+                                      <td className="px-4 py-3 text-slate-500">Conference Proceedings</td>
+                                      <td className="px-4 py-3 font-bold text-[#0b99ff]">1.4%</td>
+                                      <td className="px-4 py-3 text-right"><span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Permitted Citation</span></td>
+                                    </tr>
+                                    <tr>
+                                      <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">arXiv Computer Science Preprints</td>
+                                      <td className="px-4 py-3 text-slate-500">Author Preprint</td>
+                                      <td className="px-4 py-3 font-bold text-[#0b99ff]">0.9%</td>
+                                      <td className="px-4 py-3 text-right"><span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Self-Preprint</span></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* Download PDF Verification Report */}
+                            <div className="flex justify-end pt-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-xs font-bold flex items-center gap-2 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer"
+                                onClick={() => alert(`Downloading Crossref Similarity Check Certificate PDF for ${selectedPaper.id}...`)}
+                              >
+                                Download Similarity Certificate (PDF)
+                              </Button>
+                            </div>
+
+                          </Card>
+                        )
+                      })()}
+
+                      {/* 4. FEEDBACK PORTAL TAB VIEW */}
+                      {activeAuthorTab === "feedback" && (
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                          <div className="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <MessageSquare className="h-5 w-5 text-[#0b99ff]" />
+                                Peer Review Feedback & Decision Desk
+                              </h3>
+                              <p className="text-xs text-slate-500 mt-1">Reviewer evaluation reports, editorial decisions, and revision response form.</p>
+                            </div>
+                          </div>
+
+                          {responseSubmittedSuccess && (
+                            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-between">
+                              <span className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-emerald-600" />
+                                Author point-by-point response and revised manuscript successfully submitted! Pipeline status updated to &ldquo;Revision Under Evaluation&rdquo;.
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="space-y-4">
+                            <div className="p-4 rounded-xl bg-orange-50/50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40 space-y-4">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-orange-600 uppercase">Editorial Decision: Minor Revision Required (MS-2026-094)</span>
+                                <span className="text-xs text-slate-400">Due: 2026-09-01</span>
+                              </div>
+                              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed italic bg-white dark:bg-slate-900 p-3 rounded-lg border border-orange-100 dark:border-orange-900/30">
+                                &ldquo;The manuscript presents novel methodology. Please address Reviewer 2&rsquo;s comments regarding sample size justification and update Figure 3.&rdquo;
+                              </p>
+
+                              {/* Interactive Point-by-Point Author Response Form */}
+                              <div className="space-y-3 pt-2">
+                                <label className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                                  Point-by-Point Author Response to Reviewers
+                                </label>
+                                <textarea
+                                  value={authorResponseText}
+                                  onChange={(e) => setAuthorResponseText(e.target.value)}
+                                  rows={4}
+                                  className="w-full p-3 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-[#0b99ff] outline-none"
+                                  placeholder="Type your response addressing each reviewer query here (e.g. We thank the reviewer for the comment. As suggested, we updated Figure 3 and added sample size calculations on page 4)..."
+                                />
+
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-2 cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl">
+                                    <Upload className="h-4 w-4 text-[#0b99ff]" />
+                                    <span>Attach Revised Manuscript (.docx, .pdf)</span>
+                                    <input type="file" className="hidden" accept=".pdf,.docx,.doc" />
+                                  </label>
+
+                                  <Button 
+                                    onClick={() => {
+                                      if (!authorResponseText.trim()) {
+                                        alert("Please enter your point-by-point response before submitting.")
+                                        return
+                                      }
+                                      setIsSubmittingResponse(true)
+                                      setTimeout(() => {
+                                        setIsSubmittingResponse(false)
+                                        setResponseSubmittedSuccess(true)
+                                        // Update status of MS-2026-094 to Revision Under Evaluation
+                                        setManuscripts(prev => prev.map(m => m.id === "MS-2026-094" ? { ...m, status: "Under Review" } : m))
+                                      }, 800)
+                                    }}
+                                    disabled={isSubmittingResponse}
+                                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs py-2 px-4 rounded-xl cursor-pointer"
+                                  >
+                                    {isSubmittingResponse ? "Submitting Revision..." : "Submit Response & Revision"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+
+                      {/* 5. CONTRIBUTOR RECOGNITION TAB VIEW */}
+                      {activeAuthorTab === "recognition" && (
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                          <div className="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <Award className="h-5 w-5 text-[#0b99ff]" />
+                                Contributor Recognition & Badges
+                              </h3>
+                              <p className="text-xs text-slate-500 mt-1">Academic contributor achievements, peer review credits, and ORCID badge sync.</p>
+                            </div>
+
+                            <Button 
+                              onClick={handleSyncOrcid}
+                              disabled={isOrcidSyncing}
+                              size="sm"
+                              className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white text-xs font-bold cursor-pointer"
+                            >
+                              {isOrcidSyncing ? "Syncing ORCID..." : `Sync with ORCID (${orcidLastSynced})`}
+                            </Button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-[#0b99ff] font-bold text-sm">
+                                  <Star className="h-4 w-4" /> Quality Contributor
+                                </div>
+                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Active</span>
+                              </div>
+                              <p className="text-xs text-slate-500">Awarded for publishing high-impact peer-reviewed manuscripts with zero integrity flags.</p>
+                            </div>
+
+                            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-[#0b99ff] font-bold text-sm">
+                                  <Award className="h-4 w-4" /> Fast Responder
+                                </div>
+                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Active</span>
+                              </div>
+                              <p className="text-xs text-slate-500">Awarded for submitting peer review revisions within 5 calendar days.</p>
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+
+                      {/* 6. CAREER DASHBOARD TAB VIEW */}
+                      {activeAuthorTab === "career" && (
+                        <div className="space-y-6">
+                          <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                            <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5 text-[#0b99ff]" />
+                                Scholarly Career & Impact Metrics
+                              </h3>
+                              <p className="text-xs text-slate-500 mt-1">Track citations, article downloads, and Altmetric attention indices across your publications.</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase">Total Citations</span>
+                                <div className="text-2xl font-black text-slate-900 dark:text-white">120</div>
+                                <span className="text-[10px] text-emerald-600 font-semibold">+18 this quarter</span>
+                              </div>
+
+                              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase">h-index</span>
+                                <div className="text-2xl font-black text-slate-900 dark:text-white">8</div>
+                                <span className="text-[10px] text-slate-500 font-semibold">i10-index: 6</span>
+                              </div>
+
+                              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase">PDF Downloads</span>
+                                <div className="text-2xl font-black text-slate-900 dark:text-white">3,420</div>
+                                <span className="text-[10px] text-[#0b99ff] font-semibold">Across 5 journals</span>
+                              </div>
+
+                              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase">ORCID Status</span>
+                                <div className="text-sm font-bold text-emerald-600">Synced ✓</div>
+                                <span className="text-[10px] text-slate-500 font-semibold">0000-1234-5678</span>
+                              </div>
+                            </div>
+                          </Card>
+                        </div>
+                      )}
+
                     </div>
-                  </div>
-                )}
+                  )
+                })()}
 
                 {/* ================= 5. RESEARCH INTEGRITY ADVISOR (QC Admin) ================= */}
                 {role === "ria" && (
@@ -2914,8 +3582,9 @@ export default function Editorial360Page() {
 
               </div>
             </main>
-
           </div>
+        </div>
+      )}
 
           {/* ================= ======================================= */}
           {/* DIALOGS AND MODAL POPUPS                                  */}
@@ -3035,6 +3704,17 @@ export default function Editorial360Page() {
                         <option value="Scholarly Open: Synthetic Biology & Bio-Design">Scholarly Open: Synthetic Biology & Bio-Design</option>
                         <option value="Scholarly Open: Space Resources & Orbital Economy">Scholarly Open: Space Resources & Orbital Economy</option>
                       </optgroup>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Submission Type / Stage</label>
+                    <select
+                      value={newSubmissionStage}
+                      onChange={(e) => setNewSubmissionStage(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    >
+                      <option value="Initial Submission">Initial Submission</option>
+                      <option value="Revised Submission">Revised Submission</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
@@ -3837,10 +4517,263 @@ export default function Editorial360Page() {
             </DialogContent>
           </Dialog>
 
-        </div>
-      )}
+          {/* 11. FIRST-TIME AUTHOR PROFILE BUILDER MODAL */}
+          <Dialog open={isAuthorProfileSetupOpen} onOpenChange={setIsAuthorProfileSetupOpen}>
+            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-md transition-colors">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <User className="h-5 w-5 text-[#0b99ff]" />
+                  Author Profile
+                </DialogTitle>
+                <DialogDescription className="text-slate-500 dark:text-slate-400 text-xs">
+                  Set up your ORCID and affiliation details to get started.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setIsAuthorProfileCompleted(true)
+                  setIsAuthorProfileSetupOpen(false)
+                  setSuccess("Profile saved successfully!")
+                  if (typeof window !== "undefined") {
+                    const params = new URLSearchParams(window.location.search)
+                    if (params.get("action") === "submit") {
+                      setIsSubmitWizardOpen(true)
+                    }
+                  }
+                }} 
+                className="space-y-3 py-1"
+              >
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={profFullName}
+                      onChange={(e) => setProfFullName(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      placeholder="Dr. Evelyn Vane"
+                    />
+                  </div>
 
-    </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Title</label>
+                    <select
+                      value={profRank}
+                      onChange={(e) => setProfRank(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                    >
+                      <option value="Professor">Professor</option>
+                      <option value="Associate Professor">Associate Professor</option>
+                      <option value="Assistant Professor">Assistant Professor</option>
+                      <option value="Senior Researcher">Senior Researcher</option>
+                      <option value="Postdoctoral Fellow">Postdoctoral Fellow</option>
+                      <option value="PhD Researcher">PhD Researcher</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Institution *</label>
+                    <input
+                      type="text"
+                      required
+                      value={profInstitution}
+                      onChange={(e) => setProfInstitution(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      placeholder="Harvard Medical School"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Country *</label>
+                    <input
+                      type="text"
+                      required
+                      value={profCountry}
+                      onChange={(e) => setProfCountry(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      placeholder="United States"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">ORCID iD</label>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Verified Sync</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={profOrcid}
+                    onChange={(e) => setProfOrcid(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs font-mono rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                    placeholder="0000-0002-1825-0097"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Research Topics</label>
+                  <input
+                    type="text"
+                    value={profSpecialization}
+                    onChange={(e) => setProfSpecialization(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                    placeholder="Cardiology, Clinical AI"
+                  />
+                </div>
+
+                <div className="flex items-center pt-1">
+                  <input 
+                    id="prof-review-optin"
+                    type="checkbox"
+                    checked={profReviewOptIn}
+                    onChange={(e) => setProfReviewOptIn(e.target.checked)}
+                    className="h-3.5 w-3.5 text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 rounded cursor-pointer"
+                  />
+                  <label htmlFor="prof-review-optin" className="ml-2 block text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+                    Opt-in for peer review invitations
+                  </label>
+                </div>
+
+                <DialogFooter className="pt-2">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs py-2 rounded-md shadow cursor-pointer"
+                  >
+                    Save Profile
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* 11. AUTHOR: EXPLORE BADGES MODAL */}
+          <Dialog open={isBadgeModalOpen} onOpenChange={setIsBadgeModalOpen}>
+            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-md transition-colors">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Award className="h-5 w-5 text-[#0b99ff]" />
+                  Academic Contributor Badges
+                </DialogTitle>
+                <DialogDescription className="text-slate-500 dark:text-slate-400">
+                  Earn badges by maintaining high peer review response speed, publishing integrity, and open-access data sharing.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 py-2">
+                <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800/60 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Star className="h-5 w-5 text-[#0b99ff]" />
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">Quality Contributor</h4>
+                      <p className="text-[10px] text-slate-500">Published 3+ papers without any integrity warnings.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded">Earned ✓</span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800/60 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Award className="h-5 w-5 text-[#0b99ff]" />
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">Fast Responder</h4>
+                      <p className="text-[10px] text-slate-500">Submitted manuscript revisions within 5 calendar days.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded">Earned ✓</span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="h-5 w-5 text-amber-500" />
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">Integrity Champion</h4>
+                      <p className="text-[10px] text-slate-500">Complete 3 more ethics disclosures & peer reviews.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-amber-600 bg-amber-100 dark:bg-amber-950 px-2 py-0.5 rounded">70% Progress</span>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button 
+                  onClick={() => setIsBadgeModalOpen(false)} 
+                  className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs cursor-pointer"
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* 12. AUTHOR: MANUSCRIPT DETAILS MODAL */}
+          <Dialog open={isManuscriptDetailsOpen} onOpenChange={setIsManuscriptDetailsOpen}>
+            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg transition-colors">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-[#0b99ff]" />
+                  Manuscript Record: {selectedManuscriptDetails?.id}
+                </DialogTitle>
+                <DialogDescription className="text-slate-500 dark:text-slate-400">
+                  Full editorial pipeline metadata, assigned peer reviewers, and status log.
+                </DialogDescription>
+              </DialogHeader>
+
+              {selectedManuscriptDetails && (
+                <div className="space-y-4 py-2 text-xs">
+                  <div className="space-y-1">
+                    <span className="font-bold text-slate-400 uppercase text-[10px]">Manuscript Title</span>
+                    <h4 className="font-bold text-slate-900 dark:text-white text-sm leading-snug">{selectedManuscriptDetails.title}</h4>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div>
+                      <span className="font-bold text-slate-400 uppercase text-[10px] block">Target Journal</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{selectedManuscriptDetails.journal}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-400 uppercase text-[10px] block">Current Pipeline Status</span>
+                      <span className="font-bold text-[#0b99ff]">{selectedManuscriptDetails.status}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="font-bold text-slate-400 uppercase text-[10px]">Submission Date & Reference</span>
+                    <p className="text-slate-700 dark:text-slate-300 font-semibold">{selectedManuscriptDetails.date} (Automated Ingest Validated)</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="font-bold text-slate-400 uppercase text-[10px]">Assigned Peer Reviewers</span>
+                    <p className="text-slate-700 dark:text-slate-300 font-medium">
+                      {selectedManuscriptDetails.reviewers.length > 0 ? selectedManuscriptDetails.reviewers.join(", ") : "Assigned Editorial Desk Handling Editor"}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter className="flex flex-row justify-between items-center w-full">
+                <Button 
+                  onClick={() => alert(`Downloading PDF Manuscript package for ${selectedManuscriptDetails?.id}...`)} 
+                  variant="outline" 
+                  className="text-xs font-bold border-slate-200 dark:border-slate-800 cursor-pointer"
+                >
+                  Download PDF Package
+                </Button>
+                <Button 
+                  onClick={() => setIsManuscriptDetailsOpen(false)} 
+                  className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs cursor-pointer"
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+        </div>
   )
 }
 
