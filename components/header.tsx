@@ -195,32 +195,30 @@ export function Header() {
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-2.5 xl:gap-3 shrink-0">
 
-          {/* Frameless Minimalist Text Link (EN | DE) */}
-          <div className="flex items-center gap-1 text-xs font-medium text-[var(--primary-foreground)] select-none px-0.5 shrink-0">
-            <button
-              type="button"
-              onClick={() => setLanguage("en")}
-              className={`transition-all cursor-pointer ${
-                language === "en"
-                  ? "font-extrabold text-white underline decoration-accent decoration-2 underline-offset-4"
-                  : "opacity-70 hover:opacity-100"
-              }`}
-            >
-              EN
-            </button>
-            <span className="opacity-40 font-light">|</span>
-            <button
-              type="button"
-              onClick={() => setLanguage("de")}
-              className={`transition-all cursor-pointer ${
-                language === "de"
-                  ? "font-extrabold text-white underline decoration-accent decoration-2 underline-offset-4"
-                  : "opacity-70 hover:opacity-100"
-              }`}
-            >
-              DE
-            </button>
-          </div>
+          {/* Language Toggle Dropdown Desktop */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-2.5 py-1.5 text-xs xl:text-sm font-semibold shrink-0 cursor-pointer flex items-center">
+                <Globe className="h-4 w-4 mr-1.5 text-accent" />
+                {language.toUpperCase()}
+                <ChevronDown className="ml-1 h-3 w-3 opacity-70" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuItem 
+                onClick={() => setLanguage("en")} 
+                className={`cursor-pointer text-sm font-medium ${language === "en" ? "bg-accent/10 text-accent font-bold" : ""}`}
+              >
+                {t("language.en")}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setLanguage("de")} 
+                className={`cursor-pointer text-sm font-medium ${language === "de" ? "bg-accent/10 text-accent font-bold" : ""}`}
+              >
+                {t("language.de")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1.5 xl:px-3.5 xl:py-2 whitespace-nowrap shrink-0">
             <Link href={process.env.NODE_ENV === "development" ? "/editorial360?mode=login&action=submit" : "/submit"}>{t("nav.submitManuscript")}</Link>
