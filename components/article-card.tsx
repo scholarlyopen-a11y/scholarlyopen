@@ -16,7 +16,7 @@ export interface Article {
   keywords: string[]
   doi: string
   publishedDate: string
-  articleType: "research" | "review" | "methodology"
+  articleType: "research" | "review" | "methodology" | "editorial"
   section?: string
   pdfUrl?: string
   isOpenAccess?: boolean
@@ -30,10 +30,11 @@ interface ArticleCardProps {
 export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
   const { t } = useLanguage()
   
-  const articleTypeLabels = {
+  const articleTypeLabels: Record<string, string> = {
     research: "Research Article",
     review: "Review Article",
     methodology: "Methodology Paper",
+    editorial: "Editorial",
   }
 
   return (

@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useLanguage } from "@/lib/language-context"
+import { AntiSpamFields } from "@/components/anti-spam-fields"
+import { HumanVerification } from "@/components/human-verification"
 
 export default function JoinEditorialBoardPage() {
   const { t } = useLanguage()
@@ -205,6 +207,7 @@ export default function JoinEditorialBoardPage() {
                       </div>
                     ) : (
                       <form onSubmit={handleSubmit} className="space-y-6">
+                        <AntiSpamFields />
                         <div className="grid gap-5 sm:grid-cols-2">
                           <div className="space-y-2">
                             <label htmlFor="name" className="text-sm font-semibold">
@@ -300,6 +303,8 @@ export default function JoinEditorialBoardPage() {
                             . {t("contact.form.privacyConsent")}
                           </label>
                         </div>
+
+                        <HumanVerification />
                         
                         {errorMessage && (
                           <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive font-medium">

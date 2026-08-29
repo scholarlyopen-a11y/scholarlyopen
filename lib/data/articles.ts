@@ -8,6 +8,8 @@ export interface Article {
   publishedDate: string
   articleType: "research" | "review" | "methodology" | "editorial"
   journalSlug: string
+  section?: string
+  pdfUrl?: string
 }
 
 export const articles: Article[] = [

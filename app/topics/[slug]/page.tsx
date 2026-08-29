@@ -140,7 +140,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
                             {article.keywords.map(kw => (
                               <Link href={`/topics/${slugify(kw)}`} key={kw}>
                                 <Badge variant="outline" className={`text-[10px] font-medium border-border transition-colors hover:bg-primary/5 cursor-pointer ${
-                                  slugify(kw) === params.slug ? "bg-primary/10 text-primary border-primary/20" : ""
+                                  slugify(kw) === slug ? "bg-primary/10 text-primary border-primary/20" : ""
                                 }`}>
                                   {kw}
                                 </Badge>
@@ -206,7 +206,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
                             <div className="flex flex-wrap gap-1">
                               {editor.expertise?.slice(0, 3).map(exp => (
                                 <Badge key={exp} variant="outline" className={`text-[9px] px-1.5 py-0 ${
-                                  slugify(exp) === params.slug ? "bg-primary/10 text-primary border-primary/20" : ""
+                                  slugify(exp) === slug ? "bg-primary/10 text-primary border-primary/20" : ""
                                 }`}>
                                   {exp}
                                 </Badge>

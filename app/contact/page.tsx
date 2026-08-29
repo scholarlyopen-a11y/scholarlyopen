@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useLanguage } from "@/lib/language-context"
+import { AntiSpamFields } from "@/components/anti-spam-fields"
+import { HumanVerification } from "@/components/human-verification"
 
 export default function ContactPage() {
   const { t } = useLanguage()
@@ -312,6 +314,7 @@ export default function ContactPage() {
                     </div>
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
+                      <AntiSpamFields />
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <label htmlFor="name" className="text-sm font-medium">
@@ -394,6 +397,8 @@ export default function ContactPage() {
                           . {t("contact.form.privacyConsent")}
                         </label>
                       </div>
+
+                      <HumanVerification />
                       
                       {errorMessage && (
                         <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-muted-foreground">

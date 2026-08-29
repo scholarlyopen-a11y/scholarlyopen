@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, BookOpen, Layers } from "lucide-react"
+import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useLanguage } from "@/lib/language-context"
+import { AntiSpamFields } from "@/components/anti-spam-fields"
+import { HumanVerification } from "@/components/human-verification"
 
 const checklist = [
   "The manuscript is original and has not been published elsewhere",
@@ -228,6 +230,7 @@ export default function SubmitPage() {
                 </CardHeader>
                 <CardContent>
                   <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    <AntiSpamFields />
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label htmlFor="firstName" className="text-sm font-medium">
@@ -259,13 +262,50 @@ export default function SubmitPage() {
                       </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <label htmlFor="affiliation" className="text-sm font-medium">
-                        Institution / Affiliation *
-                      </label>
-                      <div className="relative">
-                        <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="affiliation" name="affiliation" placeholder="Enter your institution" className="pl-10" required />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label htmlFor="affiliation" className="text-sm font-medium">
+                          Institution / Affiliation *
+                        </label>
+                        <div className="relative">
+                          <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input id="affiliation" name="affiliation" placeholder="Enter your institution" className="pl-10" required />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="country" className="text-sm font-medium">
+                          Country / Region *
+                        </label>
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <select
+                            id="country"
+                            name="country"
+                            className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm"
+                            required
+                          >
+                            <option value="">Select country / region</option>
+                            <option value="United States">United States</option>
+                            <option value="Germany">Germany (Deutschland)</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="Switzerland">Switzerland (Schweiz)</option>
+                            <option value="Austria">Austria (Österreich)</option>
+                            <option value="Canada">Canada</option>
+                            <option value="France">France</option>
+                            <option value="Netherlands">Netherlands</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Japan">Japan</option>
+                            <option value="Sweden">Sweden</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="Italy">Italy</option>
+                            <option value="Spain">Spain</option>
+                            <option value="China">China</option>
+                            <option value="India">India</option>
+                            <option value="Brazil">Brazil</option>
+                            <option value="South Korea">South Korea</option>
+                            <option value="Other">Other / International</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                     
@@ -456,6 +496,8 @@ export default function SubmitPage() {
                         I confirm that all authors have agreed to this submission.
                       </label>
                     </div>
+
+                    <HumanVerification />
                     
                     <Button
                       type="submit"

@@ -2,6 +2,7 @@ export const runtime = "nodejs"
 // Force clean Vercel build to load updated environment variables
 
 import nodemailer from "nodemailer"
+import { validateSubmissionAntiSpam, getClientIp, isSuspiciousEmail } from "@/lib/anti-spam"
 
 function requiredEnv(name: string) {
   const value = process.env[name]
@@ -17,6 +18,7 @@ function asNumber(value: string) {
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request)
   let smtpHost: string | undefined
   let smtpPort: number | undefined
   let smtpUser: string | undefined
@@ -37,10 +39,29 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, email, courseTitle, includeCert } = await request.json()
+    const body = await request.json()
+    const { name, email, courseTitle, includeCert, website_hp, _form_ts, human_verification_token } = body
 
     if (!name || !email || !courseTitle) {
       return Response.json({ ok: false, error: "Missing required fields." }, { status: 400 })
+    }
+
+    // Anti-Spam & Bot Validation Check
+    const spamCheck = validateSubmissionAntiSpam({
+      honeypot: website_hp,
+      formTimestamp: _form_ts,
+      email,
+      name,
+      messageOrTitle: courseTitle,
+      ip,
+      verificationToken: human_verification_token,
+    })
+
+    if (spamCheck.isSpam) {
+      if (spamCheck.action === "silent_drop") {
+        return Response.json({ ok: true })
+      }
+      return Response.json({ ok: false, error: "Too many requests. Please wait a moment." }, { status: 429 })
     }
 
     const registrationDetails = `
@@ -96,13 +117,19 @@ Registration Date: ${new Date().toISOString()}
       }
     })
 
-    // Send confirmation to the user
-    await transporter.sendMail({
-      from: smtpFrom,
-      to: email,
-      subject: `Webinar Registration Confirmed: ${courseTitle}`,
-      text: registrationDetails,
-    })
+    // Send confirmation to the user (only if verified valid address)
+    if (!isSuspiciousEmail(email)) {
+      try {
+        await transporter.sendMail({
+          from: smtpFrom,
+          to: email,
+          subject: `Webinar Registration Confirmed: ${courseTitle}`,
+          text: registrationDetails,
+        })
+      } catch (err) {
+        console.warn("Failed to send webinar confirmation email to user:", err)
+      }
+    }
 
     // Send notification to admin
     const adminRecipient = (recipient && recipient.trim() !== "") ? recipient.trim() : "training@scholarlyopen.org"

@@ -2,6 +2,8 @@ export const runtime = "nodejs"
 
 import nodemailer from "nodemailer"
 
+import { validateSubmissionAntiSpam, getClientIp, isSuspiciousEmail } from "@/lib/anti-spam"
+
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024
 
 function requiredEnv(name: string) {
@@ -105,16 +107,50 @@ function getJournalShortCode(discipline: string): string {
 }
 
 function getArticleTypeCode(articleType: string): string {
-  const typeStr = (articleType || "").toLowerCase()
+  const typeStr = (articleType || "").toLowerCase().trim()
+
+  // 1. Clinical trial / protocols / specialized research
+  if (typeStr.includes("clinical trial") || typeStr.includes("rctp")) return "RCTP"
+  if (typeStr.includes("research protocol") || typeStr.includes("protocol")) return "RP"
+  if (typeStr.includes("brief research") || typeStr.includes("brr")) return "BRR"
+  if (typeStr.includes("research letter")) return "RL"
+  if (typeStr.includes("observational study") || typeStr.includes("observational")) return "OS"
+  if (typeStr.includes("retrospective study") || typeStr.includes("retrospective")) return "RTS"
+
+  // 2. Reviews
+  if (typeStr.includes("systematic review")) return "SRW"
+  if (typeStr.includes("literature review")) return "LRW"
+  if (typeStr.includes("book review")) return "BRW"
+  if (typeStr.includes("mini review")) return "MRW"
+  if (typeStr.includes("case review")) return "CRW"
   if (typeStr.includes("review")) return "RW"
-  if (typeStr.includes("case")) return "CS"
-  if (typeStr.includes("perspective") || typeStr.includes("commentary")) return "PR"
-  if (typeStr.includes("short") || typeStr.includes("letter")) return "SC"
+
+  // 3. Case-based types
+  if (typeStr.includes("case series")) return "CSR"
+  if (typeStr.includes("case studies") || typeStr.includes("case study")) return "CS"
+  if (typeStr.includes("case report")) return "CR"
+
+  // 4. Letters / Communications / Opinions / Editorial types
+  if (typeStr.includes("letter to the editor") || typeStr.includes("letter to editor")) return "LTE"
+  if (typeStr.includes("short communication")) return "SC"
+  if (typeStr.includes("commentary")) return "COM"
+  if (typeStr.includes("hypothesis")) return "HYP"
+  if (typeStr.includes("perspective")) return "PR"
+  if (typeStr.includes("opinion")) return "OP"
+  if (typeStr.includes("illustration")) return "IL"
+  if (typeStr.includes("conference proceeding") || typeStr.includes("proceedings")) return "CP"
+  if (typeStr.includes("technical report")) return "TR"
+  if (typeStr.includes("errata") || typeStr.includes("erratum") || typeStr.includes("corrigendum")) return "ER"
   if (typeStr.includes("editorial")) return "ED"
-  return "RES"
+
+  // 5. Default Research
+  if (typeStr.includes("research") || typeStr.includes("original")) return "RS"
+
+  return "RS"
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request)
   let smtpHost: string
   let smtpPort: number
   let smtpUser: string
@@ -151,6 +187,31 @@ export async function POST(request: Request) {
   const title = safeText(formData.get("title"), 240)
   const abstract = safeText(formData.get("abstract"), 12000)
   const agreed = safeText(formData.get("agreed"), 10)
+  const honeypot = safeText(formData.get("website_hp") || formData.get("website") || formData.get("fax_hp"), 100)
+  const formTimestamp = safeText(formData.get("_form_ts"), 50)
+  const verificationToken = safeText(formData.get("human_verification_token"), 500)
+
+  // Anti-Spam & Bot Validation Check
+  const spamCheck = validateSubmissionAntiSpam({
+    honeypot,
+    formTimestamp,
+    email: authorEmail,
+    name: `${firstName} ${lastName}`.trim(),
+    messageOrTitle: `${title} ${abstract}`.trim(),
+    ip,
+    verificationToken,
+  })
+
+  if (spamCheck.isSpam) {
+    if (spamCheck.action === "silent_drop") {
+      const mockJournalCode = getJournalShortCode(discipline)
+      const mockYr = new Date().getFullYear().toString().slice(-2)
+      const mockTypeCode = getArticleTypeCode(articleType)
+      const mockSeq = String(Math.floor(101 + Math.random() * 899))
+      return Response.json({ ok: true, trackingId: `${mockJournalCode}-${mockYr}-${mockTypeCode}${mockSeq}` })
+    }
+    return Response.json({ ok: false, error: "Too many requests. Please wait a moment." }, { status: 429 })
+  }
 
   if (!firstName || !lastName || !authorEmail || !affiliation || !discipline || !articleType || !title || !abstract) {
     return Response.json({ ok: false, error: "Missing required fields." }, { status: 400 })
@@ -172,7 +233,7 @@ export async function POST(request: Request) {
   const journalCode = getJournalShortCode(discipline)
   const yr = new Date().getFullYear().toString().slice(-2)
   const typeCode = getArticleTypeCode(articleType)
-  const seqNum = String(Math.floor(1 + Math.random() * 99)).padStart(2, "0")
+  const seqNum = String(Math.floor(101 + Math.random() * 899))
   const trackingId = `${journalCode}-${yr}-${typeCode}${seqNum}`
   const subject = `[${trackingId}] Manuscript submission (${submissionStage}): [${articleType}] ${title} (${journalLabel(discipline)})`
 
@@ -250,16 +311,18 @@ export async function POST(request: Request) {
     attachments,
   })
 
-  // 2. Send automated confirmation email directly to the submitter/registrant's email
-  try {
-    await transporter.sendMail({
-      from: smtpFrom,
-      to: authorEmail,
-      subject: authorConfirmationSubject,
-      text: authorConfirmationText,
-    })
-  } catch (authorMailErr) {
-    console.error("Failed to send author confirmation email:", authorMailErr)
+  // 2. Send automated confirmation email directly to the submitter/registrant's email (only if verified valid address)
+  if (!isSuspiciousEmail(authorEmail)) {
+    try {
+      await transporter.sendMail({
+        from: smtpFrom,
+        to: authorEmail,
+        subject: authorConfirmationSubject,
+        text: authorConfirmationText,
+      })
+    } catch (authorMailErr) {
+      console.error("Failed to send author confirmation email:", authorMailErr)
+    }
   }
 
   return Response.json({ ok: true, trackingId })

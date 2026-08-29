@@ -2,6 +2,8 @@ export const runtime = "nodejs"
 
 import nodemailer from "nodemailer"
 
+import { validateSubmissionAntiSpam, getClientIp } from "@/lib/anti-spam"
+
 function requiredEnv(name: string) {
   const value = process.env[name]
   if (!value) {
@@ -43,6 +45,7 @@ function subjectLabel(value: string) {
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request)
   let smtpHost: string
   let smtpPort: number
   let smtpUser: string
@@ -72,6 +75,28 @@ export async function POST(request: Request) {
   const subject = safeText(formData.get("subject"), 80)
   const message = safeText(formData.get("message"), 12000)
   const privacy = safeText(formData.get("privacy"), 10)
+  const honeypot = safeText(formData.get("website_hp") || formData.get("website") || formData.get("fax_hp"), 100)
+  const formTimestamp = safeText(formData.get("_form_ts"), 50)
+  const verificationToken = safeText(formData.get("human_verification_token"), 500)
+
+  // Anti-Spam & Bot Validation Check
+  const spamCheck = validateSubmissionAntiSpam({
+    honeypot,
+    formTimestamp,
+    email,
+    name: fullName,
+    messageOrTitle: message,
+    ip,
+    verificationToken,
+  })
+
+  if (spamCheck.isSpam) {
+    if (spamCheck.action === "silent_drop") {
+      // Return synthetic success so spambots don't adjust attack strategies
+      return Response.json({ ok: true })
+    }
+    return Response.json({ ok: false, error: "Too many requests. Please wait a moment." }, { status: 429 })
+  }
 
   if (!fullName || !email || !subject || !message) {
     return Response.json({ ok: false, error: "Missing required fields." }, { status: 400 })

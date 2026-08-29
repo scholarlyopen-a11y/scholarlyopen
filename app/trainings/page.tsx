@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useLanguage } from "@/lib/language-context"
+import { HumanVerification } from "@/components/human-verification"
 
 interface Course {
   id: string
@@ -139,6 +140,9 @@ export default function TrainingsPage() {
   const [regSuccess, setRegSuccess] = useState(false)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [websiteHp, setWebsiteHp] = useState("")
+  const [formTs, setFormTs] = useState<number>(0)
+  const [verificationToken, setVerificationToken] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState("")
 
@@ -147,6 +151,9 @@ export default function TrainingsPage() {
     setRegSuccess(false)
     setName("")
     setEmail("")
+    setWebsiteHp("")
+    setFormTs(Date.now())
+    setVerificationToken("")
     setIsSubmitting(false)
     setSubmitError("")
   }
@@ -169,6 +176,9 @@ export default function TrainingsPage() {
           email,
           courseTitle: modalCourse.title,
           includeCert,
+          website_hp: websiteHp,
+          _form_ts: formTs,
+          human_verification_token: verificationToken,
         }),
       })
 
@@ -426,6 +436,16 @@ export default function TrainingsPage() {
               </div>
             ) : (
               <form onSubmit={handleRegisterSubmit} className="space-y-3 text-xs">
+                <input
+                  type="text"
+                  name="website_hp"
+                  value={websiteHp}
+                  onChange={(e) => setWebsiteHp(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  style={{ opacity: 0, position: "absolute", top: 0, left: 0, height: 0, width: 0, zIndex: -1, pointerEvents: "none" }}
+                  aria-hidden="true"
+                />
                 <h3 className="text-base font-bold">{modalCourse.title}</h3>
                 <p className="text-muted-foreground text-[11px]">{modalCourse.duration}</p>
 
@@ -466,6 +486,13 @@ export default function TrainingsPage() {
                     {t("trainings.modal.field.cert")}
                   </label>
                 </div>
+
+                <HumanVerification
+                  onVerified={() => {
+                    const input = document.querySelector('input[name="human_verification_token"]') as HTMLInputElement
+                    if (input) setVerificationToken(input.value)
+                  }}
+                />
 
                 <div className="flex justify-end pt-2 border-t">
                   <Button type="submit" size="sm" disabled={isSubmitting} className="cursor-pointer">

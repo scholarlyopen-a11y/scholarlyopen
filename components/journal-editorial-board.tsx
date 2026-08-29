@@ -18,6 +18,7 @@ import { useLanguage } from "@/lib/language-context"
 
 export interface EditorMember {
   id?: string
+  slug?: string
   name: string
   role: string
   affiliation: string

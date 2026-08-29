@@ -664,37 +664,38 @@ export function HeroGlobe() {
       drawList.sort((a, b) => a.z - b.z)
       
       // 4. Render Drawables
+      const renderCtx = ctx
       drawList.forEach((el) => {
         if (
           el.type === "continent-line" ||
           el.type === "orbit-line" ||
           el.type === "trail-line"
         ) {
-          ctx.beginPath()
-          ctx.moveTo(el.x1, el.y1)
-          ctx.lineTo(el.x2, el.y2)
-          ctx.strokeStyle = el.color
-          ctx.lineWidth = el.lineWidth
-          ctx.stroke()
+          renderCtx.beginPath()
+          renderCtx.moveTo(el.x1, el.y1)
+          renderCtx.lineTo(el.x2, el.y2)
+          renderCtx.strokeStyle = el.color
+          renderCtx.lineWidth = el.lineWidth
+          renderCtx.stroke()
         } else if (el.type === "lock") {
           const size = el.size
           
           // Soft glowing golden halo under locks
-          const glow = ctx.createRadialGradient(el.x, el.y, 1, el.x, el.y, size * 1.45)
+          const glow = renderCtx.createRadialGradient(el.x, el.y, 1, el.x, el.y, size * 1.45)
           glow.addColorStop(0, "rgba(250, 204, 21, 0.45)")
           glow.addColorStop(1, "rgba(250, 204, 21, 0)")
-          ctx.fillStyle = glow
-          ctx.beginPath()
-          ctx.arc(el.x, el.y, size * 1.45, 0, Math.PI * 2)
-          ctx.fill()
+          renderCtx.fillStyle = glow
+          renderCtx.beginPath()
+          renderCtx.arc(el.x, el.y, size * 1.45, 0, Math.PI * 2)
+          renderCtx.fill()
           
-          drawLock(ctx, el.x, el.y, size)
+          drawLock(renderCtx, el.x, el.y, size)
         } else if (el.type === "globe-border") {
-          ctx.beginPath()
-          ctx.arc(el.x, el.y, el.r, 0, Math.PI * 2)
-          ctx.strokeStyle = el.color
-          ctx.lineWidth = el.lineWidth
-          ctx.stroke()
+          renderCtx.beginPath()
+          renderCtx.arc(el.x, el.y, el.r, 0, Math.PI * 2)
+          renderCtx.strokeStyle = el.color
+          renderCtx.lineWidth = el.lineWidth
+          renderCtx.stroke()
         }
       })
       
