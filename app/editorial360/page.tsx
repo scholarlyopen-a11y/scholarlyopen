@@ -1566,6 +1566,40 @@ export default function Editorial360Page() {
   const [editorPhotoUrl, setEditorPhotoUrl] = useState("")
   const [editorOrcid, setEditorOrcid] = useState("0000-0002-9842-1102")
 
+  // Are-You-Sure Confirmation Dialog State for Editorial360 Root
+  const [confirmDialogState, setConfirmDialogState] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    confirmButtonLabel: string
+    confirmColorClass: string
+    onConfirm: () => void
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmButtonLabel: "Yes, Proceed",
+    confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+    onConfirm: () => {}
+  })
+
+  const triggerConfirm = (config: {
+    title: string
+    message: string
+    confirmButtonLabel?: string
+    confirmColorClass?: string
+    onConfirm: () => void
+  }) => {
+    setConfirmDialogState({
+      isOpen: true,
+      title: config.title,
+      message: config.message,
+      confirmButtonLabel: config.confirmButtonLabel || (language === "de" ? "Ja, Fortfahren" : "Yes, Proceed"),
+      confirmColorClass: config.confirmColorClass || "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: config.onConfirm
+    })
+  }
+
   const handleSyncWithOrcid = (targetOrcid?: string) => {
     const orcidToSync = targetOrcid || profOrcid
     if (!orcidToSync || orcidToSync.trim().length < 8) {
@@ -1793,6 +1827,19 @@ export default function Editorial360Page() {
       : `Manuscript ${newMsId} submitted successfully! Confirmation sent to ${authorFullName}.`)
   }
 
+  const onTriggerNewSubmissionSubmit = () => {
+    if (!newTitle || !newAbstract) return
+    triggerConfirm({
+      title: language === "de" ? "Manuskript verbindlich einreichen?" : "Submit Manuscript for Peer Review?",
+      message: language === "de"
+        ? `Möchten Sie das Manuskript '${newTitle}' verbindlich bei '${newJournal}' einreichen? Es wird eine offizielle Vorgangsnummer generiert und an das Editorial Office übergeben.`
+        : `Are you sure you want to submit manuscript '${newTitle}' to ${newJournal}? Once submitted, an official tracking ID will be generated and routed to the editorial triage desk.`,
+      confirmButtonLabel: language === "de" ? "Ja, Manuskript einreichen" : "Yes, Submit Manuscript",
+      confirmColorClass: "bg-emerald-600 hover:bg-emerald-700",
+      onConfirm: handleNewSubmissionSubmit
+    })
+  }
+
   const handleUploadRevision = () => {
     setManuscripts(prev => {
       const updated: Manuscript[] = prev.map(m => m.id === revisionPaperId ? { ...m, status: "Revision Under Evaluation" as const } : m)
@@ -1808,21 +1855,43 @@ export default function Editorial360Page() {
     setIsRevisionDialogOpen(false)
   }
 
+  const onTriggerUploadRevision = () => {
+    triggerConfirm({
+      title: language === "de" ? "Überarbeitetes Manuskript einreichen?" : "Submit Revised Manuscript & Rebuttal?",
+      message: language === "de"
+        ? "Möchten Sie die überarbeiteten Manuskript-Dateien und die Punkt-für-Punkt-Stellungnahme verbindlich an das Editorial Office übermitteln?"
+        : "Are you sure you want to submit your revised manuscript files and point-by-point rebuttal to the editorial office?",
+      confirmButtonLabel: language === "de" ? "Ja, Revision einreichen" : "Yes, Submit Revision",
+      confirmColorClass: "bg-emerald-600 hover:bg-emerald-700",
+      onConfirm: handleUploadRevision
+    })
+  }
+
   const handleInviteUser = (e: React.FormEvent) => {
     e.preventDefault()
     if (!inviteName || !inviteEmail) return
-    const newUser: WorkspaceUser = {
-      id: `USR-${Math.floor(Math.random() * 100) + 10}`,
-      name: inviteName,
-      email: inviteEmail,
-      role: inviteRole,
-      activeTasks: 0,
-      status: "Pending Invitation"
-    }
-    setUsers(prev => [...prev, newUser])
-    setIsInviteUserOpen(false)
-    setInviteName("")
-    setInviteEmail("")
+    triggerConfirm({
+      title: language === "de" ? "Einladung versenden?" : "Send Team Invitation?",
+      message: language === "de"
+        ? `Möchten Sie eine Workspace-Einladung an ${inviteEmail} mit der Rolle '${inviteRole}' versenden?`
+        : `Are you sure you want to send a workspace invitation to ${inviteEmail} for role '${inviteRole}'?`,
+      confirmButtonLabel: language === "de" ? "Ja, Einladung senden" : "Yes, Send Invitation",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: () => {
+        const newUser: WorkspaceUser = {
+          id: `USR-${Math.floor(Math.random() * 100) + 10}`,
+          name: inviteName,
+          email: inviteEmail,
+          role: inviteRole,
+          activeTasks: 0,
+          status: "Pending Invitation"
+        }
+        setUsers(prev => [...prev, newUser])
+        setIsInviteUserOpen(false)
+        setInviteName("")
+        setInviteEmail("")
+      }
+    })
   }
 
   const handleAssignReviewer = (reviewerName: string) => {
@@ -6220,7 +6289,7 @@ export default function Editorial360Page() {
                   <Button 
                     type="button"
                     disabled={!ethicsAgreementChecked || !apcAgreementChecked}
-                    onClick={handleNewSubmissionSubmit}
+                    onClick={onTriggerNewSubmissionSubmit}
                     className="bg-[#0b99ff] hover:bg-[#0077cc] disabled:opacity-50 text-white font-semibold text-xs px-5 py-2 rounded-lg cursor-pointer transition-all shadow-xs"
                   >
                     {language === "de" ? "Bestätigen & Einreichen" : "Confirm & Submit Manuscript"}
@@ -6286,7 +6355,7 @@ export default function Editorial360Page() {
                   Cancel
                 </Button>
                 <Button 
-                  onClick={handleUploadRevision}
+                  onClick={onTriggerUploadRevision}
                   className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold cursor-pointer"
                 >
                   Submit Revision File
@@ -7685,6 +7754,45 @@ export default function Editorial360Page() {
                   {language === "de" ? "Schließen" : "Close"}
                 </button>
               </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* ========================================================================= */}
+          {/* CONFIRMATION POPUP DIALOG FOR EDITORIAL360 (AUTHOR / ADMIN / RIA)          */}
+          {/* ========================================================================= */}
+          <Dialog open={confirmDialogState.isOpen} onOpenChange={(open) => setConfirmDialogState(prev => ({ ...prev, isOpen: open }))}>
+            <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-[#0b99ff]" />
+                  {confirmDialogState.title}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 pt-2 leading-relaxed">
+                  {confirmDialogState.message}
+                </DialogDescription>
+              </DialogHeader>
+
+              <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setConfirmDialogState(prev => ({ ...prev, isOpen: false }))}
+                  className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg cursor-pointer"
+                >
+                  {language === "de" ? "Nein, Abbrechen" : "No, Cancel"}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const action = confirmDialogState.onConfirm
+                    setConfirmDialogState(prev => ({ ...prev, isOpen: false }))
+                    if (action) action()
+                  }}
+                  className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
+                >
+                  {confirmDialogState.confirmButtonLabel}
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
 

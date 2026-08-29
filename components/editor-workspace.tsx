@@ -268,6 +268,40 @@ export function EditorWorkspace({
   // Special Collections
   const [collections, setCollections] = useState<SpecialCollectionItem[]>(INITIAL_COLLECTIONS)
   const [isNewCollectionOpen, setIsNewCollectionOpen] = useState(false)
+
+  // Are-You-Sure Confirmation Dialog State
+  const [confirmDialogState, setConfirmDialogState] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    confirmButtonLabel: string
+    confirmColorClass: string
+    onConfirm: () => void
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmButtonLabel: "Yes, Proceed",
+    confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+    onConfirm: () => {}
+  })
+
+  const triggerConfirm = (config: {
+    title: string
+    message: string
+    confirmButtonLabel?: string
+    confirmColorClass?: string
+    onConfirm: () => void
+  }) => {
+    setConfirmDialogState({
+      isOpen: true,
+      title: config.title,
+      message: config.message,
+      confirmButtonLabel: config.confirmButtonLabel || (isDe ? "Ja, Fortfahren" : "Yes, Proceed"),
+      confirmColorClass: config.confirmColorClass || "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: config.onConfirm
+    })
+  }
   const [newCollectionTitle, setNewCollectionTitle] = useState("")
   const [newCollectionJournal, setNewCollectionJournal] = useState(user.journal || "Scholarly Open: Medicine & Applied Sciences")
   const [newCollectionGuestEditors, setNewCollectionGuestEditors] = useState("")
@@ -344,6 +378,19 @@ export function EditorWorkspace({
     setSelectedPaperForDecision(null)
   }
 
+  const onTriggerSubmitDecision = () => {
+    if (!selectedPaperForDecision) return
+    triggerConfirm({
+      title: isDe ? "Redaktionelle Entscheidung bestätigen?" : "Confirm Editorial Decision?",
+      message: isDe 
+        ? `Möchten Sie die redaktionelle Entscheidung '${decisionVerdict}' für das Manuskript ${selectedPaperForDecision.id} verbindlich erteilen und den offiziellen Bescheid an den Autor senden?`
+        : `Are you sure you want to render the official decision '${decisionVerdict}' on manuscript ${selectedPaperForDecision.id} and dispatch the decision letter to the author?`,
+      confirmButtonLabel: isDe ? "Ja, Entscheidung senden" : "Yes, Submit Decision",
+      confirmColorClass: decisionVerdict === "Accept" ? "bg-emerald-600 hover:bg-emerald-700" : decisionVerdict === "Reject" ? "bg-rose-600 hover:bg-rose-700" : "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: handleSubmitDecision
+    })
+  }
+
   const handleAssignReviewersSubmit = () => {
     if (!selectedPaperForReviewers) return
     const updated = manuscripts.map(m => {
@@ -361,6 +408,19 @@ export function EditorWorkspace({
 
     triggerToast(isDe ? "Gutachter-Einladungen versendet!" : "Peer reviewer invitations dispatched!")
     setSelectedPaperForReviewers(null)
+  }
+
+  const onTriggerAssignReviewers = () => {
+    if (!selectedPaperForReviewers) return
+    triggerConfirm({
+      title: isDe ? "Gutachter-Einladungen bestätigen?" : "Confirm Reviewer Invitations?",
+      message: isDe
+        ? `Möchten Sie die Einladungen zur Begutachtung an ${selectedReviewerNames.join(", ")} für Manuskript ${selectedPaperForReviewers.id} versenden?`
+        : `Are you sure you want to dispatch review invitations to ${selectedReviewerNames.join(", ")} for manuscript ${selectedPaperForReviewers.id}?`,
+      confirmButtonLabel: isDe ? "Ja, Einladungen senden" : "Yes, Dispatch Invitations",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: handleAssignReviewersSubmit
+    })
   }
 
   const handleCreateCollectionSubmit = (e: React.FormEvent) => {
@@ -1088,7 +1148,7 @@ export function EditorWorkspace({
               {isDe ? "Abbrechen" : "Cancel"}
             </Button>
             <Button
-              onClick={handleSubmitDecision}
+              onClick={onTriggerSubmitDecision}
               className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8.5 px-4 shadow-xs cursor-pointer"
             >
               <Send className="h-3.5 w-3.5 mr-1.5" />
@@ -1152,7 +1212,7 @@ export function EditorWorkspace({
               {isDe ? "Abbrechen" : "Cancel"}
             </Button>
             <Button
-              onClick={handleAssignReviewersSubmit}
+              onClick={onTriggerAssignReviewers}
               className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8.5 px-4 shadow-xs cursor-pointer"
             >
               {isDe ? "Einladungen absenden" : "Dispatch Invitations"}
@@ -1509,6 +1569,44 @@ export function EditorWorkspace({
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+      {/* ========================================================================= */}
+      {/* CONFIRMATION POPUP DIALOG FOR EDITOR                                       */}
+      {/* ========================================================================= */}
+      <Dialog open={confirmDialogState.isOpen} onOpenChange={(open) => setConfirmDialogState(prev => ({ ...prev, isOpen: open }))}>
+        <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-[#0b99ff]" />
+              {confirmDialogState.title}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 pt-2 leading-relaxed">
+              {confirmDialogState.message}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmDialogState(prev => ({ ...prev, isOpen: false }))}
+              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg cursor-pointer"
+            >
+              {isDe ? "Nein, Abbrechen" : "No, Cancel"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                const action = confirmDialogState.onConfirm
+                setConfirmDialogState(prev => ({ ...prev, isOpen: false }))
+                if (action) action()
+              }}
+              className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
+            >
+              {confirmDialogState.confirmButtonLabel}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

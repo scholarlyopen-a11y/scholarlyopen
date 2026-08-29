@@ -361,35 +361,36 @@ export function JournalManagerWorkspace({
     const editor = selectedEditor
     const reviewers = [...selectedReviewers]
 
-    // Close modal immediately with 0ms lag
-    setIsAssignModalOpen(false)
+    triggerConfirm({
+      title: "Confirm Allocation & Dispatch?",
+      message: `Are you sure you want to allocate Handling Editor (${editor}) and dispatch review invitations to ${reviewers.join(", ") || "selected reviewers"} for manuscript ${msId}?`,
+      confirmButtonLabel: "Yes, Confirm & Dispatch",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: () => {
+        setIsAssignModalOpen(false)
+        if (onAssignEditor) onAssignEditor(msId, editor)
+        if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(msId, "Under Review")
 
-    if (onAssignEditor) {
-      onAssignEditor(msId, editor)
-    }
-
-    if (onUpdateManuscriptStatus) {
-      onUpdateManuscriptStatus(msId, "Under Review")
-    }
-
-    // Fire email dispatches asynchronously in the background
-    Promise.all(reviewers.map(revName => {
-      const revObj = reviewersList.find(x => x.name === revName)
-      const targetEmail = revObj ? revObj.email : "reviewer@scholarlyopen.org"
-      return fetch("/api/editorial360/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: targetEmail,
-          recipientName: revName,
-          subject: `Review Invitation: ${msId} - ${msTitle.slice(0, 50)}...`,
-          template: "invitation",
-          paperId: msId,
-          paperTitle: msTitle,
-          journal: msJournal
-        })
-      }).catch(e => console.error(e))
-    }))
+        // Fire email dispatches asynchronously in the background
+        Promise.all(reviewers.map(revName => {
+          const revObj = reviewersList.find(x => x.name === revName)
+          const targetEmail = revObj ? revObj.email : "reviewer@scholarlyopen.org"
+          return fetch("/api/editorial360/email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: targetEmail,
+              recipientName: revName,
+              subject: `Review Invitation: ${msId} - ${msTitle.slice(0, 50)}...`,
+              template: "invitation",
+              paperId: msId,
+              paperTitle: msTitle,
+              journal: msJournal
+            })
+          }).catch(e => console.error(e))
+        }))
+      }
+    })
   }
 
   // Handle Open Moderation
@@ -406,31 +407,37 @@ export function JournalManagerWorkspace({
     const paperId = moderatingReview.paperId
     const editedText = modEditedComments
 
-    // Close modal immediately with 0ms lag
-    setIsModModalOpen(false)
+    triggerConfirm({
+      title: "Release Review Comments to Author?",
+      message: `Are you sure you want to release these sanitized peer review comments for manuscript ${paperId} to the author?`,
+      confirmButtonLabel: "Yes, Release Comments",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: () => {
+        setIsModModalOpen(false)
+        if (onReleaseComments) {
+          onReleaseComments(revId, editedText)
+        }
 
-    if (onReleaseComments) {
-      onReleaseComments(revId, editedText)
-    }
+        // Send author notification in background
+        const targetPaper = initialManuscripts.find(m => m.id === paperId)
+        const authorEmail = targetPaper?.authorEmail || "author@university.edu"
+        const authorName = targetPaper?.authorName || "Author"
 
-    // Send author notification in background
-    const targetPaper = initialManuscripts.find(m => m.id === paperId)
-    const authorEmail = targetPaper?.authorEmail || "author@university.edu"
-    const authorName = targetPaper?.authorName || "Author"
-
-    fetch("/api/editorial360/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: authorEmail,
-        recipientName: authorName,
-        subject: `Review Comments Released: ${paperId}`,
-        template: "moderation_released",
-        paperId: paperId,
-        paperTitle: targetPaper?.title || "Manuscript",
-        journal: targetPaper?.journal
-      })
-    }).catch(e => console.error(e))
+        fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: authorEmail,
+            recipientName: authorName,
+            subject: `Review Comments Released: ${paperId}`,
+            template: "moderation_released",
+            paperId: paperId,
+            paperTitle: targetPaper?.title || "Manuscript",
+            journal: targetPaper?.journal
+          })
+        }).catch(e => console.error(e))
+      }
+    })
   }
 
   // Handle Return to Author for Correction (Pre-Review Query)
@@ -442,30 +449,36 @@ export function JournalManagerWorkspace({
     const authorName = selectedManuscript.authorName || "Author"
     const message = queryAuthorMessage || "Please provide high-resolution figures and a signed ethics/COI declaration statement."
 
-    setIsQueryAuthorOpen(false)
-    setIsPreQualityModalOpen(false)
-    setQueryAuthorMessage("")
+    triggerConfirm({
+      title: "Dispatch Correction Query to Author?",
+      message: `Are you sure you want to return manuscript ${msId} to ${authorName} with these pre-check correction instructions?`,
+      confirmButtonLabel: "Yes, Dispatch Query",
+      confirmColorClass: "bg-amber-600 hover:bg-amber-700",
+      onConfirm: () => {
+        setIsQueryAuthorOpen(false)
+        setIsPreQualityModalOpen(false)
+        setQueryAuthorMessage("")
 
-    // Update status to Revision Required or Pre-Check Query
-    if (onUpdateManuscriptStatus) {
-      onUpdateManuscriptStatus(msId, "Revision Required")
-    }
+        if (onUpdateManuscriptStatus) {
+          onUpdateManuscriptStatus(msId, "Revision Required")
+        }
 
-    // Send email notification to author with CC to journal
-    fetch("/api/editorial360/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: authorEmail,
-        recipientName: authorName,
-        subject: `Technical Pre-Check Query: Action Required for ${msId}`,
-        template: "precheck_query",
-        paperId: msId,
-        paperTitle: msTitle,
-        customMessage: message,
-        journal: selectedManuscript.journal
-      })
-    }).catch(e => console.error(e))
+        fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: authorEmail,
+            recipientName: authorName,
+            subject: `Technical Pre-Check Query: Action Required for ${msId}`,
+            template: "precheck_query",
+            paperId: msId,
+            paperTitle: msTitle,
+            customMessage: message,
+            journal: selectedManuscript.journal
+          })
+        }).catch(e => console.error(e))
+      }
+    })
   }
 
   // Handle Reviewer Status Cycling (Active -> Sabbatical -> Inactive -> Active)
