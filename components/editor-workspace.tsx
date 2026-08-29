@@ -570,7 +570,8 @@ export function EditorWorkspace({
           <div className="space-y-3">
             {filteredPapers.map((paper) => {
               const isTriage = paper.status === "Awaiting Initial Check" || paper.status === "Submitted" || paper.status === "Draft"
-              const isReviewing = paper.status === "Under Review" || paper.status === "Revision Under Evaluation"
+              const isRevisedSubmitted = paper.status === "Revision Under Evaluation" || (paper as any).submissionStage === "Revised Submission"
+              const isReviewing = paper.status === "Under Review"
               const isRevision = paper.status === "Revision Required"
               const isAccepted = paper.status === "Accepted"
 
@@ -590,11 +591,12 @@ export function EditorWorkspace({
                     <div>
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${
                         isTriage ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/40" :
+                        isRevisedSubmitted ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-2xs" :
                         isReviewing ? "bg-sky-50 text-[#0b99ff] dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200/80 dark:border-sky-900/40" :
-                        isRevision ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/40" :
+                        isRevision ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/40" :
                         "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-900/40"
                       }`}>
-                        {paper.status}
+                        {isRevisedSubmitted ? "Revised Submitted ✓" : isRevision ? "Author Revising" : paper.status}
                       </span>
                     </div>
                   </div>

@@ -850,7 +850,7 @@ export default function Editorial360Page() {
       id: "SOSSH-26-SRW103",
       title: "Socio-Economic Impacts of Urban Green Spaces in Moderate Climates",
       journal: "Social Sciences & Humanities",
-      status: "Revision Required",
+      status: "Revision Under Evaluation",
       date: "2026-05-28",
       reviewers: ["Prof. Aris Thorne"],
       integrityStatus: "Clean",

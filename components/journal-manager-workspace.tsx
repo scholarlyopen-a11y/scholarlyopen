@@ -24,7 +24,11 @@ import {
   MessageSquare,
   List,
   Kanban,
-  ShieldCheck
+  ShieldCheck,
+  Sliders,
+  RotateCcw,
+  FileCheck2,
+  CheckCircle2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -238,6 +242,13 @@ export function JournalManagerWorkspace({
   const [newRevDiscipline, setNewRevDiscipline] = useState("Medicine")
   const [newRevOrcid, setNewRevOrcid] = useState("")
 
+  // Revision Triage & Control Modal States
+  const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false)
+  const [selectedRevisionManuscript, setSelectedRevisionManuscript] = useState<JmManuscript | null>(null)
+  const [selectedRound2Reviewers, setSelectedRound2Reviewers] = useState<string[]>([])
+  const [editorRoutingNote, setEditorRoutingNote] = useState("")
+  const [revisionActionSuccess, setRevisionActionSuccess] = useState<string | null>(null)
+
   // Filtered manuscripts
   const filteredManuscripts = useMemo(() => {
     return initialManuscripts.map(m => {
@@ -282,7 +293,7 @@ export function JournalManagerWorkspace({
       if (selectedStageFilter === "review") {
         return matchesSearch && matchesJournal && m.status === "Under Review"
       }
-      if (selectedStageFilter === "decision") {
+      if (selectedStageFilter === "decision" || (selectedStageFilter as string) === "revisions") {
         return matchesSearch && matchesJournal && (m.status === "Revision Required" || m.status === "Revision Under Evaluation")
       }
       if (selectedStageFilter === "accepted") {
@@ -296,7 +307,8 @@ export function JournalManagerWorkspace({
   // Pipeline columns
   const initialTriageList = initialManuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft")
   const underReviewList = initialManuscripts.filter(m => m.status === "Under Review")
-  const decisionPendingList = initialManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation")
+  const revisionList = initialManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation")
+  const decisionPendingList = revisionList
   const acceptedList = initialManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected")
 
   // Handle open Assign Modal
@@ -542,9 +554,16 @@ export function JournalManagerWorkspace({
         </div>
       )
     }
-    if (ms.status === "Revision Required" || ms.status === "Revision Under Evaluation") {
+    if (ms.status === "Revision Under Evaluation" || (ms as any).submissionStage === "Revised Submission") {
       return (
-        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-200/80 dark:border-purple-900/30 whitespace-nowrap">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 whitespace-nowrap shadow-2xs">
+          Revised Submitted ✓
+        </span>
+      )
+    }
+    if (ms.status === "Revision Required") {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/30 whitespace-nowrap">
           Author Revising
         </span>
       )
@@ -672,7 +691,7 @@ export function JournalManagerWorkspace({
               { key: "all", label: "All Manuscripts", count: initialManuscripts.length },
               { key: "triage", label: "Initial Triage", count: initialTriageList.length },
               { key: "review", label: "Under Review", count: underReviewList.length },
-              { key: "decision", label: "Decision Pending", count: decisionPendingList.length },
+              { key: "revisions", label: "Revisions & Re-Evaluations", count: revisionList.length },
               { key: "accepted", label: "In Production", count: acceptedList.length }
             ].map(tab => (
               <button
@@ -838,24 +857,31 @@ export function JournalManagerWorkspace({
                               {isRevision && (
                                 <>
                                   <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedRevisionManuscript(ms)
+                                      setSelectedRound2Reviewers(ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers : ["Prof. Aris Thorne", "Dr. Evelyn Vane"])
+                                      setEditorRoutingNote(`Revised version of ${ms.id} has been submitted by ${ms.authorName || 'Author'}. File completeness verified. Routed to Handling Editor for final evaluation.`)
+                                      setRevisionActionSuccess(null)
+                                      setIsRevisionModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3.5 rounded-lg cursor-pointer shadow-2xs"
+                                  >
+                                    <Sliders className="h-3.5 w-3.5 mr-1" />
+                                    Manage Revision
+                                  </Button>
+                                  <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      if (onTabChange) onTabChange("moderation")
+                                      setSelectedRevisionManuscript(ms)
+                                      setRevisionActionSuccess(null)
+                                      setIsRevisionModalOpen(true)
                                     }}
-                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-3 rounded-lg cursor-pointer"
+                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
                                   >
                                     <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                    Inspect
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(ms.id, "Accepted")
-                                    }}
-                                    className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 rounded-lg cursor-pointer"
-                                  >
-                                    Accept Paper
+                                    Rebuttal
                                   </Button>
                                 </>
                               )}
@@ -1831,6 +1857,281 @@ export function JournalManagerWorkspace({
               className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
             >
               Close Tracker
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 7: REVISION CONTROL & TRIAGE DISPATCH                                */}
+      {/* ========================================================================= */}
+      <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs">
+                  {selectedRevisionManuscript?.id}
+                </span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/80">
+                  Revision Received (v2.0)
+                </span>
+              </div>
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white mt-2">
+              {selectedRevisionManuscript?.title}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Journal: <span className="font-medium text-slate-700 dark:text-slate-300">{selectedRevisionManuscript?.journal}</span> • 
+              Author: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedRevisionManuscript?.authorName || "Dr. Sarah Jenkins"}</span>
+            </DialogDescription>
+          </DialogHeader>
+
+          {revisionActionSuccess ? (
+            <div className="p-5 my-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 rounded-xl text-center space-y-3 animate-in fade-in duration-200">
+              <div className="h-10 w-10 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">
+                <Check className="h-6 w-6" />
+              </div>
+              <div className="font-bold text-emerald-800 dark:text-emerald-300 text-sm">
+                {revisionActionSuccess}
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Audit archives updated and automated email dispatch notifications delivered.
+              </p>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setIsRevisionModalOpen(false)
+                  setRevisionActionSuccess(null)
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-1.5 rounded-lg cursor-pointer"
+              >
+                Done
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4 py-2 text-xs">
+              {/* 1. File Vault: Revised Docs & Rebuttal */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider">
+                    Uploaded Revision Files & Artifacts:
+                  </span>
+                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> All Required Files Present
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Clean Manuscript PDF */}
+                  <a
+                    href="/downloads/Scholarly_Open_Manuscript_Template.txt"
+                    download={`${selectedRevisionManuscript?.id || "Manuscript"}_Clean_Revision_v2.pdf`}
+                    className="flex items-center justify-between p-2.5 bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/50 transition-colors group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <FileCheck2 className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                      <div className="truncate text-left">
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">Clean Revised PDF</div>
+                        <div className="text-[10px] text-slate-400">2.4 MB • Complete Layout</div>
+                      </div>
+                    </div>
+                    <Download className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#0b99ff] shrink-0" />
+                  </a>
+
+                  {/* Tracked Changes DOCX */}
+                  <a
+                    href="/downloads/Scholarly_Open_Manuscript_Template.txt"
+                    download={`${selectedRevisionManuscript?.id || "Manuscript"}_Tracked_Changes.docx`}
+                    className="flex items-center justify-between p-2.5 bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/50 transition-colors group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <FileText className="h-4 w-4 text-purple-500 shrink-0" />
+                      <div className="truncate text-left">
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">Tracked Changes (Markup)</div>
+                        <div className="text-[10px] text-slate-400">1.8 MB • DOCX with diffs</div>
+                      </div>
+                    </div>
+                    <Download className="h-3.5 w-3.5 text-slate-400 group-hover:text-purple-500 shrink-0" />
+                  </a>
+                </div>
+              </div>
+
+              {/* 2. Point-by-Point Author Rebuttal Letter */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <MessageSquare className="h-3.5 w-3.5 text-[#0b99ff]" /> Author Point-by-Point Rebuttal:
+                  </span>
+                  <span className="text-[10px] text-slate-400">Submitted: 2026-06-03</span>
+                </div>
+
+                <div className="p-3 bg-white dark:bg-[#14151a] border border-slate-200/80 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 leading-relaxed font-sans text-xs max-h-36 overflow-y-auto space-y-2">
+                  <p className="font-medium text-slate-900 dark:text-white">
+                    Dear Handling Editor ({selectedRevisionManuscript?.assignedEditorName || "Prof. Aris Thorne"}) and Reviewers:
+                  </p>
+                  <p>
+                    &ldquo;We thank Reviewer 1 for the insightful comments on our multi-country wage disparity panel dataset. We have thoroughly revised Section 3, added sensitivity checks for 2024 OECD metrics in Table 4, and corrected all formatting anomalies. Tracked changes are highlighted in red in the attached DOCX.&rdquo;
+                  </p>
+                  <div className="text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-1.5">
+                    <strong>Specific Responses:</strong>
+                    <ul className="list-disc list-inside mt-1 space-y-0.5">
+                      <li>Comment 1 (Econometric models): Addressed in Section 3.2. Equations (4)-(7) revised.</li>
+                      <li>Comment 2 (Tone & Clarifications): Revised paragraph 3 in Discussion to objective framing.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Triage & Dispatch Routing Options */}
+              <div className="space-y-3 pt-1">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider block">
+                  Select Workflow Action for this Revision:
+                </span>
+
+                <div className="grid grid-cols-1 gap-2.5">
+                  {/* Action 1: Forward to Handling Editor for Decision */}
+                  <div className="p-3 bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Send className="h-4 w-4 text-[#0b99ff]" />
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          Option 1: Forward to Handling Editor for Re-Evaluation & Decision
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded">
+                        Standard Minor Revision Flow
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Routes the updated draft and author response directly to <strong>{selectedRevisionManuscript?.assignedEditorName || "Prof. Aris Thorne"}</strong> to render the final acceptance or minor decision.
+                    </p>
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
+                            onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Revision Under Evaluation")
+                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} successfully forwarded to Handling Editor (${selectedRevisionManuscript.assignedEditorName || "Prof. Aris Thorne"}) for re-evaluation & decision.`)
+                          }
+                        }}
+                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+                      >
+                        <Send className="h-3.5 w-3.5 mr-1" />
+                        Forward to Editor ({selectedRevisionManuscript?.assignedEditorName?.split(' ')[0] || "Editor"})
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Action 2: Dispatch for Round 2 Re-Review */}
+                  <div className="p-3 bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/40 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <RotateCcw className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          Option 2: Dispatch to Reviewers for Round 2 Peer Review
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-purple-700 bg-purple-100 dark:bg-purple-900/40 px-2 py-0.5 rounded">
+                        Major Revision Re-Review
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Dispatches the revised manuscript and rebuttal to willing Round 1 reviewers:
+                    </p>
+                    
+                    {/* Willing Reviewers Selector */}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {["Prof. Aris Thorne", "Dr. Evelyn Vane"].map(rev => (
+                        <label key={rev} className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white dark:bg-[#18191e] border border-purple-200 dark:border-purple-900/40 text-xs text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedRound2Reviewers.includes(rev)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedRound2Reviewers(prev => [...prev, rev])
+                              else setSelectedRound2Reviewers(prev => prev.filter(r => r !== rev))
+                            }}
+                            className="rounded text-purple-600"
+                          />
+                          <span>{rev} (Willing to re-review)</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
+                            onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Under Review")
+                            setRevisionActionSuccess(`✓ Round 2 re-review invitations dispatched to ${selectedRound2Reviewers.join(", ")} (14-day turnaround target).`)
+                          }
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                        Dispatch Round 2 Re-Review
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Action 3: Direct Acceptance */}
+                  <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-emerald-600" />
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          Option 3: Final Acceptance & Dispatch to Production
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">
+                        All Revisions Approved
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Immediately signs off on the revised manuscript, updates status to <strong>Accepted</strong>, and schedules typeset galley proof generation.
+                    </p>
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
+                            onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Accepted")
+                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} has been Accepted for publication. Moved to production and galley proofing.`)
+                          }
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+                      >
+                        <Check className="h-3.5 w-3.5 mr-1" />
+                        Accept Manuscript
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex flex-row items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setIsRevisionModalOpen(false)
+                setIsQueryAuthorOpen(true)
+              }}
+              className="text-xs font-semibold text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-900/40 h-8 px-3.5 rounded-lg"
+            >
+              <AlertCircle className="h-3.5 w-3.5 mr-1" />
+              Request Further Author Corrections
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsRevisionModalOpen(false)}
+              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
