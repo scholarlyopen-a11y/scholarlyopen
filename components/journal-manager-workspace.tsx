@@ -855,35 +855,20 @@ export function JournalManagerWorkspace({
                               )}
 
                               {isRevision && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedRevisionManuscript(ms)
-                                      setSelectedRound2Reviewers(ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers : ["Prof. Aris Thorne", "Dr. Evelyn Vane"])
-                                      setEditorRoutingNote(`Revised version of ${ms.id} has been submitted by ${ms.authorName || 'Author'}. File completeness verified. Routed to Handling Editor for final evaluation.`)
-                                      setRevisionActionSuccess(null)
-                                      setIsRevisionModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3.5 rounded-lg cursor-pointer shadow-2xs"
-                                  >
-                                    <Sliders className="h-3.5 w-3.5 mr-1" />
-                                    Manage Revision
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedRevisionManuscript(ms)
-                                      setRevisionActionSuccess(null)
-                                      setIsRevisionModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
-                                  >
-                                    <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                    Rebuttal
-                                  </Button>
-                                </>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedRevisionManuscript(ms)
+                                    setSelectedRound2Reviewers(ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers : ["Prof. Aris Thorne", "Dr. Evelyn Vane"])
+                                    setEditorRoutingNote(`Revised version of ${ms.id} has been submitted by ${ms.authorName || 'Author'}. File completeness verified. Routed to Handling Editor for final evaluation.`)
+                                    setRevisionActionSuccess(null)
+                                    setIsRevisionModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-4 rounded-lg cursor-pointer shadow-2xs"
+                                >
+                                  <Sliders className="h-3.5 w-3.5 mr-1.5" />
+                                  Manage Revision
+                                </Button>
                               )}
 
                               {isAccepted && (
