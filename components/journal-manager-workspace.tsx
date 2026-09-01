@@ -33,6 +33,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
 
 export interface JmManuscript {
   id: string
@@ -105,6 +106,8 @@ interface JournalManagerWorkspaceProps {
   reviews?: JmReviewFeedback[]
   onReleaseComments?: (reviewId: string, sanitizedText: string) => void
   archiveLogs?: JmArchiveLog[]
+  notifications?: CrossDeskNotification[]
+  onAddNotification?: (notif: any) => void
   user?: {
     name?: string
     role?: string
@@ -125,6 +128,8 @@ export function JournalManagerWorkspace({
   reviews: initialReviews = [],
   onReleaseComments,
   archiveLogs: initialLogs = [],
+  notifications = [],
+  onAddNotification,
   user
 }: JournalManagerWorkspaceProps) {
   const isDe = language === "de"
@@ -141,6 +146,42 @@ export function JournalManagerWorkspace({
   const [selectedManuscript, setSelectedManuscript] = useState<JmManuscript | null>(null)
   const [selectedEditor, setSelectedEditor] = useState("Prof. Aris Thorne")
   const [selectedReviewers, setSelectedReviewers] = useState<string[]>([])
+  const [jmReviewerSourceTab, setJmReviewerSourceTab] = useState<"matched" | "suggested" | "external">("matched")
+  const [customRevName, setCustomRevName] = useState("")
+  const [customRevEmail, setCustomRevEmail] = useState("")
+  const [customRevAffiliation, setCustomRevAffiliation] = useState("")
+  const [jmOpenAlexResults, setJmOpenAlexResults] = useState<any[] | null>(null)
+  const [isJmSearchingOpenAlex, setIsJmSearchingOpenAlex] = useState(false)
+  const [jmOpenAlexQuery, setJmOpenAlexQuery] = useState("")
+
+  const handleFetchJmOpenAlexReviewers = async (paper?: JmManuscript | null, query?: string) => {
+    setIsJmSearchingOpenAlex(true)
+    try {
+      const res = await fetch("/api/editorial360/match-reviewers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: paper?.title,
+          abstract: paper?.abstract,
+          keywords: paper?.keywords,
+          authorName: paper?.authorName,
+          authorAffiliation: paper?.authorAffiliation,
+          journal: paper?.journal,
+          customQuery: query
+        })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.reviewers && data.reviewers.length > 0) {
+          setJmOpenAlexResults(data.reviewers)
+        }
+      }
+    } catch (e) {
+      console.error("OpenAlex fetch error:", e)
+    } finally {
+      setIsJmSearchingOpenAlex(false)
+    }
+  }
   
   // Manual Pre-Check Modal
   const [isPreQualityModalOpen, setIsPreQualityModalOpen] = useState(false)
@@ -153,6 +194,7 @@ export function JournalManagerWorkspace({
     ethicsDeclaration: true,
     scopeFit: true
   })
+  const allChecksComplete = Object.values(preCheckChecks).every(Boolean)
 
   // Moderation Modal
   const [isModModalOpen, setIsModModalOpen] = useState(false)
@@ -248,6 +290,11 @@ export function JournalManagerWorkspace({
   const [selectedRound2Reviewers, setSelectedRound2Reviewers] = useState<string[]>([])
   const [editorRoutingNote, setEditorRoutingNote] = useState("")
   const [revisionActionSuccess, setRevisionActionSuccess] = useState<string | null>(null)
+  const [editorPromptSuccess, setEditorPromptSuccess] = useState<string | null>(null)
+  const [approvedReviewRemarks, setApprovedReviewRemarks] = useState<Record<string, boolean>>({})
+  const [promptedEditors, setPromptedEditors] = useState<Record<string, boolean>>({})
+  const [authorNudged, setAuthorNudged] = useState<Record<string, boolean>>({})
+  const [authorExtendedDays, setAuthorExtendedDays] = useState<Record<string, number>>({})
 
   // Are-You-Sure Confirmation Dialog State
   const [confirmDialogState, setConfirmDialogState] = useState<{
@@ -407,35 +454,24 @@ export function JournalManagerWorkspace({
     const paperId = moderatingReview.paperId
     const editedText = modEditedComments
 
+    setIsModModalOpen(false)
+
     triggerConfirm({
-      title: "Release Review Comments to Author?",
-      message: `Are you sure you want to release these sanitized peer review comments for manuscript ${paperId} to the author?`,
-      confirmButtonLabel: "Yes, Release Comments",
+      title: "Save & Approve Sanitized Remarks?",
+      message: `Are you sure you want to approve and save these sanitized peer review remarks for manuscript ${paperId}? These remarks will be saved to the manuscript file and bundled into the official Decision Letter sent to the author.`,
+      confirmButtonLabel: "Yes, Save & Approve",
       confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
       onConfirm: () => {
-        setIsModModalOpen(false)
         if (onReleaseComments) {
           onReleaseComments(revId, editedText)
         }
-
-        // Send author notification in background
-        const targetPaper = initialManuscripts.find(m => m.id === paperId)
-        const authorEmail = targetPaper?.authorEmail || "author@university.edu"
-        const authorName = targetPaper?.authorName || "Author"
-
-        fetch("/api/editorial360/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: authorEmail,
-            recipientName: authorName,
-            subject: `Review Comments Released: ${paperId}`,
-            template: "moderation_released",
-            paperId: paperId,
-            paperTitle: targetPaper?.title || "Manuscript",
-            journal: targetPaper?.journal
-          })
-        }).catch(e => console.error(e))
+        setApprovedReviewRemarks(prev => ({
+          ...prev,
+          [moderatingReview.reviewerName]: true,
+          [revId]: true
+        }))
+        setEditorPromptSuccess(`✓ Remarks for ${moderatingReview.reviewerName} vetted, approved & saved to manuscript dossier.`)
+        setTimeout(() => setEditorPromptSuccess(null), 6000)
       }
     })
   }
@@ -577,6 +613,48 @@ export function JournalManagerWorkspace({
     setExtendedDays(prev => ({ ...prev, [revName]: 0 }))
   }
 
+  // Handle Author Revision Reminder Nudge
+  const handleNudgeAuthor = (ms: JmManuscript) => {
+    triggerConfirm({
+      title: "Send Revision Reminder to Author?",
+      message: `Are you sure you want to dispatch a revision reminder email to Author (${ms.authorName || 'Author'}) for manuscript ${ms.id}?`,
+      confirmButtonLabel: "Yes, Send Reminder",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: () => {
+        setAuthorNudged(prev => ({ ...prev, [ms.id]: true }))
+        fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: ms.authorEmail || "author@university.edu",
+            recipientName: ms.authorName || "Author",
+            subject: `Reminder: Revision Pending for ${ms.id}`,
+            template: "precheck_query",
+            paperId: ms.id,
+            paperTitle: ms.title,
+            customMessage: "This is a friendly reminder that the revision and rebuttal for your manuscript are currently due. Please upload your revised files through the Author Portal.",
+            journal: ms.journal
+          })
+        }).catch(e => console.error(e))
+
+        setEditorPromptSuccess(`✓ Revision reminder email dispatched to ${ms.authorName || 'Author'}.`)
+        setTimeout(() => setEditorPromptSuccess(null), 6000)
+      }
+    })
+  }
+
+  // Handle Author Deadline Extension
+  const handleExtendAuthorDeadline = (msId: string) => {
+    setAuthorExtendedDays(prev => ({ ...prev, [msId]: (prev[msId] || 0) + 14 }))
+    setEditorPromptSuccess(`✓ Revision deadline extended by +14 days for ${msId}.`)
+    setTimeout(() => setEditorPromptSuccess(null), 6000)
+  }
+
+  // Handle Reset Author Deadline Extension
+  const handleResetAuthorExtension = (msId: string) => {
+    setAuthorExtendedDays(prev => ({ ...prev, [msId]: 0 }))
+  }
+
   // Helper for rendering Stage Pill Badge in List View
   const renderStageBadge = (ms: JmManuscript) => {
     if (ms.status === "Awaiting Initial Check" || ms.status === "Submitted" || ms.status === "Draft") {
@@ -588,6 +666,36 @@ export function JournalManagerWorkspace({
     }
     if (ms.status === "Under Review") {
       const isOverdue = ms.id === "SOSSH-26-SRW107"
+      const isReviewsComplete = ms.id === "SOEAS-26-RS102" || (ms.reviewers && ms.reviewers.length > 0 && ms.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))
+      const isPrompted = !!promptedEditors[ms.id]
+
+      if (isPrompted) {
+        return (
+          <div className="space-y-1">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700 whitespace-nowrap shadow-2xs">
+              <Check className="h-3 w-3 text-indigo-600" />
+              Editor Prompted ✓
+            </span>
+            <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 block px-0.5 whitespace-nowrap">
+              Decision Pending
+            </span>
+          </div>
+        )
+      }
+
+      if (isReviewsComplete) {
+        return (
+          <div className="space-y-1">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/50 whitespace-nowrap shadow-2xs">
+              Reviews In (Decision Pending)
+            </span>
+            <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 block px-0.5 whitespace-nowrap">
+              2/2 Reports Complete
+            </span>
+          </div>
+        )
+      }
+
       return (
         <div className="space-y-1">
           <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20 whitespace-nowrap">
@@ -601,7 +709,7 @@ export function JournalManagerWorkspace({
         </div>
       )
     }
-    if (ms.status === "Revision Under Evaluation" || (ms as any).submissionStage === "Revised Submission") {
+    if (ms.status === "Revision Under Evaluation") {
       return (
         <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 whitespace-nowrap shadow-2xs">
           Revised Submitted ✓
@@ -609,10 +717,17 @@ export function JournalManagerWorkspace({
       )
     }
     if (ms.status === "Revision Required") {
+      const extraDays = authorExtendedDays[ms.id] || 0
+      const remainingDays = 12 + extraDays
       return (
-        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/30 whitespace-nowrap">
-          Author Revising
-        </span>
+        <div className="space-y-1">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/30 whitespace-nowrap">
+            Author Revising
+          </span>
+          <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 block px-0.5 whitespace-nowrap">
+            Due in {remainingDays}d
+          </span>
+        </div>
       )
     }
     return (
@@ -698,6 +813,24 @@ export function JournalManagerWorkspace({
           <span className="text-xs font-medium text-slate-500 block">Benchmark &lt; 21.0 days</span>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* TAB 0: NOTIFICATIONS & ACTIVITY (COMMON ACROSS JM, EDITOR, IM)             */}
+      {/* ========================================================================= */}
+      {activeTab === "activity" && (
+        <CrossDeskActivityFeed
+          language={language}
+          currentRole="jm"
+          notifications={notifications}
+          onViewPaperDossier={(paperId) => {
+            const match = initialManuscripts.find(m => m.id === paperId)
+            if (match) {
+              setSelectedManuscript(match)
+              setIsInspectModalOpen(true)
+            }
+          }}
+        />
+      )}
 
       {/* ========================================================================= */}
       {/* 2. SUBMISSIONS PIPELINE (UNIFIED LIST VIEW)                               */}
@@ -875,33 +1008,37 @@ export function JournalManagerWorkspace({
                               )}
 
                               {isUnderReview && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setTrackingManuscript(ms)
-                                      setIsTrackModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-3 rounded-lg cursor-pointer"
-                                  >
-                                    <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                    Track
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(ms.id, "Revision Required")
-                                    }}
-                                    className="h-8 text-xs font-bold border-amber-300 text-amber-600 hover:bg-amber-50 dark:border-amber-900/50 dark:text-amber-400 px-3 rounded-lg cursor-pointer"
-                                  >
-                                    Req. Revision
-                                  </Button>
-                                </>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setTrackingManuscript(ms)
+                                    setIsTrackModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-3.5 rounded-lg cursor-pointer"
+                                >
+                                  <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Track Review Progress
+                                </Button>
                               )}
 
-                              {isRevision && (
+                              {ms.status === "Revision Required" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleNudgeAuthor(ms)}
+                                  disabled={!!authorNudged[ms.id]}
+                                  className={`h-8 text-xs font-semibold px-3.5 rounded-lg cursor-pointer whitespace-nowrap transition-all ${
+                                    authorNudged[ms.id]
+                                      ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 font-bold"
+                                      : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-[#0b99ff] hover:text-[#0b99ff]"
+                                  }`}
+                                >
+                                  {authorNudged[ms.id] ? "✓ Reminded" : "🔔 Remind Author"}
+                                </Button>
+                              )}
+
+                              {ms.status === "Revision Under Evaluation" && (
                                 <Button
                                   size="sm"
                                   onClick={() => {
@@ -951,60 +1088,7 @@ export function JournalManagerWorkspace({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 3. COMMENT MODERATION DESK                                                */}
-      {/* ========================================================================= */}
-      {activeTab === "moderation" && (
-        <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">Review Comment Moderation Desk</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Vet and sanitize reviewer feedback comments before releasing them to authors.</p>
-          </div>
 
-          <div className="p-6 space-y-4">
-            {initialReviews.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-xs font-semibold">
-                All submitted reviewer feedback has been audited and released. No pending items.
-              </div>
-            ) : (
-              initialReviews.map((rev) => {
-                const targetPaper = initialManuscripts.find(m => m.id === rev.paperId)
-                const isReleased = rev.status === "Released"
-
-                return (
-                  <div key={rev.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                          isReleased 
-                            ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30"
-                            : "bg-orange-100 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400 border border-orange-200 dark:border-orange-900/30"
-                        }`}>
-                          {isReleased ? "Released" : "Pending Release"}
-                        </span>
-                        <span className="text-[11px] font-semibold text-slate-400 whitespace-nowrap">Manuscript ID: {rev.paperId}</span>
-                        <span className="text-[11px] text-slate-400">| Reviewer: <strong className="text-slate-600 dark:text-slate-300 font-semibold">{rev.reviewerName}</strong></span>
-                      </div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">{targetPaper?.title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 italic">
-                        &ldquo;{rev.sanitizedCommentsAuthor || rev.commentsAuthor}&rdquo;
-                      </p>
-                    </div>
-
-                    <Button
-                      onClick={() => handleOpenModeration(rev)}
-                      size="sm"
-                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs shrink-0 cursor-pointer h-8 px-4 rounded-lg"
-                    >
-                      {isReleased ? "View Record" : "Vet Comments"}
-                    </Button>
-                  </div>
-                )
-              })
-            )}
-          </div>
-        </Card>
-      )}
 
       {/* ========================================================================= */}
       {/* 4. REVIEWER REGISTRY                                                      */}
@@ -1039,6 +1123,9 @@ export function JournalManagerWorkspace({
                       rev.status === "Active" ? "bg-emerald-500" : rev.status === "Busy" ? "bg-amber-500" : "bg-slate-400"
                     }`} />
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">{rev.name}</h4>
+                    <span className="text-[11px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                      ({rev.activeTasks || (rev.name === "Dr. Marcus Vance" ? 2 : rev.name === "Dr. Evelyn Vane" ? 1 : 0)} active reviews)
+                    </span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                       rev.status === "Active" ? "bg-green-100 text-green-600 border border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30" :
                       rev.status === "Busy" ? "bg-yellow-100 text-yellow-600 border border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/30" :
@@ -1052,7 +1139,7 @@ export function JournalManagerWorkspace({
                     Specialization: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{rev.specialization}</strong>
                   </p>
                   <div className="text-xs text-slate-400">
-                    Email: {rev.email} | Active Load: {rev.activeTasks} papers
+                    Email: {rev.email} | Active Capacity: {rev.activeTasks || (rev.name === "Dr. Marcus Vance" ? 2 : rev.name === "Dr. Evelyn Vane" ? 1 : 0)} / {rev.maxTasks} papers
                   </div>
                 </div>
 
@@ -1210,86 +1297,281 @@ export function JournalManagerWorkspace({
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 1: ASSIGN EDITOR & REVIEWERS                                        */}
+      {/* MODAL 1: ASSIGN EDITOR & REVIEWERS (MULTI-SOURCE SOURCING)                */}
       {/* ========================================================================= */}
       <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
-        <DialogContent className="max-w-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-              Assign Editor & Reviewers
+        <DialogContent className="sm:max-w-xl max-h-[88vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-5 flex flex-col shadow-2xl">
+          <DialogHeader className="pb-1">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2">
+              <span>Assign Editor & Reviewers</span>
+              <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
+                {selectedManuscript?.id}
+              </span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              {selectedManuscript?.id}: {selectedManuscript?.title}
+            <DialogDescription className="text-xs text-slate-500 line-clamp-1">
+              {selectedManuscript?.title}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2 text-xs">
+          <div className="space-y-3 py-1 text-xs overflow-y-auto pr-1">
+            {/* Handling Editor Selector */}
             <div className="space-y-1.5">
               <label className="font-bold text-slate-700 dark:text-slate-300">
-                Handling Editor
+                Handling Editor:
               </label>
               <select
                 value={selectedEditor}
                 onChange={(e) => setSelectedEditor(e.target.value)}
-                className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-[#0b99ff]"
+                className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-[#0b99ff]"
               >
-                <option value="Prof. Aris Thorne">Prof. Aris Thorne (Managing Editor)</option>
-                <option value="Prof. Clara Zhang">Prof. Clara Zhang (Section Editor)</option>
-                <option value="Dr. Sarah Jenkins">Dr. Sarah Jenkins (Operations Lead)</option>
+                <option value="Prof. Aris Thorne">Prof. Aris Thorne (3 active papers · Managing Editor)</option>
+                <option value="Prof. Clara Zhang">Prof. Clara Zhang (1 active paper · Section Editor)</option>
+                <option value="Dr. Sarah Jenkins">Dr. Sarah Jenkins (0 active papers · Available)</option>
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="font-bold text-slate-700 dark:text-slate-300">
-                Select Peer Reviewers
-              </label>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {reviewersList.map((rev) => {
-                  const isChecked = selectedReviewers.includes(rev.name)
-                  return (
-                    <div 
-                      key={rev.id} 
-                      onClick={() => {
-                        setSelectedReviewers(prev => 
-                          prev.includes(rev.name) ? prev.filter(r => r !== rev.name) : [...prev, rev.name]
-                        )
-                      }}
-                      className={`p-3 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-all ${
-                        isChecked 
-                          ? "bg-[#0b99ff]/10 border-[#0b99ff] text-slate-900 dark:text-white" 
-                          : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded text-[#0b99ff]" />
-                        <span className="font-bold">{rev.name}</span>
-                        <span className="text-slate-400">({rev.specialization})</span>
-                      </div>
-                      <span className="text-xs text-slate-400">{rev.status}</span>
-                    </div>
-                  )
-                })}
-              </div>
+            {/* Sourcing Mode Switcher */}
+            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-[#131418] rounded-xl border border-slate-200 dark:border-[#272832] text-xs">
+              <button
+                type="button"
+                onClick={() => setJmReviewerSourceTab("matched")}
+                className={`py-1.5 px-2 rounded-lg font-semibold transition-all text-center cursor-pointer text-xs ${
+                  jmReviewerSourceTab === "matched"
+                    ? "bg-[#0b99ff] text-white shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                Editorial Board
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setJmReviewerSourceTab("suggested")
+                  if (!jmOpenAlexResults && selectedManuscript) {
+                    handleFetchJmOpenAlexReviewers(selectedManuscript)
+                  }
+                }}
+                className={`py-1.5 px-2 rounded-lg font-semibold transition-all text-center cursor-pointer text-xs ${
+                  jmReviewerSourceTab === "suggested"
+                    ? "bg-[#0b99ff] text-white shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                Global Scholars
+              </button>
+              <button
+                type="button"
+                onClick={() => setJmReviewerSourceTab("external")}
+                className={`py-1.5 px-2 rounded-lg font-semibold transition-all text-center cursor-pointer text-xs ${
+                  jmReviewerSourceTab === "external"
+                    ? "bg-[#0b99ff] text-white shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                Invite External
+              </button>
             </div>
+
+            {/* TAB 1: EDITORIAL BOARD */}
+            {jmReviewerSourceTab === "matched" && (
+              <div className="space-y-2">
+                <div className="space-y-1.5">
+                  {reviewersList.map((rev) => {
+                    const isChecked = selectedReviewers.includes(rev.name)
+                    const activeCount = rev.activeTasks || (rev.name === "Dr. Marcus Vance" ? 2 : rev.name === "Dr. Evelyn Vane" ? 1 : 0)
+                    return (
+                      <div 
+                        key={rev.id} 
+                        onClick={() => {
+                          setSelectedReviewers(prev => 
+                            prev.includes(rev.name) ? prev.filter(r => r !== rev.name) : [...prev, rev.name]
+                          )
+                        }}
+                        className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-all ${
+                          isChecked 
+                            ? "bg-[#0b99ff]/10 border-[#0b99ff] text-slate-900 dark:text-white" 
+                            : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-slate-900 dark:text-white">{rev.name}</span>
+                            <span className="text-[11px] font-medium text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.2 rounded">
+                              {activeCount} active {activeCount === 1 ? "review" : "reviews"}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-500">{rev.specialization}</div>
+                        </div>
+                        <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded text-[#0b99ff] h-4 w-4 shrink-0" />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: GLOBAL SCHOLARS (CLEAN MINIMAL METADATA) */}
+            {jmReviewerSourceTab === "suggested" && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={jmOpenAlexQuery}
+                    onChange={(e) => setJmOpenAlexQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery)
+                      }
+                    }}
+                    placeholder="Search global scholars by topic or name..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                  />
+                  <Button
+                    type="button"
+                    disabled={isJmSearchingOpenAlex}
+                    onClick={() => handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery)}
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-3.5 rounded-xl cursor-pointer shadow-xs shrink-0"
+                  >
+                    {isJmSearchingOpenAlex ? "Searching..." : "Search"}
+                  </Button>
+                </div>
+
+                {isJmSearchingOpenAlex && (
+                  <div className="p-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <span className="h-4 w-4 border-2 border-[#0b99ff] border-t-transparent rounded-full animate-spin" />
+                    <span>Searching global scholars graph...</span>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  {(jmOpenAlexResults || [
+                    {
+                      name: "Prof. Hiroshi Tanaka",
+                      institution: "University of Tokyo (Japan)",
+                      specialty: "Juvenile Diabetes Retinopathy",
+                      metrics: "42 papers · 1,420 citations"
+                    },
+                    {
+                      name: "Dr. Sarah Jenkins",
+                      institution: "University of Edinburgh (UK)",
+                      specialty: "Deep Learning Clinical Triage",
+                      metrics: "19 papers · 540 citations"
+                    },
+                    {
+                      name: "Prof. Claire Dupond",
+                      institution: "Sorbonne Université (France)",
+                      specialty: "Microvascular Biomarkers",
+                      metrics: "31 papers · 890 citations"
+                    }
+                  ]).map((rev, idx) => {
+                    const isChecked = selectedReviewers.includes(rev.name)
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          setSelectedReviewers(prev =>
+                            isChecked ? prev.filter(n => n !== rev.name) : [...prev, rev.name]
+                          )
+                        }}
+                        className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                          isChecked ? "border-[#0b99ff] bg-[#0b99ff]/10" : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="space-y-0.5 pr-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-semibold text-slate-900 dark:text-white text-xs">{rev.name}</span>
+                            <span className="text-[11px] text-slate-500">· {rev.institution}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">
+                            <span className="text-slate-700 dark:text-slate-300 font-medium">{rev.specialty}</span>
+                            <span>•</span>
+                            <span className="text-[#0b99ff] font-medium">{rev.metrics}</span>
+                          </div>
+                        </div>
+                        <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded text-[#0b99ff] h-4 w-4 shrink-0" />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: INVITE EXTERNAL */}
+            {jmReviewerSourceTab === "external" && (
+              <div className="space-y-2.5">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <span className="font-bold text-slate-900 dark:text-white block text-xs">
+                    Invite External Expert by Email:
+                  </span>
+                  
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={customRevName}
+                      onChange={(e) => setCustomRevName(e.target.value)}
+                      placeholder="Full Name (e.g. Prof. David Miller)"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                    />
+                    <input
+                      type="email"
+                      value={customRevEmail}
+                      onChange={(e) => setCustomRevEmail(e.target.value)}
+                      placeholder="Institutional Email (e.g. d.miller@ox.ac.uk)"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={customRevAffiliation}
+                      onChange={(e) => setCustomRevAffiliation(e.target.value)}
+                      placeholder="Institution / Specialty (e.g. University of Oxford)"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                    />
+
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (!customRevName || !customRevEmail) {
+                          alert("Please enter both Name and Email.")
+                          return
+                        }
+                        setSelectedReviewers(prev => [...prev, customRevName])
+                        setCustomRevName("")
+                        setCustomRevEmail("")
+                        setCustomRevAffiliation("")
+                      }}
+                      className="w-full bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 rounded-xl cursor-pointer"
+                    >
+                      Add to Selection List
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsAssignModalOpen(false)}
-              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleConfirmAssignment}
-              disabled={selectedReviewers.length === 0}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
-            >
-              Assign & Send Invitations
-            </Button>
+          <DialogFooter className="flex flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <span className="text-xs text-slate-500 font-medium">
+              Selected: <strong className="text-[#0b99ff]">{selectedReviewers.length} Reviewers</strong>
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAssignModalOpen(false)}
+                className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleConfirmAssignment}
+                disabled={selectedReviewers.length === 0}
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+              >
+                Assign & Send Invitations
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1298,157 +1580,155 @@ export function JournalManagerWorkspace({
       {/* MODAL 2: MANUAL PRE-CHECK & FILE DOWNLOADS                                 */}
       {/* ========================================================================= */}
       <Dialog open={isPreQualityModalOpen} onOpenChange={setIsPreQualityModalOpen}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex flex-wrap items-center justify-between gap-2 pr-6">
-              <span>Manuscript Pre-Check & Forensic Inspection</span>
-              <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20">
+        <DialogContent className="sm:max-w-xl max-h-[85vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-5 flex flex-col shadow-2xl">
+          <DialogHeader className="pb-1">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2 pr-6">
+              <span>Pre-Check & Quality Inspection</span>
+              <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
                 {selectedManuscript?.id}
               </span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 line-clamp-1">
               {selectedManuscript?.title}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2 text-xs">
-            {/* 1. Automated Integrity & Forensic Suite */}
-            <div className="space-y-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
-                  Automated Integrity & Forensic Pre-Scan Suite:
-                </span>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/30">
+          <div className="space-y-3 py-1 text-xs overflow-y-auto pr-1">
+            {/* 1. Automated Integrity & Forensic Pre-Scan Suite */}
+            <div className="space-y-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 text-xs">
+                <span>Automated Integrity Pre-Scan</span>
+                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.2 rounded border border-emerald-200 dark:border-emerald-900/30">
                   All Systems Passed ✓
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+              <div className="grid grid-cols-3 gap-2">
                 {/* Plagiarism */}
-                <div className="p-3 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Similarity Index</div>
-                  <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    4.2% <span className="text-[10px] text-slate-400 font-normal">(&lt; 15% limit)</span>
+                <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                  <div className="text-[10px] text-slate-400 font-medium">Similarity</div>
+                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    4.2% <span className="text-[10px] text-slate-400 font-normal">(&lt;15%)</span>
                   </div>
-                  <div className="text-[10px] text-slate-500">iThenticate / Crossref verified</div>
+                  <div className="text-[10px] text-slate-500 truncate">iThenticate / Crossref</div>
                 </div>
 
                 {/* AI Text Detector */}
-                <div className="p-3 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AI Text Probability</div>
-                  <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    1.8% <span className="text-[10px] text-slate-400 font-normal">(Human Author)</span>
+                <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                  <div className="text-[10px] text-slate-400 font-medium">AI Text</div>
+                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    1.8% <span className="text-[10px] text-slate-400 font-normal">(Human)</span>
                   </div>
-                  <div className="text-[10px] text-slate-500">No synthetic markers detected</div>
+                  <div className="text-[10px] text-slate-500 truncate">No synthetic markers</div>
                 </div>
 
                 {/* AI Image & Figure Forensics */}
-                <div className="p-3 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Image / Figure Scan</div>
-                  <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                  <div className="text-[10px] text-slate-400 font-medium">Figure Scan</div>
+                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                     Clean <span className="text-[10px] text-slate-400 font-normal">(4 Panels)</span>
                   </div>
-                  <div className="text-[10px] text-slate-500">No splicing or clone tampering</div>
+                  <div className="text-[10px] text-slate-500 truncate">No clone tampering</div>
                 </div>
               </div>
             </div>
 
             {/* Download Files List for JM */}
-            <div className="space-y-2">
-              <span className="font-bold text-slate-800 dark:text-slate-200">
+            <div className="space-y-1.5">
+              <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
                 Submitted Manuscript Files:
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 <a
                   href="/downloads/Scholarly_Open_Manuscript_Template.txt"
                   download={`${selectedManuscript?.id || "Manuscript"}_Main_Document.pdf`}
-                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
+                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
                 >
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-[#0b99ff]" />
-                    <span>Main Manuscript (PDF)</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <FileText className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
+                    <span className="truncate">Main Manuscript (PDF)</span>
                   </div>
-                  <Download className="h-3.5 w-3.5 text-slate-400" />
+                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
                 </a>
 
                 <a
                   href="/downloads/Scholarly_Open_Author_Checklist.txt"
                   download={`${selectedManuscript?.id || "Manuscript"}_Figures_Tables.zip`}
-                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
+                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
                 >
-                  <div className="flex items-center gap-2">
-                    <Download className="h-4 w-4 text-[#0b99ff]" />
-                    <span>Figures & Tables (ZIP)</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <Download className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
+                    <span className="truncate">Figures & Tables (ZIP)</span>
                   </div>
-                  <Download className="h-3.5 w-3.5 text-slate-400" />
+                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
                 </a>
 
                 <a
                   href="/downloads/Scholarly_Open_Author_Checklist.txt"
                   download={`${selectedManuscript?.id || "Manuscript"}_Supplementary.pdf`}
-                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
+                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
                 >
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-[#0b99ff]" />
-                    <span>Supplementary File</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <FileText className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
+                    <span className="truncate">Supplementary File</span>
                   </div>
-                  <Download className="h-3.5 w-3.5 text-slate-400" />
+                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
                 </a>
 
                 <a
                   href="/downloads/Scholarly_Open_Author_Checklist.txt"
                   download={`${selectedManuscript?.id || "Manuscript"}_Ethics_Declaration.pdf`}
-                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
+                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
                 >
-                  <div className="flex items-center gap-2">
-                    <CheckSquare className="h-4 w-4 text-emerald-500" />
-                    <span>Ethics & COI Declaration</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <CheckSquare className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <span className="truncate">Ethics & COI Form</span>
                   </div>
-                  <Download className="h-3.5 w-3.5 text-slate-400" />
+                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
                 </a>
               </div>
             </div>
 
             {/* Manual Check list */}
-            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <span className="font-bold text-slate-800 dark:text-slate-200">
-                Journal Manager Manual Verification Checklist:
+            <div className="space-y-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+              <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                Verification Checklist:
               </span>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {[
-                  { key: "manuscriptFile", label: "Manuscript format & double-blind anonymization verified" },
+                  { key: "manuscriptFile", label: "Format & double-blind anonymization verified" },
                   { key: "figuresTables", label: "High-resolution figures & clear captions present" },
                   { key: "supplementary", label: "Data availability & supplementary materials complete" },
                   { key: "ethicsDeclaration", label: "IRB approval and ethics declaration signed" },
                   { key: "scopeFit", label: "Scope & aim matches journal discipline" }
                 ].map(item => (
-                  <label key={item.key} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer">
+                  <label key={item.key} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-slate-300 transition-all text-xs">
                     <input 
                       type="checkbox" 
                       checked={preCheckChecks[item.key]} 
                       onChange={() => setPreCheckChecks(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
-                      className="rounded text-[#0b99ff]"
+                      className="rounded text-[#0b99ff] h-3.5 w-3.5 shrink-0"
                     />
-                    <span className="text-slate-700 dark:text-slate-300 font-medium">{item.label}</span>
+                    <span className="text-slate-700 dark:text-slate-300">{item.label}</span>
                   </label>
                 ))}
               </div>
             </div>
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <DialogFooter className="flex flex-row items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsQueryAuthorOpen(true)}
-              className="text-xs font-semibold text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-900/40 h-8 px-3.5 rounded-lg"
+              className="text-xs font-semibold text-amber-700 dark:text-amber-300 border-amber-300 hover:bg-amber-50 dark:border-amber-900/40 h-8 px-3 rounded-lg cursor-pointer"
             >
-              <AlertCircle className="h-3.5 w-3.5 mr-1" />
-              Return to Author (Files Missing)
+              <AlertCircle className="h-3.5 w-3.5 mr-1 text-amber-500" />
+              Return to Author
             </Button>
             <Button
               size="sm"
+              disabled={!allChecksComplete}
               onClick={() => {
                 if (selectedManuscript) {
                   handleOpenAssign(selectedManuscript)
@@ -1514,23 +1794,23 @@ export function JournalManagerWorkspace({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* MODAL 3: MINIMALIST SANITIZE & RELEASE COMMENTS                           */}
+      {/* MODAL 3: SANITIZE & APPROVE REVIEW REMARKS                                */}
       {/* ========================================================================= */}
       <Dialog open={isModModalOpen} onOpenChange={setIsModModalOpen}>
         <DialogContent className="max-w-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-              Sanitize Review Comments
+              Sanitize & Vet Review Comments
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Manuscript ID: {moderatingReview?.paperId} • Reviewer: {moderatingReview?.reviewerName}
+              Manuscript ID: {moderatingReview?.paperId} • Reviewer: {moderatingReview?.reviewerName} • Approved remarks will be bundled into the Handling Editor&apos;s official decision letter.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2 text-xs">
             <div className="space-y-1">
               <label className="font-bold text-slate-700 dark:text-slate-300">
-                Author-Facing Review Comments (Editable by JM)
+                Author-Facing Review Comments (Editable / Sanitizable by JM)
               </label>
               <textarea
                 rows={5}
@@ -1558,9 +1838,9 @@ export function JournalManagerWorkspace({
             <Button
               size="sm"
               onClick={handleConfirmModerationRelease}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
             >
-              Release Comments to Author
+              Save & Approve Remarks
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1764,16 +2044,77 @@ export function JournalManagerWorkspace({
               </span>
             </div>
 
+            {/* 2/2 Complete Banner with Prompt Editor Action */}
+            {(trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && (
+              <div className="p-3.5 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 shrink-0" />
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white text-xs">
+                      All Assigned Reviews Completed (2/2)
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Peer review reports logged and ready for {trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}&apos;s official verdict.
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    triggerConfirm({
+                      title: "Prompt Handling Editor for Decision?",
+                      message: `Are you sure you want to notify Handling Editor (${trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}) that all 2/2 reviewer evaluations are in and prompt for the official verdict?`,
+                      confirmButtonLabel: "Yes, Prompt Editor",
+                      confirmColorClass: "bg-purple-600 hover:bg-purple-700",
+                      onConfirm: () => {
+                        if (trackingManuscript) {
+                          setPromptedEditors(prev => ({ ...prev, [trackingManuscript.id]: true }))
+                        }
+                        setEditorPromptSuccess(`✓ Automated alert dispatched to Handling Editor (${trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}). Pipeline status updated to 'Editor Prompted'.`)
+                        setTimeout(() => setEditorPromptSuccess(null), 6000)
+                      }
+                    })
+                  }}
+                  className={`text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 transition-all ${
+                    promptedEditors[trackingManuscript?.id || ""]
+                      ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700 hover:bg-indigo-100"
+                      : "bg-purple-600 hover:bg-purple-700 text-white shadow-xs"
+                  }`}
+                >
+                  {promptedEditors[trackingManuscript?.id || ""] ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 mr-1 text-indigo-600" />
+                      Editor Prompted ✓
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-3.5 w-3.5 mr-1" />
+                      Prompt Editor for Decision
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {editorPromptSuccess && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-2xs">
+                <span>{editorPromptSuccess}</span>
+                <button onClick={() => setEditorPromptSuccess(null)} className="text-xs font-bold cursor-pointer">✕</button>
+              </div>
+            )}
+
             {/* Reviewers Progress List */}
             <div className="space-y-3">
               <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs">
-                Assigned Reviewer Milestones & Actions:
+                Assigned Reviewer Milestones & Reports:
               </span>
 
               {(trackingManuscript?.reviewers || ["Dr. Evelyn Vane", "Dr. Marcus Vance"]).map((revName) => {
-                const isSubmitted = revName === "Dr. Evelyn Vane"
+                const isSubmitted = revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
                 const isOverdue = trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka"
                 const isNudged = nudgedReviewers[revName]
+                const isRemarksApproved = !!approvedReviewRemarks[revName]
                 const baseDays = trackingManuscript?.id === "SOEAS-26-RS106" ? 5 : 11
                 const extraDays = extendedDays[revName] || 0
                 const remainingDays = baseDays + extraDays
@@ -1798,9 +2139,17 @@ export function JournalManagerWorkspace({
                           {revName}
                         </h4>
                         {isSubmitted ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
-                            Report Submitted ✓
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
+                              Report Submitted ✓
+                            </span>
+                            {isRemarksApproved && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 whitespace-nowrap animate-in fade-in">
+                                <Check className="h-3 w-3" />
+                                Remarks Approved
+                              </span>
+                            )}
+                          </div>
                         ) : isOverdue ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 whitespace-nowrap">
                             <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse"></span>
@@ -1813,7 +2162,7 @@ export function JournalManagerWorkspace({
                         )}
                       </div>
 
-                      {!isSubmitted && (
+                      {!isSubmitted ? (
                         <div className="flex items-center gap-2 shrink-0">
                           <Button
                             size="sm"
@@ -1852,18 +2201,61 @@ export function JournalManagerWorkspace({
                             </Button>
                           )}
                         </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const revObj: JmReviewFeedback = {
+                              id: `REV-FB-${revName.replace(/\s+/g, '')}`,
+                              paperId: trackingManuscript?.id || "SOEAS-26-RS102",
+                              reviewerName: revName,
+                              originalComments: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
+                              sanitizedCommentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
+                              commentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
+                              commentsEditor: "Solid paper. Recommend minor revision.",
+                              recommendation: "Minor Revision",
+                              originality: 5,
+                              status: "Pending Moderation"
+                            }
+                            handleOpenModeration(revObj)
+                          }}
+                          className={`h-7.5 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all ${
+                            isRemarksApproved
+                              ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
+                              : "text-[#0b99ff] border-[#0b99ff]/30 hover:bg-sky-50 dark:hover:bg-sky-950/30"
+                          }`}
+                        >
+                          {isRemarksApproved ? (
+                            <>
+                              <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" />
+                              Edit Remarks
+                            </>
+                          ) : (
+                            <>
+                              <MessageSquare className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                              Vet Remarks
+                            </>
+                          )}
+                        </Button>
                       )}
                     </div>
 
                     <div className="text-xs text-slate-500 dark:text-slate-400">
                       {isSubmitted ? (
-                        <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">4.8 / 5.0</strong> • Minor Revision recommended</span>
+                        <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">4.8 / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">Minor Revision</strong></span>
                       ) : isOverdue ? (
                         <span className="text-red-600 dark:text-red-400 font-medium">Deadline was 2026-08-22 (3 days overdue) • Follow-up reminder required</span>
                       ) : (
                         <span>Invitation accepted • Target report due: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{targetDeadlineDate}</strong></span>
                       )}
                     </div>
+
+                    {isSubmitted && (
+                      <div className="p-2.5 bg-white dark:bg-[#121316] border border-slate-200/80 dark:border-slate-800 rounded-lg text-[11px] text-slate-600 dark:text-slate-400 italic">
+                        &ldquo;The methodology is rigorous and well-supported. Minor clarifications required in Section 4.&rdquo;
+                      </div>
+                    )}
                   </div>
                 )
               })}

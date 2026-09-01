@@ -300,6 +300,9 @@ export function ReviewerWorkspace({
   const [selectedInvForDecline, setSelectedInvForDecline] = useState<ReviewInvitationItem | null>(null)
   const [selectedReviewForEval, setSelectedReviewForEval] = useState<ActiveReviewItem | null>(null)
   const [selectedPackageRev, setSelectedPackageRev] = useState<ActiveReviewItem | null>(null)
+  const [selectedCertReview, setSelectedCertReview] = useState<ActiveReviewItem | null>(null)
+  const [requestCertificate, setRequestCertificate] = useState(true)
+  const [syncOrcid, setSyncOrcid] = useState(true)
   const [isDownloadingZip, setIsDownloadingZip] = useState(false)
 
   // Misconduct Escalation State (IM / Handling Editor)
@@ -1318,9 +1321,18 @@ export function ReviewerWorkspace({
                           </Button>
                         </>
                       ) : (
-                        <span className="text-xs font-semibold text-green-600 dark:text-green-400 flex items-center gap-1.5">
-                          <CheckCircle2 className="h-4 w-4" /> {isDe ? "Im Archiv hinterlegt" : "Archived in ORCID"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 px-2 py-1 rounded flex items-center gap-1">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> {isDe ? "ORCID synchronisiert" : "ORCID Synced"}
+                          </span>
+                          <Button
+                            onClick={() => setSelectedCertReview(rev)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
+                          >
+                            <Award className="h-3.5 w-3.5 mr-1" />
+                            {isDe ? "Zertifikat ansehen" : "View Certificate"}
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -2496,6 +2508,39 @@ export function ReviewerWorkspace({
                   </div>
                 </div>
 
+                {/* Section 8: Review Recognition & Certificate Preferences */}
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                    {isDe ? "Anerkennung & Gutachter-Zertifikat:" : "Review Recognition & Certificate Preferences:"}
+                  </div>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={requestCertificate}
+                      onChange={(e) => setRequestCertificate(e.target.checked)}
+                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
+                    />
+                    <span className="text-xs text-slate-700 dark:text-slate-300">
+                      {isDe 
+                        ? "Offizielles Gutachter-Zertifikat (Certificate of Review Recognition) nach redaktioneller Entscheidung ausstellen."
+                        : "Issue an official Certificate of Review Recognition upon editorial sign-off."}
+                    </span>
+                  </label>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={syncOrcid}
+                      onChange={(e) => setSyncOrcid(e.target.checked)}
+                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
+                    />
+                    <span className="text-xs text-slate-700 dark:text-slate-300">
+                      {isDe 
+                        ? `Begutachtungsnachweis automatisch mit meinem ORCID-Profil (${profile.orcid || "0000-0004-7711-2093"}) synchronisieren.`
+                        : `Automatically sync review credit to my ORCID profile (${profile.orcid || "0000-0004-7711-2093"}).`}
+                    </span>
+                  </label>
+                </div>
+
                 <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <label className="flex items-start gap-2 cursor-pointer">
                     <input 
@@ -2534,6 +2579,118 @@ export function ReviewerWorkspace({
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL 3B: INDIVIDUAL PEER REVIEW RECOGNITION CERTIFICATE ================= */}
+      <Dialog open={!!selectedCertReview} onOpenChange={(open) => !open && setSelectedCertReview(null)}>
+        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-2xl rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
+              <span>Certificate of Peer Review Recognition</span>
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/40">
+                Verified Credential ✓
+              </span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Official academic peer review recognition issued by Scholarly Open Publishing Group.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedCertReview && (
+            <div className="space-y-4 py-2">
+              {/* Institutional Certificate Canvas Card */}
+              <div className="border-4 border-double border-emerald-700/70 dark:border-emerald-600/70 rounded-xl p-6 sm:p-8 bg-gradient-to-b from-slate-50/60 to-white dark:from-slate-900/40 dark:to-slate-950 text-center space-y-4 shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-center gap-2">
+                  <img 
+                    src="/logo-mark.svg" 
+                    alt="Scholarly Open" 
+                    className="h-9 w-auto object-contain"
+                    onError={(e) => {
+                      ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                    }}
+                  />
+                  <div className="text-xl font-black text-[#132415] dark:text-white">
+                    Scholarly <span className="text-[#F6BB14]">Open</span>
+                  </div>
+                </div>
+
+                <div className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-400 tracking-widest">
+                  Editorial Board Peer Review Recognition
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Certificate of Peer Review
+                </h3>
+
+                <div className="space-y-1">
+                  <div className="text-xs text-slate-500">This official certificate is presented to</div>
+                  <div className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 border-b-2 border-emerald-600 inline-block px-4 pb-0.5">
+                    {getFormattedReviewerName(profile.title, profile.name)}
+                  </div>
+                  <div className="text-xs text-slate-500">{profile.institution}</div>
+                </div>
+
+                <p className="text-xs text-slate-700 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+                  In recognition of your scholarly contribution as an expert peer reviewer for manuscript:
+                  <strong className="block text-slate-900 dark:text-white mt-1">
+                    {selectedCertReview.manuscriptId || selectedCertReview.id}: &ldquo;{selectedCertReview.title}&rdquo;
+                  </strong>
+                  <span className="text-slate-500 text-[11px] block mt-0.5">
+                    Journal: {selectedCertReview.journal} • Final Sign-Off: {selectedCertReview.completedDate || "2026-06-12"}
+                  </span>
+                </p>
+
+                <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500 flex-wrap gap-2">
+                  <div className="text-left font-mono">
+                    <div>Verification ID: CERT-REV-{selectedCertReview.id}-2026</div>
+                    <div>ORCID iD: {profile.orcid || "0000-0004-7711-2093"} (Synced ✓)</div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
+                      COPE Compliant Verification Seal
+                    </span>
+                    <span className="text-slate-400">Managing Editorial Office</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedCertReview(null)}
+              className="text-xs h-8 cursor-pointer"
+            >
+              Close
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  alert(`✓ Review credential synced with ORCID record (0000-0004-7711-2093).`)
+                }}
+                className="text-xs h-8 font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 cursor-pointer"
+              >
+                Sync with ORCID
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.print()
+                  }
+                }}
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-4 shadow-xs cursor-pointer"
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Download PDF / Print
+              </Button>
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

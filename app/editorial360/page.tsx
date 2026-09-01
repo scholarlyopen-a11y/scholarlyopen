@@ -83,6 +83,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ReviewerWorkspace, ReviewAssessmentData } from "@/components/reviewer-workspace"
 import { JournalManagerWorkspace } from "@/components/journal-manager-workspace"
 import { EditorWorkspace } from "@/components/editor-workspace"
+import { CrossDeskActivityFeed, CrossDeskNotification } from "@/components/cross-desk-activity-feed"
 
 type UserRole = "admin" | "author" | "reviewer" | "editor" | "im" | "ria" | "jm"
 
@@ -159,6 +160,11 @@ interface IntegrityAlert {
   detail: string
   severity: "info" | "warning" | "critical"
   status: "Flagged" | "Escalated" | "Cleared"
+  escalationNotes?: string
+  escalationRecommendation?: string
+  escalationPriority?: "standard" | "high" | "critical"
+  escalatedAt?: string
+  escalatedBy?: string
 }
 
 // Workspace User registry data
@@ -793,9 +799,9 @@ export default function Editorial360Page() {
       id: "SOMED-26-RW101",
       title: "Clinical Evaluation of AI-Driven Diagnostic Imaging in Cardiovascular Medicine",
       journal: "Scholarly Open: Medicine",
-      status: "Awaiting Initial Check",
+      status: "Revision Required",
       date: "2026-08-18",
-      reviewers: [],
+      reviewers: ["Dr. Evelyn Vane", "Dr. Marcus Vance"],
       integrityStatus: "Clean",
       plagiarismScore: 5,
       aiScore: 12,
@@ -807,7 +813,7 @@ export default function Editorial360Page() {
       authorOrcid: "0000-0002-1825-0097",
       coAuthors: "Prof. Aris Thorne, Dr. Sarah Lin",
       articleType: "Original Research",
-      submissionStage: "Initial Submission",
+      submissionStage: "Revision Pending",
       abstract: "Comprehensive investigation into high-throughput predictive deep learning frameworks for diagnostic cardiology and automated ECG analysis. By leveraging a multi-center cohort of over 45,000 clinical records, we demonstrate that neural ensemble architectures achieve 98.4% diagnostic concordance with senior electrophysiologists.",
       keywords: "Cardiology, Deep Learning, ECG Analysis, Clinical AI",
       fileName: "Clinical_AI_Cardio_Manuscript.pdf",
@@ -815,7 +821,8 @@ export default function Editorial360Page() {
       ethicsIrb: "IRB-MED-2026-081-V1",
       fundingGrant: "NIH-HL-2026-9901",
       dataDoi: "doi.org/10.5281/zenodo.108921",
-      editorAssigned: false
+      editorAssigned: true,
+      assignedEditorName: "Prof. Clara Zhang"
     },
     {
       id: "SOEAS-26-RS102",
@@ -1050,7 +1057,12 @@ export default function Editorial360Page() {
       score: "88% Probability",
       detail: "Statistical signature mismatch in 'Methodology' suggests large-language model generation.",
       severity: "warning",
-      status: "Flagged"
+      status: "Escalated",
+      escalationNotes: "Elevated AI probability (88% Probability) detected in Methodology. Recommend 14-day author inquiry for LLM disclosure.",
+      escalationRecommendation: "inquiry",
+      escalationPriority: "high",
+      escalatedAt: "Aug 31, 2026, 08:00 PM",
+      escalatedBy: "Dr. Helen Vance (Research Integrity Manager)"
     },
     {
       id: "ALT-002",
@@ -1064,6 +1076,75 @@ export default function Editorial360Page() {
       status: "Flagged"
     }
   ])
+
+  const [crossDeskNotifications, setCrossDeskNotifications] = useState<CrossDeskNotification[]>([
+    {
+      id: "NOTIF-001",
+      timestamp: "Today · 20:00 UTC",
+      paperId: "SOEAS-26-RS106",
+      paperTitle: "Optimization of Silicon Anodes for Lithium-Ion Batteries",
+      journal: "Engineering & Applied Sciences",
+      type: "im_escalation",
+      severity: "urgent",
+      actorName: "Dr. Helen Vance (Research Integrity Manager)",
+      actorRole: "Research Integrity Office",
+      headline: "Ethical Misconduct Case Escalated to Editor-in-Chief",
+      summary: "Elevated AI probability (88% Index) detected in Methodology. Formal brief referred to Prof. Aris Thorne for adjudication.",
+      recipient: "Journal Manager & Editor-in-Chief",
+      isRead: false
+    },
+    {
+      id: "NOTIF-002",
+      timestamp: "Today · 18:30 UTC",
+      paperId: "SOMED-26-RW101",
+      paperTitle: "Neural Cell Proliferation in Regenerative Therapies",
+      journal: "Scholarly Open: Medicine",
+      type: "eic_inquiry",
+      severity: "high",
+      actorName: "Prof. Aris Thorne (Editor-in-Chief)",
+      actorRole: "Editor-in-Chief",
+      headline: "14-Day Formal Ethics Inquiry Dispatched to Author",
+      summary: "Inquiry letter regarding image resolution and Western blot slicing dispatched to corresponding author Dr. Evelyn Vane.",
+      dispatchedLetter: `Dear Dr. Evelyn Vane,\n\nManuscript ID: SOMED-26-RW101\nTitle: "Neural Cell Proliferation in Regenerative Therapies"\n\nDuring pre-publication integrity screening for Scholarly Open: Medicine, our Research Integrity Office identified areas requiring formal author clarification regarding Western blot image resolution (AI & Image Forensics).\n\nPlease provide a formal written explanation and itemized response within 14 calendar days via the editorial portal.\n\nSincerely,\nProf. Aris Thorne\nEditor-in-Chief, Scholarly Open: Medicine`,
+      recipient: "Dr. Evelyn Vane (Corresponding Author)",
+      isRead: false
+    },
+    {
+      id: "NOTIF-003",
+      timestamp: "Yesterday · 14:15 UTC",
+      paperId: "SOSOC-26-RS103",
+      paperTitle: "Urban Green Spaces and Socio-Spatial Equity in European Cities",
+      journal: "Social Sciences & Humanities",
+      type: "jm_assignment",
+      severity: "normal",
+      actorName: "Sarah Jenkins (Journal Manager)",
+      actorRole: "Journal Manager Desk",
+      headline: "Handling Editor Assigned & Triage Verified",
+      summary: "Assigned Prof. Aris Thorne as Lead Handling Editor. Pre-flight plagiarism check verified clean (<5%).",
+      recipient: "Prof. Aris Thorne",
+      isRead: true
+    }
+  ])
+
+  const handleAddCrossDeskNotification = (notif: Partial<CrossDeskNotification>) => {
+    const newEntry: CrossDeskNotification = {
+      id: `NOTIF-00${crossDeskNotifications.length + 1}`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " · Today",
+      paperId: notif.paperId || "MANUSCRIPT",
+      paperTitle: notif.paperTitle || "Submitted Manuscript",
+      journal: notif.journal || "Scholarly Open",
+      type: notif.type || "jm_assignment",
+      severity: notif.severity || "normal",
+      actorName: notif.actorName || "Editorial Desk",
+      actorRole: notif.actorRole || "Journal Manager Desk",
+      headline: notif.headline || "New Editorial Action",
+      summary: notif.summary || "Editorial action logged in cross-desk activity feed.",
+      dispatchedLetter: notif.dispatchedLetter,
+      recipient: notif.recipient || "Editorial Staff",
+      isRead: false
+    }
+    setCrossDeskNotifications(prev => [newEntry, ...prev])
+  }
 
   const [users, setUsers] = useState<WorkspaceUser[]>([
     { id: "USR-01", name: "Dr. Evelyn Vane", email: "e.vane@scholarlyopen.org", role: "reviewer", activeTasks: 2, status: "Active" },
@@ -1193,6 +1274,14 @@ export default function Editorial360Page() {
   const [isForensicsOpen, setIsForensicsOpen] = useState(false)
   const [activeAlertId, setActiveAlertId] = useState("")
 
+  // IM EiC Escalation Modal States
+  const [isEscalateModalOpen, setIsEscalateModalOpen] = useState(false)
+  const [escalateAlertId, setEscalateAlertId] = useState("")
+  const [escalateRecommendation, setEscalateRecommendation] = useState<string>("raw_data")
+  const [escalatePriority, setEscalatePriority] = useState<"standard" | "high" | "critical">("high")
+  const [escalateNotes, setEscalateNotes] = useState("")
+  const [escalateIncludeAuditLog, setEscalateIncludeAuditLog] = useState(true)
+
   // Co-Reviewing States
   const [coReviewInvitations, setCoReviewInvitations] = useState<CoReviewInvitation[]>([
     {
@@ -1229,6 +1318,8 @@ export default function Editorial360Page() {
   // Active sub-page tab for JM / Editor / Author / Reviewer
   const [activeJmTab, setActiveJmTab] = useState<string>("board")
   const [activeEditorTab, setActiveEditorTab] = useState<string>("desk")
+  const [activeRiaTab, setActiveRiaTab] = useState<string>("alerts")
+  const [activeAdminTab, setActiveAdminTab] = useState<string>("overview")
   const [activeAuthorTab, setActiveAuthorTab] = useState<"dashboard" | "submissions" | "scorecard" | "plagiarism" | "feedback" | "recognition" | "career">("dashboard")
   const [activeReviewerTab, setActiveReviewerTab] = useState<"overview" | "portfolio" | "forensics" | "wallet" | "certificate">("overview")
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
@@ -1248,6 +1339,12 @@ export default function Editorial360Page() {
   const [editorFeedbackPage, setEditorFeedbackPage] = useState<number>(1)
   const [reviewerAssignmentsPage, setReviewerAssignmentsPage] = useState<number>(1)
   const [reviewerInvitationsPage, setReviewerInvitationsPage] = useState<number>(1)
+
+  // Interactive COPE Ethics Decision Engine States
+  const [selectedCopeFlowchart, setSelectedCopeFlowchart] = useState<string>("image_manipulation")
+  const [selectedCopePaperId, setSelectedCopePaperId] = useState<string>("SOMED-26-RS001")
+  const [copeNodeHistory, setCopeNodeHistory] = useState<string[]>(["start"])
+  const [copiedLetterNotice, setCopiedLetterNotice] = useState<boolean>(false)
 
   // Interactive Plagiarism Scan States
   const [selectedScanPaperId, setSelectedScanPaperId] = useState<string>("SOMED-26-RW101")
@@ -2170,6 +2267,163 @@ export default function Editorial360Page() {
     setIsForensicsOpen(false)
   }
 
+  const openEscalateModal = (alertId: string) => {
+    const alert = integrityAlerts.find(a => a.id === alertId)
+    setEscalateAlertId(alertId)
+    setIsForensicsOpen(false)
+    
+    if (alert) {
+      if (alert.type === "AI Content Index") {
+        setEscalateRecommendation("inquiry")
+        setEscalatePriority("high")
+        setEscalateNotes(`Elevated AI probability (${alert.score}) detected in Methodology. Recommend 14-day author inquiry for LLM disclosure.`)
+      } else if (alert.type === "Plagiarism Match") {
+        setEscalateRecommendation("inquiry")
+        setEscalatePriority("high")
+        setEscalateNotes(`Text similarity (${alert.score}) exceeds tolerance. Recommend revision with proper attribution or desk rejection.`)
+      } else if (alert.type === "Figure Duplication") {
+        setEscalateRecommendation("raw_data")
+        setEscalatePriority("critical")
+        setEscalateNotes(`Potential figure/band duplication flagged. Recommend formal 14-day raw data request per COPE guidelines.`)
+      } else {
+        setEscalateRecommendation("raw_data")
+        setEscalatePriority("standard")
+        setEscalateNotes(`Integrity flag (${alert.type} - ${alert.score}) referred for Editor-in-Chief review.`)
+      }
+    }
+    setIsEscalateModalOpen(true)
+  }
+
+  const handleConfirmEscalation = () => {
+    if (!escalateAlertId) return
+    const now = new Date()
+    const formattedDate = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })
+
+    setIntegrityAlerts(prev => 
+      prev.map(a => {
+        if (a.id === escalateAlertId) {
+          return {
+            ...a,
+            status: "Escalated",
+            escalationNotes: escalateNotes,
+            escalationRecommendation: escalateRecommendation,
+            escalationPriority: escalatePriority,
+            escalatedAt: formattedDate,
+            escalatedBy: "Dr. Helen Vance (Research Integrity Manager)"
+          }
+        }
+        return a
+      })
+    )
+
+    const alert = integrityAlerts.find(a => a.id === escalateAlertId)
+    if (alert) {
+      setManuscripts(prev => 
+        prev.map(m => {
+          if (m.id === alert.paperId) {
+            return { 
+              ...m, 
+              integrityStatus: "Flagged",
+              status: "Under Review"
+            }
+          }
+          return m
+        })
+      )
+
+      handleAddCrossDeskNotification({
+        paperId: alert.paperId,
+        paperTitle: alert.title,
+        journal: alert.journal || "Engineering & Applied Sciences",
+        type: "im_escalation",
+        severity: "urgent",
+        actorName: "Dr. Helen Vance (Research Integrity Manager)",
+        actorRole: "Research Integrity Office",
+        headline: `Ethical Misconduct Case Escalated to Editor-in-Chief`,
+        summary: `Dr. Helen Vance (IM) escalated manuscript ${alert.paperId} (${alert.type}: ${alert.score}). IM notes: ${escalateNotes}`,
+        recipient: "Journal Manager & Editor-in-Chief"
+      })
+    }
+
+    setIsEscalateModalOpen(false)
+    setSuccess(`✓ Case ${alert?.paperId || escalateAlertId} successfully escalated to Editor-in-Chief with confidential forensic brief.`)
+  }
+
+  const onTriggerSubmitEscalation = () => {
+    const alert = integrityAlerts.find(a => a.id === escalateAlertId)
+    setIsEscalateModalOpen(false)
+    triggerConfirm({
+      title: "Confirm Escalation to Editor-in-Chief?",
+      message: `Are you sure you want to escalate manuscript ${alert?.paperId || escalateAlertId} to the Editor-in-Chief with this confidential forensic brief?`,
+      confirmButtonLabel: "Yes, Confirm Escalation",
+      confirmColorClass: "bg-red-600 hover:bg-red-700",
+      onConfirm: () => {
+        handleConfirmEscalation()
+      },
+      onCancel: () => {
+        setIsEscalateModalOpen(true)
+      }
+    })
+  }
+
+  const onTriggerResolveIntegrity = (alertId: string, action: "escalate" | "clear") => {
+    if (action === "escalate") {
+      openEscalateModal(alertId)
+      return
+    }
+
+    const alert = integrityAlerts.find(a => a.id === alertId)
+    setIsForensicsOpen(false)
+    triggerConfirm({
+      title: "Clear Integrity Flag?",
+      message: `Are you sure you want to clear the integrity flag for manuscript ${alert?.paperId || alertId} and certify automated compliance?`,
+      confirmButtonLabel: "Yes, Clear Flag",
+      confirmColorClass: "bg-emerald-600 hover:bg-emerald-700",
+      onConfirm: () => {
+        handleResolveIntegrity(alertId, "clear")
+        setSuccess("✓ Integrity flag cleared. Manuscript marked clean.")
+      }
+    })
+  }
+
+  const onTriggerInviteUser = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!inviteName || !inviteEmail) return
+    setIsInviteUserOpen(false)
+    triggerConfirm({
+      title: "Confirm Member Invitation?",
+      message: `Are you sure you want to dispatch a workspace invitation to ${inviteName} (${inviteEmail}) for the role of '${inviteRole.toUpperCase()}'?`,
+      confirmButtonLabel: "Yes, Send Invitation",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: () => {
+        const newUser: WorkspaceUser = {
+          id: `USR-${Math.floor(Math.random() * 100) + 10}`,
+          name: inviteName,
+          email: inviteEmail,
+          role: inviteRole,
+          activeTasks: 0,
+          status: "Pending Invitation"
+        }
+        setUsers(prev => [newUser, ...prev])
+        setInviteName("")
+        setInviteEmail("")
+        setSuccess(`✓ Workspace invitation dispatched to ${inviteName} (${inviteEmail}).`)
+      }
+    })
+  }
+
+  const handleSaveAdminConfigs = () => {
+    triggerConfirm({
+      title: "Save System Configurations?",
+      message: "Are you sure you want to apply these global editorial policy and automation settings across all journals?",
+      confirmButtonLabel: "Yes, Save Configurations",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: () => {
+        setSuccess("✓ System configurations and policy toggles updated successfully.")
+      }
+    })
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all font-sans">
       
@@ -2709,6 +2963,39 @@ export default function Editorial360Page() {
                 </div>
               )}
 
+              {/* Editor Quick Badges in Main Header */}
+              {role === "editor" && (
+                <div className="hidden md:flex items-center gap-2 mr-1">
+                  {/* Active Submissions Badge */}
+                  <div
+                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
+                    title={language === "de" ? "Aktive redaktionelle Manuskripte" : "Active Manuscripts Under Handling"}
+                  >
+                    <FileText className="h-3.5 w-3.5 text-[#0b99ff]" />
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
+                      {language === "de" ? `${manuscripts.length} Manuskripte aktiv` : `${manuscripts.length} Active Submissions`}
+                    </span>
+                  </div>
+
+                  {/* Official ORCID Identity Badge for Editor */}
+                  <a
+                    href="https://orcid.org/0000-0002-9842-1102"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
+                    title={language === "de" ? "Verifiziertes ORCID-Profil des Herausgebers" : "View Editor's Verified ORCID Record"}
+                  >
+                    <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
+                      iD
+                    </span>
+                    <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
+                      0000-0002-9842-1102
+                    </span>
+                    <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
+                  </a>
+                </div>
+              )}
+
               {/* 1. Dark/Light Mode Toggle */}
               <button
                 type="button"
@@ -3197,6 +3484,26 @@ export default function Editorial360Page() {
                     <>
                       <button 
                         type="button"
+                        onClick={() => setActiveJmTab("activity")}
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "activity"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Bell className="h-4 w-4 text-[#0b99ff]" />
+                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
+                        </div>
+                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
+                            {crossDeskNotifications.filter(n => !n.isRead).length}
+                          </span>
+                        )}
+                      </button>
+
+                      <button 
+                        type="button"
                         onClick={() => setActiveJmTab("board")}
                         className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "board"
@@ -3206,19 +3513,6 @@ export default function Editorial360Page() {
                       >
                         <LayoutDashboard className="h-4 w-4" />
                         {language === "de" ? "Journal-Manager" : "Journal Manager"}
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("moderation")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "moderation"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <MessageSquareOff className="h-4 w-4" />
-                        {language === "de" ? "Gutachten-Moderation" : "Comment Moderation"}
                       </button>
 
                       <button 
@@ -3279,6 +3573,26 @@ export default function Editorial360Page() {
                     <>
                       <button 
                         type="button"
+                        onClick={() => setActiveEditorTab("activity")}
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeEditorTab === "activity"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Bell className="h-4 w-4 text-[#0b99ff]" />
+                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
+                        </div>
+                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
+                            {crossDeskNotifications.filter(n => !n.isRead).length}
+                          </span>
+                        )}
+                      </button>
+
+                      <button 
+                        type="button"
                         onClick={() => setActiveEditorTab("desk")}
                         className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                           activeEditorTab === "desk"
@@ -3288,45 +3602,6 @@ export default function Editorial360Page() {
                       >
                         <LayoutDashboard className="h-4 w-4" />
                         {language === "de" ? "Redaktionstisch & Pipeline" : "Editorial Desk & Pipeline"}
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("tracker")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "tracker"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <Clock className="h-4 w-4" />
-                        {language === "de" ? "Gutachten-Tracking" : "Reviewer Progress"}
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("decision")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "decision"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <CheckSquare className="h-4 w-4" />
-                        {language === "de" ? "Entscheidungszentrum" : "Decision Central"}
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("analytics")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "analytics"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <Award className="h-4 w-4" />
-                        {language === "de" ? "Redaktionsmetriken & Impact" : "Editorial Impact & Metrics"}
                       </button>
 
                       <button 
@@ -3351,8 +3626,153 @@ export default function Editorial360Page() {
                             : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
                         }`}
                       >
+                        <Layers className="h-4 w-4" />
+                        {language === "de" ? "Sonderhefte & Sammlungen" : "Special Collections"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveEditorTab("analytics")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeEditorTab === "analytics"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <Award className="h-4 w-4" />
+                        {language === "de" ? "Redaktionsmetriken & Impact" : "Editorial Impact & Metrics"}
+                      </button>
+                    </>
+                  )}
+
+                  {(role === "ria" || role === "im") && (
+                    <>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveRiaTab("activity")}
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeRiaTab === "activity"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Bell className="h-4 w-4 text-[#0b99ff]" />
+                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
+                        </div>
+                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
+                            {crossDeskNotifications.filter(n => !n.isRead).length}
+                          </span>
+                        )}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveRiaTab("alerts")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeRiaTab === "alerts"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <ShieldAlert className="h-4 w-4 text-red-500" />
+                        {language === "de" ? "Alerts" : "Alerts"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveRiaTab("intel")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeRiaTab === "intel" || activeRiaTab === "scans"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <Search className="h-4 w-4 text-[#0b99ff]" />
+                        {language === "de" ? "Paper Mill Intel" : "Paper Mill Intel"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveRiaTab("studio")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeRiaTab === "studio" || activeRiaTab === "protocols"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <CheckSquare className="h-4 w-4 text-emerald-500" />
+                        {language === "de" ? "COPE Studio" : "COPE Studio"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveRiaTab("sanctions")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeRiaTab === "sanctions"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <ShieldCheck className="h-4 w-4 text-slate-500" />
+                        {language === "de" ? "Watchlist" : "Watchlist"}
+                      </button>
+                    </>
+                  )}
+
+                  {role === "admin" && (
+                    <>
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAdminTab("overview")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAdminTab === "overview"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        {language === "de" ? "Systemübersicht" : "System Overview"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAdminTab("members")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAdminTab === "members"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <Users className="h-4 w-4" />
+                        {language === "de" ? "Mitglieder-Registry" : "Member Registry"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAdminTab("policy")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAdminTab === "policy"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
+                        <Sliders className="h-4 w-4" />
+                        {language === "de" ? "Richtlinien & Automation" : "Policy & Automation"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAdminTab("journals")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAdminTab === "journals"
+                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                        }`}
+                      >
                         <BookOpen className="h-4 w-4" />
-                        {language === "de" ? "Sonderhefte" : "Special Collections"}
+                        {language === "de" ? "Verwaltete Journals" : "Managed Journals"}
                       </button>
                     </>
                   )}
@@ -3415,6 +3835,8 @@ export default function Editorial360Page() {
                       setReviews(prev => prev.map(r => r.id === revId ? { ...r, status: "Released", sanitizedCommentsAuthor: sanitizedText } : r))
                     }}
                     archiveLogs={archiveLogs as any}
+                    notifications={crossDeskNotifications}
+                    onAddNotification={handleAddCrossDeskNotification}
                     user={{
                       name: jmFullName,
                       role: jmStaffRole,
@@ -3433,6 +3855,10 @@ export default function Editorial360Page() {
                     activeTab={activeEditorTab}
                     onTabChange={setActiveEditorTab}
                     manuscripts={manuscripts as any}
+                    integrityAlerts={integrityAlerts}
+                    onResolveIntegrity={handleResolveIntegrity}
+                    notifications={crossDeskNotifications}
+                    onAddNotification={handleAddCrossDeskNotification}
                     onUpdateManuscriptStatus={(id, st) => {
                       setManuscripts(prev => prev.map(m => m.id === id ? { ...m, status: st as any } : m))
                     }}
@@ -5256,125 +5682,1163 @@ export default function Editorial360Page() {
                   )
                 })()}
 
-                {/* ================= 5. RESEARCH INTEGRITY ADVISOR (QC Admin) ================= */}
-                {role === "ria" && (
+                {/* ================= 5. RESEARCH INTEGRITY ADVISOR (QC Admin / IM) ================= */}
+                {(role === "ria" || role === "im") && (
                   <div className="space-y-6">
-                    <UserProfileHeaderCard role="ria" />
-                    {/* QC Admin Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Flagged Cases</CardTitle>
-                          <AlertTriangle className="h-4 w-4 text-red-500" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {integrityAlerts.filter(a => a.status === "Flagged").length}
+                    {/* 0. Dynamic In-House Research Integrity Manager Desk Header Banner */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs">
+                      <div className="flex items-center gap-3.5">
+                        <div className="relative h-11 w-11 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-[#272832]">
+                          <span>HV</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                              Dr. Helen Vance
+                            </h2>
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                              {language === "de" ? "Integritätsmanager & Ethikbeauftragte" : "Research Integrity & Ethics Manager"}
+                            </span>
                           </div>
-                          <span className="text-[10px] text-red-500 dark:text-red-400 font-semibold block mt-1">Requires technical review</span>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Audited Submissions</CardTitle>
-                          <FileText className="h-4 w-4 text-[#0b99ff]" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">156</div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Verified on automated ingest</span>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">False Positive Rate</CardTitle>
-                          <CheckSquare className="h-4 w-4 text-green-500" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">2.1%</div>
-                          <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold block mt-1">Well within calibration target</span>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">AI Integrity Scan Latency</CardTitle>
-                          <Cpu className="h-4 w-4 text-slate-400" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">4.8s</div>
-                          <span className="text-[10px] text-slate-555 dark:text-slate-405 block mt-1">Sub-second checksum parsing</span>
-                        </CardContent>
-                      </Card>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Research Integrity & Forensics Office (Basel / Berlin) • Germany • <span className="text-[#0b99ff] font-medium">integrity@scholarlyopen.org</span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/30">
+                          ● COPE Ethics & Fraud Surveillance Desk
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Integrity Alert Queue Cards */}
-                    <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-                      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white">Integrity Forensic Alert Queue</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Investigate flagged text similarity, generative AI probability indices, or figure duplication logs.</p>
+                    {/* 1. Standard Unified 4-Stat Metric Grid */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs">
+                      <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-[#272832]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                          Flagged Cases
+                        </span>
+                        <div className="text-lg font-bold tracking-tight text-red-600 dark:text-red-400 tabular-nums">
+                          {integrityAlerts.filter(a => a.status === "Flagged").length} <span className="text-xs font-medium text-red-500">Alerts</span>
+                        </div>
+                        <span className="text-xs font-medium text-slate-500 block">Requires technical forensic audit</span>
                       </div>
-                      
-                      <div className="p-5 space-y-4">
-                        {integrityAlerts.map((alert) => (
-                          <div 
-                            key={alert.id} 
-                            className={`p-4.5 rounded-lg bg-slate-50 dark:bg-slate-900 border flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all ${
-                              alert.status !== "Flagged" ? "opacity-50" : "hover:border-slate-300 dark:hover:border-slate-700"
-                            } ${
-                              alert.status === "Flagged" && alert.severity === "critical" ? "border-red-500/30 bg-red-500/5" : 
-                              alert.status === "Flagged" && alert.severity === "warning" ? "border-yellow-500/30 bg-yellow-500/5" : "border-slate-200 dark:border-slate-800"
-                            }`}
-                          >
-                            <div className="space-y-2">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className={`px-2 py-0.5 text-[9px] font-bold rounded uppercase ${
-                                  alert.severity === "critical" ? "bg-red-500/15 text-red-500 dark:text-red-400 border border-red-500/20" :
-                                  alert.severity === "warning" ? "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20" :
-                                  "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
-                                }`}>
-                                  {alert.severity} Risk
-                                </span>
-                                <span className="text-[10px] uppercase font-bold text-slate-500">{alert.journal}</span>
-                                <span className="text-[10px] text-slate-400 whitespace-nowrap">Manuscript ID: {alert.paperId}</span>
+
+                      <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                          Total Audited Submissions
+                        </span>
+                        <div className="text-lg font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                          156 <span className="text-xs font-medium text-slate-500">Manuscripts</span>
+                        </div>
+                        <span className="text-xs font-medium text-slate-500 block">Verified on automated ingest</span>
+                      </div>
+
+                      <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                          False Positive Rate
+                        </span>
+                        <div className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
+                          2.1% <span className="text-xs font-medium text-emerald-500">Low</span>
+                        </div>
+                        <span className="text-xs font-medium text-slate-500 block">Within calibration threshold</span>
+                      </div>
+
+                      <div className="space-y-1 pl-0 lg:pl-4">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                          Scan Pipeline Latency
+                        </span>
+                        <div className="text-lg font-bold tracking-tight text-[#0b99ff] tabular-nums">
+                          4.8s <span className="text-xs font-medium text-[#0b99ff]">Sub-second</span>
+                        </div>
+                        <span className="text-xs font-medium text-slate-500 block">Automated checksum & AI parity</span>
+                      </div>
+                    </div>
+
+                    {/* ========================================================= */}
+                    {/* TAB 0: NOTIFICATIONS & ACTIVITY (CROSS-DESK SYNC)         */}
+                    {/* ========================================================= */}
+                    {activeRiaTab === "activity" && (
+                      <CrossDeskActivityFeed
+                        language={language}
+                        currentRole="im"
+                        notifications={crossDeskNotifications}
+                        onMarkAsRead={(id) => {
+                          setCrossDeskNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
+                        }}
+                        onMarkAllAsRead={() => {
+                          setCrossDeskNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+                        }}
+                        onViewPaperDossier={(paperId) => {
+                          const alert = integrityAlerts.find(a => a.paperId === paperId)
+                          if (alert) {
+                            setSelectedAlertForModal(alert)
+                          }
+                        }}
+                      />
+                    )}
+
+                    {/* TAB 1: ALERTS (FORENSIC QUEUE) */}
+                    {activeRiaTab === "alerts" && (
+                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors rounded-2xl shadow-xs">
+                        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 flex items-center justify-between">
+                          <div>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Forensic Alert Queue</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Active cases flagged by automated figure scans, text similarity, or editorial referrals.</p>
+                          </div>
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900/40">
+                            {integrityAlerts.filter(a => a.status === "Flagged").length} Active Cases
+                          </span>
+                        </div>
+                        
+                        <div className="p-5 space-y-3">
+                          {integrityAlerts.map((alert) => (
+                            <div 
+                              key={alert.id} 
+                              className={`p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
+                                alert.status !== "Flagged" ? "opacity-60 bg-slate-50/50 dark:bg-slate-900/30" : "bg-white dark:bg-[#131418] hover:border-slate-300 dark:hover:border-slate-700"
+                              } ${
+                                alert.status === "Flagged" && alert.severity === "critical" ? "border-red-200 dark:border-red-900/40" : 
+                                alert.status === "Flagged" && alert.severity === "warning" ? "border-amber-200 dark:border-amber-900/40" : "border-slate-200 dark:border-slate-800"
+                              }`}
+                            >
+                              <div className="space-y-1.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
+                                    alert.severity === "critical" ? "bg-red-50 text-red-600 dark:bg-red-950/60 dark:text-red-400 border border-red-200 dark:border-red-900/40" :
+                                    alert.severity === "warning" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40" :
+                                    "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                                  }`}>
+                                    {alert.severity === "critical" ? "Critical Risk" : "Warning Risk"}
+                                  </span>
+                                  <span className="text-slate-300 dark:text-slate-700">·</span>
+                                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">{alert.journal}</span>
+                                  <span className="text-slate-300 dark:text-slate-700">·</span>
+                                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">ID: {alert.paperId}</span>
+                                </div>
+                                
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">{alert.title}</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-400 max-w-2xl leading-normal">{alert.detail}</p>
+                                
+                                <div className="flex items-center gap-3 pt-0.5 text-xs">
+                                  <span className="text-[#0b99ff] font-semibold">
+                                    {alert.type}: <strong className="font-bold">{alert.score}</strong>
+                                  </span>
+                                  <span className="text-slate-300 dark:text-slate-700">|</span>
+                                  <span className="text-slate-500">Status: <strong className="text-slate-800 dark:text-slate-200 font-bold uppercase">{alert.status}</strong></span>
+                                </div>
                               </div>
-                              
-                              <h4 className="text-sm font-bold text-slate-900 dark:text-white">{alert.title}</h4>
-                              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-2xl">{alert.detail}</p>
-                              
-                              <div className="flex items-center gap-3 pt-1 text-[11px]">
-                                <span className="text-[#0b99ff] font-bold">
-                                  {alert.type}: {alert.score}
+
+                              <div className="shrink-0 flex items-center gap-2">
+                                {alert.status === "Flagged" ? (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setSelectedCopePaperId(alert.paperId)
+                                        if (alert.type.toLowerCase().includes("figure") || alert.type.toLowerCase().includes("image")) {
+                                          setSelectedCopeFlowchart("image_manipulation")
+                                        } else if (alert.type.toLowerCase().includes("plagiarism") || alert.type.toLowerCase().includes("similarity")) {
+                                          setSelectedCopeFlowchart("plagiarism")
+                                        } else if (alert.type.toLowerCase().includes("ai") || alert.type.toLowerCase().includes("synthetic")) {
+                                          setSelectedCopeFlowchart("data_fabrication")
+                                        } else if (alert.type.toLowerCase().includes("review") || alert.type.toLowerCase().includes("ring")) {
+                                          setSelectedCopeFlowchart("peer_review_manipulation")
+                                        } else if (alert.type.toLowerCase().includes("author")) {
+                                          setSelectedCopeFlowchart("authorship_dispute")
+                                        }
+                                        setCopeNodeHistory(["start"])
+                                        setActiveRiaTab("studio")
+                                      }}
+                                      className="text-xs h-8 cursor-pointer border-[#0b99ff]/30 text-[#0b99ff] hover:bg-[#0b99ff]/10 font-semibold"
+                                    >
+                                      Diagnose in COPE Studio
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        setActiveAlertId(alert.id)
+                                        setIsForensicsOpen(true)
+                                      }}
+                                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-3.5 shadow-xs cursor-pointer"
+                                    >
+                                      Inspect Dossier
+                                    </Button>
+                                  </>
+                                ) : alert.status === "Escalated" ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-red-600 dark:text-red-400 font-semibold flex items-center gap-1.5 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/30">
+                                      <ShieldAlert className="h-3.5 w-3.5 text-red-500" /> Escalated to EiC
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => openEscalateModal(alert.id)}
+                                      className="text-xs h-8 px-2.5 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                    >
+                                      View Brief
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/30">
+                                    <CheckCircle2 className="h-3.5 w-3.5" /> Resolved (Cleared)
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* TAB 2: PAPER MILL & IDENTITY INTEL */}
+                    {(activeRiaTab === "intel" || activeRiaTab === "scans") && (
+                      <div className="space-y-4">
+                        <div className="p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Paper Mill & Identity Intelligence</h3>
+                              <p className="text-xs text-slate-500">Cross-publisher submission tracking, disposable domain detection, and author ring surveillance.</p>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/30">
+                              STM Hub Connected ✓
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 space-y-2">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Domain Integrity</span>
+                              <div className="text-base font-bold text-slate-900 dark:text-white">99.2% Verified</div>
+                              <p className="text-xs text-slate-500 leading-relaxed">0 disposable domains detected in active queue. 3 institutional email aliases verified.</p>
+                            </div>
+
+                            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 space-y-2">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Simultaneous Submissions</span>
+                              <div className="text-base font-bold text-emerald-600 dark:text-emerald-400">0 Collisions</div>
+                              <p className="text-xs text-slate-500 leading-relaxed">Cryptographic manuscript title and abstract hashes cross-referenced across registry.</p>
+                            </div>
+
+                            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 space-y-2">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Reviewer Ring Shield</span>
+                              <div className="text-base font-bold text-slate-900 dark:text-white">Active Guard</div>
+                              <p className="text-xs text-slate-500 leading-relaxed">No circular peer review or co-author collision patterns identified.</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Monitored Authors & Entities */}
+                        <div className="p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                            Recent Pattern Scans
+                          </h4>
+                          <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                            <div className="py-2.5 flex items-center justify-between">
+                              <div className="space-y-0.5">
+                                <span className="font-semibold text-slate-900 dark:text-white">SOEAS-26-RS106: Lithium Anode Protocol</span>
+                                <div className="text-[11px] text-slate-500">Electrochemical Energy Institute · Author: Prof. Robert Lang</div>
+                              </div>
+                              <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded">
+                                AI Phrasing Density: 88%
+                              </span>
+                            </div>
+
+                            <div className="py-2.5 flex items-center justify-between">
+                              <div className="space-y-0.5">
+                                <span className="font-semibold text-slate-900 dark:text-white">SOSSH-26-SRW107: Meta-Analysis Econometrics</span>
+                                <div className="text-[11px] text-slate-500">Institute of Social Economics · Author: Dr. Helen Vance</div>
+                              </div>
+                              <span className="text-[11px] font-semibold text-red-600 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded">
+                                Text Similarity Index: 34%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB 3: COPE DECISION STUDIO (LIVE BRANCHING TREE KNOWLEDGE BASE) */}
+                    {(activeRiaTab === "studio" || activeRiaTab === "protocols") && (() => {
+                      // All 6 COPE Flowchart Decision Trees
+                      const copeFlowcharts: Record<string, {
+                        title: string
+                        ref: string
+                        summary: string
+                        nodes: Record<string, {
+                          stage: string
+                          question: string
+                          knowledgeBase: string
+                          options: Array<{ label: string; nextId: string; variant?: "default" | "success" | "danger" | "warning"; badge?: string }>
+                          verdict?: {
+                            type: "clear" | "warning" | "escalate" | "reject"
+                            title: string
+                            details: string
+                            actionLabel: string
+                            letterSubject: string
+                            letterBody: string
+                          }
+                        }>
+                      }> = {
+                        image_manipulation: {
+                          title: "Image Manipulation & Figure Fabrication",
+                          ref: "COPE Flowchart #02",
+                          summary: "Investigating Western blot splicing, repeated microscopy backgrounds, and contrast manipulation.",
+                          nodes: {
+                            start: {
+                              stage: "Stage 1: Evidence Discovery",
+                              question: "What is the nature of the flagged figure irregularity?",
+                              knowledgeBase: "According to COPE Guidelines on Digital Images, editors must distinguish between benign formatting/contrast adjustments and fraudulent data alterations (such as cloning bands or splicing gels from different experiments).",
+                              options: [
+                                { label: "Repeated background pixels / Cloned lanes or bands", nextId: "raw_data_check", badge: "High Risk", variant: "danger" },
+                                { label: "Contrast/brightness altered across whole figure", nextId: "linear_adjust_check", badge: "Moderate Risk", variant: "warning" },
+                                { label: "Low-resolution compression artifact", nextId: "verdict_benign_artifact", badge: "Low Risk", variant: "success" }
+                              ]
+                            },
+                            linear_adjust_check: {
+                              stage: "Stage 2: Technical Verification",
+                              question: "Does the brightness/contrast adjustment obscure background noise or introduce non-linear bias?",
+                              knowledgeBase: "Uniform adjustments across the entire image that do not obscure background data or selectively delete bands are acceptable per COPE & CSE standards.",
+                              options: [
+                                { label: "No, adjustment is linear and background noise is visible", nextId: "verdict_clear_with_corrigendum", badge: "Acceptable", variant: "success" },
+                                { label: "Yes, non-linear adjustment obscures faint bands", nextId: "raw_data_check", badge: "Requires Raw Files", variant: "danger" }
+                              ]
+                            },
+                            raw_data_check: {
+                              stage: "Stage 2: Author Inquiry & Raw Data Audit",
+                              question: "Has the corresponding author been formally requested to supply uncropped, original instrument raw files?",
+                              knowledgeBase: "Authors must be given a standard 14-day window to provide raw instrument data files (e.g. uncropped TIFF/GEL scans with molecular weight markers). Authors must not be accused of misconduct at this inquiry stage.",
+                              options: [
+                                { label: "Author provided authentic uncropped raw data with original blot runs", nextId: "verdict_author_supplied_data", badge: "Verified", variant: "success" },
+                                { label: "Author provided unconvincing explanation, claimed lost data, or failed to reply (14d elapsed)", nextId: "institutional_escalation", badge: "Unsatisfactory", variant: "danger" }
+                              ]
+                            },
+                            institutional_escalation: {
+                              stage: "Stage 3: Institutional Escalation",
+                              question: "Has the case been escalated to the author's University Research Integrity Officer (RIO) / Ethics Board?",
+                              knowledgeBase: "When authors cannot substantiate published figures with raw data, the journal cannot conduct a criminal investigation; COPE mandates referring the dossier to the home institution's research integrity authority.",
+                              options: [
+                                { label: "Institution confirms data fabrication / inability to substantiate claims", nextId: "verdict_retract_reject", badge: "Fabrication Confirmed", variant: "danger" },
+                                { label: "Institution verifies data authenticity under formal audit", nextId: "verdict_clear_with_corrigendum", badge: "Institutional Clearance", variant: "success" }
+                              ]
+                            },
+                            verdict_benign_artifact: {
+                              stage: "Stage 3: Case Resolution",
+                              question: "Verdict: Benign Image Compression Artifact",
+                              knowledgeBase: "Technical examination confirmed high-frequency JPEG compression artifacts with no evidence of deliberate manipulation.",
+                              options: [],
+                              verdict: {
+                                type: "clear",
+                                title: "Clear Flag & Return to Handling Editor",
+                                details: "No breach of publication ethics found. Case certified clean.",
+                                actionLabel: "Clear Manuscript & Certify Compliance",
+                                letterSubject: "Editorial Integrity Audit Notice — Manuscript Certified Clean",
+                                letterBody: "Dear Author,\n\nOur Research Integrity Office has concluded the technical review of the figure files in your submission. No irregularities were found, and your manuscript has been returned to the handling editor for peer review continuation.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_clear_with_corrigendum: {
+                              stage: "Stage 3: Case Resolution",
+                              question: "Verdict: Request Figure Corrigendum & Replacement",
+                              knowledgeBase: "The underlying scientific data is valid, but the figure representation requires replacement with the original uncompressed source scan.",
+                              options: [],
+                              verdict: {
+                                type: "warning",
+                                title: "Request Corrigendum & High-Resolution Replacement",
+                                details: "Require the author to replace the figure with the verified uncropped raw scan.",
+                                actionLabel: "Dispatch Figure Replacement Notice",
+                                letterSubject: "Request for High-Resolution Figure Replacement — Manuscript Audit",
+                                letterBody: "Dear Author,\n\nDuring routine pre-publication technical auditing, our integrity desk identified figure formatting discrepancies. Please provide uncropped high-resolution raw image files and updated figures within 7 days to finalize the audit.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_author_supplied_data: {
+                              stage: "Stage 3: Case Resolution",
+                              question: "Verdict: Raw Data Verified — Flag Cleared",
+                              knowledgeBase: "Author provided complete original unprocessed blot scans matching the molecular weight markers and experimental replicates.",
+                              options: [],
+                              verdict: {
+                                type: "clear",
+                                title: "Archive Raw Data & Clear Manuscript",
+                                details: "Original raw data archived in repository and flagged case closed.",
+                                actionLabel: "Archive Raw Data & Resume Peer Review",
+                                letterSubject: "Integrity Review Complete — Raw Data Successfully Verified",
+                                letterBody: "Dear Author,\n\nThank you for providing the original uncropped raw blot scans. Our forensics desk has verified the data integrity and cleared the manuscript flag.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_retract_reject: {
+                              stage: "Stage 3: Final Sanction & Rejection",
+                              question: "Verdict: Ethical Rejection & Institutional Escalation",
+                              knowledgeBase: "Unsubstantiated image alterations violate COPE Core Practices. The manuscript must be rejected (or retracted if published), and the home institution notified.",
+                              options: [],
+                              verdict: {
+                                type: "reject",
+                                title: "Ethical Rejection & Institutional Notification",
+                                details: "Reject submission with prejudice. Place author identity on internal 12-month monitoring watchlist.",
+                                actionLabel: "Execute Rejection & Dispatch Institutional Notice",
+                                letterSubject: "Notice of Ethical Rejection — Failure to Provide Verifiable Source Data",
+                                letterBody: "Dear Author,\n\nFollowing formal inquiry regarding figure irregularities, you were unable to supply verified original raw data. Under COPE Guidelines, the journal cannot proceed with publication, and the manuscript is formally rejected.\n\nSincerely,\nEditor-in-Chief & Research Integrity Office\nScholarly Open"
+                              }
+                            }
+                          }
+                        },
+                        plagiarism: {
+                          title: "Plagiarism & Text Recycling (Submitted Manuscript)",
+                          ref: "COPE Flowchart #01",
+                          summary: "Handling overlapping text, unattributed verbatim copying, and self-plagiarism in submitted papers.",
+                          nodes: {
+                            start: {
+                              stage: "Stage 1: Similarity Assessment",
+                              question: "What type of text overlap is indicated by Crossref / iThenticate?",
+                              knowledgeBase: "High similarity scores in Methods sections (standard protocols) may be acceptable with citation, whereas uncredited duplication in Results/Discussion indicates serious text recycling or plagiarism.",
+                              options: [
+                                { label: "Major uncredited verbatim overlap in Results or Discussion (>25%)", nextId: "plag_major_inquiry", badge: "Critical", variant: "danger" },
+                                { label: "Overlap confined strictly to standard laboratory Methods section", nextId: "verdict_plag_methods", badge: "Low Risk", variant: "warning" },
+                                { label: "Self-recycling from author's own doctoral dissertation or preprint", nextId: "verdict_plag_preprint", badge: "Acceptable", variant: "success" }
+                              ]
+                            },
+                            plag_major_inquiry: {
+                              stage: "Stage 2: Author Explanation",
+                              question: "Has the author provided an explanation for uncredited copied passages?",
+                              knowledgeBase: "COPE guidelines require giving authors an opportunity to explain before rendering a final plagiarism verdict.",
+                              options: [
+                                { label: "Author admits honest attribution error and supplies rephrased text with full citations", nextId: "verdict_plag_rephrase", badge: "Remediable", variant: "success" },
+                                { label: "Author provides no response or denies copied text despite clear evidence", nextId: "verdict_plag_reject", badge: "Plagiarism Confirmed", variant: "danger" }
+                              ]
+                            },
+                            verdict_plag_methods: {
+                              stage: "Stage 3: Case Resolution",
+                              question: "Verdict: Require Methods Citation & Rewriting",
+                              knowledgeBase: "Methods text recycling is common; author must cite the original protocol source.",
+                              options: [],
+                              verdict: {
+                                type: "warning",
+                                title: "Request Citation of Original Protocol",
+                                details: "Instruct author to rephrase standardized methods and cite original publications.",
+                                actionLabel: "Send Rephrasing Request to Author",
+                                letterSubject: "Editorial Request — Attribution and Methods Citation",
+                                letterBody: "Dear Author,\n\nPlease ensure that all standard experimental protocols in your Methods section are properly cited and summarized in your own words before final peer review.\n\nSincerely,\nEditorial Office\nScholarly Open"
+                              }
+                            },
+                            verdict_plag_preprint: {
+                              stage: "Stage 3: Case Resolution",
+                              question: "Verdict: Legitimate Preprint / Dissertation Text",
+                              knowledgeBase: "COPE & Scholarly Open explicitly support prior preprint posting (e.g. arXiv, bioRxiv) and thesis publication.",
+                              options: [],
+                              verdict: {
+                                type: "clear",
+                                title: "Clear Text Similarity Flag",
+                                details: "Preprint or thesis recognized as legitimate prior dissemination.",
+                                actionLabel: "Clear Flag & Link Preprint DOI",
+                                letterSubject: "Plagiarism Audit Notice — Preprint Similarity Cleared",
+                                letterBody: "Dear Author,\n\nWe have verified that the text overlap originates from your legitimate prior preprint deposit. The similarity flag has been cleared.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_plag_rephrase: {
+                              stage: "Stage 3: Case Resolution",
+                              question: "Verdict: Minor Overlap — Author Rephrasing Permitted",
+                              knowledgeBase: "Attribution oversight corrected with full citations.",
+                              options: [],
+                              verdict: {
+                                type: "warning",
+                                title: "Permit Revision with Full Citations",
+                                details: "Allow author to submit revised text with explicit source attributions.",
+                                actionLabel: "Return to Author for Citation Revisions",
+                                letterSubject: "Revision Notice — Attribution & Text Formatting Required",
+                                letterBody: "Dear Author,\n\nPlease submit your updated manuscript incorporating all necessary citations and rephrased discussions as agreed.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_plag_reject: {
+                              stage: "Stage 3: Final Rejection",
+                              question: "Verdict: Immediate Rejection for Plagiarism",
+                              knowledgeBase: "Significant uncredited verbatim copying without justification violates COPE ethics.",
+                              options: [],
+                              verdict: {
+                                type: "reject",
+                                title: "Reject Submission for Unattributed Text Duplication",
+                                details: "Formal ethical rejection. Report logged in publisher integrity registry.",
+                                actionLabel: "Execute Rejection & Issue Plagiarism Notice",
+                                letterSubject: "Formal Rejection — Publication Ethics Violation (Plagiarism)",
+                                letterBody: "Dear Author,\n\nSubstantial unattributed verbatim text duplication was identified in your submission. In accordance with COPE Core Practices, the manuscript is rejected.\n\nSincerely,\nEditor-in-Chief & Research Integrity Office\nScholarly Open"
+                              }
+                            }
+                          }
+                        },
+                        peer_review_manipulation: {
+                          title: "Compromised Peer Review & Reviewer Rings",
+                          ref: "COPE Flowchart #04",
+                          summary: "Investigating fabricated reviewer accounts, fake email domains, and reciprocal review cartels.",
+                          nodes: {
+                            start: {
+                              stage: "Stage 1: Reviewer Ring Detection",
+                              question: "What anomaly was detected in the peer review assignment?",
+                              knowledgeBase: "COPE guidelines warn against author-suggested reviewers with disposable or non-institutional email domains (@163.com, @gmail.com) that may be controlled by paper mills or the author themselves.",
+                              options: [
+                                { label: "Author-suggested reviewer shares IP address or disposable email domain with author", nextId: "verdict_fake_reviewer", badge: "Critical Fraud", variant: "danger" },
+                                { label: "Reciprocal positive review circle detected between two research groups", nextId: "reviewer_ring_inquiry", badge: "Cartel Risk", variant: "warning" },
+                                { label: "Reviewer submitted report with non-institutional email but verified ORCID", nextId: "verdict_reviewer_verified", badge: "Low Risk", variant: "success" }
+                              ]
+                            },
+                            reviewer_ring_inquiry: {
+                              stage: "Stage 2: Review Audit",
+                              question: "Did independent reviewers verify the scientific validity of the manuscript?",
+                              knowledgeBase: "When reviewer manipulation is suspected, existing compromised reports must be voided, and fresh independent reviewers assigned without author involvement.",
+                              options: [
+                                { label: "Fresh independent reviewers confirm valid science", nextId: "verdict_fresh_reviews_pass", badge: "Science Valid", variant: "success" },
+                                { label: "Fresh independent reviewers find fatal scientific flaws", nextId: "verdict_ring_reject", badge: "Fatal Flaws", variant: "danger" }
+                              ]
+                            },
+                            verdict_fake_reviewer: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Compromised Peer Review — Rejection & Blacklist",
+                              knowledgeBase: "Deliberate creation of fake reviewer profiles constitutes severe publication misconduct.",
+                              options: [],
+                              verdict: {
+                                type: "reject",
+                                title: "Reject Manuscript & Blacklist Compromised Reviewer Accounts",
+                                details: "Cancel submission, delete fake reviewer credentials, and report to institution.",
+                                actionLabel: "Execute Rejection & Blacklist Fake Accounts",
+                                letterSubject: "Notice of Rejection — Reviewer Manipulation Detected",
+                                letterBody: "Dear Author,\n\nAn audit revealed that suggested reviewer accounts were compromised or linked to your submission network. The manuscript is rejected, and accounts have been deactivated.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_reviewer_verified: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Reviewer Identity Verified via ORCID",
+                              knowledgeBase: "Reviewer verified through authenticated institutional ORCID record.",
+                              options: [],
+                              verdict: {
+                                type: "clear",
+                                title: "Verify Reviewer & Accept Report",
+                                details: "Identity substantiated; review report confirmed valid.",
+                                actionLabel: "Accept Review Report & Proceed",
+                                letterSubject: "Reviewer Identity Confirmed",
+                                letterBody: "Dear Editor,\n\nThe reviewer identity has been verified via ORCID authentication. The report is valid.\n\nSincerely,\nResearch Integrity Office"
+                              }
+                            },
+                            verdict_fresh_reviews_pass: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Discard Biased Reviews & Proceed with Independent Reports",
+                              knowledgeBase: "Compromised reports discarded; independent peer review successfully completed.",
+                              options: [],
+                              verdict: {
+                                type: "warning",
+                                title: "Proceed Based on Independent Reviews Only",
+                                details: "Void compromised reviewer reports and base decision on independent experts.",
+                                actionLabel: "Approve Independent Review Reports",
+                                letterSubject: "Peer Review Re-Assessment Completed",
+                                letterBody: "Dear Handling Editor,\n\nPlease finalize the decision based exclusively on the new independent peer review reports.\n\nSincerely,\nResearch Integrity Office"
+                              }
+                            },
+                            verdict_ring_reject: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Rejection Based on Independent Scientific Assessment",
+                              knowledgeBase: "Manuscript fails scientific review when evaluated by genuine domain experts.",
+                              options: [],
+                              verdict: {
+                                type: "reject",
+                                title: "Reject Manuscript on Scientific & Ethical Grounds",
+                                details: "Final rejection following independent review failure.",
+                                actionLabel: "Dispatch Rejection Notice",
+                                letterSubject: "Editorial Decision — Rejection",
+                                letterBody: "Dear Author,\n\nFollowing independent expert evaluation, your manuscript does not meet the scientific standards for publication and is rejected.\n\nSincerely,\nEditor-in-Chief\nScholarly Open"
+                              }
+                            }
+                          }
+                        },
+                        authorship_dispute: {
+                          title: "Authorship Disputes & Ghost/Gift Authors",
+                          ref: "COPE Flowchart #05",
+                          summary: "Resolving contested authorship claims, omitted co-authors, and gift/honorary authorship.",
+                          nodes: {
+                            start: {
+                              stage: "Stage 1: Dispute Triage",
+                              question: "What is the nature of the authorship dispute?",
+                              knowledgeBase: "COPE authorship criteria require substantial contribution to conception, design, acquisition, or analysis of data, plus drafting and approval of the final manuscript.",
+                              options: [
+                                { label: "Researcher claims they were omitted after making substantial contributions", nextId: "omitted_author_inquiry", badge: "Omission Claim", variant: "warning" },
+                                { label: "Corresponding author attempts to remove or add co-authors during revision without explanation", nextId: "change_author_inquiry", badge: "Authorship Change", variant: "warning" },
+                                { label: "Honorary / gift authorship suspected (e.g. departmental head with no contribution)", nextId: "gift_author_inquiry", badge: "Gift Author", variant: "danger" }
+                              ]
+                            },
+                            omitted_author_inquiry: {
+                              stage: "Stage 2: Written Consent from All Authors",
+                              question: "Do all listed co-authors and the claimant agree in writing to the proposed authorship list?",
+                              knowledgeBase: "Journals cannot arbitrate authorship disputes. All authors must sign a formal written agreement, or the manuscript must be paused until their institution resolves the dispute.",
+                              options: [
+                                { label: "Yes, all authors signed written consent acknowledging claimant's co-authorship", nextId: "verdict_authorship_amended", badge: "Agreement Reached", variant: "success" },
+                                { label: "No, authors disagree and dispute remains deadlocked", nextId: "verdict_pause_dispute", badge: "Deadlock", variant: "danger" }
+                              ]
+                            },
+                            change_author_inquiry: {
+                              stage: "Stage 2: Authorship Change Justification",
+                              question: "Did all authors submit a signed Change of Authorship form explaining the modification?",
+                              knowledgeBase: "Any addition or removal of authors after initial submission requires explicit signed consent from every original and new author.",
+                              options: [
+                                { label: "Signed form received with clear justification", nextId: "verdict_authorship_amended", badge: "Justified", variant: "success" },
+                                { label: "Disputed or unapproved modification", nextId: "verdict_pause_dispute", badge: "Unapproved", variant: "danger" }
+                              ]
+                            },
+                            gift_author_inquiry: {
+                              stage: "Stage 2: Contribution Declaration",
+                              question: "Can listed authors specify individual contributions per CRediT taxonomy?",
+                              knowledgeBase: "Honorary authorship violates ICMJE and COPE guidelines. Each author must declare specific roles (e.g., Investigation, Formal Analysis, Writing).",
+                              options: [
+                                { label: "Clear CRediT contributions verified for all authors", nextId: "verdict_authorship_amended", badge: "CRediT Verified", variant: "success" },
+                                { label: "Unjustified gift author voluntarily removed with mutual consent", nextId: "verdict_authorship_amended", badge: "Removed", variant: "success" }
+                              ]
+                            },
+                            verdict_authorship_amended: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Authorship Updated with Full Written Consent",
+                              knowledgeBase: "All authors satisfied CRediT requirements and signed mutual consent.",
+                              options: [],
+                              verdict: {
+                                type: "clear",
+                                title: "Approve Authorship Update & Resume Processing",
+                                details: "Authorship roster updated; consent forms archived in case file.",
+                                actionLabel: "Update Authorship & Resume Pipeline",
+                                letterSubject: "Authorship Modification Approved — Written Consent Confirmed",
+                                letterBody: "Dear Authors,\n\nYour signed Change of Authorship declarations have been verified, and the manuscript roster has been updated accordingly.\n\nSincerely,\nEditorial Office\nScholarly Open"
+                              }
+                            },
+                            verdict_pause_dispute: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Pause Processing Pending Institutional Arbitration",
+                              knowledgeBase: "Journals must pause peer review or publication until the authors' home institution resolves the legal authorship dispute.",
+                              options: [],
+                              verdict: {
+                                type: "warning",
+                                title: "Pause Manuscript Processing Pending Institutional Resolution",
+                                details: "Place manuscript on hold until authors provide signed resolution from university ombudsperson.",
+                                actionLabel: "Place Manuscript on Administrative Hold",
+                                letterSubject: "Administrative Hold — Unresolved Authorship Dispute",
+                                letterBody: "Dear Authors,\n\nDue to an unresolved authorship dispute, processing of your submission has been paused until all parties provide written agreement or institutional arbitration findings.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            }
+                          }
+                        },
+                        data_fabrication: {
+                          title: "Data Fabrication & Missing Trial Records",
+                          ref: "COPE Flowchart #03",
+                          summary: "Investigating fabricated datasets, suspicious statistical distributions, and unverified clinical records.",
+                          nodes: {
+                            start: {
+                              stage: "Stage 1: Statistical & Dataset Forensics",
+                              question: "What statistical irregularity was identified in the raw data?",
+                              knowledgeBase: "Signs of fabricated data include unnatural digit distributions (failing Benford's Law), identical standard deviations across independent experimental groups, and lack of variance.",
+                              options: [
+                                { label: "Data fails Benford's law / Identical standard deviations across unrelated groups", nextId: "data_audit_inquiry", badge: "Fabrication Risk", variant: "danger" },
+                                { label: "Unregistered clinical trial or missing ethical IRB approval identifier", nextId: "irb_trial_check", badge: "Compliance Risk", variant: "warning" },
+                                { label: "Standard variance with transparent open data repository (Zenodo / Dryad)", nextId: "verdict_data_clean", badge: "Clean Data", variant: "success" }
+                              ]
+                            },
+                            data_audit_inquiry: {
+                              stage: "Stage 2: Raw Lab Notebooks & Instrument Logs",
+                              question: "Did the author provide time-stamped instrument raw output files (e.g. spectrometer / sequencing logs)?",
+                              knowledgeBase: "Authors must substantiate empirical datasets with raw time-stamped instrument outputs or laboratory information management system (LIMS) audit trails.",
+                              options: [
+                                { label: "Author provided verified time-stamped instrument logs and raw replicate data", nextId: "verdict_data_clean", badge: "Verified", variant: "success" },
+                                { label: "Author fails to supply raw logs or claims all raw files were corrupted", nextId: "verdict_data_reject", badge: "Unsubstantiated", variant: "danger" }
+                              ]
+                            },
+                            irb_trial_check: {
+                              stage: "Stage 2: Ethical Approval Verification",
+                              question: "Has the institutional ethics board (IRB) verified the approval certificate and patient consent records?",
+                              knowledgeBase: "Human clinical trials and animal studies must have verifiable prospective approval from an authorized ethical review committee.",
+                              options: [
+                                { label: "Ethics board confirms prospective protocol approval", nextId: "verdict_data_clean", badge: "IRB Verified", variant: "success" },
+                                { label: "Ethics board confirms study was conducted without approval", nextId: "verdict_data_reject", badge: "IRB Violation", variant: "danger" }
+                              ]
+                            },
+                            verdict_data_clean: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Data Integrity Certified Clean",
+                              knowledgeBase: "Raw instrument logs and ethics approvals substantiated.",
+                              options: [],
+                              verdict: {
+                                type: "clear",
+                                title: "Certify Raw Data Integrity & Resume Peer Review",
+                                details: "Raw datasets verified; repository DOI linked to manuscript.",
+                                actionLabel: "Certify Data Integrity & Proceed",
+                                letterSubject: "Data Integrity Review — Verified Clean",
+                                letterBody: "Dear Author,\n\nYour raw data files and ethical approval documentation have been verified. The manuscript has resumed standard peer review.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_data_reject: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Ethical Rejection & Institutional Escalation",
+                              knowledgeBase: "Inability to substantiate experimental data undermines scientific validity.",
+                              options: [],
+                              verdict: {
+                                type: "reject",
+                                title: "Ethical Rejection for Unsubstantiated / Fabricated Data",
+                                details: "Formal ethical rejection. Referral to home institution research integrity officer.",
+                                actionLabel: "Execute Rejection & Escalate to Institution",
+                                letterSubject: "Notice of Rejection — Data Invalidation",
+                                letterBody: "Dear Author,\n\nFollowing technical audit, the submitted dataset could not be substantiated with verifiable raw instrument logs. Under COPE standards, the manuscript is rejected.\n\nSincerely,\nEditor-in-Chief & Research Integrity Office\nScholarly Open"
+                              }
+                            }
+                          }
+                        },
+                        conflict_of_interest: {
+                          title: "Undisclosed Conflict of Interest & Commercial Bias",
+                          ref: "COPE Flowchart #06",
+                          summary: "Addressing undeclared commercial sponsorship, patent interests, and competing financial bias.",
+                          nodes: {
+                            start: {
+                              stage: "Stage 1: Conflict Discovery",
+                              question: "What undisclosed competing interest was discovered?",
+                              knowledgeBase: "Authors must disclose all financial and personal relationships that could inappropriately influence or bias their work (ICMJE & COPE Disclosure Standards).",
+                              options: [
+                                { label: "Direct undeclared corporate sponsorship or stock ownership in evaluated product", nextId: "coi_inquiry", badge: "Financial COI", variant: "warning" },
+                                { label: "Undeclared patent application directly related to methodology", nextId: "coi_inquiry", badge: "Patent COI", variant: "warning" },
+                                { label: "Minor non-financial academic affiliation already stated in author biography", nextId: "verdict_coi_clear", badge: "Minor", variant: "success" }
+                              ]
+                            },
+                            coi_inquiry: {
+                              stage: "Stage 2: Author Disclosure Statement",
+                              question: "Is the author willing to publish a full, comprehensive Competing Interests disclosure statement?",
+                              knowledgeBase: "Undisclosed conflicts do not automatically require rejection; transparent full disclosure allows peer reviewers and readers to evaluate potential bias objectively.",
+                              options: [
+                                { label: "Author provides transparent full disclosure statement to be published with paper", nextId: "verdict_coi_amended", badge: "Disclosed", variant: "success" },
+                                { label: "Author refuses to disclose financial ties or denies documented evidence", nextId: "verdict_coi_reject", badge: "Refusal", variant: "danger" }
+                              ]
+                            },
+                            verdict_coi_clear: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: No Significant Conflict of Interest",
+                              knowledgeBase: "Academic affiliations adequately stated; no commercial bias.",
+                              options: [],
+                              verdict: {
+                                type: "clear",
+                                title: "Clear Case — Declarations Adequate",
+                                details: "Conflict audit complete with no further action required.",
+                                actionLabel: "Close COI Case & Proceed",
+                                letterSubject: "Conflict of Interest Audit — Cleared",
+                                letterBody: "Dear Author,\n\nOur integrity review has determined that your declared interests are complete and transparent. The audit is closed.\n\nSincerely,\nResearch Integrity Office\nScholarly Open"
+                              }
+                            },
+                            verdict_coi_amended: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Incorporate Full Competing Interests Disclosure",
+                              knowledgeBase: "Transparent disclosure statement appended to article metadata.",
+                              options: [],
+                              verdict: {
+                                type: "warning",
+                                title: "Publish with Comprehensive Disclosure Statement",
+                                details: "Update Competing Interests section with full financial declarations.",
+                                actionLabel: "Update Article Metadata & Proceed",
+                                letterSubject: "Updated Competing Interests Statement Required",
+                                letterBody: "Dear Author,\n\nPlease confirm the updated Competing Interests statement to be appended to your published manuscript.\n\nSincerely,\nEditorial Office\nScholarly Open"
+                              }
+                            },
+                            verdict_coi_reject: {
+                              stage: "Stage 3: Verdict",
+                              question: "Verdict: Rejection for Undisclosed Commercial Conflict",
+                              knowledgeBase: "Willful concealment of commercial conflicts undermines public trust in published research.",
+                              options: [],
+                              verdict: {
+                                type: "reject",
+                                title: "Reject for Undisclosed Competing Interests",
+                                details: "Rejection on grounds of undisclosed commercial bias.",
+                                actionLabel: "Execute Rejection Notice",
+                                letterSubject: "Editorial Decision — Rejection for Undisclosed Conflict of Interest",
+                                letterBody: "Dear Author,\n\nDue to failure to declare significant commercial competing interests, your submission is rejected in accordance with COPE Core Practices.\n\nSincerely,\nEditor-in-Chief\nScholarly Open"
+                              }
+                            }
+                          }
+                        }
+                      }
+
+                      const activeTree = copeFlowcharts[selectedCopeFlowchart] || copeFlowcharts.image_manipulation
+                      const currentNodeId = copeNodeHistory[copeNodeHistory.length - 1] || "start"
+                      const currentNode = activeTree.nodes[currentNodeId] || activeTree.nodes.start
+
+                      // Active Target Manuscript Resolution
+                      const activeCopeManuscript = manuscripts.find(m => m.id === selectedCopePaperId) || {
+                        id: selectedCopePaperId || "SOMED-26-RS001",
+                        title: "Advances in Type 1 Diabetes Ocular Remote Tele-Health Screening",
+                        journal: "Scholarly Open: Medicine",
+                        authorName: "Dr. Evelyn Vane",
+                        authorAffiliation: "Institute of Advanced Medical Sciences",
+                        authorEmail: "e.vane@scholarlyopen.org",
+                        integrityStatus: "Flagged"
+                      }
+
+                      // Relevant active alert for this paper
+                      const activePaperAlert = integrityAlerts.find(a => a.paperId === selectedCopePaperId)
+
+                      const handleSelectOption = (nextId: string) => {
+                        setCopeNodeHistory(prev => [...prev, nextId])
+                      }
+
+                      const handleGoBack = () => {
+                        setCopeNodeHistory(prev => prev.length > 1 ? prev.slice(0, -1) : prev)
+                      }
+
+                      const handleResetTree = () => {
+                        setCopeNodeHistory(["start"])
+                        setCopiedLetterNotice(false)
+                      }
+
+                      const handleFlowchartChange = (newKey: string) => {
+                        setSelectedCopeFlowchart(newKey)
+                        setCopeNodeHistory(["start"])
+                        setCopiedLetterNotice(false)
+                      }
+
+                      const handleExecuteCopeVerdict = (actionType: "clear" | "warning" | "reject") => {
+                        if (actionType === "clear") {
+                          setIntegrityAlerts(prev => prev.map(a => a.paperId === selectedCopePaperId ? { ...a, status: "Cleared" as any } : a))
+                          setManuscripts(prev => prev.map(m => m.id === selectedCopePaperId ? { ...m, integrityStatus: "Clean" } : m))
+                          setSuccess(`✓ Case resolved: Manuscript ${selectedCopePaperId} cleared of ethics flags and certified compliant.`)
+                        } else if (actionType === "reject") {
+                          setIntegrityAlerts(prev => prev.map(a => a.paperId === selectedCopePaperId ? { ...a, status: "Escalated" as any } : a))
+                          setManuscripts(prev => prev.map(m => m.id === selectedCopePaperId ? { ...m, status: "Rejected", integrityStatus: "Flagged" } : m))
+                          setSuccess(`✓ Ethical Rejection executed: Manuscript ${selectedCopePaperId} rejected with institutional escalation.`)
+                        } else {
+                          setSuccess(`✓ Editorial notice dispatched for manuscript ${selectedCopePaperId}. Author given standard 14-day response window.`)
+                        }
+                      }
+
+                      // Dynamic Personalized Letter Generator
+                      const generatePersonalizedLetter = (rawBody: string) => {
+                        return rawBody
+                          .replace(/Dear Author,/g, `Dear ${activeCopeManuscript.authorName || "Author"},`)
+                          .replace(/your submission/g, `your submission "${activeCopeManuscript.title}" (ID: ${activeCopeManuscript.id})`)
+                          .replace(/in your submission/g, `in your submission "${activeCopeManuscript.title}" (ID: ${activeCopeManuscript.id})`)
+                          .replace(/in your manuscript/g, `in your manuscript "${activeCopeManuscript.title}" (ID: ${activeCopeManuscript.id})`)
+                      }
+
+                      return (
+                        <div className="p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+                          
+                          {/* 1. Target Manuscript Case Dossier Context Banner */}
+                          <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div className="space-y-1.5 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                                  Diagnosing Case Dossier
                                 </span>
-                                <span className="text-slate-300 dark:text-slate-700">|</span>
-                                <span className="text-slate-500 dark:text-slate-400 font-medium">Status: <strong className="text-slate-600 dark:text-slate-300 font-bold uppercase">{alert.status}</strong></span>
+                                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                  ID: {activeCopeManuscript.id}
+                                </span>
+                                <span className="text-slate-300 dark:text-slate-700">·</span>
+                                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                  {activeCopeManuscript.journal}
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                                {activeCopeManuscript.title}
+                              </h4>
+                              <p className="text-xs text-slate-500">
+                                Corresponding Author: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{activeCopeManuscript.authorName}</strong> ({activeCopeManuscript.authorAffiliation})
+                              </p>
+                              {activePaperAlert && (
+                                <div className="text-[11px] font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1.5 pt-0.5">
+                                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                                  <span>Trigger: {activePaperAlert.detail}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Dropdown to switch between flagged/all manuscripts */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 shrink-0">
+                              <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">Switch Manuscript:</span>
+                              <select
+                                value={selectedCopePaperId}
+                                onChange={(e) => {
+                                  setSelectedCopePaperId(e.target.value)
+                                  const matchingAlert = integrityAlerts.find(a => a.paperId === e.target.value)
+                                  if (matchingAlert) {
+                                    if (matchingAlert.type.toLowerCase().includes("figure")) setSelectedCopeFlowchart("image_manipulation")
+                                    else if (matchingAlert.type.toLowerCase().includes("plag")) setSelectedCopeFlowchart("plagiarism")
+                                    else if (matchingAlert.type.toLowerCase().includes("ai")) setSelectedCopeFlowchart("data_fabrication")
+                                  }
+                                  setCopeNodeHistory(["start"])
+                                  setCopiedLetterNotice(false)
+                                }}
+                                className="text-xs font-semibold px-3 py-2 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 shadow-2xs cursor-pointer max-w-[240px] truncate"
+                              >
+                                <optgroup label="Flagged Alert Cases">
+                                  {integrityAlerts.map(a => (
+                                    <option key={a.id} value={a.paperId}>
+                                      {a.paperId} — {a.title.slice(0, 32)}...
+                                    </option>
+                                  ))}
+                                </optgroup>
+                                <optgroup label="All Journal Submissions">
+                                  {manuscripts.map(m => (
+                                    <option key={m.id} value={m.id}>
+                                      {m.id} — {m.title.slice(0, 32)}...
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* 2. Flowchart Dropdown & Header */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">COPE Ethics Decision Studio</h3>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                                  {activeTree.ref}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-0.5">{activeTree.summary}</p>
+                            </div>
+
+                            {/* Dropdown Selector for All 6 COPE Flowcharts */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-xs text-slate-500 font-medium hidden md:inline">Select Flowchart:</span>
+                              <select
+                                value={selectedCopeFlowchart}
+                                onChange={(e) => handleFlowchartChange(e.target.value)}
+                                className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#18191e] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-[#0b99ff] cursor-pointer"
+                              >
+                                <option value="image_manipulation">1. Image Manipulation / Blot Splicing</option>
+                                <option value="plagiarism">2. Plagiarism & Text Recycling</option>
+                                <option value="peer_review_manipulation">3. Compromised Peer Review Rings</option>
+                                <option value="authorship_dispute">4. Authorship Disputes & Gift Authors</option>
+                                <option value="data_fabrication">5. Data Fabrication & Missing Records</option>
+                                <option value="conflict_of_interest">6. Undisclosed Conflicts of Interest</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Navigation Breadcrumb Bar */}
+                          <div className="flex items-center justify-between gap-2 text-xs bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center gap-1.5 overflow-x-auto text-[11px]">
+                              <span className="text-slate-400 font-medium">Path:</span>
+                              {copeNodeHistory.map((nodeKey, idx) => {
+                                const stepNode = activeTree.nodes[nodeKey]
+                                const isCurrent = idx === copeNodeHistory.length - 1
+                                return (
+                                  <span key={nodeKey} className="flex items-center gap-1 shrink-0">
+                                    <span className={`px-2 py-0.5 rounded font-semibold ${
+                                      isCurrent ? "bg-[#0b99ff] text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                                    }`}>
+                                      {stepNode ? stepNode.stage.split(":")[0] : `Step ${idx + 1}`}
+                                    </span>
+                                    {idx < copeNodeHistory.length - 1 && <span className="text-slate-400">→</span>}
+                                  </span>
+                                )
+                              })}
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {copeNodeHistory.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={handleGoBack}
+                                  className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white font-medium cursor-pointer"
+                                >
+                                  ← Back
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={handleResetTree}
+                                className="text-xs text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                              >
+                                ↺ Reset Tree
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Current Active Decision Node (Question & Knowledge Base Card) */}
+                          <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] shadow-xs space-y-4">
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider block">
+                                {currentNode.stage}
+                              </span>
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                                {currentNode.question}
+                              </h4>
+                            </div>
+
+                            {/* Knowledge Base Note */}
+                            <div className="p-3.5 rounded-lg bg-sky-50/70 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2.5">
+                              <Lightbulb className="h-4 w-4 text-[#0b99ff] shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-bold text-[#0b99ff] block text-[11px] uppercase mb-0.5">COPE Guidance & Best Practice</span>
+                                <p className="leading-relaxed text-slate-600 dark:text-slate-300">{currentNode.knowledgeBase}</p>
                               </div>
                             </div>
 
-                            <div className="shrink-0 flex items-center gap-2">
-                              {alert.status === "Flagged" ? (
-                                <>
-                                  <Button
-                                    onClick={() => {
-                                      setActiveAlertId(alert.id)
-                                      setIsForensicsOpen(true)
-                                    }}
-                                    className="bg-slate-200 dark:bg-slate-800 hover:bg-slate-350 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-xs font-bold cursor-pointer"
-                                  >
-                                    Investigate Case
-                                  </Button>
-                                </>
-                              ) : (
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold italic">
-                                  Resolved ({alert.status})
+                            {/* Interactive Options Branches (If Not Terminal Node) */}
+                            {currentNode.options && currentNode.options.length > 0 && (
+                              <div className="space-y-2 pt-2">
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                                  Select Observed Case Finding:
                                 </span>
-                              )}
-                            </div>
+                                <div className="grid grid-cols-1 gap-2.5">
+                                  {currentNode.options.map((opt, i) => (
+                                    <button
+                                      key={i}
+                                      type="button"
+                                      onClick={() => handleSelectOption(opt.nextId)}
+                                      className={`text-left p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 cursor-pointer group ${
+                                        opt.variant === "danger"
+                                          ? "border-red-200 dark:border-red-900/40 bg-red-50/40 dark:bg-red-950/20 hover:border-red-300 dark:hover:border-red-800"
+                                          : opt.variant === "warning"
+                                          ? "border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20 hover:border-amber-300 dark:hover:border-amber-800"
+                                          : opt.variant === "success"
+                                          ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20 hover:border-emerald-300 dark:hover:border-emerald-800"
+                                          : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 hover:border-[#0b99ff]"
+                                      }`}
+                                    >
+                                      <div className="space-y-0.5">
+                                        <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#0b99ff] transition-colors">
+                                          {opt.label}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 shrink-0">
+                                        {opt.badge && (
+                                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                                            opt.variant === "danger" ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" :
+                                            opt.variant === "warning" ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300" :
+                                            opt.variant === "success" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300" :
+                                            "bg-slate-200 text-slate-700"
+                                          }`}>
+                                            {opt.badge}
+                                          </span>
+                                        )}
+                                        <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-[#0b99ff] group-hover:translate-x-0.5 transition-all" />
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Terminal Verdict Execution Box & Letter Composer */}
+                            {currentNode.verdict && (
+                              <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <div className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                                  currentNode.verdict.type === "reject"
+                                    ? "bg-red-50/60 dark:bg-red-950/30 border-red-200 dark:border-red-900/50"
+                                    : currentNode.verdict.type === "clear"
+                                    ? "bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50"
+                                    : "bg-amber-50/60 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50"
+                                }`}>
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                        {currentNode.verdict.title}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                                      {currentNode.verdict.details}
+                                    </p>
+                                  </div>
+
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleExecuteCopeVerdict(currentNode.verdict?.type || "warning")}
+                                    className={`text-xs font-bold h-8.5 px-4 cursor-pointer shrink-0 shadow-xs ${
+                                      currentNode.verdict.type === "reject"
+                                        ? "bg-red-600 hover:bg-red-700 text-white"
+                                        : currentNode.verdict.type === "clear"
+                                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                                        : "bg-[#0b99ff] hover:bg-[#0088e0] text-white"
+                                    }`}
+                                  >
+                                    {currentNode.verdict.actionLabel}
+                                  </Button>
+                                </div>
+
+                                {/* Official Pre-Drafted Formal Notice Letter with Real Metadata */}
+                                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[11px] font-bold uppercase text-slate-500">
+                                      Official COPE Notice Template ({currentNode.verdict.letterSubject})
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (typeof navigator !== "undefined" && navigator.clipboard) {
+                                          const personalized = generatePersonalizedLetter(currentNode.verdict?.letterBody || "")
+                                          navigator.clipboard.writeText(personalized)
+                                          setCopiedLetterNotice(true)
+                                          setTimeout(() => setCopiedLetterNotice(false), 2500)
+                                        }
+                                      }}
+                                      className="text-xs font-semibold text-[#0b99ff] hover:underline cursor-pointer"
+                                    >
+                                      {copiedLetterNotice ? "✓ Copied Notice" : "Copy Template"}
+                                    </button>
+                                  </div>
+                                  <pre className="text-[11px] font-mono p-3 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                    {generatePersonalizedLetter(currentNode.verdict.letterBody)}
+                                  </pre>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    </Card>
+                        </div>
+                      )
+                    })()}
+
+                    {/* TAB 4: WATCHLIST & SANCTIONS */}
+                    {activeRiaTab === "sanctions" && (
+                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden rounded-2xl shadow-xs">
+                        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 flex items-center justify-between">
+                          <div>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Sanctions & Entity Watchlist</h3>
+                            <p className="text-xs text-slate-500">Internal registry of authors and entities with prior retractions or active submission restrictions.</p>
+                          </div>
+                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                            3 Entities Listed
+                          </span>
+                        </div>
+
+                        <div className="overflow-x-auto text-xs">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-bold text-[10px]">
+                                <th className="px-5 py-3">Entity / Author</th>
+                                <th className="px-5 py-3">Affiliation</th>
+                                <th className="px-5 py-3">Flag Reason</th>
+                                <th className="px-5 py-3">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                              <tr>
+                                <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">Dr. Viktor K.</td>
+                                <td className="px-5 py-3 text-slate-500">Bio-Nanotech Consortium</td>
+                                <td className="px-5 py-3 text-slate-600 dark:text-slate-400">Suspicious co-authorship cluster</td>
+                                <td className="px-5 py-3">
+                                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded">
+                                    Under Audit
+                                  </span>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">Synthetica Labs Consortium</td>
+                                <td className="px-5 py-3 text-slate-500">Industrial Chemistry Lab</td>
+                                <td className="px-5 py-3 text-slate-600 dark:text-slate-400">Duplicate Western blot pattern</td>
+                                <td className="px-5 py-3">
+                                  <span className="text-[10px] font-bold text-red-700 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded">
+                                    Restricted
+                                  </span>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">Prof. A. Rossi</td>
+                                <td className="px-5 py-3 text-slate-500">Regional Diagnostics Center</td>
+                                <td className="px-5 py-3 text-slate-600 dark:text-slate-400">Coercive self-citation audit</td>
+                                <td className="px-5 py-3">
+                                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
+                                    Cleared (Minor)
+                                  </span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </Card>
+                    )}
                   </div>
                 )}
 
@@ -5488,7 +6952,10 @@ export default function Editorial360Page() {
                         </div>
 
                         <div className="pt-2">
-                          <Button className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs cursor-pointer">
+                          <Button 
+                            onClick={handleSaveAdminConfigs}
+                            className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs cursor-pointer"
+                          >
                             Save Configurations
                           </Button>
                         </div>
@@ -6377,7 +7844,7 @@ export default function Editorial360Page() {
                 </DialogDescription>
               </DialogHeader>
               
-              <form onSubmit={handleInviteUser} className="space-y-4 py-2">
+              <form onSubmit={onTriggerInviteUser} className="space-y-4 py-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Invite Role Assignment</label>
                   <select
@@ -6838,14 +8305,14 @@ export default function Editorial360Page() {
 
                       <div className="flex justify-end gap-2.5 pt-2">
                         <Button
-                          onClick={() => handleResolveIntegrity(alert.id, "clear")}
+                          onClick={() => onTriggerResolveIntegrity(alert.id, "clear")}
                           className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs cursor-pointer"
                         >
                           Clear Flag (Approve)
                         </Button>
                         <Button
-                          onClick={() => handleResolveIntegrity(alert.id, "escalate")}
-                          className="bg-red-650 hover:bg-red-700 text-white font-bold text-xs cursor-pointer"
+                          onClick={() => onTriggerResolveIntegrity(alert.id, "escalate")}
+                          className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs cursor-pointer shadow-xs"
                         >
                           Escalate Case to EIC
                         </Button>
@@ -6854,6 +8321,124 @@ export default function Editorial360Page() {
                   )
                 })()}
               </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* 8B. QC Admin / IM: EIC ESCALATION BRIEFING MODAL */}
+          <Dialog open={isEscalateModalOpen} onOpenChange={setIsEscalateModalOpen}>
+            <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg transition-colors rounded-xl p-6 shadow-xl">
+              <DialogHeader className="space-y-1">
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  Escalate to Editor-in-Chief
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500">
+                  Refer this flagged submission to the Editor-in-Chief for editorial review.
+                </DialogDescription>
+              </DialogHeader>
+
+              {escalateAlertId && integrityAlerts.find(a => a.id === escalateAlertId) && (() => {
+                const alert = integrityAlerts.find(a => a.id === escalateAlertId)!
+                return (
+                  <div className="space-y-4 pt-1">
+                    {/* Compact Manuscript Reference */}
+                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">{alert.paperId}</span>
+                        <span className="text-[11px] font-bold text-red-600 dark:text-red-400 shrink-0 bg-red-50 dark:bg-red-950/50 px-2 py-0.5 rounded border border-red-200 dark:border-red-900/30">
+                          {alert.type} ({alert.score})
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400 leading-snug">
+                        {alert.title}
+                      </div>
+                    </div>
+
+                    {/* Form Controls */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                          Recommended Action
+                        </label>
+                        <select
+                          value={escalateRecommendation}
+                          onChange={(e) => setEscalateRecommendation(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-[#0b99ff] cursor-pointer"
+                        >
+                          <option value="raw_data">Request Raw Data (14-Day)</option>
+                          <option value="inquiry">Author Ethics Inquiry</option>
+                          <option value="desk_reject">Desk Reject (Ethics Breach)</option>
+                          <option value="institutional_referral">Institutional Referral (RIO)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                          Priority
+                        </label>
+                        <select
+                          value={escalatePriority}
+                          onChange={(e) => setEscalatePriority(e.target.value as any)}
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-[#0b99ff] cursor-pointer"
+                        >
+                          <option value="standard">Standard Review Queue</option>
+                          <option value="high">High (Freeze Peer Review)</option>
+                          <option value="critical">Critical (Immediate Pre-Pub Freeze)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Notes Field */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                        Forensic Notes & Rationale
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={escalateNotes}
+                        onChange={(e) => setEscalateNotes(e.target.value)}
+                        placeholder="Brief summary of findings and recommended next steps..."
+                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] resize-none"
+                      />
+                    </div>
+
+                    {/* Attach checkbox */}
+                    <div className="flex items-center gap-2 pt-0.5">
+                      <input
+                        type="checkbox"
+                        id="include-audit-log"
+                        checked={escalateIncludeAuditLog}
+                        onChange={(e) => setEscalateIncludeAuditLog(e.target.checked)}
+                        className="rounded text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer h-3.5 w-3.5"
+                      />
+                      <label htmlFor="include-audit-log" className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+                        Attach automated diagnostic logs and similarity report
+                      </label>
+                    </div>
+
+                    {/* Footer buttons */}
+                    <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEscalateModalOpen(false)}
+                        className="text-xs h-8 px-3 cursor-pointer"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={onTriggerSubmitEscalation}
+                        className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold text-xs h-8 px-3.5 cursor-pointer shadow-xs"
+                      >
+                        Submit Escalation
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })()}
             </DialogContent>
           </Dialog>
 
