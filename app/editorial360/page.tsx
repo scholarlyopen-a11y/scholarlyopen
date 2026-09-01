@@ -3480,13 +3480,78 @@ export default function Editorial360Page() {
                     </>
                   )}
 
-                  {role === "jm" && (
-                    <>
+                  {/* ========================================================================= */}
+                  {/* COMMON UNIFIED SIDEBAR FOR EDITORIAL STAFF (JM, EDITOR, IM / RIA)        */}
+                  {/* ========================================================================= */}
+                  {(role === "jm" || role === "editor" || role === "ria" || role === "im") && (
+                    <div className="space-y-4">
+                      {/* 1. Cross-Desk Switcher Header */}
+                      <div className="p-1.5 rounded-xl bg-slate-100 dark:bg-[#1c1e26] border border-slate-200/80 dark:border-[#272832]">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 py-1 flex items-center justify-between">
+                          <span>{language === "de" ? "Redaktionsbereich" : "Editorial Desk"}</span>
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRole("jm")
+                              setActiveJmTab("board")
+                            }}
+                            className={`py-1.5 px-1 rounded-lg text-[11px] font-bold transition-all text-center cursor-pointer flex flex-col items-center gap-0.5 ${
+                              role === "jm"
+                                ? "bg-white dark:bg-[#252834] text-[#0b99ff] dark:text-sky-400 shadow-2xs font-extrabold"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                            title={language === "de" ? "Journal Manager Desk" : "Journal Manager Desk"}
+                          >
+                            <span>JM Desk</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRole("editor")
+                              setActiveEditorTab("desk")
+                            }}
+                            className={`py-1.5 px-1 rounded-lg text-[11px] font-bold transition-all text-center cursor-pointer flex flex-col items-center gap-0.5 ${
+                              role === "editor"
+                                ? "bg-white dark:bg-[#252834] text-[#0b99ff] dark:text-sky-400 shadow-2xs font-extrabold"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                            title={language === "de" ? "Handling Editor Desk" : "Handling Editor Desk"}
+                          >
+                            <span>Editor</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRole("im")
+                              setActiveRiaTab("alerts")
+                            }}
+                            className={`py-1.5 px-1 rounded-lg text-[11px] font-bold transition-all text-center cursor-pointer flex flex-col items-center gap-0.5 ${
+                              role === "im" || role === "ria"
+                                ? "bg-white dark:bg-[#252834] text-[#0b99ff] dark:text-sky-400 shadow-2xs font-extrabold"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                            title={language === "de" ? "Integritäts- & Forensik-Desk" : "Research Integrity & Forensics Desk"}
+                          >
+                            <span>IM Desk</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 2. Cross-Desk Notifications */}
                       <button 
                         type="button"
-                        onClick={() => setActiveJmTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "activity"
+                        onClick={() => {
+                          if (role === "editor") setActiveEditorTab("activity")
+                          else if (role === "im" || role === "ria") setActiveRiaTab("activity")
+                          else setActiveJmTab("activity")
+                        }}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                          (role === "jm" && activeJmTab === "activity") ||
+                          (role === "editor" && activeEditorTab === "activity") ||
+                          ((role === "im" || role === "ria") && activeRiaTab === "activity")
                             ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
                             : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
                         }`}
@@ -3502,223 +3567,256 @@ export default function Editorial360Page() {
                         )}
                       </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("board")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "board"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <LayoutDashboard className="h-4 w-4" />
-                        {language === "de" ? "Journal-Manager" : "Journal Manager"}
-                      </button>
+                      {/* 3. Section: Journal Operations (JM) */}
+                      <div className="space-y-1 pt-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 block">
+                          {language === "de" ? "Betrieb (JM Desk)" : "Operations (JM Desk)"}
+                        </span>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("users")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "users"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <Users className="h-4 w-4" />
-                        {language === "de" ? "Gutachter-Registry & Last" : "Reviewer Registry"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("jm")
+                            setActiveJmTab("board")
+                          }}
+                          className={`w-full flex items-center justify-between px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "jm" && activeJmTab === "board"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <LayoutDashboard className="h-4 w-4" />
+                            <span>{language === "de" ? "Submissions & Triage" : "Submissions & Triage"}</span>
+                          </div>
+                          {manuscripts.length > 0 && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                              {manuscripts.length}
+                            </span>
+                          )}
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("checks")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "checks"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <CheckSquare className="h-4 w-4" />
-                        {language === "de" ? "Publikationsprüfungen & DOI" : "Publishing & DOI Dispatch"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("jm")
+                            setActiveJmTab("users")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "jm" && activeJmTab === "users"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <Users className="h-4 w-4" />
+                          <span>{language === "de" ? "Gutachter-Registry" : "Reviewer Registry"}</span>
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("analytics")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "analytics"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <BarChart3 className="h-4 w-4" />
-                        {language === "de" ? "Portfolio-Analysen" : "Portfolio Analytics"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("jm")
+                            setActiveJmTab("checks")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "jm" && activeJmTab === "checks"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <CheckSquare className="h-4 w-4" />
+                          <span>{language === "de" ? "Publikationsprüfungen & DOI" : "Publishing & DOI Dispatch"}</span>
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("archives")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "archives"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <Archive className="h-4 w-4" />
-                        {language === "de" ? "Kommunikations-Archive" : "Audit Archives"}
-                      </button>
-                    </>
-                  )}
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("jm")
+                            setActiveJmTab("analytics")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "jm" && activeJmTab === "analytics"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <BarChart3 className="h-4 w-4" />
+                          <span>{language === "de" ? "Portfolio-Analysen" : "Portfolio Analytics"}</span>
+                        </button>
+                      </div>
 
-                  {role === "editor" && (
-                    <>
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "activity"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4 text-[#0b99ff]" />
-                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
-                        </div>
-                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
-                            {crossDeskNotifications.filter(n => !n.isRead).length}
-                          </span>
-                        )}
-                      </button>
+                      {/* 4. Section: Editorial & Decisions (Editor Desk) */}
+                      <div className="space-y-1 pt-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 block">
+                          {language === "de" ? "Entscheidungen (Editor Desk)" : "Decisions (Editor Desk)"}
+                        </span>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("desk")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "desk"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <LayoutDashboard className="h-4 w-4" />
-                        {language === "de" ? "Redaktionstisch & Pipeline" : "Editorial Desk & Pipeline"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("editor")
+                            setActiveEditorTab("desk")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "editor" && activeEditorTab === "desk"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <FileText className="h-4 w-4" />
+                          <span>{language === "de" ? "Redaktionstisch & Pipeline" : "Editorial Desk & Pipeline"}</span>
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("integrity")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "integrity"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <ShieldCheck className="h-4 w-4" />
-                        {language === "de" ? "Integrität & Forensik" : "Integrity & Forensics"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("editor")
+                            setActiveEditorTab("integrity")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "editor" && activeEditorTab === "integrity"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <ShieldCheck className="h-4 w-4" />
+                          <span>{language === "de" ? "Integrität & Forensik" : "Integrity & Forensics"}</span>
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("collections")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "collections"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <Layers className="h-4 w-4" />
-                        {language === "de" ? "Sonderhefte & Sammlungen" : "Special Collections"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("editor")
+                            setActiveEditorTab("collections")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "editor" && activeEditorTab === "collections"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <Layers className="h-4 w-4" />
+                          <span>{language === "de" ? "Sonderhefte & Sammlungen" : "Special Collections"}</span>
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("analytics")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "analytics"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <Award className="h-4 w-4" />
-                        {language === "de" ? "Redaktionsmetriken & Impact" : "Editorial Impact & Metrics"}
-                      </button>
-                    </>
-                  )}
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("editor")
+                            setActiveEditorTab("analytics")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "editor" && activeEditorTab === "analytics"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <Award className="h-4 w-4" />
+                          <span>{language === "de" ? "Redaktionsmetriken & Impact" : "Editorial Impact & Metrics"}</span>
+                        </button>
+                      </div>
 
-                  {(role === "ria" || role === "im") && (
-                    <>
-                      <button 
-                        type="button"
-                        onClick={() => setActiveRiaTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeRiaTab === "activity"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4 text-[#0b99ff]" />
-                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
-                        </div>
-                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
-                            {crossDeskNotifications.filter(n => !n.isRead).length}
-                          </span>
-                        )}
-                      </button>
+                      {/* 5. Section: Research Integrity (IM Desk) */}
+                      <div className="space-y-1 pt-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 block">
+                          {language === "de" ? "Integrität (IM Desk)" : "Integrity (IM Desk)"}
+                        </span>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveRiaTab("alerts")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeRiaTab === "alerts"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <ShieldAlert className="h-4 w-4 text-red-500" />
-                        {language === "de" ? "Alerts" : "Alerts"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("im")
+                            setActiveRiaTab("alerts")
+                          }}
+                          className={`w-full flex items-center justify-between px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            (role === "im" || role === "ria") && activeRiaTab === "alerts"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <ShieldAlert className="h-4 w-4 text-red-500" />
+                            <span>{language === "de" ? "Forensik-Alerts" : "Forensics Alerts"}</span>
+                          </div>
+                          {integrityAlerts.filter(a => a.status === "Flagged").length > 0 && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-red-500 text-white">
+                              {integrityAlerts.filter(a => a.status === "Flagged").length}
+                            </span>
+                          )}
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveRiaTab("intel")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeRiaTab === "intel" || activeRiaTab === "scans"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <Search className="h-4 w-4 text-[#0b99ff]" />
-                        {language === "de" ? "Paper Mill Intel" : "Paper Mill Intel"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("im")
+                            setActiveRiaTab("intel")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            (role === "im" || role === "ria") && (activeRiaTab === "intel" || activeRiaTab === "scans")
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <Search className="h-4 w-4 text-[#0b99ff]" />
+                          <span>{language === "de" ? "Paper Mill Intel" : "Paper Mill Intel"}</span>
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveRiaTab("studio")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeRiaTab === "studio" || activeRiaTab === "protocols"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <CheckSquare className="h-4 w-4 text-emerald-500" />
-                        {language === "de" ? "COPE Studio" : "COPE Studio"}
-                      </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("im")
+                            setActiveRiaTab("studio")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            (role === "im" || role === "ria") && (activeRiaTab === "studio" || activeRiaTab === "protocols")
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <CheckSquare className="h-4 w-4 text-emerald-500" />
+                          <span>{language === "de" ? "COPE Studio" : "COPE Studio"}</span>
+                        </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveRiaTab("sanctions")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeRiaTab === "sanctions"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
-                        }`}
-                      >
-                        <ShieldCheck className="h-4 w-4 text-slate-500" />
-                        {language === "de" ? "Watchlist" : "Watchlist"}
-                      </button>
-                    </>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("im")
+                            setActiveRiaTab("sanctions")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            (role === "im" || role === "ria") && activeRiaTab === "sanctions"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <ShieldCheck className="h-4 w-4 text-slate-500" />
+                          <span>{language === "de" ? "Watchlist & Sanktionen" : "Watchlist & Sanctions"}</span>
+                        </button>
+                      </div>
+
+                      {/* 6. Section: Audit & Archives */}
+                      <div className="space-y-1 pt-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 block">
+                          {language === "de" ? "Protokolle & Archiv" : "Audit & Archives"}
+                        </span>
+
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRole("jm")
+                            setActiveJmTab("archives")
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                            role === "jm" && activeJmTab === "archives"
+                              ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
+                              : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          }`}
+                        >
+                          <Archive className="h-4 w-4" />
+                          <span>{language === "de" ? "Audit-Archive" : "Audit Archives"}</span>
+                        </button>
+                      </div>
+                    </div>
                   )}
 
                   {role === "admin" && (
