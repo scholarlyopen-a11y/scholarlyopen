@@ -9231,6 +9231,11 @@ export default function Editorial360Page() {
                   className="bg-slate-900 hover:bg-black dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-medium text-xs px-4 py-1.5 rounded-lg cursor-pointer transition-colors"
                 >
                   {language === "de" ? "Schließen" : "Close"}
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
         </div>
   )
 }
