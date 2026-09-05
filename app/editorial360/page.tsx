@@ -423,7 +423,7 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
     switch (role) {
       case "jm":
         return {
-          photo: "/images/manager-photo.png",
+          photo: "",
           name: "Sarah Jenkins, M.S.",
           title: isDe ? "Journal-Betriebsleiterin & Leiterin der Qualitätsprüfung" : "Journal Operations Manager & Quality Desk Lead",
           interestsLabel: isDe ? "Betrieblicher Schwerpunkt" : "Operational Scope",
@@ -441,7 +441,7 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
         }
       case "editor":
         return {
-          photo: "/images/editor-photo.png",
+          photo: "",
           name: "Prof. Aris Thorne",
           title: isDe ? "Leitender Herausgeber & Professor für Politikwissenschaft" : "Managing Editor & Professor of Political Science",
           interestsLabel: isDe ? "Redaktioneller Schwerpunkt" : "Editorial Scope",
@@ -459,7 +459,7 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
         }
       case "reviewer":
         return {
-          photo: "/images/reviewer-photo.png",
+          photo: "",
           name: "Dr. Alex Johnson",
           title: isDe ? "Senior Researcher, KI-Ethik" : "Senior Researcher, AI Ethics",
           interestsLabel: isDe ? "Forschungsschwerpunkte" : "Research Interests",
@@ -477,7 +477,7 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
         }
       case "author":
         return {
-          photo: authorProfile?.photoUrl || "",
+          photo: "",
           name: authorProfile?.name || "Dr. Evelyn Vane",
           title: authorProfile?.title || (isDe ? "Senior-Forscherin & Fachbereichsleitung" : "Senior Researcher & Faculty Lead"),
           institution: authorProfile?.institution || (isDe ? "Institut für Fortgeschrittene Medizinische Wissenschaften" : "Institute of Advanced Medical Sciences"),
@@ -500,7 +500,7 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
         }
       case "ria":
         return {
-          photo: "/images/ria-photo.png",
+          photo: "",
           name: "Dr. Marcus Vance",
           title: isDe ? "Berater für Forschungsintegrität & Forensik-Analyst" : "Research Integrity Advisor & Forensics Analyst",
           interestsLabel: isDe ? "Forensik-Spezialisierung" : "Forensics Specialization",
@@ -519,7 +519,7 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
       case "admin":
       default:
         return {
-          photo: "/images/admin-photo.png",
+          photo: "",
           name: isDe ? "Systemadministrator" : "System Administrator",
           title: isDe ? "Chef-Plattformarchitekt & Node-Admin" : "Chief Platform Architect & Node Admin",
           interestsLabel: isDe ? "Systembereich" : "System Scope",
@@ -546,12 +546,8 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
         
         {/* Left Block: Avatar & Bio */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="w-20 h-20 rounded-full border-2 border-slate-200 dark:border-[#272832] bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-2xl overflow-hidden shadow-xs">
-            {config.photo ? (
-              <img src={config.photo} alt={config.name} className="w-full h-full object-cover" />
-            ) : (
-              <span>{config.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}</span>
-            )}
+          <div className="w-20 h-20 rounded-full border-2 border-slate-200 dark:border-[#272832] bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-2xl overflow-hidden shadow-xs shrink-0">
+            <span>{config.name.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}</span>
           </div>
 
           <div className="space-y-2">
@@ -9406,7 +9402,7 @@ function UserProfileHeader({ role }: { role: string }) {
           name: 'Jane Doe',
           title: 'Senior Researcher, AI Ethics',
           orcid: '0000-1234-5678',
-          avatar: '/images/avatar_jane.png',
+          avatar: '',
           stats: [
             { label: 'Active Submissions', value: '3' },
           ],
@@ -9419,7 +9415,7 @@ function UserProfileHeader({ role }: { role: string }) {
           name: 'Prof. Aris Thorne',
           title: 'Managing Editor, Social Sciences',
           orcid: '0000-8765-4321',
-          avatar: '/images/avatar_alex.png',
+          avatar: '',
           stats: [
             { label: 'Submissions Handled', value: '124' },
             { label: 'Acceptance Rate', value: '60%' },
@@ -9432,7 +9428,7 @@ function UserProfileHeader({ role }: { role: string }) {
           name: 'Dr. Alex Johnson',
           title: 'Senior Researcher, AI Ethics',
           orcid: '0000-1122-3344',
-          avatar: '/images/avatar_alex.png',
+          avatar: '',
           stats: [
             { label: 'Avg Turnaround', value: '3 Days' },
             { label: 'Quality Score', value: '92%' },
@@ -9446,7 +9442,7 @@ function UserProfileHeader({ role }: { role: string }) {
           name: 'Sarah Jenkins',
           title: 'Senior Journal Manager',
           orcid: '0000-9988-7766',
-          avatar: '/images/avatar_jane.png',
+          avatar: '',
           stats: [
             { label: 'Managed Journals', value: '3' },
             { label: 'Active Articles', value: '45' },
@@ -9459,7 +9455,7 @@ function UserProfileHeader({ role }: { role: string }) {
           name: 'Dr. Marcus Webb',
           title: 'Quality Control & Integrity Admin',
           orcid: '0000-5544-3322',
-          avatar: '/images/avatar_alex.png',
+          avatar: '',
           stats: [
             { label: 'Audited Manuscripts', value: '340' },
             { label: 'Flags Resolved', value: '89' },
@@ -9477,7 +9473,9 @@ function UserProfileHeader({ role }: { role: string }) {
   return (
     <div className="mb-6 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col md:flex-row gap-6 items-start shadow-sm">
       <div className="flex items-center gap-4 min-w-[250px]">
-        <img src={data.avatar} alt={data.name} className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-800" />
+        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-xl border-2 border-slate-100 dark:border-slate-800 shadow-sm shrink-0">
+          {data.name.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+        </div>
         <div>
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">{data.name}</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{data.title}</p>

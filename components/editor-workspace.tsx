@@ -637,11 +637,7 @@ export function EditorWorkspace({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative h-13 w-13 rounded-2xl overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md ring-2 ring-slate-200 dark:ring-[#272832]">
-              {user.photoUrl ? (
-                <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <span>{user.name ? user.name.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT"}</span>
-              )}
+              <span>{user.name ? user.name.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT"}</span>
             </div>
             
             <div className="space-y-1">
@@ -799,12 +795,12 @@ export function EditorWorkspace({
             {/* Small Clickable Stage Filter Tabs (Synchronized 1:1 with JM Workspace) */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 pt-2 border-t border-slate-100 dark:border-[#272832]">
               {[
-                { id: "all", label: isDe ? "Alle Manuskripte" : "All Manuscripts", count: manuscripts.length },
-                { id: "triage", label: isDe ? "Desk Triage" : "Initial Triage", count: triageCount },
-                { id: "review", label: isDe ? "In Begutachtung" : "Under Review", count: reviewCount },
-                { id: "revision", label: isDe ? "Revisionen & Re-Evaluation" : "Revisions & Re-Evaluations", count: revisionCount },
-                { id: "decision", label: isDe ? "In Produktion / Entschieden" : "Decisions Completed", count: decisionCount },
-                { id: "integrity", label: isDe ? "Integritäts-Fälle" : "Integrity Cases", count: integrityCount, isAlert: true }
+                { id: "all", label: isDe ? "Alle" : "All", count: manuscripts.length },
+                { id: "triage", label: isDe ? "Triage" : "Triage", count: triageCount },
+                { id: "review", label: isDe ? "In Prüfung" : "In Review", count: reviewCount },
+                { id: "revision", label: isDe ? "Revisionen" : "Revisions", count: revisionCount },
+                { id: "decision", label: isDe ? "Entschieden" : "Decided", count: decisionCount },
+                { id: "integrity", label: isDe ? "Integrität" : "Integrity", count: integrityCount, isAlert: true }
               ].map((tab: any) => (
                 <button
                   key={tab.id}
@@ -997,7 +993,7 @@ export function EditorWorkspace({
                           className="text-xs h-8 px-3 border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 bg-red-50/50 hover:bg-red-100/50 cursor-pointer font-semibold"
                         >
                           <ShieldAlert className="h-3.5 w-3.5 mr-1 text-red-600" />
-                          {isDe ? "Integritäts-Prüfung" : "Integrity Forensics"}
+                          {isDe ? "Forensik" : "Forensics"}
                         </Button>
                       )}
 

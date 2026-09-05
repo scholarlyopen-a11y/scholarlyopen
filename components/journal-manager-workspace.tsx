@@ -763,11 +763,7 @@ export function JournalManagerWorkspace({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs">
         <div className="flex items-center gap-3.5">
           <div className="relative h-11 w-11 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-[#272832]">
-            {user?.photoUrl ? (
-              <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
-            ) : (
-              <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ"}</span>
-            )}
+            <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ"}</span>
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -887,17 +883,17 @@ export function JournalManagerWorkspace({
           {/* Stage Filter Pills */}
           <div className="flex flex-wrap items-center gap-2">
             {[
-              { key: "all", label: isDe ? "Alle Manuskripte" : "All Manuscripts", count: initialManuscripts.length },
-              { key: "triage", label: isDe ? "Desk Triage" : "Initial Triage", count: initialTriageList.length },
-              { key: "review", label: isDe ? "In Begutachtung" : "Under Review", count: underReviewList.length },
-              { key: "revisions", label: isDe ? "Revisionen & Re-Evaluation" : "Revisions & Re-Evaluations", count: revisionList.length },
-              { key: "accepted", label: isDe ? "In Produktion" : "In Production", count: acceptedList.length },
-              { key: "integrity", label: isDe ? "Integritäts-Fälle" : "Integrity Cases", count: integrityCasesList.length, isAlert: true }
+              { key: "all", label: isDe ? "Alle" : "All", count: initialManuscripts.length },
+              { key: "triage", label: isDe ? "Triage" : "Triage", count: initialTriageList.length },
+              { key: "review", label: isDe ? "In Begutachtung" : "In Review", count: underReviewList.length },
+              { key: "revisions", label: isDe ? "Revisionen" : "Revisions", count: revisionList.length },
+              { key: "accepted", label: isDe ? "Produktion" : "Production", count: acceptedList.length },
+              { key: "integrity", label: isDe ? "Integrität" : "Integrity", count: integrityCasesList.length, isAlert: true }
             ].map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setSelectedStageFilter(tab.key as any)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                   selectedStageFilter === tab.key
                     ? (tab as any).isAlert
                       ? "bg-red-600 text-white border-red-600 shadow-xs"
@@ -924,15 +920,15 @@ export function JournalManagerWorkspace({
 
           {/* Full-Width Clean Table */}
           <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left text-xs min-w-[920px]">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-                    <th className="px-5 py-3.5 whitespace-nowrap w-[170px]">Manuscript ID & Date</th>
-                    <th className="px-5 py-3.5 min-w-[280px]">Title & Journal</th>
-                    <th className="px-5 py-3.5 whitespace-nowrap w-[160px]">Pipeline Stage</th>
-                    <th className="px-5 py-3.5 whitespace-nowrap w-[240px]">Editor & Reviewers</th>
-                    <th className="px-5 py-3.5 whitespace-nowrap text-center w-[220px]">Actions</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap w-[150px]">Manuscript ID & Date</th>
+                    <th className="px-4 py-3.5 min-w-[260px]">Title & Journal</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap w-[150px]">Pipeline Stage</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap w-[200px]">Editor & Reviewers</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap text-center min-w-[220px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
@@ -1010,8 +1006,8 @@ export function JournalManagerWorkspace({
                           </td>
 
                           {/* 5. Actions (Centered) */}
-                          <td className="px-5 py-4 align-top text-center w-[220px] whitespace-nowrap">
-                            <div className="flex items-center justify-center gap-2">
+                          <td className="px-4 py-4 align-top text-center min-w-[220px]">
+                            <div className="flex items-center justify-center gap-1.5 flex-wrap">
                               {isTriage && (
                                 <>
                                   <Button
@@ -1021,7 +1017,7 @@ export function JournalManagerWorkspace({
                                       setSelectedManuscript(ms)
                                       setIsPreQualityModalOpen(true)
                                     }}
-                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-3 rounded-lg cursor-pointer"
+                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
                                   >
                                     <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
                                     Pre-Check
@@ -1029,9 +1025,9 @@ export function JournalManagerWorkspace({
                                   <Button
                                     size="sm"
                                     onClick={() => handleOpenAssign(ms)}
-                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3.5 rounded-lg cursor-pointer"
+                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer"
                                   >
-                                    Assign Editor
+                                    Assign
                                   </Button>
                                 </>
                               )}
@@ -1044,10 +1040,10 @@ export function JournalManagerWorkspace({
                                     setTrackingManuscript(ms)
                                     setIsTrackModalOpen(true)
                                   }}
-                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-3.5 rounded-lg cursor-pointer"
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
                                 >
                                   <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Track Review Progress
+                                  Track Review
                                 </Button>
                               )}
 
@@ -1059,10 +1055,10 @@ export function JournalManagerWorkspace({
                                     setSelectedManuscript(ms)
                                     setIsPreQualityModalOpen(true)
                                   }}
-                                  className="h-8 text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border-red-200 dark:border-red-800 px-3 rounded-lg cursor-pointer"
+                                  className="h-8 text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border-red-200 dark:border-red-800 px-2.5 rounded-lg cursor-pointer"
                                 >
                                   <ShieldAlert className="h-3.5 w-3.5 mr-1 text-red-600" />
-                                  Forensics & Audit
+                                  Forensics
                                 </Button>
                               )}
 
