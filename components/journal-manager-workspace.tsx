@@ -25,6 +25,8 @@ import {
   List,
   Kanban,
   ShieldCheck,
+  ShieldAlert,
+  AlertTriangle,
   Sliders,
   RotateCcw,
   FileCheck2,
@@ -135,7 +137,7 @@ export function JournalManagerWorkspace({
   const isDe = language === "de"
 
   // Stage filter for Submissions Pipeline
-  const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "decision" | "accepted">("all")
+  const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "decision" | "accepted" | "integrity">("all")
 
   // Search and Filter State
   const [searchTerm, setSearchTerm] = useState("")
@@ -380,6 +382,9 @@ export function JournalManagerWorkspace({
       if (selectedStageFilter === "accepted") {
         return matchesSearch && matchesJournal && (m.status === "Accepted" || m.status === "Rejected")
       }
+      if (selectedStageFilter === "integrity") {
+        return matchesSearch && matchesJournal && (m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
+      }
 
       return matchesSearch && matchesJournal
     })
@@ -391,6 +396,7 @@ export function JournalManagerWorkspace({
   const revisionList = initialManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation")
   const decisionPendingList = revisionList
   const acceptedList = initialManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected")
+  const integrityCasesList = initialManuscripts.filter(m => m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
 
   // Handle open Assign Modal
   const handleOpenAssign = (ms: JmManuscript) => {
@@ -657,6 +663,19 @@ export function JournalManagerWorkspace({
 
   // Helper for rendering Stage Pill Badge in List View
   const renderStageBadge = (ms: JmManuscript) => {
+    if (selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged" || (ms.plagiarismScore && ms.plagiarismScore > 15) || (ms.aiScore && ms.aiScore > 30)) {
+      return (
+        <div className="space-y-1">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-800 whitespace-nowrap shadow-2xs">
+            <ShieldAlert className="h-3 w-3 text-red-600" />
+            Integrity Flagged
+          </span>
+          <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 block px-0.5 whitespace-nowrap">
+            Plag: {ms.plagiarismScore || 0}% • AI: {ms.aiScore || 0}%
+          </span>
+        </div>
+      )
+    }
     if (ms.status === "Awaiting Initial Check" || ms.status === "Submitted" || ms.status === "Draft") {
       return (
         <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/80 dark:border-amber-900/30 whitespace-nowrap">
@@ -868,24 +887,34 @@ export function JournalManagerWorkspace({
           {/* Stage Filter Pills */}
           <div className="flex flex-wrap items-center gap-2">
             {[
-              { key: "all", label: "All Manuscripts", count: initialManuscripts.length },
-              { key: "triage", label: "Initial Triage", count: initialTriageList.length },
-              { key: "review", label: "Under Review", count: underReviewList.length },
-              { key: "revisions", label: "Revisions & Re-Evaluations", count: revisionList.length },
-              { key: "accepted", label: "In Production", count: acceptedList.length }
+              { key: "all", label: isDe ? "Alle Manuskripte" : "All Manuscripts", count: initialManuscripts.length },
+              { key: "triage", label: isDe ? "Desk Triage" : "Initial Triage", count: initialTriageList.length },
+              { key: "review", label: isDe ? "In Begutachtung" : "Under Review", count: underReviewList.length },
+              { key: "revisions", label: isDe ? "Revisionen & Re-Evaluation" : "Revisions & Re-Evaluations", count: revisionList.length },
+              { key: "accepted", label: isDe ? "In Produktion" : "In Production", count: acceptedList.length },
+              { key: "integrity", label: isDe ? "Integritäts-Fälle" : "Integrity Cases", count: integrityCasesList.length, isAlert: true }
             ].map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setSelectedStageFilter(tab.key as any)}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                   selectedStageFilter === tab.key
-                    ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                    ? (tab as any).isAlert
+                      ? "bg-red-600 text-white border-red-600 shadow-xs"
+                      : "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                    : (tab as any).isAlert
+                    ? "bg-red-50 hover:bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/40"
                     : "bg-white dark:bg-[#18191e] text-slate-600 dark:text-slate-400 border-slate-200/90 dark:border-[#272832] hover:border-slate-300"
                 }`}
               >
+                {(tab as any).isAlert && <ShieldAlert className="h-3.5 w-3.5 text-current" />}
                 <span>{tab.label}</span>
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                  selectedStageFilter === tab.key ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                  selectedStageFilter === tab.key
+                    ? "bg-white/20 text-white"
+                    : (tab as any).isAlert
+                    ? "bg-red-200 dark:bg-red-900/60 text-red-800 dark:text-red-200"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-500"
                 }`}>
                   {tab.count}
                 </span>
@@ -1019,6 +1048,21 @@ export function JournalManagerWorkspace({
                                 >
                                   <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
                                   Track Review Progress
+                                </Button>
+                              )}
+
+                              {(selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged") && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedManuscript(ms)
+                                    setIsPreQualityModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border-red-200 dark:border-red-800 px-3 rounded-lg cursor-pointer"
+                                >
+                                  <ShieldAlert className="h-3.5 w-3.5 mr-1 text-red-600" />
+                                  Forensics & Audit
                                 </Button>
                               )}
 

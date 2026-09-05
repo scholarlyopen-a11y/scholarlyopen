@@ -325,7 +325,7 @@ export function EditorWorkspace({
   const [manuscripts, setManuscripts] = useState<JmManuscript[]>(initialManuscripts)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedJournal, setSelectedJournal] = useState("all")
-  const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "revision" | "decision">("all")
+  const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "revision" | "decision" | "integrity">("all")
   const [reviewSubFilter, setReviewSubFilter] = useState<"all" | "ready" | "in_progress">("all")
 
   // EiC IM Escalation Review Modal State
@@ -481,7 +481,8 @@ export function EditorWorkspace({
   const readyForVerdictCount = manuscripts.filter(m => m.status === "Under Review" && (m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
   const inProgressReviewCount = manuscripts.filter(m => m.status === "Under Review" && !(m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
   const escalatedPaperIds = (integrityAlerts || []).filter(a => a.status === "Escalated").map(a => a.paperId)
-  const escalatedCount = manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged").length
+  const integrityCount = manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30)).length
+  const escalatedCount = integrityCount
 
   // Filtered Papers
   const filteredPapers = manuscripts.filter(m => {
@@ -505,8 +506,8 @@ export function EditorWorkspace({
       matchesStage = m.status === "Revision Required" || m.status === "Revision Under Evaluation"
     } else if (selectedStageFilter === "decision") {
       matchesStage = m.status === "Accepted" || m.status === "Rejected"
-    } else if (selectedStageFilter === "ethics" as any) {
-      matchesStage = escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged"
+    } else if (selectedStageFilter === "integrity" || (selectedStageFilter as string) === "ethics") {
+      matchesStage = escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30)
     }
 
     return matchesJournal && matchesSearch && matchesStage
@@ -803,7 +804,7 @@ export function EditorWorkspace({
                 { id: "review", label: isDe ? "In Begutachtung" : "Under Review", count: reviewCount },
                 { id: "revision", label: isDe ? "Revisionen & Re-Evaluation" : "Revisions & Re-Evaluations", count: revisionCount },
                 { id: "decision", label: isDe ? "In Produktion / Entschieden" : "Decisions Completed", count: decisionCount },
-                ...(escalatedCount > 0 ? [{ id: "ethics", label: isDe ? "⚠️ Ethik-Eskalation" : "⚠️ IM Escalations", count: escalatedCount, isAlert: true }] : [])
+                { id: "integrity", label: isDe ? "Integritäts-Fälle" : "Integrity Cases", count: integrityCount, isAlert: true }
               ].map((tab: any) => (
                 <button
                   key={tab.id}
@@ -817,6 +818,7 @@ export function EditorWorkspace({
                       : "bg-slate-100 hover:bg-slate-200 dark:bg-[#1e2027] dark:hover:bg-[#252833] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
+                  {tab.isAlert && <ShieldAlert className="h-3.5 w-3.5 text-current" />}
                   <span>{tab.label}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                     selectedStageFilter === tab.id
@@ -944,6 +946,22 @@ export function EditorWorkspace({
                             </div>
                           )
                         }
+                        const isFlagged = paper.integrityStatus === "Flagged" || (paper.plagiarismScore && paper.plagiarismScore > 15) || (paper.aiScore && paper.aiScore > 30)
+                        if (isFlagged) {
+                          return (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPaperForIntegrity(paper)}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/40 text-[11px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
+                              >
+                                <ShieldAlert className="h-3.5 w-3.5 text-red-600" />
+                                ⚠️ Plagiarism: {paper.plagiarismScore || 18}% · AI Index: {paper.aiScore || 42}% (Flagged)
+                              </button>
+                              <span className="text-[11px] text-red-500 font-medium">· Scrutiny Required</span>
+                            </div>
+                          )
+                        }
                         return (
                           <div className="flex items-center gap-2 flex-wrap">
                             <button
@@ -969,6 +987,17 @@ export function EditorWorkspace({
                         >
                           <Eye className="h-3.5 w-3.5 mr-1 text-slate-500" />
                           {isDe ? "Volltext" : "Inspect"}
+                        </Button>
+                      )}
+
+                      {(paper.integrityStatus === "Flagged" || (paper.plagiarismScore && paper.plagiarismScore > 15) || (paper.aiScore && paper.aiScore > 30)) && !isAccepted && !isRejected && (
+                        <Button
+                          onClick={() => setSelectedPaperForIntegrity(paper)}
+                          variant="outline"
+                          className="text-xs h-8 px-3 border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 bg-red-50/50 hover:bg-red-100/50 cursor-pointer font-semibold"
+                        >
+                          <ShieldAlert className="h-3.5 w-3.5 mr-1 text-red-600" />
+                          {isDe ? "Integritäts-Prüfung" : "Integrity Forensics"}
                         </Button>
                       )}
 
@@ -3164,30 +3193,52 @@ export function EditorWorkspace({
         <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-md rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              {(selectedPaperForIntegrity?.integrityStatus === "Flagged" || (selectedPaperForIntegrity?.plagiarismScore || 0) > 15 || (selectedPaperForIntegrity?.aiScore || 0) > 30) ? (
+                <ShieldAlert className="h-5 w-5 text-red-600" />
+              ) : (
+                <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              )}
               Automated Integrity & Forensic Report
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Manuscript ID: {selectedPaperForIntegrity?.id}
+              Manuscript ID: {selectedPaperForIntegrity?.id} · {selectedPaperForIntegrity?.title}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2 text-xs">
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 text-center">
+              <div className={`p-3 rounded-xl border text-center ${
+                (selectedPaperForIntegrity?.plagiarismScore || 0) > 15
+                  ? "bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40"
+                  : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40"
+              }`}>
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Similarity Index</span>
-                <span className="text-lg font-bold text-emerald-600">4% (Clear)</span>
+                <span className={`text-lg font-bold ${
+                  (selectedPaperForIntegrity?.plagiarismScore || 0) > 15 ? "text-red-600" : "text-emerald-600"
+                }`}>
+                  {selectedPaperForIntegrity?.plagiarismScore ?? 4}% { (selectedPaperForIntegrity?.plagiarismScore || 0) > 15 ? "(Flagged)" : "(Clear)" }
+                </span>
               </div>
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 text-center">
+              <div className={`p-3 rounded-xl border text-center ${
+                (selectedPaperForIntegrity?.aiScore || 0) > 30
+                  ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40"
+                  : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40"
+              }`}>
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">AI Text Prob.</span>
-                <span className="text-lg font-bold text-emerald-600">2% (Human)</span>
+                <span className={`text-lg font-bold ${
+                  (selectedPaperForIntegrity?.aiScore || 0) > 30 ? "text-amber-600" : "text-emerald-600"
+                }`}>
+                  {selectedPaperForIntegrity?.aiScore ?? 2}% { (selectedPaperForIntegrity?.aiScore || 0) > 30 ? "(Elevated AI)" : "(Human)" }
+                </span>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-1.5 text-[11px]">
               <div className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-400">Figure Image Forensics:</span>
-                <span className="font-bold text-emerald-600">No manipulation detected ✓</span>
+                <span className={`font-bold ${selectedPaperForIntegrity?.id === "SOSSH-26-SRW107" ? "text-red-600" : "text-emerald-600"}`}>
+                  {selectedPaperForIntegrity?.id === "SOSSH-26-SRW107" ? "Potential duplication flagged ⚠️" : "No manipulation detected ✓"}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-400">COPE Ethics Declaration:</span>
