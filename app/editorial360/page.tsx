@@ -3140,14 +3140,8 @@ export default function Editorial360Page() {
                   className="flex items-center gap-2.5 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-[#20222a] transition-all cursor-pointer select-none"
                 >
                   <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
-                    <div className="h-full w-full rounded-full bg-black dark:bg-zinc-900 text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
-                      {role === "editor" && editorPhotoUrl ? (
-                        <img src={editorPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
-                      ) : profPhotoUrl ? (
-                        <img src={profPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
-                      )}
+                    <div className="h-full w-full rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
+                      <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                     </div>
                     {/* Full unclipped Online (Green) / Offline (Grey) Status Dot */}
                     <span 
@@ -3186,13 +3180,7 @@ export default function Editorial360Page() {
                     {/* User Header */}
                     <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
                       <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                        {role === "editor" && editorPhotoUrl ? (
-                          <img src={editorPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
-                        ) : profPhotoUrl ? (
-                          <img src={profPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
-                        ) : (
-                          <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
-                        )}
+                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                         <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#18191e] ${userStatus === "online" ? "bg-emerald-500" : "bg-slate-400"}`} />
                       </div>
                       <div className="space-y-0.5 overflow-hidden text-left flex-1">
@@ -3315,17 +3303,17 @@ export default function Editorial360Page() {
                       onClick={() => {
                         if (role === "author") setActiveAuthorTab("dashboard")
                       }}
-                      className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                      className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                         activeAuthorTab === "dashboard"
-                          ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                          : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                          ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                          : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                       }`}
                     >
                       <span className="flex items-center gap-2.5">
                         <LayoutDashboard className="h-4 w-4" />
                         {role === "author" 
-                          ? (language === "de" ? "Autoren-Dashboard" : "Author Dashboard") 
-                          : (language === "de" ? "Übersichts-Hub" : "Overview Hub")}
+                          ? (language === "de" ? "Dashboard" : "Dashboard") 
+                          : (language === "de" ? "Systemübersicht" : "System Overview")}
                       </span>
                     </button>
                   )}
@@ -3335,28 +3323,28 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveReviewerTab("overview")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeReviewerTab === "overview"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" />
-                        <span>{language === "de" ? "Dashboard Übersicht" : "Dashboard Overview"}</span>
+                        <span>{language === "de" ? "Übersicht" : "Overview"}</span>
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveReviewerTab("portfolio")}
-                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeReviewerTab === "portfolio"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <FolderOpen className="h-4 w-4" />
-                          <span>{language === "de" ? "Begutachtungs-Portfolio" : "Review Portfolio"}</span>
+                          <span>{language === "de" ? "Meine Gutachten" : "My Reviews"}</span>
                         </div>
                         {activeReviews.length > 0 && (
                           <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
@@ -3368,28 +3356,28 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveReviewerTab("forensics")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeReviewerTab === "forensics"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <SearchCode className="h-4 w-4" />
-                        <span>{language === "de" ? "KI- & Papier-Forensik" : "AI & Paper Forensics"}</span>
+                        <span>{language === "de" ? "Forensik-Toolkit" : "Forensics Toolkit"}</span>
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveReviewerTab("wallet")}
-                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeReviewerTab === "wallet"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <Wallet className="h-4 w-4" />
-                          <span>{language === "de" ? "APC-Credit-Wallet" : "APC Credit Wallet"}</span>
+                          <span>{language === "de" ? "APC-Guthaben & Prämien" : "APC Rewards & Wallet"}</span>
                         </div>
                         <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#0b99ff]/10 text-[#0b99ff] font-bold">
                           35 Pts
@@ -3399,14 +3387,14 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveReviewerTab("certificate")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeReviewerTab === "certificate"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <FileCheck2 className="h-4 w-4" />
-                        <span>{language === "de" ? "Zertifikat & CV-Export" : "Verified CV & Certificate"}</span>
+                        <span>{language === "de" ? "Zertifikate & Nachweise" : "Certificates & Records"}</span>
                       </button>
                     </>
                   )}
@@ -3416,62 +3404,62 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveAuthorTab("submissions")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAuthorTab === "submissions"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <FileText className="h-4 w-4" />
-                        {language === "de" ? "Einreichungs-Manager" : "Submission Manager"}
+                        {language === "de" ? "Meine Einreichungen" : "My Submissions"}
                       </button>
                       <button 
                         type="button"
                         onClick={() => setActiveAuthorTab("scorecard")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAuthorTab === "scorecard"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <CheckSquare className="h-4 w-4" />
-                        {language === "de" ? "Bereitschafts-Scorecard" : "Readiness Scorecard"}
+                        {language === "de" ? "Einreichungs-Checkliste" : "Submission Checklist"}
                       </button>
                       <button 
                         type="button"
                         onClick={() => setActiveAuthorTab("plagiarism")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAuthorTab === "plagiarism"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <ShieldCheck className="h-4 w-4" />
-                        {language === "de" ? "KI- & Plagiatsprüfung" : "AI & Plagiarism Scan"}
+                        {language === "de" ? "Integritäts-Vorabprüfung" : "Integrity Pre-Scan"}
                       </button>
                       <button 
                         type="button"
                         onClick={() => setActiveAuthorTab("recognition")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAuthorTab === "recognition"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Award className="h-4 w-4" />
-                        {language === "de" ? "Erlasse & Abzeichen" : "Waivers & Badges"}
+                        {language === "de" ? "APC-Erlasse & Abzeichen" : "APC Waivers & Badges"}
                       </button>
                       <button 
                         type="button"
                         onClick={() => setActiveAuthorTab("career")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAuthorTab === "career"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <TrendingUp className="h-4 w-4" />
-                        {language === "de" ? "Karriere-Dashboard" : "Career Dashboard"}
+                        {language === "de" ? "Publikations-Impact" : "Publication Impact"}
                       </button>
                     </>
                   )}
@@ -3481,15 +3469,15 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveJmTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "activity"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <Bell className="h-4 w-4 text-[#0b99ff]" />
-                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
+                          <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
                         </div>
                         {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
@@ -3501,66 +3489,66 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveJmTab("board")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "board"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" />
-                        {language === "de" ? "Journal-Manager" : "Journal Manager"}
+                        {language === "de" ? "Einreichungs-Pipeline" : "Submissions Pipeline"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveJmTab("users")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "users"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Users className="h-4 w-4" />
-                        {language === "de" ? "Gutachter-Registry & Last" : "Reviewer Registry"}
+                        {language === "de" ? "Gutachter-Pool" : "Reviewer Pool"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveJmTab("checks")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "checks"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <CheckSquare className="h-4 w-4" />
-                        {language === "de" ? "Publikationsprüfungen & DOI" : "Publishing & DOI Dispatch"}
+                        {language === "de" ? "Produktion & DOIs" : "Production & DOIs"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveJmTab("analytics")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "analytics"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <BarChart3 className="h-4 w-4" />
-                        {language === "de" ? "Portfolio-Analysen" : "Portfolio Analytics"}
+                        {language === "de" ? "Analysen & Berichte" : "Analytics & Reports"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveJmTab("archives")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "archives"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Archive className="h-4 w-4" />
-                        {language === "de" ? "Kommunikations-Archive" : "Audit Archives"}
+                        {language === "de" ? "Archivierte Einreichungen" : "Archived Submissions"}
                       </button>
                     </>
                   )}
@@ -3570,15 +3558,15 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveEditorTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeEditorTab === "activity"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <Bell className="h-4 w-4 text-[#0b99ff]" />
-                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
+                          <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
                         </div>
                         {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
@@ -3590,53 +3578,53 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveEditorTab("desk")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeEditorTab === "desk"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" />
-                        {language === "de" ? "Redaktionstisch & Pipeline" : "Editorial Desk & Pipeline"}
+                        {language === "de" ? "Zugewiesene Manuskripte" : "Assigned Manuscripts"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveEditorTab("integrity")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeEditorTab === "integrity"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <ShieldCheck className="h-4 w-4" />
-                        {language === "de" ? "Integrität & Forensik" : "Integrity & Forensics"}
+                        {language === "de" ? "Forschungsintegrität" : "Research Integrity"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveEditorTab("collections")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeEditorTab === "collections"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Layers className="h-4 w-4" />
-                        {language === "de" ? "Sonderhefte & Sammlungen" : "Special Collections"}
+                        {language === "de" ? "Sonderausgaben" : "Special Issues"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveEditorTab("analytics")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeEditorTab === "analytics"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Award className="h-4 w-4" />
-                        {language === "de" ? "Redaktionsmetriken & Impact" : "Editorial Impact & Metrics"}
+                        {language === "de" ? "Journal-Kennzahlen" : "Journal Metrics"}
                       </button>
                     </>
                   )}
@@ -3646,15 +3634,15 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveRiaTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeRiaTab === "activity"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <Bell className="h-4 w-4 text-[#0b99ff]" />
-                          <span>{language === "de" ? "Aktivität & Mitteilungen" : "Notifications & Activity"}</span>
+                          <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
                         </div>
                         {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
@@ -3666,53 +3654,53 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveRiaTab("alerts")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeRiaTab === "alerts"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <ShieldAlert className="h-4 w-4 text-red-500" />
-                        {language === "de" ? "Alerts" : "Alerts"}
+                        {language === "de" ? "Aktive Integritäts-Warnungen" : "Active Integrity Alerts"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveRiaTab("intel")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeRiaTab === "intel" || activeRiaTab === "scans"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Search className="h-4 w-4 text-[#0b99ff]" />
-                        {language === "de" ? "Paper Mill Intel" : "Paper Mill Intel"}
+                        {language === "de" ? "Paper-Mill-Überwachung" : "Paper Mill Surveillance"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveRiaTab("studio")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeRiaTab === "studio" || activeRiaTab === "protocols"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <CheckSquare className="h-4 w-4 text-emerald-500" />
-                        {language === "de" ? "COPE Studio" : "COPE Studio"}
+                        {language === "de" ? "COPE-Ethik-Audit" : "COPE Ethics Audit"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveRiaTab("sanctions")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeRiaTab === "sanctions"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <ShieldCheck className="h-4 w-4 text-slate-500" />
-                        {language === "de" ? "Watchlist" : "Watchlist"}
+                        {language === "de" ? "Sanktionen & Watchlist" : "Sanctions & Watchlist"}
                       </button>
                     </>
                   )}
@@ -3722,10 +3710,10 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveAdminTab("overview")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAdminTab === "overview"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" />
@@ -3735,40 +3723,40 @@ export default function Editorial360Page() {
                       <button 
                         type="button"
                         onClick={() => setActiveAdminTab("members")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAdminTab === "members"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Users className="h-4 w-4" />
-                        {language === "de" ? "Mitglieder-Registry" : "Member Registry"}
+                        {language === "de" ? "Benutzerverwaltung" : "User Management"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveAdminTab("policy")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAdminTab === "policy"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <Sliders className="h-4 w-4" />
-                        {language === "de" ? "Richtlinien & Automation" : "Policy & Automation"}
+                        {language === "de" ? "Richtlinien & Automation" : "Policies & Automation"}
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => setActiveAdminTab("journals")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeAdminTab === "journals"
-                            ? "bg-slate-100 dark:bg-[#1e2027] text-[#0b99ff] dark:text-sky-400 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e2027]"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
                         <BookOpen className="h-4 w-4" />
-                        {language === "de" ? "Verwaltete Journals" : "Managed Journals"}
+                        {language === "de" ? "Journal-Portfolio" : "Journal Portfolio"}
                       </button>
                     </>
                   )}
