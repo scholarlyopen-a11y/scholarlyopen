@@ -425,40 +425,6 @@ export function EditorWorkspace({
   // Special Collections
   const [collections, setCollections] = useState<SpecialCollectionItem[]>(INITIAL_COLLECTIONS)
   const [isNewCollectionOpen, setIsNewCollectionOpen] = useState(false)
-
-  // Are-You-Sure Confirmation Dialog State
-  const [confirmDialogState, setConfirmDialogState] = useState<{
-    isOpen: boolean
-    title: string
-    message: string
-    confirmButtonLabel: string
-    confirmColorClass: string
-    onConfirm: () => void
-  }>({
-    isOpen: false,
-    title: "",
-    message: "",
-    confirmButtonLabel: "Yes, Proceed",
-    confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-    onConfirm: () => {}
-  })
-
-  const triggerConfirm = (config: {
-    title: string
-    message: string
-    confirmButtonLabel?: string
-    confirmColorClass?: string
-    onConfirm: () => void
-  }) => {
-    setConfirmDialogState({
-      isOpen: true,
-      title: config.title,
-      message: config.message,
-      confirmButtonLabel: config.confirmButtonLabel || (isDe ? "Ja, Fortfahren" : "Yes, Proceed"),
-      confirmColorClass: config.confirmColorClass || "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: config.onConfirm
-    })
-  }
   const [newCollectionTitle, setNewCollectionTitle] = useState("")
   const [newCollectionJournal, setNewCollectionJournal] = useState(user.journal || "Scholarly Open: Medicine & Applied Sciences")
   const [newCollectionGuestEditors, setNewCollectionGuestEditors] = useState("")
@@ -547,19 +513,6 @@ export function EditorWorkspace({
     setSelectedPaperForDecision(null)
   }
 
-  const onTriggerSubmitDecision = () => {
-    if (!selectedPaperForDecision) return
-    triggerConfirm({
-      title: isDe ? "Redaktionelle Entscheidung bestätigen?" : "Confirm Editorial Decision?",
-      message: isDe 
-        ? `Möchten Sie die redaktionelle Entscheidung '${decisionVerdict}' für das Manuskript ${selectedPaperForDecision.id} verbindlich erteilen und den offiziellen Bescheid an den Autor senden?`
-        : `Are you sure you want to render the official decision '${decisionVerdict}' on manuscript ${selectedPaperForDecision.id} and dispatch the decision letter to the author?`,
-      confirmButtonLabel: isDe ? "Ja, Entscheidung senden" : "Yes, Submit Decision",
-      confirmColorClass: decisionVerdict === "Accept" ? "bg-emerald-600 hover:bg-emerald-700" : decisionVerdict === "Reject" ? "bg-rose-600 hover:bg-rose-700" : "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: handleSubmitDecision
-    })
-  }
-
   const handleAssignReviewersSubmit = () => {
     if (!selectedPaperForReviewers) return
     const updated = manuscripts.map(m => {
@@ -577,19 +530,6 @@ export function EditorWorkspace({
 
     triggerToast(isDe ? "Gutachter-Einladungen versendet!" : "Peer reviewer invitations dispatched!")
     setSelectedPaperForReviewers(null)
-  }
-
-  const onTriggerAssignReviewers = () => {
-    if (!selectedPaperForReviewers) return
-    triggerConfirm({
-      title: isDe ? "Gutachter-Einladungen bestätigen?" : "Confirm Reviewer Invitations?",
-      message: isDe
-        ? `Möchten Sie die Einladungen zur Begutachtung an ${selectedReviewerNames.join(", ")} für Manuskript ${selectedPaperForReviewers.id} versenden?`
-        : `Are you sure you want to dispatch review invitations to ${selectedReviewerNames.join(", ")} for manuscript ${selectedPaperForReviewers.id}?`,
-      confirmButtonLabel: isDe ? "Ja, Einladungen senden" : "Yes, Dispatch Invitations",
-      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: handleAssignReviewersSubmit
-    })
   }
 
   const handleCreateCollectionSubmit = (e: React.FormEvent) => {
@@ -1008,15 +948,7 @@ export function EditorWorkspace({
                       {isRevision && (
                         <Button
                           onClick={() => {
-                            triggerConfirm({
-                              title: "Send Revision Reminder to Author?",
-                              message: `Are you sure you want to dispatch a revision reminder email to ${paper.authorName || 'Author'} for manuscript ${paper.id}?`,
-                              confirmButtonLabel: "Yes, Send Reminder",
-                              confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-                              onConfirm: () => {
-                                triggerToast(`✓ Revision reminder email dispatched to ${paper.authorName || 'Author'}.`)
-                              }
-                            })
+                            triggerToast(`✓ Revision reminder email dispatched to ${paper.authorName || 'Author'}.`)
                           }}
                           className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800 text-xs font-semibold h-8 px-3.5 cursor-pointer shadow-2xs"
                         >
@@ -1169,16 +1101,8 @@ export function EditorWorkspace({
                             <Button
                               onClick={() => {
                                 const revName = isSingleReviewer ? "Prof. Hiroshi Tanaka" : "Prof. Elena Rostova"
-                                triggerConfirm({
-                                  title: "Send Reviewer Deadline Reminder?",
-                                  message: `Are you sure you want to dispatch an official double-blind peer review reminder email to ${revName} for manuscript ${m.id}? A formal notification will also be logged at the Journal Manager Desk.`,
-                                  confirmButtonLabel: "Yes, Send Reminder",
-                                  confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-                                  onConfirm: () => {
-                                    setNudgedReviewers(prev => [...prev, `${m.id}-rev2`])
-                                    triggerToast(`✓ Official deadline reminder email dispatched to ${revName}.`)
-                                  }
-                                })
+                                setNudgedReviewers(prev => [...prev, `${m.id}-rev2`])
+                                triggerToast(`✓ Official deadline reminder email dispatched to ${revName}.`)
                               }}
                               variant="outline"
                               className="text-xs h-8 px-3 border-amber-300 text-amber-700 dark:text-amber-300 hover:bg-amber-100 cursor-pointer shadow-2xs font-semibold"
@@ -1615,13 +1539,7 @@ export function EditorWorkspace({
                 </div>
                 <Button
                   onClick={() => {
-                    triggerConfirm({
-                      title: "Send Reminder to Reviewer 2?",
-                      message: "Send a progress reminder email to Prof. Elena Rostova?",
-                      confirmButtonLabel: "Send Reminder",
-                      confirmColorClass: "bg-amber-500 hover:bg-amber-600",
-                      onConfirm: () => triggerToast("✓ Progress reminder sent to Prof. Elena Rostova.")
-                    })
+                    triggerToast("✓ Progress reminder sent to Prof. Elena Rostova.")
                   }}
                   variant="outline"
                   className="text-xs h-7.5 px-3 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-300 shrink-0 cursor-pointer"
@@ -1901,7 +1819,7 @@ export function EditorWorkspace({
                 {isDe ? "Abbrechen" : "Cancel"}
               </Button>
               <Button
-                onClick={onTriggerSubmitDecision}
+                onClick={handleSubmitDecision}
                 className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8.5 px-4 shadow-xs cursor-pointer"
               >
                 <Send className="h-3.5 w-3.5 mr-1.5" />
@@ -2094,16 +2012,8 @@ export function EditorWorkspace({
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => {
-                  triggerConfirm({
-                    title: "Dispatch to Round 2?",
-                    message: `Send revised manuscript back to reviewers for final evaluation?`,
-                    confirmButtonLabel: "Dispatch Round 2",
-                    confirmColorClass: "bg-amber-600 hover:bg-amber-700",
-                    onConfirm: () => {
-                      setSelectedRevisionForEvaluation(null)
-                      triggerToast("✓ Manuscript dispatched to Round 2.")
-                    }
-                  })
+                  setSelectedRevisionForEvaluation(null)
+                  triggerToast("✓ Manuscript dispatched to Round 2.")
                 }}
                 variant="outline"
                 className="text-xs h-8.5 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-300 cursor-pointer font-semibold"
@@ -3059,95 +2969,84 @@ export function EditorWorkspace({
 
                     setSelectedEscalationAlert(null)
 
-                    triggerConfirm({
-                      title: `Confirm Ruling: ${actionLabel}?`,
-                      message: confirmMsg,
-                      confirmButtonLabel: `Yes, Execute Ruling`,
-                      confirmColorClass: confirmColor,
-                      onConfirm: () => {
-                        if (onResolveIntegrity) onResolveIntegrity(alert.id, "clear")
+                    if (onResolveIntegrity) onResolveIntegrity(alert.id, "clear")
 
-                        if (eicDecisionAction === "clear") {
-                          setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Clean", status: "Under Review" } : m))
-                          if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Under Review")
-                          if (onAddNotification) {
-                            onAddNotification({
-                              paperId: paperId,
-                              paperTitle: alert.title,
-                              journal: alert.journal || user.journal,
-                              type: "eic_cleared",
-                              severity: "normal",
-                              actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
-                              actorRole: "Editor-in-Chief",
-                              headline: `Ethics Flag Cleared & Certified Clean`,
-                              summary: `Prof. Aris Thorne dismissed integrity flag on ${paperId} and certified manuscript clean for peer review.`,
-                              recipient: "Journal Manager & Research Integrity Office"
-                            })
-                          }
-                          triggerToast(`✓ Ethics flag dismissed. Manuscript ${paperId} certified clean.`)
-                        } else if (eicDecisionAction === "desk_reject") {
-                          setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Breach Confirmed", status: "Rejected" } : m))
-                          if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Rejected")
-                          if (onAddNotification) {
-                            onAddNotification({
-                              paperId: paperId,
-                              paperTitle: alert.title,
-                              journal: alert.journal || user.journal,
-                              type: "eic_desk_reject",
-                              severity: "urgent",
-                              actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
-                              actorRole: "Editor-in-Chief",
-                              headline: `Direct Desk Rejection Executed for Misconduct`,
-                              summary: `Prof. Aris Thorne executed Desk Rejection on manuscript ${paperId}. Formal decision letter dispatched to author with mandatory CC to Journal Manager.`,
-                              dispatchedLetter: eicRulingLetter,
-                              recipient: "Corresponding Author & All Co-Authors"
-                            })
-                          }
-                          triggerToast(`✓ Manuscript ${paperId} desk rejected for ethics misconduct.`)
-                        } else if (eicDecisionAction === "raw_data") {
-                          setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Raw Data Requested", status: "Revision Required" } : m))
-                          if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
-                          if (onAddNotification) {
-                            onAddNotification({
-                              paperId: paperId,
-                              paperTitle: alert.title,
-                              journal: alert.journal || user.journal,
-                              type: "eic_raw_data",
-                              severity: "high",
-                              actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
-                              actorRole: "Editor-in-Chief",
-                              headline: `14-Day Raw Data Request Dispatched to Author`,
-                              summary: `Raw data request letter dispatched for manuscript ${paperId}.`,
-                              dispatchedLetter: eicRulingLetter,
-                              recipient: "Corresponding Author"
-                            })
-                          }
-                          triggerToast(`✓ 14-day raw data request dispatched to corresponding author for ${paperId}.`)
-                        } else {
-                          setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Inquiry Dispatched", status: "Revision Required" } : m))
-                          if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
-                          if (onAddNotification) {
-                            onAddNotification({
-                              paperId: paperId,
-                              paperTitle: alert.title,
-                              journal: alert.journal || user.journal,
-                              type: "eic_inquiry",
-                              severity: "high",
-                              actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
-                              actorRole: "Editor-in-Chief",
-                              headline: `14-Day Formal Ethics Inquiry Dispatched to Author`,
-                              summary: `Inquiry letter regarding ${alert.type} (${alert.score}) dispatched to author of ${paperId}.`,
-                              dispatchedLetter: eicRulingLetter,
-                              recipient: "Corresponding Author"
-                            })
-                          }
-                          triggerToast(`✓ Formal ethics inquiry letter dispatched to corresponding author for ${paperId}.`)
-                        }
-                      },
-                      onCancel: () => {
-                        setSelectedEscalationAlert(alert)
+                    if (eicDecisionAction === "clear") {
+                      setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Clean", status: "Under Review" } : m))
+                      if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Under Review")
+                      if (onAddNotification) {
+                        onAddNotification({
+                          paperId: paperId,
+                          paperTitle: alert.title,
+                          journal: alert.journal || user.journal,
+                          type: "eic_cleared",
+                          severity: "normal",
+                          actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
+                          actorRole: "Editor-in-Chief",
+                          headline: `Ethics Flag Cleared & Certified Clean`,
+                          summary: `Prof. Aris Thorne dismissed integrity flag on ${paperId} and certified manuscript clean for peer review.`,
+                          recipient: "Journal Manager & Research Integrity Office"
+                        })
                       }
-                    })
+                      triggerToast(`✓ Ethics flag dismissed. Manuscript ${paperId} certified clean.`)
+                    } else if (eicDecisionAction === "desk_reject") {
+                      setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Breach Confirmed", status: "Rejected" } : m))
+                      if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Rejected")
+                      if (onAddNotification) {
+                        onAddNotification({
+                          paperId: paperId,
+                          paperTitle: alert.title,
+                          journal: alert.journal || user.journal,
+                          type: "eic_desk_reject",
+                          severity: "urgent",
+                          actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
+                          actorRole: "Editor-in-Chief",
+                          headline: `Direct Desk Rejection Executed for Misconduct`,
+                          summary: `Prof. Aris Thorne executed Desk Rejection on manuscript ${paperId}. Formal decision letter dispatched to author with mandatory CC to Journal Manager.`,
+                          dispatchedLetter: eicRulingLetter,
+                          recipient: "Corresponding Author & All Co-Authors"
+                        })
+                      }
+                      triggerToast(`✓ Manuscript ${paperId} desk rejected for ethics misconduct.`)
+                    } else if (eicDecisionAction === "raw_data") {
+                      setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Raw Data Requested", status: "Revision Required" } : m))
+                      if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
+                      if (onAddNotification) {
+                        onAddNotification({
+                          paperId: paperId,
+                          paperTitle: alert.title,
+                          journal: alert.journal || user.journal,
+                          type: "eic_raw_data",
+                          severity: "high",
+                          actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
+                          actorRole: "Editor-in-Chief",
+                          headline: `14-Day Raw Data Request Dispatched to Author`,
+                          summary: `Raw data request letter dispatched for manuscript ${paperId}.`,
+                          dispatchedLetter: eicRulingLetter,
+                          recipient: "Corresponding Author"
+                        })
+                      }
+                      triggerToast(`✓ 14-day raw data request dispatched to corresponding author for ${paperId}.`)
+                    } else {
+                      setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Inquiry Dispatched", status: "Revision Required" } : m))
+                      if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
+                      if (onAddNotification) {
+                        onAddNotification({
+                          paperId: paperId,
+                          paperTitle: alert.title,
+                          journal: alert.journal || user.journal,
+                          type: "eic_inquiry",
+                          severity: "high",
+                          actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
+                          actorRole: "Editor-in-Chief",
+                          headline: `14-Day Formal Ethics Inquiry Dispatched to Author`,
+                          summary: `Inquiry letter regarding ${alert.type} (${alert.score}) dispatched to author of ${paperId}.`,
+                          dispatchedLetter: eicRulingLetter,
+                          recipient: "Corresponding Author"
+                        })
+                      }
+                      triggerToast(`✓ Formal ethics inquiry letter dispatched to corresponding author for ${paperId}.`)
+                    }
                   }}
                   className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold text-xs h-8 px-4 cursor-pointer shadow-xs"
                 >
@@ -3471,45 +3370,6 @@ export function EditorWorkspace({
           </form>
         </DialogContent>
       </Dialog>
-      {/* ========================================================================= */}
-      {/* CONFIRMATION POPUP DIALOG FOR EDITOR                                       */}
-      {/* ========================================================================= */}
-      <Dialog open={confirmDialogState.isOpen} onOpenChange={(open) => setConfirmDialogState(prev => ({ ...prev, isOpen: open }))}>
-        <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-[#0b99ff]" />
-              {confirmDialogState.title}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 pt-2 leading-relaxed">
-              {confirmDialogState.message}
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setConfirmDialogState(prev => ({ ...prev, isOpen: false }))}
-              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg cursor-pointer"
-            >
-              {isDe ? "Nein, Abbrechen" : "No, Cancel"}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                const action = confirmDialogState.onConfirm
-                setConfirmDialogState(prev => ({ ...prev, isOpen: false }))
-                if (action) action()
-              }}
-              className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
-            >
-              {confirmDialogState.confirmButtonLabel}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
     </div>
   )
 }

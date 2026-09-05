@@ -296,40 +296,6 @@ export function JournalManagerWorkspace({
   const [authorNudged, setAuthorNudged] = useState<Record<string, boolean>>({})
   const [authorExtendedDays, setAuthorExtendedDays] = useState<Record<string, number>>({})
 
-  // Are-You-Sure Confirmation Dialog State
-  const [confirmDialogState, setConfirmDialogState] = useState<{
-    isOpen: boolean
-    title: string
-    message: string
-    confirmButtonLabel: string
-    confirmColorClass: string
-    onConfirm: () => void
-  }>({
-    isOpen: false,
-    title: "",
-    message: "",
-    confirmButtonLabel: "Yes, Proceed",
-    confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-    onConfirm: () => {}
-  })
-
-  const triggerConfirm = (config: {
-    title: string
-    message: string
-    confirmButtonLabel?: string
-    confirmColorClass?: string
-    onConfirm: () => void
-  }) => {
-    setConfirmDialogState({
-      isOpen: true,
-      title: config.title,
-      message: config.message,
-      confirmButtonLabel: config.confirmButtonLabel || "Yes, Proceed",
-      confirmColorClass: config.confirmColorClass || "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: config.onConfirm
-    })
-  }
-
   // Filtered manuscripts
   const filteredManuscripts = useMemo(() => {
     return initialManuscripts.map(m => {
@@ -408,36 +374,28 @@ export function JournalManagerWorkspace({
     const editor = selectedEditor
     const reviewers = [...selectedReviewers]
 
-    triggerConfirm({
-      title: "Confirm Allocation & Dispatch?",
-      message: `Are you sure you want to allocate Handling Editor (${editor}) and dispatch review invitations to ${reviewers.join(", ") || "selected reviewers"} for manuscript ${msId}?`,
-      confirmButtonLabel: "Yes, Confirm & Dispatch",
-      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: () => {
-        setIsAssignModalOpen(false)
-        if (onAssignEditor) onAssignEditor(msId, editor)
-        if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(msId, "Under Review")
+    setIsAssignModalOpen(false)
+    if (onAssignEditor) onAssignEditor(msId, editor)
+    if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(msId, "Under Review")
 
-        // Fire email dispatches asynchronously in the background
-        Promise.all(reviewers.map(revName => {
-          const revObj = reviewersList.find(x => x.name === revName)
-          const targetEmail = revObj ? revObj.email : "reviewer@scholarlyopen.org"
-          return fetch("/api/editorial360/email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              to: targetEmail,
-              recipientName: revName,
-              subject: `Review Invitation: ${msId} - ${msTitle.slice(0, 50)}...`,
-              template: "invitation",
-              paperId: msId,
-              paperTitle: msTitle,
-              journal: msJournal
-            })
-          }).catch(e => console.error(e))
-        }))
-      }
-    })
+    // Fire email dispatches asynchronously in the background
+    Promise.all(reviewers.map(revName => {
+      const revObj = reviewersList.find(x => x.name === revName)
+      const targetEmail = revObj ? revObj.email : "reviewer@scholarlyopen.org"
+      return fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: targetEmail,
+          recipientName: revName,
+          subject: `Review Invitation: ${msId} - ${msTitle.slice(0, 50)}...`,
+          template: "invitation",
+          paperId: msId,
+          paperTitle: msTitle,
+          journal: msJournal
+        })
+      }).catch(e => console.error(e))
+    }))
   }
 
   // Handle Open Moderation
@@ -456,24 +414,16 @@ export function JournalManagerWorkspace({
 
     setIsModModalOpen(false)
 
-    triggerConfirm({
-      title: "Save & Approve Sanitized Remarks?",
-      message: `Are you sure you want to approve and save these sanitized peer review remarks for manuscript ${paperId}? These remarks will be saved to the manuscript file and bundled into the official Decision Letter sent to the author.`,
-      confirmButtonLabel: "Yes, Save & Approve",
-      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: () => {
-        if (onReleaseComments) {
-          onReleaseComments(revId, editedText)
-        }
-        setApprovedReviewRemarks(prev => ({
-          ...prev,
-          [moderatingReview.reviewerName]: true,
-          [revId]: true
-        }))
-        setEditorPromptSuccess(`✓ Remarks for ${moderatingReview.reviewerName} vetted, approved & saved to manuscript dossier.`)
-        setTimeout(() => setEditorPromptSuccess(null), 6000)
-      }
-    })
+    if (onReleaseComments) {
+      onReleaseComments(revId, editedText)
+    }
+    setApprovedReviewRemarks(prev => ({
+      ...prev,
+      [moderatingReview.reviewerName]: true,
+      [revId]: true
+    }))
+    setEditorPromptSuccess(`✓ Remarks for ${moderatingReview.reviewerName} vetted, approved & saved to manuscript dossier.`)
+    setTimeout(() => setEditorPromptSuccess(null), 6000)
   }
 
   // Handle Return to Author for Correction (Pre-Review Query)
@@ -485,36 +435,28 @@ export function JournalManagerWorkspace({
     const authorName = selectedManuscript.authorName || "Author"
     const message = queryAuthorMessage || "Please provide high-resolution figures and a signed ethics/COI declaration statement."
 
-    triggerConfirm({
-      title: "Dispatch Correction Query to Author?",
-      message: `Are you sure you want to return manuscript ${msId} to ${authorName} with these pre-check correction instructions?`,
-      confirmButtonLabel: "Yes, Dispatch Query",
-      confirmColorClass: "bg-amber-600 hover:bg-amber-700",
-      onConfirm: () => {
-        setIsQueryAuthorOpen(false)
-        setIsPreQualityModalOpen(false)
-        setQueryAuthorMessage("")
+    setIsQueryAuthorOpen(false)
+    setIsPreQualityModalOpen(false)
+    setQueryAuthorMessage("")
 
-        if (onUpdateManuscriptStatus) {
-          onUpdateManuscriptStatus(msId, "Revision Required")
-        }
+    if (onUpdateManuscriptStatus) {
+      onUpdateManuscriptStatus(msId, "Revision Required")
+    }
 
-        fetch("/api/editorial360/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: authorEmail,
-            recipientName: authorName,
-            subject: `Technical Pre-Check Query: Action Required for ${msId}`,
-            template: "precheck_query",
-            paperId: msId,
-            paperTitle: msTitle,
-            customMessage: message,
-            journal: selectedManuscript.journal
-          })
-        }).catch(e => console.error(e))
-      }
-    })
+    fetch("/api/editorial360/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: authorEmail,
+        recipientName: authorName,
+        subject: `Technical Pre-Check Query: Action Required for ${msId}`,
+        template: "precheck_query",
+        paperId: msId,
+        paperTitle: msTitle,
+        customMessage: message,
+        journal: selectedManuscript.journal
+      })
+    }).catch(e => console.error(e))
   }
 
   // Handle Reviewer Status Cycling (Active -> Sabbatical -> Inactive -> Active)
@@ -615,32 +557,24 @@ export function JournalManagerWorkspace({
 
   // Handle Author Revision Reminder Nudge
   const handleNudgeAuthor = (ms: JmManuscript) => {
-    triggerConfirm({
-      title: "Send Revision Reminder to Author?",
-      message: `Are you sure you want to dispatch a revision reminder email to Author (${ms.authorName || 'Author'}) for manuscript ${ms.id}?`,
-      confirmButtonLabel: "Yes, Send Reminder",
-      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: () => {
-        setAuthorNudged(prev => ({ ...prev, [ms.id]: true }))
-        fetch("/api/editorial360/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: ms.authorEmail || "author@university.edu",
-            recipientName: ms.authorName || "Author",
-            subject: `Reminder: Revision Pending for ${ms.id}`,
-            template: "precheck_query",
-            paperId: ms.id,
-            paperTitle: ms.title,
-            customMessage: "This is a friendly reminder that the revision and rebuttal for your manuscript are currently due. Please upload your revised files through the Author Portal.",
-            journal: ms.journal
-          })
-        }).catch(e => console.error(e))
+    setAuthorNudged(prev => ({ ...prev, [ms.id]: true }))
+    fetch("/api/editorial360/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: ms.authorEmail || "author@university.edu",
+        recipientName: ms.authorName || "Author",
+        subject: `Reminder: Revision Pending for ${ms.id}`,
+        template: "precheck_query",
+        paperId: ms.id,
+        paperTitle: ms.title,
+        customMessage: "This is a friendly reminder that the revision and rebuttal for your manuscript are currently due. Please upload your revised files through the Author Portal.",
+        journal: ms.journal
+      })
+    }).catch(e => console.error(e))
 
-        setEditorPromptSuccess(`✓ Revision reminder email dispatched to ${ms.authorName || 'Author'}.`)
-        setTimeout(() => setEditorPromptSuccess(null), 6000)
-      }
-    })
+    setEditorPromptSuccess(`✓ Revision reminder email dispatched to ${ms.authorName || 'Author'}.`)
+    setTimeout(() => setEditorPromptSuccess(null), 6000)
   }
 
   // Handle Author Deadline Extension
@@ -2062,19 +1996,11 @@ export function JournalManagerWorkspace({
                 <Button
                   size="sm"
                   onClick={() => {
-                    triggerConfirm({
-                      title: "Prompt Handling Editor for Decision?",
-                      message: `Are you sure you want to notify Handling Editor (${trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}) that all 2/2 reviewer evaluations are in and prompt for the official verdict?`,
-                      confirmButtonLabel: "Yes, Prompt Editor",
-                      confirmColorClass: "bg-purple-600 hover:bg-purple-700",
-                      onConfirm: () => {
-                        if (trackingManuscript) {
-                          setPromptedEditors(prev => ({ ...prev, [trackingManuscript.id]: true }))
-                        }
-                        setEditorPromptSuccess(`✓ Automated alert dispatched to Handling Editor (${trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}). Pipeline status updated to 'Editor Prompted'.`)
-                        setTimeout(() => setEditorPromptSuccess(null), 6000)
-                      }
-                    })
+                    if (trackingManuscript) {
+                      setPromptedEditors(prev => ({ ...prev, [trackingManuscript.id]: true }))
+                    }
+                    setEditorPromptSuccess(`✓ Automated alert dispatched to Handling Editor (${trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}). Pipeline status updated to 'Editor Prompted'.`)
+                    setTimeout(() => setEditorPromptSuccess(null), 6000)
                   }}
                   className={`text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 transition-all ${
                     promptedEditors[trackingManuscript?.id || ""]
@@ -2387,18 +2313,10 @@ export function JournalManagerWorkspace({
                   <Button
                     size="sm"
                     onClick={() => {
-                      triggerConfirm({
-                        title: "Forward to Handling Editor?",
-                        message: `Are you sure you would like to forward revised manuscript ${selectedRevisionManuscript?.id} to Handling Editor (${selectedRevisionManuscript?.assignedEditorName || "Prof. Aris Thorne"}) for re-evaluation & decision?`,
-                        confirmButtonLabel: "Yes, Forward to Editor",
-                        confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-                        onConfirm: () => {
-                          if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
-                            onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Revision Under Evaluation")
-                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} forwarded to Handling Editor (${selectedRevisionManuscript.assignedEditorName || "Prof. Aris Thorne"}).`)
-                          }
-                        }
-                      })
+                      if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
+                        onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Revision Under Evaluation")
+                        setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} forwarded to Handling Editor (${selectedRevisionManuscript.assignedEditorName || "Prof. Aris Thorne"}).`)
+                      }
                     }}
                     className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0"
                   >
@@ -2421,18 +2339,10 @@ export function JournalManagerWorkspace({
                     <Button
                       size="sm"
                       onClick={() => {
-                        triggerConfirm({
-                          title: "Dispatch Round 2 Review?",
-                          message: `Are you sure you would like to dispatch Round 2 peer review invitations to ${selectedRound2Reviewers.join(" and ")}?`,
-                          confirmButtonLabel: "Yes, Dispatch Review",
-                          confirmColorClass: "bg-purple-600 hover:bg-purple-700",
-                          onConfirm: () => {
-                            if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
-                              onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Under Review")
-                              setRevisionActionSuccess(`✓ Round 2 re-review invitations dispatched to ${selectedRound2Reviewers.join(", ")}.`)
-                            }
-                          }
-                        })
+                        if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
+                          onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Under Review")
+                          setRevisionActionSuccess(`✓ Round 2 re-review invitations dispatched to ${selectedRound2Reviewers.join(", ")}.`)
+                        }
                       }}
                       className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0"
                     >
@@ -2471,18 +2381,10 @@ export function JournalManagerWorkspace({
                   <Button
                     size="sm"
                     onClick={() => {
-                      triggerConfirm({
-                        title: "Accept Manuscript?",
-                        message: `Are you sure you would like to accept manuscript ${selectedRevisionManuscript?.id} for publication and schedule typeset galley proofing?`,
-                        confirmButtonLabel: "Yes, Accept Paper",
-                        confirmColorClass: "bg-emerald-600 hover:bg-emerald-700",
-                        onConfirm: () => {
-                          if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
-                            onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Accepted")
-                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} has been Accepted for publication.`)
-                          }
-                        }
-                      })
+                      if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
+                        onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Accepted")
+                        setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} has been Accepted for publication.`)
+                      }
                     }}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0"
                   >
@@ -2499,16 +2401,8 @@ export function JournalManagerWorkspace({
               variant="outline"
               size="sm"
               onClick={() => {
-                triggerConfirm({
-                  title: "Request Author Corrections?",
-                  message: `Are you sure you want to return manuscript ${selectedRevisionManuscript?.id} to the author for further corrections or missing files?`,
-                  confirmButtonLabel: "Yes, Request Corrections",
-                  confirmColorClass: "bg-amber-600 hover:bg-amber-700",
-                  onConfirm: () => {
-                    setIsRevisionModalOpen(false)
-                    setIsQueryAuthorOpen(true)
-                  }
-                })
+                setIsRevisionModalOpen(false)
+                setIsQueryAuthorOpen(true)
               }}
               className="text-xs font-semibold text-amber-600 border-amber-300 hover:bg-amber-50 dark:border-amber-900/40 h-8 px-3 rounded-lg"
             >
@@ -2522,45 +2416,6 @@ export function JournalManagerWorkspace({
               className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg"
             >
               Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ========================================================================= */}
-      {/* MODAL 8: ARE-YOU-SURE CONFIRMATION POPUP DIALOG                            */}
-      {/* ========================================================================= */}
-      <Dialog open={confirmDialogState.isOpen} onOpenChange={(open) => setConfirmDialogState(prev => ({ ...prev, isOpen: open }))}>
-        <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-[#0b99ff]" />
-              {confirmDialogState.title}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 pt-2 leading-relaxed">
-              {confirmDialogState.message}
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setConfirmDialogState(prev => ({ ...prev, isOpen: false }))}
-              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg cursor-pointer"
-            >
-              No, Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                const action = confirmDialogState.onConfirm
-                setConfirmDialogState(prev => ({ ...prev, isOpen: false }))
-                if (action) action()
-              }}
-              className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
-            >
-              {confirmDialogState.confirmButtonLabel}
             </Button>
           </DialogFooter>
         </DialogContent>
