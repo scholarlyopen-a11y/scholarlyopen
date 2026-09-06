@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { useTheme } from "next-themes"
@@ -1322,6 +1322,19 @@ export default function Editorial360Page() {
   const [userStatus, setUserStatus] = useState<"online" | "offline">("online")
   const [isTranslationMenuOpen, setIsTranslationMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
+  const workspaceMainRef = useRef<HTMLElement>(null)
+
+  // Automatic scroll-to-top whenever logging in, switching role, or switching desk tabs
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+    }
+    if (workspaceMainRef.current) {
+      workspaceMainRef.current.scrollTop = 0
+    }
+  }, [isLoggedIn, role, activeAuthorTab, activeReviewerTab, activeJmTab, activeEditorTab, activeRiaTab, activeAdminTab])
 
   // Interactive Upwork-Style Author Dashboard States
   const [authorSubView, setAuthorSubView] = useState<"feed" | "table">("feed")
@@ -1746,6 +1759,9 @@ export default function Editorial360Page() {
     setTimeout(() => {
       setLoading(false)
       setIsLoggedIn(true)
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+      }
       setSuccess("Successfully authenticated into the Editorial360 workspace.")
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search)
@@ -1765,6 +1781,9 @@ export default function Editorial360Page() {
       setLoading(false)
       setIsLoggedIn(true)
       setRole("author")
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+      }
       setIsAuthorProfileCompleted(true)
       if (providerName === "ORCID iD") {
         setEmail("evelyn.vane@orcid-verified.org")
@@ -2421,7 +2440,7 @@ export default function Editorial360Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all font-sans">
+    <div className={`flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all font-sans ${isLoggedIn ? "h-screen overflow-hidden" : "min-h-screen"}`}>
       
       {!isLoggedIn ? (
         // ==========================================
@@ -2859,7 +2878,7 @@ export default function Editorial360Page() {
         // ==========================================
         // 2. DASHBOARD WORKSPACE MAIN VIEW
         // ==========================================
-        <div className="flex-1 flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-200">
           
           {/* Workspace Sticky Top Navigation */}
           <header className="sticky top-0 z-45 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-850 px-4 py-3 flex items-center justify-between shadow-sm transition-colors duration-200">
@@ -3273,6 +3292,9 @@ export default function Editorial360Page() {
                         onClick={() => {
                           setIsUserMenuOpen(false)
                           setIsLoggedIn(false)
+                          if (typeof window !== "undefined") {
+                            window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+                          }
                           setSuccess(language === "de" ? "Sie wurden sicher abgemeldet." : "You have been securely signed out.")
                         }}
                         className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
@@ -3772,7 +3794,7 @@ export default function Editorial360Page() {
             </aside>
 
             {/* Main scrollable body workspace content */}
-            <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-100/50 dark:bg-[#121316] transition-colors">
+            <main ref={workspaceMainRef} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-100/50 dark:bg-[#121316] transition-colors">
               <div className="max-w-[1600px] mx-auto space-y-6 animate-in fade-in duration-300">
                 
                 {/* Banner Status Header (Admin Only) */}
