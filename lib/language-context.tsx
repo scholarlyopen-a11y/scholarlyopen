@@ -46,6 +46,7 @@ export const translations = {
     // Stats
     "stats.openAccess": "Open Access",
     "stats.journals": "Journals",
+    "stats.editors": "Editors",
     "stats.reach": "Reach",
     "stats.guidelines": "Guidelines",
 
@@ -705,6 +706,7 @@ export const translations = {
     // Stats
     "stats.openAccess": "Open Access",
     "stats.journals": "Zeitschriften",
+    "stats.editors": "Editoren",
     "stats.reach": "Reichweite",
     "stats.guidelines": "Richtlinien",
 

@@ -77,13 +77,64 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import dynamic from "next/dynamic"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ReviewerWorkspace, ReviewAssessmentData } from "@/components/reviewer-workspace"
-import { JournalManagerWorkspace } from "@/components/journal-manager-workspace"
-import { EditorWorkspace } from "@/components/editor-workspace"
-import { CrossDeskActivityFeed, CrossDeskNotification } from "@/components/cross-desk-activity-feed"
+import type { ReviewAssessmentData } from "@/components/reviewer-workspace"
+import type { CrossDeskNotification } from "@/components/cross-desk-activity-feed"
+
+const ReviewerWorkspace = dynamic(
+  () => import("@/components/reviewer-workspace").then(mod => mod.ReviewerWorkspace),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center p-16 text-slate-500 gap-3">
+        <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
+        <span className="text-sm font-medium">Loading Reviewer Workspace...</span>
+      </div>
+    )
+  }
+)
+
+const JournalManagerWorkspace = dynamic(
+  () => import("@/components/journal-manager-workspace").then(mod => mod.JournalManagerWorkspace),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center p-16 text-slate-500 gap-3">
+        <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
+        <span className="text-sm font-medium">Loading Journal Manager Workspace...</span>
+      </div>
+    )
+  }
+)
+
+const EditorWorkspace = dynamic(
+  () => import("@/components/editor-workspace").then(mod => mod.EditorWorkspace),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center p-16 text-slate-500 gap-3">
+        <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
+        <span className="text-sm font-medium">Loading Editor Workspace...</span>
+      </div>
+    )
+  }
+)
+
+const CrossDeskActivityFeed = dynamic(
+  () => import("@/components/cross-desk-activity-feed").then(mod => mod.CrossDeskActivityFeed),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center p-6 text-slate-500 gap-2">
+        <RefreshCw className="w-4 h-4 animate-spin text-teal-600" />
+        <span className="text-xs">Loading Activity Feed...</span>
+      </div>
+    )
+  }
+)
 
 type UserRole = "admin" | "author" | "reviewer" | "editor" | "im" | "ria" | "jm"
 
@@ -740,6 +791,28 @@ export default function Editorial360Page() {
       if (urlMode && ["login", "register"].includes(urlMode)) {
         setMode(urlMode)
       }
+
+      // German BSI TR-03107 & OWASP Compliant Session Recovery
+      try {
+        const sessionRaw = sessionStorage.getItem("editorial360_session")
+        if (sessionRaw) {
+          const session = JSON.parse(sessionRaw)
+          const now = Date.now()
+          const maxAge = 20 * 60 * 1000 // 20 minutes inactivity window
+          if (session.isLoggedIn && (now - session.timestamp < maxAge)) {
+            setIsLoggedIn(true)
+            if (session.role) setRole(session.role)
+            if (session.email) setEmail(session.email)
+            if (session.activeJmTab) setActiveJmTab(session.activeJmTab)
+            lastActivityRef.current = now
+          } else {
+            sessionStorage.removeItem("editorial360_session")
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse editorial360_session", e)
+      }
+
       // Load any author submissions persisted in browser storage
       try {
         const stored = localStorage.getItem("editorial360_manuscripts")
@@ -792,7 +865,7 @@ export default function Editorial360Page() {
       editorAssigned: false
     },
     {
-      id: "SOMED-26-RW101",
+      id: "SOMED-26-RD101",
       title: "Clinical Evaluation of AI-Driven Diagnostic Imaging in Cardiovascular Medicine",
       journal: "Scholarly Open: Medicine",
       status: "Revision Required",
@@ -934,6 +1007,64 @@ export default function Editorial360Page() {
       editorAssigned: false
     },
     {
+      id: "SOSOC-26-RS103",
+      title: "Urban Green Spaces and Socio-Spatial Equity in European Cities",
+      journal: "Social Sciences & Humanities",
+      status: "Under Review",
+      date: "2026-06-03",
+      reviewers: ["Prof. Aris Thorne", "Prof. Hiroshi Tanaka"],
+      integrityStatus: "Clean",
+      plagiarismScore: 6,
+      aiScore: 8,
+      authorFirstName: "Elena",
+      authorLastName: "Rostova",
+      authorName: "Dr. Elena Rostova",
+      authorEmail: "e.rostova@urbanresearch.org",
+      authorAffiliation: "Department of Urban Planning & Social Geography",
+      authorOrcid: "0000-0002-3991-8842",
+      coAuthors: "Prof. Marco Bellini",
+      articleType: "Original Research",
+      submissionStage: "Under Review",
+      abstract: "Spatial analysis and econometric evaluation of park accessibility across 14 European metropolitan regions assessing socio-economic disparity indexes.",
+      keywords: "Urban Planning, Green Spaces, Socio-Spatial Equity, GIS, Public Policy",
+      fileName: "Urban_Green_Spaces_Equity.pdf",
+      fileSize: "5.1 MB",
+      ethicsIrb: "Approved by Institutional Ethics Committee (Ref: ETH-2026-091)",
+      fundingGrant: "EU-HORIZON-URBAN-2025-412",
+      dataDoi: "doi.org/10.5281/zenodo.881290",
+      editorAssigned: true,
+      assignedEditorName: "Prof. Aris Thorne"
+    },
+    {
+      id: "SOMED-26-RW101",
+      title: "Neural Cell Proliferation in Regenerative Therapies",
+      journal: "Scholarly Open: Medicine",
+      status: "Revision Required",
+      date: "2026-05-28",
+      reviewers: ["Dr. Evelyn Vane", "Dr. Marcus Vance"],
+      integrityStatus: "Flagged",
+      plagiarismScore: 12,
+      aiScore: 15,
+      authorFirstName: "Evelyn",
+      authorLastName: "Vane",
+      authorName: "Dr. Evelyn Vane",
+      authorEmail: "e.vane@university-medical.edu",
+      authorAffiliation: "Institute of Neurobiology & Regenerative Medicine",
+      authorOrcid: "0000-0002-1825-0097",
+      coAuthors: "Prof. Thomas Gray",
+      articleType: "Original Research",
+      submissionStage: "Major Revisions",
+      abstract: "Investigation into stem-cell derived neural progenitor proliferation mechanisms with potential implications for acute neurotrauma therapeutics.",
+      keywords: "Neural Proliferation, Regenerative Medicine, Stem Cells, Neurotrauma",
+      fileName: "Neural_Proliferation_Regenerative.pdf",
+      fileSize: "6.8 MB",
+      ethicsIrb: "Approved by Medical Ethics Review Board (MERB-2026-04)",
+      fundingGrant: "NIH-NINDS-2025-88",
+      dataDoi: "doi.org/10.5281/zenodo.772199",
+      editorAssigned: true,
+      assignedEditorName: "Prof. Aris Thorne"
+    },
+    {
       id: "SOEAS-26-RS106",
       title: "Optimization of Silicon Anodes for Lithium-Ion Batteries",
       journal: "Engineering & Applied Sciences",
@@ -990,6 +1121,35 @@ export default function Editorial360Page() {
       dataDoi: "Available upon reasonable request",
       editorAssigned: true,
       assignedEditorName: "Prof. Aris Thorne"
+    },
+    {
+      id: "SOENG-26-RJ110",
+      title: "High-Frequency Algorithmic Arbitrage in Automated Market Makers",
+      journal: "Engineering & Applied Sciences",
+      status: "Rejected",
+      date: "2026-05-19",
+      reviewers: ["Prof. Aris Thorne", "Dr. Evelyn Vane"],
+      integrityStatus: "Clean",
+      plagiarismScore: 7,
+      aiScore: 9,
+      authorFirstName: "Alexander",
+      authorLastName: "Kovacs",
+      authorName: "Dr. Alexander Kovacs",
+      authorEmail: "a.kovacs@appliedfinance.org",
+      authorAffiliation: "Quantitative Finance & Systems Institute",
+      authorOrcid: "0000-0003-8821-4902",
+      coAuthors: "Dr. Elena Rostova",
+      articleType: "Original Research",
+      submissionStage: "Final Decision Dispatched",
+      abstract: "Empirical latency benchmarking and sandwich-attack vulnerability surface models across decentralized automated market maker pools under high gas price volatility regimes.",
+      keywords: "Algorithmic Trading, Automated Market Makers, Arbitrage, Decentralized Finance",
+      fileName: "AMM_Arbitrage_Framework.pdf",
+      fileSize: "2.7 MB",
+      ethicsIrb: "Exempt - Algorithmic Simulation",
+      fundingGrant: "DeFi-RES-2025-01",
+      dataDoi: "doi.org/10.5281/zenodo.441920",
+      editorAssigned: true,
+      assignedEditorName: "Prof. Clara Zhang"
     }
   ])
 
@@ -1082,10 +1242,10 @@ export default function Editorial360Page() {
       journal: "Engineering & Applied Sciences",
       type: "im_escalation",
       severity: "urgent",
-      actorName: "Dr. Helen Vance (Research Integrity Manager)",
+      actorName: "Dr. Helen Vance",
       actorRole: "Research Integrity Office",
-      headline: "Ethical Misconduct Case Escalated to Editor-in-Chief",
-      summary: "Elevated AI probability (88% Index) detected in Methodology. Formal brief referred to Prof. Aris Thorne for adjudication.",
+      headline: "Integrity Flag Escalated",
+      summary: "Elevated AI probability (88%) flagged in methodology.",
       recipient: "Journal Manager & Editor-in-Chief",
       isRead: false
     },
@@ -1097,12 +1257,12 @@ export default function Editorial360Page() {
       journal: "Scholarly Open: Medicine",
       type: "eic_inquiry",
       severity: "high",
-      actorName: "Prof. Aris Thorne (Editor-in-Chief)",
+      actorName: "Prof. Aris Thorne",
       actorRole: "Editor-in-Chief",
-      headline: "14-Day Formal Ethics Inquiry Dispatched to Author",
-      summary: "Inquiry letter regarding image resolution and Western blot slicing dispatched to corresponding author Dr. Evelyn Vane.",
-      dispatchedLetter: `Dear Dr. Evelyn Vane,\n\nManuscript ID: SOMED-26-RW101\nTitle: "Neural Cell Proliferation in Regenerative Therapies"\n\nDuring pre-publication integrity screening for Scholarly Open: Medicine, our Research Integrity Office identified areas requiring formal author clarification regarding Western blot image resolution (AI & Image Forensics).\n\nPlease provide a formal written explanation and itemized response within 14 calendar days via the editorial portal.\n\nSincerely,\nProf. Aris Thorne\nEditor-in-Chief, Scholarly Open: Medicine`,
-      recipient: "Dr. Evelyn Vane (Corresponding Author)",
+      headline: "Author Inquiry Sent",
+      summary: "Image resolution query sent to Dr. Evelyn Vane.",
+      dispatchedLetter: `Dear Dr. Evelyn Vane,\n\nManuscript ID: SOMED-26-RW101\nTitle: "Neural Cell Proliferation in Regenerative Therapies"\n\nPlease provide formal clarification regarding Western blot image resolution within 14 days.\n\nSincerely,\nProf. Aris Thorne\nEditor-in-Chief`,
+      recipient: "Dr. Evelyn Vane",
       isRead: false
     },
     {
@@ -1113,10 +1273,10 @@ export default function Editorial360Page() {
       journal: "Social Sciences & Humanities",
       type: "jm_assignment",
       severity: "normal",
-      actorName: "Sarah Jenkins (Journal Manager)",
+      actorName: "Sarah Jenkins",
       actorRole: "Journal Manager Desk",
-      headline: "Handling Editor Assigned & Triage Verified",
-      summary: "Assigned Prof. Aris Thorne as Lead Handling Editor. Pre-flight plagiarism check verified clean (<5%).",
+      headline: "Editor Assigned",
+      summary: "Prof. Aris Thorne assigned as Lead Editor.",
       recipient: "Prof. Aris Thorne",
       isRead: true
     }
@@ -1335,6 +1495,111 @@ export default function Editorial360Page() {
       workspaceMainRef.current.scrollTop = 0
     }
   }, [isLoggedIn, role, activeAuthorTab, activeReviewerTab, activeJmTab, activeEditorTab, activeRiaTab, activeAdminTab])
+
+  // German BSI / OWASP Session & Inactivity Watchdog
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false)
+  const [inactivityCountdown, setInactivityCountdown] = useState(60)
+  const lastActivityRef = useRef<number>(Date.now())
+  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  const updateSessionActivity = () => {
+    lastActivityRef.current = Date.now()
+    if (typeof window !== "undefined") {
+      try {
+        const sessionRaw = sessionStorage.getItem("editorial360_session")
+        if (sessionRaw) {
+          const session = JSON.parse(sessionRaw)
+          session.timestamp = Date.now()
+          sessionStorage.setItem("editorial360_session", JSON.stringify(session))
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+
+  const handleExtendSession = () => {
+    setShowInactivityWarning(false)
+    setInactivityCountdown(60)
+    updateSessionActivity()
+  }
+
+  const handleForceSignOut = (isExpired = false) => {
+    setIsLoggedIn(false)
+    setShowInactivityWarning(false)
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.removeItem("editorial360_session")
+      } catch (e) {
+        // ignore
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+    }
+    if (isExpired) {
+      setError(language === "de" 
+        ? "Ihre Sitzung ist aufgrund von Inaktivität (BSI / OWASP Standard) abgelaufen. Bitte melden Sie sich erneut an." 
+        : "Your session has expired due to inactivity (BSI / OWASP standard). Please sign in again.")
+    } else {
+      setSuccess(language === "de" ? "Sie wurden sicher abgemeldet." : "You have been securely signed out.")
+    }
+  }
+
+  // Activity Watchdog Event Listeners
+  useEffect(() => {
+    if (!isLoggedIn) {
+      if (inactivityTimerRef.current) clearInterval(inactivityTimerRef.current)
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
+      return
+    }
+
+    const onUserActivity = () => {
+      if (!showInactivityWarning) {
+        lastActivityRef.current = Date.now()
+      }
+    }
+
+    const events = ["mousedown", "mousemove", "keydown", "touchstart", "scroll"]
+    events.forEach(evt => window.addEventListener(evt, onUserActivity, { passive: true }))
+
+    // Check idle time every 10 seconds (19 min warning threshold)
+    inactivityTimerRef.current = setInterval(() => {
+      const now = Date.now()
+      const idleTime = now - lastActivityRef.current
+      if (idleTime >= 19 * 60 * 1000 && !showInactivityWarning) {
+        setShowInactivityWarning(true)
+        setInactivityCountdown(60)
+      }
+    }, 10000)
+
+    return () => {
+      events.forEach(evt => window.removeEventListener(evt, onUserActivity))
+      if (inactivityTimerRef.current) clearInterval(inactivityTimerRef.current)
+    }
+  }, [isLoggedIn, showInactivityWarning])
+
+  // Countdown timer during warning modal
+  useEffect(() => {
+    if (!showInactivityWarning) {
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
+      return
+    }
+
+    countdownIntervalRef.current = setInterval(() => {
+      setInactivityCountdown(prev => {
+        if (prev <= 1) {
+          if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
+          handleForceSignOut(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => {
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
+    }
+  }, [showInactivityWarning, language])
 
   // Interactive Upwork-Style Author Dashboard States
   const [authorSubView, setAuthorSubView] = useState<"feed" | "table">("feed")
@@ -1760,6 +2025,17 @@ export default function Editorial360Page() {
       setLoading(false)
       setIsLoggedIn(true)
       if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("editorial360_session", JSON.stringify({
+            isLoggedIn: true,
+            role,
+            email,
+            activeJmTab,
+            timestamp: Date.now()
+          }))
+        } catch (e) {
+          // ignore
+        }
         window.scrollTo({ top: 0, left: 0, behavior: "instant" })
       }
       setSuccess("Successfully authenticated into the Editorial360 workspace.")
@@ -1782,6 +2058,16 @@ export default function Editorial360Page() {
       setIsLoggedIn(true)
       setRole("author")
       if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("editorial360_session", JSON.stringify({
+            isLoggedIn: true,
+            role: "author",
+            email: providerName === "ORCID iD" ? "evelyn.vane@orcid-verified.org" : `author.${providerName.toLowerCase().replace(/[^a-z0-9]/g, "")}@scholarlyopen.org`,
+            timestamp: Date.now()
+          }))
+        } catch (e) {
+          // ignore
+        }
         window.scrollTo({ top: 0, left: 0, behavior: "instant" })
       }
       setIsAuthorProfileCompleted(true)
@@ -2352,10 +2638,10 @@ export default function Editorial360Page() {
         journal: alert.journal || "Engineering & Applied Sciences",
         type: "im_escalation",
         severity: "urgent",
-        actorName: "Dr. Helen Vance (Research Integrity Manager)",
+        actorName: "Dr. Helen Vance",
         actorRole: "Research Integrity Office",
-        headline: `Ethical Misconduct Case Escalated to Editor-in-Chief`,
-        summary: `Dr. Helen Vance (IM) escalated manuscript ${alert.paperId} (${alert.type}: ${alert.score}). IM notes: ${escalateNotes}`,
+        headline: `Integrity Flag Escalated`,
+        summary: `Manuscript ${alert.paperId} escalated to Editor-in-Chief (${alert.type}: ${alert.score}).`,
         recipient: "Journal Manager & Editor-in-Chief"
       })
     }
@@ -2374,9 +2660,6 @@ export default function Editorial360Page() {
       confirmColorClass: "bg-red-600 hover:bg-red-700",
       onConfirm: () => {
         handleConfirmEscalation()
-      },
-      onCancel: () => {
-        setIsEscalateModalOpen(true)
       }
     })
   }
@@ -3291,11 +3574,7 @@ export default function Editorial360Page() {
                         type="button"
                         onClick={() => {
                           setIsUserMenuOpen(false)
-                          setIsLoggedIn(false)
-                          if (typeof window !== "undefined") {
-                            window.scrollTo({ top: 0, left: 0, behavior: "instant" })
-                          }
-                          setSuccess(language === "de" ? "Sie wurden sicher abgemeldet." : "You have been securely signed out.")
+                          handleForceSignOut(false)
                         }}
                         className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                       >
@@ -3498,7 +3777,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4 text-[#0b99ff]" />
+                          <Bell className="h-4 w-4" />
                           <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
                         </div>
                         {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
@@ -3587,7 +3866,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4 text-[#0b99ff]" />
+                          <Bell className="h-4 w-4" />
                           <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
                         </div>
                         {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
@@ -3663,7 +3942,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4 text-[#0b99ff]" />
+                          <Bell className="h-4 w-4" />
                           <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
                         </div>
                         {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
@@ -3682,7 +3961,7 @@ export default function Editorial360Page() {
                             : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
-                        <ShieldAlert className="h-4 w-4 text-red-500" />
+                        <ShieldAlert className="h-4 w-4" />
                         {language === "de" ? "Aktive Integritäts-Warnungen" : "Active Integrity Alerts"}
                       </button>
 
@@ -3695,7 +3974,7 @@ export default function Editorial360Page() {
                             : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
-                        <Search className="h-4 w-4 text-[#0b99ff]" />
+                        <Search className="h-4 w-4" />
                         {language === "de" ? "Paper-Mill-Überwachung" : "Paper Mill Surveillance"}
                       </button>
 
@@ -3708,7 +3987,7 @@ export default function Editorial360Page() {
                             : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
-                        <CheckSquare className="h-4 w-4 text-emerald-500" />
+                        <CheckSquare className="h-4 w-4" />
                         {language === "de" ? "COPE-Ethik-Audit" : "COPE Ethics Audit"}
                       </button>
 
@@ -3721,7 +4000,7 @@ export default function Editorial360Page() {
                             : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
-                        <ShieldCheck className="h-4 w-4 text-slate-500" />
+                        <ShieldCheck className="h-4 w-4" />
                         {language === "de" ? "Sanktionen & Watchlist" : "Sanctions & Watchlist"}
                       </button>
                     </>
@@ -5713,7 +5992,7 @@ export default function Editorial360Page() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/30">
-                          ● COPE Ethics & Fraud Surveillance Desk
+                          ● Ethics & Fraud Desk
                         </span>
                       </div>
                     </div>
@@ -5732,7 +6011,7 @@ export default function Editorial360Page() {
 
                       <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                          Total Audited Submissions
+                          Audited Papers
                         </span>
                         <div className="text-lg font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
                           156 <span className="text-xs font-medium text-slate-500">Manuscripts</span>
@@ -5742,7 +6021,7 @@ export default function Editorial360Page() {
 
                       <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                          False Positive Rate
+                          False Positives
                         </span>
                         <div className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
                           2.1% <span className="text-xs font-medium text-emerald-500">Low</span>
@@ -5752,7 +6031,7 @@ export default function Editorial360Page() {
 
                       <div className="space-y-1 pl-0 lg:pl-4">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                          Scan Pipeline Latency
+                          Scan Latency
                         </span>
                         <div className="text-lg font-bold tracking-tight text-[#0b99ff] tabular-nums">
                           4.8s <span className="text-xs font-medium text-[#0b99ff]">Sub-second</span>
@@ -5778,7 +6057,8 @@ export default function Editorial360Page() {
                         onViewPaperDossier={(paperId) => {
                           const alert = integrityAlerts.find(a => a.paperId === paperId)
                           if (alert) {
-                            setSelectedAlertForModal(alert)
+                            setActiveAlertId(alert.id)
+                            setIsForensicsOpen(true)
                           }
                         }}
                       />
@@ -5789,7 +6069,7 @@ export default function Editorial360Page() {
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors rounded-2xl shadow-xs">
                         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 flex items-center justify-between">
                           <div>
-                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Forensic Alert Queue</h3>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alert Queue</h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Active cases flagged by automated figure scans, text similarity, or editorial referrals.</p>
                           </div>
                           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900/40">
@@ -5904,7 +6184,7 @@ export default function Editorial360Page() {
                         <div className="p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Paper Mill & Identity Intelligence</h3>
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Paper Mill & Identity</h3>
                               <p className="text-xs text-slate-500">Cross-publisher submission tracking, disposable domain detection, and author ring surveillance.</p>
                             </div>
                             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/30">
@@ -5914,19 +6194,19 @@ export default function Editorial360Page() {
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 space-y-2">
-                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Domain Integrity</span>
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Domains</span>
                               <div className="text-base font-bold text-slate-900 dark:text-white">99.2% Verified</div>
                               <p className="text-xs text-slate-500 leading-relaxed">0 disposable domains detected in active queue. 3 institutional email aliases verified.</p>
                             </div>
 
                             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 space-y-2">
-                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Simultaneous Submissions</span>
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Duplicates</span>
                               <div className="text-base font-bold text-emerald-600 dark:text-emerald-400">0 Collisions</div>
                               <p className="text-xs text-slate-500 leading-relaxed">Cryptographic manuscript title and abstract hashes cross-referenced across registry.</p>
                             </div>
 
                             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 space-y-2">
-                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Reviewer Ring Shield</span>
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">Review Rings</span>
                               <div className="text-base font-bold text-slate-900 dark:text-white">Active Guard</div>
                               <p className="text-xs text-slate-500 leading-relaxed">No circular peer review or co-author collision patterns identified.</p>
                             </div>
@@ -5936,7 +6216,7 @@ export default function Editorial360Page() {
                         {/* Monitored Authors & Entities */}
                         <div className="p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
                           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                            Recent Pattern Scans
+                            Pattern Scans
                           </h4>
                           <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                             <div className="py-2.5 flex items-center justify-between">
@@ -6491,12 +6771,12 @@ export default function Editorial360Page() {
                         setCopiedLetterNotice(false)
                       }
 
-                      const handleExecuteCopeVerdict = (actionType: "clear" | "warning" | "reject") => {
+                      const handleExecuteCopeVerdict = (actionType: "clear" | "warning" | "reject" | "escalate") => {
                         if (actionType === "clear") {
                           setIntegrityAlerts(prev => prev.map(a => a.paperId === selectedCopePaperId ? { ...a, status: "Cleared" as any } : a))
                           setManuscripts(prev => prev.map(m => m.id === selectedCopePaperId ? { ...m, integrityStatus: "Clean" } : m))
                           setSuccess(`✓ Case resolved: Manuscript ${selectedCopePaperId} cleared of ethics flags and certified compliant.`)
-                        } else if (actionType === "reject") {
+                        } else if (actionType === "reject" || actionType === "escalate") {
                           setIntegrityAlerts(prev => prev.map(a => a.paperId === selectedCopePaperId ? { ...a, status: "Escalated" as any } : a))
                           setManuscripts(prev => prev.map(m => m.id === selectedCopePaperId ? { ...m, status: "Rejected", integrityStatus: "Flagged" } : m))
                           setSuccess(`✓ Ethical Rejection executed: Manuscript ${selectedCopePaperId} rejected with institutional escalation.`)
@@ -6586,7 +6866,7 @@ export default function Editorial360Page() {
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
                             <div>
                               <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">COPE Ethics Decision Studio</h3>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">COPE Studio</h3>
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
                                   {activeTree.ref}
                                 </span>
@@ -6791,7 +7071,7 @@ export default function Editorial360Page() {
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden rounded-2xl shadow-xs">
                         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 flex items-center justify-between">
                           <div>
-                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Sanctions & Entity Watchlist</h3>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Sanctions & Watchlist</h3>
                             <p className="text-xs text-slate-500">Internal registry of authors and entities with prior retractions or active submission restrictions.</p>
                           </div>
                           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
@@ -6912,7 +7192,7 @@ export default function Editorial360Page() {
                       {/* Configuration Settings */}
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 lg:col-span-1 space-y-4 transition-colors">
                         <div>
-                          <h3 className="text-base font-bold text-slate-900 dark:text-white">Workflow Automation</h3>
+                          <h3 className="text-base font-bold text-slate-900 dark:text-white">Automation</h3>
                           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Toggle global system operations policies.</p>
                         </div>
                         
@@ -6971,7 +7251,7 @@ export default function Editorial360Page() {
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 lg:col-span-2 overflow-hidden transition-colors">
                         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950">
                           <div>
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white">Workspace Registry</h3>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white">Workspaces</h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">System access logs for all active administrators, editors, and reviewers.</p>
                           </div>
                           <Button 
@@ -7028,7 +7308,7 @@ export default function Editorial360Page() {
                     {/* Managed Journals Directory Table */}
                     <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors mt-6">
                       <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white">Managed Journals Directory</h3>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white">Journal Directory</h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track submission volumes, average decision latencies, and editor-in-chief assignments for active peer journals.</p>
                       </div>
                       <div className="overflow-x-auto">
@@ -8228,7 +8508,7 @@ export default function Editorial360Page() {
                   Cancel
                 </Button>
                 <Button 
-                  onClick={handleSubmitReviewScorecard}
+                  onClick={() => handleSubmitReviewScorecard()}
                   className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold cursor-pointer"
                 >
                   Submit Assessment
@@ -9382,6 +9662,67 @@ export default function Editorial360Page() {
                   className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
                 >
                   {confirmDialogState.confirmButtonLabel}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* German BSI TR-03107 / OWASP Compliant Inactivity Expiration Modal */}
+          <Dialog open={showInactivityWarning} onOpenChange={(open) => {
+            if (!open) handleExtendSession()
+          }}>
+            <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border-2 border-amber-500/40 text-slate-900 dark:text-slate-100 font-sans shadow-2xl">
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    <Clock className="h-6 w-6 animate-pulse" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+                      {language === "de" ? "Sitzungs-Inaktivitätswarnung" : "Session Inactivity Warning"}
+                    </DialogTitle>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {language === "de" ? "BSI TR-03107 / OWASP Sicherheitsstandard" : "BSI TR-03107 / OWASP Security Standard"}
+                    </p>
+                  </div>
+                </div>
+                <DialogDescription className="text-xs text-slate-600 dark:text-slate-300 pt-3 leading-relaxed">
+                  {language === "de" ? (
+                    <>
+                      Aufgrund von Sicherheitsstandards wird Ihre Sitzung in <strong className="text-amber-600 dark:text-amber-400 font-bold">{inactivityCountdown} Sekunden</strong> automatisch gesperrt, wenn keine Aktivität festgestellt wird. Möchten Sie Ihre Sitzung verlängern?
+                    </>
+                  ) : (
+                    <>
+                      In compliance with security regulations, your session will automatically lock in <strong className="text-amber-600 dark:text-amber-400 font-bold">{inactivityCountdown} seconds</strong> due to inactivity. Would you like to extend your session?
+                    </>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 my-2 overflow-hidden">
+                <div 
+                  className="bg-amber-500 h-full transition-all duration-1000 rounded-full" 
+                  style={{ width: `${(inactivityCountdown / 60) * 100}%` }}
+                />
+              </div>
+
+              <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleForceSignOut(false)}
+                  className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 border-slate-200 dark:border-slate-800 h-9 px-3.5 rounded-lg cursor-pointer"
+                >
+                  <LogOut className="h-3.5 w-3.5 mr-1.5" />
+                  {language === "de" ? "Jetzt abmelden" : "Sign Out Now"}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleExtendSession}
+                  className="bg-[#0b99ff] hover:bg-[#0987e0] text-white text-xs font-bold h-9 px-4 rounded-lg cursor-pointer shadow-sm flex items-center gap-1.5"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  {language === "de" ? "Sitzung verlängern" : "Extend Session"}
                 </Button>
               </DialogFooter>
             </DialogContent>

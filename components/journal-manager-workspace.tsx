@@ -30,7 +30,25 @@ import {
   Sliders,
   RotateCcw,
   FileCheck2,
-  CheckCircle2
+  CheckCircle2,
+  ArrowUpRight,
+  CheckCheck,
+  Mail,
+  Layers,
+  XCircle,
+  FileX,
+  Bell,
+  TrendingUp,
+  Globe,
+  Sparkles,
+  Calendar,
+  Filter,
+  Activity,
+  Award,
+  FileSpreadsheet,
+  PieChart,
+  Zap,
+  Building2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -44,7 +62,7 @@ export interface JmManuscript {
   status: "Draft" | "Awaiting Initial Check" | "Submitted" | "Under Review" | "Revision Required" | "Revision Under Evaluation" | "Accepted" | "Rejected"
   date: string
   reviewers: string[]
-  integrityStatus: "Clean" | "Flagged" | "Unchecked"
+  integrityStatus: "Clean" | "Flagged" | "Unchecked" | "Breach Confirmed" | "Raw Data Requested" | "Inquiry Dispatched" | string
   plagiarismScore?: number
   aiScore?: number
   authorName?: string
@@ -56,6 +74,13 @@ export interface JmManuscript {
   assignedEditorName?: string
   articleType?: string
   proofStatus?: "Pending Upload" | "Pending Author Sign-off" | "Approved by Author ✓"
+  submissionStage?: string
+  fileName?: string
+  fileSize?: string
+  dataDoi?: string
+  coverLetter?: string
+  ethicsIrb?: string
+  fundingGrant?: string
 }
 
 export interface JmReviewFeedback {
@@ -63,14 +88,15 @@ export interface JmReviewFeedback {
   paperId: string
   reviewerName: string
   originality: number
-  methodology: number
-  clarity: number
-  significance: number
+  methodology?: number
+  clarity?: number
+  significance?: number
   commentsAuthor: string
   commentsEditor: string
   recommendation: string
   status: "Pending Moderation" | "Released"
   sanitizedCommentsAuthor?: string
+  originalComments?: string
 }
 
 export interface JmReviewer {
@@ -137,11 +163,18 @@ export function JournalManagerWorkspace({
   const isDe = language === "de"
 
   // Stage filter for Submissions Pipeline
-  const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "decision" | "accepted" | "integrity">("all")
+  const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "revisions" | "decisions" | "production" | "integrity">("all")
+  const [isDecisionLetterModalOpen, setIsDecisionLetterModalOpen] = useState(false)
+  const [viewingDecisionManuscript, setViewingDecisionManuscript] = useState<JmManuscript | null>(null)
 
   // Search and Filter State
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedJournal, setSelectedJournal] = useState("all")
+  
+  // Analytics Dashboard State
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState<"30d" | "quarter" | "ytd" | "all">("quarter")
+  const [analyticsJournalFilter, setAnalyticsJournalFilter] = useState<string>("all")
+  const [analyticsExportStatus, setAnalyticsExportStatus] = useState<string | null>(null)
   
   // Assign Modal
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
@@ -213,6 +246,11 @@ export function JournalManagerWorkspace({
   const [trackingManuscript, setTrackingManuscript] = useState<JmManuscript | null>(null)
   const [nudgedReviewers, setNudgedReviewers] = useState<Record<string, boolean>>({})
   const [extendedDays, setExtendedDays] = useState<Record<string, number>>({})
+
+  // Dedicated Forensics Investigation Modal
+  const [isForensicsModalOpen, setIsForensicsModalOpen] = useState(false)
+  const [forensicsManuscript, setForensicsManuscript] = useState<JmManuscript | null>(null)
+  const [forensicActionStatus, setForensicActionStatus] = useState<string | null>(null)
 
   // Reviewer Registry List
   const [reviewersList, setReviewersList] = useState<JmReviewer[]>([
@@ -376,11 +414,14 @@ export function JournalManagerWorkspace({
       if (selectedStageFilter === "review") {
         return matchesSearch && matchesJournal && m.status === "Under Review"
       }
-      if (selectedStageFilter === "decision" || (selectedStageFilter as string) === "revisions") {
+      if (selectedStageFilter === "revisions" || (selectedStageFilter as string) === "revision") {
         return matchesSearch && matchesJournal && (m.status === "Revision Required" || m.status === "Revision Under Evaluation")
       }
-      if (selectedStageFilter === "accepted") {
-        return matchesSearch && matchesJournal && (m.status === "Accepted" || m.status === "Rejected")
+      if (selectedStageFilter === "decisions" || (selectedStageFilter as string) === "decision") {
+        return matchesSearch && matchesJournal && (m.status === "Accepted" || m.status === "Rejected" || (m.status as string) === "Declined")
+      }
+      if (selectedStageFilter === "production" || (selectedStageFilter as string) === "accepted") {
+        return matchesSearch && matchesJournal && (m.status === "Accepted" || (m.status as string) === "In Production" || (m.status as string) === "Published") && m.status !== "Rejected" && (m.status as string) !== "Declined"
       }
       if (selectedStageFilter === "integrity") {
         return matchesSearch && matchesJournal && (m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
@@ -390,12 +431,14 @@ export function JournalManagerWorkspace({
     })
   }, [initialManuscripts, searchTerm, selectedJournal, selectedStageFilter])
 
-  // Pipeline columns
+  // Pipeline columns & counts
   const initialTriageList = initialManuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft")
   const underReviewList = initialManuscripts.filter(m => m.status === "Under Review")
   const revisionList = initialManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation")
   const decisionPendingList = revisionList
-  const acceptedList = initialManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected")
+  const decisionsList = initialManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected" || (m.status as string) === "Declined")
+  const productionList = initialManuscripts.filter(m => (m.status === "Accepted" || (m.status as string) === "In Production" || (m.status as string) === "Published") && m.status !== "Rejected" && (m.status as string) !== "Declined")
+  const acceptedList = productionList
   const integrityCasesList = initialManuscripts.filter(m => m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
 
   // Handle open Assign Modal
@@ -749,6 +792,32 @@ export function JournalManagerWorkspace({
         </div>
       )
     }
+    if (ms.status === "Rejected" || (ms.status as string) === "Declined") {
+      return (
+        <div className="space-y-1">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40 whitespace-nowrap shadow-2xs">
+            <XCircle className="h-3 w-3 text-rose-600 dark:text-rose-400" />
+            Declined ✗
+          </span>
+          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block px-0.5 whitespace-nowrap">
+            Decision Dispatched
+          </span>
+        </div>
+      )
+    }
+    if (ms.status === "Accepted") {
+      return (
+        <div className="space-y-1">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 whitespace-nowrap shadow-2xs">
+            <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+            {selectedStageFilter === "production" ? "DOI Assigned ✓" : "Accepted ✓"}
+          </span>
+          <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 block px-0.5 whitespace-nowrap">
+            {selectedStageFilter === "production" ? "Ready for Publishing" : "Ready for Production"}
+          </span>
+        </div>
+      )
+    }
     return (
       <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/30 whitespace-nowrap">
         DOI Assigned ✓
@@ -781,7 +850,7 @@ export function JournalManagerWorkspace({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/30">
-            ● Active Operations Desk
+            ● Active Desk
           </span>
         </div>
       </div>
@@ -790,7 +859,7 @@ export function JournalManagerWorkspace({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs">
         <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-[#272832]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Total Submissions
+            Submissions
           </span>
           <div className="text-lg font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
             {initialManuscripts.length} <span className="text-xs font-medium text-slate-500">Manuscripts</span>
@@ -800,17 +869,17 @@ export function JournalManagerWorkspace({
 
         <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Pending Editor Assignment
+            Pending Assignment
           </span>
           <div className="text-lg font-bold tracking-tight text-orange-600 dark:text-orange-400 tabular-nums">
             {initialTriageList.length} <span className="text-xs font-medium text-orange-500">Awaiting Triage</span>
           </div>
-          <span className="text-xs font-medium text-slate-500 block">Requires Handling Editor allocation</span>
+          <span className="text-xs font-medium text-slate-500 block">Requires Editor allocation</span>
         </div>
 
         <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Under Active Review
+            Under Review
           </span>
           <div className="text-lg font-bold tracking-tight text-[#0b99ff] tabular-nums">
             {underReviewList.length} <span className="text-xs font-medium text-[#0b99ff]">In Progress</span>
@@ -820,7 +889,7 @@ export function JournalManagerWorkspace({
 
         <div className="space-y-1 pl-0 lg:pl-4">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Avg Turnaround Latency
+            Turnaround Time
           </span>
           <div className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
             18.4 <span className="text-xs font-medium text-emerald-500">Days (On Target)</span>
@@ -838,11 +907,27 @@ export function JournalManagerWorkspace({
           currentRole="jm"
           notifications={notifications}
           onViewPaperDossier={(paperId) => {
-            const match = initialManuscripts.find(m => m.id === paperId)
-            if (match) {
-              setSelectedManuscript(match)
-              setIsInspectModalOpen(true)
+            let match = initialManuscripts.find(m => m.id === paperId)
+            if (!match) {
+              const notif = notifications.find(n => n.paperId === paperId)
+              match = {
+                id: paperId,
+                title: notif?.paperTitle || "Submitted Manuscript",
+                journal: notif?.journal || "Social Sciences & Humanities",
+                status: "Under Review",
+                date: "2026-06-03",
+                reviewers: ["Prof. Aris Thorne", "Prof. Hiroshi Tanaka"],
+                integrityStatus: "Clean",
+                authorName: "Dr. Elena Rostova",
+                authorEmail: "e.rostova@urbanresearch.org",
+                authorAffiliation: "Department of Urban Planning & Social Geography",
+                assignedEditorName: "Prof. Aris Thorne",
+                abstract: "Spatial analysis and econometric evaluation of park accessibility across 14 European metropolitan regions assessing socio-economic disparity indexes.",
+                keywords: "Urban Planning, Green Spaces, Socio-Spatial Equity"
+              } as JmManuscript
             }
+            setSelectedManuscript(match)
+            setIsAssignModalOpen(true)
           }}
         />
       )}
@@ -887,7 +972,8 @@ export function JournalManagerWorkspace({
               { key: "triage", label: isDe ? "Triage" : "Triage", count: initialTriageList.length },
               { key: "review", label: isDe ? "In Begutachtung" : "In Review", count: underReviewList.length },
               { key: "revisions", label: isDe ? "Revisionen" : "Revisions", count: revisionList.length },
-              { key: "accepted", label: isDe ? "Produktion" : "Production", count: acceptedList.length },
+              { key: "decisions", label: isDe ? "Entscheidungen" : "Decisions", count: decisionsList.length },
+              { key: "production", label: isDe ? "Produktion" : "Production", count: productionList.length },
               { key: "integrity", label: isDe ? "Integrität" : "Integrity", count: integrityCasesList.length, isAlert: true }
             ].map(tab => (
               <button
@@ -924,10 +1010,10 @@ export function JournalManagerWorkspace({
               <table className="w-full text-left text-xs min-w-[920px]">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-                    <th className="px-4 py-3.5 whitespace-nowrap w-[150px]">Manuscript ID & Date</th>
-                    <th className="px-4 py-3.5 min-w-[260px]">Title & Journal</th>
-                    <th className="px-4 py-3.5 whitespace-nowrap w-[150px]">Pipeline Stage</th>
-                    <th className="px-4 py-3.5 whitespace-nowrap w-[200px]">Editor & Reviewers</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap w-[150px]">ID & Date</th>
+                    <th className="px-4 py-3.5 min-w-[260px]">Manuscript</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap w-[150px]">Stage</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap w-[200px]">Assignment</th>
                     <th className="px-4 py-3.5 whitespace-nowrap text-center min-w-[220px]">Actions</th>
                   </tr>
                 </thead>
@@ -943,7 +1029,9 @@ export function JournalManagerWorkspace({
                       const isTriage = ms.status === "Awaiting Initial Check" || ms.status === "Submitted" || ms.status === "Draft"
                       const isUnderReview = ms.status === "Under Review"
                       const isRevision = ms.status === "Revision Required" || ms.status === "Revision Under Evaluation"
-                      const isAccepted = ms.status === "Accepted" || ms.status === "Rejected"
+                      const isAccepted = ms.status === "Accepted"
+                      const isDeclined = ms.status === "Rejected" || (ms.status as string) === "Declined"
+                      const isDecided = isAccepted || isDeclined
 
                       return (
                         <tr key={ms.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors">
@@ -972,7 +1060,12 @@ export function JournalManagerWorkspace({
                               </div>
                               {isAccepted && (
                                 <div className="text-[11px] text-slate-500 font-normal pt-0.5">
-                                  DOI: <span className="font-medium text-slate-700 dark:text-slate-300">10.59236/soeas.2026.104</span>
+                                  DOI: <span className="font-medium text-slate-700 dark:text-slate-300">10.59236/{ms.journal.toLowerCase().includes("medicine") ? "somed" : "soeas"}.2026.{ms.id.slice(-3)}</span>
+                                </div>
+                              )}
+                              {isDeclined && (
+                                <div className="text-[11px] text-rose-500 dark:text-rose-400 font-medium pt-0.5">
+                                  Outcome: Formal Decision Dispatched (Declined)
                                 </div>
                               )}
                             </div>
@@ -1047,13 +1140,14 @@ export function JournalManagerWorkspace({
                                 </Button>
                               )}
 
-                              {(selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged") && (
+                              {(selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged" || (ms.plagiarismScore && ms.plagiarismScore > 15) || (ms.aiScore && ms.aiScore > 30)) && (
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => {
-                                    setSelectedManuscript(ms)
-                                    setIsPreQualityModalOpen(true)
+                                    setForensicsManuscript(ms)
+                                    setForensicActionStatus(null)
+                                    setIsForensicsModalOpen(true)
                                   }}
                                   className="h-8 text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border-red-200 dark:border-red-800 px-2.5 rounded-lg cursor-pointer"
                                 >
@@ -1068,13 +1162,23 @@ export function JournalManagerWorkspace({
                                   variant="outline"
                                   onClick={() => handleNudgeAuthor(ms)}
                                   disabled={!!authorNudged[ms.id]}
-                                  className={`h-8 text-xs font-semibold px-3.5 rounded-lg cursor-pointer whitespace-nowrap transition-all ${
+                                  className={`h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
                                     authorNudged[ms.id]
-                                      ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 font-bold"
-                                      : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-[#0b99ff] hover:text-[#0b99ff]"
+                                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
                                   }`}
                                 >
-                                  {authorNudged[ms.id] ? "✓ Reminded" : "🔔 Remind Author"}
+                                  {authorNudged[ms.id] ? (
+                                    <>
+                                      <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                      {isDe ? "Erinnert" : "Reminded"}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                      {isDe ? "Autor erinnern" : "Remind Author"}
+                                    </>
+                                  )}
                                 </Button>
                               )}
 
@@ -1095,6 +1199,22 @@ export function JournalManagerWorkspace({
                                 </Button>
                               )}
 
+                              {/* Decision Letter Button for Decided Manuscripts */}
+                              {isDecided && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setViewingDecisionManuscript(ms)
+                                    setIsDecisionLetterModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
+                                >
+                                  <FileCheck2 className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Decision Letter
+                                </Button>
+                              )}
+
                               {isAccepted && (
                                 <>
                                   <Button
@@ -1103,7 +1223,7 @@ export function JournalManagerWorkspace({
                                       setGalleyManuscript(ms)
                                       setIsGalleyModalOpen(true)
                                     }}
-                                    className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 rounded-lg cursor-pointer"
+                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3.5 rounded-lg cursor-pointer shadow-2xs"
                                   >
                                     <FileText className="h-3.5 w-3.5 mr-1" />
                                     Galley Proof
@@ -1112,6 +1232,12 @@ export function JournalManagerWorkspace({
                                     Published
                                   </span>
                                 </>
+                              )}
+
+                              {isDeclined && (
+                                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                                  Archived
+                                </span>
                               )}
                             </div>
                           </td>
@@ -1205,7 +1331,7 @@ export function JournalManagerWorkspace({
       {activeTab === "checks" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">Publishing & DOI Dispatch</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Publishing & DOIs</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage galley proofs and register Crossref DOIs for accepted manuscripts.</p>
           </div>
 
@@ -1262,36 +1388,512 @@ export function JournalManagerWorkspace({
       {/* 6. PORTFOLIO & INTEGRITY ANALYTICS                                        */}
       {/* ========================================================================= */}
       {activeTab === "analytics" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-              Acceptance Rate
-            </span>
-            <div className="text-lg font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
-              21.8%
+        <div className="space-y-6">
+          
+          {/* A. Strategic Control & Filter Bar */}
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3.5 p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                {isDe ? "Portfolio-Analytik" : "Portfolio Analytics"}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {isDe 
+                  ? "Durchsatz, Begutachtungszeiten und Journal-Metriken."
+                  : "Throughput velocity, peer review turnaround, and journal health."}
+              </p>
             </div>
-            <span className="text-xs font-medium text-slate-500 block">Double-Blind Peer Review Threshold</span>
+
+            {/* Filter Controls & Exports in Clean Single Row */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 xl:pb-0 shrink-0">
+              {/* Timeframe Selector */}
+              <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 shrink-0">
+                {[
+                  { key: "30d", label: "30D" },
+                  { key: "quarter", label: "Q3 2026" },
+                  { key: "ytd", label: "YTD" },
+                  { key: "all", label: "All" }
+                ].map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => setAnalyticsTimeframe(t.key as any)}
+                    className={`px-2.5 py-1 text-xs rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+                      analyticsTimeframe === t.key
+                        ? "bg-white dark:bg-[#18191e] text-slate-900 dark:text-white shadow-2xs font-bold"
+                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white font-semibold"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Journal Scope Selector */}
+              <select
+                value={analyticsJournalFilter}
+                onChange={(e) => setAnalyticsJournalFilter(e.target.value)}
+                className="text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] shrink-0"
+              >
+                <option value="all">All Journals</option>
+                <option value="Medicine">Medicine</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Social">Social Sciences</option>
+                <option value="Decarbonization">Decarbonization</option>
+              </select>
+
+              {/* Export Buttons */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setAnalyticsExportStatus("✓ Raw CSV Dataset exported successfully.")
+                  setTimeout(() => setAnalyticsExportStatus(null), 4000)
+                }}
+                className="h-8 text-xs font-semibold border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 text-slate-700 dark:text-slate-300 px-2.5 rounded-xl cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                Export CSV
+              </Button>
+
+              <a
+                href="/downloads/Rights_Retention_Cover_Letter_Template.txt"
+                download="ScholarlyOpen_Executive_Editorial_Report_Q3_2026.pdf"
+                className="inline-flex items-center h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-xl cursor-pointer shadow-xs transition-colors shrink-0 whitespace-nowrap"
+              >
+                <Download className="h-3.5 w-3.5 mr-1" />
+                Audit Report (.pdf)
+              </a>
+            </div>
+          </div>
+
+          {/* Feedback banner if exported */}
+          {analyticsExportStatus && (
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-medium flex items-center gap-2">
+              <CheckCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>{analyticsExportStatus}</span>
+            </div>
+          )}
+
+          {/* B. Executive KPI Velocity Matrix (4 Sleek Cards) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            {/* Card 1: Acceptance Rate */}
+            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Acceptance Rate
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  Top Tier
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                  21.8%
+                </span>
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  -1.4%
+                </span>
+              </div>
+              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Desk Rejected:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">14.2%</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Post-Review Rejected:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">64.0%</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Card 2: Turnaround Latency */}
+            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Decision Turnaround
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  ● On Target
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold tracking-tight text-[#0b99ff] tabular-nums">
+                  18.4 Days
+                </span>
+                <span className="text-xs text-slate-400">
+                  vs 21.0d Goal
+                </span>
+              </div>
+              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Triage:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">3.2 Days</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Peer Review:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">12.8 Days</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Card 3: Reviewer On-Time Rate */}
+            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Reviewer On-Time
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  91.4%
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                  2.4 Reviews
+                </span>
+                <span className="text-xs text-slate-400">
+                  / Paper Avg
+                </span>
+              </div>
+              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Reviewer Pool:</span>
+                  <span className="font-semibold text-[#0b99ff]">148 Scholars</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Acceptance Rate:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">94.2%</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Card 4: Integrity & First-Pass Pass Rate */}
+            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Integrity Rate
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  100% Verified
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  97.2% Clean
+                </span>
+                <span className="text-xs text-slate-400">
+                  First-Pass
+                </span>
+              </div>
+              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>RIA Cases:</span>
+                  <span className="font-semibold text-amber-600 dark:text-amber-400">2.8% (3 Cases)</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Preprint Matched:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">100% Ingested</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* C. Submissions Funnel & Editorial Lifecycle Stages */}
+          <Card className="p-6 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Submissions Funnel
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Conversion metrics and dwell times across pipeline stages.
+                </p>
+              </div>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
+                164 Submissions (Q3 2026)
+              </span>
+            </div>
+
+            {/* Funnel Visual Steps */}
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+              {[
+                { stage: "1. Intake", count: 164, pct: "100%", time: "0.0d", desc: "Submitted", color: "bg-slate-900 dark:bg-white text-white dark:text-slate-900" },
+                { stage: "2. Triage", count: 142, pct: "86.6%", time: "3.2d", desc: "Passed pre-check", color: "bg-[#0b99ff] text-white" },
+                { stage: "3. Peer Review", count: 118, pct: "72.0%", time: "12.8d", desc: "Under review", color: "bg-indigo-600 text-white" },
+                { stage: "4. Revisions", count: 62, pct: "37.8%", time: "11.2d", desc: "Author revision", color: "bg-purple-600 text-white" },
+                { stage: "5. Decisions", count: 36, pct: "21.8%", time: "18.4d", desc: "Accepted", color: "bg-emerald-600 text-white" },
+                { stage: "6. Production", count: 36, pct: "100%", time: "3.1d", desc: "DOI minted", color: "bg-emerald-700 text-white" }
+              ].map((step, idx) => (
+                <div key={idx} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 space-y-2 relative overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                      {step.stage}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                      {step.time}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-bold text-slate-900 dark:text-white tabular-nums">
+                      {step.count}
+                    </span>
+                    <span className="text-xs font-bold text-[#0b99ff]">
+                      {step.pct}
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${step.color.split(" ")[0]}`}
+                      style={{ width: step.pct }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                    {step.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
           </Card>
 
-          <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-              Plagiarism Check Status
-            </span>
-            <div className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
-              100% Clean
+          {/* D. Journal Portfolio Comparative Performance Matrix */}
+          <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Journal Performance
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Volume, turnaround velocity, and citation projections.
+                </p>
+              </div>
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                ● 100% DOI Sync
+              </span>
             </div>
-            <span className="text-xs font-medium text-slate-500 block">All submissions verified</span>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs min-w-[840px]">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                    <th className="px-5 py-3.5">Journal & ISSN</th>
+                    <th className="px-4 py-3.5">Submissions</th>
+                    <th className="px-4 py-3.5">Accept Rate</th>
+                    <th className="px-4 py-3.5">Turnaround</th>
+                    <th className="px-4 py-3.5">CiteScore</th>
+                    <th className="px-4 py-3.5">DOI Status</th>
+                    <th className="px-4 py-3.5 text-center">Health</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                  {[
+                    {
+                      name: "Scholarly Open: Medicine",
+                      issn: "ISSN 2940-1022",
+                      subs: 48,
+                      growth: "+18%",
+                      acceptRate: "24.2%",
+                      speed: "16.8 Days",
+                      citeScore: "4.8",
+                      doiStatus: "100% Active",
+                      health: "Optimal"
+                    },
+                    {
+                      name: "Engineering & Applied Sciences",
+                      issn: "ISSN 2940-1030",
+                      subs: 62,
+                      growth: "+24%",
+                      acceptRate: "19.4%",
+                      speed: "18.2 Days",
+                      citeScore: "5.2",
+                      doiStatus: "100% Active",
+                      health: "Optimal"
+                    },
+                    {
+                      name: "Social Sciences & Humanities",
+                      issn: "ISSN 2940-1049",
+                      subs: 36,
+                      growth: "+12%",
+                      acceptRate: "22.2%",
+                      speed: "20.4 Days",
+                      citeScore: "3.9",
+                      doiStatus: "100% Active",
+                      health: "Target Range"
+                    },
+                    {
+                      name: "Decarbonization & Carbon Tech",
+                      issn: "ISSN 2940-1057",
+                      subs: 28,
+                      growth: "+32%",
+                      acceptRate: "17.9%",
+                      speed: "17.5 Days",
+                      citeScore: "6.1",
+                      doiStatus: "100% Active",
+                      health: "Optimal"
+                    }
+                  ].map((j, i) => (
+                    <tr key={i} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="font-bold text-slate-900 dark:text-white text-xs">{j.name}</div>
+                        <div className="text-[11px] text-slate-400 font-mono">{j.issn}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-bold text-slate-900 dark:text-white tabular-nums">{j.subs} Papers</div>
+                        <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{j.growth} YoY</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                          {j.acceptRate}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-bold text-[#0b99ff] tabular-nums">{j.speed}</div>
+                        <div className="text-[10px] text-slate-400">&lt;21d Target</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-bold text-slate-900 dark:text-white tabular-nums">
+                          {j.citeScore}
+                        </div>
+                        <div className="text-[10px] text-slate-400">Projected</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                          {j.doiStatus}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                          {j.health}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Card>
 
-          <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-              Avg Decision Turnaround
-            </span>
-            <div className="text-lg font-bold tracking-tight text-[#0b99ff] tabular-nums">
-              18.4 Days
-            </div>
-            <span className="text-xs font-medium text-slate-500 block">Within benchmark target</span>
-          </Card>
+          {/* E. Two-Column Operational Split: Editorial Board Load & Global Authorship */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* Left: Handling Editor Workload & Capacity Radar */}
+            <Card className="p-6 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Editor Workload
+                </h4>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                  0 Bottlenecks
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    name: "Prof. Clara Zhang",
+                    title: "Editor-in-Chief • Engineering",
+                    active: 4,
+                    max: 6,
+                    speed: "16.2d",
+                    onTime: "100%",
+                    avatar: "CZ"
+                  },
+                  {
+                    name: "Prof. Aris Thorne",
+                    title: "Senior Handling Editor • Medicine",
+                    active: 3,
+                    max: 5,
+                    speed: "18.1d",
+                    onTime: "98%",
+                    avatar: "AT"
+                  },
+                  {
+                    name: "Prof. Hiroshi Tanaka",
+                    title: "Associate Editor • Social Sciences",
+                    active: 2,
+                    max: 5,
+                    speed: "19.4d",
+                    onTime: "96%",
+                    avatar: "HT"
+                  }
+                ].map((ed, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                          {ed.avatar}
+                        </div>
+                        <div>
+                          <h5 className="text-xs font-bold text-slate-900 dark:text-white">{ed.name}</h5>
+                          <p className="text-[10px] text-slate-400">{ed.title}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">
+                          {ed.active} / {ed.max} Active
+                        </span>
+                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{ed.onTime} on-time</p>
+                      </div>
+                    </div>
+                    <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#0b99ff]"
+                        style={{ width: `${(ed.active / ed.max) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Right: Global Authorship Demographics & Open Access Reach */}
+            <Card className="p-6 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Global Reach & OA
+                </h4>
+                <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                  CC-BY 4.0 Gold OA
+                </span>
+              </div>
+
+              {/* Geographic Distribution Breakdown */}
+              <div className="space-y-2.5">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Author Origins (Q3 2026)
+                </div>
+                {[
+                  { region: "Europe (UK, Germany, Switzerland)", pct: 38, count: "62 papers", color: "bg-[#0b99ff]" },
+                  { region: "North America (United States, Canada)", pct: 34, count: "56 papers", color: "bg-indigo-600" },
+                  { region: "Asia-Pacific (Japan, Singapore, Australia)", pct: 22, count: "36 papers", color: "bg-emerald-600" },
+                  { region: "Latin America & Africa", pct: 6, count: "10 papers", color: "bg-amber-600" }
+                ].map((geo, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-700 dark:text-slate-300 font-medium truncate pr-2">{geo.region}</span>
+                      <span className="font-bold text-slate-900 dark:text-white tabular-nums shrink-0">{geo.pct}% ({geo.count})</span>
+                    </div>
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className={`h-full ${geo.color}`} style={{ width: `${geo.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Global Readership Highlights */}
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Total Readership</span>
+                  <div className="text-base font-bold text-slate-900 dark:text-white tabular-nums">48,290+</div>
+                  <span className="text-[10px] text-slate-500">PDF downloads</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Citations</span>
+                  <div className="text-base font-bold text-emerald-600 dark:text-emerald-400">OpenAlex Active</div>
+                  <span className="text-[10px] text-slate-500">Crossref synced</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+
         </div>
       )}
 
@@ -1301,7 +1903,7 @@ export function JournalManagerWorkspace({
       {activeTab === "archives" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">Audit Archives</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Audit Logs</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Log of editorial actions and releases.</p>
           </div>
 
@@ -1343,7 +1945,7 @@ export function JournalManagerWorkspace({
         <DialogContent className="sm:max-w-xl max-h-[88vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-5 flex flex-col shadow-2xl">
           <DialogHeader className="pb-1">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2">
-              <span>Assign Editor & Reviewers</span>
+              <span>Assign Team</span>
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
                 {selectedManuscript?.id}
               </span>
@@ -1453,25 +2055,28 @@ export function JournalManagerWorkspace({
             {/* TAB 2: GLOBAL SCHOLARS (CLEAN MINIMAL METADATA) */}
             {jmReviewerSourceTab === "suggested" && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={jmOpenAlexQuery}
-                    onChange={(e) => setJmOpenAlexQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault()
-                        handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery)
-                      }
-                    }}
-                    placeholder="Search global scholars by topic or name..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-                  />
+                <div className="flex items-center gap-2 w-full">
+                  <div className="relative flex-1 min-w-0">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={jmOpenAlexQuery}
+                      onChange={(e) => setJmOpenAlexQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery)
+                        }
+                      }}
+                      placeholder="Search global scholars by topic or name..."
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
                   <Button
                     type="button"
                     disabled={isJmSearchingOpenAlex}
                     onClick={() => handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery)}
-                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-3.5 rounded-xl cursor-pointer shadow-xs shrink-0"
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-4 rounded-xl cursor-pointer shadow-xs shrink-0"
                   >
                     {isJmSearchingOpenAlex ? "Searching..." : "Search"}
                   </Button>
@@ -1609,7 +2214,7 @@ export function JournalManagerWorkspace({
                 disabled={selectedReviewers.length === 0}
                 className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
               >
-                Assign & Send Invitations
+                Assign
               </Button>
             </div>
           </DialogFooter>
@@ -1617,13 +2222,13 @@ export function JournalManagerWorkspace({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* MODAL 2: MANUAL PRE-CHECK & FILE DOWNLOADS                                 */}
+      {/* MODAL 2: PRE-CHECK QUALITY ASSESSMENT                                     */}
       {/* ========================================================================= */}
       <Dialog open={isPreQualityModalOpen} onOpenChange={setIsPreQualityModalOpen}>
         <DialogContent className="sm:max-w-xl max-h-[85vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-5 flex flex-col shadow-2xl">
           <DialogHeader className="pb-1">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2 pr-6">
-              <span>Pre-Check & Quality Inspection</span>
+              <span>Pre-Check</span>
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
                 {selectedManuscript?.id}
               </span>
@@ -1635,43 +2240,74 @@ export function JournalManagerWorkspace({
 
           <div className="space-y-3 py-1 text-xs overflow-y-auto pr-1">
             {/* 1. Automated Integrity & Forensic Pre-Scan Suite */}
-            <div className="space-y-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 text-xs">
-                <span>Automated Integrity Pre-Scan</span>
-                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.2 rounded border border-emerald-200 dark:border-emerald-900/30">
-                  All Systems Passed ✓
-                </span>
-              </div>
+            {(() => {
+              const isFlagged = selectedManuscript?.integrityStatus === "Flagged" || (selectedManuscript?.plagiarismScore && selectedManuscript.plagiarismScore > 15) || (selectedManuscript?.aiScore && selectedManuscript.aiScore > 30)
+              const plag = selectedManuscript?.plagiarismScore ?? 4.2
+              const ai = selectedManuscript?.aiScore ?? 1.8
+              const figureStatus = isFlagged ? "Flagged (Review Req)" : "Clean (4 Panels)"
 
-              <div className="grid grid-cols-3 gap-2">
-                {/* Plagiarism */}
-                <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-400 font-medium">Similarity</div>
-                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    4.2% <span className="text-[10px] text-slate-400 font-normal">(&lt;15%)</span>
+              return (
+                <div className={`space-y-2 p-3 rounded-xl border ${
+                  isFlagged 
+                    ? "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/40" 
+                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                }`}>
+                  <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 text-xs">
+                    <span className="flex items-center gap-1.5">
+                      {isFlagged ? <ShieldAlert className="h-3.5 w-3.5 text-red-600" /> : <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />}
+                      <span>Automated Integrity Pre-Scan</span>
+                    </span>
+                    {isFlagged ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setForensicsManuscript(selectedManuscript)
+                          setForensicActionStatus(null)
+                          setIsForensicsModalOpen(true)
+                        }}
+                        className="text-[10px] font-bold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/60 hover:bg-red-200 px-2 py-0.5 rounded border border-red-300 dark:border-red-800 cursor-pointer flex items-center gap-1 transition-all"
+                      >
+                        <span>Audit Flagged (Open Forensics)</span>
+                        <ArrowUpRight className="h-3 w-3" />
+                      </button>
+                    ) : (
+                      <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.2 rounded border border-emerald-200 dark:border-emerald-900/30">
+                        All Systems Passed ✓
+                      </span>
+                    )}
                   </div>
-                  <div className="text-[10px] text-slate-500 truncate">iThenticate / Crossref</div>
-                </div>
 
-                {/* AI Text Detector */}
-                <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-400 font-medium">AI Text</div>
-                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    1.8% <span className="text-[10px] text-slate-400 font-normal">(Human)</span>
-                  </div>
-                  <div className="text-[10px] text-slate-500 truncate">No synthetic markers</div>
-                </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Plagiarism */}
+                    <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                      <div className="text-[10px] text-slate-400 font-medium">Similarity</div>
+                      <div className={`text-xs font-bold mt-0.5 ${plag > 15 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                        {plag}% <span className="text-[10px] text-slate-400 font-normal">{plag > 15 ? "(>15% Alert)" : "(<15%)"}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 truncate">iThenticate / Crossref</div>
+                    </div>
 
-                {/* AI Image & Figure Forensics */}
-                <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-400 font-medium">Figure Scan</div>
-                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    Clean <span className="text-[10px] text-slate-400 font-normal">(4 Panels)</span>
+                    {/* AI Text Detector */}
+                    <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                      <div className="text-[10px] text-slate-400 font-medium">AI Text</div>
+                      <div className={`text-xs font-bold mt-0.5 ${ai > 30 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                        {ai}% <span className="text-[10px] text-slate-400 font-normal">{ai > 30 ? "(Elevated)" : "(Human)"}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 truncate">{ai > 30 ? "Synthetic markers" : "No synthetic markers"}</div>
+                    </div>
+
+                    {/* AI Image & Figure Forensics */}
+                    <div className="p-2 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                      <div className="text-[10px] text-slate-400 font-medium">Figure Scan</div>
+                      <div className={`text-xs font-bold mt-0.5 ${isFlagged ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                        {figureStatus}
+                      </div>
+                      <div className="text-[10px] text-slate-500 truncate">{isFlagged ? "Review raw blots" : "No clone tampering"}</div>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-slate-500 truncate">No clone tampering</div>
                 </div>
-              </div>
-            </div>
+              )
+            })()}
 
             {/* Download Files List for JM */}
             <div className="space-y-1.5">
@@ -1790,7 +2426,7 @@ export function JournalManagerWorkspace({
         <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-              Return Manuscript for Author Correction
+              Return to Author
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
               Notify the author about missing files or formatting issues.
@@ -1840,7 +2476,7 @@ export function JournalManagerWorkspace({
         <DialogContent className="max-w-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-              Sanitize & Vet Review Comments
+              Moderate Comments
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
               Manuscript ID: {moderatingReview?.paperId} • Reviewer: {moderatingReview?.reviewerName} • Approved remarks will be bundled into the Handling Editor&apos;s official decision letter.
@@ -1893,7 +2529,7 @@ export function JournalManagerWorkspace({
         <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
-              <span>Galley Proof & Production File</span>
+              <span>Galley Proof</span>
               <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/30">
                 CC-BY 4.0 Open Access
               </span>
@@ -2062,7 +2698,7 @@ export function JournalManagerWorkspace({
         <DialogContent className="max-w-3xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex flex-wrap items-center justify-between gap-2 pr-6">
-              <span>Peer Review Progress & Reviewer Tracking</span>
+              <span>Review Tracker</span>
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20">
                 {trackingManuscript?.id}
               </span>
@@ -2209,15 +2845,30 @@ export function JournalManagerWorkspace({
                             variant="outline"
                             onClick={() => handleNudgeReviewer(revName)}
                             disabled={isNudged}
-                            className={`h-8 text-xs font-bold px-3 rounded-lg cursor-pointer whitespace-nowrap ${
+                            className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
                               isNudged 
-                                ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800" 
+                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
                                 : isOverdue 
-                                  ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:border-red-900" 
-                                  : "border-amber-300 text-amber-600 hover:bg-amber-50 dark:border-amber-900/40"
+                                  ? "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-900/50 dark:text-rose-300" 
+                                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
                             }`}
                           >
-                            {isNudged ? "✓ Reminder Dispatched" : isOverdue ? "🚨 Send Urgent Nudge" : "🔔 Send Reminder (Nudge)"}
+                            {isNudged ? (
+                              <>
+                                <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                Reminder Dispatched
+                              </>
+                            ) : isOverdue ? (
+                              <>
+                                <AlertCircle className="h-3.5 w-3.5 mr-1 text-rose-600 dark:text-rose-400" />
+                                Send Urgent Nudge
+                              </>
+                            ) : (
+                              <>
+                                <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                Send Reminder
+                              </>
+                            )}
                           </Button>
 
                           <Button
@@ -2601,6 +3252,398 @@ export function JournalManagerWorkspace({
               className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
             >
               {confirmDialogState.confirmButtonLabel}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 9: DEDICATED INTEGRITY FORENSICS INVESTIGATION SUITE                 */}
+      {/* ========================================================================= */}
+      <Dialog open={isForensicsModalOpen} onOpenChange={setIsForensicsModalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-6 flex flex-col shadow-2xl overflow-hidden">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3 pr-6">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <ShieldAlert className="h-4 w-4" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                    Forensic Dossier
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                    Similarity scans, synthetic text detection & figure forensics
+                  </DialogDescription>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 whitespace-nowrap">
+                {forensicsManuscript?.id || "SOSSH-26-SRW107"}
+              </span>
+            </div>
+          </DialogHeader>
+
+          {forensicsManuscript && (() => {
+            const plag = forensicsManuscript.plagiarismScore || 34
+            const ai = forensicsManuscript.aiScore || 15
+            const isCriticalPlag = plag > 25
+            const isHighAi = ai > 50
+
+            return (
+              <div className="space-y-4 py-3 text-xs overflow-y-auto pr-1">
+                {/* Paper Summary Box */}
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    {forensicsManuscript.journal} • Submitted {forensicsManuscript.date}
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                    {forensicsManuscript.title}
+                  </h4>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap pt-0.5">
+                    <span>Corresponding Author: <strong className="text-slate-700 dark:text-slate-300">{forensicsManuscript.authorName || "Dr. Helen Vance"}</strong></span>
+                    <span>•</span>
+                    <span>Assigned Editor: <strong className="text-slate-700 dark:text-slate-300">{forensicsManuscript.assignedEditorName || "Prof. Aris Thorne"}</strong></span>
+                  </div>
+                </div>
+
+                {/* Status / Action Notification Banner */}
+                {forensicActionStatus && (
+                  <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center gap-2 font-medium">
+                    <CheckCheck className="h-4 w-4 shrink-0 text-slate-600 dark:text-slate-400" />
+                    <span>{forensicActionStatus}</span>
+                  </div>
+                )}
+
+                {/* Primary Violation Alert Card (Subtle & Clean) */}
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <AlertTriangle className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      <span>
+                        {isCriticalPlag 
+                          ? `Flag: ${plag}% Text Overlap Detected`
+                          : isHighAi 
+                          ? `Flag: ${ai}% Synthetic Text Probability`
+                          : `Integrity Anomaly Flag`}
+                      </span>
+                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                      Review Needed
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {isCriticalPlag
+                      ? `Algorithmic cross-reference against Crossref, arXiv, and SSRN indicates verbatim phrasing in Literature Review & Empirical Estimation (Sections 2.1–3.4) matching a 2024 repository deposit without formal quotation marks.`
+                      : isHighAi
+                      ? `Stylometric entropy scan detected structural repetitive patterns in Methodology (Paragraphs 3-6) exceeding standard baseline threshold.`
+                      : `Automated scan identified potential figure contrast alterations and unverified preprint citations.`}
+                  </p>
+                </div>
+
+                {/* 3 Metric Breakdown Grid (Restrained Neutral Styling) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {/* Similarity */}
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200/90 dark:border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">iThenticate Scan</span>
+                      <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-slate-200 dark:border-slate-700">
+                        {plag > 15 ? "Over Limit" : "Passed"}
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {plag}%
+                    </div>
+                    <div className="text-[11px] text-slate-500 leading-tight">
+                      Matched: SSRN-2024-8120 & arXiv
+                    </div>
+                  </div>
+
+                  {/* AI Content */}
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200/90 dark:border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">AI Probability</span>
+                      <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-slate-200 dark:border-slate-700">
+                        {ai > 30 ? "Elevated" : "Low Risk"}
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {ai}%
+                    </div>
+                    <div className="text-[11px] text-slate-500 leading-tight">
+                      Stylometric syntax variance
+                    </div>
+                  </div>
+
+                  {/* Figure & Image Forensics */}
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200/90 dark:border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Figure Forensics</span>
+                      <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-slate-200 dark:border-slate-700">
+                        Inspected
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                      4 Panels
+                    </div>
+                    <div className="text-[11px] text-slate-500 leading-tight">
+                      No clone stamp / tampering
+                    </div>
+                  </div>
+                </div>
+
+                {/* Author Notes & Preprint Attribution */}
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">Author Declaration & Preprint Note</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Provided at Submission</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed italic bg-white dark:bg-[#18191e] p-2.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                    "A preliminary working draft was shared on SSRN in late 2024. The empirical dataset, regressions, and conclusions submitted here have been substantially expanded and are proprietary to this author team."
+                  </p>
+                </div>
+
+                {/* Operational Quick Actions (Restrained, Professional) */}
+                <div className="space-y-2 pt-1">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Editorial & Forensic Next Steps
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (onAddNotification) {
+                          onAddNotification({
+                            paperId: forensicsManuscript.id,
+                            paperTitle: forensicsManuscript.title,
+                            journal: forensicsManuscript.journal,
+                            type: "im_escalation",
+                            severity: "urgent",
+                            actorName: user?.name || "Sarah Jenkins",
+                            actorRole: "Journal Manager Desk",
+                            headline: "Forensic Escalation Submitted",
+                            summary: `Escalated ${forensicsManuscript.id} (${plag}% similarity) to Research Integrity Office for formal review.`,
+                            recipient: "Research Integrity Advisor"
+                          })
+                        }
+                        setForensicActionStatus(`✓ Case ${forensicsManuscript.id} officially escalated to Research Integrity Advisor (RIA).`)
+                      }}
+                      className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-xl px-3.5 cursor-pointer shadow-xs"
+                    >
+                      <ShieldAlert className="h-3.5 w-3.5 mr-1" />
+                      Escalate to RIA
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (onAddNotification) {
+                          onAddNotification({
+                            paperId: forensicsManuscript.id,
+                            paperTitle: forensicsManuscript.title,
+                            journal: forensicsManuscript.journal,
+                            type: "eic_inquiry",
+                            severity: "high",
+                            actorName: user?.name || "Sarah Jenkins",
+                            actorRole: "Journal Manager Desk",
+                            headline: "Author Clarification Dispatched",
+                            summary: `Requested formal citation clarification and uncropped raw files for ${forensicsManuscript.id}.`,
+                            dispatchedLetter: `Dear ${forensicsManuscript.authorName || "Author"},\n\nPlease provide formal clarification regarding the ${plag}% text overlap identified by our automated forensic scans.\n\nSincerely,\nEditorial Office`,
+                            recipient: forensicsManuscript.authorName || "Corresponding Author"
+                          })
+                        }
+                        setForensicActionStatus(`✓ Formal inquiry dispatched to ${forensicsManuscript.authorName || "Author"}.`)
+                      }}
+                      className="h-8 text-xs font-semibold bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 cursor-pointer text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80 shadow-2xs"
+                    >
+                      <Mail className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                      Query Author
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setForensicActionStatus(`✓ Flag cleared for ${forensicsManuscript.id}. Preprint attribution verified authentic.`)
+                      }}
+                      className="h-8 text-xs font-semibold bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 cursor-pointer text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80 shadow-2xs"
+                    >
+                      <Check className="h-3.5 w-3.5 mr-1 text-emerald-600" />
+                      Clear Flag (Verified)
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+
+          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between sm:justify-between">
+            <a
+              href="/downloads/Rights_Retention_Cover_Letter_Template.txt"
+              download={`${forensicsManuscript?.id || "Manuscript"}_Forensics_Audit_Report.pdf`}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Download Full Forensic Audit (.pdf)</span>
+            </a>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsForensicsModalOpen(false)}
+              className="text-xs font-semibold h-8 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer shadow-2xs"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 10: FORMAL EDITORIAL DECISION LETTER VIEWER                         */}
+      {/* ========================================================================= */}
+      <Dialog open={isDecisionLetterModalOpen} onOpenChange={setIsDecisionLetterModalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-6 flex flex-col shadow-2xl overflow-hidden">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3 pr-6">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                  <FileCheck2 className="h-4 w-4" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                    Decision Record
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                    Official correspondence, reviewer recommendations & editorial verdict
+                  </DialogDescription>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-1 rounded-md border border-[#0b99ff]/20 whitespace-nowrap">
+                {viewingDecisionManuscript?.id || "MS-DECISION"}
+              </span>
+            </div>
+          </DialogHeader>
+
+          {viewingDecisionManuscript && (() => {
+            const isAccepted = viewingDecisionManuscript.status === "Accepted"
+            const isDeclined = viewingDecisionManuscript.status === "Rejected" || (viewingDecisionManuscript.status as string) === "Declined"
+
+            const defaultAcceptLetter = `Dear ${viewingDecisionManuscript.authorName || "Author"},\n\nWe are pleased to inform you that following comprehensive peer evaluation, your manuscript titled "${viewingDecisionManuscript.title}" has been formally ACCEPTED for publication in ${viewingDecisionManuscript.journal}.\n\nNext Steps:\n1. Our production office will prepare the galley proofs and JATS XML.\n2. A formal Crossref DOI (10.59236/${viewingDecisionManuscript.journal.toLowerCase().includes("medicine") ? "somed" : "soeas"}.2026.${viewingDecisionManuscript.id.slice(-3)}) has been reserved.\n\nCongratulations on the publication of your valuable scholarly work.\n\nSincerely,\n${viewingDecisionManuscript.assignedEditorName || "Prof. Clara Zhang"}\nEditor-in-Chief, ${viewingDecisionManuscript.journal}`
+
+            const defaultDeclineLetter = `Dear ${viewingDecisionManuscript.authorName || "Author"},\n\nThank you for giving us the opportunity to consider your manuscript titled "${viewingDecisionManuscript.title}" for publication in ${viewingDecisionManuscript.journal}.\n\nFollowing detailed editorial assessment and peer evaluation, the editorial board has determined that the submission falls outside our current thematic scope and methodological prioritization requirements. We are therefore unable to accept the paper for publication in this journal.\n\nWe thank you for considering ${viewingDecisionManuscript.journal} and wish you every success in placing this work with a more specialized venue.\n\nSincerely,\n${viewingDecisionManuscript.assignedEditorName || "Prof. Clara Zhang"}\nHandling Editor, ${viewingDecisionManuscript.journal}`
+
+            return (
+              <div className="space-y-4 py-3 text-xs overflow-y-auto pr-1">
+                {/* Manuscript Meta Box */}
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    {viewingDecisionManuscript.journal} • Final Decision Archive
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                    {viewingDecisionManuscript.title}
+                  </h4>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap pt-0.5">
+                    <span>Author: <strong className="text-slate-700 dark:text-slate-300">{viewingDecisionManuscript.authorName || "Principal Author"}</strong></span>
+                    <span>•</span>
+                    <span>Deciding Editor: <strong className="text-slate-700 dark:text-slate-300">{viewingDecisionManuscript.assignedEditorName || "Prof. Clara Zhang"}</strong></span>
+                  </div>
+                </div>
+
+                {/* Verdict Banner */}
+                <div className={`p-3 rounded-xl border flex items-center justify-between gap-2 ${
+                  isAccepted
+                    ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200"
+                    : "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 text-rose-800 dark:text-rose-200"
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {isAccepted ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                    )}
+                    <span className="font-bold text-xs">
+                      {isAccepted
+                        ? "Editorial Verdict: ACCEPTED FOR PUBLICATION (Galley Proofs & DOI Assigned)"
+                        : "Editorial Verdict: DECLINED / OUT OF SCOPE (Rejection Notice Dispatched)"}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white dark:bg-slate-900 border border-current">
+                    {isAccepted ? "Published" : "Archived"}
+                  </span>
+                </div>
+
+                {/* Dispatched Correspondence Letter */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">
+                      Official Dispatched Decision Letter
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      Signed by {viewingDecisionManuscript.assignedEditorName || "Editor"}
+                    </span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 font-mono text-[11px] leading-relaxed text-slate-800 dark:text-slate-200 whitespace-pre-wrap select-all">
+                    {isAccepted ? defaultAcceptLetter : defaultDeclineLetter}
+                  </div>
+                </div>
+
+                {/* Reviewer Evaluation Summary */}
+                <div className="space-y-1.5">
+                  <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">
+                    Peer Review Panel Consensus
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200 dark:border-slate-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">Reviewer 1</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                          isAccepted ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+                        }`}>
+                          {isAccepted ? "Accept" : "Decline"}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
+                        {isAccepted ? "\"Methodological rigor verified. Clear contribution to literature.\"" : "\"Insufficient empirical validation against out-of-sample data.\""}
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200 dark:border-slate-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">Reviewer 2</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                          isAccepted ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                        }`}>
+                          {isAccepted ? "Accept" : "Major Issues"}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
+                        {isAccepted ? "\"Well written with sound technical analysis.\"" : "\"The core premise has limited novelty in present formulation.\""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+
+          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between sm:justify-between">
+            <a
+              href="/downloads/Rights_Retention_Cover_Letter_Template.txt"
+              download={`${viewingDecisionManuscript?.id || "Manuscript"}_Official_Decision_Letter.txt`}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0b99ff] hover:underline"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Download Decision Letter (.txt)</span>
+            </a>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDecisionLetterModalOpen(false)}
+              className="text-xs font-semibold h-8 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer shadow-2xs"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

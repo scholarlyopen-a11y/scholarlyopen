@@ -53,7 +53,12 @@ export async function POST(req: Request) {
 
             const orcid = author.orcid ? author.orcid.replace("https://orcid.org/", "") : "0000-0002-8812-4419"
             const citedCount = work.cited_by_count || 0
-            const concept = work.concepts?.[0]?.display_name || work.primary_topic?.display_name || searchQuery
+            const concept = 
+              work.primary_topic?.display_name ||
+              work.primary_topic?.subfield?.display_name ||
+              work.concepts?.find((c: any) => c.level && c.level >= 1 && !['Computer science', 'Medicine', 'Biology', 'Engineering', 'Mathematics', 'Chemistry', 'Physics', 'Software', 'Suite'].includes(c.display_name))?.display_name ||
+              work.concepts?.[0]?.display_name ||
+              searchQuery
 
             if (!candidatesMap.has(authorDisplayName)) {
               candidatesMap.set(authorDisplayName, {

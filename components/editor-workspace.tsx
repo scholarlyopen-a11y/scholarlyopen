@@ -507,7 +507,7 @@ export function EditorWorkspace({
     } else if (selectedStageFilter === "decision") {
       matchesStage = m.status === "Accepted" || m.status === "Rejected"
     } else if (selectedStageFilter === "integrity" || (selectedStageFilter as string) === "ethics") {
-      matchesStage = escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30)
+      matchesStage = Boolean(escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
     }
 
     return matchesJournal && matchesSearch && matchesStage
@@ -663,7 +663,7 @@ export function EditorWorkspace({
           <div className="flex items-center gap-2 shrink-0">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-2xs">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              {isDe ? "Redaktion aktiv" : "Active Editorial Desk"}
+              {isDe ? "Redaktion aktiv" : "Active Desk"}
             </span>
           </div>
         </div>
@@ -684,7 +684,7 @@ export function EditorWorkspace({
               <div>
                 <div className="flex items-center gap-2">
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                    {isDe ? "Dringende Ethik-Eskalation durch Integritätsmanagerin" : "Urgent Case Escalated by Research Integrity Office"}
+                    {isDe ? "Ethik-Eskalation" : "Integrity Escalation"}
                   </h4>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white">
                     {escalatedAlerts.length} {escalatedAlerts.length === 1 ? "Case" : "Cases"}
@@ -714,7 +714,7 @@ export function EditorWorkspace({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs">
         <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-[#272832]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Manuscripts on Desk
+            Submissions
           </span>
           <div className="text-lg font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
             {manuscripts.length} <span className="text-xs font-medium text-slate-500">Total Papers</span>
@@ -724,7 +724,7 @@ export function EditorWorkspace({
 
         <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Awaiting Desk Triage
+            Awaiting Triage
           </span>
           <div className="text-lg font-bold tracking-tight text-amber-600 dark:text-amber-400 tabular-nums">
             {triageCount} <span className="text-xs font-medium text-amber-500">Pending Review</span>
@@ -734,7 +734,7 @@ export function EditorWorkspace({
 
         <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Active Peer Review
+            In Review
           </span>
           <div className="text-lg font-bold tracking-tight text-[#0b99ff] tabular-nums">
             {reviewCount} <span className="text-xs font-medium text-[#0b99ff]">In Evaluation</span>
@@ -744,7 +744,7 @@ export function EditorWorkspace({
 
         <div className="space-y-1 pl-0 lg:pl-4">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-            Avg Turnaround Speed
+            Turnaround Time
           </span>
           <div className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
             14.2 <span className="text-xs font-medium text-emerald-500">Days (Fast)</span>
@@ -1043,10 +1043,11 @@ export function EditorWorkspace({
                               }
                             })
                           }}
-                          className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800 text-xs font-semibold h-8 px-3.5 cursor-pointer shadow-2xs"
+                          variant="outline"
+                          className="h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
                         >
-                          <Bell className="h-3.5 w-3.5 mr-1 text-amber-600" />
-                          {isDe ? "Autor erinnern" : "🔔 Remind Author"}
+                          <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                          {isDe ? "Autor erinnern" : "Remind Author"}
                         </Button>
                       )}
 
@@ -1088,10 +1089,10 @@ export function EditorWorkspace({
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#0b99ff]" />
-                {isDe ? "Gutachten-Tracking & Termine" : "Reviewer Progress & Deadline Tracking"}
+                {isDe ? "Gutachten-Tracking" : "Review Tracker"}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {isDe ? "Überwachen Sie aktive Gutachter-Scorecards, verlängern Sie Fristen oder senden Sie offizielle Mahnungen." : "Monitor active reviewer scorecards in real time, grant deadline extensions, or dispatch official reminders."}
+                {isDe ? "Überwachen Sie aktive Scorecards, verlängern Sie Fristen oder senden Sie Mahnungen." : "Monitor reviewer scorecards in real time, grant extensions, or dispatch reminders."}
               </p>
             </div>
             <span className="text-xs font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-3 py-1.5 rounded-xl border border-[#0b99ff]/20 shrink-0">
@@ -1255,10 +1256,10 @@ export function EditorWorkspace({
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl overflow-hidden shadow-xs">
           <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#272832]">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              {isDe ? "Entscheidungszentrum" : "Decision Central"}
+              {isDe ? "Entscheidungen" : "Decisions"}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {isDe ? "Wählen Sie ein begutachtetes Manuskript aus, um das formelle Entscheidungsschreiben zu erstellen." : "Select an evaluated manuscript to review reviewer feedback and issue a formal publishing decision."}
+              {isDe ? "Wählen Sie ein begutachtetes Manuskript aus, um das formelle Entscheidungsschreiben zu erstellen." : "Select an evaluated manuscript to review feedback and issue a publishing decision."}
             </p>
           </div>
 
@@ -1301,7 +1302,7 @@ export function EditorWorkspace({
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs">
             <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-[#272832]">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                Total Decisions Rendered
+                Decisions Rendered
               </span>
               <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
                 124 <span className="text-xs font-medium text-slate-500">Papers</span>
@@ -1311,17 +1312,17 @@ export function EditorWorkspace({
 
             <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                Avg. First Decision Speed
+                First Decision Speed
               </span>
               <div className="text-2xl font-bold tracking-tight text-[#0b99ff] tabular-nums">
                 14.2 <span className="text-xs font-medium text-slate-500">Days</span>
               </div>
-              <span className="text-xs font-medium text-slate-500 block">Global Benchmark: 35.0 Days</span>
+              <span className="text-xs font-medium text-slate-500 block">Benchmark: 35.0 Days</span>
             </div>
 
             <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                Acceptance Ratio
+                Acceptance Rate
               </span>
               <div className="text-2xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 tabular-nums">
                 24.5% <span className="text-xs font-medium text-slate-500">Selective</span>
@@ -1331,12 +1332,12 @@ export function EditorWorkspace({
 
             <div className="space-y-1 pl-0 lg:pl-4">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                Editorial Standing
+                Standing
               </span>
               <div className="text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400 tabular-nums">
                 Top 5% <span className="text-xs font-medium text-slate-500">Tier</span>
               </div>
-              <span className="text-xs font-medium text-emerald-600 block">Publishing Excellence Award</span>
+              <span className="text-xs font-medium text-emerald-600 block">Publishing Excellence</span>
             </div>
           </div>
 
@@ -1344,29 +1345,29 @@ export function EditorWorkspace({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Desk Triage Reject</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">Desk Reject</span>
                 <span className="font-bold text-rose-600">38.0% (47 Papers)</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-[#131418] h-2 rounded-full overflow-hidden">
                 <div className="bg-rose-500 h-full rounded-full" style={{ width: "38%" }} />
               </div>
-              <span className="text-[11px] text-slate-400 block">Filtered at initial scope & ethics check</span>
+              <span className="text-[11px] text-slate-400 block">Scope & ethics check</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Post-Review Rejection</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">Post-Review Reject</span>
                 <span className="font-bold text-amber-600">37.5% (46 Papers)</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-[#131418] h-2 rounded-full overflow-hidden">
                 <div className="bg-amber-500 h-full rounded-full" style={{ width: "37.5%" }} />
               </div>
-              <span className="text-[11px] text-slate-400 block">Rejected following expert scorecards</span>
+              <span className="text-[11px] text-slate-400 block">Scorecard evaluations</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Formal Acceptance</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">Acceptance</span>
                 <span className="font-bold text-emerald-600">24.5% (31 Papers)</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-[#131418] h-2 rounded-full overflow-hidden">
@@ -1387,7 +1388,25 @@ export function EditorWorkspace({
           currentRole="editor"
           notifications={notifications || []}
           onViewPaperDossier={(paperId) => {
-            const match = manuscripts.find(m => m.id === paperId)
+            let match = manuscripts.find(m => m.id === paperId)
+            if (!match) {
+              const notif = (notifications || []).find(n => n.paperId === paperId)
+              match = {
+                id: paperId,
+                title: notif?.paperTitle || "Submitted Manuscript",
+                journal: notif?.journal || "Social Sciences & Humanities",
+                status: "Under Review",
+                date: "2026-06-03",
+                reviewers: ["Prof. Aris Thorne", "Prof. Hiroshi Tanaka"],
+                integrityStatus: "Clean",
+                authorName: "Dr. Elena Rostova",
+                authorEmail: "e.rostova@urbanresearch.org",
+                authorAffiliation: "Department of Urban Planning & Social Geography",
+                assignedEditorName: "Prof. Aris Thorne",
+                abstract: "Spatial analysis and econometric evaluation of park accessibility across 14 European metropolitan regions assessing socio-economic disparity indexes.",
+                keywords: "Urban Planning, Green Spaces, Socio-Spatial Equity"
+              } as JmManuscript
+            }
             if (match) setSelectedPaperForDetail(match)
           }}
         />
@@ -2256,27 +2275,30 @@ export function EditorWorkspace({
             {/* TAB 2: GLOBAL SCHOLARS (CLEAN MINIMAL METADATA) */}
             {reviewerSourceTab === "suggested" && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={openAiCustomTopic}
-                    onChange={(e) => setOpenAiCustomTopic(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault()
-                        if (selectedPaperForReviewers) {
-                          handleFetchOpenAiReviewers(selectedPaperForReviewers, openAiCustomTopic)
+                <div className="flex items-center gap-2 w-full">
+                  <div className="relative flex-1 min-w-0">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={openAiCustomTopic}
+                      onChange={(e) => setOpenAiCustomTopic(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          if (selectedPaperForReviewers) {
+                            handleFetchOpenAiReviewers(selectedPaperForReviewers, openAiCustomTopic)
+                          }
                         }
-                      }
-                    }}
-                    placeholder="Search global scholars by topic or name..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-                  />
+                      }}
+                      placeholder="Search global scholars by topic or name..."
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
                   <Button
                     type="button"
                     disabled={isSearchingOpenAI}
                     onClick={() => selectedPaperForReviewers && handleFetchOpenAiReviewers(selectedPaperForReviewers, openAiCustomTopic)}
-                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-3.5 rounded-xl cursor-pointer shadow-xs shrink-0"
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-4 rounded-xl cursor-pointer shadow-xs shrink-0"
                   >
                     {isSearchingOpenAI ? "Searching..." : "Search"}
                   </Button>
@@ -3104,8 +3126,8 @@ export function EditorWorkspace({
                               severity: "normal",
                               actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
                               actorRole: "Editor-in-Chief",
-                              headline: `Ethics Flag Cleared & Certified Clean`,
-                              summary: `Prof. Aris Thorne dismissed integrity flag on ${paperId} and certified manuscript clean for peer review.`,
+                              headline: `Ethics Flag Cleared`,
+                              summary: `Ethics flag dismissed for ${paperId}.`,
                               recipient: "Journal Manager & Research Integrity Office"
                             })
                           }
@@ -3122,13 +3144,13 @@ export function EditorWorkspace({
                               severity: "urgent",
                               actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
                               actorRole: "Editor-in-Chief",
-                              headline: `Direct Desk Rejection Executed for Misconduct`,
-                              summary: `Prof. Aris Thorne executed Desk Rejection on manuscript ${paperId}. Formal decision letter dispatched to author with mandatory CC to Journal Manager.`,
+                              headline: `Desk Rejection Issued`,
+                              summary: `Desk rejection issued for ${paperId}.`,
                               dispatchedLetter: eicRulingLetter,
-                              recipient: "Corresponding Author & All Co-Authors"
+                              recipient: "Corresponding Author & Co-Authors"
                             })
                           }
-                          triggerToast(`✓ Manuscript ${paperId} desk rejected for ethics misconduct.`)
+                          triggerToast(`✓ Manuscript ${paperId} desk rejected.`)
                         } else if (eicDecisionAction === "raw_data") {
                           setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Raw Data Requested", status: "Revision Required" } : m))
                           if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
@@ -3141,13 +3163,13 @@ export function EditorWorkspace({
                               severity: "high",
                               actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
                               actorRole: "Editor-in-Chief",
-                              headline: `14-Day Raw Data Request Dispatched to Author`,
-                              summary: `Raw data request letter dispatched for manuscript ${paperId}.`,
+                              headline: `Raw Data Requested`,
+                              summary: `Raw data request sent for ${paperId}.`,
                               dispatchedLetter: eicRulingLetter,
                               recipient: "Corresponding Author"
                             })
                           }
-                          triggerToast(`✓ 14-day raw data request dispatched to corresponding author for ${paperId}.`)
+                          triggerToast(`✓ Raw data request dispatched for ${paperId}.`)
                         } else {
                           setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Inquiry Dispatched", status: "Revision Required" } : m))
                           if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
@@ -3160,17 +3182,14 @@ export function EditorWorkspace({
                               severity: "high",
                               actorName: `${user.name} (${user.title || "Editor-in-Chief"})`,
                               actorRole: "Editor-in-Chief",
-                              headline: `14-Day Formal Ethics Inquiry Dispatched to Author`,
-                              summary: `Inquiry letter regarding ${alert.type} (${alert.score}) dispatched to author of ${paperId}.`,
+                              headline: `Author Inquiry Sent`,
+                              summary: `Inquiry letter regarding ${alert.type} sent for ${paperId}.`,
                               dispatchedLetter: eicRulingLetter,
                               recipient: "Corresponding Author"
                             })
                           }
-                          triggerToast(`✓ Formal ethics inquiry letter dispatched to corresponding author for ${paperId}.`)
+                          triggerToast(`✓ Formal ethics inquiry letter dispatched for ${paperId}.`)
                         }
-                      },
-                      onCancel: () => {
-                        setSelectedEscalationAlert(alert)
                       }
                     })
                   }}
