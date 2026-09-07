@@ -150,6 +150,7 @@ export default function HomePage() {
   const stats = [
     { value: "100%", label: t("stats.openAccess") },
     { value: "13", label: t("stats.journals") },
+    { value: "5", label: t("stats.editors") },
     { value: "Global", label: t("stats.reach") },
     { value: "COPE", label: t("stats.guidelines") },
   ]
@@ -197,7 +198,7 @@ export default function HomePage() {
         {/* Stats Bar */}
         <section className="border-b border-border bg-muted/50">
           <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 lg:gap-8">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <div className="text-2xl font-bold text-primary lg:text-3xl">{stat.value}</div>
