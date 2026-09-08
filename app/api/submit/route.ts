@@ -3,6 +3,7 @@ export const runtime = "nodejs"
 import nodemailer from "nodemailer"
 
 import { validateSubmissionAntiSpam, getClientIp, isSuspiciousEmail } from "@/lib/anti-spam"
+import { upsertDbManuscript } from "@/lib/supabase"
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024
 
@@ -323,6 +324,31 @@ export async function POST(request: Request) {
     } catch (authorMailErr) {
       console.error("Failed to send author confirmation email:", authorMailErr)
     }
+  }
+
+  // 3. Persist submission in live Supabase cloud database
+  try {
+    await upsertDbManuscript({
+      id: trackingId,
+      title,
+      journal: journalLabel(discipline),
+      status: "Awaiting Initial Check",
+      date: new Date().toISOString().split("T")[0],
+      author_first_name: firstName,
+      author_last_name: lastName,
+      author_name: `${firstName} ${lastName}`.trim(),
+      author_email: authorEmail,
+      author_affiliation: affiliation,
+      article_type: articleType,
+      submission_stage: submissionStage,
+      abstract,
+      file_name: file instanceof File ? file.name : "manuscript.pdf",
+      file_size: file instanceof File ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : "Unspecified",
+      integrity_status: "Clean",
+      editor_assigned: false,
+    })
+  } catch (dbErr) {
+    console.warn("Could not save to Supabase from public submit:", dbErr)
   }
 
   return Response.json({ ok: true, trackingId })

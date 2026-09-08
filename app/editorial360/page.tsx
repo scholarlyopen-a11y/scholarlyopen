@@ -813,6 +813,51 @@ export default function Editorial360Page() {
         console.error("Failed to parse editorial360_session", e)
       }
 
+      // Load shared live cloud manuscripts from Supabase (for remote multi-user sync)
+      fetch("/api/editorial360/manuscripts")
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.ok && Array.isArray(data.manuscripts) && data.manuscripts.length > 0) {
+            const mapped: Manuscript[] = data.manuscripts.map((m: any) => ({
+              id: m.id,
+              title: m.title,
+              journal: m.journal,
+              status: m.status as any,
+              date: m.date || new Date().toISOString().split('T')[0],
+              reviewers: m.reviewers || [],
+              integrityStatus: (m.integrity_status as any) || "Clean",
+              plagiarismScore: m.plagiarism_score ?? 0,
+              aiScore: m.ai_score ?? 0,
+              authorFirstName: m.author_first_name,
+              authorLastName: m.author_last_name,
+              authorName: m.author_name || (m.author_first_name && m.author_last_name ? `${m.author_first_name} ${m.author_last_name}` : "Author"),
+              authorEmail: m.author_email,
+              authorAffiliation: m.author_affiliation,
+              authorCountry: m.author_country,
+              authorOrcid: m.author_orcid,
+              coAuthors: m.co_authors,
+              articleType: m.article_type || "Original Research",
+              submissionStage: m.submission_stage || "Initial Submission",
+              abstract: m.abstract,
+              keywords: m.keywords,
+              fileName: m.file_name,
+              fileSize: m.file_size,
+              coverLetter: m.cover_letter,
+              ethicsIrb: m.ethics_irb,
+              fundingGrant: m.funding_grant,
+              dataDoi: m.data_doi,
+              editorAssigned: m.editor_assigned ?? false,
+              assignedEditorName: m.assigned_editor_name
+            }))
+            setManuscripts(prev => {
+              const cloudIds = new Set(mapped.map(m => m.id))
+              const localOnly = prev.filter(p => !cloudIds.has(p.id))
+              return [...mapped, ...localOnly]
+            })
+          }
+        })
+        .catch(err => console.warn("Could not fetch cloud manuscripts:", err))
+
       // Load any author submissions persisted in browser storage
       try {
         const stored = localStorage.getItem("editorial360_manuscripts")
@@ -831,6 +876,57 @@ export default function Editorial360Page() {
       }
     }
   }, [])
+
+  // Auto-sync polling every 12 seconds so Noor and Abbas see each other's live changes across different computers
+  useEffect(() => {
+    if (!isLoggedIn) return
+    const timer = setInterval(() => {
+      fetch("/api/editorial360/manuscripts")
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.ok && Array.isArray(data.manuscripts) && data.manuscripts.length > 0) {
+            const mapped: Manuscript[] = data.manuscripts.map((m: any) => ({
+              id: m.id,
+              title: m.title,
+              journal: m.journal,
+              status: m.status as any,
+              date: m.date || new Date().toISOString().split('T')[0],
+              reviewers: m.reviewers || [],
+              integrityStatus: (m.integrity_status as any) || "Clean",
+              plagiarismScore: m.plagiarism_score ?? 0,
+              aiScore: m.ai_score ?? 0,
+              authorFirstName: m.author_first_name,
+              authorLastName: m.author_last_name,
+              authorName: m.author_name || (m.author_first_name && m.author_last_name ? `${m.author_first_name} ${m.author_last_name}` : "Author"),
+              authorEmail: m.author_email,
+              authorAffiliation: m.author_affiliation,
+              authorCountry: m.author_country,
+              authorOrcid: m.author_orcid,
+              coAuthors: m.co_authors,
+              articleType: m.article_type || "Original Research",
+              submissionStage: m.submission_stage || "Initial Submission",
+              abstract: m.abstract,
+              keywords: m.keywords,
+              fileName: m.file_name,
+              fileSize: m.file_size,
+              coverLetter: m.cover_letter,
+              ethicsIrb: m.ethics_irb,
+              fundingGrant: m.funding_grant,
+              dataDoi: m.data_doi,
+              editorAssigned: m.editor_assigned ?? false,
+              assignedEditorName: m.assigned_editor_name
+            }))
+            setManuscripts(prev => {
+              const cloudIds = new Set(mapped.map(m => m.id))
+              const localOnly = prev.filter(p => !cloudIds.has(p.id))
+              return [...mapped, ...localOnly]
+            })
+          }
+        })
+        .catch(() => {})
+    }, 12000)
+    return () => clearInterval(timer)
+  }, [isLoggedIn])
 
   // Mock Databases in state for interactivity
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([
@@ -2140,6 +2236,18 @@ export default function Editorial360Page() {
     if (matchedRole) {
       setEmail(matchedRole.placeholder)
     }
+    if (typeof window !== "undefined") {
+      try {
+        const sessionStr = sessionStorage.getItem("editorial360_session")
+        const sess = sessionStr ? JSON.parse(sessionStr) : {}
+        sess.role = newRole
+        sess.isLoggedIn = true
+        sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
+      } catch (e) {
+        // ignore
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+    }
   }
 
   const toggleMode = (targetMode: "login" | "register") => {
@@ -2206,6 +2314,39 @@ export default function Editorial360Page() {
       }
       return updated
     })
+
+    // Sync to Supabase cloud database so Noor and Abbas see it immediately
+    fetch("/api/editorial360/manuscripts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: newMsId,
+        title: newTitle,
+        journal: newJournal,
+        status: "Awaiting Initial Check",
+        author_first_name: newFirstName,
+        author_last_name: newLastName,
+        author_name: authorFullName,
+        author_email: newAuthorEmail || email || "author@scholarlyopen.org",
+        author_affiliation: newAuthorAffiliation || profInstitution || "Institute of Advanced Medical Sciences",
+        author_country: newAuthorCountry || profCountry || "United States",
+        author_orcid: newAuthorOrcid || profOrcid || "0000-0002-1825-0097",
+        co_authors: newCoAuthors || "None declared",
+        article_type: newArticleType || "Original Research",
+        submission_stage: newSubmissionStage || "Initial Submission",
+        abstract: newAbstract,
+        keywords: newKeywords,
+        file_name: submissionFileName || "Main_Manuscript.pdf",
+        file_size: submissionFileSize || "2.4 MB",
+        cover_letter: newCoverLetter,
+        ethics_irb: newEthicsIrb.trim() ? newEthicsIrb.trim() : "None declared / Not applicable",
+        funding_grant: newFundingGrant.trim() ? newFundingGrant.trim() : "No external funding declared",
+        data_doi: newDataDoi.trim() ? newDataDoi.trim() : "Available upon reasonable request",
+        integrity_status: "Clean",
+        editor_assigned: false
+      })
+    }).catch(err => console.error("Cloud submission sync failed:", err))
+
     setIsSubmitWizardOpen(false)
     setNewTitle("")
     setNewAbstract("")
@@ -4111,9 +4252,20 @@ export default function Editorial360Page() {
                     manuscripts={manuscripts as any}
                     onUpdateManuscriptStatus={(id, st) => {
                       setManuscripts(prev => prev.map(m => m.id === id ? { ...m, status: st as any } : m))
+                      fetch("/api/editorial360/manuscripts", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id, status: st })
+                      }).catch(e => console.error("Cloud status update failed:", e))
                     }}
                     onAssignEditor={(id, ed) => {
-                      setManuscripts(prev => prev.map(m => m.id === id ? { ...m, assignedEditorName: ed.split(" (")[0], editorAssigned: true } : m))
+                      const cleanEd = ed.split(" (")[0]
+                      setManuscripts(prev => prev.map(m => m.id === id ? { ...m, assignedEditorName: cleanEd, editorAssigned: true } : m))
+                      fetch("/api/editorial360/manuscripts", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id, assigned_editor_name: cleanEd, editor_assigned: true })
+                      }).catch(e => console.error("Cloud editor assignment failed:", e))
                     }}
                     reviews={reviews as any}
                     onReleaseComments={(revId, sanitizedText) => {
@@ -4146,6 +4298,11 @@ export default function Editorial360Page() {
                     onAddNotification={handleAddCrossDeskNotification}
                     onUpdateManuscriptStatus={(id, st) => {
                       setManuscripts(prev => prev.map(m => m.id === id ? { ...m, status: st as any } : m))
+                      fetch("/api/editorial360/manuscripts", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id, status: st })
+                      }).catch(e => console.error("Cloud status update failed:", e))
                     }}
                     user={{
                       name: editorName,
