@@ -847,6 +847,7 @@ export default function Editorial360Page() {
             if (session.role) setRole(session.role)
             if (session.email) setEmail(session.email)
             if (session.activeJmTab) setActiveJmTab(session.activeJmTab)
+            if (session.activeEditorTab) setActiveEditorTab(session.activeEditorTab)
             lastActivityRef.current = now
           } else {
             sessionStorage.removeItem("editorial360_session")
