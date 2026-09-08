@@ -303,7 +303,7 @@ const INITIAL_COLLECTIONS: SpecialCollectionItem[] = [
 
 export function EditorWorkspace({
   language,
-  activeTab = "desk",
+  activeTab = "tracker",
   onTabChange,
   manuscripts: initialManuscripts,
   onUpdateManuscriptStatus,
@@ -323,7 +323,7 @@ export function EditorWorkspace({
 }: EditorWorkspaceProps) {
   const isDe = language === "de"
 
-  const [internalTab, setInternalTab] = useState<string>(activeTab || "desk")
+  const [internalTab, setInternalTab] = useState<string>(activeTab || "tracker")
 
   useEffect(() => {
     if (activeTab) {

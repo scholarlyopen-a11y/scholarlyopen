@@ -760,8 +760,8 @@ export default function Editorial360Page() {
   const { language, setLanguage } = useLanguage()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")
-  const [role, setRole] = useState<UserRole>("jm")
-  const [email, setEmail] = useState("manager@scholarlyopen.org")
+  const [role, setRole] = useState<UserRole>("editor")
+  const [email, setEmail] = useState("editor@scholarlyopen.org")
   const [password, setPassword] = useState("password123")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -1613,7 +1613,7 @@ export default function Editorial360Page() {
 
   // Active sub-page tab for JM / Editor / Author / Reviewer
   const [activeJmTab, setActiveJmTab] = useState<string>("board")
-  const [activeEditorTab, setActiveEditorTab] = useState<string>("desk")
+  const [activeEditorTab, setActiveEditorTab] = useState<string>("tracker")
   const [activeRiaTab, setActiveRiaTab] = useState<string>("alerts")
   const [activeAdminTab, setActiveAdminTab] = useState<string>("overview")
   const [activeAuthorTab, setActiveAuthorTab] = useState<"dashboard" | "submissions" | "scorecard" | "plagiarism" | "feedback" | "recognition" | "career">("dashboard")
@@ -2035,12 +2035,12 @@ export default function Editorial360Page() {
   }
 
   const roles: { id: UserRole; label: string; placeholder: string }[] = [
-    { id: "admin", label: "Admin", placeholder: "admin@scholarlyopen.org" },
+    { id: "editor", label: "Handling Editor", placeholder: "editor@scholarlyopen.org" },
     { id: "jm", label: "Journal Manager", placeholder: "manager@scholarlyopen.org" },
     { id: "author", label: "Author", placeholder: "author@scholarlyopen.org" },
     { id: "reviewer", label: "Reviewer", placeholder: "reviewer@scholarlyopen.org" },
-    { id: "editor", label: "Editor", placeholder: "editor@scholarlyopen.org" },
     { id: "im", label: "Integrity Manager", placeholder: "im@scholarlyopen.org" },
+    { id: "admin", label: "Admin", placeholder: "admin@scholarlyopen.org" },
   ]
 
   // First-Time Profile Builder States
@@ -3533,68 +3533,6 @@ export default function Editorial360Page() {
                         </div>
                       )}
 
-                      {/* One-Click Quick Demo Switcher */}
-                      <div className="p-3 bg-slate-50 dark:bg-[#131418] rounded-xl border border-slate-200/80 dark:border-[#272832] space-y-2">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400">
-                          <span className="flex items-center gap-1.5">
-                            <Zap className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                            {language === "de" ? "Direktzugang für Demo:" : "Instant Demo Workspaces:"}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-1.5 text-xs">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRole("editor")
-                              setEmail("editor@scholarlyopen.org")
-                              setPassword("password123")
-                              setActiveEditorTab("tracker")
-                              setIsLoggedIn(true)
-                              if (typeof window !== "undefined") {
-                                try {
-                                  sessionStorage.setItem("editorial360_session", JSON.stringify({
-                                    isLoggedIn: true,
-                                    role: "editor",
-                                    email: "editor@scholarlyopen.org",
-                                    activeEditorTab: "tracker",
-                                    timestamp: Date.now()
-                                  }))
-                                } catch (e) {}
-                              }
-                            }}
-                            className="p-2 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-300 dark:border-sky-800 text-[#0b99ff] dark:text-sky-300 font-bold hover:bg-sky-100 dark:hover:bg-sky-900/50 text-left transition-all cursor-pointer shadow-2xs"
-                          >
-                            <span className="block text-xs font-bold">⚡ Handling Editor</span>
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Review Tracker & Rigor</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRole("jm")
-                              setEmail("manager@scholarlyopen.org")
-                              setPassword("password123")
-                              setIsLoggedIn(true)
-                              if (typeof window !== "undefined") {
-                                try {
-                                  sessionStorage.setItem("editorial360_session", JSON.stringify({
-                                    isLoggedIn: true,
-                                    role: "jm",
-                                    email: "manager@scholarlyopen.org",
-                                    activeJmTab: "board",
-                                    timestamp: Date.now()
-                                  }))
-                                } catch (e) {}
-                              }
-                            }}
-                            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold hover:bg-slate-200/70 text-left transition-all cursor-pointer shadow-2xs"
-                          >
-                            <span className="block text-xs font-bold">Journal Manager</span>
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Peer Review & Operations</span>
-                          </button>
-                        </div>
-                      </div>
-
                       {/* Role Select Dropdown */}
                       <div className="space-y-1">
                         <label htmlFor="role-select" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
@@ -4215,55 +4153,7 @@ export default function Editorial360Page() {
                 )}
               </div>
               
-              {/* Quick Role Switcher Pill Bar in Header */}
-              <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-[#18191e] p-1 rounded-xl border border-slate-200/80 dark:border-[#272832] text-xs">
-                <button
-                  type="button"
-                  onClick={() => handleQuickSwitch("editor")}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    role === "editor"
-                      ? "bg-[#0b99ff] text-white shadow-2xs"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                >
-                  Editor
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickSwitch("jm")}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    role === "jm"
-                      ? "bg-[#0b99ff] text-white shadow-2xs"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                >
-                  JM
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickSwitch("reviewer")}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    role === "reviewer"
-                      ? "bg-[#0b99ff] text-white shadow-2xs"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                >
-                  Reviewer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickSwitch("author")}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                    role === "author"
-                      ? "bg-[#0b99ff] text-white shadow-2xs"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                >
-                  Author
-                </button>
-              </div>
-
-              <div className="h-6 w-[1px] bg-slate-200 dark:bg-[#272832] mx-0.5 hidden sm:block" />
+              <div className="h-6 w-[1px] bg-slate-200 dark:bg-[#272832] mx-0.5" />
 
               {/* 4. Modern User Round Avatar with Green & Grey Online/Offline Dot */}
               <div className="relative">
