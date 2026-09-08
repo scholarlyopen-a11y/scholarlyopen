@@ -493,7 +493,7 @@ export function EditorWorkspace({
   const readyForVerdictCount = manuscripts.filter(m => m.status === "Under Review" && (m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
   const inProgressReviewCount = manuscripts.filter(m => m.status === "Under Review" && !(m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
   const escalatedPaperIds = (integrityAlerts || []).filter(a => a.status === "Escalated").map(a => a.paperId)
-  const integrityCount = manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30)).length
+  const integrityCount = manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)).length
   const escalatedCount = integrityCount
 
   // Filtered Papers
@@ -519,7 +519,7 @@ export function EditorWorkspace({
     } else if (selectedStageFilter === "decision") {
       matchesStage = m.status === "Accepted" || m.status === "Rejected"
     } else if (selectedStageFilter === "integrity" || (selectedStageFilter as string) === "ethics") {
-      matchesStage = Boolean(escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
+      matchesStage = Boolean(escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30))
     }
 
     return matchesJournal && matchesSearch && matchesStage
@@ -1064,7 +1064,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </div>
                           )
                         }
-                        const isFlagged = paper.integrityStatus === "Flagged" || (paper.plagiarismScore && paper.plagiarismScore > 15) || (paper.aiScore && paper.aiScore > 30)
+                        const isFlagged = Boolean(paper.integrityStatus === "Flagged" || (Number(paper.plagiarismScore) > 15) || (Number(paper.aiScore) > 30))
                         if (isFlagged) {
                           return (
                             <div className="flex items-center gap-2 flex-wrap">
@@ -1108,7 +1108,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </Button>
                       )}
 
-                      {(paper.integrityStatus === "Flagged" || (paper.plagiarismScore && paper.plagiarismScore > 15) || (paper.aiScore && paper.aiScore > 30)) && !isAccepted && !isRejected && (
+                      {Boolean((paper.integrityStatus === "Flagged" || (Number(paper.plagiarismScore) > 15) || (Number(paper.aiScore) > 30)) && !isAccepted && !isRejected) && (
                         <Button
                           onClick={() => setSelectedPaperForIntegrity(paper)}
                           variant="outline"

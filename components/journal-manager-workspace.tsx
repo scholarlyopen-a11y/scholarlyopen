@@ -450,7 +450,7 @@ export function JournalManagerWorkspace({
         return matchesSearch && matchesJournal && (m.status === "Accepted" || (m.status as string) === "In Production" || (m.status as string) === "Published") && m.status !== "Rejected" && (m.status as string) !== "Declined"
       }
       if (selectedStageFilter === "integrity") {
-        return matchesSearch && matchesJournal && (m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
+        return matchesSearch && matchesJournal && Boolean(m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30))
       }
 
       return matchesSearch && matchesJournal
@@ -465,7 +465,7 @@ export function JournalManagerWorkspace({
   const decisionsList = initialManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected" || (m.status as string) === "Declined")
   const productionList = initialManuscripts.filter(m => (m.status === "Accepted" || (m.status as string) === "In Production" || (m.status as string) === "Published") && m.status !== "Rejected" && (m.status as string) !== "Declined")
   const acceptedList = productionList
-  const integrityCasesList = initialManuscripts.filter(m => m.integrityStatus === "Flagged" || (m.plagiarismScore && m.plagiarismScore > 15) || (m.aiScore && m.aiScore > 30))
+  const integrityCasesList = initialManuscripts.filter(m => Boolean(m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)))
 
   // Handle open Assign Modal
   const handleOpenAssign = (ms: JmManuscript) => {
@@ -793,7 +793,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
   // Helper for rendering Stage Pill Badge in List View
   const renderStageBadge = (ms: JmManuscript) => {
-    if (selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged" || (ms.plagiarismScore && ms.plagiarismScore > 15) || (ms.aiScore && ms.aiScore > 30)) {
+    if (selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged" || (Number(ms.plagiarismScore) > 15) || (Number(ms.aiScore) > 30)) {
       return (
         <div className="space-y-1">
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-800 whitespace-nowrap shadow-2xs">
@@ -1227,7 +1227,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 </Button>
                               )}
 
-                              {(selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged" || (ms.plagiarismScore && ms.plagiarismScore > 15) || (ms.aiScore && ms.aiScore > 30)) && (
+                              {Boolean(selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged" || (Number(ms.plagiarismScore) > 15) || (Number(ms.aiScore) > 30)) && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -2599,7 +2599,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="space-y-3 py-1 text-xs overflow-y-auto pr-1">
             {/* 1. Automated Integrity & Forensic Pre-Scan Suite */}
             {(() => {
-              const isFlagged = selectedManuscript?.integrityStatus === "Flagged" || (selectedManuscript?.plagiarismScore && selectedManuscript.plagiarismScore > 15) || (selectedManuscript?.aiScore && selectedManuscript.aiScore > 30)
+              const isFlagged = Boolean(selectedManuscript?.integrityStatus === "Flagged" || (Number(selectedManuscript?.plagiarismScore) > 15) || (Number(selectedManuscript?.aiScore) > 30))
               const plag = selectedManuscript?.plagiarismScore ?? 4.2
               const ai = selectedManuscript?.aiScore ?? 1.8
               const figureStatus = isFlagged ? "Flagged (Review Req)" : "Clean (4 Panels)"
