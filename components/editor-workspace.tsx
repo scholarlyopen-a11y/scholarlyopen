@@ -47,7 +47,8 @@ import {
   Star,
   UserCheck,
   UserPlus,
-  Files
+  Files,
+  Coins
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -476,6 +477,43 @@ export function EditorWorkspace({
   const [newCollectionGuestEditors, setNewCollectionGuestEditors] = useState("")
   const [newCollectionDeadline, setNewCollectionDeadline] = useState("2026-12-31")
   const [newCollectionDesc, setNewCollectionDesc] = useState("")
+
+  // Reviewer Audit & Dynamic Honorarium Scoring State
+  const [scoringReviewerData, setScoringReviewerData] = useState<{
+    paperId: string
+    paperTitle: string
+    reviewerKey: string
+    reviewerName: string
+    recommendation: string
+    submissionDate: string
+    paymentMethod: "Wise" | "PayPal" | "Payoneer"
+    paymentAccount: string
+    rigorScore: number
+    editorNotes: string
+  } | null>(null)
+
+  const [approvedHonoraria, setApprovedHonoraria] = useState<Record<string, {
+    score: number
+    amount: number
+    paymentMethod: "Wise" | "PayPal" | "Payoneer"
+    paymentAccount: string
+    approvedAt: string
+  }>>({
+    "SOEAS-26-RS102-rev1": {
+      score: 95,
+      amount: 46.25,
+      paymentMethod: "Wise",
+      paymentAccount: "vance.retina@u-tokyo.ac.jp",
+      approvedAt: "2026-06-08"
+    }
+  })
+
+  // Dynamic formula: Base €35 at 80% score, scaled to €50 maximum cap at 100% score; below 80% is 0
+  const calculateReviewerHonorarium = (score: number): number => {
+    if (score < 80) return 0
+    const calculated = 35 + ((score - 80) / 20) * 15
+    return Math.min(50, Math.round(calculated * 100) / 100)
+  }
 
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -1260,38 +1298,112 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     
                     {/* Reviewer 1 */}
-                    <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="space-y-0.5">
-                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
                           <span>Reviewer 1: Dr. Marcus Vance</span>
                           <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">Verified</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-medium">Wise Rail</span>
                         </div>
                         <div className="text-[11px] text-emerald-600 font-semibold">
                           Scorecard Complete · Recommendation: Minor Revision
                         </div>
                         <div className="text-[10px] text-slate-400">Evaluated on {m.date} · 5/5 Criteria Completed</div>
                       </div>
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
-                        100% ✓
-                      </span>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {approvedHonoraria[`${m.id}-rev1`] ? (
+                          <div className="flex items-center gap-1.5 bg-emerald-100/80 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
+                            <Coins className="h-3.5 w-3.5 text-emerald-600" />
+                            <div className="text-right leading-none">
+                              <span className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-200 block">
+                                €{approvedHonoraria[`${m.id}-rev1`].amount.toFixed(2)} EUR
+                              </span>
+                              <span className="text-[9px] text-emerald-600 font-medium">
+                                Score: {approvedHonoraria[`${m.id}-rev1`].score}% ({approvedHonoraria[`${m.id}-rev1`].paymentMethod})
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => setScoringReviewerData({
+                              paperId: m.id,
+                              paperTitle: m.title,
+                              reviewerKey: `${m.id}-rev1`,
+                              reviewerName: "Dr. Marcus Vance",
+                              recommendation: "Minor Revision",
+                              submissionDate: m.date,
+                              paymentMethod: "Wise",
+                              paymentAccount: "vance.retina@u-tokyo.ac.jp",
+                              rigorScore: 92,
+                              editorNotes: "Constructive feedback on baseline calibration parameters."
+                            })}
+                            className="h-7 px-2.5 text-xs bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold rounded-lg shadow-xs cursor-pointer"
+                          >
+                            <Coins className="h-3 w-3 mr-1" />
+                            Audit & Score (€35–€50)
+                          </Button>
+                        )}
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
+                          100% ✓
+                        </span>
+                      </div>
                     </div>
 
                     {/* Reviewer 2 (or completed for SOEAS-26-RS102) */}
                     {isAllReviewsIn ? (
-                      <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 flex items-center justify-between">
+                      <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="space-y-0.5">
-                          <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
                             <span>Reviewer 2: Dr. Evelyn Vane</span>
                             <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">Verified</span>
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-medium">PayPal Rail</span>
                           </div>
                           <div className="text-[11px] text-emerald-600 font-semibold">
                             Scorecard Complete · Recommendation: Accept
                           </div>
                           <div className="text-[10px] text-slate-400">Evaluated on 2026-06-08 · 5/5 Criteria Completed</div>
                         </div>
-                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
-                          100% ✓
-                        </span>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          {approvedHonoraria[`${m.id}-rev2`] ? (
+                            <div className="flex items-center gap-1.5 bg-emerald-100/80 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
+                              <Coins className="h-3.5 w-3.5 text-emerald-600" />
+                              <div className="text-right leading-none">
+                                <span className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-200 block">
+                                  €{approvedHonoraria[`${m.id}-rev2`].amount.toFixed(2)} EUR
+                                </span>
+                                <span className="text-[9px] text-emerald-600 font-medium">
+                                  Score: {approvedHonoraria[`${m.id}-rev2`].score}% ({approvedHonoraria[`${m.id}-rev2`].paymentMethod})
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => setScoringReviewerData({
+                                paperId: m.id,
+                                paperTitle: m.title,
+                                reviewerKey: `${m.id}-rev2`,
+                                reviewerName: "Dr. Evelyn Vane",
+                                recommendation: "Accept",
+                                submissionDate: "2026-06-08",
+                                paymentMethod: "PayPal",
+                                paymentAccount: "evelyn.vane@oxford.ac.uk",
+                                rigorScore: 96,
+                                editorNotes: "Comprehensive literature contextualization and thorough validation."
+                              })}
+                              className="h-7 px-2.5 text-xs bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold rounded-lg shadow-xs cursor-pointer"
+                            >
+                              <Coins className="h-3 w-3 mr-1" />
+                              Audit & Score (€35–€50)
+                            </Button>
+                          )}
+                          <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
+                            100% ✓
+                          </span>
+                        </div>
                       </div>
                     ) : (
                       <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/10 flex items-center justify-between">
@@ -4089,6 +4201,173 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
             >
               {confirmDialogState.confirmButtonLabel}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL: REVIEWER AUDIT & HONORARIUM SCORING ================= */}
+      <Dialog open={!!scoringReviewerData} onOpenChange={(open) => !open && setScoringReviewerData(null)}>
+        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-2xl p-6 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Coins className="h-5 w-5 text-[#0b99ff]" />
+              Audit Reviewer Quality & Approve Honorarium
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Manuscript: {scoringReviewerData?.paperId} · Reviewer: {scoringReviewerData?.reviewerName}
+            </DialogDescription>
+          </DialogHeader>
+
+          {scoringReviewerData && (
+            <div className="space-y-4 py-2 text-xs">
+              {/* Referee Overview Bar */}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Referee Recommendation:</span>
+                  <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                    {scoringReviewerData.recommendation}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Submission Timeliness:</span>
+                  <span className="text-slate-700 dark:text-slate-300">{scoringReviewerData.submissionDate} (Within 14-Day Cycle ✓)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Qualification & English Level:</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">COPE Verified Gateway (≥ 80%) ✓</span>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-slate-800 pt-1.5 mt-1.5">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Designated Payout Rail:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                      {scoringReviewerData.paymentMethod}
+                    </span>
+                    <span className="text-slate-600 dark:text-slate-400 font-mono text-[11px]">{scoringReviewerData.paymentAccount}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rigor Score Slider & Input */}
+              <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="font-bold text-slate-900 dark:text-white text-xs block">
+                      Handling Editor Rigor Score (0–100%)
+                    </label>
+                    <span className="text-[11px] text-slate-500">
+                      Evaluates depth, methodology validation, and actionability for authors.
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={scoringReviewerData.rigorScore}
+                      onChange={(e) => {
+                        const val = Math.max(0, Math.min(100, Number(e.target.value) || 0))
+                        setScoringReviewerData(prev => prev ? { ...prev, rigorScore: val } : null)
+                      }}
+                      className="w-16 px-2 py-1 text-right font-bold text-sm rounded-lg border border-blue-300 dark:border-blue-800 bg-white dark:bg-[#131418] text-[#0b99ff] focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                    />
+                    <span className="font-bold text-slate-600 dark:text-slate-400">%</span>
+                  </div>
+                </div>
+
+                <input
+                  type="range"
+                  min={50}
+                  max={100}
+                  value={scoringReviewerData.rigorScore}
+                  onChange={(e) => {
+                    const val = Number(e.target.value)
+                    setScoringReviewerData(prev => prev ? { ...prev, rigorScore: val } : null)
+                  }}
+                  className="w-full h-2 bg-blue-200 dark:bg-blue-900 rounded-lg appearance-none cursor-pointer accent-[#0b99ff]"
+                />
+
+                {/* Score Bracket & Dynamic Calculation Card */}
+                <div className="p-3 rounded-lg bg-white dark:bg-[#131418] border border-blue-200/80 dark:border-blue-900/40 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Calculated Honorarium</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-xl font-extrabold ${scoringReviewerData.rigorScore >= 80 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600"}`}>
+                        €{calculateReviewerHonorarium(scoringReviewerData.rigorScore).toFixed(2)} EUR
+                      </span>
+                      {scoringReviewerData.rigorScore >= 80 && (
+                        <span className="text-[10px] text-slate-500 font-medium">(Capped at €50.00 EUR max)</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="text-right space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Rigor Status</span>
+                    {scoringReviewerData.rigorScore >= 95 ? (
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Exceptional (€50 Cap)</span>
+                    ) : scoringReviewerData.rigorScore >= 85 ? (
+                      <span className="text-xs font-bold text-[#0b99ff]">High Rigor (Approved)</span>
+                    ) : scoringReviewerData.rigorScore >= 80 ? (
+                      <span className="text-xs font-bold text-amber-600">Meets Baseline (€35)</span>
+                    ) : (
+                      <span className="text-xs font-bold text-rose-600">Ineligible (&lt;80% COPE)</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-slate-500 leading-relaxed">
+                  Formula: Base €35.00 at 80% score + scaled up to €50.00 EUR maximum cap for 100% score. Payouts are routed exclusively via <strong>Wise</strong>, <strong>PayPal</strong>, or <strong>Payoneer</strong>.
+                </div>
+              </div>
+
+              {/* Editor Comments for Reviewer */}
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300">
+                  Handling Editor Feedback Note to Reviewer
+                </label>
+                <textarea
+                  rows={2}
+                  value={scoringReviewerData.editorNotes}
+                  onChange={(e) => setScoringReviewerData(prev => prev ? { ...prev, editorNotes: e.target.value } : null)}
+                  placeholder="Optional constructive comments regarding report quality..."
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-[#272832]">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setScoringReviewerData(null)}
+              className="text-xs h-8.5 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={!scoringReviewerData || scoringReviewerData.rigorScore < 80}
+              onClick={() => {
+                if (!scoringReviewerData) return
+                const amount = calculateReviewerHonorarium(scoringReviewerData.rigorScore)
+                setApprovedHonoraria(prev => ({
+                  ...prev,
+                  [scoringReviewerData.reviewerKey]: {
+                    score: scoringReviewerData.rigorScore,
+                    amount: amount,
+                    paymentMethod: scoringReviewerData.paymentMethod,
+                    paymentAccount: scoringReviewerData.paymentAccount,
+                    approvedAt: new Date().toISOString().split("T")[0]
+                  }
+                }))
+                triggerToast(`✓ Quality score (${scoringReviewerData.rigorScore}%) approved: €${amount.toFixed(2)} EUR honorarium authorized via ${scoringReviewerData.paymentMethod} for ${scoringReviewerData.reviewerName}.`)
+                setScoringReviewerData(null)
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-8.5 px-4 rounded-xl shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              <Check className="h-3.5 w-3.5 mr-1.5" />
+              Approve & Authorize Honorarium (€{scoringReviewerData ? calculateReviewerHonorarium(scoringReviewerData.rigorScore).toFixed(2) : "0.00"} EUR)
             </Button>
           </DialogFooter>
         </DialogContent>

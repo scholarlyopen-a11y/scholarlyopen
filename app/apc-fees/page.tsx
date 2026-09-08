@@ -364,51 +364,56 @@ export default function APCFeesPage() {
             {/* Policies: Honoraria & Governance */}
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="p-6 rounded-xl bg-background border border-border">
-                <h3 className="text-base font-semibold">Editorial & Reviewer Honoraria Policy</h3>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <h3 className="text-base font-semibold">Reviewer & Editor Honoraria Policy</h3>
+                  <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full">
+                    €35 – €50 EUR (Capped at €50)
+                  </span>
+                </div>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                  Unlike traditional commercial publishers, Scholarly Open allocates a dedicated micro-share of the APC to peer reviewers and academic handling editors. To safeguard scientific integrity, honoraria are strictly quality-gated:
+                  Unlike traditional commercial publishers, Scholarly Open allocates a dedicated micro-share of the APC directly to peer reviewers and academic handling editors. To safeguard scientific integrity, honoraria are strictly quality-gated and performance-scaled:
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>COPE-Standard Evaluation:</strong> Must complete all 10 rubric criteria with substantive, constructive comments for authors.</span>
+                    <span><strong>Editor Rigor Scoring & Dynamic Calculation:</strong> The Handling Editor assigns an Editorial Rigor Score (0–100%). Reports scoring ≥ 80% dynamically receive <strong>€35 to €50 EUR</strong> (strictly capped at €50 EUR max). Reports scoring below 80% are ineligible until revised to COPE standards.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Timely Delivery:</strong> Completed within the agreed 14-day review turnaround period.</span>
+                    <span><strong>Exclusive Low-Fee Payment Rails:</strong> To protect global reviewers from prohibitive SWIFT bank wire fees (€15–€30), honoraria are disbursed exclusively via <strong>Wise</strong>, <strong>PayPal</strong>, or <strong>Payoneer</strong>. Traditional bank checks or wires are not used.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Quality Score:</strong> Receives an editor rigor rating of 85% or higher.</span>
+                    <span><strong>100% Publication Waiver Alternative:</strong> Reviewers can convert honoraria into 100% APC waiver credits for their own future submissions, with an enhanced 3× credit multiplier for scholars from low-income nations.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Waiver Option:</strong> Honorarium credits can be redeemed directly or converted into 100% publication waiver credits for future personal submissions.</span>
+                    <span><strong>Handling Editor Stipend:</strong> Handling Editors receive a dedicated honorarium of €40 – €60 EUR per completed decision cycle upon synthesizing referee scorecards and issuing reasoned decision letters.</span>
                   </li>
                 </ul>
               </div>
 
               <div className="p-6 rounded-xl bg-background border border-border">
-                <h3 className="text-base font-semibold">Workload Governance & Qualification</h3>
+                <h3 className="text-base font-semibold">Reviewer Qualification & English Gateway</h3>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                  Peer review quality depends on dedicated focus and fair opportunity distribution across the academic community:
+                  To ensure equitable global participation without compromising scientific and linguistic quality:
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Monthly Assignment Cap:</strong> Reviewers are limited to a maximum of <strong>2 active reviews per month</strong> to prevent fatigue and allow equal opportunities for peers in the same discipline.</span>
+                    <span><strong>English & Competency Assessment Gateway:</strong> Researchers from developing nations and independent applicants without an established international indexed record must pass a standardized <strong>15-minute online test</strong> evaluating academic English comprehension, constructive phrasing, and COPE ethics (passing threshold: ≥ 80%).</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Academic Fast-Track:</strong> Senior faculty and researchers with verified ORCID iDs or established institutional affiliations are automatically pre-qualified.</span>
+                    <span><strong>Supervised Onboarding:</strong> Certified reviewers complete their initial 1–2 reviews under the direct oversight of an experienced Handling Editor to calibrate feedback standards.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Optional COPE Certification:</strong> Early-career researchers can complete an optional 3-minute COPE Reviewer Certification module to earn verified credentials.</span>
+                    <span><strong>Monthly Workload Cap:</strong> Reviewers are capped at a maximum of <strong>2 active evaluations per month</strong> to prevent reviewer fatigue, maintain quality, and eliminate review-farming.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>COI Protection:</strong> Strict conflict-of-interest declarations are required prior to accessing full blinded manuscripts.</span>
+                    <span><strong>Career Advancement Pathway:</strong> Consistently top-rated reviewers (≥ 90% rigor rating over 3+ assignments) are actively invited to join journal Editorial Boards.</span>
                   </li>
                 </ul>
               </div>

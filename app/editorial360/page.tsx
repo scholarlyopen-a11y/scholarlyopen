@@ -783,6 +783,8 @@ export default function Editorial360Page() {
   const [invitationDepartment, setInvitationDepartment] = useState("")
   const [invitationOrcid, setInvitationOrcid] = useState("")
   const [invitationPassword, setInvitationPassword] = useState("")
+  const [invitationPaymentMethod, setInvitationPaymentMethod] = useState<"Wise" | "PayPal" | "Payoneer" | "Waiver">("Wise")
+  const [invitationPaymentAccount, setInvitationPaymentAccount] = useState("")
   const [invitationCoiChecked, setInvitationCoiChecked] = useState(false)
   const [invitationGovernanceChecked, setInvitationGovernanceChecked] = useState(true)
   const [invitationDeclineReason, setInvitationDeclineReason] = useState("time_constraint")
@@ -2605,6 +2607,8 @@ export default function Editorial360Page() {
       institution: invitationInstitution.trim(),
       department: invitationDepartment.trim(),
       orcid: invitationOrcid.trim(),
+      paymentMethod: invitationPaymentMethod,
+      paymentAccount: invitationPaymentAccount.trim(),
       role: "reviewer" as UserRole
     }
 
@@ -3238,14 +3242,87 @@ export default function Editorial360Page() {
                         </label>
                       </div>
 
-                      {/* Micro-Honorarium Notice Box */}
-                      <div className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/40 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed flex items-start gap-2.5">
-                        <Award className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong>{language === "de" ? "Qualitäts-Honorarium & Erlass-Gutschrift:" : "Quality-Gated Honorarium & Waiver Credit:"}</strong>{" "}
-                          {language === "de"
-                            ? "Gemäß der transparenten APC-Kostenallokation von Scholarly Open erhalten Gutachter bei Erreichen der COPE-Qualitätsstandards (Rigor-Score ≥ 85%) ein direktes Honorarium oder 100% Publikationserlass-Gutschriften in Ihrem Academic Wallet."
-                            : "In accordance with Scholarly Open's transparent APC cost allocation, peer evaluations meeting COPE standards (rigor score ≥ 85%) receive direct academic honoraria or 100% publication waiver credits in your Reviewer Wallet."}
+                      {/* Micro-Honorarium & Payment Configuration Box */}
+                      <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 space-y-3.5 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <div>
+                              <strong className="text-sm font-bold block text-slate-900 dark:text-white">
+                                {language === "de" ? "Qualitäts-Honorarium: €35 – €50 EUR (Gedeckelt auf €50)" : "Quality-Gated Honorarium: €35 – €50 EUR (Capped at €50)"}
+                              </strong>
+                              <span className="text-[11px] text-emerald-700 dark:text-emerald-300">
+                                {language === "de"
+                                  ? "Dynamisch berechnet nach Rigor-Score (80%–100%) durch den zuständigen Handling Editor."
+                                  : "Calculated dynamically from the Handling Editor's rigor score (80%–100%) upon completed review."}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-full">
+                            {language === "de" ? "COPE-Standard Gateway: Verifiziert (≥80%) ✓" : "COPE Standard Gateway: Verified (≥80%) ✓"}
+                          </span>
+                        </div>
+
+                        {/* Preferred Payout Method Selection (Exclusive Low-Fee Rails) */}
+                        <div className="pt-2 border-t border-emerald-200/60 dark:border-emerald-900/50 space-y-2.5">
+                          <label className="font-bold text-slate-900 dark:text-white text-xs block">
+                            {language === "de" ? "Bevorzugte Auszahlungsart (Nur Wise, PayPal oder Payoneer):" : "Designated Payout Rail (Exclusive: Wise, PayPal, or Payoneer):"} *
+                          </label>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {[
+                              { id: "Wise", label: "Wise (TransferWise)", sub: "Min. global fees" },
+                              { id: "PayPal", label: "PayPal", sub: "Global digital wallet" },
+                              { id: "Payoneer", label: "Payoneer", sub: "Direct balance" },
+                              { id: "Waiver", label: "100% APC Credit", sub: "3× Global South Multiplier" }
+                            ].map((method) => {
+                              const isSelected = invitationPaymentMethod === method.id
+                              return (
+                                <button
+                                  key={method.id}
+                                  type="button"
+                                  onClick={() => setInvitationPaymentMethod(method.id as any)}
+                                  className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                    isSelected
+                                      ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white shadow-2xs"
+                                      : "border-emerald-200/80 dark:border-emerald-900/40 bg-white/70 dark:bg-[#131418] hover:border-slate-300"
+                                  }`}
+                                >
+                                  <span className="font-bold text-xs block leading-tight truncate">{method.label}</span>
+                                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">{method.sub}</span>
+                                </button>
+                              )
+                            })}
+                          </div>
+
+                          {invitationPaymentMethod !== "Waiver" ? (
+                            <div className="space-y-1">
+                              <input
+                                type="text"
+                                value={invitationPaymentAccount}
+                                onChange={(e) => setInvitationPaymentAccount(e.target.value)}
+                                placeholder={
+                                  invitationPaymentMethod === "Wise"
+                                    ? "Wise account email or phone number (e.g. name@university.edu)"
+                                    : invitationPaymentMethod === "PayPal"
+                                    ? "PayPal registered email address"
+                                    : "Payoneer registered account ID or email"
+                                }
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                              />
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                                {language === "de"
+                                  ? "Internationale SWIFT-Banküberweisungen und Schecks sind ausgeschlossen, um Gutachter vor hohen Gebühren (€15–€30) zu schützen."
+                                  : "Direct SWIFT bank wires and paper checks are disallowed to protect international scholars from heavy fee deductions."}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="p-2.5 rounded-xl bg-sky-50/80 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40 text-[11px] text-sky-800 dark:text-sky-300">
+                              {language === "de"
+                                ? "Ihr verdientes Honorarium wird mit einem 3×-Gutschriften-Multiplikator in Ihr Reviewer Wallet übertragen (100% Publikationserlass für Ihre nächste Einreichung)."
+                                : "Your honorarium will be credited with a 3× voucher multiplier into your Academic Wallet (100% APC waiver for your next submission)."}
+                            </div>
+                          )}
                         </div>
                       </div>
 
