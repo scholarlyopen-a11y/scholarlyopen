@@ -298,6 +298,124 @@ export default function APCFeesPage() {
           </div>
         </section>
 
+        {/* Cost Allocation & Academic Compensation */}
+        <section className="py-16 lg:py-20 bg-muted/20 border-y border-border">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <div className="max-w-3xl mb-12">
+              <h2 className="text-3xl font-bold tracking-tight">Cost Allocation</h2>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                Scholarly Open adheres to complete financial transparency in line with Plan S and open science principles. Every Article Processing Charge is allocated across production, digital preservation, infrastructure, global author equity, and quality-gated academic honoraria.
+              </p>
+            </div>
+
+            {/* Allocation Breakdown Bar & Grid */}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5 mb-12">
+              <div className="p-5 rounded-xl bg-background border border-border flex flex-col justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-primary">35%</div>
+                  <h3 className="font-semibold text-sm mt-1">Production & Preservation</h3>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                    Full-text XML/JATS generation, CrossRef DOI registration, CrossMark metadata, Portico & PKP-PN archiving.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-xl bg-background border border-border flex flex-col justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-primary">25%</div>
+                  <h3 className="font-semibold text-sm mt-1">Platform & Infrastructure</h3>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                    Editorial360 double-blind portal maintenance, similarity forensics, automated image checks, and cloud hosting.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-xl bg-background border border-border flex flex-col justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-primary">24%</div>
+                  <h3 className="font-semibold text-sm mt-1">Global Equity & Waivers</h3>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                    Subsidizing 100% full fee waivers for scholars from low-income countries and discretionary hardship grants.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-xl bg-background border border-border flex flex-col justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-primary">10%</div>
+                  <h3 className="font-semibold text-sm mt-1">Governance & Ethics</h3>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                    COPE compliance oversight, research integrity investigations, and editorial board operations.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-xl bg-primary/5 border border-primary/20 flex flex-col justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-primary">6%</div>
+                  <h3 className="font-semibold text-sm mt-1 text-primary">Reviewer & Editor Honoraria</h3>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                    Quality-gated micro-honorarium fund directly recognizing the intellectual contributions of peer reviewers and handling editors.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Policies: Honoraria & Governance */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="p-6 rounded-xl bg-background border border-border">
+                <h3 className="text-base font-semibold">Editorial & Reviewer Honoraria Policy</h3>
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                  Unlike traditional commercial publishers, Scholarly Open allocates a dedicated micro-share of the APC to peer reviewers and academic handling editors. To safeguard scientific integrity, honoraria are strictly quality-gated:
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>COPE-Standard Evaluation:</strong> Must complete all 10 rubric criteria with substantive, constructive comments for authors.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>Timely Delivery:</strong> Completed within the agreed 14-day review turnaround period.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>Quality Score:</strong> Receives an editor rigor rating of 85% or higher.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>Waiver Option:</strong> Honorarium credits can be redeemed directly or converted into 100% publication waiver credits for future personal submissions.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-6 rounded-xl bg-background border border-border">
+                <h3 className="text-base font-semibold">Workload Governance & Qualification</h3>
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                  Peer review quality depends on dedicated focus and fair opportunity distribution across the academic community:
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>Monthly Assignment Cap:</strong> Reviewers are limited to a maximum of <strong>2 active reviews per month</strong> to prevent fatigue and allow equal opportunities for peers in the same discipline.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>Academic Fast-Track:</strong> Senior faculty and researchers with verified ORCID iDs or established institutional affiliations are automatically pre-qualified.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>Optional COPE Certification:</strong> Early-career researchers can complete an optional 3-minute COPE Reviewer Certification module to earn verified credentials.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong>COI Protection:</strong> Strict conflict-of-interest declarations are required prior to accessing full blinded manuscripts.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* APC Rates */}
         <section className="py-16 lg:py-24 bg-muted/30">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">

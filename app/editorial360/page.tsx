@@ -774,6 +774,30 @@ export default function Editorial360Page() {
   const [regPassword, setRegPassword] = useState("")
   const [regRole, setRegRole] = useState<"author" | "reviewer">("author")
 
+  // Review Invitation Accept / Decline Link Handler & Onboarding
+  const [invitationAction, setInvitationAction] = useState<"accept" | "decline" | null>(null)
+  const [invitationPaperId, setInvitationPaperId] = useState<string | null>(null)
+  const [invitationReviewerName, setInvitationReviewerName] = useState("")
+  const [invitationReviewerEmail, setInvitationReviewerEmail] = useState("")
+  const [invitationInstitution, setInvitationInstitution] = useState("")
+  const [invitationDepartment, setInvitationDepartment] = useState("")
+  const [invitationOrcid, setInvitationOrcid] = useState("")
+  const [invitationPassword, setInvitationPassword] = useState("")
+  const [invitationCoiChecked, setInvitationCoiChecked] = useState(false)
+  const [invitationGovernanceChecked, setInvitationGovernanceChecked] = useState(true)
+  const [invitationDeclineReason, setInvitationDeclineReason] = useState("time_constraint")
+  const [invitationDeclineReferral, setInvitationDeclineReferral] = useState("")
+  const [invitationSubmitted, setInvitationSubmitted] = useState(false)
+  const [invitationFormError, setInvitationFormError] = useState("")
+  const [invitationAbstractExpanded, setInvitationAbstractExpanded] = useState(false)
+  const [reviewerProfile, setReviewerProfile] = useState<{
+    name: string
+    email: string
+    institution: string
+    department?: string
+    orcid?: string
+  } | null>(null)
+
   // Theme states
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -784,6 +808,23 @@ export default function Editorial360Page() {
       const params = new URLSearchParams(window.location.search)
       const urlRole = params.get("role") as UserRole
       const urlMode = params.get("mode") as "login" | "register"
+      const urlAction = params.get("action")
+      const urlId = params.get("id")
+      const urlEmail = params.get("email") || ""
+      const urlName = params.get("name") || ""
+
+      if (urlAction && (urlAction === "accept" || urlAction === "decline")) {
+        setInvitationAction(urlAction as "accept" | "decline")
+        setInvitationPaperId(urlId)
+        if (urlEmail) {
+          setInvitationReviewerEmail(urlEmail)
+          setEmail(urlEmail)
+        }
+        if (urlName) {
+          setInvitationReviewerName(urlName)
+        }
+      }
+
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
         setRole(urlRole)
         setRegRole(urlRole === "reviewer" ? "reviewer" : "author")
@@ -2513,6 +2554,101 @@ export default function Editorial360Page() {
     }
   }
 
+  const handleConfirmReviewerAcceptance = () => {
+    if (!invitationReviewerName.trim()) {
+      setInvitationFormError(language === "de" ? "Bitte geben Sie Ihren vollständigen Namen an." : "Please enter your full name.")
+      return
+    }
+    if (!invitationReviewerEmail.trim() || !invitationReviewerEmail.includes("@")) {
+      setInvitationFormError(language === "de" ? "Bitte geben Sie eine gültige E-Mail-Adresse an." : "Please enter a valid email address.")
+      return
+    }
+    if (!invitationInstitution.trim()) {
+      setInvitationFormError(language === "de" ? "Bitte geben Sie Ihre Institution / Universität an." : "Please provide your institutional affiliation.")
+      return
+    }
+    if (!invitationPassword.trim() || invitationPassword.length < 6) {
+      setInvitationFormError(language === "de" ? "Das Passwort muss mindestens 6 Zeichen lang sein." : "Password must be at least 6 characters.")
+      return
+    }
+    if (!invitationCoiChecked) {
+      setInvitationFormError(language === "de" ? "Bitte bestätigen Sie die Erklärung zum Interessenkonflikt." : "Please confirm the Conflict of Interest (COI) declaration.")
+      return
+    }
+
+    // 14-day turnaround deadline
+    const deadlineDate = new Date()
+    deadlineDate.setDate(deadlineDate.getDate() + 14)
+    const deadlineStr = deadlineDate.toISOString().split("T")[0]
+
+    // Create / add to active reviews
+    const targetPaper = manuscripts.find(m => m.id === invitationPaperId)
+    const paperTitle = targetPaper?.title || "Advances in Type 1 Diabetes Ocular Remote Tele-Health Screening"
+    const paperJournal = targetPaper?.journal || "Scholarly Open: Medicine"
+
+    const newReview: ActiveReview = {
+      id: invitationPaperId || `REV-${Date.now().toString().slice(-4)}`,
+      title: paperTitle,
+      journal: paperJournal,
+      deadline: deadlineStr,
+      status: "In Progress"
+    }
+
+    setActiveReviews(prev => {
+      const exists = prev.some(r => r.id === newReview.id || r.title === newReview.title)
+      return exists ? prev : [newReview, ...prev]
+    })
+
+    const reviewerData = {
+      name: invitationReviewerName.trim(),
+      email: invitationReviewerEmail.trim().toLowerCase(),
+      institution: invitationInstitution.trim(),
+      department: invitationDepartment.trim(),
+      orcid: invitationOrcid.trim(),
+      role: "reviewer" as UserRole
+    }
+
+    setReviewerProfile(reviewerData)
+    setRole("reviewer")
+    setEmail(reviewerData.email)
+    setIsLoggedIn(true)
+    setInvitationAction(null)
+    setInvitationFormError("")
+    setActiveReviewerTab("overview")
+
+    try {
+      sessionStorage.setItem("editorial360_session", JSON.stringify({
+        isLoggedIn: true,
+        role: "reviewer",
+        email: reviewerData.email,
+        name: reviewerData.name,
+        timestamp: Date.now()
+      }))
+      localStorage.setItem(`so_reviewer_profile_${reviewerData.email}`, JSON.stringify(reviewerData))
+      localStorage.setItem(`so_reviewer_onboarded_${reviewerData.email}`, "true")
+    } catch (e) {
+      console.warn("Could not persist reviewer session", e)
+    }
+
+    setSuccess(language === "de"
+      ? `Willkommen, ${reviewerData.name}! Begutachtung für ${newReview.id} angenommen. Abgabefrist: ${deadlineStr}.`
+      : `Welcome, ${reviewerData.name}! Review accepted for ${newReview.id}. Turnaround deadline: ${deadlineStr}.`
+    )
+  }
+
+  const handleConfirmReviewerDecline = () => {
+    setInvitationSubmitted(true)
+    const newLog: ArchiveLog = {
+      id: `LOG-${Date.now()}`,
+      paperId: invitationPaperId || "N/A",
+      actor: invitationReviewerEmail || invitationReviewerName || "External Reviewer",
+      action: "Review Invitation Declined",
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      details: `Reason: ${invitationDeclineReason}. Referral: ${invitationDeclineReferral || "None"}.`
+    }
+    setArchiveLogs(prev => [newLog, ...prev])
+  }
+
   const handleInviteCoReviewer = (e: React.FormEvent) => {
     e.preventDefault()
     if (!coRevName || !coRevEmail || !coRevAffiliation) return
@@ -2863,77 +2999,382 @@ export default function Editorial360Page() {
     })
   }
 
+  const invitedManuscript = manuscripts.find(m => m.id === invitationPaperId) || {
+    id: invitationPaperId || "SOMED-26-RW108",
+    title: "Advances in Type 1 Diabetes Ocular Remote Tele-Health Screening",
+    journal: "Scholarly Open: Medicine",
+    abstract: "This study investigates the deployment of automated confocal microscopy combined with neural-network-assisted retinal segmentation for early diagnosis of diabetic retinopathy within distributed primary healthcare centers.",
+    date: "2026-08-23"
+  }
+
   return (
     <div className={`flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all font-sans ${isLoggedIn ? "h-screen overflow-hidden" : "min-h-screen"}`}>
       
       {!isLoggedIn ? (
-        // ==========================================
-        // 1. SIGN IN & REGISTRATION VIEW
-        // ==========================================
-        <>
-          <Header />
-          <main className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0b99ff]/5 via-transparent to-transparent">
-            <div className="w-full max-w-md space-y-8 animate-in fade-in duration-300">
-              
-              {/* Login Container Header */}
-              <div className="flex flex-col items-center text-center">
-                {/* Light Font EN | DE Language Switcher Above Login */}
-                <div className="flex items-center justify-center gap-1.5 text-xs font-light text-slate-400 select-none mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setLanguage("en")}
-                    className={`transition-colors cursor-pointer ${
-                      language === "en"
-                        ? "font-semibold text-[#0b99ff]"
-                        : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
-                    }`}
-                  >
-                    EN
-                  </button>
-                  <span className="text-slate-300 dark:text-slate-700 font-light">|</span>
-                  <button
-                    type="button"
-                    onClick={() => setLanguage("de")}
-                    className={`transition-colors cursor-pointer ${
-                      language === "de"
-                        ? "font-semibold text-[#0b99ff]"
-                        : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
-                    }`}
-                  >
-                    DE
-                  </button>
+        invitationAction ? (
+          // ==========================================
+          // 0. REVIEW INVITATION ACCEPT / DECLINE VIEW
+          // ==========================================
+          <>
+            <Header />
+            <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0b99ff]/5 via-transparent to-transparent">
+              <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
+                {/* Language Switcher & Badge */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <img src="/editorial360.svg" alt="Editorial360" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20 uppercase tracking-wider">
+                      {language === "de" ? "Doppelblindes Peer Review" : "Double-Blind Peer Review"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-light text-slate-400 select-none">
+                    <button
+                      type="button"
+                      onClick={() => setLanguage("en")}
+                      className={`transition-colors cursor-pointer ${language === "en" ? "font-semibold text-[#0b99ff]" : "hover:text-slate-700 dark:hover:text-slate-200"}`}
+                    >
+                      EN
+                    </button>
+                    <span>|</span>
+                    <button
+                      type="button"
+                      onClick={() => setLanguage("de")}
+                      className={`transition-colors cursor-pointer ${language === "de" ? "font-semibold text-[#0b99ff]" : "hover:text-slate-700 dark:hover:text-slate-200"}`}
+                    >
+                      DE
+                    </button>
+                  </div>
                 </div>
 
-                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">
-                  {mode === "login" 
-                    ? (language === "de" ? "Anmelden" : "Login") 
-                    : (language === "de" ? "Konto erstellen" : "Create account")}
-                </h1>
+                {/* Main Invitation Card */}
+                <div className="bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                  
+                  {/* Manuscript Overview Box */}
+                  <div className="p-5 rounded-2xl bg-slate-50 dark:bg-[#131418] border border-slate-200/70 dark:border-[#272832] space-y-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="text-xs font-mono font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-1 rounded-md">
+                        {invitedManuscript.id}
+                      </span>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        {invitedManuscript.journal}
+                      </span>
+                    </div>
 
-                <div className="flex h-10 w-auto items-center justify-center my-2 hover:scale-105 transition-all">
-                  <img 
-                    src="/editorial360.svg" 
-                    alt="Editorial360" 
-                    className="h-full w-auto object-contain" 
-                  />
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
+                      {invitedManuscript.title}
+                    </h2>
+
+                    {/* Metadata Pills */}
+                    <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-600 dark:text-slate-300">
+                      <span className="inline-flex items-center gap-1 bg-white dark:bg-[#1c1d24] px-2.5 py-1 rounded-md border border-slate-200 dark:border-[#272832]">
+                        <Clock className="w-3.5 h-3.5 text-amber-500" />
+                        {language === "de" ? "14 Tage Bearbeitungszeit" : "14-Day Turnaround"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 bg-white dark:bg-[#1c1d24] px-2.5 py-1 rounded-md border border-slate-200 dark:border-[#272832]">
+                        <Award className="w-3.5 h-3.5 text-emerald-500" />
+                        {language === "de" ? "Qualitäts-Honorarium berechtigt" : "Quality-Gated Honorarium Eligible"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 bg-white dark:bg-[#1c1d24] px-2.5 py-1 rounded-md border border-slate-200 dark:border-[#272832]">
+                        <Users className="w-3.5 h-3.5 text-[#0b99ff]" />
+                        {language === "de" ? "Max. 2 Gutachten/Monat Limit" : "Max 2 Reviews/Month Cap"}
+                      </span>
+                    </div>
+
+                    {/* Abstract Collapsible */}
+                    {invitedManuscript.abstract && (
+                      <div className="pt-2 border-t border-slate-200/60 dark:border-[#272832]">
+                        <button
+                          type="button"
+                          onClick={() => setInvitationAbstractExpanded(!invitationAbstractExpanded)}
+                          className="text-xs font-semibold text-[#0b99ff] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          {invitationAbstractExpanded 
+                            ? (language === "de" ? "Abstract ausblenden" : "Hide Abstract") 
+                            : (language === "de" ? "Abstract anzeigen" : "View Abstract")}
+                          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${invitationAbstractExpanded ? "rotate-180" : ""}`} />
+                        </button>
+                        {invitationAbstractExpanded && (
+                          <p className="mt-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-white dark:bg-[#18191e] p-3 rounded-lg border border-slate-200/50 dark:border-[#272832]">
+                            {invitedManuscript.abstract}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {invitationAction === "accept" ? (
+                    /* Acceptance Form */
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                          {language === "de" ? "Gutachterprofil bestätigen & Begutachtung annehmen" : "Confirm Reviewer Profile & Accept Assignment"}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                          {language === "de" 
+                            ? "Bestätigen Sie Ihre institutionelle Zugehörigkeit und vergeben Sie ein Passwort für den direkten Zugang zum Manuskript und Ihrem Gutachter-Wallet."
+                            : "Verify your academic affiliation and set a password for permanent direct access to the blinded manuscript and your Reviewer Wallet."}
+                        </p>
+                      </div>
+
+                      {invitationFormError && (
+                        <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span>{invitationFormError}</span>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "Vollständiger Name" : "Full Name"} *
+                          </label>
+                          <input
+                            type="text"
+                            value={invitationReviewerName}
+                            onChange={e => setInvitationReviewerName(e.target.value)}
+                            placeholder="e.g. Dr. Jane Smith"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "E-Mail-Adresse" : "Email Address"} *
+                          </label>
+                          <input
+                            type="email"
+                            value={invitationReviewerEmail}
+                            onChange={e => setInvitationReviewerEmail(e.target.value)}
+                            placeholder="reviewer@university.edu"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "Institution / Universität" : "Institution / University"} *
+                          </label>
+                          <input
+                            type="text"
+                            value={invitationInstitution}
+                            onChange={e => setInvitationInstitution(e.target.value)}
+                            placeholder="e.g. Charité Berlin / Oxford University"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "Fachbereich / Institut" : "Department / Institute"}
+                          </label>
+                          <input
+                            type="text"
+                            value={invitationDepartment}
+                            onChange={e => setInvitationDepartment(e.target.value)}
+                            placeholder="e.g. Dept. of Clinical Medicine"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <span className="h-3.5 w-3.5 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[8px] tracking-tighter shrink-0">
+                              iD
+                            </span>
+                            <span>ORCID iD</span>
+                            <span className="text-[10px] text-slate-400 font-normal">({language === "de" ? "Empfohlen für Zertifikat" : "Recommended for Certificate"})</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={invitationOrcid}
+                            onChange={e => setInvitationOrcid(e.target.value)}
+                            placeholder="0000-0002-1825-0097"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "Passwort für Gutachter-Konto" : "Reviewer Account Password"} *
+                          </label>
+                          <input
+                            type="password"
+                            value={invitationPassword}
+                            onChange={e => setInvitationPassword(e.target.value)}
+                            placeholder="Min. 6 characters"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Ethics & Governance Checkboxes */}
+                      <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-[#272832]">
+                        <label className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={invitationCoiChecked}
+                            onChange={e => setInvitationCoiChecked(e.target.checked)}
+                            className="mt-1 h-4 w-4 rounded text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 cursor-pointer"
+                          />
+                          <span>
+                            {language === "de" 
+                              ? "Ich erkläre, dass kein Interessenkonflikt (COI) mit den Autoren oder der Forschungsarbeit vorliegt." 
+                              : "I declare no Conflict of Interest (COI) with the authors or the work presented in this manuscript."} *
+                          </span>
+                        </label>
+
+                        <label className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={invitationGovernanceChecked}
+                            onChange={e => setInvitationGovernanceChecked(e.target.checked)}
+                            className="mt-1 h-4 w-4 rounded text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 cursor-pointer"
+                          />
+                          <span>
+                            {language === "de"
+                              ? "Ich stimme zu, die Begutachtung innerhalb von 14 Tagen nach COPE-Standards zu erstellen, und nehme das monatliche Limit von max. 2 Gutachten zur Kenntnis."
+                              : "I agree to deliver an objective evaluation within 14 calendar days adhering to COPE guidelines, and acknowledge the 2-assignment monthly cap."}
+                          </span>
+                        </label>
+                      </div>
+
+                      {/* Micro-Honorarium Notice Box */}
+                      <div className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/40 text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed flex items-start gap-2.5">
+                        <Award className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>{language === "de" ? "Qualitäts-Honorarium & Erlass-Gutschrift:" : "Quality-Gated Honorarium & Waiver Credit:"}</strong>{" "}
+                          {language === "de"
+                            ? "Gemäß der transparenten APC-Kostenallokation von Scholarly Open erhalten Gutachter bei Erreichen der COPE-Qualitätsstandards (Rigor-Score ≥ 85%) ein direktes Honorarium oder 100% Publikationserlass-Gutschriften in Ihrem Academic Wallet."
+                            : "In accordance with Scholarly Open's transparent APC cost allocation, peer evaluations meeting COPE standards (rigor score ≥ 85%) receive direct academic honoraria or 100% publication waiver credits in your Reviewer Wallet."}
+                        </div>
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                        <Button
+                          type="button"
+                          onClick={handleConfirmReviewerAcceptance}
+                          className="w-full sm:w-auto px-8 py-6 rounded-2xl bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-sm sm:text-base shadow-sm hover:shadow-md transition-all cursor-pointer"
+                        >
+                          {language === "de" ? "Begutachtung annehmen & Arbeitsbereich öffnen" : "Accept Assignment & Enter Workspace"}
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setInvitationAction("decline")
+                            setInvitationFormError("")
+                          }}
+                          className="text-xs sm:text-sm text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 font-medium transition-colors cursor-pointer"
+                        >
+                          {language === "de" ? "Anfrage ablehnen" : "Unable to review? Decline invitation"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Decline Form or Confirmation */
+                    invitationSubmitted ? (
+                      <div className="py-8 text-center space-y-4">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-[#272832] text-slate-600 dark:text-slate-300 flex items-center justify-center mx-auto">
+                          <Check className="w-8 h-8 text-emerald-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                          {language === "de" ? "Vielen Dank für Ihre Rückmeldung" : "Thank You for Notifying Us"}
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                          {language === "de" 
+                            ? "Die Redaktion wurde darüber informiert, dass Sie diesen Artikel derzeit nicht begutachten können. Wir schätzen Ihre zeitnahe Mitteilung."
+                            : "The handling editor has been informed that you cannot review manuscript at this time. We appreciate your prompt response so another specialist can be invited."}
+                        </p>
+                        <div className="pt-4">
+                          <Button asChild variant="outline" className="rounded-xl">
+                            <Link href="/">
+                              {language === "de" ? "Zurück zu Scholarly Open" : "Return to Scholarly Open"}
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                            {language === "de" ? "Begutachtungsanfrage ablehnen" : "Decline Review Invitation"}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                            {language === "de" 
+                              ? "Bitte teilen Sie uns kurz den Grund mit, damit wir unsere Zuweisungen optimieren können."
+                              : "Please let us know why you are unable to review this manuscript so we can reassign promptly."}
+                          </p>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              {language === "de" ? "Grund für die Absage" : "Reason for Declining"}
+                            </label>
+                            <select
+                              value={invitationDeclineReason}
+                              onChange={e => setInvitationDeclineReason(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            >
+                              <option value="time_constraint">{language === "de" ? "Zeitliche Engpässe / Voller Terminkalender" : "Time constraints / Busy schedule"}</option>
+                              <option value="conflict_of_interest">{language === "de" ? "Interessenkonflikt (COI)" : "Conflict of interest (COI)"}</option>
+                              <option value="outside_expertise">{language === "de" ? "Außerhalb meines Fachbereichs" : "Outside my specific scientific expertise"}</option>
+                              <option value="sabbatical">{language === "de" ? "Forschungsfreisemester / Urlaub" : "Currently on leave / sabbatical"}</option>
+                              <option value="other">{language === "de" ? "Sonstiger Grund" : "Other reason"}</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              {language === "de" ? "Kollegin / Kollegen empfehlen (Optional)" : "Suggest an Alternate Reviewer (Optional)"}
+                            </label>
+                            <input
+                              type="text"
+                              value={invitationDeclineReferral}
+                              onChange={e => setInvitationDeclineReferral(e.target.value)}
+                              placeholder="Name, Email, or Institution of a suggested peer"
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4 pt-2">
+                          <Button
+                            type="button"
+                            onClick={handleConfirmReviewerDecline}
+                            variant="destructive"
+                            className="rounded-xl px-6 py-2.5 cursor-pointer"
+                          >
+                            {language === "de" ? "Absage bestätigen" : "Submit Decline"}
+                          </Button>
+
+                          <button
+                            type="button"
+                            onClick={() => setInvitationAction("accept")}
+                            className="text-xs sm:text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium transition-colors cursor-pointer"
+                          >
+                            {language === "de" ? "Zurück zur Annahme" : "Back to Acceptance"}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  )}
+
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
-                  {language === "de" ? "Oder " : "Or "}
-                  <button
-                    type="button"
-                    onClick={() => toggleMode(mode === "login" ? "register" : "login")}
-                    className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
-                  >
-                    {mode === "login" 
-                      ? (language === "de" ? "Neues Konto erstellen" : "Create account") 
-                      : (language === "de" ? "Mit bestehendem Konto anmelden" : "Sign in to existing account")}
-                  </button>
-                </p>
               </div>
-
-              {/* Login/Registration Card container */}
-              <Card className="border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden relative transition-all">
-                <div className="h-1.5 w-full bg-[#0b99ff]" />
+            </main>
+            <Footer />
+          </>
+        ) : (
+          // ==========================================
+          // 1. SIGN IN & REGISTRATION VIEW
+          // ==========================================
+          <>
+            <Header />
+            <main className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0b99ff]/5 via-transparent to-transparent">
+              <div className="w-full max-w-md space-y-8 animate-in fade-in duration-300">
                 
                 {mode === "login" ? (
                   // ================= LOGIN FORM =================
@@ -3298,6 +3739,7 @@ export default function Editorial360Page() {
           </main>
           <Footer />
         </>
+        )
       ) : (
         // ==========================================
         // 2. DASHBOARD WORKSPACE MAIN VIEW
@@ -4322,10 +4764,10 @@ export default function Editorial360Page() {
                   <ReviewerWorkspace
                     language={language}
                     user={{
-                      name: regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || "Dr. Marcus Vance")),
-                      email: email || regEmail || "m.vance@university-charite.de",
-                      orcid: regOrcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : ""),
-                      institution: "Charité – Universitätsmedizin Berlin"
+                      name: reviewerProfile?.name || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || "Dr. Marcus Vance")),
+                      email: reviewerProfile?.email || email || regEmail || "m.vance@university-charite.de",
+                      orcid: reviewerProfile?.orcid || regOrcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : ""),
+                      institution: reviewerProfile?.institution || "Charité – Universitätsmedizin Berlin"
                     }}
                     reviewInvitations={reviewInvitations}
                     activeReviews={activeReviews}

@@ -42,8 +42,8 @@ export async function POST(req: Request) {
         paperTitle,
         journal,
         portalUrl: `${baseUrl}/editorial360`,
-        acceptUrl: `${baseUrl}/editorial360?action=accept&id=${paperId}`,
-        declineUrl: `${baseUrl}/editorial360?action=decline&id=${paperId}`,
+        acceptUrl: `${baseUrl}/editorial360?action=accept&id=${paperId}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
+        declineUrl: `${baseUrl}/editorial360?action=decline&id=${paperId}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
         editorName: "Editorial Office",
         customMessage: body.customMessage || "",
         dueDate: "within 14 calendar days"
@@ -65,13 +65,16 @@ export async function POST(req: Request) {
       }
 
       const actionLabel = body.actionLabel || (templateDef?.actionLabel || "Access Editorial360 Portal")
-      const rawActionUrl = body.actionUrl || (templateDef?.actionUrlPlaceholder ? interpolateTokens(templateDef.actionUrlPlaceholder, tokens) : `${baseUrl}/editorial360`)
+      let rawActionUrl = body.actionUrl || (templateDef?.actionUrlPlaceholder ? interpolateTokens(templateDef.actionUrlPlaceholder, tokens) : `${baseUrl}/editorial360`)
+      if (rawActionUrl.includes("action=accept") && !rawActionUrl.includes("email=")) {
+        rawActionUrl += `&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`
+      }
 
       let secondaryActionLabel: string | undefined
       let secondaryActionUrl: string | undefined
       if (body.template === "invitation") {
         secondaryActionLabel = "Decline"
-        secondaryActionUrl = `${baseUrl}/editorial360?action=decline&id=${paperId}`
+        secondaryActionUrl = `${baseUrl}/editorial360?action=decline&id=${paperId}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`
       }
 
       finalHtml = generateBrandedEmailHtml({
