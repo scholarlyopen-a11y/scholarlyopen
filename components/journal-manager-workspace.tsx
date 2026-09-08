@@ -55,6 +55,7 @@ import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
+import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 
 export interface JmManuscript {
   id: string
@@ -392,7 +393,7 @@ export function JournalManagerWorkspace({
     setDispatchDialogConfig({
       ...config,
       isOpen: true,
-      onCancel: () => setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+      onCancel: () => setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
     })
   }
 
@@ -603,7 +604,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       actionUrl: "https://www.scholarlyopen.org/editorial360",
       defaultSubject: `Technical Pre-Check Query: Action Required for ${msId}`,
       defaultBody: `Dear ${authorName},\n\nThank you for submitting manuscript ${msId} (${msTitle}) to ${selectedManuscript.journal}.\n\nDuring the initial technical pre-check by our editorial office, the following item(s) require your attention before the paper can proceed to editorial triage:\n\n${message}\n\nPlease log into the Editorial360 portal to upload the corrected files.`,
-      onConfirmSend: async (data) => {
+      onConfirmSend: async (data: any) => {
         setIsQueryAuthorOpen(false)
         setIsPreQualityModalOpen(false)
         setQueryAuthorMessage("")
@@ -626,7 +627,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           })
         }).catch(e => console.error(e))
 
-        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+        setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
       }
     })
   }
@@ -710,7 +711,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       actionUrl: "https://www.scholarlyopen.org/editorial360",
       defaultSubject: `Reminder: Double-Blind Review Pending for ${trackingManuscript.id}`,
       defaultBody: `Dear ${revName},\n\nThis is a friendly reminder regarding your double-blind peer review for manuscript ${trackingManuscript.id} (${trackingManuscript.title}) submitted to ${trackingManuscript.journal}.\n\nWe kindly request that you complete your scorecard report or let us know if you require a deadline extension.\n\nThank you for supporting rigorous peer review.`,
-      onConfirmSend: async (data) => {
+      onConfirmSend: async (data: any) => {
         setNudgedReviewers(prev => ({ ...prev, [revName]: true }))
         await fetch("/api/editorial360/email", {
           method: "POST",
@@ -725,7 +726,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             recipientName: revName
           })
         }).catch(e => console.error(e))
-        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+        setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
       }
     })
   }
@@ -756,7 +757,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       actionUrl: "https://www.scholarlyopen.org/editorial360",
       defaultSubject: `Reminder: Revision & Rebuttal Due for ${ms.id}`,
       defaultBody: `Dear ${authorName},\n\nThis is a friendly reminder that the revision and rebuttal for your manuscript ${ms.id} (${ms.title}) submitted to ${ms.journal} are currently pending.\n\nPlease upload your revised manuscript, tracked-changes version, and point-by-point rebuttal letter through the Author Portal.\n\nIf you require an extension to complete additional data analysis, please reply to this notice.`,
-      onConfirmSend: async (data) => {
+      onConfirmSend: async (data: any) => {
         setAuthorNudged(prev => ({ ...prev, [ms.id]: true }))
         await fetch("/api/editorial360/email", {
           method: "POST",
@@ -774,7 +775,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
         setEditorPromptSuccess(`✓ Revision reminder email dispatched to ${authorName}.`)
         setTimeout(() => setEditorPromptSuccess(null), 6000)
-        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+        setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
       }
     })
   }
@@ -4032,6 +4033,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Review & Edit Email Dispatch Dialog */}
+      <EmailDispatchDialog language={language} config={dispatchDialogConfig} />
 
     </div>
   )
