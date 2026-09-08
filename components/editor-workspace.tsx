@@ -323,6 +323,21 @@ export function EditorWorkspace({
 }: EditorWorkspaceProps) {
   const isDe = language === "de"
 
+  const [internalTab, setInternalTab] = useState<string>(activeTab || "desk")
+
+  useEffect(() => {
+    if (activeTab) {
+      setInternalTab(activeTab)
+    }
+  }, [activeTab])
+
+  const currentTab = internalTab || activeTab || "desk"
+
+  const handleTabSwitch = (newTab: string) => {
+    setInternalTab(newTab)
+    onTabChange?.(newTab)
+  }
+
   const [manuscripts, setManuscripts] = useState<JmManuscript[]>(initialManuscripts)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedJournal, setSelectedJournal] = useState("all")
@@ -904,9 +919,90 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       </div>
 
       {/* ========================================================================= */}
+      {/* 2. RESPONSIVE SUB-NAVIGATION TAB STRIP                                    */}
+      {/* ========================================================================= */}
+      <div className="flex items-center gap-2 border-b border-slate-200/90 dark:border-[#272832] pb-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <button
+          type="button"
+          onClick={() => handleTabSwitch("desk")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+            currentTab === "desk" || currentTab === "overview"
+              ? "bg-[#0b99ff] text-white shadow-xs"
+              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+          }`}
+        >
+          <LayoutDashboard className="h-3.5 w-3.5" />
+          <span>{isDe ? "Zugewiesene Manuskripte" : "Assigned Manuscripts"}</span>
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${currentTab === "desk" || currentTab === "overview" ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}`}>
+            {manuscripts.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSwitch("tracker")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+            currentTab === "tracker"
+              ? "bg-[#0b99ff] text-white shadow-xs"
+              : "bg-white dark:bg-[#18191e] border border-sky-300 dark:border-sky-800 text-[#0b99ff] dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/30"
+          }`}
+        >
+          <Clock className="h-3.5 w-3.5" />
+          <span>{isDe ? "Gutachten-Tracking" : "Review Tracker"}</span>
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${currentTab === "tracker" ? "bg-white/20 text-white" : "bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200"}`}>
+            {manuscripts.filter(m => m.status === "Under Review").length} Live
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSwitch("integrity")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+            currentTab === "integrity"
+              ? "bg-[#0b99ff] text-white shadow-xs"
+              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+          }`}
+        >
+          <ShieldCheck className="h-3.5 w-3.5" />
+          <span>{isDe ? "Forschungsintegrität" : "Research Integrity"}</span>
+          {integrityCount > 0 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 font-bold">
+              {integrityCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSwitch("collections")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+            currentTab === "collections"
+              ? "bg-[#0b99ff] text-white shadow-xs"
+              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+          }`}
+        >
+          <Layers className="h-3.5 w-3.5" />
+          <span>{isDe ? "Sonderausgaben" : "Special Issues"}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSwitch("analytics")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+            currentTab === "analytics"
+              ? "bg-[#0b99ff] text-white shadow-xs"
+              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+          }`}
+        >
+          <Award className="h-3.5 w-3.5" />
+          <span>{isDe ? "Journal-Kennzahlen" : "Journal Metrics"}</span>
+        </button>
+      </div>
+
+      {/* ========================================================================= */}
       {/* TAB 1: EDITORIAL DESK & PIPELINE                                          */}
       {/* ========================================================================= */}
-      {(activeTab === "desk" || activeTab === "overview") && (
+      {(currentTab === "desk" || currentTab === "overview") && (
         <div className="space-y-4">
           
           {/* Clean JM-Style Search, Subject Selector & Small Filter Tabs */}
@@ -1230,7 +1326,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* TAB 2: LIVE REVIEW TRACKER (MATCHING JM DESK & COPE WORKFLOW)             */}
       {/* ========================================================================= */}
-      {activeTab === "tracker" && (
+      {currentTab === "tracker" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl overflow-hidden shadow-xs">
           <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#272832] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50 dark:bg-[#131418]/60">
             <div>
@@ -1473,7 +1569,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* TAB 3: DECISION CENTRAL                                                   */}
       {/* ========================================================================= */}
-      {activeTab === "decision" && (
+      {currentTab === "decision" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl overflow-hidden shadow-xs">
           <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#272832]">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -1517,7 +1613,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* TAB 4: EDITORIAL IMPACT & PERFORMANCE METRICS (FROM USER DASHBOARD DESIGN) */}
       {/* ========================================================================= */}
-      {activeTab === "analytics" && (
+      {currentTab === "analytics" && (
         <div className="space-y-5">
           {/* Main 4 Metric Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs">
@@ -1603,7 +1699,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* TAB 0: NOTIFICATIONS & ACTIVITY (COMMON ACROSS JM, EDITOR, IM)             */}
       {/* ========================================================================= */}
-      {activeTab === "activity" && (
+      {currentTab === "activity" && (
         <CrossDeskActivityFeed
           language={language}
           currentRole="editor"
@@ -1636,7 +1732,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* TAB 5: INTEGRITY & FORENSIC SUITE                                         */}
       {/* ========================================================================= */}
-      {activeTab === "integrity" && (
+      {currentTab === "integrity" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl overflow-hidden shadow-xs">
           <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#272832]">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1712,7 +1808,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* TAB 6: SPECIAL ISSUES & THEMES                                            */}
       {/* ========================================================================= */}
-      {activeTab === "collections" && (
+      {currentTab === "collections" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl overflow-hidden shadow-xs">
           <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#272832] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
