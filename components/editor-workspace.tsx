@@ -4327,10 +4327,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
       {/* ================= MODAL: REVIEWER RIGOR QUALITY AUDIT (NO FINANCIAL DETAILS) ================= */}
       <Dialog open={!!scoringReviewerData} onOpenChange={(open) => !open && setScoringReviewerData(null)}>
-        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-2xl p-6 shadow-2xl">
-          <DialogHeader>
+        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl p-5 sm:p-6 shadow-2xl">
+          <DialogHeader className="pr-8">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Award className="h-5 w-5 text-[#0b99ff]" />
+              <Award className="h-5 w-5 text-[#0b99ff] shrink-0" />
               Evaluate Reviewer Rigor & Quality Score
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
@@ -4339,37 +4339,37 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </DialogHeader>
 
           {scoringReviewerData && (
-            <div className="space-y-4 py-2 text-xs">
+            <div className="space-y-4 py-2 text-xs min-w-0">
               {/* Referee Overview Bar */}
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-1.5">
-                <div className="flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-1.5">
                   <span className="font-semibold text-slate-700 dark:text-slate-300">Referee Recommendation:</span>
                   <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
                     {scoringReviewerData.recommendation}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-1.5">
                   <span className="text-slate-500">Submission Timeliness:</span>
                   <span className="text-slate-700 dark:text-slate-300">{scoringReviewerData.submissionDate} (Within 14-Day Cycle ✓)</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-1.5">
                   <span className="text-slate-500">Qualification & English Level:</span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400">COPE Verified Gateway (≥ 80%) ✓</span>
                 </div>
               </div>
 
               {/* Rigor Score Slider & Input */}
-              <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
+              <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 space-y-3 min-w-0">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
                     <label className="font-bold text-slate-900 dark:text-white text-xs block">
                       Editorial Rigor Score (0–100%)
                     </label>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-slate-500 block">
                       Rate the scientific depth, methodological critique, and actionability of the report.
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <input
                       type="number"
                       min={0}
@@ -4398,10 +4398,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 />
 
                 {/* Quality Tier Indicator Card */}
-                <div className="p-3 rounded-lg bg-white dark:bg-[#131418] border border-blue-200/80 dark:border-blue-900/40 flex items-center justify-between">
-                  <div className="space-y-0.5">
+                <div className="p-3 rounded-lg bg-white dark:bg-[#131418] border border-blue-200/80 dark:border-blue-900/40 flex flex-wrap items-center justify-between gap-2 min-w-0">
+                  <div className="space-y-0.5 min-w-0">
                     <span className="text-[10px] uppercase font-bold text-slate-400 block">Quality Assessment</span>
-                    <span className={`text-base font-bold ${
+                    <span className={`text-sm sm:text-base font-bold block ${
                       scoringReviewerData.rigorScore >= 95 
                         ? "text-emerald-600 dark:text-emerald-400" 
                         : scoringReviewerData.rigorScore >= 85 
@@ -4420,8 +4420,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </span>
                   </div>
 
-                  <div className="text-right">
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                  <div className="shrink-0">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full inline-block ${
                       scoringReviewerData.rigorScore >= 80
                         ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                         : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
@@ -4436,30 +4436,30 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <span className="font-semibold text-slate-700 dark:text-slate-300 text-[11px] block">
                     COPE Quality Rubric Verifications:
                   </span>
-                  <label className="flex items-center gap-2 cursor-pointer text-[11px] text-slate-600 dark:text-slate-400">
+                  <label className="flex items-start gap-2 cursor-pointer text-[11px] text-slate-600 dark:text-slate-400">
                     <input
                       type="checkbox"
                       checked={scoringReviewerData.methodologyChecked}
                       onChange={(e) => setScoringReviewerData(prev => prev ? { ...prev, methodologyChecked: e.target.checked } : null)}
-                      className="rounded text-[#0b99ff] h-3.5 w-3.5"
+                      className="rounded text-[#0b99ff] h-3.5 w-3.5 mt-0.5 shrink-0"
                     />
                     <span>Methodological validity, control groups & data soundness checked</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-[11px] text-slate-600 dark:text-slate-400">
+                  <label className="flex items-start gap-2 cursor-pointer text-[11px] text-slate-600 dark:text-slate-400">
                     <input
                       type="checkbox"
                       checked={scoringReviewerData.constructiveChecked}
                       onChange={(e) => setScoringReviewerData(prev => prev ? { ...prev, constructiveChecked: e.target.checked } : null)}
-                      className="rounded text-[#0b99ff] h-3.5 w-3.5"
+                      className="rounded text-[#0b99ff] h-3.5 w-3.5 mt-0.5 shrink-0"
                     />
                     <span>Constructive, actionable feedback provided for authors</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-[11px] text-slate-600 dark:text-slate-400">
+                  <label className="flex items-start gap-2 cursor-pointer text-[11px] text-slate-600 dark:text-slate-400">
                     <input
                       type="checkbox"
                       checked={scoringReviewerData.citationsChecked}
                       onChange={(e) => setScoringReviewerData(prev => prev ? { ...prev, citationsChecked: e.target.checked } : null)}
-                      className="rounded text-[#0b99ff] h-3.5 w-3.5"
+                      className="rounded text-[#0b99ff] h-3.5 w-3.5 mt-0.5 shrink-0"
                     />
                     <span>No unverified citations or manipulative reviewer references detected</span>
                   </label>
@@ -4467,8 +4467,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               {/* Editor Comments for Reviewer */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 dark:text-slate-300">
+              <div className="space-y-1 min-w-0">
+                <label className="font-bold text-slate-700 dark:text-slate-300 block">
                   Handling Editor Feedback Note to Reviewer
                 </label>
                 <textarea
@@ -4482,12 +4482,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           )}
 
-          <DialogFooter className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-[#272832]">
+          <DialogFooter className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-[#272832] min-w-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => setScoringReviewerData(null)}
-              className="text-xs h-8.5 cursor-pointer"
+              className="text-xs h-9 cursor-pointer order-last sm:order-first"
             >
               Cancel
             </Button>
@@ -4527,9 +4527,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 triggerToast(`✓ Rigor Score certified & ${scoringReviewerData.paperId} set to Minor Revision.`)
                 setScoringReviewerData(null)
               }}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-8.5 px-3.5 rounded-xl shadow-xs cursor-pointer"
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-xs cursor-pointer whitespace-normal text-center"
             >
-              <Clock className="h-3.5 w-3.5 mr-1.5" />
+              <Clock className="h-3.5 w-3.5 mr-1.5 shrink-0" />
               Certify & Set to Minor Revision
             </Button>
 
@@ -4557,9 +4557,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 triggerToast(`✓ Rigor Score (${scoringReviewerData.rigorScore}% - ${tier}) certified for ${scoringReviewerData.reviewerName}.`)
                 setScoringReviewerData(null)
               }}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-8.5 px-4 rounded-xl shadow-xs cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer whitespace-normal text-center"
             >
-              <Check className="h-3.5 w-3.5 mr-1.5" />
+              <Check className="h-3.5 w-3.5 mr-1.5 shrink-0" />
               Certify Score Only ({scoringReviewerData?.rigorScore ?? 0}%)
             </Button>
           </DialogFooter>
