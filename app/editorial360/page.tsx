@@ -3376,6 +3376,66 @@ export default function Editorial360Page() {
             <main className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0b99ff]/5 via-transparent to-transparent">
               <div className="w-full max-w-md space-y-8 animate-in fade-in duration-300">
                 
+                {/* Login Container Header */}
+                <div className="flex flex-col items-center text-center">
+                  {/* Light Font EN | DE Language Switcher Above Login */}
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-light text-slate-400 select-none mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setLanguage("en")}
+                      className={`transition-colors cursor-pointer ${
+                        language === "en"
+                          ? "font-semibold text-[#0b99ff]"
+                          : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
+                      }`}
+                    >
+                      EN
+                    </button>
+                    <span className="text-slate-300 dark:text-slate-700 font-light">|</span>
+                    <button
+                      type="button"
+                      onClick={() => setLanguage("de")}
+                      className={`transition-colors cursor-pointer ${
+                        language === "de"
+                          ? "font-semibold text-[#0b99ff]"
+                          : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
+                      }`}
+                    >
+                      DE
+                    </button>
+                  </div>
+
+                  <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">
+                    {mode === "login" 
+                      ? (language === "de" ? "Anmelden" : "Login") 
+                      : (language === "de" ? "Konto erstellen" : "Create account")}
+                  </h1>
+
+                  <div className="flex h-10 w-auto items-center justify-center my-2 hover:scale-105 transition-all">
+                    <img 
+                      src="/editorial360.svg" 
+                      alt="Editorial360" 
+                      className="h-full w-auto object-contain" 
+                    />
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                    {language === "de" ? "Oder " : "Or "}
+                    <button
+                      type="button"
+                      onClick={() => toggleMode(mode === "login" ? "register" : "login")}
+                      className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
+                    >
+                      {mode === "login" 
+                        ? (language === "de" ? "Neues Konto erstellen" : "Create account") 
+                        : (language === "de" ? "Mit bestehendem Konto anmelden" : "Sign in to existing account")}
+                    </button>
+                  </p>
+                </div>
+
+                {/* Login/Registration Card container */}
+                <Card className="border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden relative transition-all">
+                  <div className="h-1.5 w-full bg-[#0b99ff]" />
+                
                 {mode === "login" ? (
                   // ================= LOGIN FORM =================
                   <form onSubmit={handleLogin} className="pt-6">
