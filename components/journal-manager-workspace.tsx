@@ -54,8 +54,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
-import { EmailTemplatesManager } from "./email-templates-manager"
-import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 
 export interface JmManuscript {
   id: string
@@ -3696,24 +3694,6 @@ export function JournalManagerWorkspace({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* ========================================================================= */}
-      {/* TAB: EMAIL TEMPLATES HUB & STUDIO                                         */}
-      {/* ========================================================================= */}
-      {activeTab === "templates" && (
-        <EmailTemplatesManager
-          language={language}
-          currentUserEmail={user?.email || "scholarlyopen@gmail.com"}
-        />
-      )}
-
-      {/* ========================================================================= */}
-      {/* INTERACTIVE REVIEW & DISPATCH EMAIL MODAL                                  */}
-      {/* ========================================================================= */}
-      <EmailDispatchDialog
-        language={language}
-        config={dispatchDialogConfig}
-      />
 
     </div>
   )

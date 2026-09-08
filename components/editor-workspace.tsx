@@ -55,8 +55,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { JmManuscript, JmReviewer } from "./journal-manager-workspace"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
-import { EmailTemplatesManager } from "./email-templates-manager"
-import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
+import { generateBrandedEmailHtml } from "@/lib/email-templates"
 
 interface EditorWorkspaceProps {
   language: "en" | "de"
@@ -347,6 +346,10 @@ export function EditorWorkspace({
   const [selectedPaperForDecision, setSelectedPaperForDecision] = useState<JmManuscript | null>(null)
   const [decisionVerdict, setDecisionVerdict] = useState<EditorialDecisionDraft["verdict"]>("Minor Revision")
   const [decisionLetter, setDecisionLetter] = useState(getDecisionLetterTemplate("Minor Revision", user.name, user.journal))
+  const [decisionSubject, setDecisionSubject] = useState("")
+  const [decisionAuthorEmail, setDecisionAuthorEmail] = useState("")
+  const [isDecisionSending, setIsDecisionSending] = useState(false)
+  const [decisionTab, setDecisionTab] = useState<"edit" | "preview">("edit")
   const [confidentialNotes, setConfidentialNotes] = useState("")
   const [expandedReviewerScorecard, setExpandedReviewerScorecard] = useState<"rev1" | "rev2" | null>(null)
 
@@ -462,23 +465,6 @@ export function EditorWorkspace({
     })
   }
 
-  // Email Dispatch Review & Edit Dialog State
-  const [dispatchDialogConfig, setDispatchDialogConfig] = useState<EmailDispatchConfig>({
-    isOpen: false,
-    recipientEmail: "",
-    recipientName: "",
-    onConfirmSend: async () => {},
-    onCancel: () => {}
-  })
-
-  const openEmailDispatch = (config: Omit<EmailDispatchConfig, "isOpen" | "onCancel">) => {
-    setDispatchDialogConfig({
-      ...config,
-      isOpen: true,
-      onCancel: () => setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
-    })
-  }
-
   const [newCollectionTitle, setNewCollectionTitle] = useState("")
   const [newCollectionJournal, setNewCollectionJournal] = useState(user.journal || "Scholarly Open: Medicine & Applied Sciences")
   const [newCollectionGuestEditors, setNewCollectionGuestEditors] = useState("")
@@ -533,22 +519,41 @@ export function EditorWorkspace({
     return matchesJournal && matchesSearch && matchesStage
   })
 
+  const getDecisionSubject = (v: string, paperId: string, paperTitle: string) => {
+    if (v === "Accept") return `Formal Acceptance Notice: ${paperId} - ${paperTitle}`
+    if (v === "Minor Revision") return `Editorial Decision: Minor Revision Required for ${paperId}`
+    if (v === "Major Revision" || v === "Reject & Resubmit") return `Editorial Decision: Major Revisions Required for ${paperId}`
+    return `Editorial Decision: ${paperId} - ${paperTitle}`
+  }
+
   // Handlers
   const handleOpenDecisionModal = (paper: JmManuscript) => {
     setSelectedPaperForDecision(paper)
     setDecisionVerdict("Minor Revision")
     setDecisionLetter(getDecisionLetterTemplate("Minor Revision", user.name, paper.journal || user.journal))
+    setDecisionSubject(getDecisionSubject("Minor Revision", paper.id, paper.title))
+    setDecisionAuthorEmail(paper.authorEmail || "author@university.edu")
     setConfidentialNotes("")
+    setDecisionTab("edit")
   }
 
   const handleVerdictChange = (v: EditorialDecisionDraft["verdict"]) => {
     setDecisionVerdict(v)
     const templateKey = v === "Reject & Resubmit" ? "Major Revision" : v
     setDecisionLetter(getDecisionLetterTemplate(templateKey, user.name, selectedPaperForDecision?.journal || user.journal))
+    if (selectedPaperForDecision) {
+      setDecisionSubject(getDecisionSubject(v, selectedPaperForDecision.id, selectedPaperForDecision.title))
+    }
   }
 
-  const handleSubmitDecision = () => {
+  const handleSubmitDecision = async () => {
     if (!selectedPaperForDecision) return
+
+    setIsDecisionSending(true)
+    const paperId = selectedPaperForDecision.id
+    const journalName = selectedPaperForDecision.journal || user.journal
+    const authorEmail = decisionAuthorEmail || selectedPaperForDecision.authorEmail || "author@university.edu"
+    const authorName = selectedPaperForDecision.authorName || "Author"
 
     let nextStatus: JmManuscript["status"] = "Under Review"
     if (decisionVerdict === "Accept") nextStatus = "Accepted"
@@ -556,77 +561,56 @@ export function EditorWorkspace({
     else if (decisionVerdict === "Reject") nextStatus = "Rejected"
 
     const updated = manuscripts.map(m => {
-      if (m.id === selectedPaperForDecision.id) {
+      if (m.id === paperId) {
         return { ...m, status: nextStatus }
       }
       return m
     })
     setManuscripts(updated)
-    if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(selectedPaperForDecision.id, nextStatus)
+    if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, nextStatus)
 
-    triggerToast(isDe ? `Redaktionelle Entscheidung '${decisionVerdict}' erfolgreich übermittelt!` : `Editorial decision '${decisionVerdict}' dispatched to author!`)
+    // Generate branded HTML for the edited decision letter
+    const renderedHtml = generateBrandedEmailHtml({
+      subject: decisionSubject,
+      bodyText: decisionLetter,
+      actionLabel: decisionVerdict === "Accept" ? "View Publication Dossier" : "Submit Revised Manuscript",
+      actionUrl: "https://www.scholarlyopen.org/editorial360",
+      journal: journalName,
+      paperId,
+      paperTitle: selectedPaperForDecision.title,
+      recipientName: authorName
+    })
+
+    // Dispatch email via SMTP
+    await fetch("/api/editorial360/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: authorEmail,
+        customSubject: decisionSubject,
+        customHtml: renderedHtml,
+        journal: journalName,
+        paperId,
+        paperTitle: selectedPaperForDecision.title,
+        recipientName: authorName
+      })
+    }).catch(e => console.error("Decision email dispatch error:", e))
+
+    setIsDecisionSending(false)
+    triggerToast(isDe ? `Redaktionelle Entscheidung '${decisionVerdict}' erfolgreich per E-Mail übermittelt!` : `Editorial decision '${decisionVerdict}' dispatched via email to author!`)
     setSelectedPaperForDecision(null)
   }
 
   const onTriggerSubmitDecision = () => {
     if (!selectedPaperForDecision) return
-
-    let templateId = "decision_minor"
-    if (decisionVerdict === "Accept") templateId = "decision_accept"
-    else if (decisionVerdict === "Major Revision" || decisionVerdict === "Reject & Resubmit") templateId = "decision_major"
-    else if (decisionVerdict === "Reject") templateId = "decision_reject"
-
-    const authorEmail = selectedPaperForDecision.authorEmail || "author@university.edu"
-    const authorName = selectedPaperForDecision.authorName || "Author"
-    const paperId = selectedPaperForDecision.id
-    const paperTitle = selectedPaperForDecision.title
-    const journalName = selectedPaperForDecision.journal || user.journal
-
-    openEmailDispatch({
-      templateId,
-      recipientEmail: authorEmail,
-      recipientName: authorName,
-      paperId,
-      paperTitle,
-      journal: journalName,
-      defaultSubject: `Editorial Decision: ${decisionVerdict} on ${paperId} - ${paperTitle}`,
-      defaultBody: decisionLetter,
-      actionLabel: decisionVerdict === "Accept" ? "View Publication Dossier" : "Submit Revised Manuscript",
-      actionUrl: "https://www.scholarlyopen.org/editorial360",
-      onConfirmSend: async (data) => {
-        let nextStatus: JmManuscript["status"] = "Under Review"
-        if (decisionVerdict === "Accept") nextStatus = "Accepted"
-        else if (decisionVerdict === "Minor Revision" || decisionVerdict === "Major Revision" || decisionVerdict === "Reject & Resubmit") nextStatus = "Revision Required"
-        else if (decisionVerdict === "Reject") nextStatus = "Rejected"
-
-        const updated = manuscripts.map(m => {
-          if (m.id === paperId) {
-            return { ...m, status: nextStatus }
-          }
-          return m
-        })
-        setManuscripts(updated)
-        if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, nextStatus)
-
-        // Dispatch official decision email
-        await fetch("/api/editorial360/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: data.recipientEmail,
-            customSubject: data.subject,
-            customHtml: data.renderedHtml,
-            journal: journalName,
-            paperId,
-            paperTitle,
-            recipientName: authorName
-          })
-        }).catch(e => console.error("Decision email dispatch error:", e))
-
-        triggerToast(isDe ? `Redaktionelle Entscheidung '${decisionVerdict}' erfolgreich übermittelt!` : `Editorial decision '${decisionVerdict}' dispatched to author!`)
-        setSelectedPaperForDecision(null)
-        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
-      }
+    triggerConfirm({
+      title: isDe ? "Redaktionelle Entscheidung bestätigen?" : "Confirm Editorial Decision & Email Dispatch?",
+      message: isDe
+        ? `Möchten Sie die Entscheidung '${decisionVerdict}' für Manuskript ${selectedPaperForDecision.id} offiziell bestätigen und den Entscheidungsbrief direkt an ${decisionAuthorEmail || selectedPaperForDecision.authorEmail || "den Autor"} versenden?`
+        : `Are you sure you want to finalize the '${decisionVerdict}' decision for manuscript ${selectedPaperForDecision.id} and dispatch this email letter to ${decisionAuthorEmail || selectedPaperForDecision.authorEmail || "author"}?`,
+      confirmButtonLabel: isDe ? "Ja, Entscheidung & E-Mail versenden" : "Yes, Dispatch Decision & Email",
+      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+      onConfirm: handleSubmitDecision
     })
   }
 
@@ -1789,7 +1773,7 @@ export function EditorWorkspace({
 
       {/* ================= MODAL: EDITORIAL DECISION DRAWER ================= */}
       <Dialog open={!!selectedPaperForDecision} onOpenChange={(open) => !open && setSelectedPaperForDecision(null)}>
-        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-2xl rounded-2xl p-6">
+        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <CheckSquare className="h-4 w-4 text-[#0b99ff]" />
@@ -1972,22 +1956,136 @@ export function EditorWorkspace({
               </div>
             </div>
 
-            {/* Letter Content with Reviewer Reports Built In */}
-            <div className="space-y-1.5">
-              <label className="font-bold text-slate-700 dark:text-slate-300">
-                {isDe ? "Offizieller Entscheidungsbrief:" : "Decision Letter:"}
-              </label>
-              <textarea
-                rows={10}
-                value={decisionLetter}
-                onChange={(e) => setDecisionLetter(e.target.value)}
-                className="w-full p-3 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-              />
+            {/* 3. Official Decision Email Template & Customization */}
+            <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-[#272832]">
+              {/* Template Header with Edit / Live Preview Tabs */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-lg bg-[#0b99ff]/10 text-[#0b99ff] flex items-center justify-center font-bold">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <label className="font-bold text-xs text-slate-900 dark:text-white block leading-tight">
+                      {isDe ? "Entscheidungs-E-Mail-Vorlage (Wird an den Autor gesendet)" : "Official Decision Email Template (Dispatched to Author)"}
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      {isDe ? "Direkt bearbeitbar vor dem endgültigen Versand" : "Directly editable within popup prior to dispatch"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sub-Tabs: Edit Template / Live Preview */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-1 rounded-xl border border-slate-200/80 dark:border-[#272832]">
+                  <button
+                    type="button"
+                    onClick={() => setDecisionTab("edit")}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      decisionTab === "edit"
+                        ? "bg-white dark:bg-[#1f2027] text-[#0b99ff] shadow-xs"
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    <Edit3 className="h-3 w-3" />
+                    {isDe ? "Vorlage anpassen" : "Edit Letter"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDecisionTab("preview")}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      decisionTab === "preview"
+                        ? "bg-white dark:bg-[#1f2027] text-[#0b99ff] shadow-xs"
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    <Eye className="h-3 w-3" />
+                    {isDe ? "E-Mail Vorschau" : "Live Email Preview"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Recipient & Subject Line Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      {isDe ? "Empfänger (Autor-E-Mail):" : "Author Email (To):"}
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">CC: scholarlyopen@gmail.com</span>
+                  </div>
+                  <input
+                    type="email"
+                    value={decisionAuthorEmail}
+                    onChange={(e) => setDecisionAuthorEmail(e.target.value)}
+                    placeholder="author@university.edu"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    {isDe ? "E-Mail Betreffzeile:" : "Email Subject Line:"}
+                  </label>
+                  <input
+                    type="text"
+                    value={decisionSubject}
+                    onChange={(e) => setDecisionSubject(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Body: Edit Mode OR Live Branded Preview Mode */}
+              {decisionTab === "edit" ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      {isDe ? "Offizieller Entscheidungsbrief-Text (frei editierbar):" : "Decision Letter Body (Fully Customizable):"}
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      {isDe ? "Formatierung & Gutachten integriert" : "Includes greeting, verdict rationale & reviewer reports"}
+                    </span>
+                  </div>
+                  <textarea
+                    rows={12}
+                    value={decisionLetter}
+                    onChange={(e) => setDecisionLetter(e.target.value)}
+                    className="w-full p-3.5 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-[#0b99ff]" />
+                      {isDe ? "Formatierte Vorschau (wie vom Autor empfangen):" : "Rendered HTML Preview (Author's Inbox View):"}
+                    </label>
+                    <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                      Scholarly Open Branded Email
+                    </span>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-100 dark:bg-slate-950 p-2 shadow-inner">
+                    <iframe
+                      title="Decision Email Preview"
+                      srcDoc={generateBrandedEmailHtml({
+                        subject: decisionSubject,
+                        bodyText: decisionLetter,
+                        actionLabel: decisionVerdict === "Accept" ? "View Publication Dossier" : "Submit Revised Manuscript",
+                        actionUrl: "https://www.scholarlyopen.org/editorial360",
+                        journal: selectedPaperForDecision?.journal || user.journal,
+                        paperId: selectedPaperForDecision?.id,
+                        paperTitle: selectedPaperForDecision?.title,
+                        recipientName: selectedPaperForDecision?.authorName || "Author"
+                      })}
+                      className="w-full h-[360px] bg-white rounded-lg border border-slate-200 dark:border-slate-800"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Confidential Notes */}
+            {/* Confidential Notes (Internal Only) */}
             <div className="space-y-1.5">
-              <label className="font-bold text-slate-700 dark:text-slate-300">
+              <label className="font-bold text-slate-700 dark:text-slate-300 text-xs">
                 {isDe ? "Vertrauliche redaktionelle Notizen (nur intern sichtbar):" : "Confidential Editorial Notes (Internal archive only):"}
               </label>
               <input
@@ -2014,6 +2112,7 @@ export function EditorWorkspace({
                     }
                   }}
                   variant="outline"
+                  disabled={isDecisionSending}
                   className="text-xs h-8.5 cursor-pointer font-semibold text-slate-700 dark:text-slate-300"
                 >
                   <ArrowLeft className="h-3.5 w-3.5 mr-1" />
@@ -2026,16 +2125,27 @@ export function EditorWorkspace({
               <Button
                 onClick={() => setSelectedPaperForDecision(null)}
                 variant="outline"
+                disabled={isDecisionSending}
                 className="text-xs h-8.5 cursor-pointer"
               >
                 {isDe ? "Abbrechen" : "Cancel"}
               </Button>
               <Button
                 onClick={onTriggerSubmitDecision}
-                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8.5 px-4 shadow-xs cursor-pointer"
+                disabled={isDecisionSending}
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8.5 px-4 shadow-xs cursor-pointer flex items-center gap-1.5"
               >
-                <Send className="h-3.5 w-3.5 mr-1.5" />
-                {isDe ? "Entscheidung übermitteln" : "Dispatch Decision"}
+                {isDecisionSending ? (
+                  <>
+                    <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>{isDe ? "Wird versendet..." : "Dispatching Email..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-3.5 w-3.5 mr-1" />
+                    <span>{isDe ? "Entscheidung & E-Mail versenden" : "Dispatch Decision & Send Email"}</span>
+                  </>
+                )}
               </Button>
             </div>
           </DialogFooter>
@@ -3661,24 +3771,6 @@ export function EditorWorkspace({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* ========================================================================= */}
-      {/* TAB: EMAIL TEMPLATES HUB & STUDIO                                         */}
-      {/* ========================================================================= */}
-      {activeTab === "templates" && (
-        <EmailTemplatesManager
-          language={language}
-          currentUserEmail={user?.email || "scholarlyopen@gmail.com"}
-        />
-      )}
-
-      {/* ========================================================================= */}
-      {/* INTERACTIVE REVIEW & DISPATCH EMAIL MODAL                                  */}
-      {/* ========================================================================= */}
-      <EmailDispatchDialog
-        language={language}
-        config={dispatchDialogConfig}
-      />
 
     </div>
   )

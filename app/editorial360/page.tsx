@@ -136,19 +136,6 @@ const CrossDeskActivityFeed = dynamic(
   }
 )
 
-const EmailTemplatesManager = dynamic(
-  () => import("@/components/email-templates-manager").then(mod => mod.EmailTemplatesManager),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center p-16 text-slate-500 gap-2">
-        <RefreshCw className="w-5 h-5 animate-spin text-[#0b99ff]" />
-        <span className="text-sm font-medium">Loading Email Templates Studio...</span>
-      </div>
-    )
-  }
-)
-
 type UserRole = "admin" | "author" | "reviewer" | "editor" | "im" | "ria" | "jm"
 
 // Manuscript mock data structure
@@ -4005,19 +3992,6 @@ export default function Editorial360Page() {
                         <Archive className="h-4 w-4" />
                         {language === "de" ? "Archivierte Einreichungen" : "Archived Submissions"}
                       </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("templates")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "templates"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <Mail className="h-4 w-4" />
-                        {language === "de" ? "E-Mail-Vorlagen" : "Email Templates"}
-                      </button>
                     </>
                   )}
 
@@ -4095,18 +4069,6 @@ export default function Editorial360Page() {
                         {language === "de" ? "Journal-Kennzahlen" : "Journal Metrics"}
                       </button>
 
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("templates")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "templates"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <Mail className="h-4 w-4" />
-                        {language === "de" ? "E-Mail-Vorlagen" : "Email Templates"}
-                      </button>
                     </>
                   )}
 
