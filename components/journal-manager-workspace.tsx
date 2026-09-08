@@ -51,6 +51,7 @@ import {
   Building2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
 import { EmailTemplatesManager } from "./email-templates-manager"
