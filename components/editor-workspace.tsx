@@ -616,14 +616,26 @@ export function EditorWorkspace({
       return m
     })
     setManuscripts(updated)
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+      }
+    } catch (e) {}
     if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, nextStatus)
+
+    // Direct action URL that takes the author straight to their revision submission
+    const actionUrl = nextStatus === "Revision Required"
+      ? `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(paperId)}&status=Revision+Required`
+      : nextStatus === "Accepted"
+      ? `https://www.scholarlyopen.org/editorial360?role=author&id=${encodeURIComponent(paperId)}&status=Accepted`
+      : "https://www.scholarlyopen.org/editorial360?role=author"
 
     // Generate branded HTML for the edited decision letter
     const renderedHtml = generateBrandedEmailHtml({
       subject: decisionSubject,
       bodyText: decisionLetter,
       actionLabel: decisionVerdict === "Accept" ? "View Publication Dossier" : "Submit Revised Manuscript",
-      actionUrl: "https://www.scholarlyopen.org/editorial360",
+      actionUrl,
       journal: journalName,
       paperId,
       paperTitle: selectedPaperForDecision.title,
@@ -1549,13 +1561,34 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </p>
                       </div>
 
-                      <Button
-                        onClick={() => handleOpenDecisionModal(m)}
-                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-4 rounded-xl shadow-xs cursor-pointer shrink-0"
-                      >
-                        <Edit3 className="h-3.5 w-3.5 mr-1.5" />
-                        {isDe ? "Entscheidungsbrief erstellen" : "Draft Decision Letter"}
-                      </Button>
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                        <Button
+                          onClick={() => {
+                            const paperId = m.id
+                            const updated = manuscripts.map(p => p.id === paperId ? { ...p, status: "Revision Required" as const } : p)
+                            setManuscripts(updated)
+                            try {
+                              if (typeof window !== "undefined") {
+                                localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+                              }
+                            } catch (e) {}
+                            if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
+                            triggerToast(`✓ Manuscript ${m.id} transitioned to Minor Revision (Revision Required). Author notified.`)
+                          }}
+                          className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold h-8.5 px-3.5 rounded-xl shadow-xs cursor-pointer"
+                        >
+                          <Clock className="h-3.5 w-3.5 mr-1.5" />
+                          {isDe ? "Direkt: Minor Revision fordern" : "Issue Minor Revision"}
+                        </Button>
+
+                        <Button
+                          onClick={() => handleOpenDecisionModal(m)}
+                          className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-4 rounded-xl shadow-xs cursor-pointer shrink-0"
+                        >
+                          <Edit3 className="h-3.5 w-3.5 mr-1.5" />
+                          {isDe ? "Entscheidungsbrief erstellen" : "Draft Decision Letter"}
+                        </Button>
+                      </div>
                     </div>
                   )}
 
@@ -4479,13 +4512,55 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     endorsedAt: new Date().toISOString().split("T")[0]
                   }
                 }))
+
+                // Transition manuscript to Revision Required and save
+                const paperId = scoringReviewerData.paperId
+                const updated = manuscripts.map(p => p.id === paperId ? { ...p, status: "Revision Required" as const } : p)
+                setManuscripts(updated)
+                try {
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+                  }
+                } catch (e) {}
+                if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, "Revision Required")
+
+                triggerToast(`✓ Rigor Score certified & ${scoringReviewerData.paperId} set to Minor Revision.`)
+                setScoringReviewerData(null)
+              }}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-8.5 px-3.5 rounded-xl shadow-xs cursor-pointer"
+            >
+              <Clock className="h-3.5 w-3.5 mr-1.5" />
+              Certify & Set to Minor Revision
+            </Button>
+
+            <Button
+              type="button"
+              disabled={!scoringReviewerData || scoringReviewerData.rigorScore < 50}
+              onClick={() => {
+                if (!scoringReviewerData) return
+                const tier = scoringReviewerData.rigorScore >= 95 
+                  ? "Exceptional Rigor" 
+                  : scoringReviewerData.rigorScore >= 85 
+                  ? "High Rigor" 
+                  : scoringReviewerData.rigorScore >= 80 
+                  ? "Meets Baseline" 
+                  : "Needs Revision"
+                
+                setEndorsedReviewerScores(prev => ({
+                  ...prev,
+                  [scoringReviewerData.reviewerKey]: {
+                    score: scoringReviewerData.rigorScore,
+                    tier: tier,
+                    endorsedAt: new Date().toISOString().split("T")[0]
+                  }
+                }))
                 triggerToast(`✓ Rigor Score (${scoringReviewerData.rigorScore}% - ${tier}) certified for ${scoringReviewerData.reviewerName}.`)
                 setScoringReviewerData(null)
               }}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-8.5 px-4 rounded-xl shadow-xs cursor-pointer"
             >
               <Check className="h-3.5 w-3.5 mr-1.5" />
-              Certify Rigor Score ({scoringReviewerData?.rigorScore ?? 0}%)
+              Certify Score Only ({scoringReviewerData?.rigorScore ?? 0}%)
             </Button>
           </DialogFooter>
         </DialogContent>

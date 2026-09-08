@@ -827,6 +827,24 @@ export default function Editorial360Page() {
         }
       }
 
+      const urlStatus = params.get("status")
+      if (urlAction === "revision" || (urlId && urlStatus)) {
+        const targetStatus = urlStatus || "Revision Required"
+        if (urlId) {
+          setManuscripts(prev => {
+            const updated = prev.map(m => m.id === urlId ? { ...m, status: targetStatus as any } : m)
+            try {
+              localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+            } catch (e) {}
+            return updated
+          })
+          setRevisionPaperId(urlId)
+          setIsRevisionDialogOpen(true)
+        }
+        setRole("author")
+        setIsLoggedIn(true)
+      }
+
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
         setRole(urlRole)
         setRegRole(urlRole === "reviewer" ? "reviewer" : "author")
@@ -909,9 +927,14 @@ export default function Editorial360Page() {
           const parsed = JSON.parse(stored) as Manuscript[]
           if (Array.isArray(parsed) && parsed.length > 0) {
             setManuscripts(prev => {
+              const storedMap = new Map(parsed.map(p => [p.id, p]))
+              const updatedPrev = prev.map(p => {
+                const storedItem = storedMap.get(p.id)
+                return storedItem ? { ...p, ...storedItem } : p
+              })
               const existingIds = new Set(prev.map(p => p.id))
               const newItems = parsed.filter(p => !existingIds.has(p.id))
-              return [...newItems, ...prev]
+              return [...newItems, ...updatedPrev]
             })
           }
         }
@@ -4854,7 +4877,15 @@ export default function Editorial360Page() {
                     onTabChange={setActiveJmTab}
                     manuscripts={manuscripts as any}
                     onUpdateManuscriptStatus={(id, st) => {
-                      setManuscripts(prev => prev.map(m => m.id === id ? { ...m, status: st as any } : m))
+                      setManuscripts(prev => {
+                        const updated = prev.map(m => m.id === id ? { ...m, status: st as any } : m)
+                        try {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+                          }
+                        } catch (e) {}
+                        return updated
+                      })
                       fetch("/api/editorial360/manuscripts", {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
@@ -4900,7 +4931,15 @@ export default function Editorial360Page() {
                     notifications={crossDeskNotifications}
                     onAddNotification={handleAddCrossDeskNotification}
                     onUpdateManuscriptStatus={(id, st) => {
-                      setManuscripts(prev => prev.map(m => m.id === id ? { ...m, status: st as any } : m))
+                      setManuscripts(prev => {
+                        const updated = prev.map(m => m.id === id ? { ...m, status: st as any } : m)
+                        try {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+                          }
+                        } catch (e) {}
+                        return updated
+                      })
                       fetch("/api/editorial360/manuscripts", {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
