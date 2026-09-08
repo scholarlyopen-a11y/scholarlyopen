@@ -2698,47 +2698,72 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   {/* Added External Experts List */}
                   {externalReviewersList.length > 0 && (
                     <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-[#272832]">
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
-                        Added External Experts ({externalReviewersList.length}):
-                      </span>
-                      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                          Added External Experts ({externalReviewersList.length}):
+                        </span>
+                        <span className="text-[11px] text-slate-400">
+                          Click to select / deselect for invitation
+                        </span>
+                      </div>
+                      <div className="space-y-1.5 max-h-52 overflow-y-auto pr-0.5">
                         {externalReviewersList.map((rev, idx) => {
                           const isCurrentlySelected = selectedReviewerNames.includes(rev.name)
                           return (
                             <div
                               key={idx}
-                              className={`p-2.5 rounded-lg border flex items-center justify-between gap-2.5 transition-all ${
+                              onClick={() => {
+                                setSelectedReviewerNames(prev =>
+                                  isCurrentlySelected
+                                    ? prev.filter(n => n !== rev.name)
+                                    : [...prev, rev.name]
+                                )
+                              }}
+                              className={`p-2.5 rounded-lg border flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
                                 editingReviewerIndex === idx
                                   ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20"
                                   : isCurrentlySelected
-                                  ? "border-sky-200 dark:border-sky-800/60 bg-sky-50/40 dark:bg-sky-950/20"
-                                  : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#14151a]"
+                                  ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white"
+                                  : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#14151a] hover:border-slate-300"
                               }`}
                             >
-                              <div className="min-w-0 flex-1 space-y-0.5">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-semibold text-xs text-slate-900 dark:text-white truncate">
-                                    {rev.name}
-                                  </span>
-                                  <span className="text-[10px] font-medium text-sky-700 dark:text-sky-400 bg-sky-100/80 dark:bg-sky-950/60 px-1.5 py-0.2 rounded">
-                                    External Expert
-                                  </span>
-                                </div>
-                                <div className="text-[11px] text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
-                                  <span>{rev.email}</span>
-                                  {rev.affiliation && (
-                                    <>
-                                      <span>·</span>
-                                      <span>{rev.affiliation}</span>
-                                    </>
-                                  )}
+                              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                <input
+                                  type="checkbox"
+                                  checked={isCurrentlySelected}
+                                  onChange={() => {}}
+                                  className="rounded text-[#0b99ff] h-4 w-4 shrink-0 cursor-pointer"
+                                />
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-semibold text-xs text-slate-900 dark:text-white truncate">
+                                      {rev.name}
+                                    </span>
+                                    <span className={`text-[10px] font-medium px-1.5 py-0.2 rounded ${
+                                      isCurrentlySelected
+                                        ? "text-[#0b99ff] bg-[#0b99ff]/15 font-semibold"
+                                        : "text-slate-500 bg-slate-100 dark:bg-slate-800"
+                                    }`}>
+                                      {isCurrentlySelected ? "✓ Selected to Invite" : "External Expert"}
+                                    </span>
+                                  </div>
+                                  <div className="text-[11px] text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
+                                    <span>{rev.email}</span>
+                                    {rev.affiliation && (
+                                      <>
+                                        <span>·</span>
+                                        <span>{rev.affiliation}</span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-1.5 shrink-0">
+                              <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation()
                                     setEditingReviewerIndex(idx)
                                     setCustomRevName(rev.name)
                                     setCustomRevEmail(rev.email)
@@ -2750,7 +2775,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation()
                                     const revToRemove = externalReviewersList[idx]
                                     setExternalReviewersList(prev => prev.filter((_, i) => i !== idx))
                                     setSelectedReviewerNames(prev => prev.filter(n => n !== revToRemove.name))
