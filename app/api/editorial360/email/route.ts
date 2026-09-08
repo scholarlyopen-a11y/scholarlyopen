@@ -98,24 +98,35 @@ export async function POST(req: Request) {
 
     // Check if SMTP environment variables exist
     const smtpHost = process.env.SMTP_HOST
+    const smtpPort = Number(process.env.SMTP_PORT) || 587
     const smtpUser = process.env.SMTP_USER
     const smtpPass = process.env.SMTP_PASS
+    const smtpFrom = process.env.SMTP_FROM || smtpUser
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
+      const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"
       const transporter = nodemailer.createTransport({
         host: smtpHost,
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: process.env.SMTP_SECURE === "true",
+        port: smtpPort,
+        secure: isSecure,
         auth: {
           user: smtpUser,
           pass: smtpPass
+        },
+        tls: {
+          rejectUnauthorized: false
         }
       })
 
+      const formattedFrom = smtpFrom?.includes("<") 
+        ? smtpFrom 
+        : `"${journal}" <${smtpFrom}>`
+
       const info = await transporter.sendMail({
-        from: `"${journal}" <${smtpUser}>`,
+        from: formattedFrom,
         to: body.to,
         cc: "scholarlyopen@gmail.com",
+        replyTo: smtpFrom,
         subject: finalSubject,
         html: finalHtml
       })
@@ -137,7 +148,11 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Editorial360 email dispatch error:", error)
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to dispatch email" },
+      { 
+        success: false, 
+        error: error?.message || "Failed to dispatch email",
+        code: error?.code || "EMAIL_DISPATCH_ERROR" 
+      },
       { status: 500 }
     )
   }
