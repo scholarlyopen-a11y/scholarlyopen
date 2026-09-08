@@ -378,21 +378,25 @@ export function generateBrandedEmailHtml(options: {
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 32px 12px;">
   <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px -2px rgba(0,0,0,0.06);">
-    <!-- Brand Header -->
-    <div style="background-color: #ffffff; padding: 22px 28px; border-bottom: 2px solid #0b99ff; display: flex; align-items: center; justify-content: space-between;">
-      <div>
-        <div style="font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">
-          Scholarly <span style="color: #0b99ff;">Open</span>
-        </div>
-        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;">
-          ${journal}
-        </div>
-      </div>
-      <div style="text-align: right;">
-        <span style="font-size: 10px; font-weight: 700; color: #0b99ff; background-color: #eff6ff; padding: 4px 8px; border-radius: 4px; border: 1px solid #bfdbfe; text-transform: uppercase;">
-          Editorial360 System
-        </span>
-      </div>
+    <!-- Brand Header with Real Logos -->
+    <div style="background-color: #ffffff; padding: 20px 28px; border-bottom: 2px solid #0b99ff;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; width: 100%;">
+        <tr>
+          <td valign="middle" align="left" style="text-align: left; vertical-align: middle;">
+            <a href="${baseUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
+              <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" height="36" style="height: 36px; max-height: 36px; width: auto; max-width: 175px; display: block; border: 0;" onerror="this.src='/logo-full-color.svg'" />
+            </a>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px;">
+              ${journal}
+            </div>
+          </td>
+          <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
+            <a href="${baseUrl}/editorial360" target="_blank" style="text-decoration: none; display: inline-block;">
+              <img src="${baseUrl}/editorial360.svg" alt="Editorial360" height="28" style="height: 28px; max-height: 28px; width: auto; max-width: 140px; display: block; border: 0;" onerror="this.src='/editorial360.svg'" />
+            </a>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <!-- Email Body -->
@@ -403,17 +407,17 @@ export function generateBrandedEmailHtml(options: {
     </div>
 
     <!-- Corporate / Compliance Footer -->
-    <div style="background-color: #f8fafc; padding: 20px 28px; border-top: 1px solid #e2e8f0; font-size: 11px; line-height: 1.6; color: #64748b; text-align: center;">
-      <div style="font-weight: 600; color: #475569; margin-bottom: 4px;">
-        Scholarly Open Editorial Platform • Germany & Global Publishing Registry
+    <div style="background-color: #f8fafc; padding: 22px 28px; border-top: 1px solid #e2e8f0; font-size: 11px; line-height: 1.6; color: #64748b; text-align: center;">
+      <div style="font-weight: 700; color: #475569; margin-bottom: 4px; font-size: 11px;">
+        Scholarly Open Editorial Platform • Germany &amp; Global Publishing Registry
       </div>
-      <div>
+      <div style="color: #64748b;">
         Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards<br>
-        © ${currentYear} Scholarly Open. All rights reserved. • Open Access CC BY 4.0
+        &copy; ${currentYear} Scholarly Open. All rights reserved. • Open Access CC BY 4.0
       </div>
       <div style="margin-top: 8px;">
-        <a href="${baseUrl}/editorial360" style="color: #0b99ff; text-decoration: none; font-weight: 500;">Access Editorial360 Portal</a> • 
-        <a href="${baseUrl}/about" style="color: #64748b; text-decoration: none;">Ethics & Malpractice Policies</a>
+        <a href="${baseUrl}/editorial360" style="color: #0b99ff; text-decoration: none; font-weight: 600;">Access Editorial360 Portal</a> • 
+        <a href="${baseUrl}/about" style="color: #64748b; text-decoration: none;">Ethics &amp; Malpractice Policies</a>
       </div>
     </div>
   </div>
