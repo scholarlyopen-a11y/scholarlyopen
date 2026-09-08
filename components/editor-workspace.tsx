@@ -55,6 +55,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { JmManuscript, JmReviewer } from "./journal-manager-workspace"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
+import { EmailTemplatesManager } from "./email-templates-manager"
+import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 
 interface EditorWorkspaceProps {
   language: "en" | "de"
@@ -459,6 +461,24 @@ export function EditorWorkspace({
       onConfirm: config.onConfirm
     })
   }
+
+  // Email Dispatch Review & Edit Dialog State
+  const [dispatchDialogConfig, setDispatchDialogConfig] = useState<EmailDispatchConfig>({
+    isOpen: false,
+    recipientEmail: "",
+    recipientName: "",
+    onConfirmSend: async () => {},
+    onCancel: () => {}
+  })
+
+  const openEmailDispatch = (config: Omit<EmailDispatchConfig, "isOpen" | "onCancel">) => {
+    setDispatchDialogConfig({
+      ...config,
+      isOpen: true,
+      onCancel: () => setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+    })
+  }
+
   const [newCollectionTitle, setNewCollectionTitle] = useState("")
   const [newCollectionJournal, setNewCollectionJournal] = useState(user.journal || "Scholarly Open: Medicine & Applied Sciences")
   const [newCollectionGuestEditors, setNewCollectionGuestEditors] = useState("")
@@ -550,14 +570,63 @@ export function EditorWorkspace({
 
   const onTriggerSubmitDecision = () => {
     if (!selectedPaperForDecision) return
-    triggerConfirm({
-      title: isDe ? "Redaktionelle Entscheidung bestätigen?" : "Confirm Editorial Decision?",
-      message: isDe 
-        ? `Möchten Sie die redaktionelle Entscheidung '${decisionVerdict}' für das Manuskript ${selectedPaperForDecision.id} verbindlich erteilen und den offiziellen Bescheid an den Autor senden?`
-        : `Are you sure you want to render the official decision '${decisionVerdict}' on manuscript ${selectedPaperForDecision.id} and dispatch the decision letter to the author?`,
-      confirmButtonLabel: isDe ? "Ja, Entscheidung senden" : "Yes, Submit Decision",
-      confirmColorClass: decisionVerdict === "Accept" ? "bg-emerald-600 hover:bg-emerald-700" : decisionVerdict === "Reject" ? "bg-rose-600 hover:bg-rose-700" : "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: handleSubmitDecision
+
+    let templateId = "decision_minor"
+    if (decisionVerdict === "Accept") templateId = "decision_accept"
+    else if (decisionVerdict === "Major Revision" || decisionVerdict === "Reject & Resubmit") templateId = "decision_major"
+    else if (decisionVerdict === "Reject") templateId = "decision_reject"
+
+    const authorEmail = selectedPaperForDecision.authorEmail || "author@university.edu"
+    const authorName = selectedPaperForDecision.authorName || "Author"
+    const paperId = selectedPaperForDecision.id
+    const paperTitle = selectedPaperForDecision.title
+    const journalName = selectedPaperForDecision.journal || user.journal
+
+    openEmailDispatch({
+      templateId,
+      recipientEmail: authorEmail,
+      recipientName: authorName,
+      paperId,
+      paperTitle,
+      journal: journalName,
+      defaultSubject: `Editorial Decision: ${decisionVerdict} on ${paperId} - ${paperTitle}`,
+      defaultBody: decisionLetter,
+      actionLabel: decisionVerdict === "Accept" ? "View Publication Dossier" : "Submit Revised Manuscript",
+      actionUrl: "https://www.scholarlyopen.org/editorial360",
+      onConfirmSend: async (data) => {
+        let nextStatus: JmManuscript["status"] = "Under Review"
+        if (decisionVerdict === "Accept") nextStatus = "Accepted"
+        else if (decisionVerdict === "Minor Revision" || decisionVerdict === "Major Revision" || decisionVerdict === "Reject & Resubmit") nextStatus = "Revision Required"
+        else if (decisionVerdict === "Reject") nextStatus = "Rejected"
+
+        const updated = manuscripts.map(m => {
+          if (m.id === paperId) {
+            return { ...m, status: nextStatus }
+          }
+          return m
+        })
+        setManuscripts(updated)
+        if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(paperId, nextStatus)
+
+        // Dispatch official decision email
+        await fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: data.recipientEmail,
+            customSubject: data.subject,
+            customHtml: data.renderedHtml,
+            journal: journalName,
+            paperId,
+            paperTitle,
+            recipientName: authorName
+          })
+        }).catch(e => console.error("Decision email dispatch error:", e))
+
+        triggerToast(isDe ? `Redaktionelle Entscheidung '${decisionVerdict}' erfolgreich übermittelt!` : `Editorial decision '${decisionVerdict}' dispatched to author!`)
+        setSelectedPaperForDecision(null)
+        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+      }
     })
   }
 
@@ -575,6 +644,23 @@ export function EditorWorkspace({
     })
     setManuscripts(updated)
     if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(selectedPaperForReviewers.id, "Under Review")
+
+    // Dispatch review invitation emails
+    selectedReviewerNames.forEach(revName => {
+      fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "reviewer@scholarlyopen.org",
+          recipientName: revName,
+          subject: `Review Invitation: ${selectedPaperForReviewers.id} - ${selectedPaperForReviewers.title}`,
+          template: "invitation",
+          paperId: selectedPaperForReviewers.id,
+          paperTitle: selectedPaperForReviewers.title,
+          journal: selectedPaperForReviewers.journal || user.journal
+        })
+      }).catch(e => console.error(e))
+    })
 
     triggerToast(isDe ? "Gutachter-Einladungen versendet!" : "Peer reviewer invitations dispatched!")
     setSelectedPaperForReviewers(null)
@@ -3575,6 +3661,24 @@ export function EditorWorkspace({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ========================================================================= */}
+      {/* TAB: EMAIL TEMPLATES HUB & STUDIO                                         */}
+      {/* ========================================================================= */}
+      {activeTab === "templates" && (
+        <EmailTemplatesManager
+          language={language}
+          currentUserEmail={user?.email || "scholarlyopen@gmail.com"}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* INTERACTIVE REVIEW & DISPATCH EMAIL MODAL                                  */}
+      {/* ========================================================================= */}
+      <EmailDispatchDialog
+        language={language}
+        config={dispatchDialogConfig}
+      />
 
     </div>
   )

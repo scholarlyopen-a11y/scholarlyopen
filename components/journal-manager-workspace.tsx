@@ -51,9 +51,10 @@ import {
   Building2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
+import { EmailTemplatesManager } from "./email-templates-manager"
+import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 
 export interface JmManuscript {
   id: string
@@ -370,6 +371,23 @@ export function JournalManagerWorkspace({
     })
   }
 
+  // Email Dispatch Review & Edit Dialog State
+  const [dispatchDialogConfig, setDispatchDialogConfig] = useState<EmailDispatchConfig>({
+    isOpen: false,
+    recipientEmail: "",
+    recipientName: "",
+    onConfirmSend: async () => {},
+    onCancel: () => {}
+  })
+
+  const openEmailDispatch = (config: Omit<EmailDispatchConfig, "isOpen" | "onCancel">) => {
+    setDispatchDialogConfig({
+      ...config,
+      isOpen: true,
+      onCancel: () => setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+    })
+  }
+
   // Filtered manuscripts
   const filteredManuscripts = useMemo(() => {
     return initialManuscripts.map(m => {
@@ -534,12 +552,18 @@ export function JournalManagerWorkspace({
     const authorName = selectedManuscript.authorName || "Author"
     const message = queryAuthorMessage || "Please provide high-resolution figures and a signed ethics/COI declaration statement."
 
-    triggerConfirm({
-      title: "Dispatch Correction Query to Author?",
-      message: `Are you sure you want to return manuscript ${msId} to ${authorName} with these pre-check correction instructions?`,
-      confirmButtonLabel: "Yes, Dispatch Query",
-      confirmColorClass: "bg-amber-600 hover:bg-amber-700",
-      onConfirm: () => {
+    openEmailDispatch({
+      templateId: "precheck_query",
+      recipientEmail: authorEmail,
+      recipientName: authorName,
+      paperId: msId,
+      paperTitle: msTitle,
+      journal: selectedManuscript.journal,
+      actionLabel: "Upload Corrected Files",
+      actionUrl: "https://www.scholarlyopen.org/editorial360",
+      defaultSubject: `Technical Pre-Check Query: Action Required for ${msId}`,
+      defaultBody: `Dear ${authorName},\n\nThank you for submitting manuscript ${msId} (${msTitle}) to ${selectedManuscript.journal}.\n\nDuring the initial technical pre-check by our editorial office, the following item(s) require your attention before the paper can proceed to editorial triage:\n\n${message}\n\nPlease log into the Editorial360 portal to upload the corrected files.`,
+      onConfirmSend: async (data) => {
         setIsQueryAuthorOpen(false)
         setIsPreQualityModalOpen(false)
         setQueryAuthorMessage("")
@@ -548,20 +572,21 @@ export function JournalManagerWorkspace({
           onUpdateManuscriptStatus(msId, "Revision Required")
         }
 
-        fetch("/api/editorial360/email", {
+        await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: authorEmail,
-            recipientName: authorName,
-            subject: `Technical Pre-Check Query: Action Required for ${msId}`,
-            template: "precheck_query",
+            to: data.recipientEmail,
+            customSubject: data.subject,
+            customHtml: data.renderedHtml,
+            journal: selectedManuscript.journal,
             paperId: msId,
             paperTitle: msTitle,
-            customMessage: message,
-            journal: selectedManuscript.journal
+            recipientName: authorName
           })
         }).catch(e => console.error(e))
+
+        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
       }
     })
   }
@@ -634,22 +659,35 @@ export function JournalManagerWorkspace({
     const revObj = reviewersList.find(x => x.name === revName)
     const targetEmail = revObj ? revObj.email : "reviewer@scholarlyopen.org"
 
-    setNudgedReviewers(prev => ({ ...prev, [revName]: true }))
-
-    fetch("/api/editorial360/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: targetEmail,
-        recipientName: revName,
-        subject: `Reminder: Double-Blind Review for ${trackingManuscript.id}`,
-        template: "reviewer_reminder",
-        paperId: trackingManuscript.id,
-        paperTitle: trackingManuscript.title,
-        journal: trackingManuscript.journal,
-        customMessage: "This is a friendly reminder that your review scorecard is due. Please let us know if you require any assistance or an extension."
-      })
-    }).catch(e => console.error(e))
+    openEmailDispatch({
+      templateId: "reviewer_reminder",
+      recipientEmail: targetEmail,
+      recipientName: revName,
+      paperId: trackingManuscript.id,
+      paperTitle: trackingManuscript.title,
+      journal: trackingManuscript.journal,
+      actionLabel: "Access Reviewer Scorecard",
+      actionUrl: "https://www.scholarlyopen.org/editorial360",
+      defaultSubject: `Reminder: Double-Blind Review Pending for ${trackingManuscript.id}`,
+      defaultBody: `Dear ${revName},\n\nThis is a friendly reminder regarding your double-blind peer review for manuscript ${trackingManuscript.id} (${trackingManuscript.title}) submitted to ${trackingManuscript.journal}.\n\nWe kindly request that you complete your scorecard report or let us know if you require a deadline extension.\n\nThank you for supporting rigorous peer review.`,
+      onConfirmSend: async (data) => {
+        setNudgedReviewers(prev => ({ ...prev, [revName]: true }))
+        await fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: data.recipientEmail,
+            customSubject: data.subject,
+            customHtml: data.renderedHtml,
+            journal: trackingManuscript.journal,
+            paperId: trackingManuscript.id,
+            paperTitle: trackingManuscript.title,
+            recipientName: revName
+          })
+        }).catch(e => console.error(e))
+        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
+      }
+    })
   }
 
   // Handle Reviewer Deadline Extension
@@ -664,30 +702,39 @@ export function JournalManagerWorkspace({
 
   // Handle Author Revision Reminder Nudge
   const handleNudgeAuthor = (ms: JmManuscript) => {
-    triggerConfirm({
-      title: "Send Revision Reminder to Author?",
-      message: `Are you sure you want to dispatch a revision reminder email to Author (${ms.authorName || 'Author'}) for manuscript ${ms.id}?`,
-      confirmButtonLabel: "Yes, Send Reminder",
-      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: () => {
+    const authorEmail = ms.authorEmail || "author@university.edu"
+    const authorName = ms.authorName || "Author"
+
+    openEmailDispatch({
+      templateId: "author_reminder",
+      recipientEmail: authorEmail,
+      recipientName: authorName,
+      paperId: ms.id,
+      paperTitle: ms.title,
+      journal: ms.journal,
+      actionLabel: "Upload Revised Manuscript",
+      actionUrl: "https://www.scholarlyopen.org/editorial360",
+      defaultSubject: `Reminder: Revision & Rebuttal Due for ${ms.id}`,
+      defaultBody: `Dear ${authorName},\n\nThis is a friendly reminder that the revision and rebuttal for your manuscript ${ms.id} (${ms.title}) submitted to ${ms.journal} are currently pending.\n\nPlease upload your revised manuscript, tracked-changes version, and point-by-point rebuttal letter through the Author Portal.\n\nIf you require an extension to complete additional data analysis, please reply to this notice.`,
+      onConfirmSend: async (data) => {
         setAuthorNudged(prev => ({ ...prev, [ms.id]: true }))
-        fetch("/api/editorial360/email", {
+        await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: ms.authorEmail || "author@university.edu",
-            recipientName: ms.authorName || "Author",
-            subject: `Reminder: Revision Pending for ${ms.id}`,
-            template: "precheck_query",
+            to: data.recipientEmail,
+            customSubject: data.subject,
+            customHtml: data.renderedHtml,
+            journal: ms.journal,
             paperId: ms.id,
             paperTitle: ms.title,
-            customMessage: "This is a friendly reminder that the revision and rebuttal for your manuscript are currently due. Please upload your revised files through the Author Portal.",
-            journal: ms.journal
+            recipientName: authorName
           })
         }).catch(e => console.error(e))
 
-        setEditorPromptSuccess(`✓ Revision reminder email dispatched to ${ms.authorName || 'Author'}.`)
+        setEditorPromptSuccess(`✓ Revision reminder email dispatched to ${authorName}.`)
         setTimeout(() => setEditorPromptSuccess(null), 6000)
+        setDispatchDialogConfig(prev => ({ ...prev, isOpen: false }))
       }
     })
   }
@@ -3648,6 +3695,24 @@ export function JournalManagerWorkspace({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ========================================================================= */}
+      {/* TAB: EMAIL TEMPLATES HUB & STUDIO                                         */}
+      {/* ========================================================================= */}
+      {activeTab === "templates" && (
+        <EmailTemplatesManager
+          language={language}
+          currentUserEmail={user?.email || "scholarlyopen@gmail.com"}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* INTERACTIVE REVIEW & DISPATCH EMAIL MODAL                                  */}
+      {/* ========================================================================= */}
+      <EmailDispatchDialog
+        language={language}
+        config={dispatchDialogConfig}
+      />
 
     </div>
   )
