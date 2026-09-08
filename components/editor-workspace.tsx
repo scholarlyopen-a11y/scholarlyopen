@@ -360,6 +360,7 @@ export function EditorWorkspace({
   const [customRevEmail, setCustomRevEmail] = useState("")
   const [customRevAffiliation, setCustomRevAffiliation] = useState("")
   const [externalReviewersList, setExternalReviewersList] = useState<{name: string, email: string, affiliation: string}[]>([])
+  const [editingReviewerIndex, setEditingReviewerIndex] = useState<number | null>(null)
 
   // Assign Reviewer Invitation Email Template State
   const [assignEmailSubject, setAssignEmailSubject] = useState("")
@@ -2591,53 +2592,186 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {/* TAB 3: INVITE EXTERNAL SPECIALIST */}
             {reviewerSourceTab === "external" && (
               <div className="space-y-3">
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2.5">
-                  <span className="font-bold text-slate-900 dark:text-white block">
-                    Invite External Expert by Email:
-                  </span>
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-slate-900 dark:text-white block text-xs">
+                      {editingReviewerIndex !== null ? "Edit External Expert Details:" : "Invite External Expert by Email:"}
+                    </span>
+                    {editingReviewerIndex !== null && (
+                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                        Editing Reviewer #{editingReviewerIndex + 1}
+                      </span>
+                    )}
+                  </div>
                   
                   <div className="space-y-2">
                     <input
                       type="text"
                       value={customRevName}
                       onChange={(e) => setCustomRevName(e.target.value)}
-                      placeholder="Full Name"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                      placeholder="Full Name (e.g. Prof. David Miller)"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
                     />
                     <input
                       type="email"
                       value={customRevEmail}
                       onChange={(e) => setCustomRevEmail(e.target.value)}
-                      placeholder="Institutional Email"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                      placeholder="Institutional Email (e.g. d.miller@ox.ac.uk)"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
                     />
                     <input
                       type="text"
                       value={customRevAffiliation}
                       onChange={(e) => setCustomRevAffiliation(e.target.value)}
-                      placeholder="Institution / Specialty"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                      placeholder="Institution / Specialty (e.g. University of Oxford)"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
                     />
 
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        if (!customRevName || !customRevEmail) {
-                          alert("Please enter both Name and Email.")
-                          return
-                        }
-                        const newRev = { name: customRevName, email: customRevEmail, affiliation: customRevAffiliation || "External Specialist" }
-                        setExternalReviewersList(prev => [...prev, newRev])
-                        setSelectedReviewerNames(prev => [...prev, customRevName])
-                        setCustomRevName("")
-                        setCustomRevEmail("")
-                        setCustomRevAffiliation("")
-                      }}
-                      className="w-full bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 rounded-xl cursor-pointer"
-                    >
-                      Add to Selection List
-                    </Button>
+                    {editingReviewerIndex !== null ? (
+                      <div className="flex items-center gap-2 pt-1">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            if (!customRevName.trim() || !customRevEmail.trim()) {
+                              alert("Please enter both Name and Email.")
+                              return
+                            }
+                            const oldName = externalReviewersList[editingReviewerIndex].name
+                            const newName = customRevName.trim()
+                            const updatedList = [...externalReviewersList]
+                            updatedList[editingReviewerIndex] = {
+                              name: newName,
+                              email: customRevEmail.trim(),
+                              affiliation: customRevAffiliation.trim() || "External Specialist"
+                            }
+                            setExternalReviewersList(updatedList)
+                            setSelectedReviewerNames(prev => prev.map(n => n === oldName ? newName : n))
+                            setEditingReviewerIndex(null)
+                            setCustomRevName("")
+                            setCustomRevEmail("")
+                            setCustomRevAffiliation("")
+                          }}
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold h-8 rounded-lg cursor-pointer"
+                        >
+                          Update Reviewer Details
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingReviewerIndex(null)
+                            setCustomRevName("")
+                            setCustomRevEmail("")
+                            setCustomRevAffiliation("")
+                          }}
+                          className="px-3 text-xs font-medium h-8 rounded-lg cursor-pointer border-slate-300 dark:border-slate-700"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (!customRevName.trim() || !customRevEmail.trim()) {
+                            alert("Please enter both Name and Email.")
+                            return
+                          }
+                          const newRev = {
+                            name: customRevName.trim(),
+                            email: customRevEmail.trim(),
+                            affiliation: customRevAffiliation.trim() || "External Specialist"
+                          }
+                          setExternalReviewersList(prev => [...prev, newRev])
+                          setSelectedReviewerNames(prev => prev.includes(newRev.name) ? prev : [...prev, newRev.name])
+                          setCustomRevName("")
+                          setCustomRevEmail("")
+                          setCustomRevAffiliation("")
+                        }}
+                        className="w-full bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 rounded-lg cursor-pointer"
+                      >
+                        Add to Selection List
+                      </Button>
+                    )}
                   </div>
+
+                  {/* Added External Experts List */}
+                  {externalReviewersList.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-[#272832]">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                        Added External Experts ({externalReviewersList.length}):
+                      </span>
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
+                        {externalReviewersList.map((rev, idx) => {
+                          const isCurrentlySelected = selectedReviewerNames.includes(rev.name)
+                          return (
+                            <div
+                              key={idx}
+                              className={`p-2.5 rounded-lg border flex items-center justify-between gap-2.5 transition-all ${
+                                editingReviewerIndex === idx
+                                  ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20"
+                                  : isCurrentlySelected
+                                  ? "border-sky-200 dark:border-sky-800/60 bg-sky-50/40 dark:bg-sky-950/20"
+                                  : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#14151a]"
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1 space-y-0.5">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-semibold text-xs text-slate-900 dark:text-white truncate">
+                                    {rev.name}
+                                  </span>
+                                  <span className="text-[10px] font-medium text-sky-700 dark:text-sky-400 bg-sky-100/80 dark:bg-sky-950/60 px-1.5 py-0.2 rounded">
+                                    External Expert
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
+                                  <span>{rev.email}</span>
+                                  {rev.affiliation && (
+                                    <>
+                                      <span>·</span>
+                                      <span>{rev.affiliation}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingReviewerIndex(idx)
+                                    setCustomRevName(rev.name)
+                                    setCustomRevEmail(rev.email)
+                                    setCustomRevAffiliation(rev.affiliation)
+                                  }}
+                                  className="px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const revToRemove = externalReviewersList[idx]
+                                    setExternalReviewersList(prev => prev.filter((_, i) => i !== idx))
+                                    setSelectedReviewerNames(prev => prev.filter(n => n !== revToRemove.name))
+                                    if (editingReviewerIndex === idx) {
+                                      setEditingReviewerIndex(null)
+                                      setCustomRevName("")
+                                      setCustomRevEmail("")
+                                      setCustomRevAffiliation("")
+                                    }
+                                  }}
+                                  className="px-2.5 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition-colors cursor-pointer border border-rose-200 dark:border-rose-900/50"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -2758,9 +2892,42 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
           </div>
 
-          <DialogFooter className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-[#272832]">
-            <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-              Selected: <strong className="text-[#0b99ff]">{selectedReviewerNames.length} Reviewer(s)</strong>
+          <DialogFooter className="flex flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-[#272832]">
+            <div className="flex items-center gap-2 flex-wrap max-w-[65%]">
+              <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+                Selected ({selectedReviewerNames.length}):
+              </span>
+              {selectedReviewerNames.length === 0 ? (
+                <span className="text-xs text-slate-400 italic">None selected yet</span>
+              ) : (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {selectedReviewerNames.map((name) => (
+                    <span
+                      key={name}
+                      className="inline-flex items-center gap-1 text-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700"
+                    >
+                      <span className="max-w-[130px] truncate font-medium">{name}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedReviewerNames(prev => prev.filter(n => n !== name))
+                          setExternalReviewersList(prev => prev.filter(r => r.name !== name))
+                          if (editingReviewerIndex !== null && externalReviewersList[editingReviewerIndex]?.name === name) {
+                            setEditingReviewerIndex(null)
+                            setCustomRevName("")
+                            setCustomRevEmail("")
+                            setCustomRevAffiliation("")
+                          }
+                        }}
+                        className="text-slate-400 hover:text-rose-500 cursor-pointer text-xs font-bold leading-none ml-0.5"
+                        title="Remove reviewer"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
