@@ -40,7 +40,6 @@ import {
   Bell,
   TrendingUp,
   Globe,
-  Sparkles,
   Calendar,
   Filter,
   Activity,
@@ -2279,110 +2278,77 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             )}
 
-            {/* Review Invitation Email Template & Customization */}
+            {/* Reviewer Invitation Letter */}
             <div className="space-y-3 pt-3 border-t border-slate-200/80 dark:border-[#272832]">
-              {/* Template Header with Edit / Live Preview Tabs */}
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-[#0b99ff]/10 text-[#0b99ff] flex items-center justify-center font-bold">
-                    <Mail className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <label className="font-bold text-xs text-slate-900 dark:text-white block leading-tight">
-                      {isDe ? "Gutachter-Einladungs-E-Mail-Vorlage" : "Review Invitation Email Template (Dispatched to Reviewers)"}
-                    </label>
-                    <span className="text-[10px] text-slate-400">
-                      {isDe ? "Direkt im Popup editierbar vor dem Zuweisen" : "Directly editable within popup prior to dispatch"}
-                    </span>
-                  </div>
+                <div>
+                  <h4 className="font-semibold text-xs text-slate-900 dark:text-white">
+                    {isDe ? "Gutachter-Einladungsschreiben" : "Reviewer Invitation Letter"}
+                  </h4>
                 </div>
 
-                {/* Sub-Tabs: Edit Template / Live Preview */}
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-1 rounded-xl border border-slate-200/80 dark:border-[#272832]">
+                {/* Sub-Tabs: Edit Letter / Preview */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-0.5 rounded-lg border border-slate-200/80 dark:border-[#272832]">
                   <button
                     type="button"
                     onClick={() => setAssignEmailTab("edit")}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                       assignEmailTab === "edit"
-                        ? "bg-white dark:bg-[#1f2027] text-[#0b99ff] shadow-xs"
+                        ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
                         : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                     }`}
                   >
-                    <Edit3 className="h-3 w-3" />
-                    {isDe ? "Text anpassen" : "Edit Letter"}
+                    {isDe ? "Bearbeiten" : "Edit Letter"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setAssignEmailTab("preview")}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                       assignEmailTab === "preview"
-                        ? "bg-white dark:bg-[#1f2027] text-[#0b99ff] shadow-xs"
+                        ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
                         : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                     }`}
                   >
-                    <Eye className="h-3 w-3" />
-                    {isDe ? "E-Mail Vorschau" : "Live Email Preview"}
+                    {isDe ? "Vorschau" : "Preview"}
                   </button>
                 </div>
               </div>
 
-              {/* Subject Line & Target Recipients Info */}
-              <div className="space-y-2">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                      {isDe ? "Einladungs-Betreffzeile:" : "Invitation Subject Line:"}
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-medium">CC: scholarlyopen@gmail.com</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={assignEmailSubject}
-                    onChange={(e) => setAssignEmailSubject(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-                  />
+              {/* Subject Line */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                    {isDe ? "Betreff:" : "Subject:"}
+                  </label>
+                  <span className="text-[10px] text-slate-400">CC: scholarlyopen@gmail.com</span>
                 </div>
-
-                <div className="p-2 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 text-[11px] text-sky-800 dark:text-sky-300 flex items-center justify-between">
-                  <span>
-                    <strong>{selectedReviewers.length} Reviewer(s) targeted:</strong> {selectedReviewers.join(", ") || "None selected yet"}
-                  </span>
-                  <span className="text-[10px] text-sky-600 dark:text-sky-400">
-                    Auto-personalized with &#123;&#123;recipientName&#125;&#125;
-                  </span>
-                </div>
+                <input
+                  type="text"
+                  value={assignEmailSubject}
+                  onChange={(e) => setAssignEmailSubject(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                />
               </div>
 
               {/* Body Edit or Preview */}
               {assignEmailTab === "edit" ? (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                      {isDe ? "Einladungs-Text (frei anpassbar):" : "Invitation Letter Body (Fully Customizable):"}
-                    </label>
-                    <span className="text-[10px] text-slate-400">
-                      Supports markdown &amp; paragraphs
-                    </span>
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                    {isDe ? "Schreiben:" : "Letter Body:"}
+                  </label>
                   <textarea
                     rows={9}
                     value={assignEmailBody}
                     onChange={(e) => setAssignEmailBody(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
+                    className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
                   />
                 </div>
               ) : (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-[#0b99ff]" />
-                      {isDe ? "Formatierte Vorschau (wie vom Gutachter empfangen):" : "Rendered HTML Preview (Reviewer's Inbox View):"}
-                    </label>
-                    <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                      Scholarly Open Template
-                    </span>
-                  </div>
-                  <div className="rounded-xl border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-100 dark:bg-slate-950 p-2 shadow-inner">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                    {isDe ? "Vorschau:" : "Email Preview:"}
+                  </label>
+                  <div className="rounded-lg border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-50 dark:bg-slate-950 p-2">
                     <iframe
                       title="Review Invitation Email Preview"
                       srcDoc={generateBrandedEmailHtml({
@@ -2397,7 +2363,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         paperTitle: selectedManuscript?.title,
                         recipientName: selectedReviewers[0] || "Dr. Reviewer"
                       })}
-                      className="w-full h-[320px] bg-white rounded-lg border border-slate-200 dark:border-slate-800"
+                      className="w-full h-[320px] bg-white rounded border border-slate-200 dark:border-slate-800"
                     />
                   </div>
                 </div>
