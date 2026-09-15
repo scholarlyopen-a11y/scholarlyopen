@@ -273,7 +273,7 @@ export async function POST(request: Request) {
     `2. Handling Editor Assignment: An Associate Editor will be assigned to manage peer review.`,
     `3. Peer Review: Your manuscript will be evaluated by independent peer reviewers.`,
     ``,
-    `You can track the progress of your peer review, view reviewer comments, and upload revisions anytime in our Editorial360 workspace:`,
+    `You can track the progress of your peer review, view reviewer comments, and upload revisions anytime in our editorial360 workspace:`,
     `https://scholarlyopen.org/editorial360?manuscriptId=${trackingId}`,
     ``,
     `Best regards,`,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import { 
   LayoutDashboard, 
@@ -56,6 +56,21 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
+
+export interface ReviewerHistoryItem {
+  id: string
+  paperId: string
+  paperTitle?: string
+  journal?: string
+  reviewerName: string
+  reviewerEmail: string
+  invitedDate: string
+  status: "Invited" | "Accepted" | "Declined" | "Completed"
+  deadline?: string
+  declineReason?: string
+  declineReferral?: string
+  respondedAt?: string
+}
 
 export interface JmManuscript {
   id: string
@@ -256,6 +271,42 @@ export function JournalManagerWorkspace({
   const [trackingManuscript, setTrackingManuscript] = useState<JmManuscript | null>(null)
   const [nudgedReviewers, setNudgedReviewers] = useState<Record<string, boolean>>({})
   const [extendedDays, setExtendedDays] = useState<Record<string, number>>({})
+
+  // Reviewer History Tracking States
+  const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
+  const [globalReviewerHistory, setGlobalReviewerHistory] = useState<ReviewerHistoryItem[]>([])
+  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history">("directory")
+  const [isLoadingPaperHistory, setIsLoadingPaperHistory] = useState(false)
+
+  // Fetch paper-specific reviewer history when Track Modal opens
+  useEffect(() => {
+    if (isTrackModalOpen && trackingManuscript?.id) {
+      setIsLoadingPaperHistory(true)
+      fetch(`/api/editorial360/reviewers?paperId=${encodeURIComponent(trackingManuscript.id)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.ok && Array.isArray(data.history)) {
+            setPaperReviewerHistory(data.history)
+          }
+        })
+        .catch(e => console.error("Failed to load paper reviewer history:", e))
+        .finally(() => setIsLoadingPaperHistory(false))
+    }
+  }, [isTrackModalOpen, trackingManuscript?.id])
+
+  // Fetch global reviewer history for the Registry view
+  useEffect(() => {
+    if (activeTab === "users") {
+      fetch("/api/editorial360/reviewers")
+        .then(res => res.json())
+        .then(data => {
+          if (data?.ok && Array.isArray(data.history)) {
+            setGlobalReviewerHistory(data.history)
+          }
+        })
+        .catch(e => console.error("Failed to load global reviewer history:", e))
+    }
+  }, [activeTab, reviewerRegistryTab])
 
   // Dedicated Forensics Investigation Modal
   const [isForensicsModalOpen, setIsForensicsModalOpen] = useState(false)
@@ -512,18 +563,34 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       const targetEmail = extObj ? extObj.email : (revObj ? revObj.email : "reviewer@scholarlyopen.org")
       const personalizedBody = assignEmailBody.replace(/\{\{recipientName\}\}/g, revName)
 
+      const acceptLink = `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(msId)}&journal=${encodeURIComponent(msJournal)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(revName)}`
+      const declineLink = `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(msId)}&journal=${encodeURIComponent(msJournal)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(revName)}`
+
       const renderedHtml = generateBrandedEmailHtml({
         subject: assignEmailSubject,
         bodyText: personalizedBody,
         actionLabel: "Accept Review Invitation",
-        actionUrl: "https://www.scholarlyopen.org/editorial360",
+        actionUrl: acceptLink,
         secondaryActionLabel: "Decline Invitation",
-        secondaryActionUrl: "https://www.scholarlyopen.org/editorial360?action=decline",
+        secondaryActionUrl: declineLink,
         journal: msJournal,
         paperId: msId,
         paperTitle: msTitle,
         recipientName: revName
       })
+
+      // Record invitation in tracking store
+      fetch("/api/editorial360/reviewers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paperId: msId,
+          paperTitle: msTitle,
+          journal: msJournal,
+          reviewerName: revName,
+          reviewerEmail: targetEmail
+        })
+      }).catch(e => console.error("Reviewer record error:", e))
 
       return fetch("/api/editorial360/email", {
         method: "POST",
@@ -539,6 +606,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         })
       }).catch(e => console.error("Invitation email dispatch error:", e))
     }))
+
+    // Refresh reviewer history cache immediately
+    fetch("/api/editorial360/reviewers")
+      .then(res => res.json())
+      .then(data => {
+        if (data?.ok && Array.isArray(data.history)) {
+          setGlobalReviewerHistory(data.history)
+          if (trackingManuscript?.id) {
+            setPaperReviewerHistory(data.history.filter((h: any) => h.paperId.toLowerCase() === trackingManuscript.id.toLowerCase()))
+          }
+        }
+      })
+      .catch(e => console.error("Error refreshing reviewer history:", e))
 
     setIsAssignSending(false)
     setIsAssignModalOpen(false)
@@ -603,7 +683,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       actionLabel: "Upload Corrected Files",
       actionUrl: "https://www.scholarlyopen.org/editorial360",
       defaultSubject: `Technical Pre-Check Query: Action Required for ${msId}`,
-      defaultBody: `Dear ${authorName},\n\nThank you for submitting manuscript ${msId} (${msTitle}) to ${selectedManuscript.journal}.\n\nDuring the initial technical pre-check by our editorial office, the following item(s) require your attention before the paper can proceed to editorial triage:\n\n${message}\n\nPlease log into the Editorial360 portal to upload the corrected files.`,
+      defaultBody: `Dear ${authorName},\n\nThank you for submitting manuscript ${msId} (${msTitle}) to ${selectedManuscript.journal}.\n\nDuring the initial technical pre-check by our editorial office, the following item(s) require your attention before the paper can proceed to editorial triage:\n\n${message}\n\nPlease log into the editorial360 portal to upload the corrected files.`,
       onConfirmSend: async (data: any) => {
         setIsQueryAuthorOpen(false)
         setIsPreQualityModalOpen(false)
@@ -1345,71 +1425,276 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
 
       {/* ========================================================================= */}
-      {/* 4. REVIEWER REGISTRY                                                      */}
+      {/* 4. REVIEWER REGISTRY & REVIEWER HISTORY                                   */}
       {/* ========================================================================= */}
       {activeTab === "users" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Reviewer Registry</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Directory listing of vetted peer reviewers and availability status.</p>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                {reviewerRegistryTab === "directory" ? "Reviewer Registry" : "Reviewer History"}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {reviewerRegistryTab === "directory"
+                  ? "Directory listing of vetted peer reviewers and availability status."
+                  : "Complete dispatch, acceptance, and declination log across all journal desks."}
+              </p>
             </div>
 
-            <Button
-              onClick={() => setIsAddReviewerOpen(true)}
-              size="sm"
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer h-8 px-3.5 rounded-lg"
-            >
-              <UserPlus className="h-4 w-4" />
-              Invite Reviewer
-            </Button>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setReviewerRegistryTab("directory")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                    reviewerRegistryTab === "directory"
+                      ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  Active Pool ({reviewersList.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewerRegistryTab("history")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                    reviewerRegistryTab === "history"
+                      ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  Reviewer History ({globalReviewerHistory.length})
+                </button>
+              </div>
+
+              <Button
+                onClick={() => setIsAddReviewerOpen(true)}
+                size="sm"
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer h-8 px-3.5 rounded-lg"
+              >
+                <UserPlus className="h-4 w-4" />
+                Invite Reviewer
+              </Button>
+            </div>
           </div>
 
-          <div className="p-4 space-y-3">
-            {reviewersList.map((rev) => (
-              <div 
-                key={rev.id} 
-                className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-block h-2 w-2 rounded-full ${
-                      rev.status === "Active" ? "bg-emerald-500" : rev.status === "Busy" ? "bg-amber-500" : "bg-slate-400"
-                    }`} />
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">{rev.name}</h4>
-                    <span className="text-[11px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                      ({rev.activeTasks || (rev.name === "Dr. Marcus Vance" ? 2 : rev.name === "Dr. Evelyn Vane" ? 1 : 0)} active reviews)
-                    </span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                      rev.status === "Active" ? "bg-green-100 text-green-600 border border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30" :
-                      rev.status === "Busy" ? "bg-yellow-100 text-yellow-600 border border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/30" :
-                      "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400"
-                    }`}>
-                      {rev.status === "Active" ? "Active" : rev.status === "Busy" ? "Sabbatical" : "Inactive"}
-                    </span>
-                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{rev.orcid}</span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Specialization: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{rev.specialization}</strong>
-                  </p>
-                  <div className="text-xs text-slate-400">
-                    Email: {rev.email} | Active Capacity: {rev.activeTasks || (rev.name === "Dr. Marcus Vance" ? 2 : rev.name === "Dr. Evelyn Vane" ? 1 : 0)} / {rev.maxTasks} papers
-                  </div>
+          {reviewerRegistryTab === "history" ? (
+            <div className="p-5 space-y-5">
+              {/* Summary KPIs */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Total Dispatched</span>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white mt-0.5 block">{globalReviewerHistory.length}</span>
                 </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCycleReviewerStatus(rev.id)}
-                    className="text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer h-8 px-3 rounded-lg"
-                  >
-                    {rev.status === "Active" ? "Set Sabbatical" : rev.status === "Busy" ? "Set Inactive" : "Set Active"}
-                  </Button>
+                <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Accepted / Active</span>
+                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                    {globalReviewerHistory.filter(h => h.status === "Accepted" || h.status === "Completed").length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20">
+                  <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wider block">Declined</span>
+                  <span className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-0.5 block">
+                    {globalReviewerHistory.filter(h => h.status === "Declined").length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20">
+                  <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">Pending Response</span>
+                  <span className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5 block">
+                    {globalReviewerHistory.filter(h => h.status === "Invited").length}
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* Reviewer History Table */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 text-slate-500 uppercase tracking-wider text-[11px]">
+                      <th className="px-4 py-3 font-semibold">Manuscript & Journal</th>
+                      <th className="px-4 py-3 font-semibold">Reviewer</th>
+                      <th className="px-4 py-3 font-semibold">Dispatched</th>
+                      <th className="px-4 py-3 font-semibold">Status</th>
+                      <th className="px-4 py-3 font-semibold">Details / Feedback</th>
+                      <th className="px-4 py-3 font-semibold text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                    {globalReviewerHistory.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-8 text-center text-slate-400 italic">
+                          No reviewer invitations logged yet. Dispatched review requests will appear here.
+                        </td>
+                      </tr>
+                    ) : (
+                      globalReviewerHistory.map((item) => {
+                        const targetMs = initialManuscripts.find(m => m.id && m.id.toLowerCase() === item.paperId.toLowerCase())
+
+                        return (
+                          <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors">
+                            <td className="px-4 py-3.5">
+                              <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20 text-[11px]">
+                                {item.paperId}
+                              </span>
+                              <div className="font-semibold text-slate-900 dark:text-white mt-1 line-clamp-1 max-w-[220px]" title={item.paperTitle}>
+                                {item.paperTitle || targetMs?.title || "Manuscript"}
+                              </div>
+                              <div className="text-[11px] text-slate-400 mt-0.5">
+                                {item.journal || targetMs?.journal || "Scholarly Open"}
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <div className="font-bold text-slate-900 dark:text-white">{item.reviewerName}</div>
+                              <div className="text-[11px] text-slate-500">{item.reviewerEmail}</div>
+                            </td>
+
+                            <td className="px-4 py-3.5 whitespace-nowrap text-slate-500">
+                              {item.invitedDate}
+                            </td>
+
+                            <td className="px-4 py-3.5 whitespace-nowrap">
+                              {item.status === "Declined" ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-rose-700 bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800">
+                                  <X className="h-3 w-3" /> Declined
+                                </span>
+                              ) : item.status === "Accepted" ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800">
+                                  <Check className="h-3 w-3" /> Accepted
+                                </span>
+                              ) : item.status === "Completed" ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-indigo-700 bg-indigo-100 dark:bg-indigo-950/60 border border-indigo-300 dark:border-indigo-800">
+                                  <CheckCircle2 className="h-3 w-3" /> Report Submitted
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-amber-700 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800">
+                                  <Clock className="h-3 w-3" /> Pending
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="px-4 py-3.5 max-w-[260px]">
+                              {item.status === "Declined" ? (
+                                <div className="space-y-0.5 text-[11px]">
+                                  <div className="text-rose-700 dark:text-rose-400 font-medium">
+                                    <strong>Reason:</strong> {item.declineReason || "Unavailable"}
+                                  </div>
+                                  {item.declineReferral && (
+                                    <div className="text-slate-500 italic">
+                                      Referral: {item.declineReferral}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : item.status === "Accepted" ? (
+                                <span className="text-[11px] text-emerald-600 font-medium">
+                                  Turnaround Target: 14 days {item.deadline ? `(Due: ${item.deadline})` : ""}
+                                </span>
+                              ) : item.status === "Completed" ? (
+                                <span className="text-[11px] text-indigo-600 font-medium">
+                                  Evaluation logged & ready for moderation
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-slate-400">
+                                  Awaiting reviewer response
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                              {item.status === "Declined" ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (targetMs) handleOpenAssign(targetMs)
+                                  }}
+                                  className="h-7 text-[11px] font-semibold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
+                                >
+                                  <UserPlus className="h-3 w-3 mr-1" />
+                                  Assign Alternative
+                                </Button>
+                              ) : item.status === "Invited" ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleNudgeReviewer(item.reviewerName)}
+                                  className="h-7 text-[11px] font-semibold border-slate-200 dark:border-slate-800 cursor-pointer"
+                                >
+                                  <Bell className="h-3 w-3 mr-1 text-[#0b99ff]" />
+                                  Nudge
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    if (targetMs) {
+                                      setTrackingManuscript(targetMs)
+                                      setIsTrackModalOpen(true)
+                                    }
+                                  }}
+                                  className="h-7 text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 cursor-pointer"
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  Track
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 space-y-3">
+              {reviewersList.map((rev) => (
+                <div 
+                  key={rev.id} 
+                  className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block h-2 w-2 rounded-full ${
+                        rev.status === "Active" ? "bg-emerald-500" : rev.status === "Busy" ? "bg-amber-500" : "bg-slate-400"
+                      }`} />
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{rev.name}</h4>
+                      <span className="text-[11px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                        ({rev.activeTasks || (rev.name === "Dr. Marcus Vance" ? 2 : rev.name === "Dr. Evelyn Vane" ? 1 : 0)} active reviews)
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        rev.status === "Active" ? "bg-green-100 text-green-600 border border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30" :
+                        rev.status === "Busy" ? "bg-yellow-100 text-yellow-600 border border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/30" :
+                        "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400"
+                      }`}>
+                        {rev.status === "Active" ? "Active" : rev.status === "Busy" ? "Sabbatical" : "Inactive"}
+                      </span>
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{rev.orcid}</span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Specialization: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{rev.specialization}</strong>
+                    </p>
+                    <div className="text-xs text-slate-400">
+                      Email: {rev.email} | Active Capacity: {rev.activeTasks || (rev.name === "Dr. Marcus Vance" ? 2 : rev.name === "Dr. Evelyn Vane" ? 1 : 0)} / {rev.maxTasks} papers
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCycleReviewerStatus(rev.id)}
+                      className="text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer h-8 px-3 rounded-lg"
+                    >
+                      {rev.status === "Active" ? "Set Sabbatical" : rev.status === "Busy" ? "Set Inactive" : "Set Active"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       )}
 
@@ -2520,9 +2805,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         subject: assignEmailSubject,
                         bodyText: assignEmailBody.replace(/\{\{recipientName\}\}/g, selectedReviewers[0] || "Dr. Reviewer"),
                         actionLabel: "Accept Review Invitation",
-                        actionUrl: "https://www.scholarlyopen.org/editorial360",
+                        actionUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(selectedManuscript?.id || '')}&journal=${encodeURIComponent(selectedManuscript?.journal || '')}`,
                         secondaryActionLabel: "Decline Invitation",
-                        secondaryActionUrl: "https://www.scholarlyopen.org/editorial360?action=decline",
+                        secondaryActionUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(selectedManuscript?.id || '')}&journal=${encodeURIComponent(selectedManuscript?.journal || '')}`,
                         journal: selectedManuscript?.journal || "Scholarly Open",
                         paperId: selectedManuscript?.id,
                         paperTitle: selectedManuscript?.title,
@@ -3165,176 +3450,355 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             )}
 
-            {/* Reviewers Progress List */}
-            <div className="space-y-3">
-              <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs">
-                Assigned Reviewer Milestones & Reports:
-              </span>
-
-              {(trackingManuscript?.reviewers || ["Dr. Evelyn Vane", "Dr. Marcus Vance"]).map((revName) => {
-                const isSubmitted = revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
-                const isOverdue = trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka"
-                const isNudged = nudgedReviewers[revName]
-                const isRemarksApproved = !!approvedReviewRemarks[revName]
-                const baseDays = trackingManuscript?.id === "SOEAS-26-RS106" ? 5 : 11
-                const extraDays = extendedDays[revName] || 0
-                const remainingDays = baseDays + extraDays
-
-                const baseDate = trackingManuscript?.id === "SOEAS-26-RS106" ? new Date("2026-08-30") : new Date("2026-09-04")
-                const targetDate = new Date(baseDate)
-                targetDate.setDate(targetDate.getDate() + extraDays)
-                const targetDeadlineDate = targetDate.toISOString().split("T")[0]
-
-                return (
-                  <div 
-                    key={revName}
-                    className={`p-4 rounded-xl border transition-all space-y-2.5 ${
-                      isOverdue 
-                        ? "bg-red-50/40 dark:bg-red-950/20 border-red-200 dark:border-red-900/40" 
-                        : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
-                    }`}
+            {/* Reviewer History */}
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-[#0b99ff]" />
+                  <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs uppercase tracking-wider">
+                    Reviewer History
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {(() => {
+                      const list = paperReviewerHistory.length > 0 
+                        ? paperReviewerHistory 
+                        : (trackingManuscript?.reviewers || ["Dr. Evelyn Vane", "Dr. Marcus Vance"]).map((r, i) => ({
+                            id: `mock-${i}`,
+                            paperId: trackingManuscript?.id || "",
+                            reviewerName: r,
+                            reviewerEmail: r === "Dr. Evelyn Vane" ? "e.vane@university-medical.edu" : (r === "Dr. Marcus Vance" ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
+                            invitedDate: "2026-08-20",
+                            status: (r === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && r === "Dr. Marcus Vance") ? "Completed" : "Accepted") as any
+                          }))
+                      return `${list.length} logged`
+                    })()}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      if (trackingManuscript) {
+                        setIsTrackModalOpen(false)
+                        handleOpenAssign(trackingManuscript)
+                      }
+                    }}
+                    className="h-7 text-[11px] font-semibold border-slate-200 dark:border-slate-800 cursor-pointer"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                          {revName}
-                        </h4>
-                        {isSubmitted ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
-                              Report Submitted ✓
+                    <UserPlus className="h-3 w-3 mr-1 text-[#0b99ff]" />
+                    Invite Reviewer
+                  </Button>
+                </div>
+              </div>
+
+              {(() => {
+                const displayList: {
+                  id: string
+                  name: string
+                  email: string
+                  invitedDate: string
+                  status: "Invited" | "Accepted" | "Declined" | "Completed"
+                  deadline?: string
+                  declineReason?: string
+                  declineReferral?: string
+                }[] = paperReviewerHistory.length > 0
+                  ? paperReviewerHistory.map(h => ({
+                      id: h.id,
+                      name: h.reviewerName,
+                      email: h.reviewerEmail,
+                      invitedDate: h.invitedDate,
+                      status: h.status,
+                      deadline: h.deadline,
+                      declineReason: h.declineReason,
+                      declineReferral: h.declineReferral
+                    }))
+                  : (trackingManuscript?.reviewers || ["Dr. Evelyn Vane", "Dr. Marcus Vance"]).map((revName, idx) => ({
+                      id: `REV-FALLBACK-${idx}`,
+                      name: revName,
+                      email: revName === "Dr. Evelyn Vane" ? "e.vane@university-medical.edu" : (revName === "Dr. Marcus Vance" ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
+                      invitedDate: "2026-08-20",
+                      status: (revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && revName === "Dr. Marcus Vance") ? "Completed" : "Accepted") as any,
+                      deadline: "2026-09-04"
+                    }))
+
+                return displayList.map((rev) => {
+                  const revName = rev.name
+                  const isDeclined = rev.status === "Declined"
+                  const isInvitedOnly = rev.status === "Invited"
+                  const isSubmitted = rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
+                  const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
+                  const isNudged = nudgedReviewers[revName]
+                  const isRemarksApproved = !!approvedReviewRemarks[revName]
+                  const baseDays = trackingManuscript?.id === "SOEAS-26-RS106" ? 5 : 11
+                  const extraDays = extendedDays[revName] || 0
+                  const remainingDays = baseDays + extraDays
+
+                  const baseDate = trackingManuscript?.id === "SOEAS-26-RS106" ? new Date("2026-08-30") : new Date("2026-09-04")
+                  const targetDate = new Date(baseDate)
+                  targetDate.setDate(targetDate.getDate() + extraDays)
+                  const targetDeadlineDate = rev.deadline || targetDate.toISOString().split("T")[0]
+
+                  if (isDeclined) {
+                    return (
+                      <div 
+                        key={rev.id || revName}
+                        className="p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20 space-y-2.5 transition-all animate-in fade-in"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-2.5">
+                            <div>
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                {revName}
+                              </h4>
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                                {rev.email} · Invited on {rev.invitedDate}
+                              </div>
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-rose-700 bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 whitespace-nowrap">
+                              <X className="h-3 w-3" /> Declined
                             </span>
-                            {isRemarksApproved && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 whitespace-nowrap animate-in fade-in">
-                                <Check className="h-3 w-3" />
-                                Remarks Approved
+                          </div>
+
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (trackingManuscript) {
+                                setIsTrackModalOpen(false)
+                                handleOpenAssign(trackingManuscript)
+                              }
+                            }}
+                            className="h-8 text-xs font-semibold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer whitespace-nowrap"
+                          >
+                            <UserPlus className="h-3.5 w-3.5 mr-1" />
+                            Invite Replacement
+                          </Button>
+                        </div>
+
+                        <div className="p-2.5 bg-white/80 dark:bg-slate-900/80 border border-rose-200/80 dark:border-rose-900/30 rounded-lg text-xs space-y-1">
+                          <div className="text-slate-700 dark:text-slate-300">
+                            <strong className="text-rose-700 dark:text-rose-400 font-semibold">Decline Reason:</strong> {rev.declineReason || "Schedule conflict / heavy review workload"}
+                          </div>
+                          {rev.declineReferral && (
+                            <div className="text-slate-600 dark:text-slate-400 text-[11px]">
+                              <strong className="text-slate-700 dark:text-slate-300 font-medium">Recommended Colleague:</strong> {rev.declineReferral}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  if (isInvitedOnly) {
+                    return (
+                      <div 
+                        key={rev.id || revName}
+                        className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/10 space-y-2.5 transition-all animate-in fade-in"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-2.5">
+                            <div>
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                {revName}
+                              </h4>
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                                {rev.email} · Dispatched on {rev.invitedDate}
+                              </div>
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-amber-700 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 whitespace-nowrap">
+                              <Clock className="h-3 w-3" /> Invited (Pending Response)
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleNudgeReviewer(revName)}
+                              disabled={isNudged}
+                              className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
+                                isNudged 
+                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:bg-slate-50"
+                              }`}
+                            >
+                              {isNudged ? (
+                                <>
+                                  <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                  Reminder Dispatched
+                                </>
+                              ) : (
+                                <>
+                                  <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Send Reminder
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                          Invitation sent · Awaiting reviewer acceptance or decline via portal.
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div 
+                      key={rev.id || revName}
+                      className={`p-4 rounded-xl border transition-all space-y-2.5 ${
+                        isOverdue 
+                          ? "bg-red-50/40 dark:bg-red-950/20 border-red-200 dark:border-red-900/40" 
+                          : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                              {revName}
+                            </h4>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                              {rev.email}
+                            </div>
+                          </div>
+                          {isSubmitted ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
+                                Report Submitted ✓
                               </span>
+                              {isRemarksApproved && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 whitespace-nowrap animate-in fade-in">
+                                  <Check className="h-3 w-3" />
+                                  Remarks Approved
+                                </span>
+                              )}
+                            </div>
+                          ) : isOverdue ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 whitespace-nowrap">
+                              <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                              ⚠ Overdue by 3d
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 border border-[#0b99ff]/20 whitespace-nowrap">
+                              Accepted (Due in {remainingDays}d)
+                            </span>
+                          )}
+                        </div>
+
+                        {!isSubmitted ? (
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleNudgeReviewer(revName)}
+                              disabled={isNudged}
+                              className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
+                                isNudged 
+                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                                  : isOverdue 
+                                    ? "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-900/50 dark:text-rose-300" 
+                                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
+                              }`}
+                            >
+                              {isNudged ? (
+                                <>
+                                  <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                  Reminder Dispatched
+                                </>
+                              ) : isOverdue ? (
+                                <>
+                                  <AlertCircle className="h-3.5 w-3.5 mr-1 text-rose-600 dark:text-rose-400" />
+                                  Send Urgent Nudge
+                                </>
+                              ) : (
+                                <>
+                                  <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Send Reminder
+                                </>
+                              )}
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleExtendReviewer(revName)}
+                              className="h-8 text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 px-2.5 whitespace-nowrap"
+                            >
+                              +7d Extension
+                            </Button>
+
+                            {extraDays > 0 && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleResetReviewerExtension(revName)}
+                                title="Reset / Undo added days"
+                                className="h-8 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 rounded-lg cursor-pointer whitespace-nowrap"
+                              >
+                                ↺ Reset
+                              </Button>
                             )}
                           </div>
-                        ) : isOverdue ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 whitespace-nowrap">
-                            <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                            ⚠ Overdue by 3d
-                          </span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 border border-[#0b99ff]/20 whitespace-nowrap">
-                            In Progress (Due in {remainingDays}d)
-                          </span>
-                        )}
-                      </div>
-
-                      {!isSubmitted ? (
-                        <div className="flex items-center gap-2 shrink-0">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleNudgeReviewer(revName)}
-                            disabled={isNudged}
-                            className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
-                              isNudged 
-                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
-                                : isOverdue 
-                                  ? "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-900/50 dark:text-rose-300" 
-                                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
+                            onClick={() => {
+                              const revObj: JmReviewFeedback = {
+                                id: `REV-FB-${revName.replace(/\s+/g, '')}`,
+                                paperId: trackingManuscript?.id || "SOEAS-26-RS102",
+                                reviewerName: revName,
+                                originalComments: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
+                                sanitizedCommentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
+                                commentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
+                                commentsEditor: "Solid paper. Recommend minor revision.",
+                                recommendation: "Minor Revision",
+                                originality: 5,
+                                status: "Pending Moderation"
+                              }
+                              handleOpenModeration(revObj)
+                            }}
+                            className={`h-7.5 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all ${
+                              isRemarksApproved
+                                ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
+                                : "text-[#0b99ff] border-[#0b99ff]/30 hover:bg-sky-50 dark:hover:bg-sky-950/30"
                             }`}
                           >
-                            {isNudged ? (
+                            {isRemarksApproved ? (
                               <>
-                                <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
-                                Reminder Dispatched
-                              </>
-                            ) : isOverdue ? (
-                              <>
-                                <AlertCircle className="h-3.5 w-3.5 mr-1 text-rose-600 dark:text-rose-400" />
-                                Send Urgent Nudge
+                                <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" />
+                                Edit Remarks
                               </>
                             ) : (
                               <>
-                                <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                Send Reminder
+                                <MessageSquare className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                Vet Remarks
                               </>
                             )}
                           </Button>
-
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleExtendReviewer(revName)}
-                            className="h-8 text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 px-2.5 whitespace-nowrap"
-                          >
-                            +7d Extension
-                          </Button>
-
-                          {extraDays > 0 && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleResetReviewerExtension(revName)}
-                              title="Reset / Undo added days"
-                              className="h-8 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 rounded-lg cursor-pointer whitespace-nowrap"
-                            >
-                              ↺ Reset
-                            </Button>
-                          )}
-                        </div>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const revObj: JmReviewFeedback = {
-                              id: `REV-FB-${revName.replace(/\s+/g, '')}`,
-                              paperId: trackingManuscript?.id || "SOEAS-26-RS102",
-                              reviewerName: revName,
-                              originalComments: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
-                              sanitizedCommentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
-                              commentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
-                              commentsEditor: "Solid paper. Recommend minor revision.",
-                              recommendation: "Minor Revision",
-                              originality: 5,
-                              status: "Pending Moderation"
-                            }
-                            handleOpenModeration(revObj)
-                          }}
-                          className={`h-7.5 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all ${
-                            isRemarksApproved
-                              ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
-                              : "text-[#0b99ff] border-[#0b99ff]/30 hover:bg-sky-50 dark:hover:bg-sky-950/30"
-                          }`}
-                        >
-                          {isRemarksApproved ? (
-                            <>
-                              <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                              Edit Remarks
-                            </>
-                          ) : (
-                            <>
-                              <MessageSquare className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                              Vet Remarks
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      {isSubmitted ? (
-                        <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">4.8 / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">Minor Revision</strong></span>
-                      ) : isOverdue ? (
-                        <span className="text-red-600 dark:text-red-400 font-medium">Deadline was 2026-08-22 (3 days overdue) • Follow-up reminder required</span>
-                      ) : (
-                        <span>Invitation accepted • Target report due: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{targetDeadlineDate}</strong></span>
-                      )}
-                    </div>
-
-                    {isSubmitted && (
-                      <div className="p-2.5 bg-white dark:bg-[#121316] border border-slate-200/80 dark:border-slate-800 rounded-lg text-[11px] text-slate-600 dark:text-slate-400 italic">
-                        &ldquo;The methodology is rigorous and well-supported. Minor clarifications required in Section 4.&rdquo;
+                        )}
                       </div>
-                    )}
-                  </div>
-                )
-              })}
+
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                        {isSubmitted ? (
+                          <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">4.8 / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">Minor Revision</strong></span>
+                        ) : isOverdue ? (
+                          <span className="text-red-600 dark:text-red-400 font-medium">Deadline was 2026-08-22 (3 days overdue) • Follow-up reminder required</span>
+                        ) : (
+                          <span>Invitation accepted • Target report due: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{targetDeadlineDate}</strong></span>
+                        )}
+                      </div>
+
+                      {isSubmitted && (
+                        <div className="p-2.5 bg-white dark:bg-[#121316] border border-slate-200/80 dark:border-slate-800 rounded-lg text-[11px] text-slate-600 dark:text-slate-400 italic">
+                          &ldquo;The methodology is rigorous and well-supported. Minor clarifications required in Section 4.&rdquo;
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              })()}
             </div>
           </div>
 

@@ -3035,7 +3035,7 @@ export function ReviewerWorkspace({
       >
         <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto p-0 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden">
           
-          {/* Editorial360 Light Sky Blue Top Accent Bar */}
+          {/* editorial360 Light Sky Blue Top Accent Bar */}
           <div className="h-1.5 w-full bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0088e0]" />
 
           {/* Modal Header */}

@@ -187,7 +187,7 @@ export default function SubmitPage() {
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tight">Start Your Submission</h2>
                 <p className="mt-4 text-muted-foreground">
-                  Follow international publisher standards by registering an author account in Editorial360 or complete the submission details below.
+                  Follow international publisher standards by registering an author account in editorial360 or complete the submission details below.
                 </p>
               </div>
 
@@ -199,14 +199,14 @@ export default function SubmitPage() {
                       <User className="h-5 w-5" />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-base text-foreground">Recommended: Author Account Registration in Editorial360</h3>
+                      <h3 className="font-bold text-base text-foreground">Recommended: Author Account Registration in editorial360</h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         In accordance with top international publisher standards (Elsevier, Springer Nature, Wiley, Frontiers), registering an author account connects your <strong>ORCID iD</strong>, verifies institutional affiliation, and provides a persistent dashboard to track peer review, manage co-authors, and upload revisions.
                       </p>
                       <div className="pt-2 flex flex-col sm:flex-row gap-3">
                         <Button asChild variant="default" size="sm">
                           <Link href="/editorial360?mode=register&role=author">
-                            Register Author Account in Editorial360
+                            Register Author Account in editorial360
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
                         </Button>
@@ -545,7 +545,7 @@ export default function SubmitPage() {
                           <div className="pt-2 flex flex-col sm:flex-row gap-3">
                             <Button asChild variant="default" className="w-full sm:w-auto">
                               <Link href={`/editorial360?manuscriptId=${trackingId || ""}&role=author`}>
-                                Track in Editorial360 Workspace (Localhost Preview)
+                                Track in editorial360 Workspace (Localhost Preview)
                                 <ArrowRight className="ml-2 h-4 w-4" />
                               </Link>
                             </Button>

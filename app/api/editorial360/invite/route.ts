@@ -1,6 +1,7 @@
 export const runtime = "nodejs"
 
 import nodemailer from "nodemailer"
+import { getJournalReplyTo, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 
 function requiredEnv(name: string) {
   const value = process.env[name]
@@ -59,6 +60,9 @@ export async function POST(request: Request) {
       ? `[Scholarly Open] Peer Review Invitation: "${manuscriptTitle}" (${manuscriptId})`
       : `[Scholarly Open] Editorial Assignment: "${manuscriptTitle}" (${manuscriptId})`
 
+    const replyToEmail = getJournalReplyTo(journalName)
+    const senderFrom = `"${journalName || "Scholarly Open"}" <${process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL}>`
+
     const text = isReviewer
       ? [
           `Dear ${recipientName || "Colleague"},`,
@@ -71,14 +75,15 @@ export async function POST(request: Request) {
           ``,
           customNote ? `Message from Editor:\n"${customNote}"\n` : ``,
           `REVIEWER ACTIONS:`,
-          `Please log into the Editorial360 workspace to view the abstract and accept or decline this invitation:`,
-          `https://scholarlyopen.org/editorial360?manuscriptId=${manuscriptId}&action=review`,
+          `Please access the editorial360 workspace to view the abstract and accept or decline this invitation:`,
+          `https://scholarlyopen.org/editorial360?action=accept&id=${manuscriptId}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(recipientEmail)}`,
+          `To decline: https://scholarlyopen.org/editorial360?action=decline&id=${manuscriptId}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(recipientEmail)}`,
           ``,
           `Thank you for contributing your expertise to scientific peer review.`,
           ``,
           `Best regards,`,
-          `Editorial Board | Scholarly Open`,
-          `info@scholarlyopen.org`,
+          `Editorial Board | ${journalName || "Scholarly Open"}`,
+          replyToEmail,
         ].join("\n")
       : [
           `Dear ${recipientName || "Editor"},`,
@@ -89,12 +94,12 @@ export async function POST(request: Request) {
           `Manuscript ID: ${manuscriptId}`,
           ``,
           `EDITORIAL ACTIONS:`,
-          `Please access Editorial360 to assign peer reviewers and conduct the initial evaluation:`,
+          `Please access editorial360 to assign peer reviewers and conduct the initial evaluation:`,
           `https://scholarlyopen.org/editorial360?manuscriptId=${manuscriptId}&role=editor`,
           ``,
           `Best regards,`,
-          `Managing Editor | Scholarly Open`,
-          `info@scholarlyopen.org`,
+          `Managing Editor | ${journalName || "Scholarly Open"}`,
+          replyToEmail,
         ].join("\n")
 
     const transporter = nodemailer.createTransport({
@@ -108,8 +113,9 @@ export async function POST(request: Request) {
     })
 
     await transporter.sendMail({
-      from: smtpFrom,
+      from: senderFrom,
       to: recipientEmail,
+      replyTo: replyToEmail,
       subject,
       text,
     })

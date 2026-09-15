@@ -22,7 +22,7 @@ export const COMMON_PLACEHOLDERS: EmailTemplatePlaceholder[] = [
   { key: "paperId", label: "Manuscript ID", description: "Assigned manuscript identifier", example: "SOEAS-26-RS102" },
   { key: "paperTitle", label: "Manuscript Title", description: "Full title of the paper", example: "Deep Generative Modeling for Single-Cell Transcriptomics" },
   { key: "journal", label: "Journal Name", description: "Name of the journal", example: "Scholarly Open: Medicine & Applied Sciences" },
-  { key: "portalUrl", label: "Editorial360 Portal URL", description: "Direct link to login/portal", example: "https://www.scholarlyopen.org/editorial360" },
+  { key: "portalUrl", label: "editorial360 Portal URL", description: "Direct link to login/portal", example: "https://www.scholarlyopen.org/editorial360" },
   { key: "editorName", label: "Editor Name", description: "Name of the handling editor or EiC", example: "Prof. Aris Thorne" },
   { key: "customMessage", label: "Custom Message / Specific Note", description: "User-specific instructions or remarks", example: "Please provide high-resolution figures and revised COI statement." },
   { key: "dueDate", label: "Target Due Date", description: "Submission or review deadline", example: "within 14 calendar days" }
@@ -79,10 +79,10 @@ You can access your reviewer scorecard through the link below:`,
     name: "Reviewer Registry Welcome",
     category: "reviewers",
     description: "Sent to newly invited or onboarded reviewers added to the verified reviewer pool.",
-    defaultSubject: "Welcome to the Scholarly Open Reviewer Registry",
+    defaultSubject: "Welcome to the editorial360 verified reviewer registry",
     defaultBody: `Dear {{recipientName}},
 
-Welcome to the Scholarly Open Verified Reviewer Registry. Your academic profile has been registered in the {{journal}} peer evaluation pool.
+Welcome to editorial360's verified reviewer registry. Your academic profile has been registered in the {{journal}} peer evaluation pool.
 
 As a registered reviewer, you will receive invitation requests carefully matched to your discipline, keywords, and publication history. You maintain complete control over your workload and may set sabbatical periods at any time.
 
@@ -125,7 +125,7 @@ During the initial technical pre-check by our editorial office, the following it
 
 {{customMessage}}
 
-Please log into your Editorial360 Author Workspace and upload the corrected files or supplementary statements.`,
+Please log into your editorial360 Author Workspace and upload the corrected files or supplementary statements.`,
     actionLabel: "Upload Corrected Files",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -392,7 +392,7 @@ export function generateBrandedEmailHtml(options: {
           </td>
           <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
             <a href="${baseUrl}/editorial360" target="_blank" style="text-decoration: none; display: inline-block;">
-              <img src="${baseUrl}/editorial360.svg" alt="Editorial360" height="28" style="height: 28px; max-height: 28px; width: auto; max-width: 140px; display: block; border: 0;" onerror="this.src='/editorial360.svg'" />
+              <img src="${baseUrl}/editorial360.svg" alt="editorial360" height="28" style="height: 28px; max-height: 28px; width: auto; max-width: 140px; display: block; border: 0;" onerror="this.src='/editorial360.svg'" />
             </a>
           </td>
         </tr>
@@ -416,7 +416,7 @@ export function generateBrandedEmailHtml(options: {
         &copy; ${currentYear} Scholarly Open. All rights reserved. • Open Access CC BY 4.0
       </div>
       <div style="margin-top: 8px;">
-        <a href="${baseUrl}/editorial360" style="color: #0b99ff; text-decoration: none; font-weight: 600;">Access Editorial360 Portal</a> • 
+        <a href="${baseUrl}/editorial360" style="color: #0b99ff; text-decoration: none; font-weight: 600;">Access editorial360 Portal</a> • 
         <a href="${baseUrl}/about" style="color: #64748b; text-decoration: none;">Ethics &amp; Malpractice Policies</a>
       </div>
     </div>

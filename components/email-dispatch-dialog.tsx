@@ -63,8 +63,8 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
         paperTitle: config.paperTitle || "Submitted Manuscript",
         journal: config.journal || "Scholarly Open",
         portalUrl: "https://www.scholarlyopen.org/editorial360",
-        acceptUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${config.paperId || ''}`,
-        declineUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${config.paperId || ''}`,
+        acceptUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(config.paperId || '')}&journal=${encodeURIComponent(config.journal || '')}&email=${encodeURIComponent(config.recipientEmail || '')}&name=${encodeURIComponent(config.recipientName || '')}`,
+        declineUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(config.paperId || '')}&journal=${encodeURIComponent(config.journal || '')}&email=${encodeURIComponent(config.recipientEmail || '')}&name=${encodeURIComponent(config.recipientName || '')}`,
         editorName: "Editorial Office",
         customMessage: "",
         dueDate: "within 14 calendar days"

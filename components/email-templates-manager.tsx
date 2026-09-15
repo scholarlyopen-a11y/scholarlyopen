@@ -330,7 +330,7 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {isDe 
-                ? "Überprüfen, bearbeiten und testen Sie alle automatisierten und manuellen E-Mail-Vorlagen in Editorial360."
+                ? "Überprüfen, bearbeiten und testen Sie alle automatisierten und manuellen E-Mail-Vorlagen in editorial360."
                 : "View, customize, and test all automated and manual email templates dispatched across the editorial lifecycle."}
             </p>
           </div>
@@ -601,7 +601,7 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
                       type="text"
                       value={editingActionLabel}
                       onChange={(e) => setEditingActionLabel(e.target.value)}
-                      placeholder="e.g., Access Editorial360 Portal"
+                      placeholder="e.g., Access editorial360 Portal"
                       className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-[#20222a] border border-slate-200 dark:border-[#272832] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
                     />
                   </div>

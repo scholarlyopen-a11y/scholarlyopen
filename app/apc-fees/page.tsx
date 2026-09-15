@@ -325,7 +325,7 @@ export default function APCFeesPage() {
                   <div className="text-2xl font-bold text-primary">25%</div>
                   <h3 className="font-semibold text-sm mt-1">Platform & Infrastructure</h3>
                   <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    Editorial360 double-blind portal maintenance, similarity forensics, automated image checks, and cloud hosting.
+                    editorial360 double-blind portal maintenance, similarity forensics, automated image checks, and cloud hosting.
                   </p>
                 </div>
               </div>

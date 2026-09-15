@@ -527,6 +527,26 @@ export function EditorWorkspace({
     setTimeout(() => setToastMessage(null), 4000)
   }
 
+  // Reviewer History state for handling editor
+  const [editorReviewerHistory, setEditorReviewerHistory] = useState<Record<string, any[]>>({})
+
+  useEffect(() => {
+    fetch("/api/editorial360/reviewers")
+      .then(res => res.json())
+      .then(data => {
+        if (data?.ok && Array.isArray(data.history)) {
+          const grouped: Record<string, any[]> = {}
+          data.history.forEach((item: any) => {
+            const k = item.paperId.toLowerCase()
+            if (!grouped[k]) grouped[k] = []
+            grouped[k].push(item)
+          })
+          setEditorReviewerHistory(grouped)
+        }
+      })
+      .catch(e => console.error("Editor failed to load reviewer history:", e))
+  }, [currentTab])
+
   // Filter counts (Synchronized 1:1 with Journal Manager Workspace)
   const triageCount = manuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft").length
   const reviewCount = manuscripts.filter(m => m.status === "Under Review").length
@@ -724,18 +744,34 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       const targetEmail = extRev ? extRev.email : "reviewer@scholarlyopen.org"
       const personalizedBody = assignEmailBody.replace(/\{\{recipientName\}\}/g, revName)
 
+      const acceptLink = `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(paperId)}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(revName)}`
+      const declineLink = `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(paperId)}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(revName)}`
+
       const renderedHtml = generateBrandedEmailHtml({
         subject: assignEmailSubject,
         bodyText: personalizedBody,
         actionLabel: "Accept Review Invitation",
-        actionUrl: "https://www.scholarlyopen.org/editorial360",
+        actionUrl: acceptLink,
         secondaryActionLabel: "Decline Invitation",
-        secondaryActionUrl: "https://www.scholarlyopen.org/editorial360?action=decline",
+        secondaryActionUrl: declineLink,
         journal: journalName,
         paperId: paperId,
         paperTitle: paper.title,
         recipientName: revName
       })
+
+      // Record invitation in tracking store
+      fetch("/api/editorial360/reviewers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paperId,
+          paperTitle: paper.title,
+          journal: journalName,
+          reviewerName: revName,
+          reviewerEmail: targetEmail
+        })
+      }).catch(e => console.error("Reviewer record error:", e))
 
       return fetch("/api/editorial360/email", {
         method: "POST",
@@ -751,6 +787,21 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         })
       }).catch(e => console.error("Editor assign email dispatch error:", e))
     }))
+
+    fetch("/api/editorial360/reviewers")
+      .then(res => res.json())
+      .then(data => {
+        if (data?.ok && Array.isArray(data.history)) {
+          const grouped: Record<string, any[]> = {}
+          data.history.forEach((item: any) => {
+            const k = item.paperId.toLowerCase()
+            if (!grouped[k]) grouped[k] = []
+            grouped[k].push(item)
+          })
+          setEditorReviewerHistory(grouped)
+        }
+      })
+      .catch(e => console.error("Editor refresh error:", e))
 
     setIsAssignSending(false)
     triggerToast(isDe ? "Gutachter-Einladungen erfolgreich versendet!" : "Peer reviewer invitations dispatched!")
@@ -1547,6 +1598,97 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     )}
 
                   </div>
+
+                  {/* Reviewer Decline Alert Banner */}
+                  {editorReviewerHistory[m.id.toLowerCase()]?.some(h => h.status === "Declined") && (
+                    <div className="p-3.5 bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 rounded-xl space-y-2.5 animate-in fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                          <span className="font-bold text-rose-900 dark:text-rose-200 text-xs">
+                            Reviewer Declined Invitation
+                          </span>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => handleOpenReviewersModal(m)}
+                          className="h-7 text-[11px] font-semibold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-2.5 rounded-lg cursor-pointer"
+                        >
+                          <UserPlus className="h-3 w-3 mr-1" />
+                          Invite Replacement Reviewer
+                        </Button>
+                      </div>
+                      {editorReviewerHistory[m.id.toLowerCase()]
+                        .filter(h => h.status === "Declined")
+                        .map(d => (
+                          <div key={d.id} className="text-xs text-slate-700 dark:text-slate-300 pl-6 space-y-0.5 border-l-2 border-rose-300 dark:border-rose-800 ml-2">
+                            <div>
+                              <strong>{d.reviewerName}</strong> ({d.reviewerEmail}) declined on {d.invitedDate}.
+                            </div>
+                            <div className="text-[11px]">
+                              Reason: <span className="text-rose-700 dark:text-rose-400 font-medium">{d.declineReason || "Schedule conflict / workload"}</span>
+                            </div>
+                            {d.declineReferral && (
+                              <div className="text-[11px] text-slate-500">
+                                Recommended Alternative: <span className="font-semibold text-slate-700 dark:text-slate-300">{d.declineReferral}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+
+                  {/* Reviewer History for Editor */}
+                  {editorReviewerHistory[m.id.toLowerCase()] && editorReviewerHistory[m.id.toLowerCase()].length > 0 && (
+                    <div className="rounded-xl border border-slate-200/80 dark:border-[#272832] bg-slate-50/40 dark:bg-slate-900/30 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5 text-[#0b99ff]" />
+                          Reviewer History ({editorReviewerHistory[m.id.toLowerCase()].length})
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleOpenReviewersModal(m)}
+                          className="h-6 px-2 text-[10px] font-semibold text-[#0b99ff] hover:bg-[#0b99ff]/10 cursor-pointer"
+                        >
+                          <UserPlus className="h-3 w-3 mr-1" />
+                          Invite More
+                        </Button>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        {editorReviewerHistory[m.id.toLowerCase()].map(item => (
+                          <div key={item.id} className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-100 dark:border-[#272832]">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{item.reviewerName}</span>
+                              <span className="text-[10px] text-slate-400">({item.reviewerEmail})</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-slate-400">{item.invitedDate}</span>
+                              {item.status === "Declined" ? (
+                                <span className="text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/40">
+                                  ✕ Declined
+                                </span>
+                              ) : item.status === "Accepted" ? (
+                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/40">
+                                  ✓ Accepted
+                                </span>
+                              ) : item.status === "Completed" ? (
+                                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-900/40">
+                                  Report In ✓
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-900/40">
+                                  ⏳ Invited
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Prominent Action Banner for Completed Reviews */}
                   {isAllReviewsIn && (
@@ -3132,9 +3274,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         subject: assignEmailSubject,
                         bodyText: assignEmailBody.replace(/\{\{recipientName\}\}/g, selectedReviewerNames[0] || "Dr. Reviewer"),
                         actionLabel: "Accept Review Invitation",
-                        actionUrl: "https://www.scholarlyopen.org/editorial360",
+                        actionUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(selectedPaperForReviewers?.id || '')}&journal=${encodeURIComponent(selectedPaperForReviewers?.journal || user.journal)}`,
                         secondaryActionLabel: "Decline Invitation",
-                        secondaryActionUrl: "https://www.scholarlyopen.org/editorial360?action=decline",
+                        secondaryActionUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(selectedPaperForReviewers?.id || '')}&journal=${encodeURIComponent(selectedPaperForReviewers?.journal || user.journal)}`,
                         journal: selectedPaperForReviewers?.journal || user.journal,
                         paperId: selectedPaperForReviewers?.id,
                         paperTitle: selectedPaperForReviewers?.title,

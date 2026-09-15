@@ -3,6 +3,7 @@ export const runtime = "nodejs"
 import { NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES } from "@/lib/email-templates"
+import { getJournalReplyTo, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 
 interface EmailPayload {
   to: string
@@ -42,8 +43,8 @@ export async function POST(req: Request) {
         paperTitle,
         journal,
         portalUrl: `${baseUrl}/editorial360`,
-        acceptUrl: `${baseUrl}/editorial360?action=accept&id=${paperId}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
-        declineUrl: `${baseUrl}/editorial360?action=decline&id=${paperId}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
+        acceptUrl: `${baseUrl}/editorial360?action=accept&id=${paperId}&journal=${encodeURIComponent(journal)}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
+        declineUrl: `${baseUrl}/editorial360?action=decline&id=${paperId}&journal=${encodeURIComponent(journal)}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
         editorName: "Editorial Office",
         customMessage: body.customMessage || "",
         dueDate: "within 14 calendar days"
@@ -61,20 +62,20 @@ export async function POST(req: Request) {
       if (!bodyText && templateDef) {
         bodyText = interpolateTokens(templateDef.defaultBody, tokens)
       } else if (!bodyText) {
-        bodyText = `Dear ${recipientName},\n\nThis is an official communication from ${journal} regarding manuscript ${paperId} (${paperTitle}).\n\n${body.customMessage || ""}\n\nPlease access the Editorial360 portal for details.`
+        bodyText = `Dear ${recipientName},\n\nThis is an official communication from ${journal} regarding manuscript ${paperId} (${paperTitle}).\n\n${body.customMessage || ""}\n\nPlease access the editorial360 portal for details.`
       }
 
-      const actionLabel = body.actionLabel || (templateDef?.actionLabel || "Access Editorial360 Portal")
+      const actionLabel = body.actionLabel || (templateDef?.actionLabel || "Access editorial360 Portal")
       let rawActionUrl = body.actionUrl || (templateDef?.actionUrlPlaceholder ? interpolateTokens(templateDef.actionUrlPlaceholder, tokens) : `${baseUrl}/editorial360`)
       if (rawActionUrl.includes("action=accept") && !rawActionUrl.includes("email=")) {
-        rawActionUrl += `&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`
+        rawActionUrl += `&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}&journal=${encodeURIComponent(journal)}`
       }
 
       let secondaryActionLabel: string | undefined
       let secondaryActionUrl: string | undefined
       if (body.template === "invitation") {
         secondaryActionLabel = "Decline"
-        secondaryActionUrl = `${baseUrl}/editorial360?action=decline&id=${paperId}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`
+        secondaryActionUrl = `${baseUrl}/editorial360?action=decline&id=${paperId}&journal=${encodeURIComponent(journal)}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`
       }
 
       finalHtml = generateBrandedEmailHtml({
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
     }
 
     if (!finalSubject) {
-      finalSubject = `Editorial360 Notification: ${journal}`
+      finalSubject = `editorial360 Notification: ${journal}`
     }
 
     let sentViaSmtp = false
@@ -104,7 +105,13 @@ export async function POST(req: Request) {
     const smtpPort = Number(process.env.SMTP_PORT) || 587
     const smtpUser = process.env.SMTP_USER
     const smtpPass = process.env.SMTP_PASS
-    const smtpFrom = process.env.SMTP_FROM || smtpUser
+
+    // Sender Address: System Common Mailbox is editorial@scholarlyopen.org
+    const senderEmail = process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL
+    const formattedFrom = `"${journal}" <${senderEmail}>`
+
+    // Reply-To header: routed dynamically to specific journal editorial desk
+    const replyToEmail = getJournalReplyTo(journal)
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
       const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"
@@ -121,15 +128,11 @@ export async function POST(req: Request) {
         }
       })
 
-      const formattedFrom = smtpFrom?.includes("<") 
-        ? smtpFrom 
-        : `"${journal}" <${smtpFrom}>`
-
       const info = await transporter.sendMail({
         from: formattedFrom,
         to: body.to,
         cc: "scholarlyopen@gmail.com",
-        replyTo: smtpFrom,
+        replyTo: replyToEmail,
         subject: finalSubject,
         html: finalHtml
       })
