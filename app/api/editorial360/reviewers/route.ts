@@ -139,7 +139,7 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json()
-    const { paperId, reviewerEmail, action, declineReason, declineReferral } = body
+    const { paperId, reviewerEmail, action, declineReason, declineReferral, deadline, reason } = body
 
     if (!paperId || !reviewerEmail || !action) {
       return NextResponse.json({ ok: false, error: "Missing paperId, reviewerEmail, or action." }, { status: 400 })
@@ -153,12 +153,15 @@ export async function PATCH(req: Request) {
     const newStatus = action === "accept" ? "Accepted" : action === "decline" ? "Declined" : "Invited"
 
     if (itemIndex >= 0) {
+      const existing = globalReviewerHistory[itemIndex]
+      const updatedStatus = action === "update_deadline" ? existing.status : newStatus
       globalReviewerHistory[itemIndex] = {
-        ...globalReviewerHistory[itemIndex],
-        status: newStatus,
-        declineReason: action === "decline" ? (declineReason || "Unavailable") : undefined,
-        declineReferral: action === "decline" ? (declineReferral || undefined) : undefined,
-        respondedAt: todayStr
+        ...existing,
+        status: updatedStatus,
+        declineReason: action === "decline" ? (declineReason || "Unavailable") : existing.declineReason,
+        declineReferral: action === "decline" ? (declineReferral || undefined) : existing.declineReferral,
+        respondedAt: action === "update_deadline" ? (existing.respondedAt || todayStr) : todayStr,
+        deadline: deadline || existing.deadline
       }
       return NextResponse.json({ ok: true, record: globalReviewerHistory[itemIndex] })
     } else {
@@ -169,14 +172,16 @@ export async function PATCH(req: Request) {
       const created: ReviewerHistoryItem = {
         id: `REV-HIST-${Date.now()}`,
         paperId,
+        paperTitle: body.paperTitle || "Manuscript",
+        journal: body.journal || "Scholarly Open",
         reviewerName: body.reviewerName || reviewerEmail.split("@")[0],
         reviewerEmail,
         invitedDate: todayStr,
-        status: newStatus,
+        status: action === "update_deadline" ? "Accepted" : newStatus,
         declineReason: action === "decline" ? (declineReason || "Unavailable") : undefined,
         declineReferral: action === "decline" ? (declineReferral || undefined) : undefined,
         respondedAt: todayStr,
-        deadline: deadlineDate.toISOString().split("T")[0]
+        deadline: deadline || deadlineDate.toISOString().split("T")[0]
       }
       globalReviewerHistory.unshift(created)
       return NextResponse.json({ ok: true, record: created })

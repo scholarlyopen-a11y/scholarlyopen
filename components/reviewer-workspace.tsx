@@ -154,6 +154,7 @@ interface ReviewerWorkspaceProps {
   onTabChange?: (tab: "overview" | "portfolio" | "forensics" | "wallet" | "certificate") => void
   onAcceptInvitation: (invId: string, autoDeadline: string, reminders: { days5: boolean; hours48: boolean }) => void
   onDeclineInvitation: (invId: string, reason: string, recommendation?: { name: string; email: string; affiliation: string; note: string }) => void
+  onUpdateDeadline?: (paperId: string, newDeadline: string, reason?: string) => void
   onSubmitScorecard: (scorecardData: ReviewAssessmentData) => void
 }
 
@@ -214,6 +215,7 @@ export function ReviewerWorkspace({
   onTabChange,
   onAcceptInvitation,
   onDeclineInvitation,
+  onUpdateDeadline,
   onSubmitScorecard
 }: ReviewerWorkspaceProps) {
   const isDe = language === "de"
@@ -334,6 +336,25 @@ export function ReviewerWorkspace({
   const [declineColleagueEmail, setDeclineColleagueEmail] = useState("")
   const [declineColleagueAffiliation, setDeclineColleagueAffiliation] = useState("")
   const [declineColleagueNote, setDeclineColleagueNote] = useState("")
+
+  // Set / Adjust Review Deadline Modal State
+  const [selectedReviewForDeadline, setSelectedReviewForDeadline] = useState<ActiveReviewItem | null>(null)
+  const [deadlinePresetDays, setDeadlinePresetDays] = useState<number>(14)
+  const [customDeadlineDate, setCustomDeadlineDate] = useState<string>("")
+  const [deadlineExtensionReason, setDeadlineExtensionReason] = useState<string>("")
+  const [deadlineUpdateSuccess, setDeadlineUpdateSuccess] = useState<string>("")
+  const [localActiveReviews, setLocalActiveReviews] = useState<ActiveReviewItem[]>(activeReviews)
+
+  useEffect(() => {
+    setLocalActiveReviews(activeReviews)
+  }, [activeReviews])
+
+  const getDaysRemaining = (deadlineStr?: string): number => {
+    if (!deadlineStr) return 14
+    const target = new Date(deadlineStr).getTime()
+    const now = new Date().setHours(0, 0, 0, 0)
+    return Math.ceil((target - now) / (1000 * 60 * 60 * 24))
+  }
 
   // Collapsible Fraud Guide in Forensics tab
   const [isFraudGuideExpanded, setIsFraudGuideExpanded] = useState(false)
@@ -553,6 +574,43 @@ export function ReviewerWorkspace({
       hours48: reminder48Hours
     })
     setSelectedInvForAccept(null)
+  }
+
+  const handleOpenDeadlineModal = (rev: ActiveReviewItem) => {
+    setSelectedReviewForDeadline(rev)
+    setCustomDeadlineDate(rev.deadline || "")
+    setDeadlinePresetDays(14)
+    setDeadlineExtensionReason("")
+    setDeadlineUpdateSuccess("")
+  }
+
+  const handleSaveDeadline = () => {
+    if (!selectedReviewForDeadline) return
+    const newDeadline = customDeadlineDate || getCalculatedDate(deadlinePresetDays)
+
+    // Update local active reviews state immediately
+    setLocalActiveReviews(prev => 
+      prev.map(r => r.id === selectedReviewForDeadline.id ? { ...r, deadline: newDeadline } : r)
+    )
+
+    // Update selected review if currently opened in eval modal
+    if (selectedReviewForEval && selectedReviewForEval.id === selectedReviewForDeadline.id) {
+      setSelectedReviewForEval({ ...selectedReviewForEval, deadline: newDeadline })
+    }
+
+    if (onUpdateDeadline) {
+      onUpdateDeadline(selectedReviewForDeadline.id, newDeadline, deadlineExtensionReason)
+    }
+
+    setDeadlineUpdateSuccess(isDe 
+      ? `Frist erfolgreich auf ${newDeadline} aktualisiert!` 
+      : `Deadline successfully updated to ${newDeadline}!`
+    )
+
+    setTimeout(() => {
+      setSelectedReviewForDeadline(null)
+      setDeadlineUpdateSuccess("")
+    }, 900)
   }
 
   const handleOpenDecline = (inv: ReviewInvitationItem) => {
@@ -924,7 +982,7 @@ export function ReviewerWorkspace({
     }, 400)
   }
 
-  const filteredActiveReviews = activeReviews.filter(rev => {
+  const filteredActiveReviews = localActiveReviews.filter(rev => {
     if (portfolioFilter === "in_progress") return rev.status === "In Progress" || rev.status === "Pending"
     if (portfolioFilter === "completed") return rev.status === "Completed"
     return true
@@ -1140,9 +1198,11 @@ export function ReviewerWorkspace({
             </div>
 
             <div className="p-4 space-y-3">
-              {activeReviews.filter(r => r.status === "In Progress" || r.status === "Pending").map((rev) => {
+              {localActiveReviews.filter(r => r.status === "In Progress" || r.status === "Pending").map((rev) => {
                 const forensicData = FORENSIC_PROFILES[rev.manuscriptId || rev.id] || FORENSIC_PROFILES["SOMED-26-RS001"]
                 const isEscalated = !!(escalatedPaperIds[rev.id] || escalatedPaperIds[rev.manuscriptId || ""])
+                const daysLeft = getDaysRemaining(rev.deadline)
+                const isOverdue = daysLeft < 0
                 return (
                   <div 
                     key={rev.id} 
@@ -1156,8 +1216,17 @@ export function ReviewerWorkspace({
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-bold text-slate-500 uppercase">{rev.journal}</span>
                         <span className="text-slate-300">•</span>
-                        <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.2 rounded">
-                          Due in 11 days ({rev.deadline})
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                          isOverdue 
+                            ? "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50" 
+                            : daysLeft <= 3 
+                            ? "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50"
+                            : "text-[#0b99ff] dark:text-[#0b99ff] bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50"
+                        }`}>
+                          <Clock className="w-3 h-3" />
+                          {isOverdue 
+                            ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig (${rev.deadline})` : `${Math.abs(daysLeft)} days overdue (${rev.deadline})`)
+                            : (isDe ? `Noch ${daysLeft} Tage (${rev.deadline})` : `Due in ${daysLeft} days (${rev.deadline})`)}
                         </span>
                         <span className="text-slate-300">•</span>
                         <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
@@ -1185,6 +1254,16 @@ export function ReviewerWorkspace({
                         {isDe ? "Manuskript-Paket" : "Blinded Package"}
                       </Button>
                       
+                      <Button
+                        variant="outline"
+                        onClick={() => handleOpenDeadlineModal(rev)}
+                        className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                        title={isDe ? "Frist anpassen oder verlängern" : "Set or adjust review deadline"}
+                      >
+                        <Calendar className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                        {isDe ? "Frist anpassen" : "Set Deadline"}
+                      </Button>
+
                       {!isEscalated ? (
                         <Button
                           variant="outline"
@@ -1284,9 +1363,20 @@ export function ReviewerWorkspace({
                       <div className="text-xs text-slate-500 dark:text-slate-400">
                         {rev.status === "Completed" ? (
                           <span>{isDe ? "Empfehlung:" : "Verdict:"} <strong>{rev.recommendation || "Minor Revision"}</strong> • {isDe ? "Geprüft von Editor" : "Signed off by Handling Editor"}</span>
-                        ) : (
-                          <span>{isDe ? "Frist:" : "Deadline:"} <strong>{rev.deadline}</strong> (11 {isDe ? "Tage verbleibend" : "days remaining"})</span>
-                        )}
+                        ) : (() => {
+                          const daysLeft = getDaysRemaining(rev.deadline)
+                          const isOverdue = daysLeft < 0
+                          return (
+                            <span>
+                              {isDe ? "Frist:" : "Deadline:"} <strong>{rev.deadline}</strong>{" "}
+                              <span className={isOverdue ? "text-rose-600 dark:text-rose-400 font-semibold" : daysLeft <= 3 ? "text-amber-600 dark:text-amber-400 font-semibold" : "text-slate-600 dark:text-slate-300"}>
+                                ({isOverdue 
+                                  ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig` : `${Math.abs(daysLeft)} days overdue`) 
+                                  : (isDe ? `${daysLeft} Tage verbleibend` : `${daysLeft} days remaining`)})
+                              </span>
+                            </span>
+                          )
+                        })()}
                       </div>
                     </div>
 
@@ -1302,6 +1392,16 @@ export function ReviewerWorkspace({
 
                       {rev.status === "In Progress" || rev.status === "Pending" ? (
                         <>
+                          <Button
+                            variant="outline"
+                            onClick={() => handleOpenDeadlineModal(rev)}
+                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                            title={isDe ? "Frist anpassen oder verlängern" : "Set or adjust review deadline"}
+                          >
+                            <Calendar className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                            {isDe ? "Frist anpassen" : "Set Deadline"}
+                          </Button>
+
                           {!isEscalated && (
                             <Button
                               variant="outline"
@@ -2009,16 +2109,40 @@ export function ReviewerWorkspace({
                 <div className="font-bold text-slate-900 dark:text-white text-sm">{selectedInvForAccept.title}</div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="font-semibold text-slate-700 dark:text-slate-300 block">
-                  {isDe ? "Berechneter Abgabetermin (Standard 14 Tage):" : "Calculated Submission Deadline:"}
+                  {isDe ? "Abgabetermin festlegen:" : "Submission Turnaround & Deadline:"}
                 </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[7, 14, 21, 28].map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setAutoDeadlineDays(d)}
+                      className={`py-1.5 px-2 rounded text-xs font-semibold border transition-all cursor-pointer ${
+                        autoDeadlineDays === d
+                          ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                          : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                      }`}
+                    >
+                      {d} {isDe ? "Tage" : "Days"}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex items-center gap-2">
                   <input 
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     value={getCalculatedDate(autoDeadlineDays)}
-                    readOnly
-                    className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 font-semibold text-slate-800 dark:text-slate-200 text-xs"
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const targetTime = new Date(e.target.value).getTime()
+                        const nowTime = new Date().setHours(0,0,0,0)
+                        const diff = Math.max(1, Math.ceil((targetTime - nowTime) / (1000 * 60 * 60 * 24)))
+                        setAutoDeadlineDays(diff)
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-[#0b99ff]"
                   />
                   <span className="text-[11px] text-slate-500 whitespace-nowrap">
                     ({autoDeadlineDays} {isDe ? "Tage ab heute" : "days from today"})
@@ -2204,6 +2328,149 @@ export function ReviewerWorkspace({
         </DialogContent>
       </Dialog>
 
+      {/* ================= MODAL: SET / ADJUST REVIEW DEADLINE ================= */}
+      <Dialog open={!!selectedReviewForDeadline} onOpenChange={(open) => !open && setSelectedReviewForDeadline(null)}>
+        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-w-lg rounded-xl p-6 shadow-xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-[#0b99ff]">
+              <Calendar className="h-5 w-5" />
+              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+                {isDe ? "Begutachtungsfrist festlegen oder anpassen" : "Set or Adjust Review Deadline"}
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+              {isDe 
+                ? "Legen Sie den verbindlichen Abgabetermin für dieses Manuskript fest oder fordern Sie eine Fristverlängerung an." 
+                : "Set the target submission deadline for this assigned manuscript or configure an extended turnaround schedule."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedReviewForDeadline && (
+            <div className="space-y-4 py-2 text-xs">
+              {deadlineUpdateSuccess && (
+                <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold text-xs flex items-center gap-2 animate-in fade-in duration-200">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{deadlineUpdateSuccess}</span>
+                </div>
+              )}
+
+              {/* Manuscript Summary */}
+              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                <div className="text-[10px] uppercase font-bold text-[#0b99ff] tracking-wider">
+                  {selectedReviewForDeadline.journal} • {selectedReviewForDeadline.id}
+                </div>
+                <div className="font-bold text-slate-900 dark:text-white text-xs line-clamp-2">
+                  {selectedReviewForDeadline.title}
+                </div>
+                <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span>{isDe ? "Aktuelle Frist:" : "Current Deadline:"}</span>
+                  <strong className="text-slate-800 dark:text-slate-200">{selectedReviewForDeadline.deadline || "None"}</strong>
+                  {selectedReviewForDeadline.deadline && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      {getDaysRemaining(selectedReviewForDeadline.deadline)} {isDe ? "Tage ab heute" : "days from today"}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Turnaround Quick Presets */}
+              <div className="space-y-2">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                  {isDe ? "Schnellauswahl Bearbeitungszeit:" : "Select Standard Turnaround Window:"}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { days: 7, labelEn: "7 Days", labelDe: "7 Tage", tagEn: "Expedited", tagDe: "Eilig" },
+                    { days: 14, labelEn: "14 Days", labelDe: "14 Tage", tagEn: "COPE Standard", tagDe: "Standard" },
+                    { days: 21, labelEn: "21 Days", labelDe: "21 Tage", tagEn: "+1 Week Ext.", tagDe: "+1 Woche" },
+                    { days: 28, labelEn: "28 Days", labelDe: "28 Tage", tagEn: "Complex Study", tagDe: "Ausführlich" }
+                  ].map((p) => {
+                    const isSelected = !customDeadlineDate && deadlinePresetDays === p.days
+                    return (
+                      <button
+                        key={p.days}
+                        type="button"
+                        onClick={() => {
+                          setDeadlinePresetDays(p.days)
+                          setCustomDeadlineDate(getCalculatedDate(p.days))
+                        }}
+                        className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white shadow-2xs ring-1 ring-[#0b99ff]"
+                            : "border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs">{isDe ? p.labelDe : p.labelEn}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#0b99ff]" />}
+                        </div>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                          {isDe ? p.tagDe : p.tagEn}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Exact Target Date Picker */}
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                  {isDe ? "Genaue Abgabefrist festlegen (Datum):" : "Designated Target Deadline Date:"}
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    min={new Date().toISOString().split("T")[0]}
+                    value={customDeadlineDate || getCalculatedDate(deadlinePresetDays)}
+                    onChange={(e) => setCustomDeadlineDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {isDe
+                    ? `Berechnet: ${getDaysRemaining(customDeadlineDate || getCalculatedDate(deadlinePresetDays))} Tage verbleibend ab heute.`
+                    : `Calculated: ${getDaysRemaining(customDeadlineDate || getCalculatedDate(deadlinePresetDays))} days remaining from today.`}
+                </p>
+              </div>
+
+              {/* Extension Reason / Note to Editor */}
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                  {isDe ? "Grund für Fristanpassung / Notiz an Editor (Optional):" : "Reason / Note to Handling Editor (Optional):"}
+                </label>
+                <textarea
+                  rows={2}
+                  value={deadlineExtensionReason}
+                  onChange={(e) => setDeadlineExtensionReason(e.target.value)}
+                  placeholder={isDe ? "z.B. Zusätzliche Zeit für statistische Re-Analyse benötigt..." : "e.g. Additional time needed to cross-examine complex statistical supplement..."}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0b99ff] focus:outline-none resize-none"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSelectedReviewForDeadline(null)}
+              className="text-xs h-auto py-2 cursor-pointer"
+            >
+              {isDe ? "Abbrechen" : "Cancel"}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSaveDeadline}
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold py-2 px-4 h-auto cursor-pointer shadow-xs"
+            >
+              <Calendar className="w-3.5 h-3.5 mr-1" />
+              {isDe ? "Frist verbindlich speichern" : "Save Review Deadline"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* ================= MODAL 3: FULL ELECTRONIC REVIEWER ASSESSMENT FORM ================= */}
       <Dialog open={!!selectedReviewForEval} onOpenChange={(open) => !open && setSelectedReviewForEval(null)}>
         <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg p-0">
@@ -2229,6 +2496,56 @@ export function ReviewerWorkspace({
               {evalError && (
                 <div className="p-3 rounded bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400 font-semibold text-xs">
                   {evalError}
+                </div>
+              )}
+
+              {/* Review Submission Deadline Banner inside Assessment Form */}
+              {selectedReviewForEval && (
+                <div className="p-3.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-[#0b99ff] shrink-0">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          {isDe ? "Begutachtungsfrist:" : "Review Target Deadline:"} {selectedReviewForEval.deadline || "14 days"}
+                        </span>
+                        {(() => {
+                          const daysLeft = getDaysRemaining(selectedReviewForEval.deadline)
+                          const isOverdue = daysLeft < 0
+                          return (
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              isOverdue 
+                                ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40"
+                                : daysLeft <= 3 
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40"
+                                : "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40"
+                            }`}>
+                              {isOverdue 
+                                ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig` : `${Math.abs(daysLeft)} days overdue`)
+                                : (isDe ? `Noch ${daysLeft} Tage verbleibend` : `${daysLeft} days remaining`)}
+                            </span>
+                          )
+                        })()}
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        {isDe 
+                          ? "Benötigen Sie mehr Zeit für Literatur- oder Datenprüfung? Sie können die Frist hier direkt anpassen."
+                          : "Need additional time to verify data or references? You can adjust or extend your review deadline anytime."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleOpenDeadlineModal(selectedReviewForEval)}
+                    className="border-blue-300 dark:border-blue-800 text-[#0b99ff] hover:bg-blue-100 dark:hover:bg-blue-900/40 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shrink-0"
+                  >
+                    <Calendar className="w-3.5 h-3.5 mr-1" />
+                    {isDe ? "Frist anpassen" : "Adjust Deadline"}
+                  </Button>
                 </div>
               )}
 

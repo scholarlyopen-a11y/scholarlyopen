@@ -73,6 +73,7 @@ import {
   FolderOpen,
   SearchCode,
   Wallet,
+  Calendar,
   FileCheck2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -794,6 +795,15 @@ export default function Editorial360Page() {
   const [invitationSubmitted, setInvitationSubmitted] = useState(false)
   const [invitationFormError, setInvitationFormError] = useState("")
   const [invitationAbstractExpanded, setInvitationAbstractExpanded] = useState(false)
+  const [invitationDeadlineDays, setInvitationDeadlineDays] = useState<number>(14)
+  const [invitationCustomDeadline, setInvitationCustomDeadline] = useState<string>("")
+
+  const getInvitationCalculatedDeadline = (days: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() + days)
+    return d.toISOString().split("T")[0]
+  }
+
   const [reviewerProfile, setReviewerProfile] = useState<{
     name: string
     email: string
@@ -2647,10 +2657,8 @@ export default function Editorial360Page() {
       return
     }
 
-    // 14-day turnaround deadline
-    const deadlineDate = new Date()
-    deadlineDate.setDate(deadlineDate.getDate() + 14)
-    const deadlineStr = deadlineDate.toISOString().split("T")[0]
+    // Review turnaround deadline set by reviewer
+    const deadlineStr = invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)
 
     // Create / add to active reviews
     const targetPaper = manuscripts.find(m => m.id && invitationPaperId && m.id.toLowerCase() === invitationPaperId.toLowerCase())
@@ -2678,7 +2686,7 @@ export default function Editorial360Page() {
 
     setActiveReviews(prev => {
       const exists = prev.some(r => r.id === newReview.id || r.title === newReview.title)
-      const updated = exists ? prev : [newReview, ...prev]
+      const updated = exists ? prev.map(r => r.id === newReview.id ? { ...r, deadline: deadlineStr } : r) : [newReview, ...prev]
       try {
         localStorage.setItem(`editorial360_active_reviews_${reviewerData.email}`, JSON.stringify(updated))
       } catch (e) {}
@@ -2691,9 +2699,12 @@ export default function Editorial360Page() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         paperId: newReview.id,
+        paperTitle: newReview.title,
+        journal: newReview.journal,
         reviewerEmail: reviewerData.email,
         reviewerName: reviewerData.name,
-        action: "accept"
+        action: "accept",
+        deadline: deadlineStr
       })
     }).catch(e => console.error("Reviewer accept sync error:", e))
 
@@ -2722,6 +2733,35 @@ export default function Editorial360Page() {
     setSuccess(language === "de"
       ? `Willkommen, ${reviewerData.name}! Begutachtung für ${newReview.id} angenommen. Abgabefrist: ${deadlineStr}.`
       : `Welcome, ${reviewerData.name}! Review accepted for ${newReview.id}. Turnaround deadline: ${deadlineStr}.`
+    )
+  }
+
+  const handleUpdateReviewDeadline = (reviewId: string, newDeadline: string, reason?: string) => {
+    setActiveReviews(prev => {
+      const updated = prev.map(r => r.id === reviewId ? { ...r, deadline: newDeadline } : r)
+      try {
+        const emailKey = reviewerProfile?.email || email || "default"
+        localStorage.setItem(`editorial360_active_reviews_${emailKey}`, JSON.stringify(updated))
+      } catch (e) {}
+      return updated
+    })
+
+    const reviewerMail = reviewerProfile?.email || email || "reviewer@scholarlyopen.org"
+    fetch("/api/editorial360/reviewers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paperId: reviewId,
+        reviewerEmail: reviewerMail,
+        action: "update_deadline",
+        deadline: newDeadline,
+        reason
+      })
+    }).catch(e => console.error("Reviewer deadline update sync error:", e))
+
+    setSuccess(language === "de"
+      ? `Abgabefrist für ${reviewId} erfolgreich auf ${newDeadline} aktualisiert.`
+      : `Review deadline for ${reviewId} successfully set to ${newDeadline}.`
     )
   }
 
@@ -3330,6 +3370,93 @@ export default function Editorial360Page() {
                         </div>
                       </div>
 
+                      {/* Review Turnaround & Deadline Setting */}
+                      <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-[#272832]">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div>
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-[#0b99ff]" />
+                              <span>{language === "de" ? "Abgabefrist für Begutachtung festlegen" : "Set Review Submission Deadline"}</span>
+                              <span className="text-[#0b99ff]">*</span>
+                            </label>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                              {language === "de" 
+                                ? "Wählen Sie einen Richtwert oder definieren Sie ein individuelles Abgabedatum." 
+                                : "Select a standard turnaround or define a custom submission target date."}
+                            </p>
+                          </div>
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-[#0b99ff] font-semibold text-xs">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>
+                              {language === "de" ? "Ziel-Frist:" : "Target Deadline:"} {" "}
+                              <strong className="font-bold text-slate-900 dark:text-white">
+                                {invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)}
+                              </strong>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Quick Turnaround Buttons */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {[
+                            { days: 7, labelEn: "7 Days", labelDe: "7 Tage", tagEn: "Expedited", tagDe: "Eilig" },
+                            { days: 14, labelEn: "14 Days", labelDe: "14 Tage", tagEn: "COPE Standard", tagDe: "Standard" },
+                            { days: 21, labelEn: "21 Days", labelDe: "21 Tage", tagEn: "Extended", tagDe: "Erweitert" },
+                            { days: 28, labelEn: "28 Days", labelDe: "28 Tage", tagEn: "Complex Study", tagDe: "Ausführlich" },
+                          ].map((preset) => {
+                            const isSelected = !invitationCustomDeadline && invitationDeadlineDays === preset.days
+                            return (
+                              <button
+                                key={preset.days}
+                                type="button"
+                                onClick={() => {
+                                  setInvitationDeadlineDays(preset.days)
+                                  setInvitationCustomDeadline("")
+                                }}
+                                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                  isSelected
+                                    ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white shadow-2xs ring-1 ring-[#0b99ff]"
+                                    : "border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-[#131418] hover:border-slate-300 text-slate-700 dark:text-slate-300"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-bold text-xs">{language === "de" ? preset.labelDe : preset.labelEn}</span>
+                                  {isSelected && <Check className="w-3.5 h-3.5 text-[#0b99ff]" />}
+                                </div>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                                  {language === "de" ? preset.tagDe : preset.tagEn}
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
+
+                        {/* Custom Date Input Option */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 pt-1 text-xs">
+                          <label className="text-slate-600 dark:text-slate-400 shrink-0 font-medium">
+                            {language === "de" ? "Oder benutzerdefiniertes Datum wählen:" : "Or choose custom date:"}
+                          </label>
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <input
+                              type="date"
+                              min={new Date().toISOString().split("T")[0]}
+                              value={invitationCustomDeadline}
+                              onChange={(e) => setInvitationCustomDeadline(e.target.value)}
+                              className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            />
+                            {invitationCustomDeadline && (
+                              <button
+                                type="button"
+                                onClick={() => setInvitationCustomDeadline("")}
+                                className="text-slate-400 hover:text-slate-600 text-xs underline cursor-pointer"
+                              >
+                                {language === "de" ? "Zurücksetzen" : "Reset"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Ethics & Governance Checkboxes */}
                       <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-[#272832]">
                         <label className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 cursor-pointer select-none">
@@ -3355,8 +3482,8 @@ export default function Editorial360Page() {
                           />
                           <span>
                             {language === "de"
-                              ? "Ich stimme zu, die Begutachtung innerhalb von 14 Tagen nach COPE-Standards zu erstellen, und nehme das monatliche Limit von max. 2 Gutachten zur Kenntnis."
-                              : "I agree to deliver an objective evaluation within 14 calendar days adhering to COPE guidelines, and acknowledge the 2-assignment monthly cap."}
+                              ? `Ich stimme zu, die Begutachtung bis zum ${invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)} nach COPE-Standards zu erstellen, und nehme das monatliche Limit von max. 2 Gutachten zur Kenntnis.`
+                              : `I agree to deliver an objective evaluation by ${invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)} adhering to COPE guidelines, and acknowledge the 2-assignment monthly cap.`}
                           </span>
                         </label>
                       </div>
@@ -5064,6 +5191,7 @@ export default function Editorial360Page() {
                     onTabChange={setActiveReviewerTab}
                     onAcceptInvitation={handleAcceptReviewInvitation}
                     onDeclineInvitation={handleDeclineReviewInvitation}
+                    onUpdateDeadline={handleUpdateReviewDeadline}
                     onSubmitScorecard={handleSubmitReviewScorecard}
                   />
                 )}
