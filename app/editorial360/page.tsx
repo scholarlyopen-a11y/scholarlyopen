@@ -3223,23 +3223,17 @@ export default function Editorial360Page() {
                       </span>
                     </div>
 
-                    <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white leading-snug tracking-tight">
+                    <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white leading-snug">
                       {invitedManuscript.title}
                     </h2>
 
-                    {/* Standardized International Metadata Row */}
-                    <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="inline-flex items-center gap-1.5 bg-white dark:bg-[#1c1d24] px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-[#272832]">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        {language === "de" ? "14 Tage Bearbeitungszeit" : "14-Day Evaluation Window"}
+                    {/* Metadata Row */}
+                    <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-500 dark:text-slate-400">
+                      <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-[#1c1d24] border border-slate-200 dark:border-slate-800">
+                        {language === "de" ? "Doppelblind" : "Double-Blind"}
                       </span>
-                      <span className="inline-flex items-center gap-1.5 bg-white dark:bg-[#1c1d24] px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-[#272832]">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                        {language === "de" ? "COPE-Standardkonform" : "COPE Standards Compliant"}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 bg-white dark:bg-[#1c1d24] px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-[#272832]">
-                        <Users className="w-3.5 h-3.5 text-[#0b99ff]" />
-                        {language === "de" ? "Max. 2 Gutachten/Monat" : "Max 2 Reviews/Month Cap"}
+                      <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-[#1c1d24] border border-slate-200 dark:border-slate-800">
+                        COPE Guidelines
                       </span>
                     </div>
 
@@ -3267,142 +3261,124 @@ export default function Editorial360Page() {
 
                   {invitationAction === "accept" ? (
                     /* Acceptance Form */
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                          {language === "de" ? "Gutachterprofil bestätigen & Begutachtung annehmen" : "Confirm Reviewer Profile & Accept Assignment"}
+                        <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                          {language === "de" ? "Gutachter-Registrierung" : "Reviewer Registration"}
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                           {language === "de" 
-                            ? "Bestätigen Sie Ihre institutionelle Zugehörigkeit und vergeben Sie ein Passwort für den direkten Zugang zum Manuskript und Ihrem Gutachter-Wallet."
-                            : "Verify your academic affiliation and set a password for permanent direct access to the blinded manuscript and your Reviewer Wallet."}
+                            ? "Bestätigen Sie Ihre Angaben für den Zugang zum Manuskript."
+                            : "Confirm your institutional details and password to access the manuscript."}
                         </p>
                       </div>
 
                       {invitationFormError && (
-                        <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          <span>{invitationFormError}</span>
+                        <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-955/20 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-400 text-xs">
+                          {invitationFormError}
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            {language === "de" ? "Vollständiger Name" : "Full Name"} *
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            {language === "de" ? "Vollständiger Name" : "Full Name"} <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={invitationReviewerName}
                             onChange={e => setInvitationReviewerName(e.target.value)}
-                            placeholder="e.g. Dr. Jane Smith"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            placeholder="Dr. Jane Smith"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                           />
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            {language === "de" ? "E-Mail-Adresse" : "Email Address"} *
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            {language === "de" ? "E-Mail-Adresse" : "Email Address"} <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="email"
                             value={invitationReviewerEmail}
                             onChange={e => setInvitationReviewerEmail(e.target.value)}
                             placeholder="reviewer@university.edu"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                           />
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            {language === "de" ? "Institution / Universität" : "Institution / University"} *
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            {language === "de" ? "Institution / Universität" : "Institution"} <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={invitationInstitution}
                             onChange={e => setInvitationInstitution(e.target.value)}
-                            placeholder="e.g. Charité Berlin / Oxford University"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            placeholder="e.g. Oxford University"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                           />
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            {language === "de" ? "Fachbereich / Institut" : "Department / Institute"}
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            {language === "de" ? "Institut / Abteilung" : "Department"}
                           </label>
                           <input
                             type="text"
                             value={invitationDepartment}
                             onChange={e => setInvitationDepartment(e.target.value)}
-                            placeholder="e.g. Dept. of Clinical Medicine"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            placeholder="e.g. Dept. of Medicine"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                           />
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                            <span className="h-3.5 w-3.5 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[8px] tracking-tighter shrink-0">
-                              iD
-                            </span>
-                            <span>ORCID iD</span>
-                            <span className="text-[10px] text-slate-400 font-normal">({language === "de" ? "Empfohlen für Zertifikat" : "Recommended for Certificate"})</span>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            ORCID iD <span className="text-slate-400 font-normal">({language === "de" ? "optional" : "optional"})</span>
                           </label>
                           <input
                             type="text"
                             value={invitationOrcid}
                             onChange={e => setInvitationOrcid(e.target.value)}
                             placeholder="0000-0002-1825-0097"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                           />
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            {language === "de" ? "Passwort für Gutachter-Konto" : "Reviewer Account Password"} *
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            {language === "de" ? "Passwort" : "Password"} <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="password"
                             value={invitationPassword}
                             onChange={e => setInvitationPassword(e.target.value)}
                             placeholder="Min. 6 characters"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                           />
                         </div>
                       </div>
 
-                      {/* Review Turnaround & Deadline Setting */}
-                      <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-[#272832]">
-                        <div className="flex items-center justify-between flex-wrap gap-2">
-                          <div>
-                            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 text-[#0b99ff]" />
-                              <span>{language === "de" ? "Abgabefrist für Begutachtung festlegen" : "Set Review Submission Deadline"}</span>
-                              <span className="text-[#0b99ff]">*</span>
-                            </label>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                              {language === "de" 
-                                ? "Wählen Sie einen Richtwert oder definieren Sie ein individuelles Abgabedatum." 
-                                : "Select a standard turnaround or define a custom submission target date."}
-                            </p>
-                          </div>
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-[#0b99ff] font-semibold text-xs">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>
-                              {language === "de" ? "Ziel-Frist:" : "Target Deadline:"} {" "}
-                              <strong className="font-bold text-slate-900 dark:text-white">
-                                {invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)}
-                              </strong>
-                            </span>
-                          </div>
+                      {/* Review Deadline Section */}
+                      <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            {language === "de" ? "Abgabefrist" : "Review Deadline"} <span className="text-rose-500">*</span>
+                          </label>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "Frist:" : "Due:"}{" "}
+                            <strong className="text-slate-900 dark:text-white">
+                              {invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)}
+                            </strong>
+                          </span>
                         </div>
 
-                        {/* Quick Turnaround Buttons */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                           {[
-                            { days: 7, labelEn: "7 Days", labelDe: "7 Tage", tagEn: "Expedited", tagDe: "Eilig" },
-                            { days: 14, labelEn: "14 Days", labelDe: "14 Tage", tagEn: "COPE Standard", tagDe: "Standard" },
-                            { days: 21, labelEn: "21 Days", labelDe: "21 Tage", tagEn: "Extended", tagDe: "Erweitert" },
-                            { days: 28, labelEn: "28 Days", labelDe: "28 Tage", tagEn: "Complex Study", tagDe: "Ausführlich" },
+                            { days: 7, labelEn: "7 Days", labelDe: "7 Tage" },
+                            { days: 14, labelEn: "14 Days", labelDe: "14 Tage" },
+                            { days: 21, labelEn: "21 Days", labelDe: "21 Tage" },
+                            { days: 28, labelEn: "28 Days", labelDe: "28 Tage" },
                           ].map((preset) => {
                             const isSelected = !invitationCustomDeadline && invitationDeadlineDays === preset.days
                             return (
@@ -3413,114 +3389,93 @@ export default function Editorial360Page() {
                                   setInvitationDeadlineDays(preset.days)
                                   setInvitationCustomDeadline("")
                                 }}
-                                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                className={`py-1.5 px-2 rounded-lg border text-xs font-medium text-center transition-colors cursor-pointer ${
                                   isSelected
-                                    ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white shadow-2xs ring-1 ring-[#0b99ff]"
-                                    : "border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-[#131418] hover:border-slate-300 text-slate-700 dark:text-slate-300"
+                                    ? "border-[#0b99ff] bg-[#0b99ff] text-white"
+                                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                                 }`}
                               >
-                                <div className="flex items-center justify-between">
-                                  <span className="font-bold text-xs">{language === "de" ? preset.labelDe : preset.labelEn}</span>
-                                  {isSelected && <Check className="w-3.5 h-3.5 text-[#0b99ff]" />}
-                                </div>
-                                <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
-                                  {language === "de" ? preset.tagDe : preset.tagEn}
-                                </span>
+                                {language === "de" ? preset.labelDe : preset.labelEn}
                               </button>
                             )
                           })}
                         </div>
 
-                        {/* Custom Date Input Option */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 pt-1 text-xs">
-                          <label className="text-slate-600 dark:text-slate-400 shrink-0 font-medium">
-                            {language === "de" ? "Oder benutzerdefiniertes Datum wählen:" : "Or choose custom date:"}
-                          </label>
-                          <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <input
-                              type="date"
-                              min={new Date().toISOString().split("T")[0]}
-                              value={invitationCustomDeadline}
-                              onChange={(e) => setInvitationCustomDeadline(e.target.value)}
-                              className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
-                            />
-                            {invitationCustomDeadline && (
-                              <button
-                                type="button"
-                                onClick={() => setInvitationCustomDeadline("")}
-                                className="text-slate-400 hover:text-slate-600 text-xs underline cursor-pointer"
-                              >
-                                {language === "de" ? "Zurücksetzen" : "Reset"}
-                              </button>
-                            )}
-                          </div>
+                        <div className="flex items-center gap-2 pt-0.5">
+                          <span className="text-xs text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "Benutzerdefiniertes Datum:" : "Custom date:"}
+                          </span>
+                          <input
+                            type="date"
+                            min={new Date().toISOString().split("T")[0]}
+                            value={invitationCustomDeadline}
+                            onChange={(e) => setInvitationCustomDeadline(e.target.value)}
+                            className="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                          />
+                          {invitationCustomDeadline && (
+                            <button
+                              type="button"
+                              onClick={() => setInvitationCustomDeadline("")}
+                              className="text-xs text-slate-400 hover:text-slate-600 underline cursor-pointer"
+                            >
+                              {language === "de" ? "Zurücksetzen" : "Reset"}
+                            </button>
+                          )}
                         </div>
                       </div>
 
-                      {/* Ethics & Governance Checkboxes */}
-                      <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-[#272832]">
-                        <label className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                      {/* Ethics Checkboxes */}
+                      <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <label className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                           <input
                             type="checkbox"
                             checked={invitationCoiChecked}
                             onChange={e => setInvitationCoiChecked(e.target.checked)}
-                            className="mt-1 h-4 w-4 rounded text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 cursor-pointer"
+                            className="mt-0.5 h-4 w-4 rounded text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 cursor-pointer"
                           />
                           <span>
                             {language === "de" 
-                              ? "Ich erkläre, dass kein Interessenkonflikt (COI) mit den Autoren oder der Forschungsarbeit vorliegt." 
-                              : "I declare no Conflict of Interest (COI) with the authors or the work presented in this manuscript."} *
+                              ? "Ich bestätige, dass kein Interessenkonflikt vorliegt." 
+                              : "I confirm no conflict of interest regarding this manuscript."} <span className="text-rose-500">*</span>
                           </span>
                         </label>
 
-                        <label className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                        <label className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                           <input
                             type="checkbox"
                             checked={invitationGovernanceChecked}
                             onChange={e => setInvitationGovernanceChecked(e.target.checked)}
-                            className="mt-1 h-4 w-4 rounded text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 cursor-pointer"
+                            className="mt-0.5 h-4 w-4 rounded text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 cursor-pointer"
                           />
                           <span>
                             {language === "de"
-                              ? `Ich stimme zu, die Begutachtung bis zum ${invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)} nach COPE-Standards zu erstellen, und nehme das monatliche Limit von max. 2 Gutachten zur Kenntnis.`
-                              : `I agree to deliver an objective evaluation by ${invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)} adhering to COPE guidelines, and acknowledge the 2-assignment monthly cap.`}
+                              ? `Ich erstelle das Gutachten bis zum ${invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)} nach COPE-Standards.`
+                              : `I will submit the evaluation by ${invitationCustomDeadline || getInvitationCalculatedDeadline(invitationDeadlineDays)} according to COPE guidelines.`}
                           </span>
                         </label>
                       </div>
 
-                      {/* Micro-Honorarium & Payment Configuration Box */}
-                      <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 space-y-3.5 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                        <div className="flex items-start justify-between gap-3 flex-wrap">
-                          <div className="flex items-center gap-2">
-                            <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                            <div>
-                              <strong className="text-sm font-bold block text-slate-900 dark:text-white">
-                                {language === "de" ? "Qualitäts-Honorarium: €35 – €50 EUR (Gedeckelt auf €50)" : "Quality-Gated Honorarium: €35 – €50 EUR (Capped at €50)"}
-                              </strong>
-                              <span className="text-[11px] text-emerald-700 dark:text-emerald-300">
-                                {language === "de"
-                                  ? "Dynamisch berechnet nach Rigor-Score (80%–100%) durch den zuständigen Handling Editor."
-                                  : "Calculated dynamically from the Handling Editor's rigor score (80%–100%) upon completed review."}
-                              </span>
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-full">
-                            {language === "de" ? "COPE-Standard Gateway: Verifiziert (≥80%) ✓" : "COPE Standard Gateway: Verified (≥80%) ✓"}
+                      {/* Honorarium / Payout Configuration */}
+                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">
+                            {language === "de" ? "Gutachter-Honorarium (€35 – €50)" : "Reviewer Honorarium (€35 – €50)"}
+                          </span>
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {language === "de" ? "Auszahlung nach Abschluss" : "Credited upon completion"}
                           </span>
                         </div>
 
-                        {/* Preferred Payout Method Selection (Exclusive Low-Fee Rails) */}
-                        <div className="pt-2 border-t border-emerald-200/60 dark:border-emerald-900/50 space-y-2.5">
-                          <label className="font-bold text-slate-900 dark:text-white text-xs block">
-                            {language === "de" ? "Bevorzugte Auszahlungsart (Nur Wise, PayPal oder Payoneer):" : "Designated Payout Rail (Exclusive: Wise, PayPal, or Payoneer):"} *
+                        <div className="space-y-1.5">
+                          <label className="font-medium text-slate-700 dark:text-slate-300 block">
+                            {language === "de" ? "Auszahlungsmethode:" : "Payout Method:"} <span className="text-rose-500">*</span>
                           </label>
-
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             {[
-                              { id: "Wise", label: "Wise (TransferWise)", sub: "Min. global fees" },
-                              { id: "PayPal", label: "PayPal", sub: "Global digital wallet" },
-                              { id: "Payoneer", label: "Payoneer", sub: "Direct balance" },
-                              { id: "Waiver", label: "100% APC Credit", sub: "3× Global South Multiplier" }
+                              { id: "Wise", label: "Wise" },
+                              { id: "PayPal", label: "PayPal" },
+                              { id: "Payoneer", label: "Payoneer" },
+                              { id: "Waiver", label: "APC Waiver" }
                             ].map((method) => {
                               const isSelected = invitationPaymentMethod === method.id
                               return (
@@ -3528,59 +3483,52 @@ export default function Editorial360Page() {
                                   key={method.id}
                                   type="button"
                                   onClick={() => setInvitationPaymentMethod(method.id as any)}
-                                  className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium text-center transition-colors cursor-pointer ${
                                     isSelected
-                                      ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white shadow-2xs"
-                                      : "border-emerald-200/80 dark:border-emerald-900/40 bg-white/70 dark:bg-[#131418] hover:border-slate-300"
+                                      ? "border-[#0b99ff] bg-[#0b99ff] text-white"
+                                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                                   }`}
                                 >
-                                  <span className="font-bold text-xs block leading-tight truncate">{method.label}</span>
-                                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">{method.sub}</span>
+                                  {method.label}
                                 </button>
                               )
                             })}
                           </div>
-
-                          {invitationPaymentMethod !== "Waiver" ? (
-                            <div className="space-y-1">
-                              <input
-                                type="text"
-                                value={invitationPaymentAccount}
-                                onChange={(e) => setInvitationPaymentAccount(e.target.value)}
-                                placeholder={
-                                  invitationPaymentMethod === "Wise"
-                                    ? "Wise account email or phone number (e.g. name@university.edu)"
-                                    : invitationPaymentMethod === "PayPal"
-                                    ? "PayPal registered email address"
-                                    : "Payoneer registered account ID or email"
-                                }
-                                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
-                              />
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                                {language === "de"
-                                  ? "Internationale SWIFT-Banküberweisungen und Schecks sind ausgeschlossen, um Gutachter vor hohen Gebühren (€15–€30) zu schützen."
-                                  : "Direct SWIFT bank wires and paper checks are disallowed to protect international scholars from heavy fee deductions."}
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="p-2.5 rounded-xl bg-sky-50/80 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40 text-[11px] text-sky-800 dark:text-sky-300">
-                              {language === "de"
-                                ? "Ihr verdientes Honorarium wird mit einem 3×-Gutschriften-Multiplikator in Ihr Reviewer Wallet übertragen (100% Publikationserlass für Ihre nächste Einreichung)."
-                                : "Your honorarium will be credited with a 3× voucher multiplier into your Academic Wallet (100% APC waiver for your next submission)."}
-                            </div>
-                          )}
                         </div>
+
+                        {invitationPaymentMethod !== "Waiver" ? (
+                          <div className="space-y-1 pt-1">
+                            <input
+                              type="text"
+                              value={invitationPaymentAccount}
+                              onChange={(e) => setInvitationPaymentAccount(e.target.value)}
+                              placeholder={
+                                invitationPaymentMethod === "Wise"
+                                  ? "Wise account email or phone"
+                                  : invitationPaymentMethod === "PayPal"
+                                  ? "PayPal registered email"
+                                  : "Payoneer registered account"
+                              }
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                            />
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {language === "de"
+                              ? "100% Verzicht auf Publikationsgebühren (APC) für Ihre nächste Einreichung."
+                              : "100% APC waiver applied to your next journal submission."}
+                          </p>
+                        )}
                       </div>
 
-                      {/* Buttons */}
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                         <Button
                           type="button"
                           onClick={handleConfirmReviewerAcceptance}
-                          className="w-full sm:w-auto px-8 py-6 rounded-2xl bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-sm sm:text-base shadow-sm hover:shadow-md transition-all cursor-pointer"
+                          className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white font-medium text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
                         >
-                          {language === "de" ? "Begutachtung annehmen & Arbeitsbereich öffnen" : "Accept Assignment & Enter Workspace"}
-                          <ArrowRight className="w-4 h-4 ml-2" />
+                          {language === "de" ? "Begutachtung annehmen" : "Accept Assignment"}
                         </Button>
 
                         <button
@@ -3589,9 +3537,9 @@ export default function Editorial360Page() {
                             setInvitationAction("decline")
                             setInvitationFormError("")
                           }}
-                          className="text-xs sm:text-sm text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 font-medium transition-colors cursor-pointer"
+                          className="text-xs text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                         >
-                          {language === "de" ? "Anfrage ablehnen" : "Unable to review? Decline invitation"}
+                          {language === "de" ? "Anfrage ablehnen" : "Decline Invitation"}
                         </button>
                       </div>
                     </div>
