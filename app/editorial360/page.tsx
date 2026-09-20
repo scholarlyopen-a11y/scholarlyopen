@@ -1433,6 +1433,32 @@ export default function Editorial360Page() {
       commentsEditor: "Excellent paper, but please edit out the reviewer's reference to the author's tone or vice-versa, and the criticisms in paragraph 3.",
       recommendation: "Minor Revision",
       status: "Pending Moderation"
+    },
+    {
+      id: "REV-FB-03",
+      paperId: "SOEAS-26-RS102",
+      reviewerName: "Dr. Marcus Vance",
+      originality: 4,
+      methodology: 4,
+      clarity: 4,
+      significance: 4,
+      commentsAuthor: "Benchmarking against baseline datasets is sound. However, the tone in section 4.1 regarding competing literature is unnecessarily polemical and must be toned down. Also please expand dynamic range annotations on Figure 3.",
+      commentsEditor: "Rigorous paper. Please sanitize the polemical reference in section 4.1 before passing to author.",
+      recommendation: "Minor Revision",
+      status: "Pending Moderation"
+    },
+    {
+      id: "REV-FB-04",
+      paperId: "SOEAS-26-RS102",
+      reviewerName: "Prof. Elena Rostova",
+      originality: 5,
+      methodology: 4,
+      clarity: 4,
+      significance: 5,
+      commentsAuthor: "Excellent study. In Section 3.2, please clarify the sample size calculation and confidence interval in Table 2.",
+      commentsEditor: "Top tier submission. Ready for minor revision.",
+      recommendation: "Accept with Minor Revisions",
+      status: "Pending Moderation"
     }
   ])
 
@@ -5236,13 +5262,41 @@ export default function Editorial360Page() {
                     reviews={reviews as any}
                     onReleaseComments={(revId, sanitizedText) => {
                       setReviews(prev => {
-                        const updated = prev.map(r => r.id === revId ? { ...r, status: "Released", sanitizedCommentsAuthor: sanitizedText } : r)
+                        const cleanKey = revId.replace("REV-FB-", "").toLowerCase().replace(/\s+/g, '')
+                        let matched = false
+                        const updated = prev.map(r => {
+                          const rNameClean = r.reviewerName.toLowerCase().replace(/\s+/g, '')
+                          if (
+                            r.id === revId || 
+                            rNameClean === cleanKey ||
+                            cleanKey.includes(rNameClean) ||
+                            rNameClean.includes(cleanKey)
+                          ) {
+                            matched = true
+                            return { ...r, status: "Released" as const, sanitizedCommentsAuthor: sanitizedText }
+                          }
+                          return r
+                        })
+                        const finalReviews = matched ? updated : [...prev, {
+                          id: revId,
+                          paperId: "SOEAS-26-RS102",
+                          reviewerName: revId.replace("REV-FB-", ""),
+                          originality: 4,
+                          methodology: 4,
+                          clarity: 4,
+                          significance: 4,
+                          commentsAuthor: sanitizedText,
+                          sanitizedCommentsAuthor: sanitizedText,
+                          commentsEditor: "Sanitized and dispatched by Journal Manager.",
+                          recommendation: "Minor Revision",
+                          status: "Released" as const
+                        }]
                         try {
                           if (typeof window !== "undefined") {
-                            localStorage.setItem("editorial360_reviews", JSON.stringify(updated))
+                            localStorage.setItem("editorial360_reviews", JSON.stringify(finalReviews))
                           }
                         } catch (e) {}
-                        return updated
+                        return finalReviews
                       })
                     }}
                     archiveLogs={archiveLogs as any}

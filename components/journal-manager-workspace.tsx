@@ -23,6 +23,7 @@ import {
   Upload,
   FileDown,
   AlertCircle,
+  Lock,
   MessageSquare,
   List,
   Kanban,
@@ -796,19 +797,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     setIsModModalOpen(true)
   }
 
-  // Handle instant Confirm Moderation Release
+  // Handle instant Confirm Moderation Release & Dispatch to Handling Editor
   const handleConfirmModerationRelease = () => {
     if (!moderatingReview) return
     const revId = moderatingReview.id
     const paperId = moderatingReview.paperId
     const editedText = modEditedComments
+    const reviewerName = moderatingReview.reviewerName
 
     setIsModModalOpen(false)
 
     triggerConfirm({
-      title: "Save & Approve Sanitized Remarks?",
-      message: `Are you sure you want to approve and save these sanitized peer review remarks for manuscript ${paperId}? These remarks will be saved to the manuscript file and bundled into the official Decision Letter sent to the author.`,
-      confirmButtonLabel: "Yes, Save & Approve",
+      title: "Sanitize & Dispatch Remarks to Handling Editor?",
+      message: `Are you sure you want to approve and dispatch these sanitized remarks for manuscript ${paperId}? Once dispatched, the Handling Editor will be granted access to view the comments and formulate the official decision letter.`,
+      confirmButtonLabel: "Yes, Sanitize & Dispatch to Editor",
       confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
       onConfirm: () => {
         if (onReleaseComments) {
@@ -816,10 +818,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         }
         setApprovedReviewRemarks(prev => ({
           ...prev,
-          [moderatingReview.reviewerName]: true,
+          [reviewerName]: true,
           [revId]: true
         }))
-        setEditorPromptSuccess(`✓ Remarks for ${moderatingReview.reviewerName} vetted, approved & saved to manuscript dossier.`)
+
+        if (onAddNotification) {
+          onAddNotification({
+            id: `NOTIF-${Date.now()}`,
+            timestamp: "Just now",
+            paperId: paperId,
+            paperTitle: `Manuscript ${paperId}`,
+            journal: "Scholarly Open",
+            sender: "Journal Manager Office",
+            type: "review_complete",
+            title: `Review Comments Dispatched for ${paperId}`,
+            message: `Sanitized remarks for ${reviewerName} have been vetted and released to the Handling Editor. Comments are now unlocked in Editor Workspace.`,
+            priority: "high"
+          })
+        }
+
+        setEditorPromptSuccess(`✓ Remarks for ${reviewerName} sanitized & dispatched to Handling Editor. Handling Editor can now view comments.`)
         setTimeout(() => setEditorPromptSuccess(null), 6000)
       }
     })
@@ -3578,18 +3596,30 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       <Dialog open={isModModalOpen} onOpenChange={setIsModModalOpen}>
         <DialogContent className="max-w-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-              Moderate Comments
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-[#0b99ff]" />
+              Sanitize & Dispatch Review Comments to Handling Editor
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Manuscript ID: {moderatingReview?.paperId} • Reviewer: {moderatingReview?.reviewerName} • Approved remarks will be bundled into the Handling Editor&apos;s official decision letter.
+              Manuscript ID: {moderatingReview?.paperId} • Reviewer: {moderatingReview?.reviewerName}
             </DialogDescription>
           </DialogHeader>
 
+          <div className="p-3 bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 rounded-xl text-xs space-y-1">
+            <div className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5" />
+              Handling Editor Access Gate
+            </div>
+            <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+              Unless and until the Journal Manager dispatches the comments after sanitizing them, the Handling Editor cannot see them. Please review the text below to remove unblinded identity clues, harsh phrasing, or personal remarks before releasing.
+            </p>
+          </div>
+
           <div className="space-y-3 py-2 text-xs">
             <div className="space-y-1">
-              <label className="font-bold text-slate-700 dark:text-slate-300">
-                Author-Facing Review Comments (Editable / Sanitizable by JM)
+              <label className="font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                <span>Author-Facing Review Comments (Sanitizable by JM)</span>
+                <span className="text-[10px] text-slate-400 font-normal">Editable</span>
               </label>
               <textarea
                 rows={5}
@@ -3617,9 +3647,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             <Button
               size="sm"
               onClick={handleConfirmModerationRelease}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer flex items-center gap-1.5"
             >
-              Save & Approve Remarks
+              <Send className="h-3.5 w-3.5" />
+              Sanitize & Dispatch to Handling Editor
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -3968,8 +3999,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                   const isSubmitted = !!matchedReview || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
                   const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
-                  const isNudged = nudgedReviewers[revName]
-                  const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === "Approved" || approvedReviewRemarks[matchedReview.id]))
+                  const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === "Approved" || matchedReview.status === "Released" || approvedReviewRemarks[matchedReview.id]))
                   const baseDays = trackingManuscript?.id === "SOEAS-26-RS106" ? 5 : 11
                   const extraDays = extendedDays[revName] || 0
                   const remainingDays = baseDays + extraDays
@@ -4226,12 +4256,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             {isRemarksApproved ? (
                               <>
                                 <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                                Edit Remarks
+                                Edit Sanitized Remarks
                               </>
                             ) : (
                               <>
-                                <MessageSquare className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                Vet Remarks
+                                <ShieldCheck className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                Sanitize & Dispatch
                               </>
                             )}
                           </Button>
@@ -4240,7 +4270,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                       <div className="text-xs text-slate-500 dark:text-slate-400">
                         {isSubmitted ? (
-                          <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{displayScore} / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">{displayRecommendation}</strong></span>
+                          <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                            <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{displayScore} / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">{displayRecommendation}</strong></span>
+                            {isRemarksApproved ? (
+                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                                ✓ Sanitized & Dispatched to Editor
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                                <Lock className="h-2.5 w-2.5" />
+                                Pending JM Sanitization (Editor Locked)
+                              </span>
+                            )}
+                          </div>
                         ) : isOverdue ? (
                           <span className="text-red-600 dark:text-red-400 font-medium">Deadline was 2026-08-22 (3 days overdue) • Follow-up reminder required</span>
                         ) : (

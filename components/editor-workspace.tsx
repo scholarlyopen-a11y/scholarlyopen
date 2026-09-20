@@ -151,17 +151,25 @@ function getDecisionLetterTemplate(verdict: string, editorName: string, journalN
   const roleTitle = isEicVerdict ? "Editor-in-Chief" : "Handling Editor"
   const cleanJournal = journalName || "Scholarly Open"
 
-  const actualItemizedComments = (paperReviews && paperReviews.length > 0)
-    ? paperReviews.map((rev, idx) => {
+  // CRITICAL RULE: Unless and until the Journal Manager dispatches the comments after sanitizing them,
+  // the Handling Editor cannot see them, and they cannot be included in the official Decision Letter.
+  const releasedReviews = (paperReviews || []).filter(rev => rev.status === "Released")
+  const pendingReviews = (paperReviews || []).filter(rev => rev.status !== "Released")
+
+  const actualItemizedComments = releasedReviews.length > 0
+    ? releasedReviews.map((rev, idx) => {
         const revName = rev.reviewerName || `Reviewer #${idx + 1}`
         const revReco = rev.recommendation || "Evaluation Provided"
         const comments = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No detailed comments provided."
         return `[Reviewer #${idx + 1}: ${revName}]
 Recommendation: ${revReco}
+Status: Sanitized & Dispatched by Journal Office ✓
 Comments to Author:
 ${comments}`
       }).join("\n\n----------------------------------------------------------------------\n\n")
-    : null
+    : (pendingReviews.length > 0
+        ? `[NOTICE: ${pendingReviews.length} reviewer evaluation(s) submitted are currently under sanitization by the Journal Manager. Sanitized comments will be attached once formally dispatched by the Journal Office.]`
+        : null)
 
   if (verdict === "Accept") {
     const commentsBlock = actualItemizedComments ? `\n\nSummary of Reviewer Feedback:\n======================================================================\n${actualItemizedComments}\n======================================================================\n` : ""
@@ -2138,9 +2146,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               <span className="font-bold text-slate-900 dark:text-white">
                                 Reviewer: {rev.reviewerName || "Peer Reviewer"}
                               </span>
-                              <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
-                                Evaluation Completed ✓
-                              </span>
+                              {rev.status === "Released" ? (
+                                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
+                                  ✓ Dispatched by JM (Sanitized)
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                                  <Lock className="h-3 w-3" />
+                                  Awaiting JM Sanitization & Dispatch
+                                </span>
+                              )}
                               <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
                                 Verdict: {rev.recommendation || "Completed"}
                               </span>
@@ -2161,42 +2176,59 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                           {isExpanded && (
                             <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150 text-xs">
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
+                              {rev.status !== "Released" ? (
+                                <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
+                                  <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                  <div className="space-y-1">
+                                    <h5 className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                                      Reviewer Comments Locked (Under JM Sanitization)
+                                    </h5>
+                                    <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
+                                      The Journal Manager is currently reviewing and sanitizing this report. In accordance with publication protocols, reviewer comments remain restricted and cannot be viewed by the Handling Editor until formally dispatched by the Journal Manager.
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
-                                </div>
-                              </div>
+                              ) : (
+                                <>
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                    <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                      <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
+                                      <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
+                                    </div>
+                                    <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                      <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                      <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
+                                    </div>
+                                    <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                      <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                      <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
+                                    </div>
+                                    <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                      <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
+                                      <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
+                                    </div>
+                                  </div>
 
-                              <div className="space-y-1">
-                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Comments to Author:
-                                </span>
-                                <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
-                                  {rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No specific comments."}
-                                </div>
-                              </div>
+                                  <div className="space-y-1">
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center justify-between">
+                                      <span>Sanitized Comments to Author:</span>
+                                      <span className="text-[10px] text-emerald-600 font-bold">Dispatched by JM ✓</span>
+                                    </span>
+                                    <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
+                                      {rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No specific comments."}
+                                    </div>
+                                  </div>
 
-                              <div className="space-y-1">
-                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Confidential Comments to Handling Editor:
-                                </span>
-                                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
-                                  &ldquo;{rev.commentsEditor || "Evaluation submitted via portal."}&rdquo;
-                                </div>
-                              </div>
+                                  <div className="space-y-1">
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                      Confidential Comments to Handling Editor:
+                                    </span>
+                                    <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
+                                      &ldquo;{rev.commentsEditor || "Evaluation submitted via portal."}&rdquo;
+                                    </div>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
@@ -2288,6 +2320,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 ? activePaperReviews[0].recommendation || "Evaluation Provided"
                 : "Minor Revision"
 
+              const releasedReviews = activePaperReviews.filter(r => r.status === "Released")
+              const pendingReviews = activePaperReviews.filter(r => r.status !== "Released")
+              const hasPending = pendingReviews.length > 0
+
               return (
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2.5">
                   <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 flex-wrap gap-2">
@@ -2304,11 +2340,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </span>
                   </div>
 
+                  {hasPending && (
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/80 flex items-start gap-2.5 text-xs">
+                      <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                      <div className="space-y-0.5">
+                        <div className="font-bold text-amber-900 dark:text-amber-200">
+                          {pendingReviews.length} Review Report{pendingReviews.length > 1 ? "s" : ""} Under JM Moderation
+                        </div>
+                        <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
+                          Reviewer comments are hidden from the Handling Editor and omitted from the decision letter until the Journal Manager sanitizes and dispatches them.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-2 text-xs">
                     {hasActiveReviews ? (
                       activePaperReviews.map((rev, idx) => {
                         const revKey = `rev-${rev.id || idx}`
                         const isExpanded = expandedReviewerScorecard === revKey || expandedReviewerScorecard === `rev${idx + 1}` || (idx === 0 && expandedReviewerScorecard === null)
+                        const isReleased = rev.status === "Released"
                         const commentsToAuthor = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No comments to author."
                         const commentsToEditor = rev.commentsEditor || "Assessment submitted via portal. No confidential concerns noted."
 
@@ -2329,13 +2380,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
                                   {rev.recommendation || "Review Submitted"}
                                 </span>
-                                {rev.status === "Released" ? (
+                                {isReleased ? (
                                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                    Vetted & Approved by JM ✓
+                                    Vetted & Dispatched by JM ✓
                                   </span>
                                 ) : (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                                    Raw (Pending JM Vetting)
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                                    <Lock className="h-3 w-3" />
+                                    Awaiting JM Sanitization & Dispatch
                                   </span>
                                 )}
                               </div>
@@ -2350,45 +2402,62 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                             {isExpanded && (
                               <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
-                                {/* Detailed Score Matrix */}
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
-                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
+                                {!isReleased ? (
+                                  <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
+                                    <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                    <div className="space-y-1">
+                                      <div className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                                        Reviewer Comments Locked (Under JM Sanitization)
+                                      </div>
+                                      <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
+                                        The Journal Manager must sanitize and dispatch these comments before they can be reviewed by the Handling Editor or included in the decision letter.
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
-                                  </div>
-                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
-                                  </div>
-                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
-                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
-                                  </div>
-                                </div>
+                                ) : (
+                                  <>
+                                    {/* Detailed Score Matrix */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
+                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
+                                      </div>
+                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
+                                      </div>
+                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
+                                      </div>
+                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
+                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
+                                      </div>
+                                    </div>
 
-                                {/* Comments to Author */}
-                                <div className="space-y-1">
-                                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                    Comments to Author (Included in Decision Letter):
-                                  </span>
-                                  <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
-                                    {commentsToAuthor}
-                                  </div>
-                                </div>
+                                    {/* Comments to Author */}
+                                    <div className="space-y-1">
+                                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center justify-between">
+                                        <span>Sanitized Comments to Author (Dispatched by JM):</span>
+                                        <span className="text-[10px] text-emerald-600 font-bold">Vetted ✓</span>
+                                      </span>
+                                      <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
+                                        {commentsToAuthor}
+                                      </div>
+                                    </div>
 
-                                {/* Confidential Comments to Handling Editor */}
-                                <div className="space-y-1">
-                                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                    Confidential Editor Notes (Visible to Editors & JM only):
-                                  </span>
-                                  <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
-                                    &ldquo;{commentsToEditor}&rdquo;
-                                  </div>
-                                </div>
+                                    {/* Confidential Comments to Handling Editor */}
+                                    <div className="space-y-1">
+                                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                        Confidential Editor Notes (Released by JM):
+                                      </span>
+                                      <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
+                                        &ldquo;{commentsToEditor}&rdquo;
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>
