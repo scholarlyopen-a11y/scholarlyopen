@@ -229,7 +229,7 @@ export function JournalManagerWorkspace({
   // Scholar Scout (Lead Finder & Editorial Outreach Suite) State
   const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
   const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine & Health Sciences")
-  const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor">("call_for_papers")
+  const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up">("call_for_papers")
   const [scoutViewMode, setScoutViewMode] = useState<"list" | "cards">("list")
   const [scoutSubTab, setScoutSubTab] = useState<"finder" | "history">("finder")
   const [scoutLimit, setScoutLimit] = useState<number>(25)
@@ -350,7 +350,7 @@ export function JournalManagerWorkspace({
   const handleUpdateScholarEmail = (index: number, newEmail: string) => {
     setScoutResults(prev => {
       const copy = [...prev]
-      copy[index] = { ...copy[index], email: newEmail.trim() }
+      copy[index] = { ...copy[index], email: newEmail.trim(), isCustomEmail: true }
       return copy
     })
   }
@@ -385,7 +385,7 @@ export function JournalManagerWorkspace({
     }
   }
 
-  const handleDispatchScoutOutreach = (scholar: any, campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor") => {
+  const handleDispatchScoutOutreach = (scholar: any, campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up") => {
     const journalName = scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal
     const scholarName = scholar.name || "Distinguished Colleague"
     const scholarEmail = scholar.email || "colleague@university.edu"
@@ -412,6 +412,11 @@ export function JournalManagerWorkspace({
       actionLabel = "Express Interest in Leadership Post"
       actionUrl = `https://www.scholarlyopen.org/editorial360?action=eic_inquiry&name=${encodeURIComponent(scholarName)}`
       defaultBody = `Dear ${scholarName},\n\nThe Executive Publishing Board of Scholarly Open is currently seeking a visionary academic leader to serve as Editor-in-Chief (EiC) for ${journalName}.\n\nGiven your distinguished track record at ${institution} and international recognition in ${specialty}, the nominations committee has unanimously selected you as a leading candidate for this pivotal leadership post.\n\nAs Editor-in-Chief, you will guide the strategic and editorial direction of the journal.\nKey responsibilities include:\n• Overseeing the peer-review process and making final decisions on manuscript acceptance.\n• Collaborating with the internal editorial office to uphold strict ethical standards and COPE academic integrity.\n• Leading journal development initiatives and proposing new strategic directions.\n• Serving as the primary ambassador for the journal within the academic community.\n• Encouraging high-quality submissions and contributing your own scholarly work where appropriate.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and permanent recognition on the journal masthead and web registry.\n\nWe would welcome an initial discussion regarding this appointment.\n\nSincerely,\nExecutive Editorial Committee\nScholarly Open Publishing Group`
+    } else if (campaign === "follow_up") {
+      defaultSubject = `Follow-up: Academic Collaboration & Editorial Invitation for ${journalName}`
+      actionLabel = "Review Previous Invitation"
+      actionUrl = `https://www.scholarlyopen.org/editorial360`
+      defaultBody = `Dear ${scholarName},\n\nI hope this message finds you well.\n\nI am writing to gently follow up on our previous correspondence regarding ${journalName}. We recognize how demanding your research, clinical, and teaching commitments are at ${institution}, and wanted to ensure our prior invitation did not get lost in your inbox.\n\nGiven your prominent expertise in ${specialty}, we remain very enthusiastic about collaborating with your research team. Depending on your current priorities, we would be delighted to:\n1. Consider your latest research for our Founding Inaugural Volume (with our 50% launch discount and full low-income/hardship waiver provisions).\n2. Welcome you to our international editorial board.\n\nPlease let us know if you have any questions or if you would be open to a brief discussion.\n\nThank you for your time and continued dedication to advancing open science.\n\nSincerely,\nEditorial Management Office\n${journalName}\nScholarly Open Publishing Group`
     } else {
       defaultSubject = `Editorial Invitation: Associate Editor Appointment for ${journalName}`
       actionLabel = "Accept Associate Editor Role"
@@ -1708,49 +1713,45 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {activeTab === "scout" && (
         <div className="space-y-5 animate-in fade-in duration-200">
           
-          {/* Header Banner & Namecheap SMTP Safety Rail */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs relative overflow-hidden space-y-4">
+          {/* Header Banner: Clean, Standardized, International Scholarly Style */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs relative overflow-hidden space-y-4">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0077cc]" />
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0b99ff] dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-md border border-sky-200/70 dark:border-sky-800/60">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#0b99ff] dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-0.5 rounded-md border border-sky-200/70 dark:border-sky-800/60">
                     <Compass className="h-3.5 w-3.5 text-[#0b99ff]" />
-                    Scholar Scout
+                    Talent Discovery
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                    OpenAlex 250M+ Scholarly Graph Connected
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
-                    <Server className="h-3 w-3 text-slate-500" />
-                    Namecheap SMTP Rail Active
+                  <span className="text-xs text-slate-400">•</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    250M+ Open Scholarly Graph
                   </span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  Academic Talent Discovery & Editorial Outreach
+                  Scholar Scout
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-3xl leading-relaxed">
-                  Extract global active scholars with verified affiliations, citation metrics, and institutional emails. Directly invite for Call for Papers (Founding Volume for ISSN milestone & launch discounts), Editorial Board Members (EBMs), Editors-in-Chief (EiCs), or Associate Editors.
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                  Precision scholarly talent discovery, editorial recruitment, and author outreach suite.
                 </p>
               </div>
 
               {/* Namecheap Server Daily Safe Quota Meter */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 min-w-[260px] space-y-2 shrink-0">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 min-w-[240px] space-y-1.5 shrink-0">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                     <Server className="h-3.5 w-3.5 text-[#0b99ff]" />
-                    Namecheap SMTP Safety Meter
+                    Namecheap Outbound Rail
                   </span>
-                  <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded-md ${
+                  <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded ${
                     sentTodayCount > 200 ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300" :
                     sentTodayCount > 120 ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" :
                     "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
                   }`}>
-                    {sentTodayCount} / 250 Daily
+                    {sentTodayCount} / 250 sent today
                   </span>
                 </div>
-                <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div 
                     className={`h-full transition-all duration-500 ${
                       sentTodayCount > 200 ? "bg-rose-500" :
@@ -1760,40 +1761,38 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     style={{ width: `${Math.min(100, Math.max(4, Math.round((sentTodayCount / 250) * 100)))}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-                  {sentTodayCount < 200 
-                    ? "Safe rate rail: prevents Namecheap server throttling and spam blacklisting."
-                    : "Caution: Approaching Namecheap daily threshold of 250 emails/day."}
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  Protects server reputation and prevents domain throttling.
                 </p>
               </div>
             </div>
 
-            {/* Sub-tab Navigation (Finder vs History Log) */}
+            {/* Sub-tab Navigation */}
             <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setScoutSubTab("finder")}
-                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2 ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
                   scoutSubTab === "finder"
                     ? "bg-[#0b99ff] text-white shadow-xs"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                <Compass className="h-4 w-4" />
-                <span>Scholar Lead Finder</span>
+                <Compass className="h-3.5 w-3.5" />
+                <span>Lead Finder</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setScoutSubTab("history")}
-                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2 ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
                   scoutSubTab === "history"
                     ? "bg-[#0b99ff] text-white shadow-xs"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                <History className="h-4 w-4" />
-                <span>Sent Outreach History & Audit Log</span>
+                <History className="h-3.5 w-3.5" />
+                <span>Outreach Log</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 dark:bg-white/10 font-mono">
                   {sentEmailsHistory.length}
                 </span>
@@ -1926,44 +1925,43 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   ))}
                 </div>
 
-                {/* Campaign Selector Tabs */}
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="space-y-0.5">
-                      <span className="text-xs font-bold text-slate-900 dark:text-white block">
-                        Select Outreach Campaign Purpose:
-                      </span>
-                      <span className="text-[11px] text-slate-500">
-                        Dispatched invitations strictly adhere to Scholarly Open&apos;s APC &amp; Waiver Policy and official editorial terms.
-                      </span>
-                    </div>
+                {/* Campaign Mode Bar: Clean, Full-Width, Perfectly Aligned */}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Campaign Invitation Mode:
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      Templates automatically adapt with official journal terms
+                    </span>
+                  </div>
 
-                    <div className="grid grid-cols-2 sm:flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 gap-1">
-                      {[
-                        { id: "call_for_papers", label: "Call for Papers", icon: FileText, badge: "Founding Vol · 50% Launch Discount" },
-                        { id: "ebm", label: "Editorial Board (EBM)", icon: Users, badge: "2-Yr · 25% APC Discount" },
-                        { id: "eic", label: "Editor-in-Chief (EiC)", icon: Award, badge: "Leadership · 25% APC Discount" },
-                        { id: "associate_editor", label: "Associate Editor", icon: BookOpen, badge: "Section · 25% APC Discount" },
-                      ].map((c) => {
-                        const isSelected = scoutCampaignType === c.id
-                        const IconComp = c.icon
-                        return (
-                          <button
-                            key={c.id}
-                            type="button"
-                            onClick={() => setScoutCampaignType(c.id as any)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 justify-center ${
-                              isSelected
-                                ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs border border-slate-200 dark:border-slate-700 font-bold"
-                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                            }`}
-                          >
-                            <IconComp className="h-3.5 w-3.5" />
-                            <span>{c.label}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
+                    {[
+                      { id: "call_for_papers", label: "Call for Papers", icon: FileText },
+                      { id: "ebm", label: "Editorial Board (EBM)", icon: Users },
+                      { id: "eic", label: "Editor-in-Chief (EiC)", icon: Award },
+                      { id: "associate_editor", label: "Associate Editor", icon: BookOpen },
+                      { id: "follow_up", label: "Follow-Up Invite", icon: RotateCcw },
+                    ].map((c) => {
+                      const isSelected = scoutCampaignType === c.id
+                      const IconComp = c.icon
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setScoutCampaignType(c.id as any)}
+                          className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 justify-center ${
+                            isSelected
+                              ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs border border-slate-200 dark:border-slate-700 font-bold"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/40"
+                          }`}
+                        >
+                          <IconComp className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">{c.label}</span>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               </Card>
@@ -1973,13 +1971,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      Verified Scholar Candidates ({scoutResults.length})
+                      Scholar Candidates ({scoutResults.length})
                     </span>
                     <span className="text-[11px] text-slate-400">
                       Topic: &ldquo;{scoutKeyword}&rdquo;
                     </span>
                     <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                      OpenAlex &amp; ROR Verified
+                      OpenAlex &amp; ROR Verified Affiliations
                     </span>
                   </div>
 
@@ -2031,10 +2029,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         <thead>
                           <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                             <th className="py-3 px-4 min-w-[220px]">Scholar &amp; Institution</th>
-                            <th className="py-3 px-3 min-w-[170px]">Academic Profile &amp; ORCID</th>
-                            <th className="py-3 px-3 min-w-[240px]">Specialty &amp; Editorial Rationale</th>
-                            <th className="py-3 px-3 min-w-[210px]">Verified Email (Editable)</th>
-                            <th className="py-3 px-4 text-right min-w-[140px]">Action</th>
+                            <th className="py-3 px-3 min-w-[170px]">Profile &amp; ORCID</th>
+                            <th className="py-3 px-3 min-w-[240px]">Specialty &amp; Focus</th>
+                            <th className="py-3 px-3 min-w-[230px]">Email &amp; Online Verification</th>
+                            <th className="py-3 px-4 text-right min-w-[130px]">Action</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
@@ -2042,7 +2040,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             const campaignLabel = 
                               scoutCampaignType === "call_for_papers" ? "Send CFP" :
                               scoutCampaignType === "ebm" ? "Invite EBM" :
-                              scoutCampaignType === "eic" ? "Nominate EiC" : "Invite AE"
+                              scoutCampaignType === "eic" ? "Nominate EiC" :
+                              scoutCampaignType === "follow_up" ? "Send Follow-Up" : "Invite AE"
 
                             const cleanOrcid = (scholar.orcid || "").replace(/^https?:\/\/orcid\.org\//, "")
 
@@ -2107,9 +2106,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   </div>
                                 </td>
 
-                                {/* Verified Email (Editable In-Place) */}
+                                {/* Email & Online Verification Links */}
                                 <td className="py-3.5 px-3 align-top">
-                                  <div className="space-y-1">
+                                  <div className="space-y-1.5">
                                     <div className="relative">
                                       <input
                                         type="email"
@@ -2117,16 +2116,44 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                         onChange={(e) => handleUpdateScholarEmail(idx, e.target.value)}
                                         placeholder="scholar@university.edu"
                                         className="w-full text-[11px] font-mono pl-2 pr-6 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                                        title="Click to edit or correct email address"
+                                        title="Click to edit or paste confirmed email"
                                       />
                                       <Edit3 className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400 pointer-events-none" />
                                     </div>
-                                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-0.5">
-                                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                                        <CheckCircle2 className="h-2.5 w-2.5" />
-                                        Verified Rail
-                                      </span>
-                                      <span>Click to edit</span>
+                                    
+                                    {/* 1-Click Verification Links */}
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <a
+                                        href={`https://www.google.com/search?q=${encodeURIComponent(scholar.name + ' ' + (scholar.institution || '') + ' email contact')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0b99ff] hover:underline bg-sky-50 dark:bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-200 dark:border-sky-800/60"
+                                        title="Search faculty directory or lab webpage for official email"
+                                      >
+                                        <span>Faculty Search</span>
+                                        <ExternalLink className="h-2.5 w-2.5" />
+                                      </a>
+
+                                      <a
+                                        href={`https://scholar.google.com/scholar?q=${encodeURIComponent(scholar.name + ' ' + (scholar.institution || ''))}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:underline bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700"
+                                        title="View Google Scholar profile"
+                                      >
+                                        <span>Scholar</span>
+                                        <ExternalLink className="h-2.5 w-2.5" />
+                                      </a>
+
+                                      {scholar.isCustomEmail ? (
+                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                          ✓ JM Confirmed
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] text-slate-400">
+                                          Domain Match
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
                                 </td>
@@ -2156,7 +2183,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       const campaignLabel = 
                         scoutCampaignType === "call_for_papers" ? "Invite to Submit Paper" :
                         scoutCampaignType === "ebm" ? "Invite as EBM" :
-                        scoutCampaignType === "eic" ? "Nominate as EiC" : "Invite as Associate Editor"
+                        scoutCampaignType === "eic" ? "Nominate as EiC" :
+                        scoutCampaignType === "follow_up" ? "Send Follow-Up" : "Invite as Associate Editor"
 
                       const cleanOrcid = (scholar.orcid || "").replace(/^https?:\/\/orcid\.org\//, "")
 
@@ -2201,7 +2229,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </div>
 
                             {/* Verified Contact Email (Editable) */}
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                               <div className="relative">
                                 <input
                                   type="email"
@@ -2211,9 +2239,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 />
                                 <Edit3 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                               </div>
-                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block px-1">
-                                ✓ ROR Verified Domain
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <a
+                                  href={`https://www.google.com/search?q=${encodeURIComponent(scholar.name + ' ' + (scholar.institution || '') + ' email contact')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[10px] font-semibold text-[#0b99ff] hover:underline flex items-center gap-0.5"
+                                >
+                                  <span>Faculty Search</span>
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                                {scholar.isCustomEmail ? (
+                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                                    ✓ JM Confirmed
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400">
+                                    Domain Match
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
 
@@ -2276,7 +2321,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         <th className="py-3 px-3 min-w-[130px]">Campaign Type</th>
                         <th className="py-3 px-4 min-w-[220px]">Subject</th>
                         <th className="py-3 px-3 min-w-[90px]">Status</th>
-                        <th className="py-3 px-4 text-right min-w-[100px]">View</th>
+                        <th className="py-3 px-4 text-right min-w-[160px]">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
@@ -2308,6 +2353,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 record.campaignType === "call_for_papers" ? "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200 dark:border-sky-800" :
                                 record.campaignType === "eic" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800" :
                                 record.campaignType === "ebm" ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800" :
+                                record.campaignType === "follow_up" ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800" :
                                 "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                               }`}>
                                 {record.campaignType.replace(/_/g, " ")}
@@ -2323,15 +2369,37 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </span>
                             </td>
                             <td className="py-3 px-4 text-right">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setViewingHistoryEmail(record)}
-                                className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
-                              >
-                                <Eye className="h-3 w-3 mr-1" />
-                                View
-                              </Button>
+                              <div className="flex items-center justify-end gap-1.5">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    handleDispatchScoutOutreach(
+                                      {
+                                        name: record.recipientName,
+                                        email: record.recipientEmail,
+                                        institution: record.journal,
+                                        specialty: "your research field"
+                                      },
+                                      "follow_up"
+                                    )
+                                  }}
+                                  className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-sky-200 dark:border-sky-800 text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 cursor-pointer flex items-center gap-1"
+                                  title="Send a polite follow-up reminder"
+                                >
+                                  <RotateCcw className="h-3 w-3" />
+                                  Follow-up
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setViewingHistoryEmail(record)}
+                                  className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  View
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         )
