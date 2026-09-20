@@ -1391,33 +1391,30 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
   const renderEcrTalentHub = () => {
     return (
       <div className="space-y-5">
-        {/* 1. Header Banner & Mission */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/50 via-slate-900 to-sky-950/30 border border-indigo-500/20 shadow-xs space-y-4">
+        {/* 1. Header Banner & Mission (Standard Clean UI) */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                <span className="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-[#0b99ff] border border-sky-100 dark:border-sky-900/40">
                   <GraduationCap className="h-4 w-4" />
                 </span>
-                <h4 className="text-sm font-bold text-white tracking-wide">
-                  Early Career Researcher (ECR) Talent Hub &amp; Invitations
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
+                  ECR Talent Hub
                 </h4>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  Preprint First Authors
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                   bioRxiv · medRxiv · arXiv
                 </span>
               </div>
-              <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                Sponsor and empower emerging scholars (doctoral candidates, postdocs, and research fellows) from bioRxiv, medRxiv, arXiv, and OpenAlex. Invite them to serve as verified peer reviewers (Level-1 fast-track), join our Certified Reviewer Masterclass, or submit preprints with guaranteed 50% APC fee waivers.
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                Source and invite preprint lead authors for peer review, training masterclasses, and submissions.
               </p>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-right">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Merit Incentive Pool</span>
-                <span className="text-xs font-bold text-amber-300 flex items-center justify-end gap-1 mt-0.5">
+              <div className="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 text-right">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Reviewer Incentive</span>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1 mt-0.5">
                   <Sparkles className="h-3.5 w-3.5" />
                   +15 to +25 Pts / Review
                 </span>
@@ -1426,17 +1423,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </div>
 
           {/* Source Filter Tabs */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
-            <span className="text-xs font-semibold text-slate-300 mr-1 flex items-center gap-1.5">
-              <Filter className="h-3.5 w-3.5 text-indigo-400" />
-              <span>Database:</span>
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1.5">
+              <Filter className="h-3.5 w-3.5 text-slate-400" />
+              <span>Source:</span>
             </span>
             {[
-              { id: "all", label: "All Repositories", count: ecrResults.length || "12+", badge: "bioRxiv · medRxiv · arXiv" },
-              { id: "biorxiv", label: "bioRxiv Preprints", count: ecrResults.filter(r => r.ecrSource === "bioRxiv").length || "Biology", badge: "Life Sciences" },
-              { id: "medrxiv", label: "medRxiv Preprints", count: ecrResults.filter(r => r.ecrSource === "medRxiv").length || "Medicine", badge: "Health Sciences" },
-              { id: "arxiv", label: "arXiv Preprints", count: ecrResults.filter(r => r.ecrSource === "arXiv").length || "AI/CS", badge: "Computer Science & Physics" },
-              { id: "openalex", label: "OpenAlex ECR", count: ecrResults.filter(r => r.ecrSource === "OpenAlex ECR").length || "2024–26", badge: "Emerging Scholars" }
+              { id: "all", label: "All Repositories", count: ecrResults.length || "12+" },
+              { id: "biorxiv", label: "bioRxiv", count: ecrResults.filter(r => r.ecrSource === "bioRxiv").length || "Bio" },
+              { id: "medrxiv", label: "medRxiv", count: ecrResults.filter(r => r.ecrSource === "medRxiv").length || "Med" },
+              { id: "arxiv", label: "arXiv", count: ecrResults.filter(r => r.ecrSource === "arXiv").length || "AI/CS" },
+              { id: "openalex", label: "OpenAlex ECR", count: ecrResults.filter(r => r.ecrSource === "OpenAlex ECR").length || "ECR" }
             ].map(src => (
               <button
                 key={src.id}
@@ -1445,15 +1442,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   setEcrSource(src.id as any)
                   handleSearchEcrScholars(ecrKeyword, src.id as any)
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 border ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 border ${
                   ecrSource === src.id
                     ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
-                    : "bg-white/5 hover:bg-white/10 text-slate-300 border-white/10"
+                    : "bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                 }`}
               >
                 <span>{src.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  ecrSource === src.id ? "bg-white/20 text-white" : "bg-white/10 text-slate-300"
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  ecrSource === src.id ? "bg-white/20 text-white" : "bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                 }`}>
                   {src.count}
                 </span>
@@ -2243,16 +2240,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 }}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
                   scoutSubTab === "ecr"
-                    ? "bg-gradient-to-r from-[#0b99ff] to-indigo-600 text-white shadow-xs"
+                    ? "bg-[#0b99ff] text-white shadow-xs"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                <GraduationCap className="h-3.5 w-3.5 text-amber-300" />
-                <span>ECR Talent Hub (Preprints)</span>
+                <GraduationCap className="h-3.5 w-3.5" />
+                <span>ECR Talent Hub</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  scoutSubTab === "ecr" ? "bg-white/20 text-white" : "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                  scoutSubTab === "ecr" ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
                 }`}>
-                  bioRxiv · medRxiv · arXiv
+                  Preprints
                 </span>
               </button>
 
