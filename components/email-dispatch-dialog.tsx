@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES } from "@/lib/email-templates"
+import { getJournalReplyTo } from "@/lib/data/journal-contacts"
 
 export interface EmailDispatchConfig {
   isOpen: boolean
@@ -191,22 +192,37 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-[#20222a] p-3 rounded-xl border border-slate-200/80 dark:border-[#272832]">
             <div>
               <span className="font-semibold text-slate-500 dark:text-slate-400 block text-[11px]">
-                {isDe ? "Empfänger:" : "Recipient:"}
+                {isDe ? "Absender (Offizielle Journal-Mail):" : "Sending From (Official Journal Desk):"}
               </span>
-              <span className="font-bold text-slate-900 dark:text-white">
-                {config.recipientName}
+              <div className="font-bold text-slate-900 dark:text-white truncate">
+                {config.journal || "Scholarly Open"}
+              </div>
+              <span className="font-mono text-[11px] text-[#0b99ff] font-semibold">
+                {getJournalReplyTo(config.journal)}
               </span>
             </div>
 
             <div>
               <span className="font-semibold text-slate-500 dark:text-slate-400 block text-[11px]">
-                {isDe ? "Empfänger-E-Mail:" : "Recipient Email:"}
+                {isDe ? "Empfänger:" : "Recipient:"}
+              </span>
+              <div className="font-bold text-slate-900 dark:text-white truncate">
+                {config.recipientName}
+              </div>
+              <span className="text-[11px] text-slate-400">
+                Direct Scholar Outreach
+              </span>
+            </div>
+
+            <div className="sm:col-span-2">
+              <span className="font-semibold text-slate-500 dark:text-slate-400 block text-[11px]">
+                {isDe ? "Empfänger-E-Mail (anpassbar):" : "Recipient Email (Customizable):"}
               </span>
               <input
                 type="email"
                 value={recipientEmail}
                 onChange={(e) => setRecipientEmail(e.target.value)}
-                className="w-full mt-0.5 px-2 py-1 text-xs bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] rounded text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                className="w-full mt-0.5 px-2.5 py-1.5 text-xs bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] rounded-lg text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
               />
             </div>
 
@@ -216,8 +232,8 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
                 <span className="font-mono text-slate-600 dark:text-slate-300">scholarlyopen@gmail.com</span>
               </div>
               <div>
-                <span className="font-semibold">Manuscript: </span>
-                <span className="font-mono text-[#0b99ff]">{config.paperId || 'N/A'}</span>
+                <span className="font-semibold">Reply-To: </span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400">{getJournalReplyTo(config.journal)}</span>
               </div>
             </div>
           </div>

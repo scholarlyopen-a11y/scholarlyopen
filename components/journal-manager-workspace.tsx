@@ -62,6 +62,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
+import { OFFICIAL_JOURNALS, getJournalReplyTo } from "@/lib/data/journal-contacts"
 
 export interface SentEmailRecord {
   id: string
@@ -228,7 +229,7 @@ export function JournalManagerWorkspace({
 
   // Scholar Scout (Lead Finder & Editorial Outreach Suite) State
   const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
-  const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine & Health Sciences")
+  const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine")
   const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up">("call_for_papers")
   const [scoutViewMode, setScoutViewMode] = useState<"list" | "cards">("list")
   const [scoutSubTab, setScoutSubTab] = useState<"finder" | "history">("finder")
@@ -254,10 +255,10 @@ export function JournalManagerWorkspace({
         timestamp: "2026-09-20T14:22:00Z",
         recipientName: "Prof. Hiroshi Tanaka",
         recipientEmail: "h.tanaka@tokyo-institute.ac.jp",
-        journal: "Scholarly Open: Medicine & Health Sciences",
+        journal: "Scholarly Open: Medicine",
         campaignType: "call_for_papers",
-        subject: "Call for Papers: Founding Volume Submission Invitation for Scholarly Open: Medicine & Health Sciences",
-        body: "Dear Prof. Hiroshi Tanaka,\n\nOn behalf of the editorial office of Scholarly Open: Medicine & Health Sciences, we have followed your influential scholarship in Non-Mydriatic Fundus Tele-Screening Protocols & AI Triage with great admiration.\n\nScholarly Open: Medicine & Health Sciences is currently assembling high-impact original research articles for our Founding Inaugural Volume. This foundational issue is pivotal in securing international ISSN registration and establishing our baseline citation record for upcoming indexing applications.\n\nIn alignment with our official APC & Waiver Policy:\n• Inaugural 50% Launch Discount: All accepted manuscripts in 2026 automatically receive a 50% fee discount across our portfolio.\n• Low-Income Waivers: Authors from World Bank low-income countries receive 100% full fee waivers; discretionary hardship waivers are available for unfunded researchers.\n• Rigorous Double-Blind Peer Review with 14-day rapid turnaround target.\n\nSincerely,\nJournal Management Office",
+        subject: "Call for Papers: Founding Volume Submission Invitation for Scholarly Open: Medicine",
+        body: "Dear Prof. Hiroshi Tanaka,\n\nOn behalf of the editorial office of Scholarly Open: Medicine, we have followed your influential scholarship in Non-Mydriatic Fundus Tele-Screening Protocols & AI Triage with great admiration.\n\nScholarly Open: Medicine is currently assembling high-impact original research articles for our Founding Inaugural Volume. This foundational issue is pivotal in securing international ISSN registration and establishing our baseline citation record for upcoming indexing applications.\n\nIn alignment with our official APC & Waiver Policy:\n• Inaugural 50% Launch Discount: All accepted manuscripts in 2026 automatically receive a 50% fee discount across our portfolio.\n• Low-Income Waivers: Authors from World Bank low-income countries receive 100% full fee waivers; discretionary hardship waivers are available for unfunded researchers.\n• Rigorous Double-Blind Peer Review with 14-day rapid turnaround target.\n\nSincerely,\nJournal Management Office",
         status: "Delivered"
       },
       {
@@ -265,9 +266,9 @@ export function JournalManagerWorkspace({
         timestamp: "2026-09-20T11:05:00Z",
         recipientName: "Prof. Claire Dupond",
         recipientEmail: "c.dupond@sorbonne-universite.fr",
-        journal: "Scholarly Open: Medicine & Health Sciences",
+        journal: "Scholarly Open: Medicine",
         campaignType: "ebm",
-        subject: "Invitation to Join the Editorial Board: Scholarly Open: Medicine & Health Sciences",
+        subject: "Invitation to Join the Editorial Board: Scholarly Open: Medicine",
         body: "Dear Prof. Claire Dupond,\n\nIn recognition of your outstanding scholarship at Sorbonne Université, we cordially invite you to join our Editorial Board.\n\nTerm & Benefits: Initial 2-year appointment, 25% discount on APCs for your own submissions, full academic independence and masthead recognition.\n\nSincerely,\nEditorial Office",
         status: "Delivered"
       },
@@ -1842,21 +1843,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       value={scoutTargetJournal}
                       onChange={(e) => setScoutTargetJournal(e.target.value)}
                       className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                      title="Select official journal desk for outreach"
                     >
                       <option value="all">All Journals (General Portfolio)</option>
-                      <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences & Humanities</option>
-                      <option value="Scholarly Open: Biology & Life Sciences">Scholarly Open: Biology & Life Sciences</option>
-                      <option value="Scholarly Open: Chemistry & Materials Science">Scholarly Open: Chemistry & Materials Science</option>
-                      <option value="Scholarly Open: Medicine & Health Sciences">Scholarly Open: Medicine & Health Sciences</option>
-                      <option value="Scholarly Open: Data Science & Artificial Intelligence">Scholarly Open: Data Science & Artificial Intelligence</option>
-                      <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering & Applied Sciences</option>
-                      <option value="Scholarly Open: Environmental Science & Sustainability">Scholarly Open: Environmental Science & Sustainability</option>
-                      <option value="Scholarly Open: Clinical AI & Digital Health">Scholarly Open: Clinical AI & Digital Health</option>
-                      <option value="Scholarly Open: AI Safety & Governance">Scholarly Open: AI Safety & Governance</option>
-                      <option value="Scholarly Open: Decarbonization & Carbon Tech">Scholarly Open: Decarbonization & Carbon Tech</option>
-                      <option value="Scholarly Open: Quantum Engineering">Scholarly Open: Quantum Engineering</option>
-                      <option value="Scholarly Open: Synthetic Biology & Bio-Design">Scholarly Open: Synthetic Biology & Bio-Design</option>
-                      <option value="Scholarly Open: Space Resources & Orbital Economy">Scholarly Open: Space Resources & Orbital Economy</option>
+                      {OFFICIAL_JOURNALS.map((j) => (
+                        <option key={j.name} value={j.name}>
+                          {j.name} ({j.email})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -2346,7 +2340,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </div>
                             </td>
                             <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
-                              {record.journal}
+                              <div className="space-y-0.5">
+                                <span className="font-semibold text-slate-900 dark:text-white block">
+                                  {record.journal}
+                                </span>
+                                <span className="text-[11px] font-mono text-[#0b99ff] block">
+                                  {getJournalReplyTo(record.journal)}
+                                </span>
+                              </div>
                             </td>
                             <td className="py-3 px-3">
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${

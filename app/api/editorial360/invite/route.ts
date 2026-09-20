@@ -61,7 +61,10 @@ export async function POST(request: Request) {
       : `[Scholarly Open] Editorial Assignment: "${manuscriptTitle}" (${manuscriptId})`
 
     const replyToEmail = getJournalReplyTo(journalName)
-    const senderFrom = `"${journalName || "Scholarly Open"}" <${process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL}>`
+    const activeSenderEmail = process.env.FORCE_SINGLE_SENDER === "true"
+      ? (process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL)
+      : replyToEmail
+    const senderFrom = `"${journalName || "Scholarly Open"}" <${activeSenderEmail}>`
 
     const text = isReviewer
       ? [

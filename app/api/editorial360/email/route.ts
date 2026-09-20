@@ -106,12 +106,18 @@ export async function POST(req: Request) {
     const smtpUser = process.env.SMTP_USER
     const smtpPass = process.env.SMTP_PASS
 
-    // Sender Address: System Common Mailbox is editorial@scholarlyopen.org
-    const senderEmail = process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL
-    const formattedFrom = `"${journal}" <${senderEmail}>`
+    // Designated journal email through which outreach and notifications go
+    const journalEmail = getJournalReplyTo(journal)
 
-    // Reply-To header: routed dynamically to specific journal editorial desk
-    const replyToEmail = getJournalReplyTo(journal)
+    // Through which email the message goes:
+    // Uses the exact journal email (e.g. editor.bio@scholarlyopen.org, editor.med@scholarlyopen.org).
+    // If strict single-auth SMTP is enforced by the host, it can be overridden with FORCE_SINGLE_SENDER=true
+    const activeSenderEmail = process.env.FORCE_SINGLE_SENDER === "true"
+      ? (process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL)
+      : journalEmail
+
+    const formattedFrom = `"${journal}" <${activeSenderEmail}>`
+    const replyToEmail = journalEmail
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
       const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"
@@ -146,6 +152,9 @@ export async function POST(req: Request) {
       sentViaSmtp,
       messageId,
       recipient: body.to,
+      senderEmail: activeSenderEmail,
+      from: formattedFrom,
+      replyTo: replyToEmail,
       cc: "scholarlyopen@gmail.com",
       subject: finalSubject,
       renderedHtml: finalHtml,
