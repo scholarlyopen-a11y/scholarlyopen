@@ -3526,10 +3526,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   const revName = rev.name
                   const isDeclined = rev.status === "Declined"
                   const isInvitedOnly = rev.status === "Invited"
-                  const isSubmitted = rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
+
+                  // Match any real submitted review from initialReviews
+                  const matchedReview = initialReviews.find(r => 
+                    (r.paperId?.toLowerCase() === trackingManuscript?.id?.toLowerCase() || (r as any).manuscriptId?.toLowerCase() === trackingManuscript?.id?.toLowerCase()) &&
+                    (r.reviewerName?.toLowerCase().includes(revName.toLowerCase()) || revName.toLowerCase().includes(r.reviewerName?.toLowerCase()) || !r.reviewerName)
+                  ) || (initialReviews.length === 1 && (initialReviews[0].paperId?.toLowerCase() === trackingManuscript?.id?.toLowerCase() || (initialReviews[0] as any).manuscriptId?.toLowerCase() === trackingManuscript?.id?.toLowerCase()) ? initialReviews[0] : undefined)
+
+                  const isSubmitted = !!matchedReview || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
                   const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
                   const isNudged = nudgedReviewers[revName]
-                  const isRemarksApproved = !!approvedReviewRemarks[revName]
+                  const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === "Approved" || approvedReviewRemarks[matchedReview.id]))
                   const baseDays = trackingManuscript?.id === "SOEAS-26-RS106" ? 5 : 11
                   const extraDays = extendedDays[revName] || 0
                   const remainingDays = baseDays + extraDays
@@ -3538,6 +3545,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   const targetDate = new Date(baseDate)
                   targetDate.setDate(targetDate.getDate() + extraDays)
                   const targetDeadlineDate = rev.deadline || targetDate.toISOString().split("T")[0]
+
+                  // Compute display score & recommendation from matched review if available
+                  const displayScore = matchedReview?.scores 
+                    ? ((matchedReview.scores.novelty + matchedReview.scores.methodology + matchedReview.scores.clarity + matchedReview.scores.significance) / 4).toFixed(1)
+                    : (matchedReview?.originality ? `${matchedReview.originality}.0` : "4.8")
+                  const displayRecommendation = matchedReview?.recommendation || "Minor Revision"
+                  const displayQuote = matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || "The methodology is rigorous and well-supported. Minor clarifications required in Section 4."
 
                   if (isDeclined) {
                     return (
@@ -3745,7 +3759,18 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              const revObj: JmReviewFeedback = {
+                              const revObj: JmReviewFeedback = matchedReview ? {
+                                id: matchedReview.id,
+                                paperId: trackingManuscript?.id || matchedReview.paperId,
+                                reviewerName: matchedReview.reviewerName || revName,
+                                originalComments: matchedReview.originalComments || matchedReview.commentsAuthor || "",
+                                sanitizedCommentsAuthor: matchedReview.sanitizedCommentsAuthor || matchedReview.commentsAuthor || "",
+                                commentsAuthor: matchedReview.commentsAuthor || "",
+                                commentsEditor: matchedReview.commentsEditor || "",
+                                recommendation: matchedReview.recommendation || "Minor Revision",
+                                originality: (matchedReview as any).originality || (matchedReview.scores ? Math.round((matchedReview.scores.novelty + matchedReview.scores.methodology + matchedReview.scores.clarity + matchedReview.scores.significance) / 4) : 5),
+                                status: (matchedReview.status as any) || "Pending Moderation"
+                              } : {
                                 id: `REV-FB-${revName.replace(/\s+/g, '')}`,
                                 paperId: trackingManuscript?.id || "SOEAS-26-RS102",
                                 reviewerName: revName,
@@ -3782,7 +3807,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                       <div className="text-xs text-slate-500 dark:text-slate-400">
                         {isSubmitted ? (
-                          <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">4.8 / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">Minor Revision</strong></span>
+                          <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{displayScore} / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">{displayRecommendation}</strong></span>
                         ) : isOverdue ? (
                           <span className="text-red-600 dark:text-red-400 font-medium">Deadline was 2026-08-22 (3 days overdue) • Follow-up reminder required</span>
                         ) : (
@@ -3792,7 +3817,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                       {isSubmitted && (
                         <div className="p-2.5 bg-white dark:bg-[#121316] border border-slate-200/80 dark:border-slate-800 rounded-lg text-[11px] text-slate-600 dark:text-slate-400 italic">
-                          &ldquo;The methodology is rigorous and well-supported. Minor clarifications required in Section 4.&rdquo;
+                          &ldquo;{displayQuote}&rdquo;
                         </div>
                       )}
                     </div>

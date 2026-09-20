@@ -57,6 +57,23 @@ import { JmManuscript, JmReviewer } from "./journal-manager-workspace"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
 
+export interface EditorReviewFeedback {
+  id: string
+  paperId: string
+  paperTitle?: string
+  reviewerName: string
+  coReviewerName?: string
+  originality?: number
+  methodology?: number
+  clarity?: number
+  significance?: number
+  commentsAuthor: string
+  commentsEditor?: string
+  sanitizedCommentsAuthor?: string
+  recommendation: string
+  status: string
+}
+
 interface EditorWorkspaceProps {
   language: "en" | "de"
   activeTab?: string
@@ -67,6 +84,8 @@ interface EditorWorkspaceProps {
   onResolveIntegrity?: (alertId: string, action: "clear" | "escalate") => void
   notifications?: any[]
   onAddNotification?: (notif: any) => void
+  reviews?: EditorReviewFeedback[]
+  onReleaseComments?: (revId: string, sanitizedText: string) => void
   user?: {
     name: string
     title: string
@@ -127,16 +146,28 @@ Comments to Author:
   }
 }
 
-function getDecisionLetterTemplate(verdict: string, editorName: string, journalName: string) {
+function getDecisionLetterTemplate(verdict: string, editorName: string, journalName: string, paperReviews?: EditorReviewFeedback[]) {
   const isEicVerdict = verdict === "Accept" || verdict === "Reject"
   const roleTitle = isEicVerdict ? "Editor-in-Chief" : "Handling Editor"
   const cleanJournal = journalName || "Scholarly Open"
 
+  const actualItemizedComments = (paperReviews && paperReviews.length > 0)
+    ? paperReviews.map((rev, idx) => {
+        const revName = rev.reviewerName || `Reviewer #${idx + 1}`
+        const revReco = rev.recommendation || "Evaluation Provided"
+        const comments = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No detailed comments provided."
+        return `[Reviewer #${idx + 1}: ${revName}]
+Recommendation: ${revReco}
+Comments to Author:
+${comments}`
+      }).join("\n\n----------------------------------------------------------------------\n\n")
+    : null
+
   if (verdict === "Accept") {
+    const commentsBlock = actualItemizedComments ? `\n\nSummary of Reviewer Feedback:\n======================================================================\n${actualItemizedComments}\n======================================================================\n` : ""
     return `Dear Author,
 
-We are pleased to inform you that following comprehensive peer evaluation, your manuscript has been formally ACCEPTED for publication in ${cleanJournal}.
-
+We are pleased to inform you that following comprehensive peer evaluation, your manuscript has been formally ACCEPTED for publication in ${cleanJournal}.${commentsBlock}
 Next Steps:
 1. Our production office will prepare the galley proofs and JATS XML.
 2. A formal Crossref DOI will be generated upon proof approval.
@@ -149,6 +180,7 @@ ${roleTitle}, ${cleanJournal}`
   }
 
   if (verdict === "Minor Revision") {
+    const commentsBlock = actualItemizedComments || `${REVIEWER_COMMENTS_SAMPLE.default.rev1}\n\n${REVIEWER_COMMENTS_SAMPLE.default.rev2}`
     return `Dear Author,
 
 Thank you for submitting your manuscript to ${cleanJournal}. The reviewers have evaluated your work and found significant merit, but recommend MINOR REVISIONS prior to formal acceptance.
@@ -158,9 +190,7 @@ Please address the itemized reviewer comments provided below and submit your rev
 ======================================================================
 ITEMIZED REVIEWER EVALUATIONS & COMMENTS:
 
-${REVIEWER_COMMENTS_SAMPLE.default.rev1}
-
-${REVIEWER_COMMENTS_SAMPLE.default.rev2}
+${commentsBlock}
 ======================================================================
 
 Sincerely,
@@ -169,6 +199,7 @@ ${roleTitle}, ${cleanJournal}`
   }
 
   if (verdict === "Major Revision" || verdict === "Reject & Resubmit") {
+    const commentsBlock = actualItemizedComments || `${REVIEWER_COMMENTS_SAMPLE.major.rev1}\n\n${REVIEWER_COMMENTS_SAMPLE.major.rev2}`
     return `Dear Author,
 
 The peer evaluation for your manuscript is now complete. While the core concept is sound, the reviewers have identified substantial methodological and analytical areas requiring MAJOR REVISIONS.
@@ -178,9 +209,7 @@ Please review the detailed feedback below and submit a thoroughly revised versio
 ======================================================================
 ITEMIZED REVIEWER EVALUATIONS & COMMENTS:
 
-${REVIEWER_COMMENTS_SAMPLE.major.rev1}
-
-${REVIEWER_COMMENTS_SAMPLE.major.rev2}
+${commentsBlock}
 ======================================================================
 
 Sincerely,
@@ -188,10 +217,10 @@ ${editorName}
 ${roleTitle}, ${cleanJournal}`
   }
 
+  const commentsBlock = actualItemizedComments ? `\n\n======================================================================\nITEMIZED REVIEWER EVALUATIONS & COMMENTS:\n\n${actualItemizedComments}\n======================================================================\n` : ""
   return `Dear Author,
 
-Thank you for submitting your manuscript to ${cleanJournal}. Following careful peer evaluation and editorial assessment, we regret to inform you that we are unable to accept your manuscript for publication in this journal.
-
+Thank you for submitting your manuscript to ${cleanJournal}. Following careful peer evaluation and editorial assessment, we regret to inform you that we are unable to accept your manuscript for publication in this journal.${commentsBlock}
 We thank you for considering ${cleanJournal} and wish you success in placing your work elsewhere.
 
 Sincerely,
@@ -311,6 +340,8 @@ export function EditorWorkspace({
   onResolveIntegrity,
   notifications = [],
   onAddNotification,
+  reviews = [],
+  onReleaseComments,
   user = {
     name: "Prof. Aris Thorne",
     title: "Editor-in-Chief & Managing Editor",
@@ -597,10 +628,15 @@ export function EditorWorkspace({
 
   // Handlers
   const handleOpenDecisionModal = (paper: JmManuscript) => {
+    const paperReviews = (reviews || []).filter(r => 
+      (r.paperId && paper.id && r.paperId.toLowerCase() === paper.id.toLowerCase()) ||
+      (r.paperTitle && paper.title && r.paperTitle.toLowerCase() === paper.title.toLowerCase())
+    )
+    const initialVerdict = paperReviews[0]?.recommendation?.includes("Major") ? "Major Revision" : "Minor Revision"
     setSelectedPaperForDecision(paper)
-    setDecisionVerdict("Minor Revision")
-    setDecisionLetter(getDecisionLetterTemplate("Minor Revision", user.name, paper.journal || user.journal))
-    setDecisionSubject(getDecisionSubject("Minor Revision", paper.id, paper.title))
+    setDecisionVerdict(initialVerdict as any)
+    setDecisionLetter(getDecisionLetterTemplate(initialVerdict, user.name, paper.journal || user.journal, paperReviews))
+    setDecisionSubject(getDecisionSubject(initialVerdict, paper.id, paper.title))
     setDecisionAuthorEmail(paper.authorEmail || "author@university.edu")
     setConfidentialNotes("")
     setDecisionTab("edit")
@@ -609,7 +645,11 @@ export function EditorWorkspace({
   const handleVerdictChange = (v: EditorialDecisionDraft["verdict"]) => {
     setDecisionVerdict(v)
     const templateKey = v === "Reject & Resubmit" ? "Major Revision" : v
-    setDecisionLetter(getDecisionLetterTemplate(templateKey, user.name, selectedPaperForDecision?.journal || user.journal))
+    const paperReviews = selectedPaperForDecision ? (reviews || []).filter(r => 
+      (r.paperId && selectedPaperForDecision.id && r.paperId.toLowerCase() === selectedPaperForDecision.id.toLowerCase()) ||
+      (r.paperTitle && selectedPaperForDecision.title && r.paperTitle.toLowerCase() === selectedPaperForDecision.title.toLowerCase())
+    ) : []
+    setDecisionLetter(getDecisionLetterTemplate(templateKey, user.name, selectedPaperForDecision?.journal || user.journal, paperReviews))
     if (selectedPaperForDecision) {
       setDecisionSubject(getDecisionSubject(v, selectedPaperForDecision.id, selectedPaperForDecision.title))
     }
@@ -2067,104 +2107,133 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {/* Reviewers List */}
             <div className="space-y-2">
               <span className="font-bold text-slate-700 dark:text-slate-300 block text-xs">
-                Assigned Reviewers:
+                Assigned Reviewers & Scorecards:
               </span>
 
-              {/* Reviewer 1 */}
-              <div className={`p-3 rounded-xl border transition-all ${
-                isTrackerScorecardExpanded
-                  ? "border-[#0b99ff] bg-sky-50/40 dark:bg-sky-950/20 shadow-2xs"
-                  : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418]"
-              }`}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-slate-900 dark:text-white">Reviewer 1 (Dr. Marcus Vance)</span>
-                    <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
-                      Completed ✓
-                    </span>
+              {(() => {
+                const trackingPaperReviews = (reviews || []).filter(r => 
+                  (r.paperId && selectedPaperForReviewTracking?.id && r.paperId.toLowerCase() === selectedPaperForReviewTracking.id.toLowerCase()) ||
+                  (r.paperTitle && selectedPaperForReviewTracking?.title && r.paperTitle.toLowerCase() === selectedPaperForReviewTracking.title.toLowerCase())
+                )
+                const assignedList = selectedPaperForReviewTracking?.reviewers || ["Dr. Marcus Vance", "Prof. Elena Rostova"]
+
+                return (
+                  <div className="space-y-2">
+                    {/* Render all reviews that have been completed */}
+                    {trackingPaperReviews.map((rev, idx) => {
+                      const revKey = `track-rev-${rev.id || idx}`
+                      const isExpanded = isTrackerScorecardExpanded || expandedReviewerScorecard === revKey
+
+                      return (
+                        <div 
+                          key={rev.id || idx}
+                          className={`p-3 rounded-xl border transition-all ${
+                            isExpanded
+                              ? "border-[#0b99ff] bg-sky-50/40 dark:bg-sky-950/20 shadow-2xs"
+                              : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418]"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-3 flex-wrap">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-slate-900 dark:text-white">
+                                Reviewer: {rev.reviewerName || "Peer Reviewer"}
+                              </span>
+                              <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
+                                Evaluation Completed ✓
+                              </span>
+                              <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                                Verdict: {rev.recommendation || "Completed"}
+                              </span>
+                            </div>
+                            <Button
+                              onClick={() => {
+                                setIsTrackerScorecardExpanded(!isTrackerScorecardExpanded)
+                                setExpandedReviewerScorecard(isExpanded ? null : (revKey as any))
+                              }}
+                              variant="outline"
+                              className={`text-xs h-7.5 px-3 shrink-0 cursor-pointer font-semibold ${
+                                isExpanded ? "border-[#0b99ff] text-[#0b99ff] bg-sky-50 dark:bg-sky-950/50" : ""
+                              }`}
+                            >
+                              {isExpanded ? "Hide Scorecard ▲" : "View Scorecard ▼"}
+                            </Button>
+                          </div>
+
+                          {isExpanded && (
+                            <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150 text-xs">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Comments to Author:
+                                </span>
+                                <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
+                                  {rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No specific comments."}
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Confidential Comments to Handling Editor:
+                                </span>
+                                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
+                                  &ldquo;{rev.commentsEditor || "Evaluation submitted via portal."}&rdquo;
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+
+                    {/* Render other assigned reviewers who are still in progress */}
+                    {assignedList
+                      .filter(name => !trackingPaperReviews.some(r => r.reviewerName?.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(r.reviewerName?.toLowerCase() || "")))
+                      .map((name, idx) => (
+                        <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-slate-900 dark:text-white">{name}</span>
+                            <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded border border-amber-200">
+                              Evaluation In Progress (Due in 4d)
+                            </span>
+                          </div>
+                          <Button
+                            onClick={() => {
+                              triggerConfirm({
+                                title: `Send Reminder to ${name}?`,
+                                message: `Send a progress reminder email to ${name}?`,
+                                confirmButtonLabel: "Send Reminder",
+                                confirmColorClass: "bg-amber-500 hover:bg-amber-600",
+                                onConfirm: () => triggerToast(`✓ Progress reminder sent to ${name}.`)
+                              })
+                            }}
+                            variant="outline"
+                            className="text-xs h-7.5 px-3 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-300 shrink-0 cursor-pointer"
+                          >
+                            Nudge
+                          </Button>
+                        </div>
+                      ))}
                   </div>
-                  <Button
-                    onClick={() => setIsTrackerScorecardExpanded(!isTrackerScorecardExpanded)}
-                    variant="outline"
-                    className={`text-xs h-7.5 px-3 shrink-0 cursor-pointer font-semibold ${
-                      isTrackerScorecardExpanded ? "border-[#0b99ff] text-[#0b99ff] bg-sky-50 dark:bg-sky-950/50" : ""
-                    }`}
-                  >
-                    {isTrackerScorecardExpanded ? "Hide Scorecard ▲" : "View Scorecard ▼"}
-                  </Button>
-                </div>
-
-                {isTrackerScorecardExpanded && (
-                  <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150 text-xs">
-                    {/* Detailed Score Matrix */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty</span>
-                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.0 / 5.0</strong>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Clarity</span>
-                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                      </div>
-                    </div>
-
-                    {/* Comments to Author */}
-                    <div className="space-y-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                        Comments to Author:
-                      </span>
-                      <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                        <p>1. Benchmarking against baseline datasets is sound and persuasive.</p>
-                        <p>2. Expand dynamic range annotations on Figure 3 (Panels B & C) for contrast.</p>
-                        <p>3. Clarify sample preparation conditions and variance controls in Section 3.2.</p>
-                      </div>
-                    </div>
-
-                    {/* Confidential Comments to Handling Editor */}
-                    <div className="space-y-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                        Confidential Editor Notes:
-                      </span>
-                      <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed">
-                        &ldquo;Methodology is sound. Requested additions to Figure 3 and Section 3.2 are minor and should not require external re-review.&rdquo;
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Reviewer 2 */}
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-slate-900 dark:text-white">Reviewer 2 (Prof. Elena Rostova)</span>
-                  <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded border border-amber-200">
-                    Due in 4d
-                  </span>
-                </div>
-                <Button
-                  onClick={() => {
-                    triggerConfirm({
-                      title: "Send Reminder to Reviewer 2?",
-                      message: "Send a progress reminder email to Prof. Elena Rostova?",
-                      confirmButtonLabel: "Send Reminder",
-                      confirmColorClass: "bg-amber-500 hover:bg-amber-600",
-                      onConfirm: () => triggerToast("✓ Progress reminder sent to Prof. Elena Rostova.")
-                    })
-                  }}
-                  variant="outline"
-                  className="text-xs h-7.5 px-3 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-300 shrink-0 cursor-pointer"
-                >
-                  Nudge
-                </Button>
-              </div>
+                )
+              })()}
             </div>
           </div>
 
@@ -2209,148 +2278,255 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="space-y-4 py-2 text-xs max-h-[65vh] overflow-y-auto pr-1">
             
             {/* 1. Submitted Peer Review Reports */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2.5">
-              <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
-                <span>Peer Review Evaluations</span>
-                <span className="text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                  Consensus: Minor Revision
-                </span>
-              </div>
+            {(() => {
+              const activePaperReviews = (reviews || []).filter(r => 
+                (r.paperId && selectedPaperForDecision?.id && r.paperId.toLowerCase() === selectedPaperForDecision.id.toLowerCase()) ||
+                (r.paperTitle && selectedPaperForDecision?.title && r.paperTitle.toLowerCase() === selectedPaperForDecision.title.toLowerCase())
+              )
+              const hasActiveReviews = activePaperReviews.length > 0
+              const consensusText = hasActiveReviews
+                ? activePaperReviews[0].recommendation || "Evaluation Provided"
+                : "Minor Revision"
 
-              <div className="space-y-2 text-xs">
-                {/* Reviewer 1 */}
-                <div className={`p-3 rounded-xl border transition-all ${
-                  expandedReviewerScorecard === "rev1" 
-                    ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
-                    : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
-                }`}>
-                  <div className="flex items-center justify-between font-bold flex-wrap gap-2">
-                    <span className="text-slate-900 dark:text-white">
-                      Reviewer 1 (Dr. Marcus Vance)
+              return (
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2.5">
+                  <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 flex-wrap gap-2">
+                    <span className="flex items-center gap-2">
+                      Peer Review Evaluations
+                      {hasActiveReviews && (
+                        <span className="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
+                          {activePaperReviews.length} Live Review{activePaperReviews.length > 1 ? "s" : ""} Connected
+                        </span>
+                      )}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setExpandedReviewerScorecard(expandedReviewerScorecard === "rev1" ? null : "rev1")}
-                      className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
-                    >
-                      {expandedReviewerScorecard === "rev1" ? "Hide Details ▲" : "View Details ▼"}
-                    </button>
+                    <span className="text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                      Consensus: {consensusText}
+                    </span>
                   </div>
 
-                  {expandedReviewerScorecard === "rev1" && (
-                    <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
-                      {/* Detailed Score Matrix */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.0 / 5.0</strong>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Clarity</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                        </div>
-                      </div>
+                  <div className="space-y-2 text-xs">
+                    {hasActiveReviews ? (
+                      activePaperReviews.map((rev, idx) => {
+                        const revKey = `rev-${rev.id || idx}`
+                        const isExpanded = expandedReviewerScorecard === revKey || expandedReviewerScorecard === `rev${idx + 1}` || (idx === 0 && expandedReviewerScorecard === null)
+                        const commentsToAuthor = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No comments to author."
+                        const commentsToEditor = rev.commentsEditor || "Assessment submitted via portal. No confidential concerns noted."
 
-                      {/* Comments to Author */}
-                      <div className="space-y-1">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                          Comments to Author:
-                        </span>
-                        <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                          <p>1. Benchmarking against baseline datasets is sound and persuasive.</p>
-                          <p>2. Expand dynamic range annotations on Figure 3 (Panels B & C) for contrast.</p>
-                          <p>3. Clarify sample preparation conditions and variance controls in Section 3.2.</p>
-                        </div>
-                      </div>
+                        return (
+                          <div 
+                            key={rev.id || idx}
+                            className={`p-3 rounded-xl border transition-all ${
+                              isExpanded 
+                                ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
+                                : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between font-bold flex-wrap gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-slate-900 dark:text-white font-bold">
+                                  Reviewer {idx + 1}: {rev.reviewerName || "Peer Reviewer"}
+                                </span>
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                                  {rev.recommendation || "Review Submitted"}
+                                </span>
+                                {rev.status === "Released" ? (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                    Vetted & Approved by JM ✓
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                    Raw (Pending JM Vetting)
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setExpandedReviewerScorecard(isExpanded ? ("closed" as any) : (revKey as any))}
+                                className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
+                              >
+                                {isExpanded ? "Hide Details ▲" : "View Details ▼"}
+                              </button>
+                            </div>
 
-                      {/* Confidential Comments to Handling Editor */}
-                      <div className="space-y-1">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                          Confidential Editor Notes:
-                        </span>
-                        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed">
-                          &ldquo;Methodology is sound. Requested additions to Figure 3 and Section 3.2 are minor and should not require external re-review.&rdquo;
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                            {isExpanded && (
+                              <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
+                                {/* Detailed Score Matrix */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
+                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                    <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
+                                    <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
+                                  </div>
+                                </div>
 
-                {/* Reviewer 2 */}
-                <div className={`p-3 rounded-xl border transition-all ${
-                  expandedReviewerScorecard === "rev2" 
-                    ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
-                    : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
-                }`}>
-                  <div className="flex items-center justify-between font-bold flex-wrap gap-2">
-                    <span className="text-slate-900 dark:text-white">
-                      Reviewer 2 (Prof. Elena Rostova)
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setExpandedReviewerScorecard(expandedReviewerScorecard === "rev2" ? null : "rev2")}
-                      className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
-                    >
-                      {expandedReviewerScorecard === "rev2" ? "Hide Details ▲" : "View Details ▼"}
-                    </button>
+                                {/* Comments to Author */}
+                                <div className="space-y-1">
+                                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                    Comments to Author (Included in Decision Letter):
+                                  </span>
+                                  <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
+                                    {commentsToAuthor}
+                                  </div>
+                                </div>
+
+                                {/* Confidential Comments to Handling Editor */}
+                                <div className="space-y-1">
+                                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                    Confidential Editor Notes (Visible to Editors & JM only):
+                                  </span>
+                                  <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
+                                    &ldquo;{commentsToEditor}&rdquo;
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })
+                    ) : (
+                      <>
+                        {/* Reviewer 1 (Fallback Demo) */}
+                        <div className={`p-3 rounded-xl border transition-all ${
+                          expandedReviewerScorecard === "rev1" 
+                            ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
+                            : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
+                        }`}>
+                          <div className="flex items-center justify-between font-bold flex-wrap gap-2">
+                            <span className="text-slate-900 dark:text-white">
+                              Reviewer 1 (Dr. Marcus Vance)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setExpandedReviewerScorecard(expandedReviewerScorecard === "rev1" ? null : "rev1")}
+                              className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
+                            >
+                              {expandedReviewerScorecard === "rev1" ? "Hide Details ▲" : "View Details ▼"}
+                            </button>
+                          </div>
+
+                          {expandedReviewerScorecard === "rev1" && (
+                            <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.0 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Clarity</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Comments to Author:
+                                </span>
+                                <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                                  <p>1. Benchmarking against baseline datasets is sound and persuasive.</p>
+                                  <p>2. Expand dynamic range annotations on Figure 3 (Panels B & C) for contrast.</p>
+                                  <p>3. Clarify sample preparation conditions and variance controls in Section 3.2.</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Confidential Editor Notes:
+                                </span>
+                                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed">
+                                  &ldquo;Methodology is sound. Requested additions to Figure 3 and Section 3.2 are minor and should not require external re-review.&rdquo;
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Reviewer 2 (Fallback Demo) */}
+                        <div className={`p-3 rounded-xl border transition-all ${
+                          expandedReviewerScorecard === "rev2" 
+                            ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
+                            : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
+                        }`}>
+                          <div className="flex items-center justify-between font-bold flex-wrap gap-2">
+                            <span className="text-slate-900 dark:text-white">
+                              Reviewer 2 (Prof. Elena Rostova)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setExpandedReviewerScorecard(expandedReviewerScorecard === "rev2" ? null : "rev2")}
+                              className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
+                            >
+                              {expandedReviewerScorecard === "rev2" ? "Hide Details ▲" : "View Details ▼"}
+                            </button>
+                          </div>
+
+                          {expandedReviewerScorecard === "rev2" && (
+                            <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.0 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">5.0 / 5.0</strong>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Clarity</span>
+                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Comments to Author:
+                                </span>
+                                <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                                  <p>1. Significant clinical implications for pediatric cohorts with practical utility.</p>
+                                  <p>2. Explicitly report demographic cohort age ranges and standard deviations in Table 2.</p>
+                                  <p>3. Resolve typographic inconsistencies in the discussion section on page 8.</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Confidential Editor Notes:
+                                </span>
+                                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed">
+                                  &ldquo;Strong paper with high citation potential. No ethical or data issues observed. Recommend publication once Table 2 is expanded.&rdquo;
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
-
-                  {expandedReviewerScorecard === "rev2" && (
-                    <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
-                      {/* Detailed Score Matrix */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.0 / 5.0</strong>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">5.0 / 5.0</strong>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Clarity</span>
-                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                        </div>
-                      </div>
-
-                      {/* Comments to Author */}
-                      <div className="space-y-1">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                          Comments to Author:
-                        </span>
-                        <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                          <p>1. Significant clinical implications for pediatric cohorts with practical utility.</p>
-                          <p>2. Explicitly report demographic cohort age ranges and standard deviations in Table 2.</p>
-                          <p>3. Resolve typographic inconsistencies in the discussion section on page 8.</p>
-                        </div>
-                      </div>
-
-                      {/* Confidential Comments to Handling Editor */}
-                      <div className="space-y-1">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                          Confidential Editor Notes:
-                        </span>
-                        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed">
-                          &ldquo;Strong paper with high citation potential. No ethical or data issues observed. Recommend publication once Table 2 is expanded.&rdquo;
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </div>
-            </div>
+              )
+            })()}
 
             {/* 2. Verdict Selection */}
             <div className="space-y-1.5">

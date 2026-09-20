@@ -957,6 +957,23 @@ export default function Editorial360Page() {
       } catch (err) {
         console.error("Failed to load saved manuscripts from localStorage", err)
       }
+
+      // Load any peer reviews persisted in browser storage
+      try {
+        const storedReviews = localStorage.getItem("editorial360_reviews")
+        if (storedReviews) {
+          const parsedRev = JSON.parse(storedReviews) as ReviewFeedback[]
+          if (Array.isArray(parsedRev) && parsedRev.length > 0) {
+            setReviews(prev => {
+              const prevMap = new Map(prev.map(r => [r.id, r]))
+              parsedRev.forEach(r => prevMap.set(r.id, r))
+              return Array.from(prevMap.values())
+            })
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load saved reviews from localStorage", err)
+      }
     }
   }, [])
 
@@ -1329,6 +1346,35 @@ export default function Editorial360Page() {
       dataDoi: "doi.org/10.5281/zenodo.441920",
       editorAssigned: true,
       assignedEditorName: "Prof. Clara Zhang"
+    },
+    {
+      id: "SOSOC-26-RV002",
+      title: "Climate Adaptation Strategies in Coastal Communities",
+      journal: "Scholarly Open: Social Sciences & Humanities",
+      status: "Under Review",
+      date: "2026-06-01",
+      reviewers: ["Dr. Marcus Vance", "Dr. Evelyn Vane"],
+      integrityStatus: "Clean",
+      plagiarismScore: 4,
+      aiScore: 5,
+      authorFirstName: "Maria",
+      authorLastName: "Santos",
+      authorName: "Dr. Maria Santos",
+      authorEmail: "m.santos@coastal-research.org",
+      authorAffiliation: "Institute for Marine & Coastal Governance",
+      authorOrcid: "0000-0001-9234-5678",
+      coAuthors: "Prof. Clara Zhang, Dr. David Miller",
+      articleType: "Original Research",
+      submissionStage: "Under Peer Review",
+      abstract: "Comprehensive analysis of socio-ecological resilience metrics, community-led seawall infrastructures, and municipal relocation frameworks in vulnerable coastal settlements.",
+      keywords: "Climate Adaptation, Coastal Resilience, Sea Level Rise, Municipal Planning",
+      fileName: "Coastal_Adaptation_Framework_2026.pdf",
+      fileSize: "3.8 MB",
+      ethicsIrb: "IRB-SOC-2026-041",
+      fundingGrant: "UN-CLIM-2025-99",
+      dataDoi: "doi.org/10.5281/zenodo.552910",
+      editorAssigned: true,
+      assignedEditorName: "Prof. Clara Zhang"
     }
   ])
 
@@ -1348,6 +1394,13 @@ export default function Editorial360Page() {
       title: "Climate Adaptation Strategies in Coastal Communities",
       journal: "Social Sciences & Humanities",
       deadline: "2026-06-18",
+      status: "In Progress"
+    },
+    {
+      id: "SOEAS-26-RS102",
+      title: "Machine Learning Approaches in Renewable Energy Forecasting",
+      journal: "Engineering & Applied Sciences",
+      deadline: "2026-06-22",
       status: "In Progress"
     }
   ])
@@ -2861,16 +2914,24 @@ export default function Editorial360Page() {
 
   const handleSubmitReviewScorecard = (scorecardData?: ReviewAssessmentData) => {
     if (scorecardData) {
-      // Complete active review
+      // Complete active review in Reviewer list
       setActiveReviews(prev => 
         prev.map(r => r.id === scorecardData.paperId ? { ...r, status: "Completed", recommendation: scorecardData.recommendation } : r)
       )
+
+      const activeReviewerName = reviewerProfile?.name || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || "Dr. Marcus Vance"))
       
+      const targetPaper = manuscripts.find(m => 
+        (m.id && (m.id.toLowerCase() === (scorecardData.manuscriptId || "").toLowerCase() || m.id.toLowerCase() === (scorecardData.paperId || "").toLowerCase())) ||
+        (m.title && scorecardData.title && m.title.toLowerCase() === scorecardData.title.toLowerCase())
+      )
+      const paperId = targetPaper ? targetPaper.id : (scorecardData.manuscriptId || scorecardData.paperId || "SOSOC-26-RV002")
+
       const newReview: ReviewFeedback = {
-        id: `REV-FB-${Math.floor(Math.random() * 1000) + 200}`,
-        paperId: scorecardData.manuscriptId || "MS-2026-081",
-        reviewerName: "Dr. Marcus Vance",
-        originality: scorecardData.priorityRating <= 3 ? 5 : 4,
+        id: `REV-FB-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        paperId: paperId,
+        reviewerName: activeReviewerName,
+        originality: scorecardData.priorityRating <= 3 ? 5 : (scorecardData.priorityRating <= 6 ? 4 : 3),
         methodology: 4,
         clarity: 4,
         significance: 4,
@@ -2879,12 +2940,60 @@ export default function Editorial360Page() {
         recommendation: scorecardData.recommendation,
         status: "Pending Moderation"
       }
-      setReviews(prev => [...prev, newReview])
+
+      setReviews(prev => {
+        const filtered = prev.filter(r => !(r.paperId.toLowerCase() === paperId.toLowerCase() && r.reviewerName.toLowerCase() === activeReviewerName.toLowerCase()))
+        const updated = [...filtered, newReview]
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("editorial360_reviews", JSON.stringify(updated))
+          }
+        } catch (e) {}
+        return updated
+      })
+
+      // Update manuscript in manuscripts state to register the reviewer & review completion
+      setManuscripts(prev => {
+        const updated = prev.map(m => {
+          if (m.id.toLowerCase() === paperId.toLowerCase()) {
+            const currentReviewers = m.reviewers || []
+            const hasRev = currentReviewers.some(r => r.toLowerCase().includes(activeReviewerName.toLowerCase()) || activeReviewerName.toLowerCase().includes(r.toLowerCase()))
+            const nextReviewers = hasRev ? currentReviewers : [...currentReviewers, activeReviewerName]
+            return {
+              ...m,
+              reviewers: nextReviewers,
+              submissionStage: "Reviews In (Decision Pending)"
+            }
+          }
+          return m
+        })
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+          }
+        } catch (e) {}
+        return updated
+      })
+
+      // Send CrossDeskNotification so JM and Handling Editor immediately see the submitted review
+      const newNotif: CrossDeskNotification = {
+        id: `NOTIF-${Date.now()}`,
+        timestamp: "Just now",
+        paperId: paperId,
+        paperTitle: targetPaper?.title || scorecardData.title || "Manuscript",
+        journal: targetPaper?.journal || scorecardData.journal || "Scholarly Open",
+        sender: `${activeReviewerName} (Reviewer)`,
+        type: "review_complete",
+        title: `Peer Review Evaluation Submitted for ${paperId}`,
+        message: `Verdict: "${scorecardData.recommendation}". Priority: ${scorecardData.priorityRating}/10. Scorecard and comments delivered to Handling Editor and Journal Manager.`,
+        priority: "high"
+      }
+      setCrossDeskNotifications(prev => [newNotif, ...prev])
       
       const newLog: ArchiveLog = {
         id: `LOG-${Math.floor(Math.random() * 100) + 200}`,
-        paperId: scorecardData.manuscriptId || "MS-2026-081",
-        actor: "Dr. Marcus Vance (Reviewer)",
+        paperId: paperId,
+        actor: `${activeReviewerName} (Reviewer)`,
         action: "Electronic Assessment Form Submitted",
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
         details: `10-Point Questionnaire completed. Priority: ${scorecardData.priorityRating}/10. Verdict: "${scorecardData.recommendation}". COPE Certified. Routed to Editor Quality Endorsement Gate.`
@@ -2907,11 +3016,12 @@ export default function Editorial360Page() {
     if (activeRevObj) {
       const targetPaper = manuscripts.find(m => m.title === activeRevObj.title)
       const paperId = targetPaper ? targetPaper.id : "MS-2026-081"
+      const activeReviewerName = reviewerProfile?.name || regName || "Dr. Evelyn Vane"
       
       const newReview: ReviewFeedback = {
-        id: `REV-FB-${Math.floor(Math.random() * 1000) + 200}`,
+        id: `REV-FB-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         paperId: paperId,
-        reviewerName: "Dr. Evelyn Vane",
+        reviewerName: activeReviewerName,
         coReviewerName: isCoRevAcknowledged ? "Dr. Alex Johnson (Co-Reviewer)" : undefined,
         originality: scoreOriginality,
         methodology: scoreMethodology,
@@ -2922,12 +3032,43 @@ export default function Editorial360Page() {
         recommendation: reviewRecommendation,
         status: "Pending Moderation"
       }
-      setReviews(prev => [...prev, newReview])
+      setReviews(prev => {
+        const filtered = prev.filter(r => !(r.paperId.toLowerCase() === paperId.toLowerCase() && r.reviewerName.toLowerCase() === activeReviewerName.toLowerCase()))
+        const updated = [...filtered, newReview]
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("editorial360_reviews", JSON.stringify(updated))
+          }
+        } catch (e) {}
+        return updated
+      })
+
+      setManuscripts(prev => {
+        const updated = prev.map(m => {
+          if (m.id.toLowerCase() === paperId.toLowerCase()) {
+            const currentReviewers = m.reviewers || []
+            const hasRev = currentReviewers.some(r => r.toLowerCase().includes(activeReviewerName.toLowerCase()) || activeReviewerName.toLowerCase().includes(r.toLowerCase()))
+            const nextReviewers = hasRev ? currentReviewers : [...currentReviewers, activeReviewerName]
+            return {
+              ...m,
+              reviewers: nextReviewers,
+              submissionStage: "Reviews In (Decision Pending)"
+            }
+          }
+          return m
+        })
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+          }
+        } catch (e) {}
+        return updated
+      })
       
       const newLog: ArchiveLog = {
         id: `LOG-${Math.floor(Math.random() * 100) + 200}`,
         paperId: paperId,
-        actor: "Dr. Evelyn Vane (Reviewer)",
+        actor: `${activeReviewerName} (Reviewer)`,
         action: "Review Comments Submitted",
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
         details: "Evaluation scorecard logged. Routed to Journal Manager/Editor Moderation desk."
@@ -2950,12 +3091,18 @@ export default function Editorial360Page() {
 
   const handleApproveAndReleaseFeedback = () => {
     // Release review feedback to author (changes status and saves edited text)
-    setReviews(prev => 
-      prev.map(r => r.id === moderatingReviewId 
+    setReviews(prev => {
+      const updated = prev.map(r => r.id === moderatingReviewId 
         ? { ...r, status: "Released", sanitizedCommentsAuthor: modRedactdComments } 
         : r
       )
-    )
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("editorial360_reviews", JSON.stringify(updated))
+        }
+      } catch (e) {}
+      return updated
+    })
 
     const revObj = reviews.find(r => r.id === moderatingReviewId)
     if (revObj) {
@@ -2971,9 +3118,15 @@ export default function Editorial360Page() {
       setArchiveLogs(prev => [newLog, ...prev])
       
       // Change target manuscript status to Revision Required to simulate active flow
-      setManuscripts(prev => 
-        prev.map(m => m.id === revObj.paperId ? { ...m, status: "Revision Required" } : m)
-      )
+      setManuscripts(prev => {
+        const updated = prev.map(m => m.id === revObj.paperId ? { ...m, status: "Revision Required" } : m)
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+          }
+        } catch (e) {}
+        return updated
+      })
     }
 
     setIsModerationOpen(false)
@@ -5068,7 +5221,15 @@ export default function Editorial360Page() {
                     }}
                     reviews={reviews as any}
                     onReleaseComments={(revId, sanitizedText) => {
-                      setReviews(prev => prev.map(r => r.id === revId ? { ...r, status: "Released", sanitizedCommentsAuthor: sanitizedText } : r))
+                      setReviews(prev => {
+                        const updated = prev.map(r => r.id === revId ? { ...r, status: "Released", sanitizedCommentsAuthor: sanitizedText } : r)
+                        try {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("editorial360_reviews", JSON.stringify(updated))
+                          }
+                        } catch (e) {}
+                        return updated
+                      })
                     }}
                     archiveLogs={archiveLogs as any}
                     notifications={crossDeskNotifications}
@@ -5091,6 +5252,18 @@ export default function Editorial360Page() {
                     activeTab={activeEditorTab}
                     onTabChange={setActiveEditorTab}
                     manuscripts={manuscripts as any}
+                    reviews={reviews as any}
+                    onReleaseComments={(revId, sanitizedText) => {
+                      setReviews(prev => {
+                        const updated = prev.map(r => r.id === revId ? { ...r, status: "Released", sanitizedCommentsAuthor: sanitizedText } : r)
+                        try {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("editorial360_reviews", JSON.stringify(updated))
+                          }
+                        } catch (e) {}
+                        return updated
+                      })
+                    }}
                     integrityAlerts={integrityAlerts}
                     onResolveIntegrity={handleResolveIntegrity}
                     notifications={crossDeskNotifications}
