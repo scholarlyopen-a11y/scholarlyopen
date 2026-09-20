@@ -56,7 +56,8 @@ import {
   History,
   Server,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  GraduationCap
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -239,14 +240,22 @@ export function JournalManagerWorkspace({
   // Scholar Scout (Lead Finder & Editorial Outreach Suite) State
   const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
   const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine")
-  const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up">("call_for_papers")
+  const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver">("call_for_papers")
   const [scoutViewMode, setScoutViewMode] = useState<"list" | "cards">("list")
-  const [scoutSubTab, setScoutSubTab] = useState<"finder" | "history">("finder")
+  const [scoutSubTab, setScoutSubTab] = useState<"finder" | "ecr" | "history">("finder")
   const [scoutLimit, setScoutLimit] = useState<number>(25)
   const [scoutPage, setScoutPage] = useState<number>(1)
   const [scoutTotalResults, setScoutTotalResults] = useState<number>(142)
   const [editingScholarEmailIndex, setEditingScholarEmailIndex] = useState<number | null>(null)
   const [viewingHistoryEmail, setViewingHistoryEmail] = useState<SentEmailRecord | null>(null)
+
+  // Early Career Researcher (ECR Talent Hub: bioRxiv / medRxiv / arXiv / OpenAlex) State
+  const [ecrSource, setEcrSource] = useState<"all" | "biorxiv" | "medrxiv" | "arxiv" | "openalex">("all")
+  const [ecrKeyword, setEcrKeyword] = useState("Biomedical Engineering & AI Preprints")
+  const [ecrResults, setEcrResults] = useState<any[]>([])
+  const [isEcrScouting, setIsEcrScouting] = useState(false)
+  const [ecrSelectedNames, setEcrSelectedNames] = useState<string[]>([])
+  const [ecrCampaignType, setEcrCampaignType] = useState<"ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver">("ecr_reviewer")
 
   // Sent Emails History (Audit Log) with LocalStorage persistence
   const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>(() => {
@@ -429,7 +438,42 @@ export function JournalManagerWorkspace({
     }
   }
 
-  const handleDispatchScoutOutreach = (scholar: any, campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up") => {
+  const handleSearchEcrScholars = async (termToSearch?: string, srcToSearch = ecrSource) => {
+    const term = (termToSearch !== undefined ? termToSearch : ecrKeyword).trim()
+    setIsEcrScouting(true)
+    try {
+      const res = await fetch("/api/editorial360/match-reviewers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isEcr: true,
+          ecrSource: srcToSearch,
+          customQuery: term || "biomedical engineering artificial intelligence",
+          journal: scoutTargetJournal,
+          limit: 25
+        })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.reviewers && data.reviewers.length > 0) {
+          setEcrResults(data.reviewers)
+        }
+      }
+    } catch (err) {
+      console.error("ECR Scout search error:", err)
+    } finally {
+      setIsEcrScouting(false)
+    }
+  }
+
+  // Load initial ECR results when scout sub-tab switches to "ecr" or reviewer registry switches to "ecr"
+  useEffect(() => {
+    if ((scoutSubTab === "ecr" || reviewerRegistryTab === "ecr") && ecrResults.length === 0) {
+      handleSearchEcrScholars()
+    }
+  }, [scoutSubTab, reviewerRegistryTab])
+
+  const handleDispatchScoutOutreach = (scholar: any, campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver") => {
     const journalName = scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal
     const scholarName = scholar.name || "Distinguished Colleague"
     const scholarEmail = scholar.email || "colleague@university.edu"
@@ -461,11 +505,26 @@ export function JournalManagerWorkspace({
       actionLabel = "Review Previous Invitation"
       actionUrl = `https://www.scholarlyopen.org/editorial360`
       defaultBody = `Dear ${scholarName},\n\nI hope this message finds you well.\n\nI am writing to gently follow up on our previous correspondence regarding ${journalName}. We recognize how demanding your research, clinical, and teaching commitments are at ${institution}, and wanted to ensure our prior invitation did not get lost in your inbox.\n\nGiven your prominent expertise in ${specialty}, we remain very enthusiastic about collaborating with your research team. Depending on your current priorities, we would be delighted to:\n1. Consider your latest research for our Founding Inaugural Volume (with our 50% launch discount and full low-income/hardship waiver provisions).\n2. Welcome you to our international editorial board.\n\nPlease let us know if you have any questions or if you would be open to a brief discussion.\n\nThank you for your time and continued dedication to advancing open science.\n\nSincerely,\nEditorial Management Office\n${journalName}\nScholarly Open Publishing Group`
-    } else {
+    } else if (campaign === "associate_editor") {
       defaultSubject = `Editorial Invitation: Associate Editor Appointment for ${journalName}`
       actionLabel = "Accept Associate Editor Role"
       actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ae&name=${encodeURIComponent(scholarName)}`
       defaultBody = `Dear ${scholarName},\n\n${journalName} is expanding its editorial leadership to support increasing submission volumes in ${specialty}. In recognition of your authoritative scholarship at ${institution}, we would be delighted to invite you to join us as an Associate Editor.\n\nIn this role, you will support the Editor-in-Chief by managing the peer-review process for assigned manuscripts within your domain (approximately 1–2 manuscripts per month).\nKey responsibilities include:\n• Managing the peer review process, including identifying and inviting qualified reviewers.\n• Evaluating reviewer reports and formulating detailed editorial recommendations.\n• Upholding ethical standards and academic integrity in all decisions.\n• Promoting the journal and encouraging high-quality submissions within your network.\n• Mentoring Early Career Editorial Board members through transparent co-reviewing.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead.\n\nPlease let us know if you would be delighted to accept this appointment.\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
+    } else if (campaign === "ecr_reviewer") {
+      defaultSubject = `Invitation to Peer Review & Early Career Reviewer Track: ${journalName}`
+      actionLabel = "Accept Review Invitation & Claim Merit Credit"
+      actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ecr_review&name=${encodeURIComponent(scholarName)}`
+      defaultBody = `Dear ${scholarName},\n\nWe recently came across your compelling scholarship in ${specialty}, originating from ${institution}.\n\nAt ${journalName}, we are actively dedicated to opening doors for Early Career Researchers (ECRs), postdoctoral fellows, and advanced doctoral investigators. We believe that emerging scholars provide some of the most thorough, constructive, and forward-looking evaluations in academic publishing.\n\nWe cordially invite you to join our active Peer Reviewer Community. By joining this reviewer cohort, you will benefit from:\n• Fast-Track "Level 1 Verified Reviewer" status on your Editorial360 public profile.\n• Official Reviewer Certificate of Excellence with Crossref / ORCID peer-review verification for your academic CV.\n• 15 Merit Points deposited into your Reviewer Wallet upon report submission (redeemable for 25% or 50% APC fee waivers on future submissions).\n• Transparent Co-Reviewing: You are encouraged to collaborate with a senior colleague or mentor if desired, with both contributors receiving official recognition.\n\nWe would be honored to count you among our expert reviewers.\n\nPlease click the button below to confirm your interest and select your primary sub-discipline keywords.\n\nWarm regards,\nEditorial Management Office\n${journalName}\nScholarly Open Publishing Group`
+    } else if (campaign === "ecr_masterclass") {
+      defaultSubject = `Complimentary Invitation: Certified Peer Reviewer Masterclass (${journalName})`
+      actionLabel = "Register for Masterclass (Free Admission)"
+      actionUrl = `https://www.scholarlyopen.org/editorial360?action=register_masterclass&name=${encodeURIComponent(scholarName)}`
+      defaultBody = `Dear ${scholarName},\n\nOn behalf of ${journalName} and the Scholarly Open Editorial Board, we are pleased to offer you a sponsored, complimentary registration for our upcoming "Certified Peer Reviewer Masterclass".\n\nRecognizing your emerging scholarship at ${institution} in ${specialty}, our editorial leadership has nominated you for this targeted professional development initiative.\n\nMasterclass Highlights:\n• Live & On-Demand Interactive Modules: COPE publication ethics, detecting image/data anomalies, statistical rigor evaluation, and writing constructive author-facing feedback.\n• Direct Mentorship from Journal Editors: Learn firsthand what Editors-in-Chief look for when weighing reviewer recommendations.\n• Credentials & Incentives: Participants who complete the masterclass receive an official "Certified Peer Reviewer" credential badge, priority reviewer assignment in ${journalName}, and a 25 Merit Points voucher towards author publication fee waivers.\n\nThis registration is fully sponsored by our Open Science Equity Fund (registration fee 100% waived).\n\nPlease click below to reserve your complimentary place.\n\nBest regards,\nReviewer Education Committee\n${journalName}\nScholarly Open Publishing Group`
+    } else if (campaign === "ecr_author_waiver") {
+      defaultSubject = `Founding Author Invitation: Publish Your Preprint in ${journalName} (50% Launch Waiver)`
+      actionLabel = "Submit Preprint Manuscript"
+      actionUrl = "https://www.scholarlyopen.org/editorial360?action=submit"
+      defaultBody = `Dear ${scholarName},\n\nWe recently reviewed your preprint${scholar.preprintTitle ? ` ("${scholar.preprintTitle}")` : ""} and were impressed by the originality and methodological rigor demonstrated by your research team at ${institution}.\n\nAs you consider permanent journal venues for this work, we cordially invite you to submit your manuscript for peer review in ${journalName}.\n\nWhy Publish Your Preprint with Scholarly Open?\n• Inaugural 50% Fee Discount: As an Early Career lead author, your submission will automatically qualify for our 50% APC fee waiver, with full hardship waivers available for unfunded researchers.\n• Rapid Double-Blind Peer Review: Expedited initial editorial decision within 14 days by specialists in ${specialty}.\n• Immediate Gold Open Access: Published under Creative Commons CC BY 4.0 with Crossref DOI registration, indexed across international open discovery engines.\n• Author Retention of Rights: You retain 100% copyright over your work and raw datasets.\n\nWe would be thrilled to feature your cutting-edge findings in our upcoming volume.\n\nPlease use the link below to submit your manuscript or review our author guidelines.\n\nSincerely,\nJournal Management Office\n${journalName}\nScholarly Open Publishing Group`
     }
 
     openEmailDispatch({
@@ -587,7 +646,7 @@ export function JournalManagerWorkspace({
   // Reviewer History Tracking States
   const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
   const [globalReviewerHistory, setGlobalReviewerHistory] = useState<ReviewerHistoryItem[]>([])
-  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history">("directory")
+  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr">("directory")
   const [isLoadingPaperHistory, setIsLoadingPaperHistory] = useState(false)
 
   // Fetch paper-specific reviewer history when Track Modal opens
@@ -1326,6 +1385,352 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     )
   }
 
+  // =========================================================================
+  // RENDER ECR TALENT HUB & INVITATIONS SUITE
+  // =========================================================================
+  const renderEcrTalentHub = () => {
+    return (
+      <div className="space-y-5">
+        {/* 1. Header Banner & Mission */}
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/50 via-slate-900 to-sky-950/30 border border-indigo-500/20 shadow-xs space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                  <GraduationCap className="h-4 w-4" />
+                </span>
+                <h4 className="text-sm font-bold text-white tracking-wide">
+                  Early Career Researcher (ECR) Talent Hub &amp; Invitations
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  Preprint First Authors
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  bioRxiv · medRxiv · arXiv
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                Sponsor and empower emerging scholars (doctoral candidates, postdocs, and research fellows) from bioRxiv, medRxiv, arXiv, and OpenAlex. Invite them to serve as verified peer reviewers (Level-1 fast-track), join our Certified Reviewer Masterclass, or submit preprints with guaranteed 50% APC fee waivers.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-right">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Merit Incentive Pool</span>
+                <span className="text-xs font-bold text-amber-300 flex items-center justify-end gap-1 mt-0.5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  +15 to +25 Pts / Review
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Source Filter Tabs */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
+            <span className="text-xs font-semibold text-slate-300 mr-1 flex items-center gap-1.5">
+              <Filter className="h-3.5 w-3.5 text-indigo-400" />
+              <span>Database:</span>
+            </span>
+            {[
+              { id: "all", label: "All Repositories", count: ecrResults.length || "12+", badge: "bioRxiv · medRxiv · arXiv" },
+              { id: "biorxiv", label: "bioRxiv Preprints", count: ecrResults.filter(r => r.ecrSource === "bioRxiv").length || "Biology", badge: "Life Sciences" },
+              { id: "medrxiv", label: "medRxiv Preprints", count: ecrResults.filter(r => r.ecrSource === "medRxiv").length || "Medicine", badge: "Health Sciences" },
+              { id: "arxiv", label: "arXiv Preprints", count: ecrResults.filter(r => r.ecrSource === "arXiv").length || "AI/CS", badge: "Computer Science & Physics" },
+              { id: "openalex", label: "OpenAlex ECR", count: ecrResults.filter(r => r.ecrSource === "OpenAlex ECR").length || "2024–26", badge: "Emerging Scholars" }
+            ].map(src => (
+              <button
+                key={src.id}
+                type="button"
+                onClick={() => {
+                  setEcrSource(src.id as any)
+                  handleSearchEcrScholars(ecrKeyword, src.id as any)
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 border ${
+                  ecrSource === src.id
+                    ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                    : "bg-white/5 hover:bg-white/10 text-slate-300 border-white/10"
+                }`}
+              >
+                <span>{src.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                  ecrSource === src.id ? "bg-white/20 text-white" : "bg-white/10 text-slate-300"
+                }`}>
+                  {src.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. Interactive Search & Journal Target Suite */}
+        <div className="p-4 rounded-xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] space-y-3 shadow-2xs">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div className="md:col-span-6 relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={ecrKeyword}
+                onChange={(e) => setEcrKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearchEcrScholars()
+                }}
+                placeholder="Search ECR preprints by keyword, gene, technology, or author..."
+                className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+              />
+            </div>
+
+            <div className="md:col-span-4">
+              <select
+                value={scoutTargetJournal}
+                onChange={(e) => setScoutTargetJournal(e.target.value)}
+                className="w-full px-3 py-2.5 text-xs bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] cursor-pointer"
+              >
+                <option value="all">All Scholarly Open Journals</option>
+                <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
+                <option value="Engineering & Applied Sciences">Engineering & Applied Sciences</option>
+                <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
+                <option value="Decarbonization & Carbon Tech">Decarbonization & Carbon Tech</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <Button
+                onClick={() => handleSearchEcrScholars()}
+                disabled={isEcrScouting}
+                className="w-full h-10 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-xl shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {isEcrScouting ? (
+                  <>
+                    <RotateCcw className="h-3.5 w-3.5 animate-spin" />
+                    <span>Scouting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-3.5 w-3.5" />
+                    <span>Search ECRs</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Batch Actions Bar (When items selected) */}
+          {ecrSelectedNames.length > 0 && (
+            <div className="p-3 rounded-xl bg-[#0b99ff]/10 border border-[#0b99ff]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/20 px-2.5 py-0.5 rounded-full">
+                  {ecrSelectedNames.length} Candidates Selected
+                </span>
+                <button
+                  onClick={() => setEcrSelectedNames([])}
+                  className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline cursor-pointer"
+                >
+                  Clear
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const scholarsToInvite = ecrResults.filter(r => ecrSelectedNames.includes(r.name))
+                    if (scholarsToInvite.length > 0) {
+                      handleDispatchScoutOutreach(scholarsToInvite[0], "ecr_reviewer")
+                    }
+                  }}
+                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-lg cursor-pointer"
+                >
+                  <UserPlus className="h-3.5 w-3.5 mr-1" />
+                  Invite Reviewers ({ecrSelectedNames.length})
+                </Button>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const scholarsToInvite = ecrResults.filter(r => ecrSelectedNames.includes(r.name))
+                    if (scholarsToInvite.length > 0) {
+                      handleDispatchScoutOutreach(scholarsToInvite[0], "ecr_masterclass")
+                    }
+                  }}
+                  className="h-8 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer"
+                >
+                  <GraduationCap className="h-3.5 w-3.5 mr-1" />
+                  Invite to Masterclass
+                </Button>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const scholarsToInvite = ecrResults.filter(r => ecrSelectedNames.includes(r.name))
+                    if (scholarsToInvite.length > 0) {
+                      handleDispatchScoutOutreach(scholarsToInvite[0], "ecr_author_waiver")
+                    }
+                  }}
+                  className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg cursor-pointer"
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1" />
+                  Call for Papers (50% Waiver)
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 3. Candidate Cards Grid */}
+        {ecrResults.length === 0 && !isEcrScouting ? (
+          <div className="p-12 text-center bg-white dark:bg-[#18191e] rounded-2xl border border-slate-200/90 dark:border-[#272832] space-y-3">
+            <GraduationCap className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto" />
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              No ECR preprints found matching "{ecrKeyword}"
+            </div>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Try broader keywords like "machine learning", "oncology", "materials", or select "All Repositories".
+            </p>
+            <Button
+              onClick={() => {
+                setEcrKeyword("Biomedical Engineering & AI Preprints")
+                handleSearchEcrScholars("Biomedical Engineering & AI Preprints", "all")
+              }}
+              variant="outline"
+              size="sm"
+              className="text-xs rounded-xl"
+            >
+              Reset to Recommended ECR Pool
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {ecrResults.map((candidate, idx) => {
+              const isSelected = ecrSelectedNames.includes(candidate.name)
+              const sourceBadgeColor = 
+                candidate.ecrSource === "bioRxiv" ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-900/40" :
+                candidate.ecrSource === "medRxiv" ? "bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-900/40" :
+                candidate.ecrSource === "arXiv" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-900/40" :
+                "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-900/40"
+
+              return (
+                <div
+                  key={candidate.name + idx}
+                  className={`p-4 rounded-2xl border transition-all space-y-3.5 shadow-2xs ${
+                    isSelected
+                      ? "border-[#0b99ff] bg-[#0b99ff]/[0.02] dark:bg-sky-950/[0.08] ring-1 ring-[#0b99ff]"
+                      : "border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
+                  }`}
+                >
+                  {/* Top Bar: Source + Career Stage + Checkbox */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${sourceBadgeColor}`}>
+                        {candidate.ecrSource || "Preprint"}
+                      </span>
+                      <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                        {candidate.careerStage || "Early Career Researcher"}
+                      </span>
+                    </div>
+
+                    <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEcrSelectedNames(prev => [...prev, candidate.name])
+                          } else {
+                            setEcrSelectedNames(prev => prev.filter(n => n !== candidate.name))
+                          }
+                        }}
+                        className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff]"
+                      />
+                      <span className="text-[11px] text-slate-400 select-none">Select</span>
+                    </label>
+                  </div>
+
+                  {/* Scholar Info */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h5 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                        {candidate.name}
+                      </h5>
+                      {candidate.orcid && (
+                        <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800 shrink-0">
+                          ORCID: {candidate.orcid}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                      {candidate.institution}
+                    </div>
+                    <div className="text-[11px] text-[#0b99ff] font-mono">
+                      {candidate.email}
+                    </div>
+                  </div>
+
+                  {/* Preprint / Research Work Details */}
+                  {candidate.preprintTitle && (
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] space-y-1 text-xs">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between gap-2">
+                        <span>Preprint / Lead Work ({candidate.preprintDate || "2026"})</span>
+                        {candidate.preprintDoi && (
+                          <span className="font-mono text-slate-500 truncate max-w-[150px]">{candidate.preprintDoi}</span>
+                        )}
+                      </div>
+                      <p className="font-medium text-slate-800 dark:text-slate-200 leading-snug line-clamp-2">
+                        "{candidate.preprintTitle}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Specialty & Rationale */}
+                  <div className="space-y-1 text-xs">
+                    <div className="text-[11px] text-slate-500">
+                      <strong>Field:</strong> {candidate.specialty}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      <strong>Metrics:</strong> {candidate.metrics}
+                    </div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 italic bg-amber-50/50 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-200/50 dark:border-amber-900/20">
+                      💡 {candidate.editorialRationale}
+                    </div>
+                  </div>
+
+                  {/* 3 Action Buttons */}
+                  <div className="pt-2 border-t border-slate-100 dark:border-[#272832] grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleDispatchScoutOutreach(candidate, "ecr_reviewer")}
+                      className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-xl shadow-2xs cursor-pointer"
+                    >
+                      <UserPlus className="h-3 w-3 mr-1" />
+                      Invite Reviewer
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() => handleDispatchScoutOutreach(candidate, "ecr_masterclass")}
+                      className="h-8 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-2xs cursor-pointer"
+                    >
+                      <GraduationCap className="h-3 w-3 mr-1" />
+                      Masterclass
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() => handleDispatchScoutOutreach(candidate, "ecr_author_waiver")}
+                      className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-2xs cursor-pointer"
+                    >
+                      <FileText className="h-3 w-3 mr-1" />
+                      Call for Papers
+                    </Button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 font-sans">
       
@@ -1828,6 +2233,27 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               >
                 <Compass className="h-3.5 w-3.5" />
                 <span>Lead Finder</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setScoutSubTab("ecr")
+                  if (ecrResults.length === 0) handleSearchEcrScholars()
+                }}
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
+                  scoutSubTab === "ecr"
+                    ? "bg-gradient-to-r from-[#0b99ff] to-indigo-600 text-white shadow-xs"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <GraduationCap className="h-3.5 w-3.5 text-amber-300" />
+                <span>ECR Talent Hub (Preprints)</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  scoutSubTab === "ecr" ? "bg-white/20 text-white" : "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                }`}>
+                  bioRxiv · medRxiv · arXiv
+                </span>
               </button>
 
               <button
@@ -2419,6 +2845,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </>
           )}
 
+          {/* ===================== SUBTAB: ECR TALENT HUB (bioRxiv / medRxiv / arXiv) ===================== */}
+          {scoutSubTab === "ecr" && renderEcrTalentHub()}
+
           {/* ===================== SUBTAB 2: SENT EMAILS HISTORY AUDIT LOG ===================== */}
           {scoutSubTab === "history" && (
             <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-6 shadow-xs space-y-4">
@@ -2559,11 +2988,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {reviewerRegistryTab === "directory" ? "Reviewer Registry" : "Reviewer History"}
+                {reviewerRegistryTab === "directory" ? "Reviewer Registry" : reviewerRegistryTab === "ecr" ? "Early Career Researcher (ECR) Invitations" : "Reviewer History"}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {reviewerRegistryTab === "directory"
                   ? "Directory listing of vetted peer reviewers and availability status."
+                  : reviewerRegistryTab === "ecr"
+                  ? "Source and invite emerging scholars and preprint lead authors from bioRxiv, medRxiv, and arXiv."
                   : "Complete dispatch, acceptance, and declination log across all journal desks."}
               </p>
             </div>
@@ -2580,6 +3011,21 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   }`}
                 >
                   Active Pool ({reviewersList.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReviewerRegistryTab("ecr")
+                    if (ecrResults.length === 0) handleSearchEcrScholars()
+                  }}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                    reviewerRegistryTab === "ecr"
+                      ? "bg-white dark:bg-[#18191e] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
+                  <span>ECR Invitations (bioRxiv / arXiv)</span>
                 </button>
                 <button
                   type="button"
@@ -2605,7 +3051,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           </div>
 
-          {reviewerRegistryTab === "history" ? (
+          {reviewerRegistryTab === "ecr" ? (
+            <div className="p-5">
+              {renderEcrTalentHub()}
+            </div>
+          ) : reviewerRegistryTab === "history" ? (
             <div className="p-5 space-y-5">
               {/* Summary KPIs */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

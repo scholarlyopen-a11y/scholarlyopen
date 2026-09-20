@@ -78,6 +78,8 @@ export async function POST(req: Request) {
         secondaryActionUrl = `${baseUrl}/editorial360?action=decline&id=${paperId}&journal=${encodeURIComponent(journal)}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`
       }
 
+      const includeEditorial360Logo = body.includeEditorial360Logo ?? templateDef?.includeEditorial360Logo ?? false
+
       finalHtml = generateBrandedEmailHtml({
         subject: finalSubject,
         bodyText,
@@ -89,7 +91,8 @@ export async function POST(req: Request) {
         paperId: paperId !== "N/A" ? paperId : undefined,
         paperTitle: paperTitle !== "Manuscript" ? paperTitle : undefined,
         recipientName,
-        baseUrl
+        baseUrl,
+        includeEditorial360Logo
       })
     }
 

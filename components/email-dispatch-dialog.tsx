@@ -29,6 +29,7 @@ export interface EmailDispatchConfig {
   journal?: string
   actionLabel?: string
   actionUrl?: string
+  includeEditorial360Logo?: boolean
   onConfirmSend: (finalData: {
     subject: string
     bodyText: string
@@ -106,7 +107,8 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
       journal: config.journal || "Scholarly Open",
       paperId: config.paperId,
       paperTitle: config.paperTitle,
-      recipientName: config.recipientName
+      recipientName: config.recipientName,
+      includeEditorial360Logo: config.includeEditorial360Logo ?? false
     })
   }, [subject, bodyText, config])
 

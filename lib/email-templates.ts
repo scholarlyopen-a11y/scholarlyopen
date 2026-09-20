@@ -14,6 +14,7 @@ export interface EmailTemplateDefinition {
   defaultBody: string
   actionLabel?: string
   actionUrlPlaceholder?: string
+  includeEditorial360Logo?: boolean
   placeholders: EmailTemplatePlaceholder[]
 }
 
@@ -315,6 +316,7 @@ export function generateBrandedEmailHtml(options: {
   paperTitle?: string
   recipientName?: string
   baseUrl?: string
+  includeEditorial360Logo?: boolean
 }): string {
   const {
     subject,
@@ -327,7 +329,8 @@ export function generateBrandedEmailHtml(options: {
     paperId,
     paperTitle,
     recipientName = "Colleague",
-    baseUrl = "https://www.scholarlyopen.org"
+    baseUrl = "https://www.scholarlyopen.org",
+    includeEditorial360Logo = false
   } = options
 
   const currentYear = new Date().getFullYear()
@@ -378,7 +381,7 @@ export function generateBrandedEmailHtml(options: {
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 32px 12px;">
   <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px -2px rgba(0,0,0,0.06);">
-    <!-- Brand Header with Real Logos -->
+    <!-- Brand Header with Real Logos / Masthead -->
     <div style="background-color: #ffffff; padding: 20px 28px; border-bottom: 2px solid #0b99ff;">
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; width: 100%;">
         <tr>
@@ -391,9 +394,20 @@ export function generateBrandedEmailHtml(options: {
             </div>
           </td>
           <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
-            <a href="${baseUrl}/editorial360" target="_blank" style="text-decoration: none; display: inline-block;">
-              <img src="${baseUrl}/editorial360.svg" alt="editorial360" height="28" style="height: 28px; max-height: 28px; width: auto; max-width: 140px; display: block; border: 0;" onerror="this.src='/editorial360.svg'" />
-            </a>
+            ${includeEditorial360Logo ? `
+              <a href="${baseUrl}/editorial360" target="_blank" style="text-decoration: none; display: inline-block;">
+                <img src="${baseUrl}/editorial360.svg" alt="editorial360" height="28" style="height: 28px; max-height: 28px; width: auto; max-width: 140px; display: block; border: 0;" onerror="this.src='/editorial360.svg'" />
+              </a>
+            ` : `
+              <div style="text-align: right; display: inline-block;">
+                <span style="display: inline-block; padding: 4px 10px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 10px; font-weight: 700; color: #475569; letter-spacing: 0.5px; text-transform: uppercase;">
+                  Editorial Office
+                </span>
+                <div style="font-size: 10px; color: #94a3b8; margin-top: 3px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                  Official Masthead
+                </div>
+              </div>
+            `}
           </td>
         </tr>
       </table>

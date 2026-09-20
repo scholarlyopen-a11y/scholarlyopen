@@ -106,6 +106,18 @@ interface EditorialDecisionDraft {
   notifyCoAuthors: boolean
 }
 
+export interface ReviewerIncentiveDraft {
+  reviewerName: string
+  reviewerEmail: string
+  qualityRating: number // 1 to 5 stars
+  timeliness: "on_time" | "early" | "delayed"
+  meritPoints: number // 10, 15, 25
+  incentiveType: "apc_waiver_25" | "apc_waiver_50" | "certificate" | "honorarium"
+  voucherCode: string
+  commendationNote: string
+  notifyReviewer: boolean
+}
+
 interface SpecialCollectionItem {
   id: string
   title: string
@@ -566,6 +578,9 @@ export function EditorWorkspace({
     setTimeout(() => setToastMessage(null), 4000)
   }
 
+  // Research Integrity Filter Mode ("flagged" = 3 cases matching badge, "all" = full portfolio)
+  const [integrityFilterMode, setIntegrityFilterMode] = useState<"flagged" | "all">("flagged")
+
   // Reviewer History state for handling editor
   const [editorReviewerHistory, setEditorReviewerHistory] = useState<Record<string, any[]>>({})
 
@@ -631,10 +646,15 @@ export function EditorWorkspace({
     return timeB - timeA
   })
 
+  const [confidentialNotes, setConfidentialNotes] = useState("")
+  const [expandedReviewerScorecard, setExpandedReviewerScorecard] = useState<"rev1" | "rev2" | null>(null)
+  const [reviewerIncentives, setReviewerIncentives] = useState<Record<string, ReviewerIncentiveDraft>>({})
+
   const getDecisionSubject = (v: string, paperId: string, paperTitle: string) => {
-    if (v === "Accept") return `Formal Acceptance Notice: ${paperId} - ${paperTitle}`
+    if (v === "Accept") return `Formal Acceptance: ${paperId} - ${paperTitle}`
     if (v === "Minor Revision") return `Editorial Decision: Minor Revision Required for ${paperId}`
     if (v === "Major Revision" || v === "Reject & Resubmit") return `Editorial Decision: Major Revisions Required for ${paperId}`
+    if (v === "Reject") return `Editorial Decision: ${paperId} - ${paperTitle}`
     return `Editorial Decision: ${paperId} - ${paperTitle}`
   }
 
@@ -652,6 +672,45 @@ export function EditorWorkspace({
     setDecisionAuthorEmail(paper.authorEmail || "author@university.edu")
     setConfidentialNotes("")
     setDecisionTab("edit")
+
+    // Populate Reviewer Recognition & Incentives
+    const initialIncentives: Record<string, ReviewerIncentiveDraft> = {}
+    const reviewerNames = new Set<string>()
+    paperReviews.forEach(r => {
+      if (r.reviewerName) reviewerNames.add(r.reviewerName)
+    })
+    if (paper.reviewers && Array.isArray(paper.reviewers)) {
+      paper.reviewers.forEach(name => reviewerNames.add(name))
+    }
+    if (reviewerNames.size === 0) {
+      reviewerNames.add("Dr. Evelyn Vane")
+      reviewerNames.add("Dr. Marcus Vance")
+    }
+
+    const emailMap: Record<string, string> = {
+      "Dr. Evelyn Vane": "e.vane@university-medical.edu",
+      "Dr. Marcus Vance": "m.vance@university-charite.de",
+      "Prof. Aris Thorne": "a.thorne@oxford-academic.uk",
+      "Prof. Hiroshi Tanaka": "h.tanaka@tokyo-institute.ac.jp",
+      "Prof. Elena Rostova": "e.rostova@sorbonne-universite.fr"
+    }
+
+    const cleanPaperId = paper.id ? paper.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) : "APC"
+    reviewerNames.forEach(name => {
+      const email = emailMap[name] || `${name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@scholarlyopen.org`
+      initialIncentives[name] = {
+        reviewerName: name,
+        reviewerEmail: email,
+        qualityRating: 5,
+        timeliness: "on_time",
+        meritPoints: 15,
+        incentiveType: "apc_waiver_25",
+        voucherCode: `REV-WAV25-${cleanPaperId}-${Math.floor(1000 + Math.random() * 9000)}`,
+        commendationNote: `Rigorous, constructive peer evaluation rendered for manuscript ${paper.id}.`,
+        notifyReviewer: true
+      }
+    })
+    setReviewerIncentives(initialIncentives)
   }
 
   const handleVerdictChange = (v: EditorialDecisionDraft["verdict"]) => {
@@ -711,7 +770,8 @@ export function EditorWorkspace({
       journal: journalName,
       paperId,
       paperTitle: selectedPaperForDecision.title,
-      recipientName: authorName
+      recipientName: authorName,
+      includeEditorial360Logo: false
     })
 
     // Dispatch email via SMTP
@@ -729,8 +789,107 @@ export function EditorWorkspace({
       })
     }).catch(e => console.error("Decision email dispatch error:", e))
 
+    // Process Reviewer Incentives & Merit Points
+    const awardsToStore: any[] = []
+    for (const name of Object.keys(reviewerIncentives)) {
+      const inc = reviewerIncentives[name]
+      if (!inc) continue
+
+      const discountLabel = inc.incentiveType === "apc_waiver_50" 
+        ? "50% APC Waiver" 
+        : inc.incentiveType === "apc_waiver_25" 
+        ? "25% APC Waiver" 
+        : inc.incentiveType === "certificate" 
+        ? "Verified Review Certificate" 
+        : "Academic Honorarium"
+
+      const awardRecord = {
+        id: `AWD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        code: inc.voucherCode,
+        discount: discountLabel,
+        pointsAwarded: inc.meritPoints,
+        qualityRating: inc.qualityRating,
+        timeliness: inc.timeliness,
+        paperId,
+        paperTitle: selectedPaperForDecision.title,
+        reviewerName: inc.reviewerName,
+        reviewerEmail: inc.reviewerEmail,
+        awardedBy: `${user.name} (Handling Editor)`,
+        awardedAt: new Date().toISOString().split("T")[0],
+        status: "Active"
+      }
+      awardsToStore.push(awardRecord)
+
+      // Update reviewer points and vouchers in localStorage
+      try {
+        const ptKey = `editorial360_reviewer_points_${inc.reviewerEmail}`
+        const currentPts = parseInt(localStorage.getItem(ptKey) || "35", 10)
+        localStorage.setItem(ptKey, (currentPts + inc.meritPoints).toString())
+
+        const vKey = `editorial360_reviewer_vouchers_${inc.reviewerEmail}`
+        const existingVouchers = JSON.parse(localStorage.getItem(vKey) || "[]")
+        existingVouchers.unshift(awardRecord)
+        localStorage.setItem(vKey, JSON.stringify(existingVouchers))
+      } catch (e) {}
+
+      // Dispatch to Reviewer History API
+      fetch("/api/editorial360/reviewers", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "award_incentive",
+          paperId,
+          paperTitle: selectedPaperForDecision.title,
+          journal: journalName,
+          reviewerName: inc.reviewerName,
+          reviewerEmail: inc.reviewerEmail,
+          pointsAwarded: inc.meritPoints,
+          qualityRating: inc.qualityRating,
+          timeliness: inc.timeliness,
+          incentiveType: inc.incentiveType,
+          voucherCode: inc.voucherCode,
+          editorCommendation: inc.commendationNote,
+          awardedBy: `${user.name} (Handling Editor)`
+        })
+      }).catch(e => console.warn("Reviewer incentive API error:", e))
+
+      // If notifyReviewer is checked, send official award notice email
+      if (inc.notifyReviewer) {
+        const voucherEmailHtml = generateBrandedEmailHtml({
+          subject: `Peer Review Recognition & Merit Award: ${paperId}`,
+          bodyText: `Dear ${inc.reviewerName},\n\nThe Handling Editor (${user.name}) and Editorial Board of ${journalName} have officially reviewed and endorsed your expert peer review evaluation for manuscript ${paperId} ("${selectedPaperForDecision.title}").\n\nIn recognition of your academic service, rigorous critiques, and prompt turnaround, the journal has credited +${inc.meritPoints} Reviewer Merit Points to your editorial360 Wallet.\n\nYou have also been awarded a ${discountLabel} voucher for your upcoming submissions:\n\nVoucher Code: ${inc.voucherCode}\n\nEditor Commendation: "${inc.commendationNote}"\n\nThank you for championing scientific integrity and excellence in open-access scholarship.`,
+          actionLabel: "Access Reviewer Wallet & Vouchers",
+          actionUrl: "https://www.scholarlyopen.org/editorial360?role=reviewer&tab=wallet",
+          journal: journalName,
+          paperId,
+          paperTitle: selectedPaperForDecision.title,
+          recipientName: inc.reviewerName,
+          includeEditorial360Logo: false
+        })
+
+        fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: inc.reviewerEmail,
+            customSubject: `Peer Review Recognition & Merit Award: ${paperId}`,
+            customHtml: voucherEmailHtml,
+            journal: journalName,
+            paperId,
+            paperTitle: selectedPaperForDecision.title,
+            recipientName: inc.reviewerName
+          })
+        }).catch(e => console.warn("Reviewer reward email dispatch error:", e))
+      }
+    }
+
+    try {
+      const allAwards = JSON.parse(localStorage.getItem("editorial360_reviewer_awards") || "[]")
+      localStorage.setItem("editorial360_reviewer_awards", JSON.stringify([...awardsToStore, ...allAwards]))
+    } catch (e) {}
+
     setIsDecisionSending(false)
-    triggerToast(isDe ? `Redaktionelle Entscheidung '${decisionVerdict}' erfolgreich per E-Mail übermittelt!` : `Editorial decision '${decisionVerdict}' dispatched via email to author!`)
+    triggerToast(isDe ? `Redaktionelle Entscheidung '${decisionVerdict}' erfolgreich per E-Mail übermittelt & Gutachterpunkte gutgeschrieben!` : `Editorial decision '${decisionVerdict}' dispatched via email & reviewer merit points credited!`)
     setSelectedPaperForDecision(null)
   }
 
@@ -1034,85 +1193,87 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. RESPONSIVE SUB-NAVIGATION TAB STRIP                                    */}
+      {/* 2. RESPONSIVE SUB-NAVIGATION TAB STRIP (Omitted when managed by parent)   */}
       {/* ========================================================================= */}
-      <div className="flex items-center gap-2 border-b border-slate-200/90 dark:border-[#272832] pb-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <button
-          type="button"
-          onClick={() => handleTabSwitch("desk")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
-            currentTab === "desk" || currentTab === "overview"
-              ? "bg-[#0b99ff] text-white shadow-xs"
-              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
-          }`}
-        >
-          <LayoutDashboard className="h-3.5 w-3.5" />
-          <span>{isDe ? "Zugewiesene Manuskripte" : "Assigned Manuscripts"}</span>
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${currentTab === "desk" || currentTab === "overview" ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}`}>
-            {manuscripts.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleTabSwitch("tracker")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
-            currentTab === "tracker"
-              ? "bg-[#0b99ff] text-white shadow-xs"
-              : "bg-white dark:bg-[#18191e] border border-sky-300 dark:border-sky-800 text-[#0b99ff] dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/30"
-          }`}
-        >
-          <Clock className="h-3.5 w-3.5" />
-          <span>{isDe ? "Gutachten-Tracking" : "Review Tracker"}</span>
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${currentTab === "tracker" ? "bg-white/20 text-white" : "bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200"}`}>
-            {manuscripts.filter(m => m.status === "Under Review").length} Live
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleTabSwitch("integrity")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
-            currentTab === "integrity"
-              ? "bg-[#0b99ff] text-white shadow-xs"
-              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
-          }`}
-        >
-          <ShieldCheck className="h-3.5 w-3.5" />
-          <span>{isDe ? "Forschungsintegrität" : "Research Integrity"}</span>
-          {integrityCount > 0 && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 font-bold">
-              {integrityCount}
+      {!onTabChange && (
+        <div className="flex items-center gap-2 border-b border-slate-200/90 dark:border-[#272832] pb-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <button
+            type="button"
+            onClick={() => handleTabSwitch("desk")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+              currentTab === "desk" || currentTab === "overview"
+                ? "bg-[#0b99ff] text-white shadow-xs"
+                : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+            }`}
+          >
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            <span>{isDe ? "Zugewiesene Manuskripte" : "Assigned Manuscripts"}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${currentTab === "desk" || currentTab === "overview" ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}`}>
+              {manuscripts.length}
             </span>
-          )}
-        </button>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => handleTabSwitch("collections")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
-            currentTab === "collections"
-              ? "bg-[#0b99ff] text-white shadow-xs"
-              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
-          }`}
-        >
-          <Layers className="h-3.5 w-3.5" />
-          <span>{isDe ? "Sonderausgaben" : "Special Issues"}</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => handleTabSwitch("tracker")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+              currentTab === "tracker"
+                ? "bg-[#0b99ff] text-white shadow-xs"
+                : "bg-white dark:bg-[#18191e] border border-sky-300 dark:border-sky-800 text-[#0b99ff] dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/30"
+            }`}
+          >
+            <Clock className="h-3.5 w-3.5" />
+            <span>{isDe ? "Gutachten-Tracking" : "Review Tracker"}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${currentTab === "tracker" ? "bg-white/20 text-white" : "bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200"}`}>
+              {manuscripts.filter(m => m.status === "Under Review").length} Live
+            </span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => handleTabSwitch("analytics")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
-            currentTab === "analytics"
-              ? "bg-[#0b99ff] text-white shadow-xs"
-              : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
-          }`}
-        >
-          <Award className="h-3.5 w-3.5" />
-          <span>{isDe ? "Journal-Kennzahlen" : "Journal Metrics"}</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => handleTabSwitch("integrity")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+              currentTab === "integrity"
+                ? "bg-[#0b99ff] text-white shadow-xs"
+                : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+            }`}
+          >
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>{isDe ? "Forschungsintegrität" : "Research Integrity"}</span>
+            {integrityCount > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 font-bold">
+                {integrityCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTabSwitch("collections")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+              currentTab === "collections"
+                ? "bg-[#0b99ff] text-white shadow-xs"
+                : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+            }`}
+          >
+            <Layers className="h-3.5 w-3.5" />
+            <span>{isDe ? "Sonderausgaben" : "Special Issues"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTabSwitch("analytics")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+              currentTab === "analytics"
+                ? "bg-[#0b99ff] text-white shadow-xs"
+                : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+            }`}
+          >
+            <Award className="h-3.5 w-3.5" />
+            <span>{isDe ? "Journal-Kennzahlen" : "Journal Metrics"}</span>
+          </button>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* TAB 1: EDITORIAL DESK & PIPELINE                                          */}
@@ -1992,41 +2153,157 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Desk Manuscript Forensic Clearance Log:</h4>
-              {manuscripts.map((m) => (
-                <div key={m.id} className="p-3.5 rounded-xl border border-slate-200/80 dark:border-[#272832] bg-slate-50 dark:bg-[#131418] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#0b99ff]">{m.id}</span>
-                      <span className="text-slate-400">•</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{m.title}</span>
-                    </div>
-                    <div className="text-[11px] text-slate-500">Author: {m.authorName || "Dr. Marcus Vance"}</div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                    <span className="text-[11px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded">
-                      Sim: 4% · AI: 2% ✓
-                    </span>
-                    <Button
-                      onClick={() => setSelectedPaperForIntegrity(m)}
-                      variant="outline"
-                      className="text-xs h-7.5 px-2.5"
-                    >
-                      Report
-                    </Button>
-                    <Button
-                      onClick={() => setSelectedPaperForImEscalation(m)}
-                      variant="outline"
-                      className="text-xs h-7.5 px-2.5 border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-400 cursor-pointer"
-                    >
-                      <AlertCircle className="h-3 w-3 mr-1 text-rose-500" />
-                      Escalate to IM & JM
-                    </Button>
-                  </div>
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-[#272832] pb-3">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    {isDe ? "Desk Forensik- und Integritätsüberprüfung" : "Desk Manuscript Forensic Clearance Log:"}
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    {integrityFilterMode === "flagged"
+                      ? (isDe ? `Zeigt ${integrityCount} Manuskripte mit Integritätswarnung oder Eskalation.` : `Showing ${integrityCount} manuscripts with active integrity flags or escalations.`)
+                      : (isDe ? `Zeigt alle ${manuscripts.length} Manuskripte im Portfolio.` : `Showing all ${manuscripts.length} portfolio manuscripts.`)}
+                  </p>
                 </div>
-              ))}
+
+                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setIntegrityFilterMode("flagged")}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                      integrityFilterMode === "flagged"
+                        ? "bg-red-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <ShieldAlert className="h-3.5 w-3.5" />
+                      <span>{isDe ? "Auffällige Fälle" : "Flagged & Escalated"}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        integrityFilterMode === "flagged" ? "bg-white/20 text-white" : "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300"
+                      }`}>
+                        {integrityCount}
+                      </span>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIntegrityFilterMode("all")}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                      integrityFilterMode === "all"
+                        ? "bg-[#0b99ff] text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <span>{isDe ? "Alle Manuskripte" : "All Portfolio"}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        integrityFilterMode === "all" ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      }`}>
+                        {manuscripts.length}
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {(() => {
+                const list = integrityFilterMode === "flagged"
+                  ? manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30))
+                  : manuscripts
+
+                if (list.length === 0) {
+                  return (
+                    <div className="p-8 text-center bg-slate-50 dark:bg-[#131418] rounded-xl border border-slate-200/80 dark:border-[#272832] text-slate-500 text-xs">
+                      {isDe ? "Keine auffälligen Integritätsfälle gefunden." : "No flagged or escalated integrity cases found."}
+                    </div>
+                  )
+                }
+
+                return list.map((m) => {
+                  const isEscalated = escalatedPaperIds.includes(m.id)
+                  const matchingEscalation = (integrityAlerts || []).find(a => a.paperId === m.id && a.status === "Escalated")
+                  const isFlagged = m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)
+                  const plag = m.plagiarismScore ?? (m.id === "SOSSH-26-SRW107" ? 34 : 4)
+                  const ai = m.aiScore ?? (m.id === "SOEAS-26-RS106" ? 88 : 2)
+
+                  return (
+                    <div 
+                      key={m.id} 
+                      className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-all ${
+                        isEscalated
+                          ? "border-red-300 dark:border-red-900/60 bg-red-50/40 dark:bg-red-950/20"
+                          : isFlagged
+                          ? "border-amber-300 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20"
+                          : "border-slate-200/80 dark:border-[#272832] bg-slate-50 dark:bg-[#131418]"
+                      }`}
+                    >
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-[#0b99ff]">{m.id}</span>
+                          <span className="text-slate-400">•</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">{m.title}</span>
+                          {isEscalated && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white flex items-center gap-1">
+                              <ShieldAlert className="h-3 w-3" />
+                              Escalated by IM
+                            </span>
+                          )}
+                          {!isEscalated && isFlagged && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              Integrity Flag
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Author: {m.authorName || "Dr. Marcus Vance"} · {m.journal}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg ${
+                          isEscalated || ai > 30 || plag > 15
+                            ? "bg-red-100 text-red-800 dark:bg-red-950/80 dark:text-red-300 border border-red-200 dark:border-red-800"
+                            : "text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5"
+                        }`}>
+                          Sim: {plag}% · AI: {ai}% {ai > 30 || plag > 15 ? "⚠️" : "✓"}
+                        </span>
+
+                        {isEscalated && matchingEscalation && (
+                          <Button
+                            onClick={() => handleOpenEscalationAlert(matchingEscalation)}
+                            className="text-xs h-7.5 px-3 bg-red-600 hover:bg-red-700 text-white font-bold cursor-pointer shadow-2xs"
+                          >
+                            <ShieldAlert className="h-3 w-3 mr-1" />
+                            Ruling Brief
+                          </Button>
+                        )}
+
+                        <Button
+                          onClick={() => setSelectedPaperForIntegrity(m)}
+                          variant="outline"
+                          className="text-xs h-7.5 px-2.5"
+                        >
+                          Report
+                        </Button>
+
+                        {!isEscalated && (
+                          <Button
+                            onClick={() => setSelectedPaperForImEscalation(m)}
+                            variant="outline"
+                            className="text-xs h-7.5 px-2.5 border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-400 cursor-pointer"
+                          >
+                            <AlertCircle className="h-3 w-3 mr-1 text-rose-500" />
+                            Escalate
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })
+              })()}
             </div>
           </div>
         </Card>
@@ -2601,7 +2878,201 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               )
             })()}
 
-            {/* 2. Verdict Selection */}
+            {/* 2. Reviewer Recognition & Merit Points Incentive Flow */}
+            <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/80 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
+                    {isDe ? "Gutachter-Würdigung & Leistungs-Incentives" : "Reviewer Recognition & Incentive Flow"}
+                  </h4>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                  Direct Wallet Sync · APC Waivers
+                </span>
+              </div>
+
+              <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/80 leading-relaxed">
+                {isDe
+                  ? "Bewerten Sie die Qualität der Gutachten und vergeben Sie Merit-Punkte sowie APC-Waiver-Codes (25% / 50%) direkt an das persönliche Wallet der Gutachter."
+                  : "Evaluate reviewer rigor, endorse merit points, and grant APC waiver vouchers (25% / 50%) directly crediting the reviewer's personal wallet upon decision dispatch."}
+              </p>
+
+              <div className="space-y-3 pt-1">
+                {Object.keys(reviewerIncentives).map((revName) => {
+                  const draft = reviewerIncentives[revName]
+                  if (!draft) return null
+
+                  return (
+                    <div 
+                      key={revName}
+                      className="p-3.5 rounded-xl bg-white dark:bg-[#15171c] border border-emerald-200/80 dark:border-emerald-900/60 space-y-3 shadow-xs"
+                    >
+                      <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+                        <div>
+                          <span className="font-bold text-slate-900 dark:text-white text-xs">{draft.reviewerName}</span>
+                          <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono ml-2">({draft.reviewerEmail})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Quality Rating:</span>
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => {
+                                  setReviewerIncentives(prev => ({
+                                    ...prev,
+                                    [revName]: { ...prev[revName], qualityRating: star }
+                                  }))
+                                }}
+                                className="cursor-pointer focus:outline-none p-0.5"
+                              >
+                                <Star
+                                  className={`h-3.5 w-3.5 ${
+                                    star <= draft.qualityRating
+                                      ? "text-amber-400 fill-amber-400"
+                                      : "text-slate-300 dark:text-slate-600"
+                                  }`}
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                        {/* Timeliness */}
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Timeliness</label>
+                          <select
+                            value={draft.timeliness}
+                            onChange={(e) => {
+                              const val = e.target.value as any
+                              setReviewerIncentives(prev => ({
+                                ...prev,
+                                [revName]: { ...prev[revName], timeliness: val }
+                              }))
+                            }}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs"
+                          >
+                            <option value="early">Ahead of Schedule (+Bonus)</option>
+                            <option value="on_time">On-Time (Within 14 Days)</option>
+                            <option value="delayed">Delayed</option>
+                          </select>
+                        </div>
+
+                        {/* Merit Points Chip selection */}
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Merit Points</label>
+                          <div className="flex items-center gap-1">
+                            {[10, 15, 25].map((pts) => (
+                              <button
+                                key={pts}
+                                type="button"
+                                onClick={() => {
+                                  setReviewerIncentives(prev => ({
+                                    ...prev,
+                                    [revName]: { ...prev[revName], meritPoints: pts }
+                                  }))
+                                }}
+                                className={`flex-1 py-1 text-center font-bold text-xs rounded-md border transition-all cursor-pointer ${
+                                  draft.meritPoints === pts
+                                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                                    : "bg-slate-50 dark:bg-[#1f2128] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300"
+                                }`}
+                              >
+                                +{pts}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Incentive Voucher Type */}
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Incentive Voucher</label>
+                          <select
+                            value={draft.incentiveType}
+                            onChange={(e) => {
+                              const val = e.target.value as any
+                              setReviewerIncentives(prev => ({
+                                ...prev,
+                                [revName]: { ...prev[revName], incentiveType: val }
+                              }))
+                            }}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs font-medium"
+                          >
+                            <option value="apc_waiver_25">25% APC Waiver Code</option>
+                            <option value="apc_waiver_50">50% APC Waiver Code</option>
+                            <option value="certificate">Verified Certificate</option>
+                            <option value="honorarium">Honorarium Commendation</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Generated Voucher Code & Commendation */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Auto-Generated Voucher Code</label>
+                          <input
+                            type="text"
+                            value={draft.voucherCode}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              setReviewerIncentives(prev => ({
+                                ...prev,
+                                [revName]: { ...prev[revName], voucherCode: val }
+                              }))
+                            }}
+                            className="w-full px-2.5 py-1.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 rounded-lg text-emerald-900 dark:text-emerald-200 font-mono font-bold text-xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Editor Commendation Note</label>
+                          <input
+                            type="text"
+                            value={draft.commendationNote}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              setReviewerIncentives(prev => ({
+                                ...prev,
+                                [revName]: { ...prev[revName], commendationNote: val }
+                              }))
+                            }}
+                            placeholder="Commendation note for reviewer dossier..."
+                            className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Notification Toggle */}
+                      <div className="flex items-center justify-between pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={draft.notifyReviewer}
+                            onChange={(e) => {
+                              const checked = e.target.checked
+                              setReviewerIncentives(prev => ({
+                                ...prev,
+                                [revName]: { ...prev[revName], notifyReviewer: checked }
+                              }))
+                            }}
+                            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 cursor-pointer"
+                          />
+                          <span>{isDe ? "Gutachter per E-Mail benachrichtigen & Gutschein ins Wallet laden" : "Notify Reviewer via Email & Credit Voucher to Wallet upon Dispatch"}</span>
+                        </label>
+                        <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                          +{draft.meritPoints} Pts → Wallet
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 3. Verdict Selection */}
             <div className="space-y-1.5">
               <label className="font-bold text-slate-700 dark:text-slate-300">
                 {isDe ? "Entscheidungs-Verdikt:" : "Decision Verdict:"}

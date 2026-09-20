@@ -1801,6 +1801,7 @@ export default function Editorial360Page() {
 
   const handleForceSignOut = (isExpired = false) => {
     setIsLoggedIn(false)
+    setIsSubmitWizardOpen(false)
     setShowInactivityWarning(false)
     if (typeof window !== "undefined") {
       try {
@@ -2351,7 +2352,17 @@ export default function Editorial360Page() {
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search)
         if (params.get("action") === "submit") {
-          setIsSubmitWizardOpen(true)
+          if (role === "author") {
+            setIsSubmitWizardOpen(true)
+          } else {
+            setIsSubmitWizardOpen(false)
+          }
+          // Clean action=submit from URL so it doesn't linger across logins or roles
+          params.delete("action")
+          const newQuery = params.toString() ? `?${params.toString()}` : ""
+          window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+        } else {
+          setIsSubmitWizardOpen(false)
         }
       }
     }, 1000)
@@ -2396,7 +2407,16 @@ export default function Editorial360Page() {
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search)
         if (params.get("action") === "submit") {
-          setIsSubmitWizardOpen(true)
+          if (role === "author") {
+            setIsSubmitWizardOpen(true)
+          } else {
+            setIsSubmitWizardOpen(false)
+          }
+          params.delete("action")
+          const newQuery = params.toString() ? `?${params.toString()}` : ""
+          window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+        } else {
+          setIsSubmitWizardOpen(false)
         }
       }
     }, 800)
@@ -2433,6 +2453,9 @@ export default function Editorial360Page() {
 
   const handleRoleChange = (selectedRole: UserRole) => {
     setRole(selectedRole)
+    if (selectedRole !== "author") {
+      setIsSubmitWizardOpen(false)
+    }
     setError("")
     setSuccess("")
     const matchedRole = roles.find(r => r.id === selectedRole)
@@ -2443,6 +2466,9 @@ export default function Editorial360Page() {
 
   const handleQuickSwitch = (newRole: UserRole) => {
     setRole(newRole)
+    if (newRole !== "author") {
+      setIsSubmitWizardOpen(false)
+    }
     setError("")
     setSuccess("")
     const matchedRole = roles.find(r => r.id === newRole)
@@ -5052,7 +5078,12 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" />
-                        {language === "de" ? "Zugewiesene Manuskripte" : "Assigned Manuscripts"}
+                        <span>{language === "de" ? "Zugewiesene Manuskripte" : "Assigned Manuscripts"}</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                          activeEditorTab === "desk" ? "bg-[#0b99ff]/20 text-[#0b99ff]" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                        }`}>
+                          {manuscripts.length}
+                        </span>
                       </button>
 
                       <button 
@@ -5083,7 +5114,16 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <ShieldCheck className="h-4 w-4" />
-                        {language === "de" ? "Forschungsintegrität" : "Research Integrity"}
+                        <span>{language === "de" ? "Forschungsintegrität" : "Research Integrity"}</span>
+                        {(() => {
+                          const escalatedPaperIds = (integrityAlerts || []).filter(a => a.status === "Escalated").map(a => a.paperId)
+                          const count = manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)).length
+                          return count > 0 ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
+                              {count}
+                            </span>
+                          ) : null
+                        })()}
                       </button>
 
                       <button 
@@ -8701,7 +8741,7 @@ export default function Editorial360Page() {
           </Dialog>
 
           {/* 2. AUTHOR: SUBMIT MANUSCRIPT STEPPER MODAL */}
-          <Dialog open={isSubmitWizardOpen} onOpenChange={setIsSubmitWizardOpen}>
+          <Dialog open={isSubmitWizardOpen && role === "author"} onOpenChange={setIsSubmitWizardOpen}>
             <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-xl p-6 transition-colors shadow-2xl rounded-2xl">
               <DialogHeader className="pb-1 space-y-1">
                 <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
@@ -10213,8 +10253,11 @@ export default function Editorial360Page() {
                   setSuccess(language === "de" ? "Profil erfolgreich gespeichert! Dashboard aktualisiert." : "Profile saved successfully! Dashboard updated.")
                   if (typeof window !== "undefined") {
                     const params = new URLSearchParams(window.location.search)
-                    if (params.get("action") === "submit") {
+                    if (params.get("action") === "submit" && role === "author") {
                       setIsSubmitWizardOpen(true)
+                      params.delete("action")
+                      const newQuery = params.toString() ? `?${params.toString()}` : ""
+                      window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
                     }
                   }
                 }} 

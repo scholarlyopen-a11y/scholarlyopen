@@ -54,6 +54,7 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
   const [editingSubject, setEditingSubject] = useState("")
   const [editingBody, setEditingBody] = useState("")
   const [editingActionLabel, setEditingActionLabel] = useState("")
+  const [editingIncludeLogo, setEditingIncludeLogo] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [customizedIds, setCustomizedIds] = useState<Set<string>>(new Set())
 
@@ -80,7 +81,8 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
                 ...def,
                 defaultSubject: found.defaultSubject || def.defaultSubject,
                 defaultBody: found.defaultBody || def.defaultBody,
-                actionLabel: found.actionLabel !== undefined ? found.actionLabel : def.actionLabel
+                actionLabel: found.actionLabel !== undefined ? found.actionLabel : def.actionLabel,
+                includeEditorial360Logo: found.includeEditorial360Logo !== undefined ? found.includeEditorial360Logo : (def.includeEditorial360Logo || false)
               }
             }
             return def
@@ -114,6 +116,7 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
       setEditingSubject(activeTemplate.defaultSubject)
       setEditingBody(activeTemplate.defaultBody)
       setEditingActionLabel(activeTemplate.actionLabel || "")
+      setEditingIncludeLogo(activeTemplate.includeEditorial360Logo || false)
       setIsSaved(false)
     }
   }, [activeTemplate.id])
@@ -160,7 +163,8 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
           ...t,
           defaultSubject: editingSubject,
           defaultBody: editingBody,
-          actionLabel: editingActionLabel
+          actionLabel: editingActionLabel,
+          includeEditorial360Logo: editingIncludeLogo
         }
       }
       return t
@@ -187,6 +191,7 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
     setEditingSubject(factoryDef.defaultSubject)
     setEditingBody(factoryDef.defaultBody)
     setEditingActionLabel(factoryDef.actionLabel || "")
+    setEditingIncludeLogo(factoryDef.includeEditorial360Logo || false)
 
     const updated = templates.map(t => t.id === activeTemplate.id ? factoryDef : t)
     setTemplates(updated)
@@ -217,6 +222,7 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
       setEditingSubject(cur.defaultSubject)
       setEditingBody(cur.defaultBody)
       setEditingActionLabel(cur.actionLabel || "")
+      setEditingIncludeLogo(cur.includeEditorial360Logo || false)
     }
   }
 
@@ -248,9 +254,10 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
       journal: sampleTokens.journal,
       paperId: sampleTokens.paperId,
       paperTitle: sampleTokens.paperTitle,
-      recipientName: sampleTokens.recipientName
+      recipientName: sampleTokens.recipientName,
+      includeEditorial360Logo: editingIncludeLogo
     })
-  }, [editingSubject, editingBody, editingActionLabel, activeTemplate])
+  }, [editingSubject, editingBody, editingActionLabel, editingIncludeLogo, activeTemplate])
 
   // Handle Send Test Email
   const handleSendTestEmail = async () => {
@@ -275,7 +282,8 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
           paperId: sampleTokens.paperId,
           paperTitle: sampleTokens.paperTitle,
           recipientName: sampleTokens.recipientName,
-          journal: sampleTokens.journal
+          journal: sampleTokens.journal,
+          includeEditorial360Logo: editingIncludeLogo
         })
       })
 
@@ -617,6 +625,27 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
                       className="w-full px-3 py-2 text-xs bg-slate-100 dark:bg-[#1c1d22] border border-slate-200 dark:border-[#272832] rounded-lg text-slate-500 dark:text-slate-400 font-mono"
                     />
                   </div>
+                </div>
+
+                {/* Optional editorial360 Logo Toggle */}
+                <div className="pt-3 border-t border-slate-100 dark:border-[#272832] flex items-center justify-between gap-4 bg-slate-50/50 dark:bg-[#1a1c22]/50 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                  <div className="space-y-0.5">
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer" htmlFor="toggle-logo">
+                      {isDe ? "editorial360 Plattform-Badge im Header anzeigen" : "Display editorial360 Platform Badge in Header"}
+                    </label>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {isDe 
+                        ? "Optional. Wenn deaktiviert, wird vorrangig das offizielle Journal-Masthead für akademische Korrespondenz angezeigt." 
+                        : "Optional. When unchecked, the official Journal Masthead & Editorial Office seal are prioritized for formal academic correspondence."}
+                    </p>
+                  </div>
+                  <input
+                    id="toggle-logo"
+                    type="checkbox"
+                    checked={editingIncludeLogo}
+                    onChange={(e) => setEditingIncludeLogo(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
+                  />
                 </div>
               </CardContent>
             )}

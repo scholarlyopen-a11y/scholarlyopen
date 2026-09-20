@@ -47,7 +47,8 @@ import {
   Globe,
   UserCheck,
   Save,
-  CheckCheck
+  CheckCheck,
+  Copy
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -296,6 +297,72 @@ export function ReviewerWorkspace({
   const [walletExpiryDays, setWalletExpiryDays] = useState(312)
   const [calcReviews, setCalcReviews] = useState(4)
   const [certViewMode, setCertViewMode] = useState<"certificate" | "cv">("certificate")
+
+  // Awarded Vouchers & Wallet Perks
+  const [awardedVouchers, setAwardedVouchers] = useState<Array<{
+    id: string
+    code: string
+    discount: string
+    paperId: string
+    paperTitle?: string
+    awardedBy: string
+    awardedAt: string
+    status: "Active" | "Redeemed"
+  }>>([])
+  const [copiedVoucherCode, setCopiedVoucherCode] = useState<string | null>(null)
+
+  // Sync reviewer wallet points & vouchers from storage / API
+  useEffect(() => {
+    try {
+      const email = user?.email || "reviewer@scholarlyopen.org"
+      // Load accumulated points
+      const storedPoints = localStorage.getItem(`editorial360_reviewer_points_${email}`)
+      if (storedPoints) {
+        const parsed = parseInt(storedPoints, 10)
+        if (!isNaN(parsed) && parsed > 0) {
+          setPoints(prev => Math.min(100, Math.max(prev, parsed)))
+        }
+      }
+
+      // Load awarded vouchers
+      const allAwardsStr = localStorage.getItem("editorial360_reviewer_awards")
+      const userVouchersStr = localStorage.getItem(`editorial360_reviewer_vouchers_${email}`)
+      let list: any[] = []
+      if (allAwardsStr) {
+        const parsedAll = JSON.parse(allAwardsStr)
+        if (Array.isArray(parsedAll)) {
+          list = [...parsedAll.filter((a: any) => !a.reviewerEmail || a.reviewerEmail.toLowerCase() === email.toLowerCase())]
+        }
+      }
+      if (userVouchersStr) {
+        const parsedUser = JSON.parse(userVouchersStr)
+        if (Array.isArray(parsedUser)) {
+          parsedUser.forEach(uv => {
+            if (!list.some(l => l.code === uv.code)) list.unshift(uv)
+          })
+        }
+      }
+
+      // Default active starter vouchers if none exist yet
+      if (list.length === 0) {
+        list = [
+          {
+            id: "VOUCH-INIT-01",
+            code: "REV-WAV25-SOMED-7821",
+            discount: "25% APC Waiver",
+            paperId: "SOMED-26-RW101",
+            paperTitle: "Advances in Type 1 Diabetes Ocular Remote Tele-Health Screening",
+            awardedBy: "Prof. Aris Thorne (Handling Editor)",
+            awardedAt: "2026-09-12",
+            status: "Active"
+          }
+        ]
+      }
+      setAwardedVouchers(list)
+    } catch (e) {
+      console.warn("Failed to load reviewer wallet awards:", e)
+    }
+  }, [user?.email])
 
   // Modals state
   const [selectedInvForAccept, setSelectedInvForAccept] = useState<ReviewInvitationItem | null>(null)
@@ -1748,6 +1815,106 @@ export function ReviewerWorkspace({
                   <div className="text-[10px] text-slate-400 uppercase font-semibold">Service</div>
                   <div className="font-bold text-slate-700 dark:text-slate-300 mt-0.5">{calcReviews * 6} hrs</div>
                 </div>
+              </div>
+            </div>
+
+            {/* Awarded Peer Review Vouchers & APC Waivers */}
+            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/80 bg-gradient-to-br from-white to-emerald-50/30 dark:from-slate-900 dark:to-emerald-950/20 p-5 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-emerald-100 dark:border-emerald-800/60">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
+                    <Award className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      {isDe ? "Verliehene Gutachter-Voucher & APC-Rabattcodes" : "Awarded Peer Review Vouchers & APC Waivers"}
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                        {awardedVouchers.length} Available
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {isDe 
+                        ? "Von Handling Editors verliehene Anerkennungen. Einlösbar für 25% – 100% APC-Erlass bei eigenen Manuskripteinreichungen."
+                        : "Official incentives awarded by Handling Editors upon decision endorsement. Redeemable for 25%–100% APC waivers on your own submissions."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+                {awardedVouchers.map((vouch) => {
+                  const isCopied = copiedVoucherCode === vouch.code
+
+                  return (
+                    <div
+                      key={vouch.id || vouch.code}
+                      className="p-4 rounded-xl bg-white dark:bg-slate-950 border border-emerald-200/80 dark:border-slate-800 space-y-3 relative overflow-hidden shadow-xs hover:border-emerald-400 transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-black text-sm text-emerald-700 dark:text-emerald-400">
+                              {vouch.discount}
+                            </span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                              {vouch.status}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                            Ref: <strong className="text-slate-700 dark:text-slate-300">{vouch.paperId}</strong> · Awarded on {vouch.awardedAt}
+                          </div>
+                          {vouch.awardedBy && (
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              By: {vouch.awardedBy}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Voucher Code Box */}
+                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Redemption Code</div>
+                          <span className="font-mono font-black text-xs text-slate-900 dark:text-white tracking-wider">
+                            {vouch.code}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (typeof navigator !== "undefined" && navigator.clipboard) {
+                              navigator.clipboard.writeText(vouch.code)
+                            }
+                            setCopiedVoucherCode(vouch.code)
+                            setTimeout(() => setCopiedVoucherCode(null), 2500)
+                          }}
+                          className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                            isCopied
+                              ? "bg-emerald-600 text-white shadow-xs"
+                              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                          }`}
+                        >
+                          {isCopied ? (
+                            <>
+                              <Check className="h-3.5 w-3.5" />
+                              <span>{isDe ? "Kopiert!" : "Copied!"}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3.5 w-3.5 text-slate-400" />
+                              <span>{isDe ? "Code kopieren" : "Copy Code"}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
+                        <span>Valid across all 13 Scholarly Open journals</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Single Use / Transferable</span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 

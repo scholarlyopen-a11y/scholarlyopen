@@ -15,6 +15,15 @@ export interface ReviewerHistoryItem {
   declineReason?: string
   declineReferral?: string
   respondedAt?: string
+  // Reviewer Recognition & Incentives
+  pointsAwarded?: number
+  qualityRating?: number
+  timeliness?: "on_time" | "early" | "delayed"
+  incentiveType?: "apc_waiver_25" | "apc_waiver_50" | "certificate" | "honorarium"
+  voucherCode?: string
+  editorCommendation?: string
+  awardedAt?: string
+  awardedBy?: string
 }
 
 // In-memory store for active session with mock data pre-populated
@@ -149,6 +158,48 @@ export async function PATCH(req: Request) {
     const itemIndex = globalReviewerHistory.findIndex(
       r => r.paperId.toLowerCase() === paperId.toLowerCase() && r.reviewerEmail.toLowerCase() === reviewerEmail.toLowerCase()
     )
+
+    if (action === "award_incentive") {
+      const { pointsAwarded, qualityRating, timeliness, incentiveType, voucherCode, editorCommendation, awardedBy } = body
+      if (itemIndex >= 0) {
+        const existing = globalReviewerHistory[itemIndex]
+        globalReviewerHistory[itemIndex] = {
+          ...existing,
+          status: "Completed",
+          pointsAwarded: pointsAwarded ?? existing.pointsAwarded ?? 15,
+          qualityRating: qualityRating ?? existing.qualityRating ?? 5,
+          timeliness: timeliness ?? existing.timeliness ?? "on_time",
+          incentiveType: incentiveType ?? existing.incentiveType ?? "apc_waiver_25",
+          voucherCode: voucherCode ?? existing.voucherCode,
+          editorCommendation: editorCommendation ?? existing.editorCommendation,
+          awardedAt: todayStr,
+          awardedBy: awardedBy || "Handling Editor"
+        }
+        return NextResponse.json({ ok: true, record: globalReviewerHistory[itemIndex] })
+      } else {
+        const created: ReviewerHistoryItem = {
+          id: `REV-HIST-${Date.now()}`,
+          paperId,
+          paperTitle: body.paperTitle || "Manuscript",
+          journal: body.journal || "Scholarly Open",
+          reviewerName: body.reviewerName || reviewerEmail.split("@")[0],
+          reviewerEmail,
+          invitedDate: todayStr,
+          status: "Completed",
+          respondedAt: todayStr,
+          pointsAwarded: pointsAwarded || 15,
+          qualityRating: qualityRating || 5,
+          timeliness: timeliness || "on_time",
+          incentiveType: incentiveType || "apc_waiver_25",
+          voucherCode: voucherCode || `REV-WAV25-${Date.now().toString().slice(-6)}`,
+          editorCommendation,
+          awardedAt: todayStr,
+          awardedBy: awardedBy || "Handling Editor"
+        }
+        globalReviewerHistory.unshift(created)
+        return NextResponse.json({ ok: true, record: created })
+      }
+    }
 
     const newStatus = action === "accept" ? "Accepted" : action === "decline" ? "Declined" : "Invited"
 
