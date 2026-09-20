@@ -286,11 +286,45 @@ export function JournalManagerWorkspace({
     ]
   })
 
-  // Calculate sent today for Namecheap Safe Server Rate Meter (250/day safe ceiling)
-  const sentTodayCount = useMemo(() => {
+  // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 3,250/day across all 13 journals)
+  const quotaInfo = useMemo(() => {
     const todayStr = new Date().toISOString().split("T")[0]
-    return sentEmailsHistory.filter(e => e.timestamp && e.timestamp.startsWith(todayStr)).length
-  }, [sentEmailsHistory])
+    const todayEmails = sentEmailsHistory.filter(e => e.timestamp && e.timestamp.startsWith(todayStr))
+    
+    if (scoutTargetJournal === "all") {
+      const maxQuota = 13 * 250 // 3,250 total capacity across all 13 official journal mailboxes
+      const sentCount = todayEmails.length
+      const percentage = Math.min(100, Math.max(sentCount > 0 ? 4 : 0, Math.round((sentCount / maxQuota) * 100)))
+      return {
+        label: "Portfolio Dispatch Rail (13 Desks)",
+        sentCount,
+        maxQuota,
+        percentage,
+        isWarning: sentCount > maxQuota * 0.8,
+        isCaution: sentCount > maxQuota * 0.5,
+        subtext: "Combined safe daily capacity across all 13 official journal mailboxes (250/day each)."
+      }
+    } else {
+      const officialJ = OFFICIAL_JOURNALS.find(j => j.name === scoutTargetJournal)
+      const deskName = officialJ ? officialJ.shortName : scoutTargetJournal.replace("Scholarly Open: ", "")
+      const maxQuota = 250 // Safe ceiling for this specific mailbox
+      const sentCount = todayEmails.filter(e => {
+        if (!e.journal) return false
+        return e.journal.toLowerCase().includes(deskName.toLowerCase()) || 
+               scoutTargetJournal.toLowerCase().includes(e.journal.toLowerCase())
+      }).length
+      const percentage = Math.min(100, Math.max(sentCount > 0 ? 4 : 0, Math.round((sentCount / maxQuota) * 100)))
+      return {
+        label: `${deskName} Mailbox Rail`,
+        sentCount,
+        maxQuota,
+        percentage,
+        isWarning: sentCount > 200,
+        isCaution: sentCount > 120,
+        subtext: `Safe daily capacity for ${officialJ ? officialJ.email : 'this mailbox'} (protects domain reputation).`
+      }
+    }
+  }, [sentEmailsHistory, scoutTargetJournal])
 
   const [scoutResults, setScoutResults] = useState<any[]>([
     {
@@ -1737,33 +1771,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </p>
               </div>
 
-              {/* Namecheap Server Daily Safe Quota Meter */}
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 min-w-[240px] space-y-1.5 shrink-0">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <Server className="h-3.5 w-3.5 text-[#0b99ff]" />
-                    Namecheap Outbound Rail
+              {/* Dynamic Daily Safe Dispatch Quota Meter */}
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 min-w-[260px] space-y-1.5 shrink-0">
+                <div className="flex items-center justify-between text-xs gap-2">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 truncate max-w-[150px]" title={quotaInfo.label}>
+                    <Server className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
+                    <span className="truncate">{quotaInfo.label}</span>
                   </span>
-                  <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded ${
-                    sentTodayCount > 200 ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300" :
-                    sentTodayCount > 120 ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" :
+                  <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded shrink-0 ${
+                    quotaInfo.isWarning ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300" :
+                    quotaInfo.isCaution ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" :
                     "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
                   }`}>
-                    {sentTodayCount} / 250 sent today
+                    {quotaInfo.sentCount.toLocaleString()} / {quotaInfo.maxQuota.toLocaleString()} sent today
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div 
                     className={`h-full transition-all duration-500 ${
-                      sentTodayCount > 200 ? "bg-rose-500" :
-                      sentTodayCount > 120 ? "bg-amber-500" :
+                      quotaInfo.isWarning ? "bg-rose-500" :
+                      quotaInfo.isCaution ? "bg-amber-500" :
                       "bg-emerald-500"
                     }`}
-                    style={{ width: `${Math.min(100, Math.max(4, Math.round((sentTodayCount / 250) * 100)))}%` }}
+                    style={{ width: `${quotaInfo.percentage}%` }}
                   />
                 </div>
                 <p className="text-[10px] text-slate-400 leading-tight">
-                  Protects server reputation and prevents domain throttling.
+                  {quotaInfo.subtext}
                 </p>
               </div>
             </div>
