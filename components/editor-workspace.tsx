@@ -625,6 +625,10 @@ export function EditorWorkspace({
     }
 
     return matchesJournal && matchesSearch && matchesStage
+  }).sort((a, b) => {
+    const timeA = new Date((a as any).updatedAt || (a as any).lastActivity || (a as any).revisionDate || a.date || 0).getTime()
+    const timeB = new Date((b as any).updatedAt || (b as any).lastActivity || (b as any).revisionDate || b.date || 0).getTime()
+    return timeB - timeA
   })
 
   const getDecisionSubject = (v: string, paperId: string, paperTitle: string) => {
@@ -2916,26 +2920,42 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {revisionTab === "diff" && (
               <div className="space-y-2">
                 {[
-                  { name: "Revised_Manuscript_Clean_R1.pdf", type: "Clean Manuscript PDF", size: "2.4 MB" },
-                  { name: "Track_Changes_Comparison_Doc.pdf", type: "Marked-Up Redline Diff", size: "2.8 MB" },
-                  { name: "Supplementary_Table_S2_Stratification.xlsx", type: "Supplemental Dataset", size: "420 KB" }
+                  { 
+                    name: selectedRevisionPaper?.revisedFileName || selectedRevisionPaper?.fileName || "Revised_Manuscript_Clean_R1.pdf", 
+                    type: "Clean Manuscript PDF (Submitted by Author)", 
+                    size: selectedRevisionPaper?.revisedFileSize || selectedRevisionPaper?.fileSize || "2.8 MB",
+                    url: selectedRevisionPaper?.revisedFileUrl || selectedRevisionPaper?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"
+                  },
+                  { 
+                    name: "Track_Changes_Comparison_Doc.pdf", 
+                    type: "Marked-Up Redline Diff", 
+                    size: "2.8 MB", 
+                    url: "/downloads/Scholarly_Open_Manuscript_Template.txt" 
+                  },
+                  { 
+                    name: "Supplementary_Table_S2_Stratification.xlsx", 
+                    type: "Supplemental Dataset", 
+                    size: "420 KB", 
+                    url: "/downloads/Scholarly_Open_Author_Checklist.txt" 
+                  }
                 ].map((file, i) => (
                   <div key={i} className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 truncate">
                       <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                      <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-xs">{file.name}</div>
+                      <div className="truncate">
+                        <div className="font-bold text-slate-900 dark:text-white text-xs truncate">{file.name}</div>
                         <div className="text-[11px] text-slate-500">{file.type} · {file.size}</div>
                       </div>
                     </div>
-                    <Button
+                    <a
+                      href={file.url}
+                      download={file.name}
                       onClick={() => triggerToast(`✓ Downloading ${file.name}...`)}
-                      variant="outline"
-                      className="text-xs h-7.5 px-3 shrink-0 cursor-pointer font-semibold"
+                      className="inline-flex items-center text-xs h-7.5 px-3 shrink-0 font-semibold rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-slate-700 dark:text-slate-200"
                     >
-                      <Download className="h-3 w-3 mr-1" />
+                      <Download className="h-3 w-3 mr-1 text-[#0b99ff]" />
                       Download
-                    </Button>
+                    </a>
                   </div>
                 ))}
               </div>

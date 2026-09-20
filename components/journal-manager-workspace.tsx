@@ -54,7 +54,9 @@ import {
   Edit3,
   ExternalLink,
   History,
-  Server
+  Server,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -113,6 +115,13 @@ export interface JmManuscript {
   submissionStage?: string
   fileName?: string
   fileSize?: string
+  fileUrl?: string
+  revisedFileName?: string
+  revisedFileSize?: string
+  revisedFileUrl?: string
+  revisionDate?: string
+  updatedAt?: string
+  lastActivity?: string
   dataDoi?: string
   coverLetter?: string
   ethicsIrb?: string
@@ -300,14 +309,14 @@ export function JournalManagerWorkspace({
         sentCount,
         maxQuota,
         percentage,
-        isWarning: sentCount > maxQuota * 0.8,
-        isCaution: sentCount > maxQuota * 0.5,
-        subtext: "Combined safe daily capacity across all 13 official journal mailboxes (250/day each)."
+        isWarning: sentCount > 650,
+        isCaution: sentCount > 400,
+        subtext: "Deliverability target: ≤50/day per desk (650 total) to prevent blacklisting (server limit: 3,250/day)."
       }
     } else {
       const officialJ = OFFICIAL_JOURNALS.find(j => j.name === scoutTargetJournal)
       const deskName = officialJ ? officialJ.shortName : scoutTargetJournal.replace("Scholarly Open: ", "")
-      const maxQuota = 250 // Safe ceiling for this specific mailbox
+      const maxQuota = 250 // Safe server ceiling for this specific mailbox
       const sentCount = todayEmails.filter(e => {
         if (!e.journal) return false
         return e.journal.toLowerCase().includes(deskName.toLowerCase()) || 
@@ -319,9 +328,9 @@ export function JournalManagerWorkspace({
         sentCount,
         maxQuota,
         percentage,
-        isWarning: sentCount > 200,
-        isCaution: sentCount > 120,
-        subtext: `Safe daily capacity for ${officialJ ? officialJ.email : 'this mailbox'} (protects domain reputation).`
+        isWarning: sentCount > 50,
+        isCaution: sentCount > 35,
+        subtext: `Deliverability target: ≤50/day for ${officialJ ? officialJ.email : 'this mailbox'} (server limit: 250/day).`
       }
     }
   }, [sentEmailsHistory, scoutTargetJournal])
@@ -809,6 +818,10 @@ export function JournalManagerWorkspace({
       }
 
       return matchesSearch && matchesJournal
+    }).sort((a, b) => {
+      const timeA = new Date(a.updatedAt || a.lastActivity || a.revisionDate || a.date || 0).getTime()
+      const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()
+      return timeB - timeA
     })
   }, [initialManuscripts, searchTerm, selectedJournal, selectedStageFilter])
 
@@ -2309,6 +2322,99 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     })}
                   </div>
                 )}
+
+                {/* Pagination Controls Bar */}
+                {scoutResults.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(scoutTotalResults / scoutLimit))
+                  const startRecord = (scoutPage - 1) * scoutLimit + 1
+                  const endRecord = Math.min(scoutPage * scoutLimit, scoutTotalResults)
+
+                  // Generate smart page numbers array (up to 7 items)
+                  const getPageNumbers = () => {
+                    if (totalPages <= 7) {
+                      return Array.from({ length: totalPages }, (_, i) => i + 1)
+                    }
+                    if (scoutPage <= 4) {
+                      return [1, 2, 3, 4, 5, "...", totalPages]
+                    }
+                    if (scoutPage >= totalPages - 3) {
+                      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
+                    }
+                    return [1, "...", scoutPage - 1, scoutPage, scoutPage + 1, "...", totalPages]
+                  }
+
+                  const pages = getPageNumbers()
+
+                  return (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] rounded-2xl shadow-xs">
+                      {/* Left: Summary text */}
+                      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <span>
+                          Showing <strong className="text-slate-900 dark:text-white font-mono">{startRecord}</strong> to{" "}
+                          <strong className="text-slate-900 dark:text-white font-mono">{endRecord}</strong> of{" "}
+                          <strong className="text-slate-900 dark:text-white font-mono">{scoutTotalResults.toLocaleString()}</strong> candidates
+                        </span>
+                        <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+                        <span className="hidden sm:inline font-medium">Page {scoutPage} of {totalPages}</span>
+                      </div>
+
+                      {/* Right: Pagination buttons */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {/* Previous Button */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={scoutPage <= 1 || isScouting}
+                          onClick={() => handleSearchScoutScholars(undefined, scoutPage - 1, scoutLimit)}
+                          className="h-8 px-2.5 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer"
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5 mr-0.5" />
+                          <span>Previous</span>
+                        </Button>
+
+                        {/* Numbered Page Buttons */}
+                        {pages.map((p, pIdx) => {
+                          if (p === "...") {
+                            return (
+                              <span key={`ellipsis-${pIdx}`} className="px-2 py-1 text-xs text-slate-400 font-bold">
+                                ...
+                              </span>
+                            )
+                          }
+                          const pageNum = Number(p)
+                          const isCurrent = pageNum === scoutPage
+                          return (
+                            <button
+                              key={pageNum}
+                              type="button"
+                              disabled={isScouting}
+                              onClick={() => handleSearchScoutScholars(undefined, pageNum, scoutLimit)}
+                              className={`h-8 min-w-[32px] px-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                isCurrent
+                                  ? "bg-[#0b99ff] text-white shadow-2xs"
+                                  : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          )
+                        })}
+
+                        {/* Next Button */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={scoutPage >= totalPages || isScouting}
+                          onClick={() => handleSearchScoutScholars(undefined, scoutPage + 1, scoutLimit)}
+                          className="h-8 px-2.5 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer"
+                        >
+                          <span>Next</span>
+                          <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             </>
           )}
@@ -4007,13 +4113,22 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <a
-                  href="/downloads/Scholarly_Open_Manuscript_Template.txt"
-                  download={`${selectedManuscript?.id || "Manuscript"}_Main_Document.pdf`}
+                  href={selectedManuscript?.fileUrl || selectedManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"}
+                  download={selectedManuscript?.fileName || `${selectedManuscript?.id || "Manuscript"}_Main_Document.pdf`}
                   className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <FileText className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
-                    <span className="truncate">Main Manuscript (PDF)</span>
+                    <div className="truncate">
+                      <span className="truncate block">
+                        {selectedManuscript?.fileName || "Main Manuscript (PDF)"}
+                      </span>
+                      {selectedManuscript?.fileSize && (
+                        <span className="text-[10px] text-slate-400 block font-mono">
+                          {selectedManuscript.fileSize}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
                 </a>
@@ -4944,15 +5059,22 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               {/* 1. File Downloads */}
               <div className="grid grid-cols-2 gap-2">
                 <a
-                  href="/downloads/Scholarly_Open_Manuscript_Template.txt"
-                  download={`${selectedRevisionManuscript?.id || "Manuscript"}_Clean_Revision.pdf`}
+                  href={selectedRevisionManuscript?.revisedFileUrl || selectedRevisionManuscript?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"}
+                  download={selectedRevisionManuscript?.revisedFileName || selectedRevisionManuscript?.fileName || `${selectedRevisionManuscript?.id || "Manuscript"}_Clean_Revision.pdf`}
                   className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <FileCheck2 className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">Clean Revised PDF</span>
+                    <div className="truncate">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
+                        {selectedRevisionManuscript?.revisedFileName || selectedRevisionManuscript?.fileName || "Clean Revised PDF"}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block font-mono">
+                        {selectedRevisionManuscript?.revisedFileSize || selectedRevisionManuscript?.fileSize || "2.8 MB"}
+                      </span>
+                    </div>
                   </div>
-                  <Download className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
                 </a>
 
                 <a

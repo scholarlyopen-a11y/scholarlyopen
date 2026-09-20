@@ -158,13 +158,19 @@ interface Manuscript {
   authorAffiliation?: string
   authorCountry?: string
   authorOrcid?: string
-  coAuthors?: string
   articleType?: string
   submissionStage?: string
   abstract?: string
   keywords?: string
   fileName?: string
   fileSize?: string
+  fileUrl?: string
+  revisedFileName?: string
+  revisedFileSize?: string
+  revisedFileUrl?: string
+  revisionDate?: string
+  updatedAt?: string
+  lastActivity?: string
   coverLetter?: string
   ethicsIrb?: string
   fundingGrant?: string
@@ -1677,9 +1683,13 @@ export default function Editorial360Page() {
 
     if (manuscriptStageFilter === "inbox") return m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.reviewers.length === 0
     if (manuscriptStageFilter === "review") return m.status === "Under Review"
-    if (manuscriptStageFilter === "revision") return m.status === "Revision Required"
+    if (manuscriptStageFilter === "revision") return m.status === "Revision Required" || m.status === "Revision Under Evaluation"
     if (manuscriptStageFilter === "decided") return m.status === "Accepted" || m.status === "Rejected"
     return true
+  }).sort((a, b) => {
+    const timeA = new Date(a.updatedAt || a.lastActivity || a.revisionDate || a.date || 0).getTime()
+    const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()
+    return timeB - timeA
   })
 
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false)
@@ -2589,12 +2599,27 @@ export default function Editorial360Page() {
   const handleUploadRevision = () => {
     const finalFileName = revisionFileName || "Revised_Manuscript_V2.pdf"
     const finalFileSize = revisionFileSize || "2.8 MB"
+    let generatedBlobUrl: string | undefined = undefined
+    if (revisionFile) {
+      try {
+        generatedBlobUrl = URL.createObjectURL(revisionFile)
+      } catch (e) {}
+    }
+    const nowIso = new Date().toISOString()
     setManuscripts(prev => {
       const updated: Manuscript[] = prev.map(m => m.id === revisionPaperId ? { 
         ...m, 
         status: "Revision Under Evaluation" as const,
         fileName: finalFileName,
-        fileSize: finalFileSize
+        fileSize: finalFileSize,
+        fileUrl: generatedBlobUrl || m.fileUrl,
+        revisedFileName: finalFileName,
+        revisedFileSize: finalFileSize,
+        revisedFileUrl: generatedBlobUrl || m.fileUrl,
+        revisionDate: nowIso,
+        lastActivity: nowIso,
+        updatedAt: nowIso,
+        date: nowIso
       } : m)
       try {
         if (typeof window !== "undefined") {
@@ -2605,6 +2630,23 @@ export default function Editorial360Page() {
       }
       return updated
     })
+
+    // Cloud sync
+    fetch("/api/editorial360/manuscripts", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: revisionPaperId,
+        status: "Revision Under Evaluation",
+        fileName: finalFileName,
+        fileSize: finalFileSize,
+        revisedFileName: finalFileName,
+        revisedFileSize: finalFileSize,
+        updatedAt: nowIso,
+        date: nowIso
+      })
+    }).catch(e => console.error("Cloud revision sync failed:", e))
+
     setSuccess(language === "de" 
       ? `Überarbeitetes Manuskript "${finalFileName}" erfolgreich eingereicht!`
       : `Revised manuscript "${finalFileName}" and rebuttal successfully submitted to Editorial Office!`
@@ -5253,8 +5295,15 @@ export default function Editorial360Page() {
                     onTabChange={setActiveJmTab}
                     manuscripts={manuscripts as any}
                     onUpdateManuscriptStatus={(id, st) => {
+                      const nowIso = new Date().toISOString()
                       setManuscripts(prev => {
-                        const updated = prev.map(m => m.id === id ? { ...m, status: st as any } : m)
+                        const updated = prev.map(m => m.id === id ? { 
+                          ...m, 
+                          status: st as any,
+                          updatedAt: nowIso,
+                          lastActivity: nowIso,
+                          date: nowIso
+                        } : m)
                         try {
                           if (typeof window !== "undefined") {
                             localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
@@ -5265,7 +5314,7 @@ export default function Editorial360Page() {
                       fetch("/api/editorial360/manuscripts", {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ id, status: st })
+                        body: JSON.stringify({ id, status: st, updatedAt: nowIso, date: nowIso })
                       }).catch(e => console.error("Cloud status update failed:", e))
                     }}
                     onAssignEditor={(id, ed) => {
@@ -5355,8 +5404,15 @@ export default function Editorial360Page() {
                     notifications={crossDeskNotifications}
                     onAddNotification={handleAddCrossDeskNotification}
                     onUpdateManuscriptStatus={(id, st) => {
+                      const nowIso = new Date().toISOString()
                       setManuscripts(prev => {
-                        const updated = prev.map(m => m.id === id ? { ...m, status: st as any } : m)
+                        const updated = prev.map(m => m.id === id ? { 
+                          ...m, 
+                          status: st as any,
+                          updatedAt: nowIso,
+                          lastActivity: nowIso,
+                          date: nowIso
+                        } : m)
                         try {
                           if (typeof window !== "undefined") {
                             localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
@@ -5367,7 +5423,7 @@ export default function Editorial360Page() {
                       fetch("/api/editorial360/manuscripts", {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ id, status: st })
+                        body: JSON.stringify({ id, status: st, updatedAt: nowIso, date: nowIso })
                       }).catch(e => console.error("Cloud status update failed:", e))
                     }}
                     user={{
@@ -5406,10 +5462,14 @@ export default function Editorial360Page() {
                 {/* ================= 4. AUTHOR WORKSPACE ================= */}
                 {role === "author" && (() => {
                   const isDe = language === "de"
-                  // Deduplicate manuscripts array by ID and Title to guarantee clean unique list
+                  // Deduplicate manuscripts array by ID and Title and sort by newest status update / activity first
                   const uniqueManuscripts = Array.from(
                     new Map(manuscripts.map(m => [m.id ? m.id : m.title, m])).values()
-                  )
+                  ).sort((a, b) => {
+                    const timeA = new Date(a.updatedAt || a.lastActivity || a.revisionDate || a.date || 0).getTime()
+                    const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()
+                    return timeB - timeA
+                  })
 
                   const translateStatus = (st: string) => {
                     if (!isDe) return st
