@@ -249,6 +249,12 @@ export function JournalManagerWorkspace({
   const [editingScholarEmailIndex, setEditingScholarEmailIndex] = useState<number | null>(null)
   const [viewingHistoryEmail, setViewingHistoryEmail] = useState<SentEmailRecord | null>(null)
 
+  // Reviewer Registry & History Tracking States
+  const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
+  const [globalReviewerHistory, setGlobalReviewerHistory] = useState<ReviewerHistoryItem[]>([])
+  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr">("directory")
+  const [isLoadingPaperHistory, setIsLoadingPaperHistory] = useState(false)
+
   // Early Career Researcher (ECR Talent Hub: bioRxiv / medRxiv / arXiv / OpenAlex) State
   const [ecrSource, setEcrSource] = useState<"all" | "biorxiv" | "medrxiv" | "arxiv" | "openalex">("all")
   const [ecrKeyword, setEcrKeyword] = useState("Biomedical Engineering & AI Preprints")
@@ -642,12 +648,6 @@ export function JournalManagerWorkspace({
   const [trackingManuscript, setTrackingManuscript] = useState<JmManuscript | null>(null)
   const [nudgedReviewers, setNudgedReviewers] = useState<Record<string, boolean>>({})
   const [extendedDays, setExtendedDays] = useState<Record<string, number>>({})
-
-  // Reviewer History Tracking States
-  const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
-  const [globalReviewerHistory, setGlobalReviewerHistory] = useState<ReviewerHistoryItem[]>([])
-  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr">("directory")
-  const [isLoadingPaperHistory, setIsLoadingPaperHistory] = useState(false)
 
   // Fetch paper-specific reviewer history when Track Modal opens
   useEffect(() => {
