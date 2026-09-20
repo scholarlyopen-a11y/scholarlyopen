@@ -646,8 +646,6 @@ export function EditorWorkspace({
     return timeB - timeA
   })
 
-  const [confidentialNotes, setConfidentialNotes] = useState("")
-  const [expandedReviewerScorecard, setExpandedReviewerScorecard] = useState<"rev1" | "rev2" | null>(null)
   const [reviewerIncentives, setReviewerIncentives] = useState<Record<string, ReviewerIncentiveDraft>>({})
 
   const getDecisionSubject = (v: string, paperId: string, paperTitle: string) => {
