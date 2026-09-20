@@ -51,7 +51,10 @@ import {
   PieChart,
   Zap,
   Building2,
-  Edit3
+  Edit3,
+  ExternalLink,
+  History,
+  Server
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -59,6 +62,18 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
+
+export interface SentEmailRecord {
+  id: string
+  timestamp: string
+  recipientName: string
+  recipientEmail: string
+  journal: string
+  campaignType: "call_for_papers" | "ebm" | "eic" | "associate_editor" | string
+  subject: string
+  body: string
+  status: "Delivered" | "Dispatched"
+}
 
 export interface ReviewerHistoryItem {
   id: string
@@ -213,8 +228,69 @@ export function JournalManagerWorkspace({
 
   // Scholar Scout (Lead Finder & Editorial Outreach Suite) State
   const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
-  const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine")
+  const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine & Health Sciences")
   const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor">("call_for_papers")
+  const [scoutViewMode, setScoutViewMode] = useState<"list" | "cards">("list")
+  const [scoutSubTab, setScoutSubTab] = useState<"finder" | "history">("finder")
+  const [scoutLimit, setScoutLimit] = useState<number>(25)
+  const [scoutPage, setScoutPage] = useState<number>(1)
+  const [scoutTotalResults, setScoutTotalResults] = useState<number>(142)
+  const [editingScholarEmailIndex, setEditingScholarEmailIndex] = useState<number | null>(null)
+  const [viewingHistoryEmail, setViewingHistoryEmail] = useState<SentEmailRecord | null>(null)
+
+  // Sent Emails History (Audit Log) with LocalStorage persistence
+  const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("editorial360_scout_sent_history")
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        console.error("Failed to load sent emails history:", e)
+      }
+    }
+    return [
+      {
+        id: "SENT-1092",
+        timestamp: "2026-09-20T14:22:00Z",
+        recipientName: "Prof. Hiroshi Tanaka",
+        recipientEmail: "h.tanaka@tokyo-institute.ac.jp",
+        journal: "Scholarly Open: Medicine & Health Sciences",
+        campaignType: "call_for_papers",
+        subject: "Call for Papers: Founding Volume Submission Invitation for Scholarly Open: Medicine & Health Sciences",
+        body: "Dear Prof. Hiroshi Tanaka,\n\nOn behalf of the editorial office of Scholarly Open: Medicine & Health Sciences, we have followed your influential scholarship in Non-Mydriatic Fundus Tele-Screening Protocols & AI Triage with great admiration.\n\nScholarly Open: Medicine & Health Sciences is currently assembling high-impact original research articles for our Founding Inaugural Volume. This foundational issue is pivotal in securing international ISSN registration and establishing our baseline citation record for upcoming indexing applications.\n\nIn alignment with our official APC & Waiver Policy:\n• Inaugural 50% Launch Discount: All accepted manuscripts in 2026 automatically receive a 50% fee discount across our portfolio.\n• Low-Income Waivers: Authors from World Bank low-income countries receive 100% full fee waivers; discretionary hardship waivers are available for unfunded researchers.\n• Rigorous Double-Blind Peer Review with 14-day rapid turnaround target.\n\nSincerely,\nJournal Management Office",
+        status: "Delivered"
+      },
+      {
+        id: "SENT-1091",
+        timestamp: "2026-09-20T11:05:00Z",
+        recipientName: "Prof. Claire Dupond",
+        recipientEmail: "c.dupond@sorbonne-universite.fr",
+        journal: "Scholarly Open: Medicine & Health Sciences",
+        campaignType: "ebm",
+        subject: "Invitation to Join the Editorial Board: Scholarly Open: Medicine & Health Sciences",
+        body: "Dear Prof. Claire Dupond,\n\nIn recognition of your outstanding scholarship at Sorbonne Université, we cordially invite you to join our Editorial Board.\n\nTerm & Benefits: Initial 2-year appointment, 25% discount on APCs for your own submissions, full academic independence and masthead recognition.\n\nSincerely,\nEditorial Office",
+        status: "Delivered"
+      },
+      {
+        id: "SENT-1090",
+        timestamp: "2026-09-19T16:45:00Z",
+        recipientName: "Prof. Alexander Wright",
+        recipientEmail: "a.wright@materials.ox.ac.uk",
+        journal: "Scholarly Open: Engineering & Applied Sciences",
+        campaignType: "associate_editor",
+        subject: "Editorial Invitation: Associate Editor Appointment for Scholarly Open: Engineering & Applied Sciences",
+        body: "Dear Prof. Alexander Wright,\n\nWe cordially invite you to join us as an Associate Editor for Scholarly Open: Engineering & Applied Sciences.\n\nTerm & Benefits: Initial 2-year appointment, 25% discount on APCs, recognition on journal masthead.\n\nSincerely,\nEditorial Office",
+        status: "Delivered"
+      }
+    ]
+  })
+
+  // Calculate sent today for Namecheap Safe Server Rate Meter (250/day safe ceiling)
+  const sentTodayCount = useMemo(() => {
+    const todayStr = new Date().toISOString().split("T")[0]
+    return sentEmailsHistory.filter(e => e.timestamp && e.timestamp.startsWith(todayStr)).length
+  }, [sentEmailsHistory])
+
   const [scoutResults, setScoutResults] = useState<any[]>([
     {
       name: "Prof. Hiroshi Tanaka",
@@ -271,7 +347,15 @@ export function JournalManagerWorkspace({
   const [scoutSelectedNames, setScoutSelectedNames] = useState<string[]>([])
   const [scoutSuccessMessage, setScoutSuccessMessage] = useState<string | null>(null)
 
-  const handleSearchScoutScholars = async (queryToSearch?: string) => {
+  const handleUpdateScholarEmail = (index: number, newEmail: string) => {
+    setScoutResults(prev => {
+      const copy = [...prev]
+      copy[index] = { ...copy[index], email: newEmail.trim() }
+      return copy
+    })
+  }
+
+  const handleSearchScoutScholars = async (queryToSearch?: string, pageToSearch = 1, limitToSearch = scoutLimit) => {
     const term = (queryToSearch !== undefined ? queryToSearch : scoutKeyword).trim()
     if (!term) return
     setIsScouting(true)
@@ -281,23 +365,17 @@ export function JournalManagerWorkspace({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customQuery: term,
-          journal: scoutTargetJournal
+          journal: scoutTargetJournal,
+          page: pageToSearch,
+          limit: limitToSearch
         })
       })
       if (res.ok) {
         const data = await res.json()
         if (data.reviewers && data.reviewers.length > 0) {
-          const normalized = data.reviewers.map((r: any) => {
-            const cleanName = (r.name || "Scholar").toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-            const emailUser = cleanName.length > 1 ? `${cleanName[0][0]}.${cleanName[cleanName.length - 1]}` : cleanName[0] || "scholar"
-            const cleanInst = (r.institution || "university").toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-            const emailDomain = cleanInst.length > 0 && cleanInst[0].length > 3 ? `${cleanInst[0]}.edu` : "research.org"
-            return {
-              ...r,
-              email: r.email || `${emailUser}@${emailDomain}`
-            }
-          })
-          setScoutResults(normalized)
+          setScoutResults(data.reviewers)
+          if (data.totalResults) setScoutTotalResults(data.totalResults)
+          setScoutPage(pageToSearch)
         }
       }
     } catch (err) {
@@ -320,25 +398,25 @@ export function JournalManagerWorkspace({
     let actionUrl = "https://www.scholarlyopen.org/editorial360"
 
     if (campaign === "call_for_papers") {
-      defaultSubject = `Call for Papers: Thematic Submission Invitation for ${journalName}`
+      defaultSubject = `Call for Papers: Founding Volume Submission Invitation for ${journalName}`
       actionLabel = "Submit Manuscript"
       actionUrl = "https://www.scholarlyopen.org/editorial360?action=submit"
-      defaultBody = `Dear ${scholarName},\n\nOn behalf of the editorial office of ${journalName}, we have followed your influential work in ${specialty} with great interest.\n\nWe are currently soliciting high-impact original research articles, reviews, and rapid communications for upcoming thematic issues. Given your significant contributions to the field, we would like to formally invite you and your research group to submit a manuscript.\n\nAuthors submitting under this invitation are granted:\n1. Expedited 14-day double-blind peer review.\n2. A 25% APC Waiver Grant applied automatically to your submission.\n3. Priority Crossref DOI registration and global indexing upon acceptance.\n\nPlease use the button below to submit your manuscript or review our author guidelines.\n\nSincerely,\nEditorial Office\n${journalName}`
+      defaultBody = `Dear ${scholarName},\n\nOn behalf of the editorial office of ${journalName}, we have followed your influential scholarship in ${specialty} with great admiration.\n\n${journalName} is currently assembling high-impact original research articles, reviews, and rapid communications for our Founding Inaugural Volume. This foundational issue is pivotal in securing international ISSN registration and establishing our baseline citation record for upcoming indexing applications (DOAJ, Crossref, and major bibliographic registries).\n\nIn alignment with our official APC & Waiver Policy:\n• Inaugural 50% Launch Discount: All accepted manuscripts in 2026 automatically receive a 50% fee discount across our entire portfolio.\n• Equitable Waivers: Authors from World Bank-classified low-income countries receive a 100% full fee waiver. Researchers without grant or institutional backing are eligible to apply for discretionary financial hardship waivers.\n• Rigorous Double-Blind Peer Review: Expedited initial decision target within 14 days.\n• Immediate Gold Open Access: Published under Creative Commons CC BY 4.0 with Crossref DOI registration upon acceptance.\n\nGiven your distinguished track record, we cordially invite you and your research team to contribute your latest findings to this founding milestone volume.\n\nPlease use the button below to review our author guidelines or submit your manuscript to our editorial desk.\n\nSincerely,\nJournal Management Office\n${journalName}\nScholarly Open Publishing Group`
     } else if (campaign === "ebm") {
       defaultSubject = `Invitation to Join the Editorial Board: ${journalName}`
       actionLabel = "Accept Editorial Board Invitation"
       actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_board&name=${encodeURIComponent(scholarName)}`
-      defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding scholarship and research leadership at ${institution} in ${specialty}, the Editorial Leadership of ${journalName} cordially invites you to join our distinguished Editorial Board as an Editorial Board Member (EBM).\n\nAs an Editorial Board Member, you will play a pivotal role in:\n- Guiding the journal's strategic scope and thematic special issues.\n- Recommending high-quality manuscripts and peer review standards.\n- Serving as an ambassador for open science and COPE publication ethics.\n\nYour appointment will be featured on the official journal masthead and indexed in our global editorial registry.\n\nWe would be honored by your acceptance.\n\nSincerely,\nEditorial Office\n${journalName}`
+      defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding scholarship and research leadership at ${institution} in ${specialty}, the Editorial Leadership of ${journalName} cordially invites you to join our distinguished Editorial Board as an Editorial Board Member (EBM).\n\nAs an Editorial Board Member, you will play a vital role in maintaining the journal's academic rigor and strategic direction.\nKey responsibilities include:\n• Providing expert, timely reviews for submitted manuscripts within your field (approximately 1–2 per quarter).\n• Upholding COPE publication ethics and academic integrity in all decisions.\n• Supporting the journal's scope, quality, and strategic development.\n• Promoting the journal and encouraging high-quality submissions through academic and professional networks.\n• Contributing your own high-quality scholarly work where appropriate.\n• Mentoring young scientists in the peer-review process.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead and web registry.\n\nWe would be honored by your acceptance.\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
     } else if (campaign === "eic") {
       defaultSubject = `Leadership Appointment: Invitation to Serve as Editor-in-Chief for ${journalName}`
       actionLabel = "Express Interest in Leadership Post"
       actionUrl = `https://www.scholarlyopen.org/editorial360?action=eic_inquiry&name=${encodeURIComponent(scholarName)}`
-      defaultBody = `Dear ${scholarName},\n\nThe Executive Publishing Board of Scholarly Open is currently seeking a visionary academic leader to serve as Editor-in-Chief (EiC) for ${journalName}.\n\nGiven your distinguished track record at ${institution} and international recognition in ${specialty}, the nominations committee has unanimously selected you as a leading candidate for this pivotal leadership post.\n\nThe Editor-in-Chief oversees journal editorial policy, appoints section editors, and shapes future research directions, supported by our full-service managing editorial team and automated Editorial360 infrastructure.\n\nWe would welcome an initial discussion regarding this appointment.\n\nSincerely,\nExecutive Editorial Committee\nScholarly Open`
+      defaultBody = `Dear ${scholarName},\n\nThe Executive Publishing Board of Scholarly Open is currently seeking a visionary academic leader to serve as Editor-in-Chief (EiC) for ${journalName}.\n\nGiven your distinguished track record at ${institution} and international recognition in ${specialty}, the nominations committee has unanimously selected you as a leading candidate for this pivotal leadership post.\n\nAs Editor-in-Chief, you will guide the strategic and editorial direction of the journal.\nKey responsibilities include:\n• Overseeing the peer-review process and making final decisions on manuscript acceptance.\n• Collaborating with the internal editorial office to uphold strict ethical standards and COPE academic integrity.\n• Leading journal development initiatives and proposing new strategic directions.\n• Serving as the primary ambassador for the journal within the academic community.\n• Encouraging high-quality submissions and contributing your own scholarly work where appropriate.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and permanent recognition on the journal masthead and web registry.\n\nWe would welcome an initial discussion regarding this appointment.\n\nSincerely,\nExecutive Editorial Committee\nScholarly Open Publishing Group`
     } else {
       defaultSubject = `Editorial Invitation: Associate Editor Appointment for ${journalName}`
       actionLabel = "Accept Associate Editor Role"
       actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ae&name=${encodeURIComponent(scholarName)}`
-      defaultBody = `Dear ${scholarName},\n\n${journalName} is expanding its editorial board to support increasing submission volumes in ${specialty}. We would be delighted to invite you to join us as an Associate Editor.\n\nIn this role, you will oversee peer review workflows for approximately 2–3 manuscripts per month within your domain, supported by our streamlined automated review tracker.\n\nPlease let us know if you would be willing to accept this appointment.\n\nSincerely,\nEditorial Office\n${journalName}`
+      defaultBody = `Dear ${scholarName},\n\n${journalName} is expanding its editorial leadership to support increasing submission volumes in ${specialty}. In recognition of your authoritative scholarship at ${institution}, we would be delighted to invite you to join us as an Associate Editor.\n\nIn this role, you will support the Editor-in-Chief by managing the peer-review process for assigned manuscripts within your domain (approximately 1–2 manuscripts per month).\nKey responsibilities include:\n• Managing the peer review process, including identifying and inviting qualified reviewers.\n• Evaluating reviewer reports and formulating detailed editorial recommendations.\n• Upholding ethical standards and academic integrity in all decisions.\n• Promoting the journal and encouraging high-quality submissions within your network.\n• Mentoring Early Career Editorial Board members through transparent co-reviewing.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead.\n\nPlease let us know if you would be delighted to accept this appointment.\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
     }
 
     openEmailDispatch({
@@ -362,6 +440,29 @@ export function JournalManagerWorkspace({
             journal: journalName
           })
         }).catch(e => console.error(e))
+
+        // Save into sent history log
+        const sentRecord: SentEmailRecord = {
+          id: `SENT-${Date.now().toString().slice(-4)}`,
+          timestamp: new Date().toISOString(),
+          recipientName: scholarName,
+          recipientEmail: data.recipientEmail,
+          journal: journalName,
+          campaignType: campaign,
+          subject: data.subject,
+          body: data.renderedHtml || data.body || "",
+          status: "Delivered"
+        }
+
+        setSentEmailsHistory(prev => {
+          const next = [sentRecord, ...prev]
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(next))
+            } catch (e) {}
+          }
+          return next
+        })
 
         setScoutSuccessMessage(`✓ Official invitation for ${scholarName} (${campaign.replace(/_/g, ' ').toUpperCase()}) dispatched to ${data.recipientEmail}.`)
         setTimeout(() => setScoutSuccessMessage(null), 7000)
@@ -1607,8 +1708,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {activeTab === "scout" && (
         <div className="space-y-5 animate-in fade-in duration-200">
           
-          {/* Header Banner */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs relative overflow-hidden">
+          {/* Header Banner & Namecheap SMTP Safety Rail */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs relative overflow-hidden space-y-4">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0077cc]" />
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
               <div className="space-y-1.5">
@@ -1621,21 +1722,82 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <CheckCircle2 className="h-3 w-3 text-emerald-600" />
                     OpenAlex 250M+ Scholarly Graph Connected
                   </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
+                    <Server className="h-3 w-3 text-slate-500" />
+                    Namecheap SMTP Rail Active
+                  </span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                   Academic Talent Discovery & Editorial Outreach
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-3xl leading-relaxed">
-                  Search global active researchers by keyword to extract names, verified institutional affiliations, publication metrics, and contact emails. Directly recruit for Call for Papers, Editorial Board Members (EBMs), Editors-in-Chief (EiCs), or Associate Editors.
+                  Extract global active scholars with verified affiliations, citation metrics, and institutional emails. Directly invite for Call for Papers (Founding Volume for ISSN milestone & launch discounts), Editorial Board Members (EBMs), Editors-in-Chief (EiCs), or Associate Editors.
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Found Scholars</span>
-                  <span className="text-lg font-bold text-slate-900 dark:text-white tabular-nums">{scoutResults.length} Active</span>
+              {/* Namecheap Server Daily Safe Quota Meter */}
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 min-w-[260px] space-y-2 shrink-0">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Server className="h-3.5 w-3.5 text-[#0b99ff]" />
+                    Namecheap SMTP Safety Meter
+                  </span>
+                  <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded-md ${
+                    sentTodayCount > 200 ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300" :
+                    sentTodayCount > 120 ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" :
+                    "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
+                  }`}>
+                    {sentTodayCount} / 250 Daily
+                  </span>
                 </div>
+                <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 ${
+                      sentTodayCount > 200 ? "bg-rose-500" :
+                      sentTodayCount > 120 ? "bg-amber-500" :
+                      "bg-emerald-500"
+                    }`}
+                    style={{ width: `${Math.min(100, Math.max(4, Math.round((sentTodayCount / 250) * 100)))}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                  {sentTodayCount < 200 
+                    ? "Safe rate rail: prevents Namecheap server throttling and spam blacklisting."
+                    : "Caution: Approaching Namecheap daily threshold of 250 emails/day."}
+                </p>
               </div>
+            </div>
+
+            {/* Sub-tab Navigation (Finder vs History Log) */}
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setScoutSubTab("finder")}
+                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2 ${
+                  scoutSubTab === "finder"
+                    ? "bg-[#0b99ff] text-white shadow-xs"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <Compass className="h-4 w-4" />
+                <span>Scholar Lead Finder</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setScoutSubTab("history")}
+                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2 ${
+                  scoutSubTab === "history"
+                    ? "bg-[#0b99ff] text-white shadow-xs"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <History className="h-4 w-4" />
+                <span>Sent Outreach History & Audit Log</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 dark:bg-white/10 font-mono">
+                  {sentEmailsHistory.length}
+                </span>
+              </button>
             </div>
           </div>
 
@@ -1650,231 +1812,536 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           )}
 
-          {/* Search & Campaign Control Suite */}
-          <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-5 shadow-xs space-y-4">
-            
-            {/* Top Row: Search Input & Journal Select */}
-            <div className="flex flex-col md:flex-row items-center gap-3">
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={scoutKeyword}
-                  onChange={(e) => setScoutKeyword(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      handleSearchScoutScholars()
-                    }
-                  }}
-                  placeholder="Enter research topic, keywords or scholar name (e.g. Oncology, Silicon Anodes, CRISPR)..."
-                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                />
-              </div>
+          {/* ===================== SUBTAB 1: SCHOLAR LEAD FINDER ===================== */}
+          {scoutSubTab === "finder" && (
+            <>
+              {/* Search & Campaign Control Suite */}
+              <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-5 shadow-xs space-y-4">
+                
+                {/* Top Row: Search Input + 13 Official Journals Dropdown + Page Size Limit */}
+                <div className="flex flex-col md:flex-row items-center gap-3">
+                  <div className="relative flex-1 w-full">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={scoutKeyword}
+                      onChange={(e) => setScoutKeyword(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          handleSearchScoutScholars()
+                        }
+                      }}
+                      placeholder="Enter research topic, keywords or scholar name (e.g. Oncology, Silicon Anodes, CRISPR)..."
+                      className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                    />
+                  </div>
 
-              <div className="w-full md:w-64 shrink-0">
-                <select
-                  value={scoutTargetJournal}
-                  onChange={(e) => setScoutTargetJournal(e.target.value)}
-                  className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                >
-                  <option value="all">All Journals</option>
-                  <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
-                  <option value="Engineering & Applied Sciences">Engineering & Applied Sciences</option>
-                  <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
-                  <option value="Decarbonization & Carbon Tech">Decarbonization & Carbon Tech</option>
-                </select>
-              </div>
+                  {/* 13 Official Journals Dropdown */}
+                  <div className="w-full md:w-80 shrink-0">
+                    <select
+                      value={scoutTargetJournal}
+                      onChange={(e) => setScoutTargetJournal(e.target.value)}
+                      className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    >
+                      <option value="all">All Journals (General Portfolio)</option>
+                      <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences & Humanities</option>
+                      <option value="Scholarly Open: Biology & Life Sciences">Scholarly Open: Biology & Life Sciences</option>
+                      <option value="Scholarly Open: Chemistry & Materials Science">Scholarly Open: Chemistry & Materials Science</option>
+                      <option value="Scholarly Open: Medicine & Health Sciences">Scholarly Open: Medicine & Health Sciences</option>
+                      <option value="Scholarly Open: Data Science & Artificial Intelligence">Scholarly Open: Data Science & Artificial Intelligence</option>
+                      <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering & Applied Sciences</option>
+                      <option value="Scholarly Open: Environmental Science & Sustainability">Scholarly Open: Environmental Science & Sustainability</option>
+                      <option value="Scholarly Open: Clinical AI & Digital Health">Scholarly Open: Clinical AI & Digital Health</option>
+                      <option value="Scholarly Open: AI Safety & Governance">Scholarly Open: AI Safety & Governance</option>
+                      <option value="Scholarly Open: Decarbonization & Carbon Tech">Scholarly Open: Decarbonization & Carbon Tech</option>
+                      <option value="Scholarly Open: Quantum Engineering">Scholarly Open: Quantum Engineering</option>
+                      <option value="Scholarly Open: Synthetic Biology & Bio-Design">Scholarly Open: Synthetic Biology & Bio-Design</option>
+                      <option value="Scholarly Open: Space Resources & Orbital Economy">Scholarly Open: Space Resources & Orbital Economy</option>
+                    </select>
+                  </div>
 
-              <Button
-                type="button"
-                disabled={isScouting}
-                onClick={() => handleSearchScoutScholars()}
-                className="w-full md:w-auto bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-10 px-5 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
-              >
-                {isScouting ? (
-                  <>
-                    <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Scouting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search className="h-3.5 w-3.5" />
-                    <span>Extract Scholars</span>
-                  </>
-                )}
-              </Button>
-            </div>
+                  {/* Search Limit Dropdown */}
+                  <div className="w-full md:w-32 shrink-0">
+                    <select
+                      value={scoutLimit}
+                      onChange={(e) => {
+                        const newLimit = parseInt(e.target.value, 10)
+                        setScoutLimit(newLimit)
+                        handleSearchScoutScholars(undefined, 1, newLimit)
+                      }}
+                      className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                      title="Result batch limit per search"
+                    >
+                      <option value="10">10 per page</option>
+                      <option value="25">25 per page</option>
+                      <option value="50">50 per page</option>
+                      <option value="100">100 per page</option>
+                    </select>
+                  </div>
 
-            {/* Quick Topic Chips */}
-            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">Popular:</span>
-              {[
-                "Cardiology & Tele-health",
-                "Battery Materials & Electrochemistry",
-                "AI Diagnostics & Medical Imaging",
-                "Climate Economics & Urban Policy",
-                "Quantum Cryptography & Security",
-                "CRISPR & Gene Therapy"
-              ].map((topic) => (
-                <button
-                  key={topic}
-                  type="button"
-                  onClick={() => {
-                    setScoutKeyword(topic)
-                    handleSearchScoutScholars(topic)
-                  }}
-                  className="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
-                >
-                  {topic}
-                </button>
-              ))}
-            </div>
-
-            {/* Campaign Selector Tabs */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white block">
-                    Select Outreach Campaign Purpose:
-                  </span>
-                  <span className="text-[11px] text-slate-500">
-                    Dispatched invitations will automatically adapt to the chosen editorial role.
-                  </span>
+                  <Button
+                    type="button"
+                    disabled={isScouting}
+                    onClick={() => handleSearchScoutScholars()}
+                    className="w-full md:w-auto bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-10 px-5 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
+                  >
+                    {isScouting ? (
+                      <>
+                        <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Extracting Scholars...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Search className="h-3.5 w-3.5" />
+                        <span>Extract Scholars</span>
+                      </>
+                    )}
+                  </Button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 gap-1">
+                {/* Quick Topic Chips */}
+                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">Popular:</span>
                   {[
-                    { id: "call_for_papers", label: "Call for Papers", icon: FileText, badge: "25% Waiver" },
-                    { id: "ebm", label: "Editorial Board (EBM)", icon: Users, badge: "Masthead" },
-                    { id: "eic", label: "Editor-in-Chief (EiC)", icon: Award, badge: "Lead" },
-                    { id: "associate_editor", label: "Associate Editor", icon: BookOpen, badge: "Section" },
-                  ].map((c) => {
-                    const isSelected = scoutCampaignType === c.id
-                    const IconComp = c.icon
-                    return (
+                    "Cardiology & Tele-health",
+                    "Battery Materials & Electrochemistry",
+                    "AI Diagnostics & Medical Imaging",
+                    "Climate Economics & Urban Policy",
+                    "Quantum Cryptography & Security",
+                    "CRISPR & Gene Therapy",
+                    "Space Propulsion & Orbital Economy"
+                  ].map((topic) => (
+                    <button
+                      key={topic}
+                      type="button"
+                      onClick={() => {
+                        setScoutKeyword(topic)
+                        handleSearchScoutScholars(topic)
+                      }}
+                      className="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Campaign Selector Tabs */}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                        Select Outreach Campaign Purpose:
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        Dispatched invitations strictly adhere to Scholarly Open&apos;s APC &amp; Waiver Policy and official editorial terms.
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 gap-1">
+                      {[
+                        { id: "call_for_papers", label: "Call for Papers", icon: FileText, badge: "Founding Vol · 50% Launch Discount" },
+                        { id: "ebm", label: "Editorial Board (EBM)", icon: Users, badge: "2-Yr · 25% APC Discount" },
+                        { id: "eic", label: "Editor-in-Chief (EiC)", icon: Award, badge: "Leadership · 25% APC Discount" },
+                        { id: "associate_editor", label: "Associate Editor", icon: BookOpen, badge: "Section · 25% APC Discount" },
+                      ].map((c) => {
+                        const isSelected = scoutCampaignType === c.id
+                        const IconComp = c.icon
+                        return (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setScoutCampaignType(c.id as any)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 justify-center ${
+                              isSelected
+                                ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs border border-slate-200 dark:border-slate-700 font-bold"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                          >
+                            <IconComp className="h-3.5 w-3.5" />
+                            <span>{c.label}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Results Section with View Mode Switcher (List vs Cards) */}
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      Verified Scholar Candidates ({scoutResults.length})
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      Topic: &ldquo;{scoutKeyword}&rdquo;
+                    </span>
+                    <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      OpenAlex &amp; ROR Verified
+                    </span>
+                  </div>
+
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-slate-400 font-medium">View:</span>
+                    <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                       <button
-                        key={c.id}
                         type="button"
-                        onClick={() => setScoutCampaignType(c.id as any)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 justify-center ${
-                          isSelected
-                            ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs border border-slate-200 dark:border-slate-700"
-                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        onClick={() => setScoutViewMode("list")}
+                        className={`px-2.5 py-1 text-xs rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          scoutViewMode === "list"
+                            ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                       >
-                        <IconComp className="h-3.5 w-3.5" />
-                        <span>{c.label}</span>
+                        <List className="h-3.5 w-3.5" />
+                        <span>List / Table</span>
                       </button>
-                    )
-                  })}
+                      <button
+                        type="button"
+                        onClick={() => setScoutViewMode("cards")}
+                        className={`px-2.5 py-1 text-xs rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          scoutViewMode === "cards"
+                            ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        <Kanban className="h-3.5 w-3.5" />
+                        <span>Cards</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {scoutResults.length === 0 ? (
+                  <Card className="p-12 text-center bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] rounded-2xl space-y-3">
+                    <Compass className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto" />
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No scholars found for this query</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Try broader research keywords such as &ldquo;cardiology&rdquo;, &ldquo;materials&rdquo;, &ldquo;artificial intelligence&rdquo;, or &ldquo;energy&rdquo;.
+                    </p>
+                  </Card>
+                ) : scoutViewMode === "list" ? (
+                  /* ================= HIGH-DENSITY LIST / TABLE VIEW ================= */
+                  <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th className="py-3 px-4 min-w-[220px]">Scholar &amp; Institution</th>
+                            <th className="py-3 px-3 min-w-[170px]">Academic Profile &amp; ORCID</th>
+                            <th className="py-3 px-3 min-w-[240px]">Specialty &amp; Editorial Rationale</th>
+                            <th className="py-3 px-3 min-w-[210px]">Verified Email (Editable)</th>
+                            <th className="py-3 px-4 text-right min-w-[140px]">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                          {scoutResults.map((scholar, idx) => {
+                            const campaignLabel = 
+                              scoutCampaignType === "call_for_papers" ? "Send CFP" :
+                              scoutCampaignType === "ebm" ? "Invite EBM" :
+                              scoutCampaignType === "eic" ? "Nominate EiC" : "Invite AE"
+
+                            const cleanOrcid = (scholar.orcid || "").replace(/^https?:\/\/orcid\.org\//, "")
+
+                            return (
+                              <tr 
+                                key={idx}
+                                className="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors"
+                              >
+                                {/* Scholar & Institution */}
+                                <td className="py-3.5 px-4 align-top">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-bold text-slate-900 dark:text-white">
+                                        {scholar.name}
+                                      </span>
+                                      {scholar.country && (
+                                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                          {scholar.country}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                      {scholar.institution}
+                                    </p>
+                                  </div>
+                                </td>
+
+                                {/* Academic Profile & ORCID */}
+                                <td className="py-3.5 px-3 align-top">
+                                  <div className="space-y-1.5">
+                                    {cleanOrcid ? (
+                                      <a
+                                        href={`https://orcid.org/${cleanOrcid}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors"
+                                      >
+                                        <span className="font-bold bg-[#A6CE39] text-white px-1 rounded text-[9px]">iD</span>
+                                        <span>{cleanOrcid}</span>
+                                        <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                                      </a>
+                                    ) : (
+                                      <span className="text-[10px] text-slate-400 italic">No ORCID listed</span>
+                                    )}
+                                    <div className="text-[11px] font-semibold text-[#0b99ff]">
+                                      {scholar.metrics || "Active Researcher"}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* Specialty & Rationale */}
+                                <td className="py-3.5 px-3 align-top">
+                                  <div className="space-y-1">
+                                    <p className="font-medium text-slate-800 dark:text-slate-200 line-clamp-2 leading-relaxed">
+                                      {scholar.specialty}
+                                    </p>
+                                    {scholar.editorialRationale && (
+                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 italic line-clamp-2 leading-snug">
+                                        &ldquo;{scholar.editorialRationale}&rdquo;
+                                      </p>
+                                    )}
+                                  </div>
+                                </td>
+
+                                {/* Verified Email (Editable In-Place) */}
+                                <td className="py-3.5 px-3 align-top">
+                                  <div className="space-y-1">
+                                    <div className="relative">
+                                      <input
+                                        type="email"
+                                        value={scholar.email || ""}
+                                        onChange={(e) => handleUpdateScholarEmail(idx, e.target.value)}
+                                        placeholder="scholar@university.edu"
+                                        className="w-full text-[11px] font-mono pl-2 pr-6 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                        title="Click to edit or correct email address"
+                                      />
+                                      <Edit3 className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400 pointer-events-none" />
+                                    </div>
+                                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-0.5">
+                                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                        <CheckCircle2 className="h-2.5 w-2.5" />
+                                        Verified Rail
+                                      </span>
+                                      <span>Click to edit</span>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* Quick Action */}
+                                <td className="py-3.5 px-4 align-top text-right">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3 rounded-lg cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                                  >
+                                    <Send className="h-3 w-3" />
+                                    <span>{campaignLabel}</span>
+                                  </Button>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                ) : (
+                  /* ================= CARDS GRID VIEW ================= */
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {scoutResults.map((scholar, idx) => {
+                      const campaignLabel = 
+                        scoutCampaignType === "call_for_papers" ? "Invite to Submit Paper" :
+                        scoutCampaignType === "ebm" ? "Invite as EBM" :
+                        scoutCampaignType === "eic" ? "Nominate as EiC" : "Invite as Associate Editor"
+
+                      const cleanOrcid = (scholar.orcid || "").replace(/^https?:\/\/orcid\.org\//, "")
+
+                      return (
+                        <Card 
+                          key={idx}
+                          className="p-4 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs flex flex-col justify-between space-y-3.5 hover:border-slate-300"
+                        >
+                          <div className="space-y-2.5">
+                            {/* Header: Name + ORCID */}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="space-y-0.5 min-w-0 flex-1">
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                  {scholar.name}
+                                </h4>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1" title={scholar.institution}>
+                                  {scholar.institution}
+                                </p>
+                              </div>
+                              {cleanOrcid && (
+                                <a
+                                  href={`https://orcid.org/${cleanOrcid}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0"
+                                >
+                                  <span className="font-bold bg-[#A6CE39] text-white px-1 rounded text-[9px]">iD</span>
+                                  <span>{cleanOrcid}</span>
+                                </a>
+                              )}
+                            </div>
+
+                            {/* Specialty Tags */}
+                            <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 space-y-1">
+                              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Domain &amp; Metrics:</span>
+                              <p className="text-xs font-medium text-slate-700 dark:text-slate-300 line-clamp-2">
+                                {scholar.specialty}
+                              </p>
+                              <div className="text-[11px] font-semibold text-[#0b99ff] pt-0.5">
+                                {scholar.metrics || "Active Researcher"}
+                              </div>
+                            </div>
+
+                            {/* Verified Contact Email (Editable) */}
+                            <div className="space-y-1">
+                              <div className="relative">
+                                <input
+                                  type="email"
+                                  value={scholar.email || ""}
+                                  onChange={(e) => handleUpdateScholarEmail(idx, e.target.value)}
+                                  className="w-full text-xs font-mono pl-3 pr-7 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                                />
+                                <Edit3 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                              </div>
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block px-1">
+                                ✓ ROR Verified Domain
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Card Action Button */}
+                          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-medium text-slate-400">
+                              {scholar.country ? `${scholar.country} · ` : ""}COPE Vetted
+                            </span>
+                            <Button
+                              size="sm"
+                              onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                            >
+                              <Send className="h-3 w-3" />
+                              <span>{campaignLabel}</span>
+                            </Button>
+                          </div>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* ===================== SUBTAB 2: SENT EMAILS HISTORY AUDIT LOG ===================== */}
+          {scoutSubTab === "history" && (
+            <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <History className="h-4 w-4 text-[#0b99ff]" />
+                    Sent Outreach History &amp; Dispatch Audit Log
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Immutable tracking record of all recruitment and Call for Papers emails sent via Editorial360.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 font-medium">
+                    Total Dispatched: <strong className="text-slate-900 dark:text-white font-mono">{sentEmailsHistory.length}</strong>
+                  </span>
                 </div>
               </div>
-            </div>
-          </Card>
 
-          {/* Results Grid */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-900 dark:text-white">
-                  Verified Scholar Candidates ({scoutResults.length})
-                </span>
-                <span className="text-[11px] text-slate-400">
-                  Topic: &ldquo;{scoutKeyword}&rdquo;
-                </span>
-              </div>
-              <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                100% Institutional Affiliations & Citations Vetted
-              </span>
-            </div>
+              {sentEmailsHistory.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 text-xs">
+                  No outreach emails dispatched yet. Search candidates and send invitations to populate this audit log.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        <th className="py-3 px-4 min-w-[140px]">Date / Time</th>
+                        <th className="py-3 px-4 min-w-[180px]">Recipient Scholar</th>
+                        <th className="py-3 px-4 min-w-[200px]">Journal Desk</th>
+                        <th className="py-3 px-3 min-w-[130px]">Campaign Type</th>
+                        <th className="py-3 px-4 min-w-[220px]">Subject</th>
+                        <th className="py-3 px-3 min-w-[90px]">Status</th>
+                        <th className="py-3 px-4 text-right min-w-[100px]">View</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                      {sentEmailsHistory.map((record) => {
+                        const dateFormatted = record.timestamp 
+                          ? new Date(record.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                          : "Recent"
 
-            {scoutResults.length === 0 ? (
-              <Card className="p-12 text-center bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] rounded-2xl space-y-3">
-                <Compass className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto" />
-                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No scholars found for this query</h4>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Try broader research keywords such as &ldquo;cardiology&rdquo;, &ldquo;materials&rdquo;, &ldquo;artificial intelligence&rdquo;, or &ldquo;energy&rdquo;.
-                </p>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {scoutResults.map((scholar, idx) => {
-                  const isChecked = scoutSelectedNames.includes(scholar.name)
-                  const campaignLabel = 
-                    scoutCampaignType === "call_for_papers" ? "Invite to Submit Paper" :
-                    scoutCampaignType === "ebm" ? "Invite as EBM" :
-                    scoutCampaignType === "eic" ? "Nominate as EiC" : "Invite as Associate Editor"
-
-                  return (
-                    <Card 
-                      key={idx}
-                      className={`p-4 bg-white dark:bg-[#18191e] border rounded-2xl transition-all shadow-xs flex flex-col justify-between space-y-3.5 ${
-                        isChecked ? "border-[#0b99ff] ring-1 ring-[#0b99ff]/30" : "border-slate-200/90 dark:border-[#272832] hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="space-y-2.5">
-                        {/* Header: Name + ORCID */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="space-y-0.5 min-w-0 flex-1">
-                            <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                              {scholar.name}
-                            </h4>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1" title={scholar.institution}>
-                              {scholar.institution}
-                            </p>
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
-                            <span className="font-bold bg-[#A6CE39] text-white px-1 rounded text-[9px]">iD</span>
-                            {scholar.orcid || "0000-0002-8812-4419"}
-                          </span>
-                        </div>
-
-                        {/* Specialty Tags */}
-                        <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 space-y-1">
-                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Domain & Metrics:</span>
-                          <p className="text-xs font-medium text-slate-700 dark:text-slate-300 line-clamp-2">
-                            {scholar.specialty}
-                          </p>
-                          <div className="text-[11px] font-semibold text-[#0b99ff] pt-0.5">
-                            {scholar.metrics || "35 papers · 1,200 citations"}
-                          </div>
-                        </div>
-
-                        {/* Verified Contact Email */}
-                        <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
-                          <div className="flex items-center gap-1.5 truncate">
-                            <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            <span className="text-slate-600 dark:text-slate-400 font-mono text-[11px] truncate">
-                              {scholar.email || "scholar@university.edu"}
-                            </span>
-                          </div>
-                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.2 rounded shrink-0">
-                            Verified
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Card Action Button */}
-                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-medium text-slate-400">
-                          {scholar.country ? `${scholar.country} · ` : ""}COPE Vetted
-                        </span>
-                        <Button
-                          size="sm"
-                          onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
-                          className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                        >
-                          <Send className="h-3 w-3" />
-                          <span>{campaignLabel}</span>
-                        </Button>
-                      </div>
-                    </Card>
-                  )
-                })}
-              </div>
-            )}
-          </div>
+                        return (
+                          <tr key={record.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors">
+                            <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
+                              {dateFormatted}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="space-y-0.5">
+                                <span className="font-bold text-slate-900 dark:text-white block">
+                                  {record.recipientName}
+                                </span>
+                                <span className="text-[11px] font-mono text-slate-500 truncate block">
+                                  {record.recipientEmail}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
+                              {record.journal}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                                record.campaignType === "call_for_papers" ? "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200 dark:border-sky-800" :
+                                record.campaignType === "eic" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800" :
+                                record.campaignType === "ebm" ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800" :
+                                "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                              }`}>
+                                {record.campaignType.replace(/_/g, " ")}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-slate-600 dark:text-slate-300 truncate max-w-[240px]" title={record.subject}>
+                              {record.subject}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                                <Check className="h-3 w-3 text-emerald-600" />
+                                {record.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setViewingHistoryEmail(record)}
+                                className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                View
+                              </Button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Card>
+          )}
 
         </div>
       )}
@@ -5000,6 +5467,68 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
       {/* Review & Edit Email Dispatch Dialog */}
       <EmailDispatchDialog language={language} config={dispatchDialogConfig} />
+
+      {/* Sent Email History Record Viewer Modal */}
+      <Dialog open={!!viewingHistoryEmail} onOpenChange={(open) => !open && setViewingHistoryEmail(null)}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl">
+          {viewingHistoryEmail && (
+            <div className="space-y-4">
+              <DialogHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-50 text-[#0b99ff] dark:bg-sky-950/50 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                    {viewingHistoryEmail.campaignType.replace(/_/g, " ")}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {viewingHistoryEmail.id}
+                  </span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    <Check className="h-2.5 w-2.5" />
+                    {viewingHistoryEmail.status}
+                  </span>
+                </div>
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white leading-snug">
+                  {viewingHistoryEmail.subject}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                  Dispatched to {viewingHistoryEmail.recipientName} ({viewingHistoryEmail.recipientEmail}) on{" "}
+                  {new Date(viewingHistoryEmail.timestamp).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Target Journal:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{viewingHistoryEmail.journal}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Recipient Email:</span>
+                  <span className="font-mono text-slate-700 dark:text-slate-300">{viewingHistoryEmail.recipientEmail}</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 max-h-[350px] overflow-y-auto space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                  Dispatched Email Content:
+                </span>
+                <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
+                  {viewingHistoryEmail.body}
+                </div>
+              </div>
+
+              <DialogFooter className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewingHistoryEmail(null)}
+                  className="text-xs font-semibold h-8 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </div>
   )

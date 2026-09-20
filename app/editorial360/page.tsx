@@ -1642,6 +1642,11 @@ export default function Editorial360Page() {
   const [rightsAgreementChecked, setRightsAgreementChecked] = useState<boolean>(true)
   const [isRevisionDialogOpen, setIsRevisionDialogOpen] = useState<boolean>(false)
   const [revisionPaperId, setRevisionPaperId] = useState("")
+  const [revisionFile, setRevisionFile] = useState<File | null>(null)
+  const [revisionFileName, setRevisionFileName] = useState<string>("")
+  const [revisionFileSize, setRevisionFileSize] = useState<string>("")
+  const [revisionRebuttal, setRevisionRebuttal] = useState<string>("")
+  const revisionFileInputRef = useRef<HTMLInputElement>(null)
   
   const [isInviteUserOpen, setIsInviteUserOpen] = useState(false)
   const [inviteName, setInviteName] = useState("")
@@ -2582,8 +2587,15 @@ export default function Editorial360Page() {
   }
 
   const handleUploadRevision = () => {
+    const finalFileName = revisionFileName || "Revised_Manuscript_V2.pdf"
+    const finalFileSize = revisionFileSize || "2.8 MB"
     setManuscripts(prev => {
-      const updated: Manuscript[] = prev.map(m => m.id === revisionPaperId ? { ...m, status: "Revision Under Evaluation" as const } : m)
+      const updated: Manuscript[] = prev.map(m => m.id === revisionPaperId ? { 
+        ...m, 
+        status: "Revision Under Evaluation" as const,
+        fileName: finalFileName,
+        fileSize: finalFileSize
+      } : m)
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
@@ -2593,7 +2605,13 @@ export default function Editorial360Page() {
       }
       return updated
     })
+    setSuccess(language === "de" 
+      ? `Überarbeitetes Manuskript "${finalFileName}" erfolgreich eingereicht!`
+      : `Revised manuscript "${finalFileName}" and rebuttal successfully submitted to Editorial Office!`
+    )
     setIsRevisionDialogOpen(false)
+    setRevisionFile(null)
+    setRevisionRebuttal("")
   }
 
   const onTriggerUploadRevision = () => {
@@ -9293,15 +9311,58 @@ export default function Editorial360Page() {
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Point-by-point Response Letter</label>
                   <textarea
                     rows={4}
+                    value={revisionRebuttal}
+                    onChange={(e) => setRevisionRebuttal(e.target.value)}
                     className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-none"
                     placeholder="Briefly state modifications made in response to reviewers..."
                   />
                 </div>
                 
-                <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg p-6 bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center cursor-pointer hover:border-[#0b99ff]">
-                  <FileText className="h-8 w-8 text-[#0b99ff] mb-2" />
-                  <span className="text-xs font-bold text-slate-650 dark:text-slate-300">Select revised PDF manuscript</span>
-                  <span className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">draft_revised_V2.pdf</span>
+                {/* Hidden File Input for Revision Upload */}
+                <input
+                  type="file"
+                  ref={revisionFileInputRef}
+                  accept=".pdf,.docx,.doc"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setRevisionFile(file)
+                      setRevisionFileName(file.name)
+                      setRevisionFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
+                    }
+                  }}
+                />
+
+                <div 
+                  onClick={() => revisionFileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                    revisionFile 
+                      ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
+                      : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-[#0b99ff] hover:bg-sky-50/30"
+                  }`}
+                >
+                  {revisionFile ? (
+                    <>
+                      <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400 mb-1.5 animate-in zoom-in-50" />
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                        {revisionFileName}
+                      </span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                        {revisionFileSize} · Ready for Submission (Click to replace)
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-8 w-8 text-[#0b99ff] mb-1.5" />
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                        Select revised PDF manuscript
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                        PDF, DOCX up to 25MB (Click to browse file)
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
