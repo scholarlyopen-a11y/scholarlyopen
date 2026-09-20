@@ -21,6 +21,7 @@ import {
   Send, 
   AlertTriangle, 
   Cpu, 
+  Compass,
   BarChart3, 
   Settings, 
   ShieldAlert, 
@@ -4864,6 +4865,19 @@ export default function Editorial360Page() {
                       >
                         <LayoutDashboard className="h-4 w-4" />
                         {language === "de" ? "Einreichungs-Pipeline" : "Submissions Pipeline"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveJmTab("scout")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "scout"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
+                        }`}
+                      >
+                        <Compass className="h-4 w-4 text-[#0b99ff]" />
+                        <span>Scholar Scout</span>
                       </button>
 
                       <button 

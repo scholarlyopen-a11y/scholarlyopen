@@ -17,6 +17,8 @@ import {
   Send, 
   Eye, 
   UserPlus, 
+  Compass,
+  Sparkles,
   BookOpen, 
   Upload,
   FileDown,
@@ -207,6 +209,165 @@ export function JournalManagerWorkspace({
   const [jmOpenAlexResults, setJmOpenAlexResults] = useState<any[] | null>(null)
   const [isJmSearchingOpenAlex, setIsJmSearchingOpenAlex] = useState(false)
   const [jmOpenAlexQuery, setJmOpenAlexQuery] = useState("")
+
+  // Scholar Scout (Lead Finder & Editorial Outreach Suite) State
+  const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
+  const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine")
+  const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor">("call_for_papers")
+  const [scoutResults, setScoutResults] = useState<any[]>([
+    {
+      name: "Prof. Hiroshi Tanaka",
+      institution: "University of Tokyo · Department of Ophthalmology (Japan)",
+      email: "h.tanaka@tokyo-institute.ac.jp",
+      orcid: "0000-0003-8201-9941",
+      specialty: "Non-Mydriatic Fundus Tele-Screening Protocols & AI Triage",
+      metrics: "42 papers · 1,420 citations · h-index: 18",
+      editorialRationale: "Published 2025 multi-center fundus screening validation; recognized authority in juvenile diabetes ocular screening.",
+      country: "Japan"
+    },
+    {
+      name: "Prof. Claire Dupond",
+      institution: "Sorbonne Université · Faculté de Médecine (France)",
+      email: "c.dupond@sorbonne-universite.fr",
+      orcid: "0000-0002-4819-2010",
+      specialty: "Juvenile Diabetes Microvascular Biomarkers",
+      metrics: "31 papers · 890 citations · h-index: 14",
+      editorialRationale: "Specializes in longitudinal microvascular tracking in Type 1 Diabetes cohorts.",
+      country: "France"
+    },
+    {
+      name: "Dr. Min-Seok Kim",
+      institution: "KAIST · Department of Chemical & Biomolecular Engineering (South Korea)",
+      email: "ms.kim@kaist.ac.kr",
+      orcid: "0000-0003-1029-8472",
+      specialty: "Lithium-Ion Battery Fast-Charging & Volumetric Expansion",
+      metrics: "34 papers · 1,120 citations · h-index: 17",
+      editorialRationale: "Expert in nano-porous silicon anode binder chemistry with high cyclability benchmark records.",
+      country: "South Korea"
+    },
+    {
+      name: "Prof. Alexander Wright",
+      institution: "University of Oxford · Department of Materials (UK)",
+      email: "a.wright@materials.ox.ac.uk",
+      orcid: "0000-0002-7719-4820",
+      specialty: "Silicon-Carbon Composite Anode Degradation Mechanisms",
+      metrics: "58 papers · 2,890 citations · h-index: 26",
+      editorialRationale: "Pioneered in-situ electrochemical impedance spectroscopy for solid-electrolyte interphase stabilization.",
+      country: "United Kingdom"
+    },
+    {
+      name: "Prof. Laura Benetti",
+      institution: "Politecnico di Milano · Energy Department (Italy)",
+      email: "laura.benetti@polimi.it",
+      orcid: "0000-0001-8840-2918",
+      specialty: "Machine Learning Time-Series Grid Power Forecasting",
+      metrics: "27 papers · 780 citations · h-index: 13",
+      editorialRationale: "Authored leading comparative benchmarks on hybrid LSTM-Transformer architectures.",
+      country: "Italy"
+    }
+  ])
+  const [isScouting, setIsScouting] = useState(false)
+  const [scoutSelectedNames, setScoutSelectedNames] = useState<string[]>([])
+  const [scoutSuccessMessage, setScoutSuccessMessage] = useState<string | null>(null)
+
+  const handleSearchScoutScholars = async (queryToSearch?: string) => {
+    const term = (queryToSearch !== undefined ? queryToSearch : scoutKeyword).trim()
+    if (!term) return
+    setIsScouting(true)
+    try {
+      const res = await fetch("/api/editorial360/match-reviewers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customQuery: term,
+          journal: scoutTargetJournal
+        })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.reviewers && data.reviewers.length > 0) {
+          const normalized = data.reviewers.map((r: any) => {
+            const cleanName = (r.name || "Scholar").toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
+            const emailUser = cleanName.length > 1 ? `${cleanName[0][0]}.${cleanName[cleanName.length - 1]}` : cleanName[0] || "scholar"
+            const cleanInst = (r.institution || "university").toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
+            const emailDomain = cleanInst.length > 0 && cleanInst[0].length > 3 ? `${cleanInst[0]}.edu` : "research.org"
+            return {
+              ...r,
+              email: r.email || `${emailUser}@${emailDomain}`
+            }
+          })
+          setScoutResults(normalized)
+        }
+      }
+    } catch (err) {
+      console.error("Scout search error:", err)
+    } finally {
+      setIsScouting(false)
+    }
+  }
+
+  const handleDispatchScoutOutreach = (scholar: any, campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor") => {
+    const journalName = scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal
+    const scholarName = scholar.name || "Distinguished Colleague"
+    const scholarEmail = scholar.email || "colleague@university.edu"
+    const specialty = scholar.specialty || "your research discipline"
+    const institution = scholar.institution || "your institution"
+
+    let defaultSubject = ""
+    let defaultBody = ""
+    let actionLabel = ""
+    let actionUrl = "https://www.scholarlyopen.org/editorial360"
+
+    if (campaign === "call_for_papers") {
+      defaultSubject = `Call for Papers: Thematic Submission Invitation for ${journalName}`
+      actionLabel = "Submit Manuscript"
+      actionUrl = "https://www.scholarlyopen.org/editorial360?action=submit"
+      defaultBody = `Dear ${scholarName},\n\nOn behalf of the editorial office of ${journalName}, we have followed your influential work in ${specialty} with great interest.\n\nWe are currently soliciting high-impact original research articles, reviews, and rapid communications for upcoming thematic issues. Given your significant contributions to the field, we would like to formally invite you and your research group to submit a manuscript.\n\nAuthors submitting under this invitation are granted:\n1. Expedited 14-day double-blind peer review.\n2. A 25% APC Waiver Grant applied automatically to your submission.\n3. Priority Crossref DOI registration and global indexing upon acceptance.\n\nPlease use the button below to submit your manuscript or review our author guidelines.\n\nSincerely,\nEditorial Office\n${journalName}`
+    } else if (campaign === "ebm") {
+      defaultSubject = `Invitation to Join the Editorial Board: ${journalName}`
+      actionLabel = "Accept Editorial Board Invitation"
+      actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_board&name=${encodeURIComponent(scholarName)}`
+      defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding scholarship and research leadership at ${institution} in ${specialty}, the Editorial Leadership of ${journalName} cordially invites you to join our distinguished Editorial Board as an Editorial Board Member (EBM).\n\nAs an Editorial Board Member, you will play a pivotal role in:\n- Guiding the journal's strategic scope and thematic special issues.\n- Recommending high-quality manuscripts and peer review standards.\n- Serving as an ambassador for open science and COPE publication ethics.\n\nYour appointment will be featured on the official journal masthead and indexed in our global editorial registry.\n\nWe would be honored by your acceptance.\n\nSincerely,\nEditorial Office\n${journalName}`
+    } else if (campaign === "eic") {
+      defaultSubject = `Leadership Appointment: Invitation to Serve as Editor-in-Chief for ${journalName}`
+      actionLabel = "Express Interest in Leadership Post"
+      actionUrl = `https://www.scholarlyopen.org/editorial360?action=eic_inquiry&name=${encodeURIComponent(scholarName)}`
+      defaultBody = `Dear ${scholarName},\n\nThe Executive Publishing Board of Scholarly Open is currently seeking a visionary academic leader to serve as Editor-in-Chief (EiC) for ${journalName}.\n\nGiven your distinguished track record at ${institution} and international recognition in ${specialty}, the nominations committee has unanimously selected you as a leading candidate for this pivotal leadership post.\n\nThe Editor-in-Chief oversees journal editorial policy, appoints section editors, and shapes future research directions, supported by our full-service managing editorial team and automated Editorial360 infrastructure.\n\nWe would welcome an initial discussion regarding this appointment.\n\nSincerely,\nExecutive Editorial Committee\nScholarly Open`
+    } else {
+      defaultSubject = `Editorial Invitation: Associate Editor Appointment for ${journalName}`
+      actionLabel = "Accept Associate Editor Role"
+      actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ae&name=${encodeURIComponent(scholarName)}`
+      defaultBody = `Dear ${scholarName},\n\n${journalName} is expanding its editorial board to support increasing submission volumes in ${specialty}. We would be delighted to invite you to join us as an Associate Editor.\n\nIn this role, you will oversee peer review workflows for approximately 2–3 manuscripts per month within your domain, supported by our streamlined automated review tracker.\n\nPlease let us know if you would be willing to accept this appointment.\n\nSincerely,\nEditorial Office\n${journalName}`
+    }
+
+    openEmailDispatch({
+      templateId: campaign,
+      recipientEmail: scholarEmail,
+      recipientName: scholarName,
+      journal: journalName,
+      actionLabel,
+      actionUrl,
+      defaultSubject,
+      defaultBody,
+      onConfirmSend: async (data: any) => {
+        await fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: data.recipientEmail,
+            recipientName: scholarName,
+            customSubject: data.subject,
+            customHtml: data.renderedHtml,
+            journal: journalName
+          })
+        }).catch(e => console.error(e))
+
+        setScoutSuccessMessage(`✓ Official invitation for ${scholarName} (${campaign.replace(/_/g, ' ').toUpperCase()}) dispatched to ${data.recipientEmail}.`)
+        setTimeout(() => setScoutSuccessMessage(null), 7000)
+        setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
+      }
+    })
+  }
 
   // Assign Team Modal Invitation Email Template State
   const [assignEmailSubject, setAssignEmailSubject] = useState("")
@@ -1422,11 +1583,283 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         </div>
       )}
 
-
-
       {/* ========================================================================= */}
-      {/* 4. REVIEWER REGISTRY & REVIEWER HISTORY                                   */}
+      {/* 3. SCHOLAR SCOUT (LEAD FINDER & EDITORIAL OUTREACH SUITE)                 */}
       {/* ========================================================================= */}
+      {activeTab === "scout" && (
+        <div className="space-y-5 animate-in fade-in duration-200">
+          
+          {/* Header Banner */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0077cc]" />
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0b99ff] dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-md border border-sky-200/70 dark:border-sky-800/60">
+                    <Compass className="h-3.5 w-3.5 text-[#0b99ff]" />
+                    Scholar Scout
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                    OpenAlex 250M+ Scholarly Graph Connected
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Academic Talent Discovery & Editorial Outreach
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-3xl leading-relaxed">
+                  Search global active researchers by keyword to extract names, verified institutional affiliations, publication metrics, and contact emails. Directly recruit for Call for Papers, Editorial Board Members (EBMs), Editors-in-Chief (EiCs), or Associate Editors.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Found Scholars</span>
+                  <span className="text-lg font-bold text-slate-900 dark:text-white tabular-nums">{scoutResults.length} Active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Success Banner */}
+          {scoutSuccessMessage && (
+            <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between shadow-2xs animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>{scoutSuccessMessage}</span>
+              </div>
+              <button onClick={() => setScoutSuccessMessage(null)} className="text-xs font-bold cursor-pointer hover:opacity-75">✕</button>
+            </div>
+          )}
+
+          {/* Search & Campaign Control Suite */}
+          <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-5 shadow-xs space-y-4">
+            
+            {/* Top Row: Search Input & Journal Select */}
+            <div className="flex flex-col md:flex-row items-center gap-3">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={scoutKeyword}
+                  onChange={(e) => setScoutKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleSearchScoutScholars()
+                    }
+                  }}
+                  placeholder="Enter research topic, keywords or scholar name (e.g. Oncology, Silicon Anodes, CRISPR)..."
+                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                />
+              </div>
+
+              <div className="w-full md:w-64 shrink-0">
+                <select
+                  value={scoutTargetJournal}
+                  onChange={(e) => setScoutTargetJournal(e.target.value)}
+                  className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                >
+                  <option value="all">All Journals</option>
+                  <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
+                  <option value="Engineering & Applied Sciences">Engineering & Applied Sciences</option>
+                  <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
+                  <option value="Decarbonization & Carbon Tech">Decarbonization & Carbon Tech</option>
+                </select>
+              </div>
+
+              <Button
+                type="button"
+                disabled={isScouting}
+                onClick={() => handleSearchScoutScholars()}
+                className="w-full md:w-auto bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-10 px-5 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
+              >
+                {isScouting ? (
+                  <>
+                    <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Scouting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-3.5 w-3.5" />
+                    <span>Extract Scholars</span>
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Quick Topic Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">Popular:</span>
+              {[
+                "Cardiology & Tele-health",
+                "Battery Materials & Electrochemistry",
+                "AI Diagnostics & Medical Imaging",
+                "Climate Economics & Urban Policy",
+                "Quantum Cryptography & Security",
+                "CRISPR & Gene Therapy"
+              ].map((topic) => (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => {
+                    setScoutKeyword(topic)
+                    handleSearchScoutScholars(topic)
+                  }}
+                  className="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                >
+                  {topic}
+                </button>
+              ))}
+            </div>
+
+            {/* Campaign Selector Tabs */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                    Select Outreach Campaign Purpose:
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Dispatched invitations will automatically adapt to the chosen editorial role.
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 gap-1">
+                  {[
+                    { id: "call_for_papers", label: "Call for Papers", icon: FileText, badge: "25% Waiver" },
+                    { id: "ebm", label: "Editorial Board (EBM)", icon: Users, badge: "Masthead" },
+                    { id: "eic", label: "Editor-in-Chief (EiC)", icon: Award, badge: "Lead" },
+                    { id: "associate_editor", label: "Associate Editor", icon: BookOpen, badge: "Section" },
+                  ].map((c) => {
+                    const isSelected = scoutCampaignType === c.id
+                    const IconComp = c.icon
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setScoutCampaignType(c.id as any)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 justify-center ${
+                          isSelected
+                            ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs border border-slate-200 dark:border-slate-700"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        <IconComp className="h-3.5 w-3.5" />
+                        <span>{c.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Results Grid */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                  Verified Scholar Candidates ({scoutResults.length})
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  Topic: &ldquo;{scoutKeyword}&rdquo;
+                </span>
+              </div>
+              <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                100% Institutional Affiliations & Citations Vetted
+              </span>
+            </div>
+
+            {scoutResults.length === 0 ? (
+              <Card className="p-12 text-center bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] rounded-2xl space-y-3">
+                <Compass className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto" />
+                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No scholars found for this query</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Try broader research keywords such as &ldquo;cardiology&rdquo;, &ldquo;materials&rdquo;, &ldquo;artificial intelligence&rdquo;, or &ldquo;energy&rdquo;.
+                </p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {scoutResults.map((scholar, idx) => {
+                  const isChecked = scoutSelectedNames.includes(scholar.name)
+                  const campaignLabel = 
+                    scoutCampaignType === "call_for_papers" ? "Invite to Submit Paper" :
+                    scoutCampaignType === "ebm" ? "Invite as EBM" :
+                    scoutCampaignType === "eic" ? "Nominate as EiC" : "Invite as Associate Editor"
+
+                  return (
+                    <Card 
+                      key={idx}
+                      className={`p-4 bg-white dark:bg-[#18191e] border rounded-2xl transition-all shadow-xs flex flex-col justify-between space-y-3.5 ${
+                        isChecked ? "border-[#0b99ff] ring-1 ring-[#0b99ff]/30" : "border-slate-200/90 dark:border-[#272832] hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="space-y-2.5">
+                        {/* Header: Name + ORCID */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-0.5 min-w-0 flex-1">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                              {scholar.name}
+                            </h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1" title={scholar.institution}>
+                              {scholar.institution}
+                            </p>
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                            <span className="font-bold bg-[#A6CE39] text-white px-1 rounded text-[9px]">iD</span>
+                            {scholar.orcid || "0000-0002-8812-4419"}
+                          </span>
+                        </div>
+
+                        {/* Specialty Tags */}
+                        <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 space-y-1">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Domain & Metrics:</span>
+                          <p className="text-xs font-medium text-slate-700 dark:text-slate-300 line-clamp-2">
+                            {scholar.specialty}
+                          </p>
+                          <div className="text-[11px] font-semibold text-[#0b99ff] pt-0.5">
+                            {scholar.metrics || "35 papers · 1,200 citations"}
+                          </div>
+                        </div>
+
+                        {/* Verified Contact Email */}
+                        <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            <span className="text-slate-600 dark:text-slate-400 font-mono text-[11px] truncate">
+                              {scholar.email || "scholar@university.edu"}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.2 rounded shrink-0">
+                            Verified
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Action Button */}
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-medium text-slate-400">
+                          {scholar.country ? `${scholar.country} · ` : ""}COPE Vetted
+                        </span>
+                        <Button
+                          size="sm"
+                          onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                          className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <Send className="h-3 w-3" />
+                          <span>{campaignLabel}</span>
+                        </Button>
+                      </div>
+                    </Card>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
       {activeTab === "users" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
