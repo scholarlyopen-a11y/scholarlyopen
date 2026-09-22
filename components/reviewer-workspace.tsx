@@ -299,7 +299,6 @@ export function ReviewerWorkspace({
   const [points, setPoints] = useState(35)
   const [reviewsDone, setReviewsDone] = useState(3)
   const [walletExpiryDays, setWalletExpiryDays] = useState(312)
-  const [calcReviews, setCalcReviews] = useState(4)
   const [certViewMode, setCertViewMode] = useState<"certificate" | "cv">("certificate")
 
   // Awarded Vouchers & Wallet Perks
@@ -2067,55 +2066,23 @@ COPE & Plan S Certified Archive
               </div>
             </div>
 
-            {/* Compact Annual Calculator */}
-            <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 dark:text-white">Annual Contribution Simulator</span>
-                <span className="font-semibold text-emerald-700 dark:text-emerald-400">{calcReviews} Reviews / Year</span>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={12}
-                value={calcReviews}
-                onChange={(e) => setCalcReviews(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600"
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center pt-1">
-                <div className="p-2 bg-white dark:bg-slate-950 rounded border border-slate-200/80 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Credits</div>
-                  <div className="font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">€{calcReviews * 50}</div>
-                </div>
-                <div className="p-2 bg-white dark:bg-slate-950 rounded border border-slate-200/80 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Waiver Rate</div>
-                  <div className="font-bold text-slate-900 dark:text-white mt-0.5">{Math.min(100, Math.round((calcReviews * 50 / 1500) * 100))}%</div>
-                </div>
-                <div className="p-2 bg-white dark:bg-slate-950 rounded border border-slate-200/80 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Grant Value</div>
-                  <div className="font-bold text-slate-900 dark:text-white mt-0.5">€{calcReviews * 50}</div>
-                </div>
-                <div className="p-2 bg-white dark:bg-slate-950 rounded border border-slate-200/80 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Service</div>
-                  <div className="font-bold text-slate-700 dark:text-slate-300 mt-0.5">{calcReviews * 6} hrs</div>
-                </div>
-              </div>
-            </div>
-
             {/* Awarded Peer Review Vouchers & APC Waivers */}
-            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/80 bg-gradient-to-br from-white to-emerald-50/30 dark:from-slate-900 dark:to-emerald-950/20 p-5 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-emerald-100 dark:border-emerald-800/60">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-5 shadow-xs">
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <Award className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      {isDe ? "Verliehene Gutachter-Voucher & APC-Rabattcodes" : "Awarded Peer Review Vouchers & APC Waivers"}
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                        {isDe ? "Verliehene Gutachter-Voucher & APC-Rabattcodes" : "Awarded Peer Review Vouchers & APC Waivers"}
+                      </h4>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                         {awardedVouchers.length} Available
                       </span>
-                    </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                       {isDe 
                         ? "Von Handling Editors verliehene Anerkennungen. Einlösbar für 25% – 100% APC-Erlass bei eigenen Manuskripteinreichungen."
                         : "Official incentives awarded by Handling Editors upon decision endorsement. Redeemable for 25%–100% APC waivers on your own submissions."}
@@ -2131,15 +2098,15 @@ COPE & Plan S Certified Archive
                   return (
                     <div
                       key={vouch.id || vouch.code}
-                      className="p-4 rounded-xl bg-white dark:bg-slate-950 border border-emerald-200/80 dark:border-slate-800 space-y-3 relative overflow-hidden shadow-xs hover:border-emerald-400 transition-all"
+                      className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 relative overflow-hidden hover:border-slate-300 dark:hover:border-slate-700 transition-all"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-black text-sm text-emerald-700 dark:text-emerald-400">
+                            <span className="font-bold text-sm text-emerald-700 dark:text-emerald-400">
                               {vouch.discount}
                             </span>
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                               {vouch.status}
                             </span>
                           </div>
@@ -2155,10 +2122,10 @@ COPE & Plan S Certified Archive
                       </div>
 
                       {/* Voucher Code Box */}
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                      <div className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
                         <div className="space-y-0.5">
                           <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Redemption Code</div>
-                          <span className="font-mono font-black text-xs text-slate-900 dark:text-white tracking-wider">
+                          <span className="font-mono font-bold text-xs text-slate-900 dark:text-white tracking-wider">
                             {vouch.code}
                           </span>
                         </div>
@@ -2171,10 +2138,10 @@ COPE & Plan S Certified Archive
                             setCopiedVoucherCode(vouch.code)
                             setTimeout(() => setCopiedVoucherCode(null), 2500)
                           }}
-                          className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                             isCopied
-                              ? "bg-emerald-600 text-white shadow-xs"
-                              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                              ? "bg-emerald-700 text-white shadow-xs"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
                           }`}
                         >
                           {isCopied ? (
@@ -2193,7 +2160,7 @@ COPE & Plan S Certified Archive
 
                       <div className="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
                         <span>Valid across all 13 Scholarly Open journals</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Single Use / Transferable</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 font-medium">Single Use / Transferable</span>
                       </div>
                     </div>
                   )
@@ -2202,10 +2169,10 @@ COPE & Plan S Certified Archive
             </div>
 
             {/* Reviewer Honoraria & 4-Option Disbursement Portal */}
-            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/80 bg-white dark:bg-slate-950 p-5 sm:p-6 space-y-5 shadow-xs">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <Landmark className="h-5 w-5" />
                   </div>
                   <div>
@@ -2213,7 +2180,7 @@ COPE & Plan S Certified Archive
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
                         {isDe ? "Gutachter-Honorare & 4-Wege Auszahlungsportal" : "Reviewer Honoraria & 4-Option Disbursement Portal"}
                       </h4>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                         {reviewsDone > 0 ? `€${reviewsDone * 50}.00 Available` : "€50.00 Per Review"}
                       </span>
                     </div>
@@ -2227,7 +2194,7 @@ COPE & Plan S Certified Archive
 
                 <div className="text-right shrink-0">
                   <div className="text-[10px] uppercase font-bold text-slate-400">{isDe ? "Verfügbares Honorar" : "Available Honorarium"}</div>
-                  <div className="text-xl font-black text-emerald-700 dark:text-emerald-400">
+                  <div className="text-xl font-black text-slate-900 dark:text-white">
                     €{Math.max(50, (reviewsDone || 1) * 50)}.00
                   </div>
                 </div>
@@ -2235,7 +2202,7 @@ COPE & Plan S Certified Archive
 
               {/* Success Notification Banner */}
               {payoutSuccessMsg && (
-                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center gap-3 text-xs text-emerald-900 dark:text-emerald-200 animate-in fade-in">
+                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-3 text-xs text-emerald-900 dark:text-emerald-200 animate-in fade-in">
                   <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
                   <span className="font-semibold">{payoutSuccessMsg}</span>
                 </div>
@@ -2247,21 +2214,21 @@ COPE & Plan S Certified Archive
                 {/* Option 1: Digital Cashout (PayPal / Payoneer / Wise) */}
                 <div 
                   onClick={() => setPayoutOption("bank")}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
                     payoutOption === "bank"
-                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                      ? "border-emerald-600 dark:border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-xs ring-1 ring-emerald-600/20"
+                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <CreditCard className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                       <span className="font-bold text-xs text-slate-900 dark:text-white">
                         {isDe ? "1. Digitale Auszahlung (PayPal / Payoneer / Wise)" : "1. Digital Cashout (PayPal / Payoneer / Wise)"}
                       </span>
                     </div>
                     <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "bank" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                      payoutOption === "bank" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 dark:border-slate-700"
                     }`}>
                       {payoutOption === "bank" && <Check className="h-3 w-3" />}
                     </span>
@@ -2272,7 +2239,7 @@ COPE & Plan S Certified Archive
                       : "Direct disbursement to your registered digital payout email (PayPal, Payoneer, or Wise) within 24–48 hours without bank wire fees."}
                   </p>
                   {payoutOption === "bank" && (
-                    <div className="space-y-2 pt-2 border-t border-emerald-200/60 dark:border-slate-800 text-xs">
+                    <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 text-xs">
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Select Payout Rail</label>
                         <div className="grid grid-cols-4 gap-1.5">
@@ -2286,8 +2253,8 @@ COPE & Plan S Certified Archive
                               }}
                               className={`py-1.5 px-1.5 rounded-lg text-[11px] font-bold border transition-all text-center ${
                                 payoutService === service
-                                  ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
-                                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-400"
+                                  ? "bg-emerald-700 text-white border-emerald-700 shadow-2xs"
+                                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-500"
                               }`}
                             >
                               {service}
@@ -2305,7 +2272,7 @@ COPE & Plan S Certified Archive
                           value={payoutEmail} 
                           onChange={(e) => setPayoutEmail(e.target.value)}
                           placeholder={`name@domain.com (${payoutService} account)`}
-                          className="w-full mt-1 p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
+                          className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700"
                         />
                       </div>
 
@@ -2318,7 +2285,7 @@ COPE & Plan S Certified Archive
                           value={payoutBeneficiary} 
                           onChange={(e) => setPayoutBeneficiary(e.target.value)}
                           placeholder={getFormattedReviewerName(profile.title, profile.name) || "Dr. Marcus Vance"}
-                          className="w-full mt-1 p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
+                          className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700"
                         />
                       </div>
                     </div>
@@ -2328,21 +2295,21 @@ COPE & Plan S Certified Archive
                 {/* Option 2: APC Credit Voucher */}
                 <div 
                   onClick={() => setPayoutOption("voucher")}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
                     payoutOption === "voucher"
-                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                      ? "border-emerald-600 dark:border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-xs ring-1 ring-emerald-600/20"
+                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-[#0b99ff]" />
+                      <Award className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                       <span className="font-bold text-xs text-slate-900 dark:text-white">
                         {isDe ? "2. APC-Gutschein für nächste Publikation" : "2. Re-use as APC Voucher for Next Submission"}
                       </span>
                     </div>
                     <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "voucher" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                      payoutOption === "voucher" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 dark:border-slate-700"
                     }`}>
                       {payoutOption === "voucher" && <Check className="h-3 w-3" />}
                     </span>
@@ -2362,10 +2329,10 @@ COPE & Plan S Certified Archive
                 {/* Option 3: Developing Countries Fee-Waiver Fund */}
                 <div 
                   onClick={() => setPayoutOption("waiver_fund")}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
                     payoutOption === "waiver_fund"
-                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                      ? "border-emerald-600 dark:border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-xs ring-1 ring-emerald-600/20"
+                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -2376,7 +2343,7 @@ COPE & Plan S Certified Archive
                       </span>
                     </div>
                     <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "waiver_fund" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                      payoutOption === "waiver_fund" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 dark:border-slate-700"
                     }`}>
                       {payoutOption === "waiver_fund" && <Check className="h-3 w-3" />}
                     </span>
@@ -2396,10 +2363,10 @@ COPE & Plan S Certified Archive
                 {/* Option 4: University Library Donation */}
                 <div 
                   onClick={() => setPayoutOption("library")}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
                     payoutOption === "library"
-                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                      ? "border-emerald-600 dark:border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-xs ring-1 ring-emerald-600/20"
+                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -2410,7 +2377,7 @@ COPE & Plan S Certified Archive
                       </span>
                     </div>
                     <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "library" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                      payoutOption === "library" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 dark:border-slate-700"
                     }`}>
                       {payoutOption === "library" && <Check className="h-3 w-3" />}
                     </span>
@@ -2427,7 +2394,7 @@ COPE & Plan S Certified Archive
                         type="text" 
                         value={payoutLibraryName || `${profile.institution} Medical Library`}
                         onChange={(e) => setPayoutLibraryName(e.target.value)}
-                        className="w-full p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
+                        className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700"
                       />
                     </div>
                   )}
@@ -2446,7 +2413,7 @@ COPE & Plan S Certified Archive
                 <Button
                   onClick={handleSubmitPayout}
                   disabled={isSubmittingPayout}
-                  className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-xs shrink-0"
+                  className="bg-primary hover:bg-primary-mid text-primary-foreground text-xs font-bold px-5 py-2 cursor-pointer shadow-xs shrink-0"
                 >
                   <CreditCard className="h-3.5 w-3.5 mr-1.5" />
                   {isSubmittingPayout 
