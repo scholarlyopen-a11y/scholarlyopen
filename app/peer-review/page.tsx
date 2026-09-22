@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, FileText, Users, CheckCircle, Clock, Shield, MessageSquare } from "lucide-react"
+import { ArrowRight, FileText, Users, CheckCircle, Clock, Shield, MessageSquare, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -232,9 +232,98 @@ export default function PeerReviewPage() {
                     Follow COPE ethical guidelines
                   </li>
                 </ul>
-                <Button asChild variant="outline">
-                  <Link href="/contact">Register as Reviewer</Link>
-                </Button>
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild className="bg-primary text-primary-foreground text-xs font-semibold cursor-pointer">
+                    <Link href="/reviewer-gateway">Take Reviewer Gateway Assessment</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="text-xs font-semibold cursor-pointer">
+                    <Link href="#reviewer-honoraria">Honoraria & Stipends Policy</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Reviewer Recognition, Honoraria & Quality Governance */}
+        <section id="reviewer-honoraria" className="py-16 lg:py-24 bg-muted/30 border-t border-border">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <div className="max-w-3xl mb-12">
+              <h2 className="text-3xl font-bold tracking-tight">Reviewer & Editor Honoraria & Governance</h2>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                To safeguard scientific rigor and recognize scholarly peer evaluation, Scholarly Open operates an equitable, quality-gated micro-honorarium fund and structured reviewer qualification gateway.
+              </p>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-2">
+              {/* Card 1: Honoraria Policy */}
+              <div className="p-6 sm:p-8 rounded-2xl bg-background border border-border shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h3 className="text-lg font-bold">Reviewer & Editor Honoraria Policy</h3>
+                    <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                      €35 – €50 EUR (Capped at €50)
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                    Unlike traditional commercial publishers, Scholarly Open allocates a dedicated micro-share of the APC directly to peer reviewers and academic handling editors. To safeguard scientific integrity, honoraria are strictly quality-gated and performance-scaled:
+                  </p>
+                  <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>Editor Rigor Scoring & Dynamic Calculation:</strong> The Handling Editor assigns an Editorial Rigor Score (0–100%). Reports scoring ≥ 80% dynamically receive <strong>€35 to €50 EUR</strong> (strictly capped at €50 EUR max). Reports scoring below 80% are ineligible until revised to COPE standards.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>Exclusive Low-Fee Payment Rails:</strong> To protect global reviewers from prohibitive SWIFT bank wire fees (€15–€30), honoraria are disbursed exclusively via <strong>Wise</strong>, <strong>PayPal</strong>, or <strong>Payoneer</strong>. Traditional bank checks or wires are not used.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>100% Publication Waiver Alternative:</strong> Reviewers can convert honoraria into 100% APC waiver credits for their own future submissions, with an enhanced 3× credit multiplier for scholars from low-income nations.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>Handling Editor Stipend:</strong> Handling Editors receive a dedicated honorarium of €40 – €60 EUR per completed decision cycle upon synthesizing referee scorecards and issuing reasoned decision letters.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Card 2: Reviewer Gateway */}
+              <div className="p-6 sm:p-8 rounded-2xl bg-background border border-border shadow-xs flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-bold mb-2">Reviewer Gateway & Onboarding</h3>
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                    To ensure equitable global participation without compromising scientific and linguistic quality:
+                  </p>
+                  <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>English & Competency Assessment Gateway:</strong> Researchers from developing nations and independent applicants without an established international indexed record must pass a standardized <strong>15-minute online test</strong> evaluating academic English comprehension, constructive phrasing, and COPE ethics (passing threshold: ≥ 80%).</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>Supervised Onboarding:</strong> Certified reviewers complete their initial 1–2 reviews under the direct oversight of an experienced Handling Editor to calibrate feedback standards.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>Monthly Workload Cap:</strong> Reviewers are capped at a maximum of <strong>2 active evaluations per month</strong> to prevent reviewer fatigue, maintain quality, and eliminate review-farming.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>Career Advancement Pathway:</strong> Consistently top-rated reviewers (≥ 90% rigor rating over 3+ assignments) are actively invited to join journal Editorial Boards.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-6 pt-5 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">Ready to certify your peer review credentials?</span>
+                  <Button asChild size="sm" className="text-xs font-semibold gap-1.5 cursor-pointer">
+                    <Link href="/reviewer-gateway">
+                      Take 15-Min Online Assessment <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
