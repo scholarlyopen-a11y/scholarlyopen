@@ -712,6 +712,89 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
               </span>
             </div>
           </div>
+        ) : role === "editor" ? (
+          <div className="lg:col-span-7 space-y-5 lg:pl-6 lg:border-l border-slate-100 dark:border-[#272832]">
+            {/* Editor Performance Row */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                  {isDe ? "Redaktionelle Kennzahlen & Beiratsstatus" : "Editorial Performance & Governance"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  <Check className="h-3.5 w-3.5 text-emerald-600" /> {isDe ? "Stufe 5 · Leitender Herausgeber" : "Level 5 · Managing Editor"}
+                </span>
+              </div>
+
+              {/* Minimal 3-Stat Card */}
+              <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/70 dark:border-[#272832]">
+                <div>
+                  <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Entscheidungen" : "Decisions"}</span>
+                  <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5 block">{isDe ? "86 Abgeschlossen" : "86 Completed"}</span>
+                </div>
+                <div>
+                  <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Entscheidungszeit" : "Decision Latency"}</span>
+                  <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5 block">{isDe ? "12,4 Tage Ø" : "12.4d Avg"}</span>
+                </div>
+                <div>
+                  <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Beirats-Audit" : "Board Rigor"}</span>
+                  <span className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">{isDe ? "96% Score" : "96% Score"}</span>
+                </div>
+              </div>
+
+              {/* Action Link */}
+              <div className="flex justify-end">
+                <button
+                  onClick={() => onExploreBadges && onExploreBadges()}
+                  type="button"
+                  className="text-sm font-semibold text-[#0b99ff] hover:text-[#0088e0] dark:hover:text-[#38bdf8] flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  {isDe ? "Redaktionsrichtlinien & Standards ansehen" : "View Editorial Standards & Policies"}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* 3 Prominent Editor Recognition Badges */}
+            <div className="pt-3 border-t border-slate-100 dark:border-[#272832] space-y-2.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                {isDe ? "Redaktionelle Anerkennungs-Abzeichen" : "Editorial Recognition Badges"}
+              </span>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {/* Badge 1: Distinguished Editor */}
+                <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
+                  <div className="h-12 w-12 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-xs">
+                    <Star className="h-6 w-6 fill-amber-500/30 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Herausgeber-Auszeichnung" : "Distinguished Editor"}</span>
+                    <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "Top 3% Portfolio" : "Top 3% Portfolio"}</span>
+                  </div>
+                </div>
+
+                {/* Badge 2: Rapid Decisioner */}
+                <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
+                  <div className="h-12 w-12 rounded-full bg-sky-500/15 text-[#0b99ff] flex items-center justify-center shadow-xs">
+                    <Award className="h-6 w-6 fill-sky-500/30 text-[#0b99ff]" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Schnelle Entscheidung" : "Rapid Decisioner"}</span>
+                    <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "< 14 Tage Bearbeitung" : "< 14d Turnaround"}</span>
+                  </div>
+                </div>
+
+                {/* Badge 3: Governance Lead */}
+                <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
+                  <div className="h-12 w-12 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
+                    <ShieldCheck className="h-6 w-6 fill-emerald-500/30 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "COPE Governance" : "Governance Lead"}</span>
+                    <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "100% Verifiziert" : "100% Verified"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="lg:col-span-7 space-y-5 lg:pl-6 lg:border-l border-slate-100 dark:border-[#272832]">
             
@@ -1912,7 +1995,7 @@ export default function Editorial360Page() {
 
   // Active sub-page tab for JM / Editor / Author / Reviewer
   const [activeJmTab, setActiveJmTab] = useState<string>("board")
-  const [activeEditorTab, setActiveEditorTab] = useState<string>("tracker")
+  const [activeEditorTab, setActiveEditorTab] = useState<string>("desk")
   const [activeRiaTab, setActiveRiaTab] = useState<string>("alerts")
   const [activeAdminTab, setActiveAdminTab] = useState<string>("overview")
   const [activeAuthorTab, setActiveAuthorTab] = useState<"dashboard" | "submissions" | "scorecard" | "plagiarism" | "feedback" | "recognition" | "career">("dashboard")
@@ -2676,6 +2759,9 @@ export default function Editorial360Page() {
     setTimeout(() => {
       setLoading(false)
       setIsLoggedIn(true)
+      if (role === "editor") {
+        setActiveEditorTab("desk")
+      }
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("editorial360_session", JSON.stringify({
@@ -2683,6 +2769,7 @@ export default function Editorial360Page() {
             role,
             email,
             activeJmTab,
+            activeEditorTab: role === "editor" ? "desk" : activeEditorTab,
             timestamp: Date.now()
           }))
         } catch (e) {
@@ -2792,7 +2879,7 @@ export default function Editorial360Page() {
       setEmail(regEmail)
       setIsLoggedIn(true)
       if (regRole === "editor") {
-        setActiveEditorTab("tracker")
+        setActiveEditorTab("desk")
       }
       if (typeof window !== "undefined") {
         try {
@@ -2800,7 +2887,7 @@ export default function Editorial360Page() {
             role: regRole,
             email: regEmail,
             isLoggedIn: true,
-            activeEditorTab: regRole === "editor" ? "tracker" : undefined,
+            activeEditorTab: regRole === "editor" ? "desk" : undefined,
             timestamp: Date.now()
           }
           sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
@@ -2843,7 +2930,7 @@ export default function Editorial360Page() {
       setEmail(matchedRole.placeholder)
     }
     if (newRole === "editor") {
-      setActiveEditorTab("tracker")
+      setActiveEditorTab("desk")
     }
     if (typeof window !== "undefined") {
       try {
@@ -2851,7 +2938,7 @@ export default function Editorial360Page() {
         const sess = sessionStr ? JSON.parse(sessionStr) : {}
         sess.role = newRole
         sess.isLoggedIn = true
-        if (newRole === "editor") sess.activeEditorTab = "tracker"
+        if (newRole === "editor") sess.activeEditorTab = "desk"
         sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
       } catch (e) {
         // ignore
@@ -4341,7 +4428,7 @@ export default function Editorial360Page() {
                     <button
                       type="button"
                       onClick={() => toggleMode(mode === "login" ? "register" : "login")}
-                      className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
+                      className="text-slate-900 dark:text-slate-100 hover:underline font-bold focus:outline-none cursor-pointer"
                     >
                       {mode === "login" 
                         ? (language === "de" ? "Neues Konto erstellen" : "Create account") 
@@ -4351,8 +4438,7 @@ export default function Editorial360Page() {
                 </div>
 
                 {/* Login/Registration Card container */}
-                <Card className="border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden relative transition-all">
-                  <div className="h-1.5 w-full bg-[#0b99ff]" />
+                <Card className="border border-slate-200 dark:border-slate-800 shadow-md rounded-2xl bg-white dark:bg-slate-900 overflow-hidden relative transition-all">
                 
                 {mode === "login" ? (
                   // ================= LOGIN FORM =================
@@ -4379,7 +4465,7 @@ export default function Editorial360Page() {
                             id="role-select"
                             value={role === "ria" ? "im" : role}
                             onChange={(e) => handleRoleChange(e.target.value as UserRole)}
-                            className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0b99ff] focus:border-transparent transition-all cursor-pointer shadow-2xs appearance-none pr-9"
+                            className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-sky-500 transition-all cursor-pointer shadow-2xs appearance-none pr-9"
                           >
                             {roles.map((r) => (
                               <option key={r.id} value={r.id}>
@@ -4404,7 +4490,7 @@ export default function Editorial360Page() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full px-3.5 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                          className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-sky-500 transition-all"
                           placeholder={language === "de" ? "E-Mail-Adresse eingeben" : "Email address"}
                         />
                       </div>
@@ -4417,7 +4503,7 @@ export default function Editorial360Page() {
                           </label>
                           <Link
                             href="#"
-                            className="text-xs text-[#0b99ff] hover:underline"
+                            className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:underline"
                           >
                             {language === "de" ? "Passwort vergessen?" : "Forgot email or password?"}
                           </Link>
@@ -4430,7 +4516,7 @@ export default function Editorial360Page() {
                           required
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full px-3.5 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                          className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-sky-500 transition-all"
                           placeholder={language === "de" ? "Passwort eingeben" : "Password"}
                         />
                       </div>
@@ -4442,7 +4528,7 @@ export default function Editorial360Page() {
                           name="remember-me"
                           type="checkbox"
                           defaultChecked
-                          className="h-4 w-4 rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
+                          className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400 cursor-pointer"
                         />
                         <label htmlFor="remember-me" className="ml-2 block text-xs text-slate-600 dark:text-slate-400 select-none cursor-pointer">
                           {language === "de" ? "Angemeldet bleiben" : "Remember me"}
@@ -4454,11 +4540,11 @@ export default function Editorial360Page() {
                       <Button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold py-2.5 rounded-md shadow transition-all active:scale-[0.98] cursor-pointer text-sm"
+                        className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold py-2.5 rounded-lg shadow-sm transition-all active:scale-[0.99] cursor-pointer text-sm"
                       >
                         {loading 
                           ? (language === "de" ? "Wird authentifiziert..." : "Authenticating...") 
-                          : (language === "de" ? "Anmelden" : "Login")}
+                          : (language === "de" ? "Anmelden" : "Sign In")}
                       </Button>
 
                       <button
@@ -4477,27 +4563,27 @@ export default function Editorial360Page() {
                           <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
                         </div>
 
-                        <div className="grid grid-cols-6 gap-2 pt-2">
+                        <div className="grid grid-cols-6 gap-2 pt-1.5">
                           {/* Apple */}
                           <button
                             type="button"
                             title="Sign in with Apple"
                             onClick={() => handleSsoLogin("Apple")}
-                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-sm cursor-pointer"
+                            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition-all shadow-2xs cursor-pointer"
                           >
-                            <svg className="w-4 h-4 fill-current" viewBox="0 0 170 170">
+                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 170 170">
                               <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.34.13-9.14-1.9-14.4-6.1-3.69-3.04-7.69-7.85-12.01-14.44-6.3-9.59-11.25-20.35-14.85-32.28-3.6-11.93-5.4-23.32-5.4-34.17 0-15.84 4.11-28.79 12.33-38.86 8.22-10.07 18.52-15.19 30.9-15.35 4.93 0 10.15 1.15 15.67 3.44 5.52 2.29 9.39 3.44 11.61 3.44 1.95 0 5.86-1.15 11.73-3.44 5.87-2.29 10.83-3.34 14.89-3.16 10.74.52 19.64 4.54 26.7 12.06 7.06 7.52 11.39 16.59 13 27.21-11.3 6.84-16.81 16.32-16.53 28.45.28 10.66 4.31 19.46 12.09 26.4 3.73 3.34 8.01 5.92 12.84 7.74-2.73 7.84-6.4 15.67-11.01 23.49zM119.22 31.86c0-6.72 2.45-13.16 7.35-19.32 4.9-6.16 11.08-9.88 18.54-11.16.63 7.15-1.63 13.88-6.78 20.19-5.15 6.31-11.45 9.94-18.9 10.89-.06-.2-.11-.4-.21-.6z"/>
                             </svg>
                           </button>
                           
-                          {/* ORCID / Facebook */}
+                          {/* ORCID */}
                           <button
                             type="button"
                             title="Sign in with ORCID"
                             onClick={() => handleSsoLogin("ORCID iD")}
-                            className="flex items-center justify-center h-10 rounded-md border border-emerald-300 dark:border-emerald-800 bg-[#A6CE39] text-white hover:opacity-90 transition-all shadow-sm cursor-pointer"
+                            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-[#71991a] dark:text-[#A6CE39] transition-all shadow-2xs cursor-pointer font-bold text-xs"
                           >
-                            <span className="font-bold text-xs tracking-tighter">iD</span>
+                            iD
                           </button>
 
                           {/* GitHub */}
@@ -4505,9 +4591,9 @@ export default function Editorial360Page() {
                             type="button"
                             title="Sign in with GitHub"
                             onClick={() => handleSsoLogin("GitHub")}
-                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-[#24292e] text-white hover:bg-[#1b1f23] transition-all shadow-sm cursor-pointer"
+                            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition-all shadow-2xs cursor-pointer"
                           >
-                            <svg className="w-4 h-4 fill-current" viewBox="0 0 16 16">
+                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16">
                               <path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                             </svg>
                           </button>
@@ -4517,9 +4603,9 @@ export default function Editorial360Page() {
                             type="button"
                             title="Sign in with Google"
                             onClick={() => handleSsoLogin("Google")}
-                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-white text-slate-800 hover:bg-slate-50 dark:bg-slate-900 dark:text-white transition-all shadow-sm cursor-pointer"
+                            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition-all shadow-2xs cursor-pointer"
                           >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -4532,9 +4618,9 @@ export default function Editorial360Page() {
                             type="button"
                             title="Sign in with Microsoft"
                             onClick={() => handleSsoLogin("Microsoft")}
-                            className="flex items-center justify-center h-10 rounded-md border border-slate-200 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900 transition-all shadow-sm cursor-pointer"
+                            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition-all shadow-2xs cursor-pointer"
                           >
-                            <svg className="w-4 h-4" viewBox="0 0 23 23">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 23 23">
                               <path fill="#f35325" d="M1 1h10v10H1z"/>
                               <path fill="#81bc06" d="M12 1h10v10H12z"/>
                               <path fill="#05a6f0" d="M1 12h10v10H1z"/>
@@ -4547,9 +4633,9 @@ export default function Editorial360Page() {
                             type="button"
                             title="Sign in with LinkedIn"
                             onClick={() => handleSsoLogin("LinkedIn")}
-                            className="flex items-center justify-center h-10 rounded-md border border-blue-200 dark:border-blue-900 bg-[#0077b5] text-white hover:opacity-90 transition-all shadow-sm cursor-pointer"
+                            className="flex items-center justify-center h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 hover:bg-slate-100 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-[#0077b5] dark:text-[#38bdf8] transition-all shadow-2xs cursor-pointer"
                           >
-                            <Linkedin className="w-4 h-4 fill-current" />
+                            <Linkedin className="w-3.5 h-3.5 fill-current" />
                           </button>
                         </div>
                       </div>
@@ -4596,7 +4682,7 @@ export default function Editorial360Page() {
                               onClick={() => setRegRole("author")}
                               className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
                                 regRole === "author"
-                                  ? "bg-[#0b99ff] text-white shadow-sm"
+                                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
                                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                               }`}
                             >
@@ -4607,7 +4693,7 @@ export default function Editorial360Page() {
                               onClick={() => setRegRole("reviewer")}
                               className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
                                 regRole === "reviewer"
-                                  ? "bg-[#0b99ff] text-white shadow-sm"
+                                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
                                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                               }`}
                             >
@@ -4635,7 +4721,7 @@ export default function Editorial360Page() {
                             required
                             value={regName}
                             onChange={(e) => setRegName(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all"
                             placeholder="Dr. Sarah Jenkins"
                           />
                         </div>
@@ -4656,7 +4742,7 @@ export default function Editorial360Page() {
                             required
                             value={regEmail}
                             onChange={(e) => setRegEmail(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all"
                             placeholder="s.jenkins@university.edu"
                           />
                         </div>
@@ -4675,7 +4761,7 @@ export default function Editorial360Page() {
                           type="text"
                           value={regOrcid}
                           onChange={(e) => setRegOrcid(e.target.value)}
-                          className="w-full px-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                          className="w-full px-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all"
                           placeholder="0000-0002-1825-0097"
                         />
                       </div>
@@ -4695,7 +4781,7 @@ export default function Editorial360Page() {
                             required
                             value={regPassword}
                             onChange={(e) => setRegPassword(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all"
                             placeholder="••••••••"
                           />
                         </div>
@@ -4706,7 +4792,7 @@ export default function Editorial360Page() {
                       <Button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold py-2 rounded-md shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                        className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold py-2.5 rounded-lg shadow-sm transition-all active:scale-[0.99] cursor-pointer text-sm"
                       >
                         {loading 
                           ? "Activating account..." 
@@ -4720,7 +4806,7 @@ export default function Editorial360Page() {
                         <button 
                           type="button" 
                           onClick={() => toggleMode("login")}
-                          className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
+                          className="text-slate-900 dark:text-white hover:underline font-bold focus:outline-none cursor-pointer"
                         >
                           Sign In here
                         </button>

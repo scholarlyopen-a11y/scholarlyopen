@@ -48,7 +48,10 @@ import {
   UserCheck,
   UserPlus,
   Files,
-  Coins
+  Coins,
+  Trophy,
+  Link2,
+  Linkedin
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -374,7 +377,7 @@ export function EditorWorkspace({
 }: EditorWorkspaceProps) {
   const isDe = language === "de"
 
-  const [internalTab, setInternalTab] = useState<string>(activeTab || "tracker")
+  const [internalTab, setInternalTab] = useState<string>(activeTab || "desk")
 
   useEffect(() => {
     if (activeTab) {
@@ -1144,6 +1147,174 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </div>
         )
       })()}
+
+      {/* ========================================================================= */}
+      {/* 2. EDITOR METRICS CARD (EXACT 5-COLUMN STATS & SHARE LINKS LIKE REVIEWERS) */}
+      {/* ========================================================================= */}
+      <div className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#272832] pb-3">
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            {isDe ? "Redaktions-Kennzahlen" : "Editorial Desk Metrics"}
+          </h3>
+          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
+            {isDe ? "COPE-Beirats-Governance" : "COPE Verified Governance"}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-2 text-center items-start pt-2">
+          {/* 1. Decision turnaround */}
+          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
+            <Clock className="h-6 w-6 text-sky-400" />
+            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+              {isDe ? "12,4 Tage" : "12.4 days"}
+            </div>
+            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+              {isDe ? "DURCHSCHN. ENTSCHEIDUNG" : "TIME TO DECISION (AVG)"}
+            </div>
+          </div>
+
+          {/* 2. Board Rigor score */}
+          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
+            <Star className="h-6 w-6 text-sky-400" />
+            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+              96%
+            </div>
+            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+              {isDe ? "BEIRATS-AUDIT-ERGEBNIS" : "BOARD AUDIT SCORE"}
+            </div>
+          </div>
+
+          {/* 3. Decisions Rendered */}
+          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
+            <FileCheck2 className="h-6 w-6 text-sky-400" />
+            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+              86
+            </div>
+            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+              {isDe ? "BEARBEITETE ARTIKEL" : "DECISIONS RENDERED"}
+            </div>
+          </div>
+
+          {/* 4. Badges earned */}
+          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors cursor-pointer group">
+            <Award className="h-6 w-6 text-sky-400 group-hover:scale-110 transition-transform" />
+            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1 text-sky-600 dark:text-sky-400">
+              4
+            </div>
+            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+              {isDe ? "ABZEICHEN ERHALTEN" : "BADGES EARNED"}
+            </div>
+          </div>
+
+          {/* 5. Percentile rank */}
+          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
+            <TrendingUp className="h-6 w-6 text-sky-400" />
+            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+              Top 3%
+            </div>
+            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+              {isDe ? "REDAKTIONSRANG" : "PERCENTILE SCORE"}
+            </div>
+          </div>
+        </div>
+
+        {/* Share ORCID & LinkedIn */}
+        <div className="flex items-center justify-center sm:justify-end gap-5 pt-3 border-t border-slate-100 dark:border-[#272832] text-xs">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.open("https://orcid.org", "_blank")
+              }
+            }}
+            className="inline-flex items-center gap-1.5 text-sky-500 hover:text-sky-600 font-semibold cursor-pointer transition-colors"
+          >
+            <Link2 className="h-3.5 w-3.5" />
+            <span>Share ORCID</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                const text = encodeURIComponent("I am a verified Handling Editor with Scholarly Open! Track our double-blind peer review stewardship and academic badges.")
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
+              }
+            }}
+            className="inline-flex items-center gap-1.5 text-sky-500 hover:text-sky-600 font-semibold cursor-pointer transition-colors"
+          >
+            <Linkedin className="h-3.5 w-3.5" />
+            <span>Share LinkedIn</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. ACADEMIC RECOGNITION BADGES (BIG BADGES & TEXT LIKE REVIEWERS)         */}
+      {/* ========================================================================= */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            {isDe ? "Erhaltene Auszeichnungen & Abzeichen" : "Earned Academic Prestige Badges"}
+          </h4>
+          <span className="text-[11px] text-slate-400">
+            {isDe ? "Freigeschaltet durch redaktionelle Leitung & Doppelblind-Qualität" : "Unlocked through verified editorial decisions & rigor"}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Badge 1 */}
+          <div className="p-4 rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-white dark:bg-[#18191e] text-center flex flex-col items-center shadow-2xs hover:border-amber-400 hover:shadow-xs transition-all">
+            <div className="h-12 w-12 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2 ring-4 ring-amber-100/60 dark:ring-amber-900/20">
+              <Trophy className="h-6 w-6" />
+            </div>
+            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+              Distinguished Editor 2026
+            </div>
+            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+              {isDe ? "EDITORIAL BOARD AUSZEICHNUNG" : "EDITORIAL BOARD COMMENDATION"}
+            </div>
+          </div>
+
+          {/* Badge 2 */}
+          <div className="p-4 rounded-xl border border-sky-200/80 dark:border-sky-900/40 bg-white dark:bg-[#18191e] text-center flex flex-col items-center shadow-2xs hover:border-sky-400 hover:shadow-xs transition-all">
+            <div className="h-12 w-12 rounded-full bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] flex items-center justify-center mb-2 ring-4 ring-sky-100/60 dark:ring-sky-900/20">
+              <Zap className="h-6 w-6" />
+            </div>
+            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+              Rapid Decisioner
+            </div>
+            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+              {isDe ? "TOP 5% SCHNELLIGKEIT (<14 TAGE)" : "TOP 5% DECISION SPEED (<14D)"}
+            </div>
+          </div>
+
+          {/* Badge 3 */}
+          <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-white dark:bg-[#18191e] text-center flex flex-col items-center shadow-2xs hover:border-emerald-400 hover:shadow-xs transition-all">
+            <div className="h-12 w-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 ring-4 ring-emerald-100/60 dark:ring-emerald-900/20">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
+            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+              COPE Ethics Certified
+            </div>
+            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+              {isDe ? "PUBLIKATIONSETHIK VERIFIZIERT" : "PUBLICATION ETHICS VERIFIED"}
+            </div>
+          </div>
+
+          {/* Badge 4 */}
+          <div className="p-4 rounded-xl border border-purple-200/80 dark:border-purple-900/40 bg-white dark:bg-[#18191e] text-center flex flex-col items-center shadow-2xs hover:border-purple-400 hover:shadow-xs transition-all">
+            <div className="h-12 w-12 rounded-full bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 ring-4 ring-purple-100/60 dark:ring-purple-900/20">
+              <Star className="h-6 w-6 fill-purple-600/20" />
+            </div>
+            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+              5-Star Rigor Guardian
+            </div>
+            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+              {isDe ? "EDITORIAL RIGOR AUSZEICHNUNG" : "EDITORIAL RIGOR DISTINCTION"}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ========================================================================= */}
       {/* 1. COMPACT 4-STAT METRIC STRIP (JM-STYLE CLEAN ROW)                       */}
