@@ -75,7 +75,10 @@ import {
   SearchCode,
   Wallet,
   Calendar,
-  FileCheck2
+  FileCheck2,
+  DollarSign,
+  CreditCard,
+  Landmark
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -1757,6 +1760,139 @@ export default function Editorial360Page() {
   const [isTranslationMenuOpen, setIsTranslationMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
   const workspaceMainRef = useRef<HTMLElement>(null)
+
+  // Admin Reviewer Payouts & Honoraria Ledger State
+  const [adminPayouts, setAdminPayouts] = useState<Array<{
+    id: string
+    reviewerName: string
+    reviewerEmail: string
+    institution: string
+    manuscriptId: string
+    amount: number
+    currency: string
+    option: "bank" | "voucher" | "waiver_fund" | "library"
+    details: string
+    requestedAt: string
+    status: "Pending" | "Released"
+    releasedAt?: string
+    txRef?: string
+  }>>([])
+  const [payoutFilter, setPayoutFilter] = useState<"all" | "pending" | "released">("all")
+  const [payoutSearch, setPayoutSearch] = useState("")
+  const [payoutReleaseSuccess, setPayoutReleaseSuccess] = useState<string | null>(null)
+
+  // Sync Admin Payout Ledger with localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("editorial360_payout_requests")
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAdminPayouts(parsed)
+          return
+        }
+      }
+      const initialSeed: Array<{
+        id: string
+        reviewerName: string
+        reviewerEmail: string
+        institution: string
+        manuscriptId: string
+        amount: number
+        currency: string
+        option: "bank" | "voucher" | "waiver_fund" | "library"
+        details: string
+        requestedAt: string
+        status: "Pending" | "Released"
+        releasedAt?: string
+        txRef?: string
+      }> = [
+        {
+          id: "PAY-2026-9021",
+          reviewerName: "Dr. Marcus Vance",
+          reviewerEmail: "reviewer@scholarlyopen.org",
+          institution: "Charité – Universitätsmedizin Berlin",
+          manuscriptId: "SOMED-26-RS001",
+          amount: 50,
+          currency: "EUR",
+          option: "bank",
+          details: "Wise / Deutsche Bank | IBAN: DE89 3704 0044 0532 0130 00 | Beneficiary: Dr. Marcus Vance",
+          requestedAt: "2026-09-21",
+          status: "Pending"
+        },
+        {
+          id: "PAY-2026-9018",
+          reviewerName: "Prof. Dr. Elena Rostova",
+          reviewerEmail: "e.rostova@oxford.ac.uk",
+          institution: "University of Oxford",
+          manuscriptId: "SOENG-26-RS002",
+          amount: 50,
+          currency: "EUR",
+          option: "library",
+          details: "Institutional Library Donation: Bodleian Library Open Access Fund (Ref: OX-OA-2026)",
+          requestedAt: "2026-09-20",
+          status: "Pending"
+        },
+        {
+          id: "PAY-2026-8994",
+          reviewerName: "Dr. Kenji Sato",
+          reviewerEmail: "k.sato@u-tokyo.ac.jp",
+          institution: "University of Tokyo",
+          manuscriptId: "SOSOC-26-RV003",
+          amount: 50,
+          currency: "EUR",
+          option: "voucher",
+          details: "APC Credit Voucher generated for next submission (Code: REV-WAV-UTOKYO-912)",
+          requestedAt: "2026-09-18",
+          status: "Released",
+          releasedAt: "2026-09-19",
+          txRef: "APC-CR-8994-AUTOGEN"
+        },
+        {
+          id: "PAY-2026-8971",
+          reviewerName: "Dr. Amara Okafor",
+          reviewerEmail: "a.okafor@unilag.edu.ng",
+          institution: "University of Lagos",
+          manuscriptId: "SOMED-26-RS089",
+          amount: 50,
+          currency: "EUR",
+          option: "waiver_fund",
+          details: "Solidarity Waiver Pool for Low-Income Country Researchers (Scholarly Open Global South Fund)",
+          requestedAt: "2026-09-15",
+          status: "Released",
+          releasedAt: "2026-09-15",
+          txRef: "DON-SOLIDARITY-4019"
+        }
+      ]
+      setAdminPayouts(initialSeed)
+      localStorage.setItem("editorial360_payout_requests", JSON.stringify(initialSeed))
+    } catch (e) {}
+  }, [])
+
+  const handleReleasePayout = (id: string) => {
+    const updated = adminPayouts.map(p => {
+      if (p.id === id) {
+        const txRef = p.option === "bank" 
+          ? `WISE-SEPA-${Math.floor(100000 + Math.random() * 900000)}` 
+          : p.option === "voucher"
+          ? `APC-VOUCH-${Math.floor(1000 + Math.random() * 9000)}`
+          : `DISBURSE-TX-${Math.floor(10000 + Math.random() * 90000)}`
+        return {
+          ...p,
+          status: "Released" as const,
+          releasedAt: new Date().toISOString().split("T")[0],
+          txRef
+        }
+      }
+      return p
+    })
+    setAdminPayouts(updated)
+    try {
+      localStorage.setItem("editorial360_payout_requests", JSON.stringify(updated))
+    } catch (e) {}
+    setPayoutReleaseSuccess(language === "de" ? `Zahlung ${id} erfolgreich autorisiert und freigegeben!` : `Payment ${id} authorized and released successfully!`)
+    setTimeout(() => setPayoutReleaseSuccess(null), 4500)
+  }
 
   // Automatic scroll-to-top whenever logging in, switching role, or switching desk tabs
   useEffect(() => {
@@ -4655,113 +4791,137 @@ export default function Editorial360Page() {
 
                 {/* Interactive User Profile Dropdown Popover */}
                 {isUserMenuOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] shadow-2xl p-4 z-50 animate-in fade-in duration-200"
-                  >
-                    {/* User Header */}
-                    <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
-                      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
-                        <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#18191e] ${userStatus === "online" ? "bg-emerald-500" : "bg-slate-400"}`} />
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40 bg-transparent" 
+                      onClick={() => setIsUserMenuOpen(false)} 
+                    />
+                    <div 
+                      className="absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] shadow-2xl p-4 z-50 animate-in fade-in duration-200"
+                    >
+                      {/* User Header */}
+                      <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
+                        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
+                          <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                          <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#18191e] ${userStatus === "online" ? "bg-emerald-500" : "bg-slate-400"}`} />
+                        </div>
+                        <div className="space-y-0.5 overflow-hidden text-left flex-1">
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? "Dr. Marcus Vance" : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                          </h4>
+                          <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : email}</p>
+                          <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                            {role === "editor"
+                              ? editorRank
+                              : role === "jm" 
+                              ? jmStaffRole
+                              : role === "reviewer" 
+                              ? (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
+                              : role === "author" 
+                              ? (language === "de" ? "Verifizierter Autor" : "Verified Author") 
+                              : (role === "im" || role === "ria") 
+                              ? (language === "de" ? "Integritätsmanager" : "Integrity Manager") 
+                              : "System Admin"}
+                          </span>
+                        </div>
                       </div>
-                      <div className="space-y-0.5 overflow-hidden text-left flex-1">
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                          {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? "Dr. Marcus Vance" : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
-                        </h4>
-                        <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : email}</p>
-                        <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
-                          {role === "editor"
-                            ? editorRank
-                            : role === "jm" 
-                            ? jmStaffRole
-                            : role === "reviewer" 
-                            ? (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
-                            : role === "author" 
-                            ? (language === "de" ? "Verifizierter Autor" : "Verified Author") 
-                            : (role === "im" || role === "ria") 
-                            ? (language === "de" ? "Integritätsmanager" : "Integrity Manager") 
-                            : "System Admin"}
+
+                      {/* Presence Status Segmented Toggle */}
+                      <div className="py-2 px-3 my-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center justify-between text-xs">
+                        <span className="text-slate-600 dark:text-slate-400 font-semibold">
+                          {language === "de" ? "Status" : "Presence"}
                         </span>
+                        <div className="flex items-center bg-white dark:bg-[#18191e] p-0.5 rounded-lg border border-slate-200 dark:border-[#272832] shadow-2xs">
+                          <button
+                            type="button"
+                            onClick={() => setUserStatus("online")}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                              userStatus === "online"
+                                ? "bg-emerald-500 text-white shadow-xs"
+                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full ${userStatus === "online" ? "bg-white" : "bg-emerald-500"}`} />
+                            Online
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setUserStatus("offline")}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                              userStatus === "offline"
+                                ? "bg-slate-600 text-white shadow-xs"
+                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full ${userStatus === "offline" ? "bg-white" : "bg-slate-400"}`} />
+                            Offline
+                          </button>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Presence Status Segmented Toggle */}
-                    <div className="py-2 px-3 my-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center justify-between text-xs">
-                      <span className="text-slate-600 dark:text-slate-400 font-semibold">
-                        {language === "de" ? "Status" : "Presence"}
-                      </span>
-                      <div className="flex items-center bg-white dark:bg-[#18191e] p-0.5 rounded-lg border border-slate-200 dark:border-[#272832] shadow-2xs">
-                        <button
-                          type="button"
-                          onClick={() => setUserStatus("online")}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                            userStatus === "online"
-                              ? "bg-emerald-500 text-white shadow-xs"
-                              : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${userStatus === "online" ? "bg-white" : "bg-emerald-500"}`} />
-                          Online
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setUserStatus("offline")}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                            userStatus === "offline"
-                              ? "bg-slate-600 text-white shadow-xs"
-                              : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${userStatus === "offline" ? "bg-white" : "bg-slate-400"}`} />
-                          Offline
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Action Links */}
-                    <div className="py-1 space-y-1 text-left">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsUserMenuOpen(false)
-                          setIsAuthorProfileSetupOpen(true)
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#20222a] transition-colors cursor-pointer"
-                      >
-                        <User className="h-4 w-4 text-[#0b99ff]" />
-                        {language === "de" ? "Profileinstellungen" : "Profile Settings"}
-                      </button>
-
-                      {role === "author" && (
+                      {/* Action Links */}
+                      <div className="py-1 space-y-1 text-left">
                         <button
                           type="button"
                           onClick={() => {
                             setIsUserMenuOpen(false)
-                            setIsSubmitWizardOpen(true)
+                            if (role === "reviewer") {
+                              setIsProfileModalOpen(true)
+                            } else {
+                              setIsAuthorProfileSetupOpen(true)
+                            }
                           }}
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#20222a] transition-colors cursor-pointer"
                         >
-                          <Plus className="h-4 w-4 text-emerald-500" />
-                          {language === "de" ? "Neues Manuskript einreichen" : "Submit New Manuscript"}
+                          <User className="h-4 w-4 text-[#0b99ff]" />
+                          {language === "de" ? "Profileinstellungen" : "Profile Settings"}
                         </button>
-                      )}
-                    </div>
 
-                    {/* Sign Out Button */}
-                    <div className="pt-2 mt-1 border-t border-slate-100 dark:border-[#272832]">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsUserMenuOpen(false)
-                          handleForceSignOut(false)
-                        }}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        {language === "de" ? "Abmelden" : "Sign Out"}
-                      </button>
+                        {role === "reviewer" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsUserMenuOpen(false)
+                              setActiveReviewerTab("certificate")
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#20222a] transition-colors cursor-pointer"
+                          >
+                            <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                            {language === "de" ? "Verifiziertes Zertifikat" : "Verified Reviewer Certificate"}
+                          </button>
+                        )}
+
+                        {role === "author" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsUserMenuOpen(false)
+                              setIsSubmitWizardOpen(true)
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#20222a] transition-colors cursor-pointer"
+                          >
+                            <Plus className="h-4 w-4 text-emerald-500" />
+                            {language === "de" ? "Neues Manuskript einreichen" : "Submit New Manuscript"}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Sign Out Button */}
+                      <div className="pt-2 mt-1 border-t border-slate-100 dark:border-[#272832]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false)
+                            handleForceSignOut(false)
+                          }}
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          {language === "de" ? "Abmelden" : "Sign Out"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
@@ -4842,8 +5002,8 @@ export default function Editorial360Page() {
                             : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
                         }`}
                       >
-                        <SearchCode className="h-4 w-4" />
-                        <span>{language === "de" ? "Forensik-Toolkit" : "Forensics Toolkit"}</span>
+                        <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                        <span>{language === "de" ? "Integritäts-Prüfbericht" : "Integrity Pre-Check"}</span>
                       </button>
 
                       <button 
@@ -5283,6 +5443,26 @@ export default function Editorial360Page() {
                       >
                         <BookOpen className="h-4 w-4" />
                         {language === "de" ? "Journal-Portfolio" : "Journal Portfolio"}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAdminTab("payouts")}
+                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAdminTab === "payouts"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <DollarSign className="h-4 w-4 text-emerald-500" />
+                          <span>{language === "de" ? "Gutachter-Honorare" : "Reviewer Honoraria"}</span>
+                        </div>
+                        {adminPayouts.filter(p => p.status === "Pending").length > 0 && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                            {adminPayouts.filter(p => p.status === "Pending").length}
+                          </span>
+                        )}
                       </button>
                     </>
                   )}
@@ -8456,8 +8636,9 @@ export default function Editorial360Page() {
                 {role === "admin" && (
                   <div className="space-y-6">
                     <UserProfileHeaderCard role="admin" />
+
                     {/* Admin stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Submissions</CardTitle>
@@ -8478,7 +8659,7 @@ export default function Editorial360Page() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">118</div>
-                          <span className="text-[10px] text-slate-555 dark:text-slate-400 font-medium block mt-1">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
                             84 verified with ORCID
                           </span>
                         </CardContent>
@@ -8491,9 +8672,29 @@ export default function Editorial360Page() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">4</div>
-                          <span className="text-[10px] text-slate-555 dark:text-slate-400 font-medium block mt-1">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
                             Indexed & Managed
                           </span>
+                        </CardContent>
+                      </Card>
+
+                      {/* 6% Reviewer Honoraria Fund Card */}
+                      <Card 
+                        onClick={() => setActiveAdminTab("payouts")}
+                        className="bg-white dark:bg-slate-950 border border-emerald-500/30 hover:border-emerald-500 shadow-sm transition-all cursor-pointer group"
+                      >
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Reviewer Honoraria</CardTitle>
+                          <DollarSign className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold text-slate-900 dark:text-white">€4,850</div>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
+                              {adminPayouts.filter(p => p.status === "Pending").length} pending ({adminPayouts.filter(p => p.status === "Pending").reduce((acc, p) => acc + p.amount, 0)}€)
+                            </span>
+                            <span className="text-[10px] text-[#0b99ff] underline font-semibold">Ledger &rarr;</span>
+                          </div>
                         </CardContent>
                       </Card>
 
@@ -8511,71 +8712,370 @@ export default function Editorial360Page() {
                       </Card>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      
-                      {/* Configuration Settings */}
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 lg:col-span-1 space-y-4 transition-colors">
-                        <div>
-                          <h3 className="text-base font-bold text-slate-900 dark:text-white">Automation</h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Toggle global system operations policies.</p>
-                        </div>
-                        
-                        <div className="space-y-4.5 pt-2">
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <label className="text-xs font-bold text-slate-700 dark:text-slate-200">Double-Blind Review</label>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Hide identities of authors/reviewers.</span>
-                            </div>
-                            <input 
-                              type="checkbox" 
-                              checked={doubleBlind}
-                              onChange={(e) => setDoubleBlind(e.target.checked)}
-                              className="h-4 w-4 text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer rounded"
-                            />
-                          </div>
+                    {/* Success notification for payout approval */}
+                    {payoutReleaseSuccess && (
+                      <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center gap-3 animate-in fade-in">
+                        <CheckCircle2 className="h-5 w-5 shrink-0" />
+                        <span className="text-sm font-semibold">{payoutReleaseSuccess}</span>
+                      </div>
+                    )}
 
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <label className="text-xs font-bold text-slate-700 dark:text-slate-200">Pre-flight Integrity Scans</label>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Trigger plagiarism/AI checkers on submission.</span>
+                    {/* ================= VIEW A: REVIEWER HONORARIA & PAYOUTS LEDGER ================= */}
+                    {activeAdminTab === "payouts" && (
+                      <div className="space-y-6 animate-in fade-in">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-6 w-6 text-emerald-500" />
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                {language === "de" ? "Gutachter-Honorare & Auszahlungsverwaltung (6% APC-Pool)" : "Reviewer Honoraria & Payout Management (6% APC Allocation)"}
+                              </h3>
                             </div>
-                            <input 
-                              type="checkbox" 
-                              checked={autoIntegrity}
-                              onChange={(e) => setAutoIntegrity(e.target.checked)}
-                              className="h-4 w-4 text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer rounded"
-                            />
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">
+                              {language === "de" 
+                                ? "Verwaltung der 6%-Mikrovergütung für qualifizierte Peer-Reviewer (€50 pro Gutachten). Genehmigung und Freigabe für direkte Banküberweisungen (Wise/SEPA), APC-Voucher, Entwicklungsland-Waiver-Fonds oder universitäre Bibliotheksspenden." 
+                                : "Administer quality-gated micro-honoraria for verified peer reviews (€50 / 25 APC points). Authorize and release payouts across 4 disbursement channels: Direct Bank/Wise, APC Voucher, Low-Income Country Waiver Fund, or University Library OA Fund."}
+                            </p>
                           </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <label className="text-xs font-bold text-slate-700 dark:text-slate-200">Mandatory ORCID Registry</label>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Block registration without verified ORCID.</span>
-                            </div>
-                            <input 
-                              type="checkbox" 
-                              checked={orcidRequired}
-                              onChange={(e) => setOrcidRequired(e.target.checked)}
-                              className="h-4 w-4 text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer rounded"
-                            />
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              Reserve Pool: €4,850.00
+                            </span>
                           </div>
                         </div>
 
-                        <div className="pt-2">
-                          <Button 
-                            onClick={handleSaveAdminConfigs}
-                            className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs cursor-pointer"
-                          >
-                            Save Configurations
-                          </Button>
+                        {/* Summary Metrics */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Reserve Allocation</div>
+                            <div className="text-xl font-extrabold text-slate-900 dark:text-white mt-1">€4,850.00</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">Calculated from 6% of active journal APCs</div>
+                          </div>
+                          <div className="bg-white dark:bg-slate-950 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Pending Reviewer Approvals</div>
+                            <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">
+                              €{adminPayouts.filter(p => p.status === "Pending").reduce((acc, p) => acc + p.amount, 0)}.00
+                            </div>
+                            <div className="text-[10px] text-amber-600/80 mt-0.5">
+                              {adminPayouts.filter(p => p.status === "Pending").length} requests awaiting release
+                            </div>
+                          </div>
+                          <div className="bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Disbursed to Date</div>
+                            <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                              €{adminPayouts.filter(p => p.status === "Released").reduce((acc, p) => acc + p.amount, 0)}.00
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">
+                              {adminPayouts.filter(p => p.status === "Released").length} payouts settled & audited
+                            </div>
+                          </div>
+                          <div className="bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Payment Channels</div>
+                            <div className="text-xl font-extrabold text-[#0b99ff] mt-1">4 Active Options</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">Bank, Voucher, Waiver Fund, Library</div>
+                          </div>
                         </div>
-                      </Card>
 
-                      {/* Workspace Registry Directory */}
-                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 lg:col-span-2 overflow-hidden transition-colors">
+                        {/* Search & Filter Toolbar */}
+                        <div className="bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                          <div className="relative w-full sm:w-80">
+                            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                            <input 
+                              type="text" 
+                              value={payoutSearch}
+                              onChange={(e) => setPayoutSearch(e.target.value)}
+                              placeholder={language === "de" ? "Gutachter, Manuskript oder Bank filtern..." : "Filter by reviewer, paper ID, or details..."}
+                              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-[#0b99ff]"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                            <button 
+                              type="button"
+                              onClick={() => setPayoutFilter("all")}
+                              className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-colors cursor-pointer ${
+                                payoutFilter === "all" 
+                                  ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" 
+                                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900"
+                              }`}
+                            >
+                              All ({adminPayouts.length})
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setPayoutFilter("pending")}
+                              className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                payoutFilter === "pending" 
+                                  ? "bg-amber-500 text-white" 
+                                  : "text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                              }`}
+                            >
+                              <span>Pending</span>
+                              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
+                                {adminPayouts.filter(p => p.status === "Pending").length}
+                              </span>
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setPayoutFilter("released")}
+                              className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-colors cursor-pointer ${
+                                payoutFilter === "released" 
+                                  ? "bg-emerald-600 text-white" 
+                                  : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                              }`}
+                            >
+                              Released ({adminPayouts.filter(p => p.status === "Released").length})
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Payouts Ledger Table */}
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead>
+                                <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase">
+                                  <th className="px-5 py-3.5">Ticket ID & Date</th>
+                                  <th className="px-5 py-3.5">Reviewer</th>
+                                  <th className="px-5 py-3.5">Manuscript</th>
+                                  <th className="px-5 py-3.5 text-right">Honorarium</th>
+                                  <th className="px-5 py-3.5">Selected Option</th>
+                                  <th className="px-5 py-3.5">Disbursement Details</th>
+                                  <th className="px-5 py-3.5 text-center">Status</th>
+                                  <th className="px-5 py-3.5 text-center">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
+                                {adminPayouts
+                                  .filter(p => {
+                                    if (payoutFilter === "pending") return p.status === "Pending"
+                                    if (payoutFilter === "released") return p.status === "Released"
+                                    return true
+                                  })
+                                  .filter(p => {
+                                    if (!payoutSearch) return true
+                                    const q = payoutSearch.toLowerCase()
+                                    return (
+                                      p.reviewerName.toLowerCase().includes(q) ||
+                                      p.reviewerEmail.toLowerCase().includes(q) ||
+                                      p.manuscriptId.toLowerCase().includes(q) ||
+                                      p.details.toLowerCase().includes(q) ||
+                                      p.id.toLowerCase().includes(q)
+                                    )
+                                  })
+                                  .map((p) => (
+                                    <tr key={p.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
+                                      <td className="px-5 py-3.5 whitespace-nowrap">
+                                        <div className="font-bold text-slate-900 dark:text-white font-mono">{p.id}</div>
+                                        <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                                          <Calendar className="h-3 w-3" />
+                                          {p.requestedAt}
+                                        </div>
+                                      </td>
+                                      <td className="px-5 py-3.5">
+                                        <div className="font-bold text-slate-900 dark:text-white">{p.reviewerName}</div>
+                                        <div className="text-[10px] text-slate-500 dark:text-slate-400">{p.reviewerEmail}</div>
+                                        <div className="text-[10px] text-slate-400 truncate max-w-[200px]">{p.institution}</div>
+                                      </td>
+                                      <td className="px-5 py-3.5 whitespace-nowrap">
+                                        <span className="px-2 py-0.5 font-mono text-[10px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-[#0b99ff] border border-slate-200 dark:border-slate-700">
+                                          {p.manuscriptId}
+                                        </span>
+                                      </td>
+                                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                                        <span className="text-sm font-extrabold text-slate-900 dark:text-white">€{p.amount}.00</span>
+                                        <div className="text-[10px] text-slate-400 uppercase">{p.currency}</div>
+                                      </td>
+                                      <td className="px-5 py-3.5 whitespace-nowrap">
+                                        {p.option === "bank" && (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                            <Landmark className="h-3 w-3" />
+                                            Direct Cash (Bank / Wise)
+                                          </span>
+                                        )}
+                                        {p.option === "voucher" && (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                            <Receipt className="h-3 w-3" />
+                                            APC Credit Voucher
+                                          </span>
+                                        )}
+                                        {p.option === "waiver_fund" && (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                            <Globe className="h-3 w-3" />
+                                            Solidarity Waiver Pool
+                                          </span>
+                                        )}
+                                        {p.option === "library" && (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                            <BookOpen className="h-3 w-3" />
+                                            University Library Fund
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="px-5 py-3.5 max-w-[280px]">
+                                        <div className="text-xs text-slate-700 dark:text-slate-300 font-mono text-[11px] truncate" title={p.details}>
+                                          {p.details}
+                                        </div>
+                                        {p.txRef && (
+                                          <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+                                            Ref: {p.txRef}
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td className="px-5 py-3.5 text-center whitespace-nowrap">
+                                        {p.status === "Pending" ? (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                            Pending Release
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                            <Check className="h-3 w-3" />
+                                            Released & Audited
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="px-5 py-3.5 text-center whitespace-nowrap">
+                                        {p.status === "Pending" ? (
+                                          <Button 
+                                            size="sm"
+                                            onClick={() => handleReleasePayout(p.id)}
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs"
+                                          >
+                                            <Check className="h-3.5 w-3.5 mr-1" />
+                                            Release Payment
+                                          </Button>
+                                        ) : (
+                                          <span className="text-[10px] text-slate-400 font-mono">
+                                            Paid ({p.releasedAt})
+                                          </span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* ================= VIEW B: SYSTEM OVERVIEW (DEFAULT) ================= */}
+                    {(activeAdminTab === "overview" || activeAdminTab === "policy") && (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Configuration Settings */}
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 lg:col-span-1 space-y-4 transition-colors">
+                          <div>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white">Automation & Integrity</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Toggle global system operations and quality policies.</p>
+                          </div>
+                          
+                          <div className="space-y-4.5 pt-2">
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-0.5">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-200">Double-Blind Review</label>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Hide identities of authors/reviewers.</span>
+                              </div>
+                              <input 
+                                type="checkbox" 
+                                checked={doubleBlind}
+                                onChange={(e) => setDoubleBlind(e.target.checked)}
+                                className="h-4 w-4 text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer rounded"
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-0.5">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-200">Pre-flight Integrity Scans</label>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Trigger plagiarism/AI checkers on submission.</span>
+                              </div>
+                              <input 
+                                type="checkbox" 
+                                checked={autoIntegrity}
+                                onChange={(e) => setAutoIntegrity(e.target.checked)}
+                                className="h-4 w-4 text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer rounded"
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-0.5">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-200">Mandatory ORCID Registry</label>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Block registration without verified ORCID.</span>
+                              </div>
+                              <input 
+                                type="checkbox" 
+                                checked={orcidRequired}
+                                onChange={(e) => setOrcidRequired(e.target.checked)}
+                                className="h-4 w-4 text-[#0b99ff] focus:ring-[#0b99ff] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer rounded"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="pt-2">
+                            <Button 
+                              onClick={handleSaveAdminConfigs}
+                              className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold text-xs cursor-pointer"
+                            >
+                              Save Configurations
+                            </Button>
+                          </div>
+                        </Card>
+
+                        {/* Quick Reviewer Honoraria Snapshot in Overview */}
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 lg:col-span-2 p-6 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <DollarSign className="h-5 w-5 text-emerald-500" />
+                                <h3 className="text-base font-bold text-slate-900 dark:text-white">Reviewer Micro-Honoraria Status (6% Fund)</h3>
+                              </div>
+                              <Button 
+                                size="sm" 
+                                onClick={() => setActiveAdminTab("payouts")}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer"
+                              >
+                                View Payout Ledger &rarr;
+                              </Button>
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                              Every completed peer review qualifies for €50 honorarium. Reviewers can direct cash out, redeem as APC credits, or donate to low-income fee-waiver pools or university libraries.
+                            </p>
+
+                            <div className="grid grid-cols-3 gap-3 mt-4">
+                              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase">Available Reserve</div>
+                                <div className="text-lg font-bold text-slate-900 dark:text-white">€4,850.00</div>
+                              </div>
+                              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                <div className="text-[10px] font-bold text-amber-600 uppercase">Pending Release</div>
+                                <div className="text-lg font-bold text-amber-600">
+                                  {adminPayouts.filter(p => p.status === "Pending").length} requests
+                                </div>
+                              </div>
+                              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                <div className="text-[10px] font-bold text-emerald-600 uppercase">Disbursed</div>
+                                <div className="text-lg font-bold text-emerald-600">
+                                  €{adminPayouts.filter(p => p.status === "Released").reduce((acc, p) => acc + p.amount, 0)}.00
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                            <span className="text-slate-500">Quality Gating: Active (Scorecard submission required before release)</span>
+                            <span className="font-semibold text-emerald-600">Auto-Audited ✓</span>
+                          </div>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* ================= VIEW C: USER MANAGEMENT & WORKSPACES ================= */}
+                    {(activeAdminTab === "overview" || activeAdminTab === "members") && (
+                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
                         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950">
                           <div>
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white">Workspaces</h3>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white">User Workspaces & Role Directory</h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">System access logs for all active administrators, editors, and reviewers.</p>
                           </div>
                           <Button 
@@ -8626,46 +9126,47 @@ export default function Editorial360Page() {
                           </table>
                         </div>
                       </Card>
+                    )}
 
-                    </div>
-
-                    {/* Managed Journals Directory Table */}
-                    <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors mt-6">
-                      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white">Journal Directory</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track submission volumes, average decision latencies, and editor-in-chief assignments for active peer journals.</p>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-xs">
-                          <thead>
-                            <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase">
-                              <th className="px-5 py-3">Journal Name</th>
-                              <th className="px-5 py-3 text-center">Acronym</th>
-                              <th className="px-5 py-3 text-center">Submissions Volume</th>
-                              <th className="px-5 py-3 text-center">Avg Turnaround Latency</th>
-                              <th className="px-5 py-3">Editor-in-Chief</th>
-                              <th className="px-5 py-3">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
-                            {journals.map((j, idx) => (
-                              <tr key={idx} className="hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
-                                <td className="px-5 py-3.5 font-bold text-slate-900 dark:text-white">{j.name}</td>
-                                <td className="px-5 py-3.5 text-center font-bold text-[#0b99ff]">{j.code}</td>
-                                <td className="px-5 py-3.5 text-center text-slate-700 dark:text-slate-350">{j.submissions} articles</td>
-                                <td className="px-5 py-3.5 text-center text-slate-700 dark:text-slate-350">{j.latency} days</td>
-                                <td className="px-5 py-3.5 text-slate-700 dark:text-slate-300">{j.editorInChief}</td>
-                                <td className="px-5 py-3.5">
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                                    {j.status}
-                                  </span>
-                                </td>
+                    {/* ================= VIEW D: MANAGED JOURNALS DIRECTORY ================= */}
+                    {(activeAdminTab === "overview" || activeAdminTab === "journals") && (
+                      <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
+                        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+                          <h3 className="text-base font-bold text-slate-900 dark:text-white">Journal Directory</h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track submission volumes, average decision latencies, and editor-in-chief assignments for active peer journals.</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                              <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase">
+                                <th className="px-5 py-3">Journal Name</th>
+                                <th className="px-5 py-3 text-center">Acronym</th>
+                                <th className="px-5 py-3 text-center">Submissions Volume</th>
+                                <th className="px-5 py-3 text-center">Avg Turnaround Latency</th>
+                                <th className="px-5 py-3">Editor-in-Chief</th>
+                                <th className="px-5 py-3">Status</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </Card>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
+                              {journals.map((j, idx) => (
+                                <tr key={idx} className="hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
+                                  <td className="px-5 py-3.5 font-bold text-slate-900 dark:text-white">{j.name}</td>
+                                  <td className="px-5 py-3.5 text-center font-bold text-[#0b99ff]">{j.code}</td>
+                                  <td className="px-5 py-3.5 text-center text-slate-700 dark:text-slate-350">{j.submissions} articles</td>
+                                  <td className="px-5 py-3.5 text-center text-slate-700 dark:text-slate-350">{j.latency} days</td>
+                                  <td className="px-5 py-3.5 text-slate-700 dark:text-slate-300">{j.editorInChief}</td>
+                                  <td className="px-5 py-3.5">
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
+                                      {j.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </Card>
+                    )}
 
                   </div>
                 )}

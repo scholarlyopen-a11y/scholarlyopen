@@ -439,6 +439,29 @@ export default function ReviewerGatewayPage() {
   const handleFinishExam = () => {
     setIsTimerRunning(false)
     setStep("results")
+
+    // Persist passed credential to localStorage for editorial360 sync
+    if (typeof window !== "undefined") {
+      let correctCount = 0
+      questions.forEach(q => {
+        const chosen = userAnswers[q.id]
+        const opt = q.options.find(o => o.id === chosen)
+        if (opt && opt.isCorrect) correctCount += 1
+      })
+      const percentage = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0
+      if (percentage >= 80) {
+        const record = {
+          name: candidateName || "Dr. Marcus Vance",
+          email: candidateEmail || "reviewer@scholarlyopen.org",
+          discipline: selectedDiscipline,
+          credentialId,
+          percentage,
+          passedAt: new Date().toISOString(),
+          reviewsDone: 0
+        }
+        localStorage.setItem("scholarlyopen_passed_reviewer_gateway", JSON.stringify(record))
+      }
+    }
   }
 
   // Scoring

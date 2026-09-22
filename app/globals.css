@@ -172,20 +172,6 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    -ms-overflow-style: none !important;
-    scrollbar-width: none !important;
-  }
-  *::-webkit-scrollbar {
-    display: none !important;
-    width: 0px !important;
-    height: 0px !important;
-    background: transparent !important;
-  }
-  *::-webkit-scrollbar-thumb {
-    display: none !important;
-  }
-  *::-webkit-scrollbar-track {
-    display: none !important;
   }
   body {
     @apply bg-background text-foreground;
@@ -235,45 +221,54 @@
 }
 
 /* ========================================================= */
-/* COMPLETELY REMOVE ALL SCROLLBARS GLOBALLY ACROSS PLATFORM */
+/* SLEEK, MODERN PLATFORM SCROLLBARS                         */
 /* ========================================================= */
-*, *::before, *::after, html, body, div, span, applet, object, iframe,
-p, blockquote, pre, a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var,
-b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,
-time, mark, audio, video, main, section, aside, nav, dialog {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
 }
 
 ::-webkit-scrollbar {
-  display: none !important;
-  width: 0px !important;
-  height: 0px !important;
-  background: transparent !important;
-}
-
-::-webkit-scrollbar-thumb {
-  display: none !important;
-  background: transparent !important;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  display: none !important;
-  background: transparent !important;
+  background: transparent;
 }
 
-::-webkit-scrollbar-corner {
-  display: none !important;
-  background: transparent !important;
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
-::-webkit-scrollbar-button {
-  display: none !important;
-  width: 0px !important;
-  height: 0px !important;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
+
+.dark html,
+.dark body {
+  scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
 
 

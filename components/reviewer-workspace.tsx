@@ -48,7 +48,11 @@ import {
   UserCheck,
   Save,
   CheckCheck,
-  Copy
+  Copy,
+  Landmark,
+  HeartHandshake,
+  Library,
+  CreditCard
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -357,6 +361,31 @@ export function ReviewerWorkspace({
             status: "Active"
           }
         ]
+      // Sync candidate from passed gateway if available
+      const gatewayPassStr = localStorage.getItem("scholarlyopen_passed_reviewer_gateway")
+      if (gatewayPassStr) {
+        try {
+          const gw = JSON.parse(gatewayPassStr)
+          if (gw?.name) {
+            setProfile(prev => ({
+              ...prev,
+              name: gw.name.replace(/^Dr\.\s*|^Prof\.\s*/i, ""),
+              email: gw.email || prev.email,
+              primaryDiscipline: gw.discipline || prev.primaryDiscipline
+            }))
+          }
+        } catch (e) {}
+      }
+
+      // Sync completed reviews count so certificate is not predefined
+      const storedCompletedStr = localStorage.getItem(`editorial360_reviewer_completed_reviews_${email}`)
+      if (storedCompletedStr !== null) {
+        setReviewsDone(parseInt(storedCompletedStr, 10) || 0)
+      } else if (gatewayPassStr) {
+        setReviewsDone(0)
+      } else {
+        // Start with 0 so the reviewer genuinely earns their verified certificate
+        setReviewsDone(0)
       }
       setAwardedVouchers(list)
     } catch (e) {
@@ -373,6 +402,15 @@ export function ReviewerWorkspace({
   const [requestCertificate, setRequestCertificate] = useState(true)
   const [syncOrcid, setSyncOrcid] = useState(true)
   const [isDownloadingZip, setIsDownloadingZip] = useState(false)
+
+  // 4-Way Payout & Honorarium State
+  const [payoutOption, setPayoutOption] = useState<"bank" | "voucher" | "waiver_fund" | "library">("bank")
+  const [payoutBeneficiary, setPayoutBeneficiary] = useState("")
+  const [payoutIban, setPayoutIban] = useState("DE89 3704 0044 0532 0130 00")
+  const [payoutBankName, setPayoutBankName] = useState("Wise / Deutsche Bank")
+  const [payoutLibraryName, setPayoutLibraryName] = useState("")
+  const [payoutSuccessMsg, setPayoutSuccessMsg] = useState<string | null>(null)
+  const [isSubmittingPayout, setIsSubmittingPayout] = useState(false)
 
   // Misconduct Escalation State (IM / Handling Editor)
   const [selectedEscalateRev, setSelectedEscalateRev] = useState<ActiveReviewItem | null>(null)
@@ -809,11 +847,177 @@ export function ReviewerWorkspace({
 
           onSubmitScorecard(payload)
           setPoints(prev => Math.min(100, prev + 12))
-          setReviewsDone(prev => prev + 1)
+          const newDone = (reviewsDone || 0) + 1
+          setReviewsDone(newDone)
+          try {
+            const email = user?.email || "reviewer@scholarlyopen.org"
+            localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, String(newDone))
+          } catch (e) {}
           setSelectedReviewForEval(null)
         }, 600)
       }
     })
+  }
+
+  // Active Real Document & Package Downloader
+  const handleDownloadFile = (filename: string, content: string) => {
+    if (typeof window === "undefined") return
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleDownloadSpecificFile = (type: "fulltext" | "supp" | "irb", rev: ActiveReviewItem) => {
+    const id = rev.manuscriptId || rev.id || "SOMED-26-RS001"
+    if (type === "fulltext") {
+      const content = `================================================================================
+SCHOLARLY OPEN • BLINDED MANUSCRIPT FULL TEXT
+Double-Blind Evaluation Copy (Author details and institutional PII redacted)
+================================================================================
+MANUSCRIPT ID: ${id}
+JOURNAL: ${rev.journal}
+TITLE: ${rev.title}
+DISCIPLINE: Medicine & Healthcare
+
+ABSTRACT:
+This study presents an empirical investigation into high-throughput predictive modeling 
+and clinical workflows. Across a multi-center cohort, the proposed pipeline achieved 
+significant diagnostic concordance (p < 0.001) while adhering to strict ethical safeguards.
+
+1. INTRODUCTION
+Contemporary scholarly literature indicates substantial variance in diagnostic workflows...
+[Full text anonymized for double-blind referee review across 14 pages]
+
+2. METHODS & MATERIALS
+- Participant cohort: n=14,280 anonymized subjects
+- Pre-registration: Clinical trials protocol clearance #2026-MED-4401
+- Primary endpoints: Concordance coefficient and sensitivity
+
+3. RESULTS & DISCUSSION
+Quantitative comparisons demonstrate a 14.8% relative improvement in predictive fidelity...
+
+4. REFERENCES
+[42 Crossref verified archival references included in full package]
+`
+      handleDownloadFile(`${id}_Blinded_Manuscript_FullText.txt`, content)
+    } else if (type === "supp") {
+      const content = `================================================================================
+SCHOLARLY OPEN • SUPPLEMENTARY DATASETS, TABLES & HIGH-RES FIGURES
+================================================================================
+MANUSCRIPT ID: ${id}
+TITLE: ${rev.title}
+
+SUPPLEMENTARY FIGURE S1:
+- Receiver Operating Characteristic (ROC) curve across cohort strata.
+- Resolution: 300 DPI vector graphic verified clean of contrast manipulation.
+
+SUPPLEMENTARY TABLE S1:
+- Baseline demographic distributions and stratified propensity score matching.
+
+SUPPLEMENTARY DATASET 1:
+- Open Research Data deposition DOI: 10.5555/zenodo.9481023 (Anonymized).
+`
+      handleDownloadFile(`${id}_Supplementary_Tables_Figures.txt`, content)
+    } else if (type === "irb") {
+      const content = `================================================================================
+SCHOLARLY OPEN • INSTITUTIONAL REVIEW BOARD (IRB) CLEARANCE STATEMENT
+================================================================================
+MANUSCRIPT ID: ${id}
+CLEARANCE PROTOCOL: #2026-ETHICS-4401
+STATUS: APPROVED & VERIFIED COMPLIANT WITH DECLARATION OF HELSINKI
+
+The institutional ethics committee evaluated the protocol submitted for the study titled:
+"${rev.title}".
+Informed written consent was secured from all participants prior to anonymization.
+All clinical research procedures adhere strictly to COPE guidelines and local statutory laws.
+`
+      handleDownloadFile(`${id}_IRB_Ethics_Statement_Redacted.txt`, content)
+    }
+  }
+
+  const handleDownloadFullPackage = (rev: ActiveReviewItem) => {
+    setIsDownloadingZip(true)
+    setTimeout(() => {
+      setIsDownloadingZip(false)
+      const id = rev.manuscriptId || rev.id || "SOMED-26-RS001"
+      const content = `================================================================================
+SCHOLARLY OPEN • EDITORIAL360 COMPLETE BLINDED PEER REVIEW PACKAGE
+================================================================================
+MANUSCRIPT ID: ${id}
+JOURNAL: ${rev.journal}
+TITLE: ${rev.title}
+DECISION DEADLINE: ${rev.deadline}
+PEER REVIEW TRACK: Double-Blind Evaluation
+
+INCLUDED ANONYMIZED DOSSIER FILES:
+1. ${id}_Blinded_Manuscript_FullText.txt
+2. ${id}_Supplementary_Tables_Figures.txt
+3. ${id}_IRB_Ethics_Statement_Redacted.txt
+
+EDITORIAL INTEGRITY PRE-SCREENING SUMMARY:
+- AI Linguistic Index: 4% Probability (Clean)
+- Image & Figure Forensics: 100% Original (Clean)
+- Citation & COI Graph: Verified Network (Balanced)
+- Plagiarism Overlap: < 8% (Standard cross-citations)
+
+REFEREE INSTRUCTIONS & EVALUATION RUBRIC:
+- Evaluate scientific originality, methodology rigor, statistical validity, and data transparency.
+- Record constructive feedback for the authors in Section 1.
+- Provide confidential recommendations for the Handling Editor in Section 2.
+- Submit final scorecard via editorial360 Referee Workspace to claim your €50 honorarium.
+
+Scholarly Open Publishing Group • editorial360 Governance Framework
+COPE & Plan S Certified Archive
+`
+      handleDownloadFile(`${id}_Complete_Blinded_Package.txt`, content)
+      setSelectedPackageRev(null)
+    }, 500)
+  }
+
+  // 4-Way Payout Submission Handler
+  const handleSubmitPayout = () => {
+    setIsSubmittingPayout(true)
+    setTimeout(() => {
+      setIsSubmittingPayout(false)
+      const ticketId = `SO-PAY-${Math.floor(1000 + Math.random() * 9000)}`
+      const recipientName = getFormattedReviewerName(profile.title, profile.name)
+      const newRequest = {
+        id: ticketId,
+        reviewerName: recipientName,
+        reviewerEmail: profile.email || "reviewer@scholarlyopen.org",
+        institution: profile.institution || "Charité – Universitätsmedizin Berlin",
+        manuscriptId: "SOMED-26-RS001",
+        amount: 50,
+        option: payoutOption,
+        details: payoutOption === "bank" 
+          ? `Bank: ${payoutBankName} | IBAN: ${payoutIban} | Beneficiary: ${payoutBeneficiary || recipientName}`
+          : payoutOption === "voucher"
+          ? "APC Credit Voucher generated for next submission across 13 journals"
+          : payoutOption === "waiver_fund"
+          ? "Solidarity Waiver Pool for Low-Income Country Researchers"
+          : `Institutional Library Donation: ${payoutLibraryName || (profile.institution + " Medical Library OA Fund")}`,
+        requestedAt: new Date().toISOString().split("T")[0],
+        status: "Pending"
+      }
+
+      try {
+        const existing = localStorage.getItem("editorial360_payout_requests")
+        const list = existing ? JSON.parse(existing) : []
+        list.unshift(newRequest)
+        localStorage.setItem("editorial360_payout_requests", JSON.stringify(list))
+      } catch (e) {}
+
+      setPayoutSuccessMsg(isDe 
+        ? `Auszahlungsantrag (${ticketId}) eingereicht! Die Buchhaltung/Admin prüft und gibt die €50 frei.` 
+        : `Disbursement request (${ticketId}) submitted! Managing Editor will review and release the €50 honorarium within 24–48 hours.`)
+      setTimeout(() => setPayoutSuccessMsg(null), 6000)
+    }, 600)
   }
 
   const handlePrintCertificate = () => {
@@ -821,91 +1025,160 @@ export function ReviewerWorkspace({
     if (!printWindow) return
 
     const origin = typeof window !== "undefined" ? window.location.origin : ""
+    const recipientName = getFormattedReviewerName(profile.title, profile.name)
+    const orcidVal = profile.orcid || "0000-0004-7711-2093"
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Scholarly Open • Certificate of Verified Peer Review</title>
-        <style>
-          body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
-          .cert-box { border: 8px double #166534; padding: 40px; text-align: center; border-radius: 4px; position: relative; }
-          .logo-container { margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
-          .logo-wrap { display: inline-flex; align-items: center; gap: 12px; }
-          .logo-img { height: 50px; width: auto; }
-          .logo-text { font-size: 26px; font-weight: 900; color: #132415; letter-spacing: -0.5px; }
-          .logo-text span { color: #F6BB14; }
-          h1 { color: #166534; font-size: 24px; text-transform: uppercase; margin: 16px 0 4px; letter-spacing: 2px; }
-          h2 { font-size: 14px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; }
-          .recipient { font-size: 24px; font-weight: bold; margin: 24px 0 10px; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: inline-block; padding-bottom: 5px; }
-          .body-text { font-size: 14px; max-width: 600px; margin: 0 auto 26px; color: #334155; }
-          .meta-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; text-align: left; }
-          .meta-table th, .meta-table td { border: 1px solid #cbd5e1; padding: 10px 14px; }
-          .meta-table th { background: #f8fafc; font-weight: bold; color: #334155; }
-          .seal-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px; padding-top: 18px; border-top: 1px solid #e2e8f0; }
-          .seal { border: 2px solid #166534; padding: 8px 16px; font-size: 11px; font-weight: bold; color: #166534; text-transform: uppercase; }
-        </style>
-      </head>
-      <body>
-        <div class="cert-box">
-          <div class="logo-container">
-            <div class="logo-wrap">
-              <img src="${origin}/logo-mark.svg" alt="Scholarly Open" class="logo-img" onerror="this.src='${origin}/logo-mark-01.png'" />
-              <div class="logo-text">Scholarly <span>Open</span></div>
+    if (reviewsDone === 0) {
+      // Print Reviewer Gateway Qualification Certificate
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Scholarly Open • Reviewer Gateway Qualification Certificate</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+            .cert-box { border: 8px double #0284c7; padding: 40px; text-align: center; border-radius: 4px; position: relative; }
+            .logo-container { margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
+            .logo-wrap { display: inline-flex; align-items: center; gap: 12px; }
+            .logo-img { height: 50px; width: auto; }
+            .logo-text { font-size: 26px; font-weight: 900; color: #132415; letter-spacing: -0.5px; }
+            .logo-text span { color: #F6BB14; }
+            h1 { color: #0369a1; font-size: 24px; text-transform: uppercase; margin: 16px 0 4px; letter-spacing: 2px; }
+            h2 { font-size: 13px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; }
+            .recipient { font-size: 24px; font-weight: bold; margin: 24px 0 10px; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: inline-block; padding-bottom: 5px; }
+            .body-text { font-size: 14px; max-width: 600px; margin: 0 auto 26px; color: #334155; }
+            .meta-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; text-align: left; }
+            .meta-table th, .meta-table td { border: 1px solid #cbd5e1; padding: 10px 14px; }
+            .meta-table th { background: #f8fafc; font-weight: bold; color: #334155; }
+            .seal-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px; padding-top: 18px; border-top: 1px solid #e2e8f0; }
+            .seal { border: 2px solid #0284c7; padding: 8px 16px; font-size: 11px; font-weight: bold; color: #0284c7; text-transform: uppercase; }
+          </style>
+        </head>
+        <body>
+          <div class="cert-box">
+            <div class="logo-container">
+              <div class="logo-wrap">
+                <img src="${origin}/logo-mark.svg" alt="Scholarly Open" class="logo-img" onerror="this.src='${origin}/logo-mark-01.png'" />
+                <div class="logo-text">Scholarly <span>Open</span></div>
+              </div>
+            </div>
+            <h1>Certificate of Peer Review Qualification</h1>
+            <h2>Scholarly Open Standards Board • Gateway Examination</h2>
+            <div class="recipient">${recipientName}</div>
+            <div class="body-text">
+              This official credential certifies that the scholar named above has successfully completed the Reviewer Gateway Examination, demonstrating verified competence in academic English phrasing, COPE research integrity guidelines, and methodological evaluation in <strong>${profile.primaryDiscipline.toUpperCase()}</strong>.
+            </div>
+            <table class="meta-table">
+              <tr>
+                <th>Gateway Credential ID</th>
+                <th>Assessment Status</th>
+                <th>Discipline</th>
+                <th>COPE & Plan S Benchmark</th>
+              </tr>
+              <tr>
+                <td><strong>SO-GW-2026-9041</strong></td>
+                <td><strong style="color: #16a34a;">Passed (80%+ Standard)</strong></td>
+                <td>${profile.primaryDiscipline.toUpperCase()}</td>
+                <td>Verified & Active for Matching</td>
+              </tr>
+            </table>
+            <div class="seal-row">
+              <div style="text-align: left; font-size: 12px; color: #64748b;">
+                <div>Verified ORCID Record: <strong>${orcidVal}</strong></div>
+                <div>Status: <strong>Qualified Peer Reviewer</strong></div>
+              </div>
+              <div class="seal">Gateway Certified Seal</div>
             </div>
           </div>
-          <h1>Certificate of Peer Review</h1>
-          <h2>Official Publisher Verification</h2>
-          <div class="recipient">Dr. Marcus Vance</div>
-          <div class="body-text">
-            This official credential certifies that the scholar named above has completed verified, editor-endorsed scientific peer evaluations in full compliance with COPE standards and Scholarly Open ethical guidelines.
-          </div>
-          <table class="meta-table">
-            <tr>
-              <th>Manuscript ID</th>
-              <th>Verified Review Title</th>
-              <th>Journal</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-            <tr>
-              <td><strong>SOENG-26-RS001</strong></td>
-              <td>Decentralized Federated Learning on Non-IID Data</td>
-              <td>Engineering & Applied Sciences</td>
-              <td>2026-08-20</td>
-              <td>Completed & Released</td>
-            </tr>
-            <tr>
-              <td><strong>SOMED-26-CR002</strong></td>
-              <td>Clinical Evaluation of AI Diagnostics in Cardiology</td>
-              <td>Scholarly Open: Medicine</td>
-              <td>2026-06-12</td>
-              <td>Completed & Released</td>
-            </tr>
-            <tr>
-              <td><strong>SOSOC-26-RV003</strong></td>
-              <td>Socio-Economic Impacts of Urban Green Spaces</td>
-              <td>Social Sciences & Humanities</td>
-              <td>2026-05-28</td>
-              <td>Completed & Released</td>
-            </tr>
-          </table>
-          <div class="seal-row">
-            <div style="text-align: left; font-size: 12px; color: #64748b;">
-              <div>Verified ORCID Record: <strong>0000-0004-7711-2093</strong></div>
-              <div>Digital Certificate Hash: <strong>SHA256:88a109fe2c041</strong></div>
+        </body>
+        </html>
+      `)
+    } else {
+      // Print Verified Peer Review Certificate with real completed count
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Scholarly Open • Certificate of Verified Peer Review</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+            .cert-box { border: 8px double #166534; padding: 40px; text-align: center; border-radius: 4px; position: relative; }
+            .logo-container { margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
+            .logo-wrap { display: inline-flex; align-items: center; gap: 12px; }
+            .logo-img { height: 50px; width: auto; }
+            .logo-text { font-size: 26px; font-weight: 900; color: #132415; letter-spacing: -0.5px; }
+            .logo-text span { color: #F6BB14; }
+            h1 { color: #166534; font-size: 24px; text-transform: uppercase; margin: 16px 0 4px; letter-spacing: 2px; }
+            h2 { font-size: 14px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; }
+            .recipient { font-size: 24px; font-weight: bold; margin: 24px 0 10px; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: inline-block; padding-bottom: 5px; }
+            .body-text { font-size: 14px; max-width: 600px; margin: 0 auto 26px; color: #334155; }
+            .meta-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; text-align: left; }
+            .meta-table th, .meta-table td { border: 1px solid #cbd5e1; padding: 10px 14px; }
+            .meta-table th { background: #f8fafc; font-weight: bold; color: #334155; }
+            .seal-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px; padding-top: 18px; border-top: 1px solid #e2e8f0; }
+            .seal { border: 2px solid #166534; padding: 8px 16px; font-size: 11px; font-weight: bold; color: #166534; text-transform: uppercase; }
+          </style>
+        </head>
+        <body>
+          <div class="cert-box">
+            <div class="logo-container">
+              <div class="logo-wrap">
+                <img src="${origin}/logo-mark.svg" alt="Scholarly Open" class="logo-img" onerror="this.src='${origin}/logo-mark-01.png'" />
+                <div class="logo-text">Scholarly <span>Open</span></div>
+              </div>
             </div>
-            <div class="seal">Certified Editorial Board Seal</div>
+            <h1>Certificate of Peer Review</h1>
+            <h2>Official Publisher Verification</h2>
+            <div class="recipient">${recipientName}</div>
+            <div class="body-text">
+              This official credential certifies that the scholar named above has completed verified, editor-endorsed scientific peer evaluations in full compliance with COPE standards and Scholarly Open ethical guidelines.
+            </div>
+            <table class="meta-table">
+              <tr>
+                <th>Manuscript ID</th>
+                <th>Verified Review Title</th>
+                <th>Journal</th>
+                <th>Status</th>
+              </tr>
+              <tr>
+                <td><strong>SOMED-26-RS001</strong></td>
+                <td>Clinical Evaluation of AI Diagnostics in Cardiology</td>
+                <td>Medicine & Healthcare</td>
+                <td>Completed & Endorsed</td>
+              </tr>
+              ${reviewsDone > 1 ? `
+              <tr>
+                <td><strong>SOENG-26-RS002</strong></td>
+                <td>Decentralized Federated Learning on Non-IID Data</td>
+                <td>Engineering & Applied Sciences</td>
+                <td>Completed & Endorsed</td>
+              </tr>` : ''}
+              ${reviewsDone > 2 ? `
+              <tr>
+                <td><strong>SOSOC-26-RV003</strong></td>
+                <td>Socio-Economic Impacts of Urban Green Spaces</td>
+                <td>Social Sciences & Humanities</td>
+                <td>Completed & Endorsed</td>
+              </tr>` : ''}
+            </table>
+            <div class="seal-row">
+              <div style="text-align: left; font-size: 12px; color: #64748b;">
+                <div>Verified ORCID Record: <strong>${orcidVal}</strong></div>
+                <div>Total Completed Reviews: <strong>${reviewsDone} Verified Manuscript${reviewsDone > 1 ? 's' : ''} (2026)</strong></div>
+                <div>Digital Certificate Hash: <strong>SHA256:88a109fe2c041</strong></div>
+              </div>
+              <div class="seal">Certified Editorial Board Seal</div>
+            </div>
           </div>
-        </div>
-      </body>
-      </html>
-    `)
+        </body>
+        </html>
+      `)
+    }
     printWindow.document.close()
     setTimeout(() => {
       printWindow.focus()
       printWindow.print()
-    }, 400)
+    }, 250)
   }
 
   const handlePrintCV = () => {
@@ -1517,11 +1790,19 @@ export function ReviewerWorkspace({
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {isDe ? "KI- & Manuskript-Forensik-Dashboard" : "Paper Forensics & Synthetic Content Analyzer"}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {isDe ? "Automatische Integritätsprüfungen zur Unterstützung von Gutachtern vor der Bewertung." : "Automated integrity scans assisting reviewers in identifying synthetic text and data anomalies."}
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {isDe ? "Automatisierter Integritäts- & KI-Prüfbericht" : "Automated Integrity & AI Pre-Check Brief"}
+                  </h3>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                    {isDe ? "Vorprüfung Bestanden" : "Editorial Pre-Screening: Clean"}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {isDe 
+                    ? "Vorabprüfung durch die Redaktion (editorial360 Integrity Desk): Plagiate, Bildmanipulation und KI-Anomalien wurden bereits gescannt, damit Sie sich ganz auf die wissenschaftliche Methodik konzentrieren können." 
+                    : "Pre-screening completed by editorial360 before referee dispatch. Image forensics, citation networks, and synthetic text scans are verified clean so you can focus strictly on the science."}
                 </p>
               </div>
 
@@ -1916,6 +2197,229 @@ export function ReviewerWorkspace({
                   )
                 })}
               </div>
+            {/* Reviewer Honoraria & 4-Option Disbursement Portal */}
+            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/80 bg-white dark:bg-slate-950 p-5 sm:p-6 space-y-5 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                    <Landmark className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                        {isDe ? "Gutachter-Honorare & 4-Wege Auszahlungsportal" : "Reviewer Honoraria & 4-Option Disbursement Portal"}
+                      </h4>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                        {reviewsDone > 0 ? `€${reviewsDone * 50}.00 Available` : "€50.00 Per Review"}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      {isDe 
+                        ? "Gemäß unserem 6% Gutachterfonds: Wählen Sie, wie Sie Ihr €50-Honorar auszahlen, anrechnen oder stiften möchten." 
+                        : "Quality-gated micro-honorarium fund (6% APC allocation): Choose how to receive, convert, or donate your €50 peer review honorarium."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <div className="text-[10px] uppercase font-bold text-slate-400">{isDe ? "Verfügbares Honorar" : "Available Honorarium"}</div>
+                  <div className="text-xl font-black text-emerald-700 dark:text-emerald-400">
+                    €{Math.max(50, (reviewsDone || 1) * 50)}.00
+                  </div>
+                </div>
+              </div>
+
+              {/* Success Notification Banner */}
+              {payoutSuccessMsg && (
+                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center gap-3 text-xs text-emerald-900 dark:text-emerald-200 animate-in fade-in">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <span className="font-semibold">{payoutSuccessMsg}</span>
+                </div>
+              )}
+
+              {/* 4 Interactive Option Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                
+                {/* Option 1: Direct Bank Transfer */}
+                <div 
+                  onClick={() => setPayoutOption("bank")}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                    payoutOption === "bank"
+                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Landmark className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">
+                        {isDe ? "1. Bankkonto / Wise / PayPal" : "1. Direct Cashout to Bank / PayPal"}
+                      </span>
+                    </div>
+                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                      payoutOption === "bank" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                    }`}>
+                      {payoutOption === "bank" && <Check className="h-3 w-3" />}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {isDe 
+                      ? "Auszahlung direkt auf Ihr Bankkonto via SEPA / Wise oder PayPal innerhalb von 24–48 Stunden."
+                      : "Direct cashout via SEPA, Wise, or PayPal batch payment transferred directly to your bank account."}
+                  </p>
+                  {payoutOption === "bank" && (
+                    <div className="space-y-2 pt-2 border-t border-emerald-200/60 dark:border-slate-800 text-xs">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">IBAN / Bank Account</label>
+                        <input 
+                          type="text" 
+                          value={payoutIban} 
+                          onChange={(e) => setPayoutIban(e.target.value)}
+                          className="w-full mt-1 p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Bank / Service</label>
+                        <input 
+                          type="text" 
+                          value={payoutBankName} 
+                          onChange={(e) => setPayoutBankName(e.target.value)}
+                          className="w-full mt-1 p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Option 2: APC Credit Voucher */}
+                <div 
+                  onClick={() => setPayoutOption("voucher")}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                    payoutOption === "voucher"
+                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-[#0b99ff]" />
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">
+                        {isDe ? "2. APC-Gutschein für nächste Publikation" : "2. Re-use as APC Voucher for Next Submission"}
+                      </span>
+                    </div>
+                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                      payoutOption === "voucher" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                    }`}>
+                      {payoutOption === "voucher" && <Check className="h-3 w-3" />}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {isDe 
+                      ? "Reinvestieren Sie das Honorar für 50% bis 100% APC-Erlass bei eigener Einreichung in einem unserer 13 Journale."
+                      : "Convert your honorarium into an official transferable APC waiver voucher valid across all 13 Scholarly Open journals."}
+                  </p>
+                  {payoutOption === "voucher" && (
+                    <div className="p-2.5 rounded bg-emerald-50/80 dark:bg-emerald-950/40 text-[11px] text-emerald-800 dark:text-emerald-300 font-medium">
+                      ✓ An immediate promotional code will be generated upon confirmation and stored in your wallet.
+                    </div>
+                  )}
+                </div>
+
+                {/* Option 3: Developing Countries Fee-Waiver Fund */}
+                <div 
+                  onClick={() => setPayoutOption("waiver_fund")}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                    payoutOption === "waiver_fund"
+                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <HeartHandshake className="h-4 w-4 text-rose-500" />
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">
+                        {isDe ? "3. Spende an Entwicklungsland-Erlassfonds" : "3. Donate to Developing Countries Fee-Waiver Fund"}
+                      </span>
+                    </div>
+                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                      payoutOption === "waiver_fund" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                    }`}>
+                      {payoutOption === "waiver_fund" && <Check className="h-3 w-3" />}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {isDe 
+                      ? "100% Ihrer €50 finanzieren Artikel-Bearbeitungsgebühren für Forscher aus Ländern mit niedrigem Einkommen (Plan S Solidarität)."
+                      : "100% of your €50 subsidizes publication fees for researchers and scholars from low-income nations under our Plan S solidarity program."}
+                  </p>
+                  {payoutOption === "waiver_fund" && (
+                    <div className="p-2.5 rounded bg-rose-50/80 dark:bg-rose-950/40 text-[11px] text-rose-800 dark:text-rose-300 font-medium">
+                      ♥ You will receive an official Plan S Philanthropic Recognition Certificate for your academic dossier.
+                    </div>
+                  )}
+                </div>
+
+                {/* Option 4: University Library Donation */}
+                <div 
+                  onClick={() => setPayoutOption("library")}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
+                    payoutOption === "library"
+                      ? "border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Library className="h-4 w-4 text-amber-500" />
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">
+                        {isDe ? "4. Spende an Ihre Universitätsbibliothek" : "4. Donate to Your University Library OA Fund"}
+                      </span>
+                    </div>
+                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                      payoutOption === "library" ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300"
+                    }`}>
+                      {payoutOption === "library" && <Check className="h-3 w-3" />}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {isDe 
+                      ? "Stiften Sie das Honorar direkt an den Open-Access-Erwerbungsfonds Ihrer Heimatuniversität zur Förderung freier Forschung."
+                      : "Direct the €50 honorarium directly to your home institution's academic library to support university open access publishing."}
+                  </p>
+                  {payoutOption === "library" && (
+                    <div className="space-y-1 pt-1 text-xs">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Institutional Library</label>
+                      <input 
+                        type="text" 
+                        value={payoutLibraryName || `${profile.institution} Medical Library`}
+                        onChange={(e) => setPayoutLibraryName(e.target.value)}
+                        className="w-full p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
+                      />
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Submit Action */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <span className="text-[11px] text-slate-500">
+                  {isDe 
+                    ? "Auszahlungsanträge werden vom Managing Editor im Admin-Ledger geprüft und freigegeben." 
+                    : "Requests are recorded in the editorial360 Admin Ledger for managing editor release."}
+                </span>
+
+                <Button
+                  onClick={handleSubmitPayout}
+                  disabled={isSubmittingPayout}
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-xs shrink-0"
+                >
+                  <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                  {isSubmittingPayout 
+                    ? (isDe ? "Wird übermittelt..." : "Submitting Request...") 
+                    : (isDe ? "Auszahlung / Spende jetzt einreichen" : "Submit Disbursement Request")}
+                </Button>
+              </div>
             </div>
 
           </div>
@@ -1969,70 +2473,208 @@ export function ReviewerWorkspace({
           {/* VIEW 1: OFFICIAL CERTIFICATE */}
           {certViewMode === "certificate" && (
             <div className="space-y-4">
-              <div className="flex justify-end">
-                <Button
-                  onClick={handlePrintCertificate}
-                  className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2 cursor-pointer shadow-xs flex items-center gap-1.5"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  {isDe ? "Offizielles Zertifikat drucken (PDF)" : "Print Official Certificate (PDF)"}
-                </Button>
+              
+              {/* Quick Status / Switcher Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 font-semibold">{isDe ? "Status:" : "Earned Status:"}</span>
+                  <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs ${
+                    reviewsDone > 0 
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300"
+                      : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300"
+                  }`}>
+                    {reviewsDone > 0 
+                      ? (isDe ? `${reviewsDone} Manuskripte Begutachtet (Zertifiziert)` : `${reviewsDone} Manuscripts Reviewed (Active)`)
+                      : (isDe ? "0 / 1 Begutachtungen (In Bearbeitung)" : "0 / 1 Reviews Completed (In Progress)")}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {reviewsDone === 0 ? (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const newDone = 1
+                        setReviewsDone(newDone)
+                        try {
+                          const email = user?.email || "reviewer@scholarlyopen.org"
+                          localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, String(newDone))
+                        } catch (e) {}
+                      }}
+                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-7 px-3 cursor-pointer"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                      {isDe ? "1. Gutachten abschließen (Demo)" : "Simulate 1st Completed Review"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const newDone = 0
+                        setReviewsDone(newDone)
+                        try {
+                          const email = user?.email || "reviewer@scholarlyopen.org"
+                          localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, "0")
+                        } catch (e) {}
+                      }}
+                      className="text-xs h-7 px-2.5 text-slate-500 border-slate-300 cursor-pointer"
+                    >
+                      {isDe ? "Auf 0 zurücksetzen (Neuer Gutachter)" : "Reset to 0 (New Reviewer)"}
+                    </Button>
+                  )}
+
+                  <Button
+                    onClick={handlePrintCertificate}
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    {isDe ? "Zertifikat drucken (PDF)" : "Print Certificate (PDF)"}
+                  </Button>
+                </div>
               </div>
 
-              {/* Certificate Card with Green & Yellow Logo */}
-              <Card className="bg-white dark:bg-slate-950 border-4 border-double border-emerald-700/80 dark:border-emerald-600/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
-                
-                {/* Official Brand Logo - Green Mark with Yellow Open */}
-                <div className="flex items-center justify-center gap-3">
-                  <img 
-                    src="/logo-mark.svg" 
-                    alt="Scholarly Open" 
-                    className="h-12 w-auto object-contain"
-                    onError={(e) => {
-                      ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
-                    }}
-                  />
-                  <div className="text-2xl font-black text-[#132415] dark:text-white tracking-tight">
-                    Scholarly <span className="text-[#F6BB14]">Open</span>
+              {/* IF 0 REVIEWS DONE: SHOW GATEWAY QUALIFICATION CERTIFICATE + LOCKED MILESTONE */}
+              {reviewsDone === 0 ? (
+                <div className="space-y-6">
+                  {/* Milestone Card Explaining Why Peer Review Certificate requires contributions */}
+                  <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+                    <div className="flex items-start gap-3">
+                      <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                      <div>
+                        <h4 className="font-bold text-amber-950 dark:text-amber-200 text-sm">
+                          {isDe ? "Peer-Review-Zertifikat noch gesperrt (0 Gutachten abgeschlossen)" : "Verified Peer Review Certificate Locked (0 Reviews Completed)"}
+                        </h4>
+                        <p className="text-[11px] text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
+                          {isDe 
+                            ? "Um akademische Integrität zu gewährleisten, ist das offizielle Begutachtungszertifikat an reale Gutachterbeiträge gebunden. Schließen Sie Ihr erstes zugewiesenes Manuskript ab, um Ihr offizielles Zertifikat mit Crossref-Zeitstempel freizuschalten."
+                            : "In compliance with COPE transparency standards, verified peer evaluation certificates are earned through genuine contributions. Complete your first assigned evaluation below to activate your permanent, Crossref-timestamped credential."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const rev = activeReviews[0] || { id: "SOMED-26-RS001", title: "Clinical Evaluation of AI Diagnostics in Cardiology", journal: "Medicine & Healthcare", deadline: "2026-06-20", status: "In Progress" }
+                        handleOpenScorecard(rev)
+                      }}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-8 px-4 shrink-0 cursor-pointer shadow-xs"
+                    >
+                      <FileText className="h-3.5 w-3.5 mr-1" />
+                      {isDe ? "Manuskript jetzt begutachten" : "Evaluate SOMED-26-RS001"}
+                    </Button>
                   </div>
+
+                  {/* GATEWAY CERTIFICATE (Earned upon passing the exam) */}
+                  <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/80 dark:border-sky-500/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
+                    <div className="flex items-center justify-center gap-3">
+                      <img 
+                        src="/logo-mark.svg" 
+                        alt="Scholarly Open" 
+                        className="h-12 w-auto object-contain"
+                        onError={(e) => {
+                          ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                        }}
+                      />
+                      <div className="text-2xl font-black text-[#132415] dark:text-white tracking-tight">
+                        Scholarly <span className="text-[#F6BB14]">Open</span>
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
+                      Scholarly Open Standards Board • Gateway Examination
+                    </div>
+
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
+                      Certificate of Peer Review Qualification
+                    </h2>
+
+                    <div className="inline-block border-b-2 border-sky-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
+                      {getFormattedReviewerName(profile.title, profile.name)}
+                    </div>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+                      This official credential confirms that <strong>{getFormattedReviewerName(profile.title, profile.name)}</strong> has successfully passed the Reviewer Gateway Examination, verifying proficiency in constructive academic English, COPE publication ethics, and methodological rigor in <strong>{profile.primaryDiscipline.toUpperCase()}</strong>.
+                    </p>
+
+                    <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Gateway Credential ID:</span>
+                        <strong className="text-slate-900 dark:text-white font-mono">SO-GW-2026-9041</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Assessment Status:</span>
+                        <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Passed (80%+ Standard) ✓</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Discipline Track:</span>
+                        <strong className="text-slate-900 dark:text-white">{DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}</strong>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                      <span>Verified ORCID: {profile.orcid || "0000-0004-7711-2093"}</span>
+                      <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Gateway Certified Seal</span>
+                    </div>
+                  </Card>
                 </div>
-
-                <div className="text-[11px] uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
-                  Official Editorial Board Verification
-                </div>
-
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Certificate of Verified Peer Review
-                </h2>
-
-                <div className="inline-block border-b-2 border-emerald-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                  Dr. Marcus Vance
-                </div>
-
-                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-                  This official credential confirms that Dr. Marcus Vance has completed verified, editor-endorsed scientific peer evaluations in full compliance with COPE standards and Scholarly Open ethical guidelines.
-                </p>
-
-                <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Verified ORCID Record:</span>
-                    <strong className="text-slate-900 dark:text-white font-mono">0000-0004-7711-2093</strong>
+              ) : (
+                /* IF 1+ REVIEWS DONE: SHOW OFFICIAL VERIFIED PEER REVIEW CERTIFICATE */
+                <Card className="bg-white dark:bg-slate-950 border-4 border-double border-emerald-700/80 dark:border-emerald-600/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
+                  
+                  {/* Official Brand Logo */}
+                  <div className="flex items-center justify-center gap-3">
+                    <img 
+                      src="/logo-mark.svg" 
+                      alt="Scholarly Open" 
+                      className="h-12 w-auto object-contain"
+                      onError={(e) => {
+                        ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                      }}
+                    />
+                    <div className="text-2xl font-black text-[#132415] dark:text-white tracking-tight">
+                      Scholarly <span className="text-[#F6BB14]">Open</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Total Completed Reviews:</span>
-                    <strong className="text-slate-900 dark:text-white">3 Verified Manuscripts (2026)</strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Crossref Review Activity:</span>
-                    <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Synced & Timestamped ✓</strong>
-                  </div>
-                </div>
 
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Hash: SHA256:88a109fe2c041</span>
-                  <span className="font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Editorial Board Certified Seal</span>
-                </div>
-              </Card>
+                  <div className="text-[11px] uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
+                    Official Editorial Board Verification
+                  </div>
+
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                    Certificate of Verified Peer Review
+                  </h2>
+
+                  <div className="inline-block border-b-2 border-emerald-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
+                    {getFormattedReviewerName(profile.title, profile.name)}
+                  </div>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+                    This official credential confirms that {getFormattedReviewerName(profile.title, profile.name)} has completed verified, editor-endorsed scientific peer evaluations in full compliance with COPE standards and Scholarly Open ethical guidelines.
+                  </p>
+
+                  <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Verified ORCID Record:</span>
+                      <strong className="text-slate-900 dark:text-white font-mono">{profile.orcid || "0000-0004-7711-2093"}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Total Completed Reviews:</span>
+                      <strong className="text-slate-900 dark:text-white">{reviewsDone} Verified Manuscript{reviewsDone > 1 ? "s" : ""} (2026)</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Crossref Review Activity:</span>
+                      <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Synced & Timestamped ✓</strong>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Hash: SHA256:88a109fe2c041</span>
+                    <span className="font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Editorial Board Certified Seal</span>
+                  </div>
+                </Card>
+              )}
             </div>
           )}
 
@@ -3209,37 +3851,73 @@ export function ReviewerWorkspace({
                 </span>
 
                 <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-lg border border-slate-200 dark:border-slate-800">
-                  <div className="p-2.5 flex items-center justify-between">
+                  <div className="p-2.5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-red-500" />
+                      <FileText className="h-4 w-4 text-red-500 shrink-0" />
                       <div>
-                        <div className="font-semibold text-slate-800 dark:text-slate-200">Blinded_Manuscript_FullText.pdf</div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Blinded_Manuscript_FullText.txt</div>
                         <div className="text-[10px] text-slate-400">Main text · 14 Pages · Anonymized (Authors/PII Redacted)</div>
                       </div>
                     </div>
-                    <span className="text-[11px] font-mono text-slate-500">2.4 MB</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-mono text-slate-400">2.4 MB</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
+                        className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        {isDe ? "Laden" : "Download"}
+                      </Button>
+                    </div>
                   </div>
 
-                  <div className="p-2.5 flex items-center justify-between">
+                  <div className="p-2.5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-emerald-500" />
+                      <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
                       <div>
-                        <div className="font-semibold text-slate-800 dark:text-slate-200">Supplementary_Tables_Figures.pdf</div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Supplementary_Tables_Figures.txt</div>
                         <div className="text-[10px] text-slate-400">High-res vector figures (300 DPI) & Extended Datasets</div>
                       </div>
                     </div>
-                    <span className="text-[11px] font-mono text-slate-500">8.1 MB</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-mono text-slate-400">8.1 MB</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
+                        className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        {isDe ? "Laden" : "Download"}
+                      </Button>
+                    </div>
                   </div>
 
-                  <div className="p-2.5 flex items-center justify-between">
+                  <div className="p-2.5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
+                      <ShieldCheck className="h-4 w-4 text-[#0b99ff] shrink-0" />
                       <div>
-                        <div className="font-semibold text-slate-800 dark:text-slate-200">IRB_Ethics_Statement_Redacted.pdf</div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">IRB_Ethics_Statement_Redacted.txt</div>
                         <div className="text-[10px] text-slate-400">Institutional Review Board protocol clearance certification</div>
                       </div>
                     </div>
-                    <span className="text-[11px] font-mono text-slate-500">410 KB</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-mono text-slate-400">410 KB</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownloadSpecificFile("irb", selectedPackageRev)}
+                        className="h-7 px-2.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 border-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        {isDe ? "Laden" : "Download"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3265,15 +3943,7 @@ export function ReviewerWorkspace({
             </Button>
             <Button
               onClick={() => {
-                setIsDownloadingZip(true)
-                setTimeout(() => {
-                  setIsDownloadingZip(false)
-                  const alertMsg = isDe 
-                    ? "Blinded Manuskript-Paket heruntergeladen (PDF + Begleitdaten)!" 
-                    : "Blinded manuscript package downloaded (PDF + Supplementary Data)!"
-                  alert(alertMsg)
-                  setSelectedPackageRev(null)
-                }, 700)
+                if (selectedPackageRev) handleDownloadFullPackage(selectedPackageRev)
               }}
               className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-4 py-2 cursor-pointer flex items-center gap-1.5"
             >
@@ -3281,7 +3951,7 @@ export function ReviewerWorkspace({
               <span>
                 {isDownloadingZip 
                   ? (isDe ? "Wird gepackt..." : "Archiving...") 
-                  : (isDe ? "Komplettes Paket herunterladen (.ZIP)" : "Download Full Package (.ZIP)")}
+                  : (isDe ? "Komplettes Paket herunterladen (.TXT)" : "Download Full Package (.TXT)")}
               </span>
             </Button>
           </DialogFooter>
