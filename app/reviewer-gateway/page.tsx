@@ -11,7 +11,6 @@ import {
   Award, 
   ArrowRight, 
   RotateCcw, 
-  Sparkles, 
   Check, 
   X, 
   FileText, 
@@ -528,7 +527,7 @@ export default function ReviewerGatewayPage() {
                 <Card className="border-border bg-card/60">
                   <CardContent className="p-5 flex items-start gap-3">
                     <div className="p-2.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                      <Sparkles className="h-5 w-5" />
+                      <CheckCircle2 className="h-5 w-5" />
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold">Honoraria Access</h4>
