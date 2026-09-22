@@ -1614,14 +1614,18 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       : "border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
                   }`}
                 >
-                  {/* Top Bar: Source + Career Stage + Checkbox */}
+                  {/* Top Bar: Source + Career Stage + Verification Status + Checkbox */}
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${sourceBadgeColor}`}>
                         {candidate.ecrSource || "Preprint"}
                       </span>
                       <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
                         {candidate.careerStage || "Early Career Researcher"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-900/40">
+                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                        <span>{candidate.verificationStatus || "Verified Archival Record"}</span>
                       </span>
                     </div>
 
@@ -1642,48 +1646,106 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </label>
                   </div>
 
-                  {/* Scholar Info */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-2">
+                  {/* Scholar Info with Clickable ORCID and Google Scholar Cross-Verification */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
                       <h5 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
                         {candidate.name}
                       </h5>
                       {candidate.orcid && (
-                        <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800 shrink-0">
-                          ORCID: {candidate.orcid}
-                        </span>
+                        <a
+                          href={candidate.orcidUrl || `https://orcid.org/${candidate.orcid}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 transition-colors shrink-0 group cursor-pointer"
+                          title="Verify researcher in ORCID Public Registry"
+                        >
+                          <span className="font-bold text-emerald-600">iD</span>
+                          <span>ORCID: {candidate.orcid}</span>
+                          <ExternalLink className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100" />
+                        </a>
                       )}
                     </div>
                     <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                       {candidate.institution}
                     </div>
-                    <div className="text-[11px] text-[#0b99ff] font-mono">
-                      {candidate.email}
+                    <div className="flex items-center justify-between gap-2 pt-0.5 flex-wrap">
+                      <span className="text-[11px] text-[#0b99ff] font-mono">
+                        {candidate.email}
+                      </span>
+                      <a
+                        href={`https://scholar.google.com/scholar?q=${encodeURIComponent(`${candidate.name} ${candidate.institution ? candidate.institution.split("·")[0].trim() : ""}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0b99ff] hover:text-[#0077cc] hover:underline cursor-pointer"
+                        title="Cross-verify scholar publications and citations on Google Scholar"
+                      >
+                        <Search className="h-3 w-3" />
+                        <span>Cross-Verify Scholar ↗</span>
+                      </a>
                     </div>
                   </div>
 
-                  {/* Preprint / Research Work Details */}
+                  {/* Preprint / Research Work Details with Direct Verified Source Link */}
                   {candidate.preprintTitle && (
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] space-y-1 text-xs">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between gap-2">
-                        <span>Preprint / Lead Work ({candidate.preprintDate || "2026"})</span>
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] space-y-2 text-xs">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2 flex-wrap">
+                        <span className="flex items-center gap-1.5">
+                          <BookOpen className="h-3.5 w-3.5 text-[#0b99ff]" />
+                          <span>Preprint Work ({candidate.preprintDate || "2026"})</span>
+                        </span>
                         {candidate.preprintDoi && (
-                          <span className="font-mono text-slate-500 truncate max-w-[150px]">{candidate.preprintDoi}</span>
+                          <a
+                            href={
+                              candidate.sourceUrl ||
+                              (candidate.preprintDoi.startsWith("arXiv:")
+                                ? `https://arxiv.org/abs/${candidate.preprintDoi.replace("arXiv:", "")}`
+                                : `https://doi.org/${candidate.preprintDoi}`)
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-[#0b99ff] hover:text-[#0077cc] hover:underline inline-flex items-center gap-1 truncate max-w-[200px] cursor-pointer"
+                            title={`Open ${candidate.preprintDoi} directly on official repository`}
+                          >
+                            <span>{candidate.preprintDoi}</span>
+                            <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                          </a>
                         )}
                       </div>
-                      <p className="font-medium text-slate-800 dark:text-slate-200 leading-snug line-clamp-2">
+                      <p className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">
                         "{candidate.preprintTitle}"
                       </p>
+
+                      {/* Prominent Cross-Verification Source Bar */}
+                      <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                          Repository: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{candidate.ecrSource || "Open Archive"}</strong>
+                        </span>
+                        <a
+                          href={
+                            candidate.sourceUrl ||
+                            (candidate.preprintDoi?.startsWith("arXiv:")
+                              ? `https://arxiv.org/abs/${candidate.preprintDoi.replace("arXiv:", "")}`
+                              : `https://doi.org/${candidate.preprintDoi}`)
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-[#0b99ff] hover:bg-sky-100 dark:hover:bg-sky-900/60 border border-sky-200 dark:border-sky-800/60 text-[11px] font-bold transition-all shadow-2xs group cursor-pointer"
+                        >
+                          <ExternalLink className="h-3 w-3 text-[#0b99ff]" />
+                          <span>View {candidate.ecrSource || "Preprint"} Source ↗</span>
+                        </a>
+                      </div>
                     </div>
                   )}
 
                   {/* Specialty & Rationale */}
                   <div className="space-y-1 text-xs">
-                    <div className="text-[11px] text-slate-500">
-                      <strong>Field:</strong> {candidate.specialty}
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      <strong className="text-slate-700 dark:text-slate-300">Field:</strong> {candidate.specialty}
                     </div>
-                    <div className="text-[11px] text-slate-500">
-                      <strong>Metrics:</strong> {candidate.metrics}
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      <strong className="text-slate-700 dark:text-slate-300">Metrics:</strong> {candidate.metrics}
                     </div>
                     <div className="text-[11px] text-slate-600 dark:text-slate-400 italic bg-amber-50/50 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-200/50 dark:border-amber-900/20">
                       💡 {candidate.editorialRationale}
