@@ -526,7 +526,7 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
           title: isDe ? "Senior Researcher, KI-Ethik" : "Senior Researcher, AI Ethics",
           interestsLabel: isDe ? "Forschungsschwerpunkte" : "Research Interests",
           interests: isDe ? "KI-Voreingenommenheit, Datenschutz, Algorithmische Fairness" : "AI Bias, Data Privacy, Algorithmic Fairness",
-          alertText: isDe ? "Achten Sie auf KI-Artefakte in Text und Grafiken: vage Formulierungen, inkonsistente Formatierungen, fehlende Maßstabsbalken..." : "Watch for AI artifacts in both text and visuals: vague language, inconsistent formatting, missing scale bars...",
+          alertText: isDe ? `Reviewer Merit Wallet: Verdienen Sie 15–25 Merit‑Punkte für jeden fristgerechten Bericht, einlösbar für 25 % bis 50 % APC‑Autor‑Publikationsfreistellungen oder wohltätige Open‑Science‑Stipendien.` : `Reviewer Merit Wallet: Earn 15–25 Merit Points for every on-time report, redeemable for 25% to 50% APC author publication waivers or charitable open‑science grants.` ,
           alertIcon: Lightbulb,
           metricsTitle: isDe ? "Gutachter-Kennzahlen" : "Reviewer Metrics",
           metrics: [
