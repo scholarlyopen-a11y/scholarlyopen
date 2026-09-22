@@ -1030,6 +1030,11 @@ export default function Editorial360Page() {
         setSuccess(`Welcome to editorial360! You have been officially appointed. Please confirm your credentials below to activate your account.`)
       }
 
+      if (urlAction === "submit") {
+        setRole("author")
+        setRegRole("author")
+      }
+
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
         const normalizedRole = (urlRole === "im" ? "ria" : urlRole) as UserRole
         setRole(normalizedRole)
@@ -1055,6 +1060,10 @@ export default function Editorial360Page() {
             if (session.activeJmTab) setActiveJmTab(session.activeJmTab)
             if (session.activeEditorTab) setActiveEditorTab(session.activeEditorTab)
             lastActivityRef.current = now
+            if (urlAction === "submit") {
+              setRole("author")
+              setIsSubmitWizardOpen(true)
+            }
           } else {
             sessionStorage.removeItem("editorial360_session")
           }
@@ -2902,6 +2911,15 @@ export default function Editorial360Page() {
           ...(prev || {})
         }))
       }
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search)
+        if (params.get("action") === "submit" && regRole === "author") {
+          setIsSubmitWizardOpen(true)
+          params.delete("action")
+          const newQuery = params.toString() ? `?${params.toString()}` : ""
+          window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+        }
+      }
     }, 1000)
   }
 
@@ -4540,7 +4558,7 @@ export default function Editorial360Page() {
                       <Button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold py-2.5 rounded-lg shadow-sm transition-all active:scale-[0.99] cursor-pointer text-sm"
+                        className="w-full bg-[#0b99ff] hover:bg-[#0088e0] active:bg-[#0077cc] text-white font-bold py-2.5 rounded-lg shadow-sm transition-all active:scale-[0.99] cursor-pointer text-sm"
                       >
                         {loading 
                           ? (language === "de" ? "Wird authentifiziert..." : "Authenticating...") 
@@ -4682,7 +4700,7 @@ export default function Editorial360Page() {
                               onClick={() => setRegRole("author")}
                               className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
                                 regRole === "author"
-                                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
+                                  ? "bg-[#0b99ff] text-white shadow-sm"
                                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                               }`}
                             >
@@ -4693,7 +4711,7 @@ export default function Editorial360Page() {
                               onClick={() => setRegRole("reviewer")}
                               className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
                                 regRole === "reviewer"
-                                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
+                                  ? "bg-[#0b99ff] text-white shadow-sm"
                                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                               }`}
                             >
@@ -4792,7 +4810,7 @@ export default function Editorial360Page() {
                       <Button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold py-2.5 rounded-lg shadow-sm transition-all active:scale-[0.99] cursor-pointer text-sm"
+                        className="w-full bg-[#0b99ff] hover:bg-[#0088e0] active:bg-[#0077cc] text-white font-bold py-2.5 rounded-lg shadow-sm transition-all active:scale-[0.99] cursor-pointer text-sm"
                       >
                         {loading 
                           ? "Activating account..." 

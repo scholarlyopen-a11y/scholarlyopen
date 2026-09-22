@@ -98,6 +98,7 @@ interface EditorWorkspaceProps {
     country?: string
     photoUrl?: string
     orcid?: string
+    specialization?: string
   }
 }
 
@@ -1075,12 +1076,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       <div className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="relative h-13 w-13 rounded-2xl overflow-hidden bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center font-bold text-base shrink-0 shadow-sm border border-slate-200 dark:border-slate-700">
-              <span>{user.name ? user.name.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT"}</span>
-            </div>
+          <div className="flex items-start sm:items-center gap-4">
+            {user.photoUrl && (
+              <div className="relative h-13 w-13 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs">
+                <img src={user.photoUrl} alt={user.name} className="h-full w-full object-cover" />
+              </div>
+            )}
             
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">
                   {user.name}
@@ -1096,6 +1099,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <span>{user.institution || "Charité – Universitätsmedizin Berlin"}{user.country ? ` (${user.country})` : ""}</span>
                 <span className="text-slate-300 dark:text-slate-700 select-none">|</span>
                 <span className="text-slate-600 dark:text-slate-400 font-medium">{user.email}</span>
+              </div>
+
+              {/* Research Interests & Specialties */}
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 pt-0.5 flex-wrap">
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                  {isDe ? "Forschungsschwerpunkte & Fachgebiete:" : "Research Interests & Scope:"}
+                </span>
+                <span>
+                  {user.specialization || (isDe ? "Öffentliche Ordnung · Internationale Beziehungen · Governance-Systeme · KI-Ethik" : "Public Policy · International Relations · Governance Systems · AI Safety")}
+                </span>
               </div>
             </div>
           </div>

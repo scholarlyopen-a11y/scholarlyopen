@@ -60,6 +60,28 @@ export default function SubmitPage() {
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
                 Submit your research to {t("brand.name")}. Our editorial team will guide your manuscript through our rigorous peer review process.
               </p>
+
+              <div className="mt-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#0b99ff]/10 via-[#0b99ff]/5 to-transparent border border-[#0b99ff]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#0b99ff] bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/30">
+                      Standard Author Workflow
+                    </span>
+                    <h3 className="text-base font-bold text-foreground">
+                      Submit Online via editorial360 Portal
+                    </h3>
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
+                    Track manuscript triage in real time, view referee scorecards, upload revised drafts, and receive official decision notices directly within your editorial360 author dashboard.
+                  </p>
+                </div>
+                <Button asChild className="bg-[#0b99ff] hover:bg-[#0088e0] active:bg-[#0077cc] text-white font-bold px-5 py-2.5 rounded-xl shadow-xs shrink-0 cursor-pointer">
+                  <Link href="/editorial360?role=author&action=submit">
+                    <span>Launch editorial360</span>
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
