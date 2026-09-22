@@ -1774,7 +1774,8 @@ export default function Editorial360Page() {
     switch (r) {
       case "reviewer": return "Peer Reviewer"
       case "editor": return "Section / Handling Editor"
-      case "ria": return "Quality Check Admin (QC Admin)"
+      case "ria":
+      case "im": return "Integrity Manager"
       case "jm": return "Journal Manager"
       case "author": return "Contributing Author"
       case "admin": return "System Administrator"
@@ -1784,7 +1785,7 @@ export default function Editorial360Page() {
 
   const getDefaultInviteSubject = (r: UserRole | string, name?: string): string => {
     const roleName = getRoleDisplayName(r)
-    return `Official Invitation: Join Editorial360 Workspace as ${roleName} - Scholarly Open`
+    return `Official Invitation: Join editorial360 Workspace as ${roleName} - Scholarly Open`
   }
 
   const getDefaultInviteBody = (r: UserRole | string, name?: string, journalName?: string, emailAddr?: string): string => {
@@ -1793,22 +1794,22 @@ export default function Editorial360Page() {
     const journalStr = journalName || "Scholarly Open"
 
     if (r === "reviewer") {
-      return `${salutation}\n\nYou are cordially invited by the Editorial Office of Scholarly Open to join our verified Peer Reviewer Registry on the Editorial360 collaborative publishing platform.\n\nRole: ${roleName}\nDesignated Discipline: ${journalStr}\n\nAs a verified reviewer, you will receive invitation requests carefully matched to your discipline and publication history, gain access to double-blind evaluation scorecards, and accumulate verified review credits with publication fee waiver benefits under COPE ethical standards.\n\nPlease accept this invitation to activate your reviewer workspace credentials.`
+      return `${salutation}\n\nYou are cordially invited by the Editorial Office of Scholarly Open to join our verified Peer Reviewer Registry on the editorial360 collaborative publishing platform.\n\nRole: ${roleName}\nDesignated Discipline: ${journalStr}\n\nAs a verified reviewer, you will receive invitation requests carefully matched to your discipline and publication history, gain access to double-blind evaluation scorecards, and accumulate verified review credits with publication fee waiver benefits under COPE ethical standards.\n\nPlease accept this invitation to activate your reviewer workspace credentials.`
     }
 
     if (r === "editor") {
-      return `${salutation}\n\nOn behalf of Scholarly Open, we are honored to invite you to join the Editorial Board as a ${roleName} for ${journalStr}.\n\nRole: ${roleName}\nEditorial Suite: Editorial360 Unified Editorial Management\n\nThrough Editorial360, you will manage manuscript triage, oversee peer review evaluation rounds, and issue final publication recommendations with full editorial autonomy.\n\nPlease accept this invitation to activate your editor workspace.`
+      return `${salutation}\n\nOn behalf of Scholarly Open, we are honored to invite you to join the Editorial Board as a ${roleName} for ${journalStr}.\n\nRole: ${roleName}\nEditorial Suite: editorial360 Unified Editorial Management\n\nThrough editorial360, you will manage manuscript triage, oversee peer review evaluation rounds, and issue final publication recommendations with full editorial autonomy.\n\nPlease accept this invitation to activate your editor workspace.`
     }
 
-    if (r === "ria") {
-      return `${salutation}\n\nYou have been appointed as Quality Check Administrator (QC Admin) for ${journalStr} on Editorial360.\n\nRole: ${roleName}\nFocus: Ethical Pre-checks, Plagiarism Screening & Technical Compliance\n\nPlease activate your account below to access the incoming manuscript triage queue.`
+    if (r === "ria" || r === "im") {
+      return `${salutation}\n\nYou have been appointed as Integrity Manager for ${journalStr} on editorial360.\n\nRole: ${roleName}\nFocus: Research Integrity, COPE Ethical Guidelines, Plagiarism Screening & Image Forensics\n\nPlease activate your account below to access the integrity review and triage queue.`
     }
 
     if (r === "jm") {
-      return `${salutation}\n\nYou have been appointed as Journal Manager for ${journalStr} on Editorial360.\n\nRole: ${roleName}\nFocus: Operational Workflows, ECR Talent Pool Outreach & Author Communications\n\nPlease accept this invitation to activate your management portal.`
+      return `${salutation}\n\nYou have been appointed as Journal Manager for ${journalStr} on editorial360.\n\nRole: ${roleName}\nFocus: Operational Workflows, ECR Talent Pool Outreach & Author Communications\n\nPlease accept this invitation to activate your management portal.`
     }
 
-    return `${salutation}\n\nYou have been formally invited to join the Editorial360 workspace for Scholarly Open in the official capacity of ${roleName}.\n\nRole: ${roleName}\nAssociated Portfolio: ${journalStr}\n\nPlease click the button below to accept your invitation and activate your workspace credentials.`
+    return `${salutation}\n\nYou have been formally invited to join the editorial360 workspace for Scholarly Open in the official capacity of ${roleName}.\n\nRole: ${roleName}\nAssociated Portfolio: ${journalStr}\n\nPlease click the button below to accept your invitation and activate your workspace credentials.`
   }
 
   const [isAssignReviewerOpen, setIsAssignReviewerOpen] = useState(false)
@@ -1966,7 +1967,7 @@ export default function Editorial360Page() {
       if (res.ok) {
         const data = await res.json()
         if (data.tests) setAdminReviewerTests(data.tests)
-        setReviewerTestSuccessMsg(`Activated Editorial360 status for ${candidateEmail}`)
+        setReviewerTestSuccessMsg(`Activated editorial360 status for ${candidateEmail}`)
         setTimeout(() => setReviewerTestSuccessMsg(null), 4000)
       }
     } catch (e) {
@@ -9289,7 +9290,7 @@ export default function Editorial360Page() {
                               </h3>
                             </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">
-                              Track reviewer candidates completing the Gateway Assessment, evaluate competency scores, and monitor Editorial360 account activation.
+                              Track reviewer candidates completing the Gateway Assessment, evaluate competency scores, and monitor editorial360 account activation.
                             </p>
                           </div>
                           
@@ -9346,7 +9347,7 @@ export default function Editorial360Page() {
                             <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
                               {adminReviewerTests.filter(t => t.status === "Passed - Pending Account").length}
                             </div>
-                            <span className="text-[10px] text-amber-600/80 mt-0.5 block">Awaiting Editorial360 Link</span>
+                            <span className="text-[10px] text-amber-600/80 mt-0.5 block">Awaiting editorial360 Link</span>
                           </Card>
                           <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Active Reviewers</span>
@@ -10531,18 +10532,23 @@ export default function Editorial360Page() {
               {/* Sender Details Header Card */}
               <div className="bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-[#0b99ff] text-white font-bold flex items-center justify-center text-xs shadow-sm">
-                    SO
-                  </div>
+                  <img
+                    src="/logo-mark.svg"
+                    alt="Scholarly Open"
+                    className="w-8 h-8 object-contain shrink-0"
+                  />
                   <div>
-                    <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 flex-wrap">
                       <span>Scholarly Open Editorial Office</span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-mono">
                         editorial@scholarlyopen.org
                       </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-mono font-semibold">
+                        CC: scholarlyopen@gmail.com
+                      </span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Standard Outbound Dispatch Protocol • TLS 1.3 Secure SMTP
+                      Standard Outbound Dispatch Protocol • TLS 1.3 Secure SMTP • Auto-CC Logged
                     </div>
                   </div>
                 </div>
@@ -10601,7 +10607,7 @@ export default function Editorial360Page() {
                         >
                           <option value="reviewer">Peer Reviewer (Verified Registry)</option>
                           <option value="editor">Section / Handling Editor</option>
-                          <option value="ria">Quality Check Admin (QC Admin)</option>
+                          <option value="ria">Integrity Manager</option>
                           <option value="jm">Journal Manager</option>
                           <option value="author">Contributing Author</option>
                         </select>
@@ -10763,26 +10769,35 @@ export default function Editorial360Page() {
                             <span className="font-semibold text-slate-700 dark:text-slate-300">To:</span>{" "}
                             {inviteName || "Colleague"} &lt;{inviteEmail || "colleague@university.edu"}&gt;
                           </div>
+                          <div>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">CC:</span>{" "}
+                            <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">scholarlyopen@gmail.com</span>
+                          </div>
                         </div>
                       </div>
 
                       {/* Rendered Email Body Simulation */}
-                      <div className="p-6 bg-white dark:bg-slate-950 max-h-[380px] overflow-y-auto">
-                        <div className="max-w-[560px] mx-auto border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
-                          {/* Email Brand Masthead */}
-                          <div className="px-5 py-4 border-b-2 border-[#0b99ff] bg-white dark:bg-slate-900 flex items-center justify-between">
-                            <div>
-                              <div className="text-base font-extrabold text-[#0b99ff] tracking-tight">
-                                SCHOLARLY OPEN
-                              </div>
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <div className="p-6 bg-slate-50/80 dark:bg-slate-950 max-h-[380px] overflow-y-auto flex justify-center">
+                        <div className="w-full max-w-[560px] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+                          {/* Email Brand Masthead with Official Logos */}
+                          <div className="px-5 py-4 border-b-2 border-[#0b99ff] bg-white dark:bg-slate-900 flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2.5">
+                              <img 
+                                src="/logo-full-color.svg" 
+                                alt="Scholarly Open" 
+                                className="h-8 w-auto max-w-[170px] object-contain"
+                              />
+                              <div className="h-6 w-px bg-slate-200 dark:bg-slate-750 hidden sm:block" />
+                              <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider hidden sm:block truncate max-w-[140px]">
                                 {inviteJournal}
                               </div>
                             </div>
-                            <div className="text-right">
-                              <span className="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded uppercase">
-                                Editorial360
-                              </span>
+                            <div className="text-right shrink-0">
+                              <img 
+                                src="/editorial360.svg" 
+                                alt="editorial360" 
+                                className="h-6 w-auto max-w-[130px] object-contain"
+                              />
                             </div>
                           </div>
 
@@ -10813,7 +10828,7 @@ export default function Editorial360Page() {
                                 <ArrowRight className="h-3.5 w-3.5" />
                               </div>
                               <div className="text-[10px] text-slate-400 mt-1.5">
-                                Secure one-time activation link dispatched from editorial@scholarlyopen.org
+                                Secure one-time activation link dispatched from editorial@scholarlyopen.org • CC to scholarlyopen@gmail.com
                               </div>
                             </div>
                           </div>
@@ -10834,9 +10849,16 @@ export default function Editorial360Page() {
                 )}
 
                 <DialogFooter className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between sm:justify-between w-full">
-                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    <Mail className="h-3.5 w-3.5 text-[#0b99ff]" />
-                    <span>Sender: <strong className="text-slate-700 dark:text-slate-200">editorial@scholarlyopen.org</strong></span>
+                  <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <Mail className="h-3.5 w-3.5 text-[#0b99ff]" />
+                      <span>Sender: <strong className="text-slate-700 dark:text-slate-200">editorial@scholarlyopen.org</strong></span>
+                    </div>
+                    <span className="text-slate-300 dark:text-slate-700">•</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold text-slate-600 dark:text-slate-300">CC:</span>
+                      <span className="font-mono text-slate-600 dark:text-slate-300">scholarlyopen@gmail.com</span>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">

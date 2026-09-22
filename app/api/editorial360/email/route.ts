@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       const templateDef = DEFAULT_EMAIL_TEMPLATES.find(t => t.id === body.template)
       
       const roleDisplayName = body.role 
-        ? (body.role === "reviewer" ? "Peer Reviewer" : body.role === "editor" ? "Section Editor" : body.role === "ria" ? "Quality Check Admin (QC Admin)" : body.role === "jm" ? "Journal Manager" : body.role === "author" ? "Contributing Author" : body.role)
+        ? (body.role === "reviewer" ? "Peer Reviewer" : body.role === "editor" ? "Section Editor" : (body.role === "ria" || body.role === "im") ? "Integrity Manager" : body.role === "jm" ? "Journal Manager" : body.role === "author" ? "Contributing Author" : body.role)
         : "Workspace Member"
 
       const tokens: Record<string, string> = {

@@ -96,17 +96,17 @@ Thank you for supporting transparent, rigorous open-access peer review.`,
     id: "workspace_invite",
     name: "Workspace Member Invitation",
     category: "reviewers",
-    description: "Official administrative invitation dispatched to scholars and editors to join Editorial360 workspace.",
-    defaultSubject: "Official Invitation: Join the Editorial360 Workspace as {{role}} - Scholarly Open",
+    description: "Official administrative invitation dispatched to scholars and editors to join editorial360 workspace.",
+    defaultSubject: "Official Invitation: Join the editorial360 Workspace as {{role}} - Scholarly Open",
     defaultBody: `Dear {{recipientName}},
 
-You have been formally invited by the System Administration team at Scholarly Open to join the Editorial360 publishing workspace.
+You have been formally invited by the System Administration team at Scholarly Open to join the editorial360 publishing workspace.
 
 Role Assignment: {{role}}
 Scope / Portfolio: {{journal}}
 Designated Email: {{recipientEmail}}
 
-As an active {{role}} in the Editorial360 ecosystem, you will have access to real-time manuscript queues, double-blind peer review tools, and automated editorial decision support adhering to COPE ethical standards.
+As an active {{role}} in the editorial360 ecosystem, you will have access to real-time manuscript queues, double-blind peer review tools, and automated editorial decision support adhering to COPE ethical standards.
 
 Please use the secure button below to accept this invitation, complete your profile, and activate your workspace credentials:`,
     actionLabel: "Accept Invitation & Activate Account",

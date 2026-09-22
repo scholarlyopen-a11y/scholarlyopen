@@ -848,11 +848,11 @@ export default function ReviewerGatewayPage() {
                       <div className="flex items-center gap-2">
                         <ShieldCheck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                         <h4 className="font-bold text-sm text-amber-900 dark:text-amber-200">
-                          Step 2 Required: Activate Account on Editorial360 to Unlock Official Certificate
+                          Step 2 Required: Activate Account on editorial360 to Unlock Official Certificate
                         </h4>
                       </div>
                       <p className="text-xs text-amber-800/80 dark:text-amber-300/80 max-w-2xl leading-relaxed">
-                        To protect credential authenticity and prevent fraudulent use, official downloadable certificates and peer-review matching status are issued directly within your verified Editorial360 Reviewer Account.
+                        To protect credential authenticity and prevent fraudulent use, official downloadable certificates and peer-review matching status are issued directly within your verified editorial360 Reviewer Account.
                       </p>
                     </div>
 
@@ -933,12 +933,12 @@ export default function ReviewerGatewayPage() {
                     <div className="space-y-0.5">
                       <h4 className="font-bold text-sm text-[#0b99ff] dark:text-sky-400">Ready to Review & Earn Merit Honoraria?</h4>
                       <p className="text-xs text-muted-foreground max-w-xl">
-                        Register or sign in to your Editorial360 account to link your verified credential, unlock official high-res PDF certificate export, and access the €35–€50 honoraria wallet.
+                        Register or sign in to your editorial360 account to link your verified credential, unlock official high-res PDF certificate export, and access the €35–€50 honoraria wallet.
                       </p>
                     </div>
                     <Button asChild size="sm" className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold gap-1.5 shrink-0 px-4 py-2 rounded-xl shadow-sm">
                       <Link href={`/editorial360?action=claim_reviewer&name=${encodeURIComponent(candidateName || 'Reviewer')}&email=${encodeURIComponent(candidateEmail || '')}&cred=${credentialId}`}>
-                        Proceed to Editorial360 <ArrowRight className="h-4 w-4" />
+                        Proceed to editorial360 <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
                   </div>
