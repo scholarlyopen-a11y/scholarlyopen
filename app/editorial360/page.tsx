@@ -10777,22 +10777,21 @@ export default function Editorial360Page() {
                       </div>
 
                       {/* Rendered Email Body Simulation */}
-                      <div className="p-6 bg-slate-50/80 dark:bg-slate-950 max-h-[380px] overflow-y-auto flex justify-center">
-                        <div className="w-full max-w-[560px] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+                      <div className="p-4 sm:p-6 bg-slate-50/80 dark:bg-slate-950 flex justify-center">
+                        <div className="w-full max-w-[580px] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
                           {/* Email Brand Masthead with Official Logos */}
-                          <div className="px-5 py-4 border-b-2 border-[#0b99ff] bg-white dark:bg-slate-900 flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-2.5">
+                          <div className="px-5 py-4 border-b-2 border-[#0b99ff] bg-white dark:bg-slate-900 flex items-start justify-between gap-4">
+                            <div className="flex flex-col items-start gap-1">
                               <img 
                                 src="/logo-full-color.svg" 
                                 alt="Scholarly Open" 
                                 className="h-8 w-auto max-w-[170px] object-contain"
                               />
-                              <div className="h-6 w-px bg-slate-200 dark:bg-slate-750 hidden sm:block" />
-                              <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider hidden sm:block truncate max-w-[140px]">
+                              <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                 {inviteJournal}
                               </div>
                             </div>
-                            <div className="text-right shrink-0">
+                            <div className="text-right shrink-0 pt-0.5">
                               <img 
                                 src="/editorial360.svg" 
                                 alt="editorial360" 
