@@ -63,14 +63,9 @@ export default function SubmitPage() {
 
               <div className="mt-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#0b99ff]/10 via-[#0b99ff]/5 to-transparent border border-[#0b99ff]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#0b99ff] bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/30">
-                      Standard Author Workflow
-                    </span>
-                    <h3 className="text-base font-bold text-foreground">
-                      Submit Online via editorial360 Portal
-                    </h3>
-                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">
+                    Submit Online via editorial360 Portal
+                  </h3>
                   <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
                     Track manuscript triage in real time, view referee scorecards, upload revised drafts, and receive official decision notices directly within your editorial360 author dashboard.
                   </p>
