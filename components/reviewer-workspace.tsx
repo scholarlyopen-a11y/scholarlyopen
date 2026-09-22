@@ -2199,6 +2199,8 @@ COPE & Plan S Certified Archive
                   )
                 })}
               </div>
+            </div>
+
             {/* Reviewer Honoraria & 4-Option Disbursement Portal */}
             <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/80 bg-white dark:bg-slate-950 p-5 sm:p-6 space-y-5 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
