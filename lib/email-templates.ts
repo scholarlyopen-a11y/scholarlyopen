@@ -93,6 +93,33 @@ Thank you for supporting transparent, rigorous open-access peer review.`,
     placeholders: COMMON_PLACEHOLDERS
   },
   {
+    id: "workspace_invite",
+    name: "Workspace Member Invitation",
+    category: "reviewers",
+    description: "Official administrative invitation dispatched to scholars and editors to join Editorial360 workspace.",
+    defaultSubject: "Official Invitation: Join the Editorial360 Workspace as {{role}} - Scholarly Open",
+    defaultBody: `Dear {{recipientName}},
+
+You have been formally invited by the System Administration team at Scholarly Open to join the Editorial360 publishing workspace.
+
+Role Assignment: {{role}}
+Scope / Portfolio: {{journal}}
+Designated Email: {{recipientEmail}}
+
+As an active {{role}} in the Editorial360 ecosystem, you will have access to real-time manuscript queues, double-blind peer review tools, and automated editorial decision support adhering to COPE ethical standards.
+
+Please use the secure button below to accept this invitation, complete your profile, and activate your workspace credentials:`,
+    actionLabel: "Accept Invitation & Activate Account",
+    actionUrlPlaceholder: "{{portalUrl}}?action=activate_invite&role={{roleKey}}&email={{recipientEmail}}&name={{recipientName}}",
+    includeEditorial360Logo: true,
+    placeholders: [
+      ...COMMON_PLACEHOLDERS,
+      { key: "role", label: "Assigned Role", description: "Designated role in workspace", example: "Peer Reviewer" },
+      { key: "roleKey", label: "Role Identifier Key", description: "System role slug (e.g. reviewer, editor)", example: "reviewer" },
+      { key: "recipientEmail", label: "Recipient Email Address", description: "Invitee email address", example: "c.zhang@scholarlyopen.org" }
+    ]
+  },
+  {
     id: "submission_ack",
     name: "Author Submission Acknowledgment",
     category: "authors",

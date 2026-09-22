@@ -19,6 +19,10 @@ interface EmailPayload {
   journal?: string
   actionLabel?: string
   actionUrl?: string
+  fromEmail?: string
+  senderName?: string
+  role?: string
+  includeEditorial360Logo?: boolean
 }
 
 export async function POST(req: Request) {
@@ -37,11 +41,18 @@ export async function POST(req: Request) {
     if (!finalHtml) {
       const templateDef = DEFAULT_EMAIL_TEMPLATES.find(t => t.id === body.template)
       
+      const roleDisplayName = body.role 
+        ? (body.role === "reviewer" ? "Peer Reviewer" : body.role === "editor" ? "Section Editor" : body.role === "ria" ? "Quality Check Admin (QC Admin)" : body.role === "jm" ? "Journal Manager" : body.role === "author" ? "Contributing Author" : body.role)
+        : "Workspace Member"
+
       const tokens: Record<string, string> = {
         recipientName,
+        recipientEmail: body.to,
         paperId,
         paperTitle,
         journal,
+        role: roleDisplayName,
+        roleKey: body.role || "member",
         portalUrl: `${baseUrl}/editorial360`,
         acceptUrl: `${baseUrl}/editorial360?action=accept&id=${paperId}&journal=${encodeURIComponent(journal)}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
         declineUrl: `${baseUrl}/editorial360?action=decline&id=${paperId}&journal=${encodeURIComponent(journal)}&email=${encodeURIComponent(body.to)}&name=${encodeURIComponent(recipientName)}`,
@@ -109,18 +120,17 @@ export async function POST(req: Request) {
     const smtpUser = process.env.SMTP_USER
     const smtpPass = process.env.SMTP_PASS
 
-    // Designated journal email through which outreach and notifications go
-    const journalEmail = getJournalReplyTo(journal)
+    // Designated sender email. Prioritizes explicit fromEmail (e.g. editorial@scholarlyopen.org)
+    // or falls back to journal-specific address or DEFAULT_EDITORIAL_EMAIL
+    const designatedEmail = body.fromEmail || (body.template === "workspace_invite" ? DEFAULT_EDITORIAL_EMAIL : getJournalReplyTo(journal))
 
-    // Through which email the message goes:
-    // Uses the exact journal email (e.g. editor.bio@scholarlyopen.org, editor.med@scholarlyopen.org).
-    // If strict single-auth SMTP is enforced by the host, it can be overridden with FORCE_SINGLE_SENDER=true
     const activeSenderEmail = process.env.FORCE_SINGLE_SENDER === "true"
       ? (process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL)
-      : journalEmail
+      : designatedEmail
 
-    const formattedFrom = `"${journal}" <${activeSenderEmail}>`
-    const replyToEmail = journalEmail
+    const senderDisplayName = body.senderName || (body.template === "workspace_invite" ? "Scholarly Open Editorial Office" : `"${journal} Editorial Office"`)
+    const formattedFrom = `"${senderDisplayName}" <${activeSenderEmail}>`
+    const replyToEmail = body.fromEmail || designatedEmail || DEFAULT_EDITORIAL_EMAIL
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
       const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"

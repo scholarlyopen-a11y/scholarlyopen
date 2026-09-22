@@ -89,6 +89,7 @@ import { Footer } from "@/components/footer"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { ReviewAssessmentData } from "@/components/reviewer-workspace"
 import type { CrossDeskNotification } from "@/components/cross-desk-activity-feed"
+import { OFFICIAL_JOURNALS, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 
 const ReviewerWorkspace = dynamic(
   () => import("@/components/reviewer-workspace").then(mod => mod.ReviewerWorkspace),
@@ -921,6 +922,22 @@ export default function Editorial360Page() {
         setIsLoggedIn(true)
       }
 
+      if (urlAction === "activate_invite") {
+        setMode("register")
+        if (urlEmail) {
+          setEmail(urlEmail)
+          setRegEmail(urlEmail)
+        }
+        if (urlName) {
+          setRegName(urlName)
+        }
+        if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
+          setRole(urlRole)
+          setRegRole(urlRole === "reviewer" ? "reviewer" : "author")
+        }
+        setSuccess(`Welcome to Editorial360! You have been officially invited. Please set your password below to activate your account.`)
+      }
+
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
         setRole(urlRole)
         setRegRole(urlRole === "reviewer" ? "reviewer" : "author")
@@ -1745,6 +1762,54 @@ export default function Editorial360Page() {
   const [inviteName, setInviteName] = useState("")
   const [inviteEmail, setInviteEmail] = useState("")
   const [inviteRole, setInviteRole] = useState<UserRole>("reviewer")
+  const [inviteJournal, setInviteJournal] = useState("Scholarly Open")
+  const [inviteSubject, setInviteSubject] = useState("")
+  const [inviteBody, setInviteBody] = useState("")
+  const [inviteModalTab, setInviteModalTab] = useState<"compose" | "preview">("compose")
+  const [isSendingInvite, setIsSendingInvite] = useState(false)
+  const [inviteSubjectTouched, setInviteSubjectTouched] = useState(false)
+  const [inviteBodyTouched, setInviteBodyTouched] = useState(false)
+
+  const getRoleDisplayName = (r: UserRole | string): string => {
+    switch (r) {
+      case "reviewer": return "Peer Reviewer"
+      case "editor": return "Section / Handling Editor"
+      case "ria": return "Quality Check Admin (QC Admin)"
+      case "jm": return "Journal Manager"
+      case "author": return "Contributing Author"
+      case "admin": return "System Administrator"
+      default: return "Workspace Member"
+    }
+  }
+
+  const getDefaultInviteSubject = (r: UserRole | string, name?: string): string => {
+    const roleName = getRoleDisplayName(r)
+    return `Official Invitation: Join Editorial360 Workspace as ${roleName} - Scholarly Open`
+  }
+
+  const getDefaultInviteBody = (r: UserRole | string, name?: string, journalName?: string, emailAddr?: string): string => {
+    const salutation = name ? `Dear ${name},` : "Dear Colleague,"
+    const roleName = getRoleDisplayName(r)
+    const journalStr = journalName || "Scholarly Open"
+
+    if (r === "reviewer") {
+      return `${salutation}\n\nYou are cordially invited by the Editorial Office of Scholarly Open to join our verified Peer Reviewer Registry on the Editorial360 collaborative publishing platform.\n\nRole: ${roleName}\nDesignated Discipline: ${journalStr}\n\nAs a verified reviewer, you will receive invitation requests carefully matched to your discipline and publication history, gain access to double-blind evaluation scorecards, and accumulate verified review credits with publication fee waiver benefits under COPE ethical standards.\n\nPlease accept this invitation to activate your reviewer workspace credentials.`
+    }
+
+    if (r === "editor") {
+      return `${salutation}\n\nOn behalf of Scholarly Open, we are honored to invite you to join the Editorial Board as a ${roleName} for ${journalStr}.\n\nRole: ${roleName}\nEditorial Suite: Editorial360 Unified Editorial Management\n\nThrough Editorial360, you will manage manuscript triage, oversee peer review evaluation rounds, and issue final publication recommendations with full editorial autonomy.\n\nPlease accept this invitation to activate your editor workspace.`
+    }
+
+    if (r === "ria") {
+      return `${salutation}\n\nYou have been appointed as Quality Check Administrator (QC Admin) for ${journalStr} on Editorial360.\n\nRole: ${roleName}\nFocus: Ethical Pre-checks, Plagiarism Screening & Technical Compliance\n\nPlease activate your account below to access the incoming manuscript triage queue.`
+    }
+
+    if (r === "jm") {
+      return `${salutation}\n\nYou have been appointed as Journal Manager for ${journalStr} on Editorial360.\n\nRole: ${roleName}\nFocus: Operational Workflows, ECR Talent Pool Outreach & Author Communications\n\nPlease accept this invitation to activate your management portal.`
+    }
+
+    return `${salutation}\n\nYou have been formally invited to join the Editorial360 workspace for Scholarly Open in the official capacity of ${roleName}.\n\nRole: ${roleName}\nAssociated Portfolio: ${journalStr}\n\nPlease click the button below to accept your invitation and activate your workspace credentials.`
+  }
 
   const [isAssignReviewerOpen, setIsAssignReviewerOpen] = useState(false)
   const [assignPaperId, setAssignPaperId] = useState("")
@@ -2967,32 +3032,8 @@ export default function Editorial360Page() {
     })
   }
 
-  const handleInviteUser = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!inviteName || !inviteEmail) return
-    triggerConfirm({
-      title: language === "de" ? "Einladung versenden?" : "Send Team Invitation?",
-      message: language === "de"
-        ? `Möchten Sie eine Workspace-Einladung an ${inviteEmail} mit der Rolle '${inviteRole}' versenden?`
-        : `Are you sure you want to send a workspace invitation to ${inviteEmail} for role '${inviteRole}'?`,
-      confirmButtonLabel: language === "de" ? "Ja, Einladung senden" : "Yes, Send Invitation",
-      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: () => {
-        const newUser: WorkspaceUser = {
-          id: `USR-${Math.floor(Math.random() * 100) + 10}`,
-          name: inviteName,
-          email: inviteEmail,
-          role: inviteRole,
-          activeTasks: 0,
-          status: "Pending Invitation"
-        }
-        setUsers(prev => [...prev, newUser])
-        setIsInviteUserOpen(false)
-        setInviteName("")
-        setInviteEmail("")
-      }
-    })
-  }
+  const handleInviteUser = onTriggerInviteUser
+
 
   const handleAssignReviewer = (reviewerName: string) => {
     setManuscripts(prev => 
@@ -3662,30 +3703,69 @@ export default function Editorial360Page() {
     })
   }
 
-  const onTriggerInviteUser = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!inviteName || !inviteEmail) return
-    setIsInviteUserOpen(false)
-    triggerConfirm({
-      title: "Confirm Member Invitation?",
-      message: `Are you sure you want to dispatch a workspace invitation to ${inviteName} (${inviteEmail}) for the role of '${inviteRole.toUpperCase()}'?`,
-      confirmButtonLabel: "Yes, Send Invitation",
-      confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-      onConfirm: () => {
-        const newUser: WorkspaceUser = {
-          id: `USR-${Math.floor(Math.random() * 100) + 10}`,
-          name: inviteName,
-          email: inviteEmail,
+  const onTriggerInviteUser = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (!inviteName || !inviteEmail) {
+      setError("Please provide both Full Name and Institutional Email address.")
+      return
+    }
+
+    setIsSendingInvite(true)
+    const currentSubject = inviteSubject || getDefaultInviteSubject(inviteRole, inviteName)
+    const currentBody = inviteBody || getDefaultInviteBody(inviteRole, inviteName, inviteJournal, inviteEmail)
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://www.scholarlyopen.org"
+    const actionUrl = `${baseUrl}/editorial360?action=activate_invite&role=${inviteRole}&email=${encodeURIComponent(inviteEmail)}&name=${encodeURIComponent(inviteName)}&journal=${encodeURIComponent(inviteJournal)}`
+
+    try {
+      const res = await fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: inviteEmail,
+          recipientName: inviteName,
+          fromEmail: DEFAULT_EDITORIAL_EMAIL, // "editorial@scholarlyopen.org"
+          senderName: "Scholarly Open Editorial Office",
+          subject: currentSubject,
+          customBody: currentBody,
+          journal: inviteJournal,
           role: inviteRole,
-          activeTasks: 0,
-          status: "Pending Invitation"
-        }
-        setUsers(prev => [newUser, ...prev])
-        setInviteName("")
-        setInviteEmail("")
-        setSuccess(`✓ Workspace invitation dispatched to ${inviteName} (${inviteEmail}).`)
+          template: "workspace_invite",
+          actionLabel: "Accept Invitation & Activate Account",
+          actionUrl,
+          includeEditorial360Logo: true
+        })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || "Failed to dispatch email")
       }
-    })
+
+      const newUser: WorkspaceUser = {
+        id: `USR-${Math.floor(Math.random() * 100) + 10}`,
+        name: inviteName,
+        email: inviteEmail,
+        role: inviteRole,
+        activeTasks: 0,
+        status: "Invited (Live Email Sent)"
+      }
+      setUsers(prev => [newUser, ...prev])
+      setIsInviteUserOpen(false)
+      setInviteName("")
+      setInviteEmail("")
+      setInviteSubject("")
+      setInviteBody("")
+      setInviteSubjectTouched(false)
+      setInviteBodyTouched(false)
+      setInviteModalTab("compose")
+      setSuccess(`✓ Live invitation email dispatched to ${inviteName} (${inviteEmail}) from editorial@scholarlyopen.org${data.sentViaSmtp ? " via SMTP" : " (recorded live)"}!`)
+    } catch (err: any) {
+      console.error("Invite dispatch error:", err)
+      setError(`Failed to dispatch invitation: ${err?.message || "Check network/SMTP connection"}`)
+    } finally {
+      setIsSendingInvite(false)
+    }
   }
 
   const handleSaveAdminConfigs = () => {
@@ -10427,73 +10507,384 @@ export default function Editorial360Page() {
             </DialogContent>
           </Dialog>
 
-          {/* 4. ADMIN: INVITE USER MODAL */}
+          {/* 4. ADMIN: INVITE USER MODAL WITH LIVE EMAIL TEMPLATE PREVIEW & EDITORIAL@SCHOLARLYOPEN.ORG SENDER */}
           <Dialog open={isInviteUserOpen} onOpenChange={setIsInviteUserOpen}>
-            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-md transition-colors">
-              <DialogHeader>
-                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <UserPlus className="h-5 w-5 text-[#0b99ff]" />
-                  Invite Workspace Member
-                </DialogTitle>
-                <DialogDescription className="text-slate-500 dark:text-slate-400">
-                  Send an automatic system invitation link to a verified academic colleague.
+            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-3xl max-h-[92vh] overflow-y-auto transition-colors p-6 rounded-2xl shadow-2xl">
+              <DialogHeader className="border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 flex items-center justify-center text-[#0b99ff]">
+                      <UserPlus className="h-5 w-5" />
+                    </div>
+                    Invite Workspace Member
+                  </DialogTitle>
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-full text-[11px] font-semibold">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Live Dispatch: editorial@scholarlyopen.org
+                  </div>
+                </div>
+                <DialogDescription className="text-slate-500 dark:text-slate-400 text-xs mt-1">
+                  Send an official invitation with secure activation credentials dispatched live from the verified Scholarly Open editorial address.
                 </DialogDescription>
               </DialogHeader>
-              
-              <form onSubmit={onTriggerInviteUser} className="space-y-4 py-2">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Invite Role Assignment</label>
-                  <select
-                    value={inviteRole}
-                    onChange={(e) => setInviteRole(e.target.value as UserRole)}
-                    className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-955 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                  >
-                    <option value="editor">Editor</option>
-                    <option value="reviewer">Reviewer</option>
-                    <option value="ria">Quality Check Admin (QC Admin)</option>
-                    <option value="jm">Journal Manager</option>
-                  </select>
-                </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={inviteName}
-                    onChange={(e) => setInviteName(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                    placeholder="e.g. Prof. Clara Zhang"
-                  />
+              {/* Sender Details Header Card */}
+              <div className="bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#0b99ff] text-white font-bold flex items-center justify-center text-xs shadow-sm">
+                    SO
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <span>Scholarly Open Editorial Office</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-mono">
+                        editorial@scholarlyopen.org
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Standard Outbound Dispatch Protocol • TLS 1.3 Secure SMTP
+                    </div>
+                  </div>
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Institutional Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                    placeholder="c.zhang@scholarlyopen.org"
-                  />
+                {/* Tab Switcher */}
+                <div className="flex items-center bg-slate-200/80 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setInviteModalTab("compose")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                      inviteModalTab === "compose"
+                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <Edit3 className="h-3.5 w-3.5" />
+                    Customize Template
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInviteModalTab("preview")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                      inviteModalTab === "preview"
+                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    Live Email Preview
+                  </button>
                 </div>
+              </div>
 
-                <DialogFooter className="pt-2">
-                  <Button 
-                    type="button" 
-                    onClick={() => setIsInviteUserOpen(false)}
-                    variant="ghost" 
-                    className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold cursor-pointer"
-                  >
-                    Send Invitation
-                  </Button>
+              <form onSubmit={onTriggerInviteUser} className="space-y-4 pt-1">
+                {inviteModalTab === "compose" ? (
+                  <>
+                    {/* Role & Journal Selectors */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                          <span>Invite Role Assignment</span>
+                          <span className="text-[10px] text-slate-400 font-normal">Controls portal permissions</span>
+                        </label>
+                        <select
+                          value={inviteRole}
+                          onChange={(e) => {
+                            const newRole = e.target.value as UserRole
+                            setInviteRole(newRole)
+                            if (!inviteSubjectTouched) {
+                              setInviteSubject(getDefaultInviteSubject(newRole, inviteName))
+                            }
+                            if (!inviteBodyTouched) {
+                              setInviteBody(getDefaultInviteBody(newRole, inviteName, inviteJournal, inviteEmail))
+                            }
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                        >
+                          <option value="reviewer">Peer Reviewer (Verified Registry)</option>
+                          <option value="editor">Section / Handling Editor</option>
+                          <option value="ria">Quality Check Admin (QC Admin)</option>
+                          <option value="jm">Journal Manager</option>
+                          <option value="author">Contributing Author</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                          <span>Designated Journal / Scope</span>
+                          <span className="text-[10px] text-slate-400 font-normal">13 Official Journals</span>
+                        </label>
+                        <select
+                          value={inviteJournal}
+                          onChange={(e) => {
+                            const newJ = e.target.value
+                            setInviteJournal(newJ)
+                            if (!inviteBodyTouched) {
+                              setInviteBody(getDefaultInviteBody(inviteRole, inviteName, newJ, inviteEmail))
+                            }
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                        >
+                          <option value="Scholarly Open">Scholarly Open (Platform-Wide)</option>
+                          {OFFICIAL_JOURNALS.map((j) => (
+                            <option key={j.name} value={j.name}>
+                              {j.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Invitee Contact Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name &amp; Title</label>
+                        <input
+                          type="text"
+                          required
+                          value={inviteName}
+                          onChange={(e) => {
+                            const newName = e.target.value
+                            setInviteName(newName)
+                            if (!inviteSubjectTouched) {
+                              setInviteSubject(getDefaultInviteSubject(inviteRole, newName))
+                            }
+                            if (!inviteBodyTouched) {
+                              setInviteBody(getDefaultInviteBody(inviteRole, newName, inviteJournal, inviteEmail))
+                            }
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          placeholder="e.g. Prof. Clara Zhang"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Institutional Email</label>
+                        <input
+                          type="email"
+                          required
+                          value={inviteEmail}
+                          onChange={(e) => {
+                            const newEmail = e.target.value
+                            setInviteEmail(newEmail)
+                            if (!inviteBodyTouched) {
+                              setInviteBody(getDefaultInviteBody(inviteRole, inviteName, inviteJournal, newEmail))
+                            }
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                          placeholder="c.zhang@university.edu"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email Subject Line */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Subject Line</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setInviteSubject(getDefaultInviteSubject(inviteRole, inviteName))
+                            setInviteSubjectTouched(false)
+                          }}
+                          className="text-[10px] text-[#0b99ff] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <RefreshCw className="h-2.5 w-2.5" />
+                          Reset to Default
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={inviteSubject || getDefaultInviteSubject(inviteRole, inviteName)}
+                        onChange={(e) => {
+                          setInviteSubject(e.target.value)
+                          setInviteSubjectTouched(true)
+                        }}
+                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      />
+                    </div>
+
+                    {/* Email Message Body */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Invitation Letter Content</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setInviteBody(getDefaultInviteBody(inviteRole, inviteName, inviteJournal, inviteEmail))
+                            setInviteBodyTouched(false)
+                          }}
+                          className="text-[10px] text-[#0b99ff] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <RefreshCw className="h-2.5 w-2.5" />
+                          Reset Template Body
+                        </button>
+                      </div>
+                      <textarea
+                        rows={7}
+                        value={inviteBody || getDefaultInviteBody(inviteRole, inviteName, inviteJournal, inviteEmail)}
+                        onChange={(e) => {
+                          setInviteBody(e.target.value)
+                          setInviteBodyTouched(true)
+                        }}
+                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-mono text-[11.5px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      />
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-0.5">
+                        <span>An official &apos;Accept Invitation &amp; Activate Account&apos; button will be automatically attached.</span>
+                        <button
+                          type="button"
+                          onClick={() => setInviteModalTab("preview")}
+                          className="text-[#0b99ff] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          View Live Preview <ArrowRight className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* ================= LIVE EMAIL PREVIEW TAB ================= */
+                  <div className="space-y-3">
+                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs bg-slate-50/50 dark:bg-slate-950">
+                      {/* Email Client Header Bar */}
+                      <div className="bg-slate-100 dark:bg-slate-900/90 px-4 py-3 border-b border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-slate-900 dark:text-white truncate">
+                            {inviteSubject || getDefaultInviteSubject(inviteRole, inviteName)}
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-semibold shrink-0">
+                            Live HTML Template
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-600 dark:text-slate-400 flex flex-wrap gap-x-4 gap-y-1">
+                          <div>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">From:</span>{" "}
+                            &quot;Scholarly Open Editorial Office&quot; &lt;editorial@scholarlyopen.org&gt;
+                          </div>
+                          <div>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">To:</span>{" "}
+                            {inviteName || "Colleague"} &lt;{inviteEmail || "colleague@university.edu"}&gt;
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Rendered Email Body Simulation */}
+                      <div className="p-6 bg-white dark:bg-slate-950 max-h-[380px] overflow-y-auto">
+                        <div className="max-w-[560px] mx-auto border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+                          {/* Email Brand Masthead */}
+                          <div className="px-5 py-4 border-b-2 border-[#0b99ff] bg-white dark:bg-slate-900 flex items-center justify-between">
+                            <div>
+                              <div className="text-base font-extrabold text-[#0b99ff] tracking-tight">
+                                SCHOLARLY OPEN
+                              </div>
+                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                {inviteJournal}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <span className="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded uppercase">
+                                Editorial360
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Email Content Box */}
+                          <div className="p-6 space-y-4">
+                            {/* Role Detail Box */}
+                            <div className="bg-sky-50 dark:bg-sky-950/40 border-l-4 border-[#0b99ff] p-3 rounded text-xs space-y-1">
+                              <div className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider">
+                                Official Workspace Assignment
+                              </div>
+                              <div className="font-bold text-slate-900 dark:text-white text-sm">
+                                Role: {getRoleDisplayName(inviteRole)}
+                              </div>
+                              <div className="text-slate-600 dark:text-slate-400 text-[11px]">
+                                Associated Scope: {inviteJournal} • Account: {inviteEmail || "c.zhang@university.edu"}
+                              </div>
+                            </div>
+
+                            {/* Letter Paragraphs */}
+                            <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line space-y-3">
+                              {inviteBody || getDefaultInviteBody(inviteRole, inviteName, inviteJournal, inviteEmail)}
+                            </div>
+
+                            {/* Activation Button */}
+                            <div className="pt-2 pb-1">
+                              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0b99ff] text-white font-bold rounded-lg text-xs shadow-sm">
+                                Accept Invitation &amp; Activate Account
+                                <ArrowRight className="h-3.5 w-3.5" />
+                              </div>
+                              <div className="text-[10px] text-slate-400 mt-1.5">
+                                Secure one-time activation link dispatched from editorial@scholarlyopen.org
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Compliance Footer */}
+                          <div className="bg-slate-50 dark:bg-slate-950 px-5 py-3 border-t border-slate-200 dark:border-slate-800 text-center text-[10px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                            <div className="font-semibold text-slate-600 dark:text-slate-300">
+                              Scholarly Open Editorial Platform • Germany &amp; Global Publishing Registry
+                            </div>
+                            <div>
+                              Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <DialogFooter className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between sm:justify-between w-full">
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <Mail className="h-3.5 w-3.5 text-[#0b99ff]" />
+                    <span>Sender: <strong className="text-slate-700 dark:text-slate-200">editorial@scholarlyopen.org</strong></span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      type="button" 
+                      onClick={() => setIsInviteUserOpen(false)}
+                      variant="ghost" 
+                      className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer text-xs"
+                    >
+                      Cancel
+                    </Button>
+                    {inviteModalTab === "compose" ? (
+                      <Button
+                        type="button"
+                        onClick={() => setInviteModalTab("preview")}
+                        variant="outline"
+                        className="text-xs font-semibold cursor-pointer border-slate-300 dark:border-slate-700"
+                      >
+                        Preview Email
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={() => setInviteModalTab("compose")}
+                        variant="outline"
+                        className="text-xs font-semibold cursor-pointer border-slate-300 dark:border-slate-700"
+                      >
+                        Edit Details
+                      </Button>
+                    )}
+                    <Button 
+                      type="submit" 
+                      disabled={isSendingInvite || !inviteName || !inviteEmail}
+                      className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold cursor-pointer text-xs flex items-center gap-1.5 px-4"
+                    >
+                      {isSendingInvite ? (
+                        <>
+                          <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          Dispatching Live...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-3.5 w-3.5" />
+                          Send Invitation
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </DialogFooter>
               </form>
             </DialogContent>
