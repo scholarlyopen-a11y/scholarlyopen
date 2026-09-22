@@ -259,12 +259,7 @@ export default function PeerReviewPage() {
               {/* Card 1: Honoraria Policy */}
               <div className="p-6 sm:p-8 rounded-2xl bg-background border border-border shadow-xs flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <h3 className="text-lg font-bold">Reviewer & Editor Honoraria Policy</h3>
-                    <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full whitespace-nowrap">
-                      €35 – €50 EUR (Capped at €50)
-                    </span>
-                  </div>
+                  <h3 className="text-lg font-bold mb-2">Reviewer & Editor Honoraria Policy</h3>
                   <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                     Unlike traditional commercial publishers, Scholarly Open allocates a dedicated micro-share of the APC directly to peer reviewers and academic handling editors. To safeguard scientific integrity, honoraria are strictly quality-gated and performance-scaled:
                   </p>
