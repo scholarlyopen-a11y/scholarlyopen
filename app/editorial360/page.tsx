@@ -820,7 +820,18 @@ export default function Editorial360Page() {
     institution: string
     department?: string
     orcid?: string
+    photoUrl?: string
+    badges?: string[]
   } | null>(null)
+
+  const getReviewerInitials = (name?: string) => {
+    if (!name) return "MV"
+    const cleaned = name.replace(/^(Dr\.|Prof\.|Prof\. Dr\.|Mr\.|Ms\.|Mrs\.)\s+/i, "").trim()
+    const parts = cleaned.split(/\s+/).filter(Boolean)
+    if (parts.length === 0) return "MV"
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
 
   // Theme states
   const { theme, setTheme } = useTheme()
@@ -984,8 +995,42 @@ export default function Editorial360Page() {
       } catch (err) {
         console.error("Failed to load saved reviews from localStorage", err)
       }
+
+      // Load saved reviewer profile from localStorage
+      try {
+        const defaultRevKey = "so_reviewer_profile_m.vance@university-charite.de"
+        const altRevKey = "so_reviewer_profile_reviewer@scholarlyopen.org"
+        const savedProfileStr = localStorage.getItem(defaultRevKey) || localStorage.getItem(altRevKey)
+        if (savedProfileStr) {
+          const parsedProf = JSON.parse(savedProfileStr)
+          if (parsedProf && parsedProf.name) {
+            setReviewerProfile(parsedProf)
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load saved reviewer profile from localStorage", err)
+      }
     }
   }, [])
+
+  // Sync reviewer profile whenever email or role changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && role === "reviewer") {
+      try {
+        const revEmail = (reviewerProfile?.email || email || "m.vance@university-charite.de").toLowerCase().trim()
+        const storageKey = `so_reviewer_profile_${revEmail}`
+        const saved = localStorage.getItem(storageKey) || 
+                      localStorage.getItem("so_reviewer_profile_m.vance@university-charite.de") ||
+                      localStorage.getItem("so_reviewer_profile_reviewer@scholarlyopen.org")
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed && parsed.name) {
+            setReviewerProfile(prev => ({ ...prev, ...parsed }))
+          }
+        }
+      } catch (e) {}
+    }
+  }, [role, email])
 
   // Auto-sync polling every 12 seconds so Noor and Abbas see each other's live changes across different computers
   useEffect(() => {
@@ -2584,6 +2629,15 @@ export default function Editorial360Page() {
       setMode("login")
       setRole(regRole)
       setEmail(regEmail)
+      if (regRole === "reviewer") {
+        setReviewerProfile(prev => ({
+          name: regName,
+          email: regEmail,
+          institution: "Scholarly Open Verified Reviewer Community",
+          department: "Peer Review Faculty",
+          ...(prev || {})
+        }))
+      }
     }, 1200)
   }
 
@@ -4758,7 +4812,27 @@ export default function Editorial360Page() {
                 >
                   <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
                     <div className="h-full w-full rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
-                      <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                      {role === "reviewer" && reviewerProfile?.photoUrl ? (
+                        <img 
+                          src={reviewerProfile.photoUrl} 
+                          alt={reviewerProfile.name || "Reviewer"} 
+                          className="h-full w-full object-cover"
+                        />
+                      ) : role === "editor" && editorPhotoUrl ? (
+                        <img 
+                          src={editorPhotoUrl} 
+                          alt={editorName} 
+                          className="h-full w-full object-cover"
+                        />
+                      ) : role === "author" && profPhotoUrl ? (
+                        <img 
+                          src={profPhotoUrl} 
+                          alt={profFullName} 
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                      )}
                     </div>
                     {/* Full unclipped Online (Green) / Offline (Grey) Status Dot */}
                     <span 
@@ -4770,7 +4844,7 @@ export default function Editorial360Page() {
                   </div>
                   <div className="hidden lg:flex flex-col text-left pr-1">
                     <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 leading-tight">
-                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? "Dr. Marcus Vance" : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                     </span>
                     <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
                       {role === "editor"
@@ -4802,14 +4876,34 @@ export default function Editorial360Page() {
                       {/* User Header */}
                       <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                          <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? "MV" : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                          {role === "reviewer" && reviewerProfile?.photoUrl ? (
+                            <img 
+                              src={reviewerProfile.photoUrl} 
+                              alt={reviewerProfile.name || "Reviewer"} 
+                              className="h-full w-full object-cover"
+                            />
+                          ) : role === "editor" && editorPhotoUrl ? (
+                            <img 
+                              src={editorPhotoUrl} 
+                              alt={editorName} 
+                              className="h-full w-full object-cover"
+                            />
+                          ) : role === "author" && profPhotoUrl ? (
+                            <img 
+                              src={profPhotoUrl} 
+                              alt={profFullName} 
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                          )}
                           <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#18191e] ${userStatus === "online" ? "bg-emerald-500" : "bg-slate-400"}`} />
                         </div>
                         <div className="space-y-0.5 overflow-hidden text-left flex-1">
                           <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? "Dr. Marcus Vance" : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                           </h4>
-                          <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : email}</p>
+                          <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : role === "reviewer" ? (reviewerProfile?.email || email) : email}</p>
                           <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
                             {role === "editor"
                               ? editorRank
@@ -4866,7 +4960,7 @@ export default function Editorial360Page() {
                           onClick={() => {
                             setIsUserMenuOpen(false)
                             if (role === "reviewer") {
-                              setIsProfileModalOpen(true)
+                              setActiveReviewerTab("overview")
                             } else {
                               setIsAuthorProfileSetupOpen(true)
                             }
@@ -5666,7 +5760,12 @@ export default function Editorial360Page() {
                       name: reviewerProfile?.name || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || "Dr. Marcus Vance")),
                       email: reviewerProfile?.email || email || regEmail || "m.vance@university-charite.de",
                       orcid: reviewerProfile?.orcid || regOrcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : ""),
-                      institution: reviewerProfile?.institution || "Charité – Universitätsmedizin Berlin"
+                      institution: reviewerProfile?.institution || "Charité – Universitätsmedizin Berlin",
+                      photoUrl: reviewerProfile?.photoUrl
+                    }}
+                    initialProfile={reviewerProfile || undefined}
+                    onSaveProfile={(updated) => {
+                      setReviewerProfile(updated)
                     }}
                     reviewInvitations={reviewInvitations}
                     activeReviews={activeReviews}

@@ -52,7 +52,10 @@ import {
   Landmark,
   HeartHandshake,
   Library,
-  CreditCard
+  CreditCard,
+  Upload,
+  Trophy,
+  Star
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -67,6 +70,8 @@ export interface ReviewerProfile {
   country: string
   orcid: string
   scholarUrl: string
+  photoUrl?: string
+  badges?: string[]
   primaryDiscipline: string
   subDisciplines: string[]
   keywords: string[]
@@ -152,6 +157,7 @@ interface ReviewerWorkspaceProps {
     email?: string
     orcid?: string
     institution?: string
+    photoUrl?: string
   }
   initialProfile?: Partial<ReviewerProfile>
   onSaveProfile?: (profile: ReviewerProfile) => void
@@ -185,8 +191,8 @@ export interface ReviewAssessmentData {
   aiAuthenticityScore: number
 }
 
-const QUESTIONNAIRE_ITEMS = [
-  { id: "q1_mission", label: "Does the manuscript fit into the mission and scope of the journal?" },
+const QUESTIONNAIRE_CRITERIA = [
+  { id: "q1_mission", label: "Is the subject matter within the scope and aims of the journal?" },
   { id: "q2_originality", label: "Does the manuscript contain original and significant information to justify publication?" },
   { id: "q3_abstract", label: "Does the abstract clearly and accurately describe the content of the article?" },
   { id: "q4_irb", label: "Is the information on Institutional Review Board (IRB) / Ethics approval explicitly stated?" },
@@ -207,6 +213,14 @@ function getFormattedReviewerName(title?: string, name?: string): string {
     return rawName
   }
   return `${rawTitle} ${rawName}`
+}
+
+function getReviewerInitials(name?: string): string {
+  const rawName = (name || "Marcus Vance").replace(/^(prof\.?\s*dr\.?|dr\.?|assoc\.?\s*prof\.?|assist\.?\s*prof\.?|md|phd)\s+/i, '').trim()
+  if (!rawName) return "MV"
+  const parts = rawName.split(/\s+/).filter(Boolean)
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
 export function ReviewerWorkspace({
@@ -231,6 +245,8 @@ export function ReviewerWorkspace({
       title: initialProfile?.title || "Dr.",
       name: user?.name || initialProfile?.name || "Marcus Vance",
       email: user?.email || initialProfile?.email || "m.vance@university-charite.de",
+      photoUrl: user?.photoUrl || initialProfile?.photoUrl || "",
+      badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"],
       institution: user?.institution || initialProfile?.institution || "Charité – Universitätsmedizin Berlin",
       department: initialProfile?.department || "Department of Cardiology & Vascular Medicine",
       country: initialProfile?.country || "Germany",
@@ -248,9 +264,23 @@ export function ReviewerWorkspace({
     }
   })
 
+  // Sync profile when user or initialProfile changes
+  useEffect(() => {
+    if (user?.name || user?.photoUrl !== undefined || initialProfile?.name || initialProfile?.photoUrl !== undefined) {
+      setProfile(prev => ({
+        ...prev,
+        name: user?.name || initialProfile?.name || prev.name,
+        email: user?.email || initialProfile?.email || prev.email,
+        institution: user?.institution || initialProfile?.institution || prev.institution,
+        photoUrl: user?.photoUrl !== undefined ? user.photoUrl : (initialProfile?.photoUrl !== undefined ? initialProfile.photoUrl : prev.photoUrl)
+      }))
+    }
+  }, [user?.name, user?.photoUrl, user?.email, user?.institution, initialProfile?.name, initialProfile?.photoUrl])
+
   // Profile Modal Form States
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileStep, setProfileStep] = useState<1 | 2 | 3 | 4>(1)
+  const [formPhotoUrl, setFormPhotoUrl] = useState(profile.photoUrl || "")
   const [formTitle, setFormTitle] = useState(profile.title)
   const [formName, setFormName] = useState(profile.name)
   const [formEmail, setFormEmail] = useState(profile.email)
@@ -585,6 +615,7 @@ export function ReviewerWorkspace({
 
   // Profile Action Handlers
   const handleOpenProfileModal = () => {
+    setFormPhotoUrl(profile.photoUrl || "")
     setFormTitle(profile.title)
     setFormName(profile.name)
     setFormEmail(profile.email)
@@ -636,6 +667,8 @@ export function ReviewerWorkspace({
       country: formCountry,
       orcid: formOrcid,
       scholarUrl: formScholarUrl,
+      photoUrl: formPhotoUrl,
+      badges: profile.badges || ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"],
       primaryDiscipline: formPrimaryDiscipline,
       subDisciplines: formSubDisciplines,
       keywords: formKeywords,
@@ -648,6 +681,10 @@ export function ReviewerWorkspace({
     }
     setProfile(updated)
     markOnboarded()
+    try {
+      localStorage.setItem(`so_reviewer_profile_${formEmail}`, JSON.stringify(updated))
+      localStorage.setItem("so_reviewer_profile_default", JSON.stringify(updated))
+    } catch (err) {}
     if (onSaveProfile) {
       onSaveProfile(updated)
     }
@@ -1193,7 +1230,7 @@ COPE & Plan S Certified Archive
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Academic Peer Review Curriculum Vitae • Dr. Marcus Vance</title>
+        <title>Academic Peer Review Curriculum Vitae • ${getFormattedReviewerName(profile.title, profile.name)}</title>
         <style>
           @page { size: A4; margin: 16mm 18mm; }
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 24px; line-height: 1.5; }
@@ -1234,14 +1271,14 @@ COPE & Plan S Certified Archive
 
         <div class="profile-card">
           <div>
-            <div class="name">Dr. Marcus Vance</div>
-            <div class="affil">Senior Peer Reviewer · Cardiology & Applied Sciences</div>
-            <div class="orcid">✓ ORCID iD: 0000-0004-7711-2093 (Verified & Synced)</div>
+            <div class="name">${getFormattedReviewerName(profile.title, profile.name)}</div>
+            <div class="affil">${profile.department ? profile.department + " · " : ""}${profile.institution} (${profile.country})</div>
+            <div class="orcid">✓ ORCID iD: ${profile.orcid || "0000-0004-7711-2093"} (Verified & Synced)</div>
           </div>
           <div style="text-align: right; font-size: 11px; color: #64748b;">
             <div><strong>Publisher:</strong> Scholarly Open</div>
             <div><strong>Ethics Standard:</strong> COPE Certified Reviewer</div>
-            <div><strong>Standing:</strong> Excellent / Senior Contributor</div>
+            <div><strong>Standing:</strong> Top 5% Reviewer Honors (100% On-Time)</div>
           </div>
         </div>
 
@@ -1358,14 +1395,54 @@ COPE & Plan S Certified Archive
 
           {/* Top Summary Banner */}
           <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                  {getFormattedReviewerName(profile.title, profile.name)}
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {profile.department ? `${profile.department} · ` : ""}{profile.institution} ({profile.country})
-                </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="relative h-14 w-14 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md ring-2 ring-slate-200 dark:ring-slate-800">
+                  {profile.photoUrl ? (
+                    <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{getReviewerInitials(profile.name)}</span>
+                  )}
+                  <span 
+                    className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full ring-2 ring-white dark:ring-slate-950 bg-emerald-500 z-10" 
+                    title="Verified Active Reviewer"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                      {getFormattedReviewerName(profile.title, profile.name)}
+                    </h2>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                      COPE Verified
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {profile.department ? `${profile.department} · ` : ""}{profile.institution} ({profile.country})
+                  </p>
+
+                  {/* Academic Recognition Badges Row */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px] font-semibold border border-amber-200/80 dark:border-amber-800/60 shadow-2xs">
+                      <Trophy className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+                      Top Reviewer 2026
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 text-[11px] font-semibold border border-sky-200/80 dark:border-sky-800/60 shadow-2xs">
+                      <Zap className="h-3 w-3 text-[#0b99ff]" />
+                      Fast Turnaround (&lt;12d)
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[11px] font-semibold border border-emerald-200/80 dark:border-emerald-800/60 shadow-2xs">
+                      <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                      COPE Ethics Certified
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 text-[11px] font-semibold border border-purple-200/80 dark:border-purple-800/60 shadow-2xs">
+                      <Star className="h-3 w-3 text-purple-600 dark:text-purple-400 fill-purple-600/20" />
+                      5-Star Rigor Endorsed
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
@@ -2477,7 +2554,7 @@ COPE & Plan S Certified Archive
               
               {/* Quick Status / Switcher Bar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-slate-500 font-semibold">{isDe ? "Status:" : "Earned Status:"}</span>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs ${
                     reviewsDone > 0 
@@ -2487,6 +2564,9 @@ COPE & Plan S Certified Archive
                     {reviewsDone > 0 
                       ? (isDe ? `${reviewsDone} Manuskripte Begutachtet (Zertifiziert)` : `${reviewsDone} Manuscripts Reviewed (Active)`)
                       : (isDe ? "0 / 1 Begutachtungen (In Bearbeitung)" : "0 / 1 Reviews Completed (In Progress)")}
+                  </span>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
+                    ⚡ {isDe ? "100% Pünktliche Abgabe (Gold-Siegel)" : "100% On-Time Turnaround (Gold Distinction)"}
                   </span>
                 </div>
 
@@ -2558,7 +2638,7 @@ COPE & Plan S Certified Archive
                       type="button"
                       onClick={() => {
                         const rev = activeReviews[0] || { id: "SOMED-26-RS001", title: "Clinical Evaluation of AI Diagnostics in Cardiology", journal: "Medicine & Healthcare", deadline: "2026-06-20", status: "In Progress" }
-                        handleOpenScorecard(rev)
+                        setSelectedReviewForEval(rev)
                       }}
                       className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-8 px-4 shrink-0 cursor-pointer shadow-xs"
                     >
@@ -2668,6 +2748,14 @@ COPE & Plan S Certified Archive
                       <span className="text-slate-500">Crossref Review Activity:</span>
                       <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Synced & Timestamped ✓</strong>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Turnaround Performance:</span>
+                      <strong className="text-sky-700 dark:text-sky-400 font-bold">100% On-Time Delivery Seal (Avg 11.4d) ⚡</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Editorial Rigor Distinction:</span>
+                      <strong className="text-purple-700 dark:text-purple-400 font-bold">4.9 / 5.0 (Top 5% Reviewer Honors) 🏆</strong>
+                    </div>
                   </div>
 
                   <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
@@ -2754,22 +2842,38 @@ COPE & Plan S Certified Archive
 
                 {/* Scholar Profile Card */}
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Dr. Marcus Vance, MD, PhD</h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">Senior Peer Reviewer · Cardiology & Applied Computational Sciences</p>
-                    <div className="flex items-center gap-2 mt-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
-                      <span>✓ ORCID: 0000-0004-7711-2093</span>
-                      <span>•</span>
-                      <span>WoS: WOS-REV-2026-9812</span>
+                  <div className="flex items-center gap-3.5">
+                    <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
+                      {profile.photoUrl ? (
+                        <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{getReviewerInitials(profile.name)}</span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                        {getFormattedReviewerName(profile.title, profile.name)}
+                      </h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        {profile.department ? `${profile.department} · ` : ""}{profile.institution} ({profile.country})
+                      </p>
+                      <div className="flex items-center gap-2 mt-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
+                        <span>✓ ORCID: {profile.orcid || "0000-0004-7711-2093"}</span>
+                        <span>•</span>
+                        <span>WoS: WOS-REV-2026-9812</span>
+                      </div>
                     </div>
                   </div>
 
                   <div className="shrink-0 flex flex-wrap gap-2 text-[11px]">
-                    <span className="px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold">
-                      COPE Certified Reviewer
+                    <span className="px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-amber-600 dark:text-amber-400" /> Top Reviewer 2026
                     </span>
-                    <span className="px-2.5 py-1 rounded-md bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-bold">
-                      Lead Reviewer Tier
+                    <span className="px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1">
+                      <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" /> COPE Certified Reviewer
+                    </span>
+                    <span className="px-2.5 py-1 rounded-md bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-bold flex items-center gap-1">
+                      <Zap className="h-3 w-3 text-[#0b99ff]" /> Fast Turnaround (&lt;12d)
                     </span>
                   </div>
                 </div>
@@ -3403,7 +3507,7 @@ COPE & Plan S Certified Archive
                 </h3>
 
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {QUESTIONNAIRE_ITEMS.map((item, idx) => (
+                  {QUESTIONNAIRE_CRITERIA.map((item, idx) => (
                     <div key={item.id} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="text-slate-800 dark:text-slate-200 font-medium pr-2">
                         <span className="text-slate-400 dark:text-slate-500 mr-1.5 font-bold">{idx + 1}.</span>
@@ -4235,6 +4339,47 @@ COPE & Plan S Certified Archive
             {/* STEP 1: Academic Identity & Affiliation */}
             {profileStep === 1 && (
               <div className="space-y-3.5">
+                {/* Reviewer Photo Upload Row */}
+                <div className="flex items-center gap-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                  <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
+                    {formPhotoUrl ? (
+                      <img src={formPhotoUrl} alt="Reviewer Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{getReviewerInitials(formName)}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
+                      <Upload className="h-3.5 w-3.5 text-[#0b99ff]" />
+                      {isDe ? "Foto hochladen" : "Upload Photo"}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            const reader = new FileReader()
+                            reader.onloadend = () => {
+                              setFormPhotoUrl(reader.result as string)
+                            }
+                            reader.readAsDataURL(file)
+                          }
+                        }} 
+                      />
+                    </label>
+                    {formPhotoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setFormPhotoUrl("")}
+                        className="px-2.5 py-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                      >
+                        {isDe ? "Entfernen" : "Remove"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
