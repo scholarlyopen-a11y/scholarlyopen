@@ -450,11 +450,11 @@ export function generateBrandedEmailHtml(options: {
     <!-- Corporate / Compliance Footer -->
     <div style="background-color: #f8fafc; padding: 22px 28px; border-top: 1px solid #e2e8f0; font-size: 11px; line-height: 1.6; color: #64748b; text-align: center;">
       <div style="font-weight: 700; color: #475569; margin-bottom: 4px; font-size: 11px;">
-        Scholarly Open Editorial Platform • Germany &amp; Global Publishing Registry
+        Scholarly Open Editorial Office • International Open Access Publishing
       </div>
       <div style="color: #64748b;">
-        Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards<br>
-        &copy; ${currentYear} Scholarly Open. All rights reserved. • Open Access CC BY 4.0
+        Rigorous Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards<br>
+        &copy; ${currentYear} Scholarly Open • Open Access CC BY 4.0 • editorial360 Platform
       </div>
       <div style="margin-top: 8px;">
         <a href="${baseUrl}/editorial360" style="color: #0b99ff; text-decoration: none; font-weight: 600;">Access editorial360 Portal</a> • 

@@ -823,7 +823,10 @@ export default function Editorial360Page() {
   const [regEmail, setRegEmail] = useState("")
   const [regOrcid, setRegOrcid] = useState("")
   const [regPassword, setRegPassword] = useState("")
-  const [regRole, setRegRole] = useState<"author" | "reviewer">("author")
+  const [regRole, setRegRole] = useState<UserRole>("author")
+  const [invitedRole, setInvitedRole] = useState<UserRole | null>(null)
+  const [invitedJournal, setInvitedJournal] = useState<string>("")
+  const [isInvitedFlow, setIsInvitedFlow] = useState<boolean>(false)
 
   // Review Invitation Accept / Decline Link Handler & Onboarding
   const [invitationAction, setInvitationAction] = useState<"accept" | "decline" | null>(null)
@@ -924,6 +927,7 @@ export default function Editorial360Page() {
 
       if (urlAction === "activate_invite") {
         setMode("register")
+        setIsInvitedFlow(true)
         if (urlEmail) {
           setEmail(urlEmail)
           setRegEmail(urlEmail)
@@ -931,16 +935,24 @@ export default function Editorial360Page() {
         if (urlName) {
           setRegName(urlName)
         }
-        if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
-          setRole(urlRole)
-          setRegRole(urlRole === "reviewer" ? "reviewer" : "author")
+        if (urlJournal) {
+          setInvitedJournal(urlJournal)
         }
-        setSuccess(`Welcome to Editorial360! You have been officially invited. Please set your password below to activate your account.`)
+        if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
+          const normalizedRole = (urlRole === "im" ? "ria" : urlRole) as UserRole
+          setRole(normalizedRole)
+          setRegRole(normalizedRole)
+          setInvitedRole(normalizedRole)
+        }
+        setSuccess(`Welcome to editorial360! You have been officially appointed. Please confirm your credentials below to activate your account.`)
       }
 
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
-        setRole(urlRole)
-        setRegRole(urlRole === "reviewer" ? "reviewer" : "author")
+        const normalizedRole = (urlRole === "im" ? "ria" : urlRole) as UserRole
+        setRole(normalizedRole)
+        if (urlAction !== "activate_invite") {
+          setRegRole(normalizedRole)
+        }
       }
       if (urlMode && ["login", "register"].includes(urlMode)) {
         setMode(urlMode)
@@ -2764,7 +2776,8 @@ export default function Editorial360Page() {
 
     setTimeout(() => {
       setLoading(false)
-      setSuccess("Account request approved! You can now log in using your credentials.")
+      const roleTitle = getRoleDisplayName(regRole)
+      setSuccess(`Account activated successfully! Logged in as ${roleTitle}.`)
       // Add user to the registry
       const newUser: WorkspaceUser = {
         id: `USR-${Math.floor(Math.random() * 100) + 10}`,
@@ -2775,9 +2788,24 @@ export default function Editorial360Page() {
         status: "Active"
       }
       setUsers(prev => [...prev, newUser])
-      setMode("login")
       setRole(regRole)
       setEmail(regEmail)
+      setIsLoggedIn(true)
+      if (regRole === "editor") {
+        setActiveEditorTab("tracker")
+      }
+      if (typeof window !== "undefined") {
+        try {
+          const sess = {
+            role: regRole,
+            email: regEmail,
+            isLoggedIn: true,
+            activeEditorTab: regRole === "editor" ? "tracker" : undefined,
+            timestamp: Date.now()
+          }
+          sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
+        } catch (e) {}
+      }
       if (regRole === "reviewer") {
         setReviewerProfile(prev => ({
           name: regName,
@@ -2787,7 +2815,7 @@ export default function Editorial360Page() {
           ...(prev || {})
         }))
       }
-    }, 1200)
+    }, 1000)
   }
 
   const handleRoleChange = (selectedRole: UserRole) => {
@@ -4538,36 +4566,59 @@ export default function Editorial360Page() {
                         </div>
                       )}
 
-                      {/* Role selection tab button group */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          Select Workspace Role
-                        </label>
-                        <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                          <button
-                            type="button"
-                            onClick={() => setRegRole("author")}
-                            className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
-                              regRole === "author"
-                                ? "bg-[#0b99ff] text-white shadow-sm"
-                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                            }`}
-                          >
-                            Author Profile
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setRegRole("reviewer")}
-                            className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
-                              regRole === "reviewer"
-                                ? "bg-[#0b99ff] text-white shadow-sm"
-                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                            }`}
-                          >
-                            Reviewer Panel
-                          </button>
+                      {/* Role selection or verified invite appointment display */}
+                      {isInvitedFlow && regRole && regRole !== "author" && regRole !== "reviewer" ? (
+                        <div className="bg-sky-50 dark:bg-sky-950/40 border border-[#0b99ff]/30 rounded-xl p-3.5 space-y-1.5 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider flex items-center gap-1.5">
+                              <ShieldCheck className="h-3.5 w-3.5 text-[#0b99ff]" />
+                              Official Editorial Appointment
+                            </span>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-semibold">
+                              Verified Invitation
+                            </span>
+                          </div>
+                          <div className="text-base font-bold text-slate-900 dark:text-white">
+                            Role: {getRoleDisplayName(regRole)}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            Designated Portfolio: <strong className="text-slate-700 dark:text-slate-300">{invitedJournal || "Scholarly Open Platform"}</strong>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Select Workspace Role
+                          </label>
+                          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                            <button
+                              type="button"
+                              onClick={() => setRegRole("author")}
+                              className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
+                                regRole === "author"
+                                  ? "bg-[#0b99ff] text-white shadow-sm"
+                                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                              }`}
+                            >
+                              Author Profile
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setRegRole("reviewer")}
+                              className={`py-1.5 rounded-md text-xs font-bold transition-all text-center tracking-wide cursor-pointer ${
+                                regRole === "reviewer"
+                                  ? "bg-[#0b99ff] text-white shadow-sm"
+                                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                              }`}
+                            >
+                              Reviewer Panel
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                            Handling Editors, Integrity Managers, and Journal Managers are onboarded via official invitation from the Editorial Office.
+                          </p>
+                        </div>
+                      )}
 
                       {/* Full Name input */}
                       <div className="space-y-1.5">
@@ -4657,7 +4708,11 @@ export default function Editorial360Page() {
                         disabled={loading}
                         className="w-full bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold py-2 rounded-md shadow-md transition-all active:scale-[0.98] cursor-pointer"
                       >
-                        {loading ? "Registering account..." : `Register Workspace Profile`}
+                        {loading 
+                          ? "Activating account..." 
+                          : isInvitedFlow && regRole !== "author" && regRole !== "reviewer"
+                          ? `Activate ${getRoleDisplayName(regRole)} Account`
+                          : `Register Workspace Profile`}
                       </Button>
                       
                       <div className="text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -10835,10 +10890,13 @@ export default function Editorial360Page() {
                           {/* Compliance Footer */}
                           <div className="bg-slate-50 dark:bg-slate-950 px-5 py-3 border-t border-slate-200 dark:border-slate-800 text-center text-[10px] text-slate-500 dark:text-slate-400 space-y-0.5">
                             <div className="font-semibold text-slate-600 dark:text-slate-300">
-                              Scholarly Open Editorial Platform • Germany &amp; Global Publishing Registry
+                              Scholarly Open Editorial Office • International Open Access Publishing
                             </div>
                             <div>
-                              Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards
+                              Rigorous Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards
+                            </div>
+                            <div className="text-[9.5px] text-slate-400">
+                              &copy; {new Date().getFullYear()} Scholarly Open • Open Access CC BY 4.0 • editorial360 Platform
                             </div>
                           </div>
                         </div>
