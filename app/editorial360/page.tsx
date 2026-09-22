@@ -58,6 +58,7 @@ import {
   Upload,
   Link2,
   Linkedin,
+  GraduationCap,
   Activity,
   CheckCircle2,
   Globe,
@@ -653,8 +654,8 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
             )}
           </div>
 
-          {/* Research Focus as interactive button-like tags */}
-          {config.interests && (
+          {/* Research Focus as interactive button-like tags (Hidden for Admin) */}
+          {config.interests && role !== "admin" && (
             <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-[#272832]">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
                 {config.interestsLabel}
@@ -673,93 +674,131 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
           )}
         </div>
 
-        {/* Right Block: Publication Credits & Recognition Badges */}
-        <div className="lg:col-span-7 space-y-5 lg:pl-6 lg:border-l border-slate-100 dark:border-[#272832]">
-          
-          {/* Publication Credits Row */}
-          <div className="space-y-2.5">
+        {/* Right Block: Admin System Overview OR Reviewer Credits & Recognition Badges */}
+        {role === "admin" ? (
+          <div className="lg:col-span-7 space-y-4 lg:pl-6 lg:border-l border-slate-100 dark:border-[#272832]">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                {isDe ? "Publikations-Gutschriften & Erlass" : "Publication Credits"}
+                {isDe ? "System- & Infrastrukturstatus" : "System & Infrastructure Status"}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                <Check className="h-3.5 w-3.5 text-emerald-600" /> {isDe ? "Stufe 2 · 25% Erlass" : "Tier 2 · 25% Waiver"}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                {isDe ? "Alle Systeme betriebsbereit" : "All Systems Operational"}
               </span>
             </div>
 
-            {/* Minimal 3-Stat Card */}
-            <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/70 dark:border-[#272832]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/70 dark:border-[#272832]">
               <div>
-                <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Gutachten" : "Reviews"}</span>
-                <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5 block">{isDe ? "12 Abgeschlossen" : "12 Completed"}</span>
+                <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Knoten-Verfügbarkeit" : "Node Uptime"}</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white mt-0.5 block">99.99%</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">320 Nodes Active</span>
               </div>
               <div>
-                <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Bearbeitung" : "Turnaround"}</span>
-                <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5 block">{isDe ? "4,5 Tage Ø" : "4.5d Avg"}</span>
+                <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Sicherheits-Architektur" : "Security Status"}</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white mt-0.5 block">Zero Breaches</span>
+                <span className="text-[10px] text-slate-500 font-medium">COPE & 2FA Enforced</span>
               </div>
               <div>
-                <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Nächste Stufe" : "Next Tier"}</span>
-                <span className="text-sm sm:text-base font-bold text-[#0b99ff] mt-0.5 block">{isDe ? "In 2 Gutachten" : "In 2 Reviews"}</span>
+                <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Zugriffsebene" : "Access Level"}</span>
+                <span className="text-base font-bold text-[#0b99ff] mt-0.5 block">Superuser / Root</span>
+                <span className="text-[10px] text-slate-500 font-medium">Full Governance Control</span>
               </div>
             </div>
 
-            {/* Action Link */}
-            <div className="flex justify-end">
-              <button
-                onClick={() => onExploreBadges && onExploreBadges()}
-                type="button"
-                className="text-sm font-semibold text-[#0b99ff] hover:text-[#0088e0] dark:hover:text-[#38bdf8] flex items-center gap-1.5 cursor-pointer transition-colors"
-              >
-                {isDe ? "Erlassrichtlinie & Stufen ansehen" : "View Waiver Policy & Tiers"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
+            <div className="p-3.5 rounded-xl bg-sky-50/60 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-900/40 flex items-center justify-between text-xs">
+              <span className="text-slate-600 dark:text-slate-300">
+                Active Governance: Automated peer-review auditing, 6% honoraria fund ledger, and reviewer candidate test pipeline.
+              </span>
             </div>
           </div>
+        ) : (
+          <div className="lg:col-span-7 space-y-5 lg:pl-6 lg:border-l border-slate-100 dark:border-[#272832]">
+            
+            {/* Publication Credits Row */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                  {isDe ? "Publikations-Gutschriften & Erlass" : "Publication Credits"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  <Check className="h-3.5 w-3.5 text-emerald-600" /> {isDe ? "Stufe 2 · 25% Erlass" : "Tier 2 · 25% Waiver"}
+                </span>
+              </div>
 
-          {/* 3 Prominent Recognition Badges (Boxless & Enlarged) */}
-          <div className="pt-3 border-t border-slate-100 dark:border-[#272832] space-y-2.5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-              {isDe ? "Redaktionelle Anerkennungs-Abzeichen" : "Editorial Recognition Badges"}
-            </span>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              
-              {/* Badge 1: Top Contributor */}
-              <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
-                <div className="h-12 w-12 rounded-full bg-[#0b99ff]/15 text-[#0b99ff] flex items-center justify-center shadow-xs">
-                  <Star className="h-6 w-6 fill-[#0b99ff]/30 text-[#0b99ff]" />
+              {/* Minimal 3-Stat Card */}
+              <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/70 dark:border-[#272832]">
+                <div>
+                  <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Gutachten" : "Reviews"}</span>
+                  <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5 block">{isDe ? "12 Abgeschlossen" : "12 Completed"}</span>
                 </div>
                 <div>
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Top-Beitragende(r)" : "Top Contributor"}</span>
-                  <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "Top 5% Gutachter" : "Top 5% Reviewer"}</span>
+                  <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Bearbeitung" : "Turnaround"}</span>
+                  <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5 block">{isDe ? "4,5 Tage Ø" : "4.5d Avg"}</span>
+                </div>
+                <div>
+                  <span className="text-xs uppercase font-semibold text-slate-400 block tracking-wider">{isDe ? "Nächste Stufe" : "Next Tier"}</span>
+                  <span className="text-sm sm:text-base font-bold text-[#0b99ff] mt-0.5 block">{isDe ? "In 2 Gutachten" : "In 2 Reviews"}</span>
                 </div>
               </div>
 
-              {/* Badge 2: Fast Responder */}
-              <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
-                <div className="h-12 w-12 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
-                  <Award className="h-6 w-6 fill-emerald-500/30 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Schnelle Reaktion" : "Fast Responder"}</span>
-                  <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "< 5 Tage Bearbeitung" : "< 5d Turnaround"}</span>
-                </div>
+              {/* Action Link */}
+              <div className="flex justify-end">
+                <button
+                  onClick={() => onExploreBadges && onExploreBadges()}
+                  type="button"
+                  className="text-sm font-semibold text-[#0b99ff] hover:text-[#0088e0] dark:hover:text-[#38bdf8] flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  {isDe ? "Erlassrichtlinie & Stufen ansehen" : "View Waiver Policy & Tiers"}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
               </div>
-
-              {/* Badge 3: Integrity Champion */}
-              <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
-                <div className="h-12 w-12 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-xs">
-                  <ShieldCheck className="h-6 w-6 fill-indigo-500/30 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Integritäts-Leitung" : "Integrity Lead"}</span>
-                  <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "100% Verifiziert" : "100% Verified"}</span>
-                </div>
-              </div>
-
             </div>
-          </div>
 
-        </div>
+            {/* 3 Prominent Recognition Badges (Boxless & Enlarged) */}
+            <div className="pt-3 border-t border-slate-100 dark:border-[#272832] space-y-2.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                {isDe ? "Redaktionelle Anerkennungs-Abzeichen" : "Editorial Recognition Badges"}
+              </span>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                
+                {/* Badge 1: Top Contributor */}
+                <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
+                  <div className="h-12 w-12 rounded-full bg-[#0b99ff]/15 text-[#0b99ff] flex items-center justify-center shadow-xs">
+                    <Star className="h-6 w-6 fill-[#0b99ff]/30 text-[#0b99ff]" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Top-Beitragende(r)" : "Top Contributor"}</span>
+                    <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "Top 5% Gutachter" : "Top 5% Reviewer"}</span>
+                  </div>
+                </div>
+
+                {/* Badge 2: Fast Responder */}
+                <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
+                  <div className="h-12 w-12 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
+                    <Award className="h-6 w-6 fill-emerald-500/30 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Schnelle Reaktion" : "Fast Responder"}</span>
+                    <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "< 5 Tage Bearbeitung" : "< 5d Turnaround"}</span>
+                  </div>
+                </div>
+
+                {/* Badge 3: Integrity Champion */}
+                <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
+                  <div className="h-12 w-12 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-xs">
+                    <ShieldCheck className="h-6 w-6 fill-indigo-500/30 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white block leading-tight">{isDe ? "Integritäts-Leitung" : "Integrity Lead"}</span>
+                    <span className="text-xs text-slate-400 font-normal mt-0.5 block">{isDe ? "100% Verifiziert" : "100% Verified"}</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        )}
 
       </div>
     </div>
@@ -1825,6 +1864,50 @@ export default function Editorial360Page() {
   const [payoutFilter, setPayoutFilter] = useState<"all" | "pending" | "released">("all")
   const [payoutSearch, setPayoutSearch] = useState("")
   const [payoutReleaseSuccess, setPayoutReleaseSuccess] = useState<string | null>(null)
+
+  // Reviewer Test Tracking & Candidate Pipeline State
+  const [adminReviewerTests, setAdminReviewerTests] = useState<any[]>([])
+  const [isLoadingReviewerTests, setIsLoadingReviewerTests] = useState(false)
+  const [reviewerTestFilter, setReviewerTestFilter] = useState<"all" | "passed" | "pending" | "failed">("all")
+  const [reviewerTestSearch, setReviewerTestSearch] = useState("")
+  const [reviewerTestSuccessMsg, setReviewerTestSuccessMsg] = useState<string | null>(null)
+
+  const loadReviewerTests = async () => {
+    setIsLoadingReviewerTests(true)
+    try {
+      const res = await fetch("/api/editorial360/reviewer-tests")
+      if (res.ok) {
+        const data = await res.json()
+        if (data.tests) setAdminReviewerTests(data.tests)
+      }
+    } catch (e) {
+      console.error("Failed to load reviewer tests:", e)
+    } finally {
+      setIsLoadingReviewerTests(false)
+    }
+  }
+
+  useEffect(() => {
+    loadReviewerTests()
+  }, [])
+
+  const handleUpdateTestStatus = async (testId: string, candidateEmail: string, newStatus: string) => {
+    try {
+      const res = await fetch("/api/editorial360/reviewer-tests", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: testId, candidateEmail, status: newStatus })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.tests) setAdminReviewerTests(data.tests)
+        setReviewerTestSuccessMsg(`Activated Editorial360 status for ${candidateEmail}`)
+        setTimeout(() => setReviewerTestSuccessMsg(null), 4000)
+      }
+    } catch (e) {
+      console.error("Failed to update test status:", e)
+    }
+  }
 
   // Sync Admin Payout Ledger with localStorage
   useEffect(() => {
@@ -5039,12 +5122,10 @@ export default function Editorial360Page() {
                   className="flex md:flex-col items-center md:items-stretch gap-1.5 overflow-x-auto md:overflow-x-hidden pb-2 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                   style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                 >
-                  {(role === "author" || role === "admin") && (
+                  {role === "author" && (
                     <button 
                       type="button"
-                      onClick={() => {
-                        if (role === "author") setActiveAuthorTab("dashboard")
-                      }}
+                      onClick={() => setActiveAuthorTab("dashboard")}
                       className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                         activeAuthorTab === "dashboard"
                           ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
@@ -5053,9 +5134,7 @@ export default function Editorial360Page() {
                     >
                       <span className="flex items-center gap-2.5">
                         <LayoutDashboard className="h-4 w-4" />
-                        {role === "author" 
-                          ? (language === "de" ? "Dashboard" : "Dashboard") 
-                          : (language === "de" ? "Systemübersicht" : "System Overview")}
+                        {language === "de" ? "Dashboard" : "Dashboard"}
                       </span>
                     </button>
                   )}
@@ -5563,6 +5642,26 @@ export default function Editorial360Page() {
                         {adminPayouts.filter(p => p.status === "Pending").length > 0 && (
                           <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                             {adminPayouts.filter(p => p.status === "Pending").length}
+                          </span>
+                        )}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAdminTab("tests")}
+                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAdminTab === "tests"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <GraduationCap className="h-4 w-4 text-[#0b99ff]" />
+                          <span>{language === "de" ? "Gutachter-Tests & Tracking" : "Reviewer Test Tracking"}</span>
+                        </div>
+                        {adminReviewerTests.filter(t => t.status === "Passed - Pending Account").length > 0 && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#0b99ff]/15 text-[#0b99ff] border border-[#0b99ff]/30">
+                            {adminReviewerTests.filter(t => t.status === "Passed - Pending Account").length}
                           </span>
                         )}
                       </button>
@@ -8754,43 +8853,63 @@ export default function Editorial360Page() {
                     <UserProfileHeaderCard role="admin" />
 
                     {/* Admin stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Submissions</CardTitle>
+                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Submissions</CardTitle>
                           <FileText className="h-4 w-4 text-[#0b99ff]" />
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">342</div>
                           <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold flex items-center gap-1 mt-1">
-                            +12% increase this quarter
+                            +12% this quarter
                           </span>
                         </CardContent>
                       </Card>
                       
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Reviewers</CardTitle>
+                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Reviewers</CardTitle>
                           <Users className="h-4 w-4 text-[#0b99ff]" />
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">118</div>
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
-                            84 verified with ORCID
+                            84 with ORCID
                           </span>
                         </CardContent>
                       </Card>
 
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Journals</CardTitle>
+                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Journals</CardTitle>
                           <BookOpen className="h-4 w-4 text-slate-400" />
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">4</div>
+                          <div className="text-2xl font-bold text-slate-900 dark:text-white">13</div>
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
-                            Indexed & Managed
+                            Active Desks
                           </span>
+                        </CardContent>
+                      </Card>
+
+                      {/* Reviewer Test Tracking Stat Card */}
+                      <Card 
+                        onClick={() => setActiveAdminTab("tests")}
+                        className="bg-white dark:bg-slate-950 border border-[#0b99ff]/30 hover:border-[#0b99ff] shadow-sm transition-all cursor-pointer group"
+                      >
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-[#0b99ff]">Reviewer Tests</CardTitle>
+                          <GraduationCap className="h-4 w-4 text-[#0b99ff] group-hover:scale-110 transition-transform" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold text-slate-900 dark:text-white">{adminReviewerTests.length}</div>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
+                              {adminReviewerTests.filter(t => t.status === "Passed - Pending Account").length} pending
+                            </span>
+                            <span className="text-[10px] text-[#0b99ff] underline font-semibold">Track &rarr;</span>
+                          </div>
                         </CardContent>
                       </Card>
 
@@ -8800,14 +8919,14 @@ export default function Editorial360Page() {
                         className="bg-white dark:bg-slate-950 border border-emerald-500/30 hover:border-emerald-500 shadow-sm transition-all cursor-pointer group"
                       >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Reviewer Honoraria</CardTitle>
+                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Honoraria</CardTitle>
                           <DollarSign className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">€4,850</div>
                           <div className="flex items-center justify-between mt-1">
                             <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
-                              {adminPayouts.filter(p => p.status === "Pending").length} pending ({adminPayouts.filter(p => p.status === "Pending").reduce((acc, p) => acc + p.amount, 0)}€)
+                              {adminPayouts.filter(p => p.status === "Pending").length} pending
                             </span>
                             <span className="text-[10px] text-[#0b99ff] underline font-semibold">Ledger &rarr;</span>
                           </div>
@@ -8816,13 +8935,13 @@ export default function Editorial360Page() {
 
                       <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Integrity Index</CardTitle>
+                          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Integrity</CardTitle>
                           <ShieldCheck className="h-4 w-4 text-green-500" />
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold text-slate-900 dark:text-white">99.8%</div>
-                          <span className="text-[10px] text-orange-500 font-semibold flex items-center gap-1 mt-1">
-                            2 pending alerts flagged
+                          <span className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1 mt-1">
+                            All Scans Clean
                           </span>
                         </CardContent>
                       </Card>
@@ -9066,6 +9185,213 @@ export default function Editorial360Page() {
                                           <span className="text-[10px] text-slate-400 font-mono">
                                             Paid ({p.releasedAt})
                                           </span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* ================= VIEW E: REVIEWER TEST TRACKING & CANDIDATE PIPELINE ================= */}
+                    {activeAdminTab === "tests" && (
+                      <div className="space-y-6 animate-in fade-in">
+                        {/* Header Banner */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <GraduationCap className="h-6 w-6 text-[#0b99ff]" />
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                {language === "de" ? "Gutachter-Tests & Qualifikations-Pipeline" : "Reviewer Test Tracking & Qualification Pipeline"}
+                              </h3>
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">
+                              Track reviewer candidates completing the Gateway Assessment, evaluate competency scores, and monitor Editorial360 account activation.
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={loadReviewerTests}
+                              disabled={isLoadingReviewerTests}
+                              className="text-xs font-semibold rounded-xl gap-1.5 cursor-pointer"
+                            >
+                              <RefreshCw className={`h-3.5 w-3.5 ${isLoadingReviewerTests ? "animate-spin" : ""}`} />
+                              <span>Refresh Tests</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              asChild
+                              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold rounded-xl gap-1.5 cursor-pointer shadow-xs"
+                            >
+                              <Link href="/reviewer-gateway" target="_blank">
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                <span>Preview Test Gateway</span>
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Success notification for action */}
+                        {reviewerTestSuccessMsg && (
+                          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center gap-3 animate-in fade-in text-xs font-semibold">
+                            <CheckCircle2 className="h-4 w-4 shrink-0" />
+                            <span>{reviewerTestSuccessMsg}</span>
+                          </div>
+                        )}
+
+                        {/* 4 Stat Cards */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                          <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Attempts</span>
+                            <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{adminReviewerTests.length}</div>
+                            <span className="text-[10px] text-slate-500 mt-0.5 block">Recorded Candidates</span>
+                          </Card>
+                          <Card className="bg-white dark:bg-slate-950 border border-emerald-500/30 p-4">
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Passed (≥80%)</span>
+                            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                              {adminReviewerTests.filter(t => t.passed).length}
+                            </div>
+                            <span className="text-[10px] text-emerald-600/80 mt-0.5 block">
+                              {adminReviewerTests.length > 0 ? Math.round((adminReviewerTests.filter(t => t.passed).length / adminReviewerTests.length) * 100) : 0}% Pass Rate
+                            </span>
+                          </Card>
+                          <Card className="bg-white dark:bg-slate-950 border border-amber-500/30 p-4">
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Pending Activation</span>
+                            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                              {adminReviewerTests.filter(t => t.status === "Passed - Pending Account").length}
+                            </div>
+                            <span className="text-[10px] text-amber-600/80 mt-0.5 block">Awaiting Editorial360 Link</span>
+                          </Card>
+                          <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Active Reviewers</span>
+                            <div className="text-2xl font-bold text-[#0b99ff] mt-1">
+                              {adminReviewerTests.filter(t => t.status === "Passed - Account Active").length}
+                            </div>
+                            <span className="text-[10px] text-slate-500 mt-0.5 block">Certified & In Referee Pool</span>
+                          </Card>
+                        </div>
+
+                        {/* Search & Filter Bar */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                          <div className="relative w-full sm:w-80">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                            <input
+                              type="text"
+                              value={reviewerTestSearch}
+                              onChange={(e) => setReviewerTestSearch(e.target.value)}
+                              placeholder="Search candidate by name, email, institution..."
+                              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+                            {(["all", "passed", "pending", "failed"] as const).map((f) => (
+                              <button
+                                key={f}
+                                onClick={() => setReviewerTestFilter(f)}
+                                className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-colors cursor-pointer ${
+                                  reviewerTestFilter === f
+                                    ? "bg-[#0b99ff] text-white"
+                                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900"
+                                }`}
+                              >
+                                {f === "all" ? "All Attempts" : f === "passed" ? "Passed" : f === "pending" ? "Pending Account" : "Failed"}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Test Submissions Table */}
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead>
+                                <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                  <th className="py-3 px-4">Candidate</th>
+                                  <th className="py-3 px-4">Discipline & Affiliation</th>
+                                  <th className="py-3 px-4 text-center">Score</th>
+                                  <th className="py-3 px-4">Account Status</th>
+                                  <th className="py-3 px-4">Credential ID</th>
+                                  <th className="py-3 px-4">Date</th>
+                                  <th className="py-3 px-4 text-right">Admin Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                                {adminReviewerTests
+                                  .filter(t => {
+                                    if (reviewerTestFilter === "passed") return t.passed
+                                    if (reviewerTestFilter === "pending") return t.status === "Passed - Pending Account"
+                                    if (reviewerTestFilter === "failed") return !t.passed
+                                    return true
+                                  })
+                                  .filter(t => {
+                                    if (!reviewerTestSearch.trim()) return true
+                                    const q = reviewerTestSearch.toLowerCase()
+                                    return (
+                                      t.candidateName?.toLowerCase().includes(q) ||
+                                      t.candidateEmail?.toLowerCase().includes(q) ||
+                                      t.institution?.toLowerCase().includes(q) ||
+                                      t.credentialId?.toLowerCase().includes(q)
+                                    )
+                                  })
+                                  .map((test) => (
+                                    <tr key={test.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors">
+                                      <td className="py-3.5 px-4 align-top">
+                                        <div className="font-bold text-slate-900 dark:text-white">{test.candidateName}</div>
+                                        <div className="text-[11px] font-mono text-[#0b99ff]">{test.candidateEmail}</div>
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top">
+                                        <div className="font-semibold text-slate-700 dark:text-slate-300 capitalize">{test.discipline?.replace("-", " ")}</div>
+                                        <div className="text-[11px] text-slate-500 line-clamp-1">{test.institution}</div>
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-center">
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
+                                          test.passed
+                                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                            : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                                        }`}>
+                                          {test.score}%
+                                        </span>
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top">
+                                        {test.status === "Passed - Account Active" ? (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                            <CheckCircle2 className="h-3 w-3" /> Account Active
+                                          </span>
+                                        ) : test.status === "Passed - Pending Account" ? (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                            <Clock className="h-3 w-3" /> Pending Activation
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                            Threshold Not Met
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                                        {test.credentialId || "N/A"}
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-slate-500 text-[11px] whitespace-nowrap">
+                                        {test.date}
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-right">
+                                        {test.status === "Passed - Pending Account" ? (
+                                          <Button
+                                            size="sm"
+                                            onClick={() => handleUpdateTestStatus(test.id, test.candidateEmail, "Passed - Account Active")}
+                                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-[11px] font-bold h-7 px-2.5 rounded-lg cursor-pointer"
+                                          >
+                                            <Check className="h-3 w-3 mr-1" />
+                                            Verify & Activate
+                                          </Button>
+                                        ) : (
+                                          <span className="text-[11px] text-slate-400">Archived</span>
                                         )}
                                       </td>
                                     </tr>

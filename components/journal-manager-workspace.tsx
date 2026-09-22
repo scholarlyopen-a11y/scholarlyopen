@@ -414,6 +414,14 @@ export function JournalManagerWorkspace({
     })
   }
 
+  const handleUpdateEcrEmail = (index: number, newEmail: string) => {
+    setEcrResults(prev => {
+      const copy = [...prev]
+      copy[index] = { ...copy[index], email: newEmail.trim(), isCustomEmail: true }
+      return copy
+    })
+  }
+
   const handleSearchScoutScholars = async (queryToSearch?: string, pageToSearch = 1, limitToSearch = scoutLimit) => {
     const term = (queryToSearch !== undefined ? queryToSearch : scoutKeyword).trim()
     if (!term) return
@@ -1482,11 +1490,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 onChange={(e) => setScoutTargetJournal(e.target.value)}
                 className="w-full px-3 py-2.5 text-xs bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] cursor-pointer"
               >
-                <option value="all">All Scholarly Open Journals</option>
-                <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
-                <option value="Engineering & Applied Sciences">Engineering & Applied Sciences</option>
-                <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
-                <option value="Decarbonization & Carbon Tech">Decarbonization & Carbon Tech</option>
+                <option value="all">All Scholarly Open Journals (13 Desks)</option>
+                {OFFICIAL_JOURNALS.map((j) => (
+                  <option key={j.name} value={j.name}>
+                    {j.name} ({j.email})
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -1669,20 +1678,56 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                       {candidate.institution}
                     </div>
-                    <div className="flex items-center justify-between gap-2 pt-0.5 flex-wrap">
-                      <span className="text-[11px] text-[#0b99ff] font-mono">
-                        {candidate.email}
-                      </span>
-                      <a
-                        href={`https://scholar.google.com/scholar?q=${encodeURIComponent(`${candidate.name} ${candidate.institution ? candidate.institution.split("·")[0].trim() : ""}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0b99ff] hover:text-[#0077cc] hover:underline cursor-pointer"
-                        title="Cross-verify scholar publications and citations on Google Scholar"
-                      >
-                        <Search className="h-3 w-3" />
-                        <span>Cross-Verify Scholar ↗</span>
-                      </a>
+                    {/* Harvested Contact Email Box (Editable) */}
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Contact Email:
+                        </span>
+                        {candidate.isCustomEmail ? (
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                            ✓ Confirmed
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400">
+                            Preprint Contact
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="email"
+                          value={candidate.email || ""}
+                          onChange={(e) => handleUpdateEcrEmail(idx, e.target.value)}
+                          placeholder="author@university.edu"
+                          className="w-full text-xs font-mono pl-3 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                          title="Click to edit or paste confirmed email"
+                        />
+                        <Edit3 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                      </div>
+                      <div className="flex items-center justify-between gap-2 pt-0.5 flex-wrap">
+                        <a
+                          href={`https://www.google.com/search?q=${encodeURIComponent(`${candidate.name} ${candidate.institution || ''} email contact`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0b99ff] hover:underline bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800/60"
+                          title="Search faculty directory or lab webpage for official email"
+                        >
+                          <Search className="h-2.5 w-2.5" />
+                          <span>Search Faculty Email</span>
+                          <ExternalLink className="h-2 w-2" />
+                        </a>
+                        <a
+                          href={`https://scholar.google.com/scholar?q=${encodeURIComponent(`${candidate.name} ${candidate.institution ? candidate.institution.split("·")[0].trim() : ""}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0b99ff] hover:underline cursor-pointer"
+                          title="Cross-verify scholar publications and citations on Google Scholar"
+                        >
+                          <Search className="h-2.5 w-2.5" />
+                          <span>Google Scholar ↗</span>
+                        </a>
+                      </div>
                     </div>
                   </div>
 

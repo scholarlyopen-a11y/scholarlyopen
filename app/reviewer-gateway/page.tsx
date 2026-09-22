@@ -440,16 +440,18 @@ export default function ReviewerGatewayPage() {
     setIsTimerRunning(false)
     setStep("results")
 
+    let correctCount = 0
+    questions.forEach(q => {
+      const chosen = userAnswers[q.id]
+      const opt = q.options.find(o => o.id === chosen)
+      if (opt && opt.isCorrect) correctCount += 1
+    })
+    const percentage = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0
+    const isPassed = percentage >= 80
+
     // Persist passed credential to localStorage for editorial360 sync
     if (typeof window !== "undefined") {
-      let correctCount = 0
-      questions.forEach(q => {
-        const chosen = userAnswers[q.id]
-        const opt = q.options.find(o => o.id === chosen)
-        if (opt && opt.isCorrect) correctCount += 1
-      })
-      const percentage = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0
-      if (percentage >= 80) {
+      if (isPassed) {
         const record = {
           name: candidateName || "Dr. Marcus Vance",
           email: candidateEmail || "reviewer@scholarlyopen.org",
@@ -462,6 +464,23 @@ export default function ReviewerGatewayPage() {
         localStorage.setItem("scholarlyopen_passed_reviewer_gateway", JSON.stringify(record))
       }
     }
+
+    // Server-side audit log for Admin tracking
+    fetch("/api/editorial360/reviewer-tests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        candidateName: candidateName || "Dr. Candidate",
+        candidateEmail: candidateEmail || "candidate@university.edu",
+        discipline: selectedDiscipline,
+        institution: candidateAffiliation || "Academic Institution",
+        score: percentage,
+        totalQuestions: questions.length,
+        passed: isPassed,
+        credentialId: isPassed ? credentialId : undefined,
+        status: isPassed ? "Passed - Pending Account" : "Failed Threshold"
+      })
+    }).catch(err => console.error("Failed to log reviewer test:", err))
   }
 
   // Scoring
@@ -821,20 +840,48 @@ export default function ReviewerGatewayPage() {
 
               {/* IF PASSED: THE OFFICIAL VERIFIABLE CERTIFICATE */}
               {scoreStats.passed && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold flex items-center gap-2">
-                      <Award className="h-5 w-5 text-primary" /> Verified Digital Certificate
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-xs cursor-pointer">
-                        <Printer className="h-3.5 w-3.5" /> Print / Save PDF
-                      </Button>
+                <div className="space-y-5">
+                  
+                  {/* Account Creation Security Gate Callout */}
+                  <div className="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        <h4 className="font-bold text-sm text-amber-900 dark:text-amber-200">
+                          Step 2 Required: Activate Account on Editorial360 to Unlock Official Certificate
+                        </h4>
+                      </div>
+                      <p className="text-xs text-amber-800/80 dark:text-amber-300/80 max-w-2xl leading-relaxed">
+                        To protect credential authenticity and prevent fraudulent use, official downloadable certificates and peer-review matching status are issued directly within your verified Editorial360 Reviewer Account.
+                      </p>
                     </div>
+
+                    <Button asChild className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shrink-0 cursor-pointer">
+                      <Link href={`/editorial360?action=claim_reviewer&name=${encodeURIComponent(candidateName || 'Reviewer')}&email=${encodeURIComponent(candidateEmail || '')}&cred=${credentialId}`}>
+                        Create Account & Unlock Certificate &rarr;
+                      </Link>
+                    </Button>
                   </div>
 
-                  {/* High-End Certificate Card */}
-                  <div className="relative p-8 sm:p-12 rounded-2xl border-4 border-primary/20 bg-card shadow-lg text-center overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                      <Award className="h-5 w-5 text-primary" /> Certificate Preview (Watermarked & Protected)
+                    </h3>
+                    <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+                      Preview Copy · Non-Transferable
+                    </span>
+                  </div>
+
+                  {/* High-End Certificate Card with Anti-Screenshot Deterrent */}
+                  <div 
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="select-none relative p-8 sm:p-12 rounded-2xl border-4 border-primary/20 bg-card shadow-lg text-center overflow-hidden"
+                  >
+                    {/* Security Diagonal Watermark Overlays */}
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-10 rotate-[-25deg] text-xs sm:text-lg font-black tracking-widest text-slate-900 dark:text-white uppercase select-none">
+                      PREVIEW ONLY • ACTIVATION REQUIRED ON EDITORIAL360 • SCHOLARLY OPEN
+                    </div>
+
                     {/* Background Seal Watermark */}
                     <div className="absolute -right-16 -bottom-16 opacity-5 pointer-events-none">
                       <Award className="h-80 w-80 text-primary" />
@@ -873,25 +920,25 @@ export default function ReviewerGatewayPage() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs">
-                            <Check className="h-3.5 w-3.5" /> Gateway Verified
+                          <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full text-xs">
+                            <Clock className="h-3.5 w-3.5" /> Pending Account Activation
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Next Step CTA */}
-                  <div className="p-6 rounded-xl bg-primary/10 border border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                      <h4 className="font-bold text-sm text-primary">Your Status is Active in editorial360</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Your profile is now certified for incoming manuscript matching and eligible for the €35–€50 honoraria reward pool.
+                  {/* Next Step CTA Card */}
+                  <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-[#0b99ff]/10 to-primary/5 border border-[#0b99ff]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="space-y-0.5">
+                      <h4 className="font-bold text-sm text-[#0b99ff] dark:text-sky-400">Ready to Review & Earn Merit Honoraria?</h4>
+                      <p className="text-xs text-muted-foreground max-w-xl">
+                        Register or sign in to your Editorial360 account to link your verified credential, unlock official high-res PDF certificate export, and access the €35–€50 honoraria wallet.
                       </p>
                     </div>
-                    <Button asChild size="sm" className="font-semibold gap-1.5 shrink-0">
-                      <Link href="/editorial360">
-                        Access Reviewer Workspace <ArrowRight className="h-4 w-4" />
+                    <Button asChild size="sm" className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold gap-1.5 shrink-0 px-4 py-2 rounded-xl shadow-sm">
+                      <Link href={`/editorial360?action=claim_reviewer&name=${encodeURIComponent(candidateName || 'Reviewer')}&email=${encodeURIComponent(candidateEmail || '')}&cred=${credentialId}`}>
+                        Proceed to Editorial360 <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
                   </div>

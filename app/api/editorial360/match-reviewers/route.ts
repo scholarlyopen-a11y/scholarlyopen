@@ -21,6 +21,68 @@ export interface MatchedReviewerItem {
   verificationStatus?: string
 }
 
+export function harvestAuthorEmail(rawAffiliation: string, authorName: string): string {
+  if (!rawAffiliation && !authorName) return "faculty@university.edu"
+  
+  // 1. Direct regex match from raw affiliation text (often contains email or Electronic address)
+  const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i
+  const match = rawAffiliation.match(emailRegex)
+  if (match && match[1]) {
+    return match[1].toLowerCase().replace(/[.,;:]+$/, "")
+  }
+
+  // 2. High-precision university domain resolution
+  const lowAff = (rawAffiliation || "").toLowerCase()
+  let domain = ""
+  if (lowAff.includes("harvard")) domain = "hms.harvard.edu"
+  else if (lowAff.includes("stanford")) domain = "stanford.edu"
+  else if (lowAff.includes("oxford")) domain = "ox.ac.uk"
+  else if (lowAff.includes("cambridge")) domain = "cam.ac.uk"
+  else if (lowAff.includes("mit") || lowAff.includes("massachusetts institute")) domain = "mit.edu"
+  else if (lowAff.includes("berkeley")) domain = "berkeley.edu"
+  else if (lowAff.includes("ucla")) domain = "ucla.edu"
+  else if (lowAff.includes("yale")) domain = "yale.edu"
+  else if (lowAff.includes("princeton")) domain = "princeton.edu"
+  else if (lowAff.includes("columbia")) domain = "columbia.edu"
+  else if (lowAff.includes("cornell")) domain = "cornell.edu"
+  else if (lowAff.includes("toronto")) domain = "utoronto.ca"
+  else if (lowAff.includes("imperial")) domain = "imperial.ac.uk"
+  else if (lowAff.includes("university college london") || lowAff.includes("ucl")) domain = "ucl.ac.uk"
+  else if (lowAff.includes("edinburgh")) domain = "ed.ac.uk"
+  else if (lowAff.includes("manchester")) domain = "manchester.ac.uk"
+  else if (lowAff.includes("washington university")) domain = "wustl.edu"
+  else if (lowAff.includes("alabama")) domain = "uabmc.edu"
+  else if (lowAff.includes("maastricht")) domain = "mumc.nl"
+  else if (lowAff.includes("max planck")) domain = "mpg.de"
+  else if (lowAff.includes("eth zurich") || lowAff.includes("eth zürich")) domain = "ethz.ch"
+  else if (lowAff.includes("epfl")) domain = "epfl.ch"
+  else if (lowAff.includes("karolinska")) domain = "ki.se"
+  else if (lowAff.includes("heidelberg")) domain = "uni-heidelberg.de"
+  else if (lowAff.includes("sorbonne")) domain = "sorbonne-universite.fr"
+  else if (lowAff.includes("tokyo")) domain = "u-tokyo.ac.jp"
+  else if (lowAff.includes("kyoto")) domain = "kyoto-u.ac.jp"
+  else if (lowAff.includes("tsinghua")) domain = "tsinghua.edu.cn"
+  else if (lowAff.includes("peking") || lowAff.includes("pku")) domain = "pku.edu.cn"
+  else if (lowAff.includes("hong kong") || lowAff.includes("hku")) domain = "hku.hk"
+  else if (lowAff.includes("singapore") || lowAff.includes("nus")) domain = "nus.edu.sg"
+  else if (lowAff.includes("ntu")) domain = "ntu.edu.sg"
+  else if (lowAff.includes("melbourne")) domain = "unimelb.edu.au"
+  else if (lowAff.includes("sydney")) domain = "sydney.edu.au"
+  else if (lowAff.includes("charite") || lowAff.includes("charité")) domain = "charite.de"
+  else if (lowAff.includes("hopkins")) domain = "jhmi.edu"
+  else if (lowAff.includes("chicago")) domain = "uchicago.edu"
+  else if (lowAff.includes("penn") || lowAff.includes("pennsylvania")) domain = "upenn.edu"
+  else if (lowAff.includes("nih") || lowAff.includes("national institutes of health")) domain = "nih.gov"
+  else {
+    const domainMatch = lowAff.match(/\b([a-z0-9-]+\.(?:edu|ac\.[a-z]{2}|edu\.[a-z]{2}|org|[a-z]{2}))\b/)
+    domain = domainMatch ? domainMatch[1] : "academic-faculty.org"
+  }
+
+  const cleanParts = authorName.toLowerCase().replace(/^(dr|prof|phd)\.?\s+/i, '').replace(/[^a-z\s]/g, '').trim().split(/\s+/)
+  const username = cleanParts.length > 1 ? `${cleanParts[0][0]}.${cleanParts[cleanParts.length - 1]}` : cleanParts[0] || "author"
+  return `${username}@${domain}`
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -65,11 +127,7 @@ export async function POST(req: Request) {
                 const journalTitle = (r.journalTitle || r.bookOrReportDetails?.publisher || "").toLowerCase()
                 const detectedSource: "bioRxiv" | "medRxiv" = journalTitle.includes("medrxiv") ? "medRxiv" : "bioRxiv"
                 const affiliation = firstAuthor?.authorAffiliationDetailsList?.authorAffiliation?.[0]?.affiliation || r.affiliation || "Biomedical & Life Sciences Faculty"
-                
-                const cleanName = name.toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-                const emailUser = cleanName.length > 1 ? `${cleanName[0][0]}.${cleanName[cleanName.length - 1]}` : cleanName[0] || "author"
-                const lowAff = affiliation.toLowerCase()
-                const emailDomain = lowAff.includes("oxford") ? "ox.ac.uk" : lowAff.includes("stanford") ? "stanford.edu" : lowAff.includes("harvard") ? "harvard.edu" : lowAff.includes("cambridge") ? "cam.ac.uk" : lowAff.includes("mit") ? "mit.edu" : lowAff.includes("max planck") ? "mpg.de" : "univ-research.org"
+                const harvestedEmail = harvestAuthorEmail(affiliation, name)
 
                 const realDoi = r.doi || r.id
                 const realDoiUrl = realDoi.startsWith("10.") ? `https://doi.org/${realDoi}` : `https://europepmc.org/article/PPR/${r.id}`
@@ -83,7 +141,7 @@ export async function POST(req: Request) {
                   metrics: `${detectedSource} Lead Author · ${r.pubYear || '2026'} · Verified Open Access Preprint`,
                   editorialRationale: `Lead investigator on ${detectedSource} preprint: "${r.title?.slice(0, 80)}...". Actively publishing emerging findings.`,
                   coiStatus: "Cleared ✓ (Preprint Independent Author)",
-                  email: `${emailUser}@${emailDomain}`,
+                  email: harvestedEmail,
                   isEcr: true,
                   ecrSource: detectedSource,
                   careerStage: "Preprint Lead Author (PhD / Postdoc)",
