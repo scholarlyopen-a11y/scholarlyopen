@@ -4812,10 +4812,10 @@ export default function Editorial360Page() {
                 >
                   <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
                     <div className="h-full w-full rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
-                      {role === "reviewer" && reviewerProfile?.photoUrl ? (
+                      {role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl) ? (
                         <img 
-                          src={reviewerProfile.photoUrl} 
-                          alt={reviewerProfile.name || "Reviewer"} 
+                          src={reviewerProfile?.photoUrl || profPhotoUrl} 
+                          alt={reviewerProfile?.name || "Reviewer"} 
                           className="h-full w-full object-cover"
                         />
                       ) : role === "editor" && editorPhotoUrl ? (
@@ -4831,7 +4831,7 @@ export default function Editorial360Page() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || profFullName || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                       )}
                     </div>
                     {/* Full unclipped Online (Green) / Offline (Grey) Status Dot */}
@@ -4876,10 +4876,10 @@ export default function Editorial360Page() {
                       {/* User Header */}
                       <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                          {role === "reviewer" && reviewerProfile?.photoUrl ? (
+                          {role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl) ? (
                             <img 
-                              src={reviewerProfile.photoUrl} 
-                              alt={reviewerProfile.name || "Reviewer"} 
+                              src={reviewerProfile?.photoUrl || profPhotoUrl} 
+                              alt={reviewerProfile?.name || "Reviewer"} 
                               className="h-full w-full object-cover"
                             />
                           ) : role === "editor" && editorPhotoUrl ? (
@@ -4920,18 +4920,18 @@ export default function Editorial360Page() {
                         </div>
                       </div>
 
-                      {/* Presence Status Segmented Toggle */}
-                      <div className="py-2 px-3 my-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center justify-between text-xs">
-                        <span className="text-slate-600 dark:text-slate-400 font-semibold">
+                      {/* Presence Toggle in Dropdown */}
+                      <div className="py-2.5 px-3 border-b border-slate-100 dark:border-[#272832] flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                           {language === "de" ? "Status" : "Presence"}
                         </span>
-                        <div className="flex items-center bg-white dark:bg-[#18191e] p-0.5 rounded-lg border border-slate-200 dark:border-[#272832] shadow-2xs">
+                        <div className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-[#131418] border border-slate-200 dark:border-[#272832]">
                           <button
                             type="button"
                             onClick={() => setUserStatus("online")}
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
                               userStatus === "online"
-                                ? "bg-emerald-500 text-white shadow-xs"
+                                ? "bg-emerald-600 text-white shadow-xs"
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                             }`}
                           >
@@ -4941,7 +4941,7 @@ export default function Editorial360Page() {
                           <button
                             type="button"
                             onClick={() => setUserStatus("offline")}
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
                               userStatus === "offline"
                                 ? "bg-slate-600 text-white shadow-xs"
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
@@ -4960,7 +4960,15 @@ export default function Editorial360Page() {
                           onClick={() => {
                             setIsUserMenuOpen(false)
                             if (role === "reviewer") {
-                              setActiveReviewerTab("overview")
+                              const activeName = reviewerProfile?.name || profFullName || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : "Dr. Marcus Vance")
+                              const activeInst = reviewerProfile?.institution || profInstitution || "Charité – Universitätsmedizin Berlin"
+                              const activePhoto = reviewerProfile?.photoUrl || profPhotoUrl || ""
+                              const activeOrcid = reviewerProfile?.orcid || profOrcid || regOrcid || "0000-0004-7711-2093"
+                              setProfFullName(activeName)
+                              setProfInstitution(activeInst)
+                              setProfPhotoUrl(activePhoto)
+                              setProfOrcid(activeOrcid)
+                              setIsAuthorProfileSetupOpen(true)
                             } else {
                               setIsAuthorProfileSetupOpen(true)
                             }
@@ -5757,15 +5765,24 @@ export default function Editorial360Page() {
                   <ReviewerWorkspace
                     language={language}
                     user={{
-                      name: reviewerProfile?.name || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || "Dr. Marcus Vance")),
+                      name: reviewerProfile?.name || profFullName || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || "Dr. Marcus Vance")),
                       email: reviewerProfile?.email || email || regEmail || "m.vance@university-charite.de",
-                      orcid: reviewerProfile?.orcid || regOrcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : ""),
-                      institution: reviewerProfile?.institution || "Charité – Universitätsmedizin Berlin",
-                      photoUrl: reviewerProfile?.photoUrl
+                      orcid: reviewerProfile?.orcid || profOrcid || regOrcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : ""),
+                      institution: reviewerProfile?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
+                      photoUrl: reviewerProfile?.photoUrl || profPhotoUrl
                     }}
-                    initialProfile={reviewerProfile || undefined}
+                    initialProfile={reviewerProfile || (profPhotoUrl ? {
+                      name: profFullName || "Dr. Marcus Vance",
+                      email: email || "reviewer@scholarlyopen.org",
+                      institution: profInstitution || "Charité – Universitätsmedizin Berlin",
+                      photoUrl: profPhotoUrl,
+                      badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"]
+                    } : undefined)}
                     onSaveProfile={(updated) => {
                       setReviewerProfile(updated)
+                      if (updated.photoUrl) setProfPhotoUrl(updated.photoUrl)
+                      if (updated.name) setProfFullName(updated.name)
+                      if (updated.institution) setProfInstitution(updated.institution)
                     }}
                     reviewInvitations={reviewInvitations}
                     activeReviews={activeReviews}
@@ -10835,12 +10852,21 @@ export default function Editorial360Page() {
                   <User className="h-4 w-4 text-[#0b99ff]" />
                   {role === "jm" 
                     ? (language === "de" ? "Journal Manager Profil (Intern)" : "Journal Manager Staff Profile")
+                    : role === "reviewer"
+                    ? (language === "de" ? "Gutachter-Profileinstellungen" : "Reviewer Profile Settings")
                     : (language === "de" ? "Profileinstellungen" : "Profile Settings")
                   }
                 </DialogTitle>
                 {role !== "jm" && (
                   <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-                    {language === "de" ? "Verwalten Sie Ihre akademischen Profildaten und Affiliationen." : "Manage your verified academic profile, ORCID iD, and institutional affiliations."}
+                    {role === "reviewer"
+                      ? (language === "de" 
+                          ? "Verwalten Sie Ihr Gutachterfoto, akademische Affiliationen und ORCID iD." 
+                          : "Manage your reviewer profile photo, verified academic affiliation, and ORCID iD.")
+                      : (language === "de" 
+                          ? "Verwalten Sie Ihre akademischen Profildaten und Affiliationen." 
+                          : "Manage your verified academic profile, ORCID iD, and institutional affiliations.")
+                    }
                   </DialogDescription>
                 )}
               </DialogHeader>
@@ -10850,6 +10876,27 @@ export default function Editorial360Page() {
                   e.preventDefault()
                   setIsAuthorProfileCompleted(true)
                   setIsAuthorProfileSetupOpen(false)
+                  if (role === "reviewer") {
+                    setReviewerProfile(prev => {
+                      const next = {
+                        name: profFullName || prev?.name || "Dr. Marcus Vance",
+                        email: prev?.email || email || "reviewer@scholarlyopen.org",
+                        institution: profInstitution || prev?.institution || "Charité – Universitätsmedizin Berlin",
+                        orcid: profOrcid || prev?.orcid || "0000-0004-7711-2093",
+                        photoUrl: profPhotoUrl || prev?.photoUrl || "",
+                        badges: prev?.badges || ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"],
+                        country: profCountry || prev?.country || "Germany",
+                        ...prev,
+                        title: profRank || prev?.title || "Senior Researcher",
+                        specialization: profSpecialization || prev?.specialization || ""
+                      }
+                      try {
+                        localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
+                        if (next.email) localStorage.setItem(`so_reviewer_profile_${next.email}`, JSON.stringify(next))
+                      } catch (err) {}
+                      return next
+                    })
+                  }
                   setSuccess(language === "de" ? "Profil erfolgreich gespeichert! Dashboard aktualisiert." : "Profile saved successfully! Dashboard updated.")
                   if (typeof window !== "undefined") {
                     const params = new URLSearchParams(window.location.search)
@@ -10870,8 +10917,10 @@ export default function Editorial360Page() {
                       <img src={editorPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : profPhotoUrl ? (
                       <img src={profPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : role === "reviewer" && reviewerProfile?.photoUrl ? (
+                      <img src={reviewerProfile.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV")}</span>
+                      <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || profFullName || "Dr. Marcus Vance") : (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV")}</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
@@ -10887,10 +10936,28 @@ export default function Editorial360Page() {
                           if (file) {
                             const reader = new FileReader()
                             reader.onloadend = () => {
+                              const photoStr = reader.result as string
                               if (role === "editor") {
-                                setEditorPhotoUrl(reader.result as string)
+                                setEditorPhotoUrl(photoStr)
                               } else {
-                                setProfPhotoUrl(reader.result as string)
+                                setProfPhotoUrl(photoStr)
+                                if (role === "reviewer") {
+                                  setReviewerProfile(prev => {
+                                    const next = {
+                                      name: prev?.name || profFullName || "Dr. Marcus Vance",
+                                      email: prev?.email || email || "reviewer@scholarlyopen.org",
+                                      institution: prev?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
+                                      orcid: prev?.orcid || profOrcid || "0000-0004-7711-2093",
+                                      ...prev,
+                                      photoUrl: photoStr
+                                    }
+                                    try {
+                                      localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
+                                      if (next.email) localStorage.setItem(`so_reviewer_profile_${next.email}`, JSON.stringify(next))
+                                    } catch (err) {}
+                                    return next
+                                  })
+                                }
                               }
                             }
                             reader.readAsDataURL(file)
@@ -10898,12 +10965,26 @@ export default function Editorial360Page() {
                         }} 
                       />
                     </label>
-                    {((role === "editor" && editorPhotoUrl) || profPhotoUrl) && (
+                    {((role === "editor" && editorPhotoUrl) || profPhotoUrl || (role === "reviewer" && reviewerProfile?.photoUrl)) && (
                       <button
                         type="button"
                         onClick={() => {
-                          if (role === "editor") setEditorPhotoUrl("")
-                          else setProfPhotoUrl("")
+                          if (role === "editor") {
+                            setEditorPhotoUrl("")
+                          } else {
+                            setProfPhotoUrl("")
+                            if (role === "reviewer") {
+                              setReviewerProfile(prev => {
+                                if (!prev) return null
+                                const next = { ...prev, photoUrl: "" }
+                                try {
+                                  localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
+                                  if (prev?.email) localStorage.setItem(`so_reviewer_profile_${prev.email}`, JSON.stringify(next))
+                                } catch (err) {}
+                                return next
+                              })
+                            }
+                          }
                         }}
                         className="px-2.5 py-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
                       >
