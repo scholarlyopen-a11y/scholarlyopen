@@ -3517,13 +3517,13 @@ export function ReviewerWorkspace({
           setShowProfileModal(open)
         }}
       >
-        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto p-0 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden">
+        <DialogContent className="max-w-xl max-h-[85vh] flex flex-col p-0 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden">
           
           {/* editorial360 Light Sky Blue Top Accent Bar */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0088e0]" />
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0088e0] shrink-0" />
 
           {/* Modal Header */}
-          <div className="px-6 pt-5 pb-3 border-b border-slate-200 dark:border-slate-800">
+          <div className="px-6 pt-5 pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
             <DialogTitle className="text-base font-semibold text-slate-900 dark:text-white">
               {isDe ? "Gutachterprofil einrichten" : "Reviewer Profile Setup"}
             </DialogTitle>
@@ -3557,8 +3557,9 @@ export function ReviewerWorkspace({
             </div>
           </div>
 
-          {/* Form Body */}
-          <form onSubmit={handleSaveProfile} className="p-6 space-y-4 pt-4">
+          {/* Form Body with Scrollable Content and Fixed Footer */}
+          <form onSubmit={handleSaveProfile} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 pt-4">
 
             {/* STEP 1: Academic Identity & Affiliation */}
             {profileStep === 1 && (
@@ -4002,9 +4003,10 @@ export function ReviewerWorkspace({
                 </div>
               </div>
             )}
+            </div>
 
-            {/* Modal Dialog Navigation Footer */}
-            <DialogFooter className="flex flex-row items-center justify-between gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+            {/* Modal Dialog Navigation Footer (Pinned at Bottom) */}
+            <DialogFooter className="shrink-0 px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-row items-center justify-between gap-2 z-10">
               <div>
                 {profileStep > 1 && (
                   <Button
