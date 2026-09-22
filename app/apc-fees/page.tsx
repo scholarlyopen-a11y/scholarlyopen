@@ -394,7 +394,7 @@ export default function APCFeesPage() {
               </div>
 
               <div className="p-6 rounded-xl bg-background border border-border">
-                <h3 className="text-base font-semibold">Reviewer Qualification & English Gateway</h3>
+                <h3 className="text-base font-semibold">Reviewer Gateway</h3>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                   To ensure equitable global participation without compromising scientific and linguistic quality:
                 </p>

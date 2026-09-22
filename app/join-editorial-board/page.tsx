@@ -191,8 +191,8 @@ export default function JoinEditorialBoardPage() {
                   {selectedRole === "Reviewer" && !submitted && (
                     <div className="mx-6 mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-300">
                       <div>
-                        <span className="text-xs font-bold text-primary flex items-center gap-1.5 uppercase tracking-wider">
-                          <Sparkles className="h-3.5 w-3.5" /> Reviewer Qualification Gateway
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block">
+                          Reviewer Gateway
                         </span>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                           Want priority assignment and eligibility for the €35–€50 honoraria pool? Take our 15-minute standardized online assessment.
@@ -220,7 +220,7 @@ export default function JoinEditorialBoardPage() {
                         {selectedRole === "Reviewer" && (
                           <div className="mb-8 p-6 rounded-xl bg-primary/10 border border-primary/20 max-w-lg mx-auto text-left shadow-xs">
                             <h4 className="font-bold text-sm text-primary flex items-center gap-2">
-                              <Award className="h-4 w-4" /> Fast-Track: Reviewer Qualification Gateway
+                              <Award className="h-4 w-4" /> Fast-Track: Reviewer Gateway
                             </h4>
                             <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                               Complete our 15-minute standardized online test evaluating constructive phrasing and COPE ethics to become a <strong>Certified Peer Reviewer</strong> and unlock the €35–€50 honoraria pool.

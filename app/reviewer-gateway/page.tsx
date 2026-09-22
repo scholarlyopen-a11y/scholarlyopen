@@ -489,7 +489,7 @@ export default function ReviewerGatewayPage() {
             <div className="space-y-8 animate-in fade-in duration-300">
               <div className="text-center max-w-2xl mx-auto">
                 <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-semibold text-primary mb-4">
-                  <ShieldCheck className="h-4 w-4" /> Reviewer Qualification & English Gateway
+                  <ShieldCheck className="h-4 w-4" /> Reviewer Gateway
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
                   Certified Peer Reviewer Assessment
@@ -841,7 +841,7 @@ export default function ReviewerGatewayPage() {
                       </h3>
 
                       <p className="text-xs sm:text-sm text-foreground/80 max-w-xl mx-auto leading-relaxed">
-                        has successfully completed the <strong>Reviewer Qualification & English Gateway</strong>, demonstrating verified competence in academic English phrasing, COPE research integrity guidelines, and methodological evaluation in <strong>{selectedDiscipline.replace("-", " ").toUpperCase()}</strong>.
+                        has successfully completed the <strong>Reviewer Gateway Assessment</strong>, demonstrating verified competence in academic English phrasing, COPE research integrity guidelines, and methodological evaluation in <strong>{selectedDiscipline.replace("-", " ").toUpperCase()}</strong>.
                       </p>
 
                       <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
