@@ -361,6 +361,8 @@ export function ReviewerWorkspace({
             status: "Active"
           }
         ]
+      }
+
       // Sync candidate from passed gateway if available
       const gatewayPassStr = localStorage.getItem("scholarlyopen_passed_reviewer_gateway")
       if (gatewayPassStr) {
