@@ -1816,7 +1816,7 @@ export default function Editorial360Page() {
           amount: 50,
           currency: "EUR",
           option: "bank",
-          details: "Wise / Deutsche Bank | IBAN: DE89 3704 0044 0532 0130 00 | Beneficiary: Dr. Marcus Vance",
+          details: "PayPal | Account: m.vance.reviews@charite.de | Recipient: Dr. Marcus Vance",
           requestedAt: "2026-09-21",
           status: "Pending"
         },
@@ -8891,7 +8891,7 @@ export default function Editorial360Page() {
                                         {p.option === "bank" && (
                                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                                             <Landmark className="h-3 w-3" />
-                                            Direct Cash (Bank / Wise)
+                                            Digital Cash (PayPal / Payoneer / Wise)
                                           </span>
                                         )}
                                         {p.option === "voucher" && (

@@ -408,8 +408,8 @@ export function ReviewerWorkspace({
   // 4-Way Payout & Honorarium State
   const [payoutOption, setPayoutOption] = useState<"bank" | "voucher" | "waiver_fund" | "library">("bank")
   const [payoutBeneficiary, setPayoutBeneficiary] = useState("")
-  const [payoutIban, setPayoutIban] = useState("DE89 3704 0044 0532 0130 00")
-  const [payoutBankName, setPayoutBankName] = useState("Wise / Deutsche Bank")
+  const [payoutService, setPayoutService] = useState<"PayPal" | "Payoneer" | "Wise" | "Other">("PayPal")
+  const [payoutEmail, setPayoutEmail] = useState("reviewer@scholarlyopen.org")
   const [payoutLibraryName, setPayoutLibraryName] = useState("")
   const [payoutSuccessMsg, setPayoutSuccessMsg] = useState<string | null>(null)
   const [isSubmittingPayout, setIsSubmittingPayout] = useState(false)
@@ -998,7 +998,7 @@ COPE & Plan S Certified Archive
         amount: 50,
         option: payoutOption,
         details: payoutOption === "bank" 
-          ? `Bank: ${payoutBankName} | IBAN: ${payoutIban} | Beneficiary: ${payoutBeneficiary || recipientName}`
+          ? `${payoutService} | Account Email: ${payoutEmail || profile.email || "reviewer@scholarlyopen.org"} | Recipient: ${payoutBeneficiary || recipientName}`
           : payoutOption === "voucher"
           ? "APC Credit Voucher generated for next submission across 13 journals"
           : payoutOption === "waiver_fund"
@@ -2244,7 +2244,7 @@ COPE & Plan S Certified Archive
               {/* 4 Interactive Option Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 
-                {/* Option 1: Direct Bank Transfer */}
+                {/* Option 1: Digital Cashout (PayPal / Payoneer / Wise) */}
                 <div 
                   onClick={() => setPayoutOption("bank")}
                   className={`p-4 rounded-xl border-2 cursor-pointer transition-all space-y-2.5 ${
@@ -2255,9 +2255,9 @@ COPE & Plan S Certified Archive
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Landmark className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <CreditCard className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        {isDe ? "1. Bankkonto / Wise / PayPal" : "1. Direct Cashout to Bank / PayPal"}
+                        {isDe ? "1. Digitale Auszahlung (PayPal / Payoneer / Wise)" : "1. Digital Cashout (PayPal / Payoneer / Wise)"}
                       </span>
                     </div>
                     <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
@@ -2268,26 +2268,56 @@ COPE & Plan S Certified Archive
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                     {isDe 
-                      ? "Auszahlung direkt auf Ihr Bankkonto via SEPA / Wise oder PayPal innerhalb von 24–48 Stunden."
-                      : "Direct cashout via SEPA, Wise, or PayPal batch payment transferred directly to your bank account."}
+                      ? "Direkte gebührenfreie Überweisung an Ihre registrierte PayPal-, Payoneer- oder Wise-E-Mail innerhalb von 24–48 Stunden."
+                      : "Direct disbursement to your registered digital payout email (PayPal, Payoneer, or Wise) within 24–48 hours without bank wire fees."}
                   </p>
                   {payoutOption === "bank" && (
                     <div className="space-y-2 pt-2 border-t border-emerald-200/60 dark:border-slate-800 text-xs">
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">IBAN / Bank Account</label>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Select Payout Rail</label>
+                        <div className="grid grid-cols-4 gap-1.5">
+                          {(["PayPal", "Payoneer", "Wise", "Other"] as const).map((service) => (
+                            <button
+                              key={service}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setPayoutService(service)
+                              }}
+                              className={`py-1.5 px-1.5 rounded-lg text-[11px] font-bold border transition-all text-center ${
+                                payoutService === service
+                                  ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
+                                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-400"
+                              }`}
+                            >
+                              {service}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">
+                          {payoutService} Account Email
+                        </label>
                         <input 
-                          type="text" 
-                          value={payoutIban} 
-                          onChange={(e) => setPayoutIban(e.target.value)}
+                          type="email" 
+                          value={payoutEmail} 
+                          onChange={(e) => setPayoutEmail(e.target.value)}
+                          placeholder={`name@domain.com (${payoutService} account)`}
                           className="w-full mt-1 p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
                         />
                       </div>
+
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">Bank / Service</label>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">
+                          Account Holder / Full Name (Optional)
+                        </label>
                         <input 
                           type="text" 
-                          value={payoutBankName} 
-                          onChange={(e) => setPayoutBankName(e.target.value)}
+                          value={payoutBeneficiary} 
+                          onChange={(e) => setPayoutBeneficiary(e.target.value)}
+                          placeholder={getFormattedReviewerName(profile.title, profile.name) || "Dr. Marcus Vance"}
                           className="w-full mt-1 p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono"
                         />
                       </div>
