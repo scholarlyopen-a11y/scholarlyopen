@@ -55,7 +55,12 @@ import {
   CreditCard,
   Upload,
   Trophy,
-  Star
+  Star,
+  Flag,
+  TrendingUp,
+  Linkedin,
+  Link2,
+  Lightbulb
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -1393,130 +1398,244 @@ COPE & Plan S Certified Archive
             </div>
           )}
 
-          {/* Top Summary Banner */}
-          <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3.5">
+          {/* Top AI Pre-review Watch Banner (from screenshot) */}
+          <div className="p-3.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900/50 text-sky-800 dark:text-sky-300 text-xs flex items-center gap-2.5 shadow-2xs">
+            <Lightbulb className="h-4 w-4 text-[#0b99ff] shrink-0" />
+            <span className="font-medium">
+              {isDe 
+                ? "Achten Sie auf KI-Artefakte in Text und Grafiken: vage Formulierungen, inkonsistente Formatierung, fehlende Maßstabsleisten..." 
+                : "Watch for AI artifacts in both text and visuals: vague language, inconsistent formatting, missing scale bars..."}
+            </span>
+          </div>
+
+          {/* Profile Card (from screenshot) */}
+          <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="relative h-14 w-14 sm:h-16 sm:w-16 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md ring-2 ring-slate-200 dark:ring-slate-800">
+              <div className="flex items-start sm:items-center gap-4">
+                <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
                   {profile.photoUrl ? (
                     <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
                   ) : (
                     <span>{getReviewerInitials(profile.name)}</span>
                   )}
                   <span 
-                    className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full ring-2 ring-white dark:ring-slate-950 bg-emerald-500 z-10" 
+                    className="absolute bottom-0 right-0 h-4 w-4 rounded-full ring-2 ring-white dark:ring-slate-950 bg-emerald-500 z-10" 
                     title="Verified Active Reviewer"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                      {getFormattedReviewerName(profile.title, profile.name)}
-                    </h2>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                      COPE Verified
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {profile.department ? `${profile.department} · ` : ""}{profile.institution} ({profile.country})
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
+                    {getFormattedReviewerName(profile.title, profile.name)}
+                  </h2>
+                  <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                    {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Senior Researcher, AI Ethics"}
                   </p>
-
-                  {/* Academic Recognition Badges Row */}
-                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px] font-semibold border border-amber-200/80 dark:border-amber-800/60 shadow-2xs">
-                      <Trophy className="h-3 w-3 text-amber-600 dark:text-amber-400" />
-                      Top Reviewer 2026
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 text-[11px] font-semibold border border-sky-200/80 dark:border-sky-800/60 shadow-2xs">
-                      <Zap className="h-3 w-3 text-[#0b99ff]" />
-                      Fast Turnaround (&lt;12d)
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[11px] font-semibold border border-emerald-200/80 dark:border-emerald-800/60 shadow-2xs">
-                      <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                      COPE Ethics Certified
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 text-[11px] font-semibold border border-purple-200/80 dark:border-purple-800/60 shadow-2xs">
-                      <Star className="h-3 w-3 text-purple-600 dark:text-purple-400 fill-purple-600/20" />
-                      5-Star Rigor Endorsed
-                    </span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <strong className="text-slate-700 dark:text-slate-300 font-semibold">{isDe ? "Forschungsinteressen: " : "Research Interests: "}</strong>
+                    {profile.keywords.length > 0 
+                      ? profile.keywords.slice(0, 4).join(", ") 
+                      : "AI Bias, Data Privacy, Algorithmic Fairness"}
+                  </p>
+                  <div className="pt-1.5 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleOpenProfileModal}
+                      className="px-3.5 py-1 rounded-lg border border-sky-200 dark:border-sky-800/80 bg-sky-50/70 dark:bg-sky-950/40 text-[#0b99ff] hover:bg-sky-100 dark:hover:bg-sky-900/60 font-semibold text-xs transition-colors cursor-pointer"
+                    >
+                      {isDe ? "Vollständiges Profil ansehen" : "View Full Profile"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCertViewMode("cv")
+                        onTabChange && onTabChange("certificate")
+                      }}
+                      className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 text-xs font-medium transition-colors cursor-pointer"
+                    >
+                      {isDe ? "CV Exportieren" : "Export CV"}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  onClick={handleOpenProfileModal}
-                  variant="outline"
-                  className="text-xs h-8 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer"
-                >
-                  <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
-                  {isDe ? "Profil anpassen" : "Edit Profile & Matching"}
-                </Button>
-                <Button 
-                  onClick={() => onTabChange && onTabChange("wallet")}
-                  variant="outline" 
-                  className="text-xs h-8 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer"
-                >
-                  <Wallet className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
-                  {points} Pts ({currentDiscount}% Off)
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setCertViewMode("cv")
-                    onTabChange && onTabChange("certificate")
-                  }}
-                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-3.5 cursor-pointer shadow-xs"
-                >
-                  <Download className="h-3.5 w-3.5 mr-1.5" />
-                  {isDe ? "CV / Zertifikat" : "Export CV PDF"}
-                </Button>
-              </div>
-            </div>
-
-            {/* Active Matching Tags Row */}
-            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-1.5 text-xs">
-              <span className="text-[11px] font-medium text-slate-400 mr-1 flex items-center gap-1">
-                <Tag className="h-3 w-3 text-slate-400" />
-                {isDe ? "Fachgebiete:" : "Matching Topics:"}
-              </span>
-              <span className="font-medium text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px] border border-slate-200 dark:border-slate-700">
-                {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}
-              </span>
-              {profile.keywords.slice(0, 5).map((kw, i) => (
-                <span key={i} className="text-[11px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200/80 dark:border-slate-800">
-                  #{kw}
+              {/* Matching Topics Quick Tag */}
+              <div className="hidden lg:flex flex-col items-end gap-1.5 text-right">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  {isDe ? "Fachgebiet" : "Primary Discipline"}
                 </span>
-              ))}
-              {profile.keywords.length > 5 && (
-                <button 
-                  onClick={handleOpenProfileModal}
-                  className="text-[10px] font-semibold text-[#0b99ff] hover:underline cursor-pointer"
-                >
-                  +{profile.keywords.length - 5} {isDe ? "weitere" : "more"}
-                </button>
-              )}
+                <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-800">
+                  {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}
+                </span>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  ● {profile.availabilityStatus === "Available" ? (isDe ? "Verfügbar für Gutachten" : "Available for Invitations") : (isDe ? "Im Forschungsurlaub" : "On Sabbatical")}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Quick Metrics Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Active Reviewer Tier</span>
-              <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{currentTier} ({currentDiscount}% Off)</div>
+          {/* Reviewer Metrics Card (Exact 5-Column Stats & Big Badges from Screenshot) */}
+          <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                {isDe ? "Gutachter-Kennzahlen" : "Reviewer Metrics"}
+              </h3>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
+                {isDe ? "Verifizierte COPE-Aktivität" : "COPE Verified Performance"}
+              </span>
             </div>
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Average Turnaround</span>
-              <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">11.4 Days</div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-2 text-center items-start pt-2">
+              {/* 1. Time to complete */}
+              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                <Clock className="h-6 w-6 text-sky-400" />
+                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+                  {isDe ? "3 Tage" : "3 days"}
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+                  {isDe ? "DURCHSCHN. DAUER (AVG)" : "TIME TO COMPLETE (AVG)"}
+                </div>
+              </div>
+
+              {/* 2. Reviews rated high quality */}
+              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                <Star className="h-6 w-6 text-sky-400" />
+                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+                  95%
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+                  {isDe ? "QUALITATIV HOCHWERTIG" : "REVIEWS RATED HIGH QUALITY"}
+                </div>
+              </div>
+
+              {/* 3. Integrity flags raised */}
+              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                <Flag className="h-6 w-6 text-sky-400" />
+                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+                  7
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+                  {isDe ? "INTEGRITÄTSMELDUNGEN" : "INTEGRITY FLAGS RAISED"}
+                </div>
+              </div>
+
+              {/* 4. Badges earned */}
+              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors cursor-pointer group" onClick={() => onTabChange && onTabChange("certificate")}>
+                <Award className="h-6 w-6 text-sky-400 group-hover:scale-110 transition-transform" />
+                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1 text-sky-600 dark:text-sky-400">
+                  4
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+                  {isDe ? "ABZEICHEN ERHALTEN" : "BADGES EARNED"}
+                </div>
+              </div>
+
+              {/* 5. Percentile score */}
+              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                <TrendingUp className="h-6 w-6 text-sky-400" />
+                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+                  Top 12%
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
+                  {isDe ? "PERZENTIL-RANG" : "PERCENTILE SCORE"}
+                </div>
+              </div>
             </div>
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">On-Time Delivery</span>
-              <div className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">100% On Schedule</div>
+
+            {/* Share ORCID & LinkedIn */}
+            <div className="flex items-center justify-center sm:justify-end gap-5 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    const orcidUrl = profile.orcid ? `https://orcid.org/${profile.orcid}` : "https://orcid.org"
+                    window.open(orcidUrl, "_blank")
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 text-sky-500 hover:text-sky-600 font-semibold cursor-pointer transition-colors"
+              >
+                <Link2 className="h-3.5 w-3.5" />
+                <span>Share ORCID</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    const text = encodeURIComponent("I am a verified Peer Reviewer with Scholarly Open! Track my verified peer evaluations and academic badges.")
+                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 text-sky-500 hover:text-sky-600 font-semibold cursor-pointer transition-colors"
+              >
+                <Linkedin className="h-3.5 w-3.5" />
+                <span>Share LinkedIn</span>
+              </button>
             </div>
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Verified Evaluations</span>
-              <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{reviewsDone} Manuscripts</div>
+          </div>
+
+          {/* Academic Recognition Badges (BIG BADGES & SMALL TEXT UNDERNEATH) */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                {isDe ? "Erhaltene Auszeichnungen & Abzeichen" : "Earned Academic Prestige Badges"}
+              </h4>
+              <span className="text-[11px] text-slate-400">
+                {isDe ? "Freigeschaltet durch Peer-Review-Leistung" : "Unlocked through verified review contributions"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Badge 1 */}
+              <div className="p-4 rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-amber-400 hover:shadow-xs transition-all">
+                <div className="h-12 w-12 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2 ring-4 ring-amber-100/60 dark:ring-amber-900/20">
+                  <Trophy className="h-6 w-6" />
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  Top Reviewer 2026
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                  {isDe ? "EDITORIAL BOARD AUSZEICHNUNG" : "EDITORIAL BOARD COMMENDATION"}
+                </div>
+              </div>
+
+              {/* Badge 2 */}
+              <div className="p-4 rounded-xl border border-sky-200/80 dark:border-sky-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-sky-400 hover:shadow-xs transition-all">
+                <div className="h-12 w-12 rounded-full bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] flex items-center justify-center mb-2 ring-4 ring-sky-100/60 dark:ring-sky-900/20">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  Fast Turnaround
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                  {isDe ? "TOP 5% SCHNELLIGKEIT (<12 TAGE)" : "TOP 5% RESPONSE SPEED (<12D)"}
+                </div>
+              </div>
+
+              {/* Badge 3 */}
+              <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-emerald-400 hover:shadow-xs transition-all">
+                <div className="h-12 w-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 ring-4 ring-emerald-100/60 dark:ring-emerald-900/20">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  COPE Ethics Certified
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                  {isDe ? "PUBLIKATIONSETHIK VERIFIZIERT" : "PUBLICATION ETHICS VERIFIED"}
+                </div>
+              </div>
+
+              {/* Badge 4 */}
+              <div className="p-4 rounded-xl border border-purple-200/80 dark:border-purple-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-purple-400 hover:shadow-xs transition-all">
+                <div className="h-12 w-12 rounded-full bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 ring-4 ring-purple-100/60 dark:ring-purple-900/20">
+                  <Star className="h-6 w-6 fill-purple-600/20" />
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  5-Star Rigor Endorsed
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                  {isDe ? "HANDLING EDITOR AUSZEICHNUNG" : "HANDLING EDITOR DISTINCTION"}
+                </div>
+              </div>
             </div>
           </div>
 
