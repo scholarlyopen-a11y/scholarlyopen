@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Send, User, Mail, Building, Briefcase, BookOpen, Link as LinkIcon, CheckCircle2, Globe } from "lucide-react"
+import { Send, User, Mail, Building, Briefcase, BookOpen, Link as LinkIcon, CheckCircle2, Globe, Sparkles, Award, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -187,6 +187,25 @@ export default function JoinEditorialBoardPage() {
                       {t("join.form.subtitle")}
                     </CardDescription>
                   </CardHeader>
+
+                  {selectedRole === "Reviewer" && !submitted && (
+                    <div className="mx-6 mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-300">
+                      <div>
+                        <span className="text-xs font-bold text-primary flex items-center gap-1.5 uppercase tracking-wider">
+                          <Sparkles className="h-3.5 w-3.5" /> Reviewer Qualification Gateway
+                        </span>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          Want priority assignment and eligibility for the €35–€50 honoraria pool? Take our 15-minute standardized online assessment.
+                        </p>
+                      </div>
+                      <Button asChild size="sm" className="text-xs font-semibold shrink-0 gap-1.5 cursor-pointer">
+                        <Link href="/reviewer-gateway">
+                          Take Assessment <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+
                   <CardContent className="pt-4">
                     {submitted ? (
                       <div className="text-center py-12">
@@ -194,9 +213,28 @@ export default function JoinEditorialBoardPage() {
                           <Send className="h-10 w-10 text-primary" />
                         </div>
                         <h3 className="text-2xl font-semibold mb-3">{t("join.form.successTitle")}</h3>
-                        <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
+                        <p className="text-muted-foreground text-lg mb-6 max-w-md mx-auto">
                           {t("join.form.successDesc")}
                         </p>
+
+                        {selectedRole === "Reviewer" && (
+                          <div className="mb-8 p-6 rounded-xl bg-primary/10 border border-primary/20 max-w-lg mx-auto text-left shadow-xs">
+                            <h4 className="font-bold text-sm text-primary flex items-center gap-2">
+                              <Award className="h-4 w-4" /> Fast-Track: Reviewer Qualification Gateway
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                              Complete our 15-minute standardized online test evaluating constructive phrasing and COPE ethics to become a <strong>Certified Peer Reviewer</strong> and unlock the €35–€50 honoraria pool.
+                            </p>
+                            <div className="mt-4">
+                              <Button asChild className="w-full text-xs font-semibold gap-1.5 cursor-pointer">
+                                <Link href="/reviewer-gateway">
+                                  Start 15-Min Qualification Assessment <ArrowRight className="h-3.5 w-3.5" />
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
                         <Button 
                           size="lg"
                           variant="outline" 

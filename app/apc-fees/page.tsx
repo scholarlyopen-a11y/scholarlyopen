@@ -416,6 +416,15 @@ export default function APCFeesPage() {
                     <span><strong>Career Advancement Pathway:</strong> Consistently top-rated reviewers (≥ 90% rigor rating over 3+ assignments) are actively invited to join journal Editorial Boards.</span>
                   </li>
                 </ul>
+
+                <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">Ready to certify your peer review credentials?</span>
+                  <Button asChild size="sm" className="text-xs font-semibold gap-1.5 cursor-pointer">
+                    <Link href="/reviewer-gateway">
+                      Take 15-Min Online Assessment <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

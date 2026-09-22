@@ -17,11 +17,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/contact',
     '/editorial-board',
     '/impressum',
+    '/join-editorial-board',
     '/journals',
     '/open-access',
     '/peer-review',
     '/privacy',
     '/publication-ethics',
+    '/reviewer-gateway',
     '/submit',
     '/trainings',
   ].map((route) => ({
