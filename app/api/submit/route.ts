@@ -4,6 +4,7 @@ import nodemailer from "nodemailer"
 
 import { validateSubmissionAntiSpam, getClientIp, isSuspiciousEmail } from "@/lib/anti-spam"
 import { upsertDbManuscript } from "@/lib/supabase"
+import { getJournalReplyTo } from "@/lib/data/journal-contacts"
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024
 
@@ -315,8 +316,12 @@ export async function POST(request: Request) {
   // 2. Send automated confirmation email directly to the submitter/registrant's email (only if verified valid address)
   if (!isSuspiciousEmail(authorEmail)) {
     try {
+      const journalTitle = journalLabel(discipline)
+      const journalEmail = getJournalReplyTo(journalTitle)
+      const authorFrom = `"${journalTitle} Editorial Office" <${journalEmail}>`
       await transporter.sendMail({
-        from: smtpFrom,
+        from: authorFrom,
+        replyTo: journalEmail,
         to: authorEmail,
         subject: authorConfirmationSubject,
         text: authorConfirmationText,

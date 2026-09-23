@@ -107,9 +107,29 @@ export async function POST(req: Request) {
       })
     }
 
+    if (!body.to || !body.to.trim()) {
+      return NextResponse.json(
+        { success: false, error: "Recipient email ('to') is required." },
+        { status: 400 }
+      )
+    }
+
     if (!finalSubject) {
       finalSubject = `editorial360 Notification: ${journal}`
     }
+
+    // Build plain text alternative for optimal deliverability (eliminates MIME_HTML_ONLY spam penalty)
+    const plainTextBody = (body.customBody || bodyText || finalHtml
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/\s+/g, " ")
+      .trim()).trim()
 
     let sentViaSmtp = false
     let messageId = `MSG-SIM-${Date.now()}`
@@ -128,9 +148,20 @@ export async function POST(req: Request) {
       ? (process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL)
       : designatedEmail
 
-    const senderDisplayName = body.senderName || (body.template === "workspace_invite" ? "Scholarly Open Editorial Office" : `"${journal} Editorial Office"`)
-    const formattedFrom = `"${senderDisplayName}" <${activeSenderEmail}>`
+    // Ensure display name adheres to RFC 5322 without redundant double-quotes
+    const rawSenderDisplayName = body.senderName || (
+      body.template === "workspace_invite" 
+        ? "Scholarly Open Editorial Office" 
+        : journal.includes("Editorial Office") 
+          ? journal 
+          : `${journal} Editorial Office`
+    )
+    const cleanSenderName = rawSenderDisplayName.replace(/["\r\n]/g, "").trim()
+    const formattedFrom = `"${cleanSenderName}" <${activeSenderEmail}>`
     const replyToEmail = body.fromEmail || designatedEmail || DEFAULT_EDITORIAL_EMAIL
+
+    const normalizedTo = body.to.trim().toLowerCase()
+    const ccRecipient = normalizedTo !== "scholarlyopen@gmail.com" ? "scholarlyopen@gmail.com" : undefined
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
       const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"
@@ -147,14 +178,20 @@ export async function POST(req: Request) {
         }
       })
 
-      const info = await transporter.sendMail({
+      const mailOptions: nodemailer.SendMailOptions = {
         from: formattedFrom,
-        to: body.to,
-        cc: "scholarlyopen@gmail.com",
+        to: body.to.trim(),
         replyTo: replyToEmail,
         subject: finalSubject,
+        text: plainTextBody,
         html: finalHtml
-      })
+      }
+
+      if (ccRecipient) {
+        mailOptions.cc = ccRecipient
+      }
+
+      const info = await transporter.sendMail(mailOptions)
 
       sentViaSmtp = true
       messageId = info.messageId
@@ -164,13 +201,14 @@ export async function POST(req: Request) {
       success: true,
       sentViaSmtp,
       messageId,
-      recipient: body.to,
+      recipient: body.to.trim(),
       senderEmail: activeSenderEmail,
       from: formattedFrom,
       replyTo: replyToEmail,
-      cc: "scholarlyopen@gmail.com",
+      cc: ccRecipient || null,
       subject: finalSubject,
       renderedHtml: finalHtml,
+      plainText: plainTextBody,
       timestamp: new Date().toISOString()
     })
   } catch (error: any) {

@@ -231,7 +231,7 @@ export function JournalPage({
     badge: "bg-slate-950/10 text-slate-950 border-slate-900/15 shadow-none hover:bg-slate-950/20"
   }
 
-  const currentBrandTheme = brandThemes["biology"]
+  const currentBrandTheme = (journalSlug && brandThemes[journalSlug]) || defaultTheme
 
   const stats = [
     { label: "Average Review Time", value: "4-8 weeks" },

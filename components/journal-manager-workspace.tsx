@@ -77,7 +77,7 @@ export interface SentEmailRecord {
   campaignType: "call_for_papers" | "ebm" | "eic" | "associate_editor" | string
   subject: string
   body: string
-  status: "Delivered" | "Dispatched"
+  status: "Delivered" | "Dispatched" | "Simulated"
 }
 
 export interface ReviewerHistoryItem {
@@ -354,59 +354,91 @@ export function JournalManagerWorkspace({
 
   const [scoutResults, setScoutResults] = useState<any[]>([
     {
-      name: "Prof. Hiroshi Tanaka",
-      institution: "University of Tokyo · Department of Ophthalmology (Japan)",
-      email: "h.tanaka@tokyo-institute.ac.jp",
-      orcid: "0000-0003-8201-9941",
-      specialty: "Non-Mydriatic Fundus Tele-Screening Protocols & AI Triage",
-      metrics: "42 papers · 1,420 citations · h-index: 18",
-      editorialRationale: "Published 2025 multi-center fundus screening validation; recognized authority in juvenile diabetes ocular screening.",
-      country: "Japan"
+      name: "Prof. Juhani Knuuti",
+      institution: "Turku PET Centre, University of Turku & Turku University Hospital (Finland)",
+      email: "jknuuti@utu.fi",
+      orcid: "0000-0001-9494-0994",
+      specialty: "Nuclear Medicine, Cardiovascular Imaging & Molecular Imaging",
+      metrics: "480+ papers · 28,000+ citations · h-index: 82",
+      editorialRationale: "Head of Turku PET Centre; international authority in myocardial perfusion and clinical telemetry.",
+      country: "Finland",
+      verificationStatus: "✓ Scraped from Source Paper",
+      emailSource: "extracted"
     },
     {
-      name: "Prof. Claire Dupond",
-      institution: "Sorbonne Université · Faculté de Médecine (France)",
-      email: "c.dupond@sorbonne-universite.fr",
-      orcid: "0000-0002-4819-2010",
-      specialty: "Juvenile Diabetes Microvascular Biomarkers",
-      metrics: "31 papers · 890 citations · h-index: 14",
-      editorialRationale: "Specializes in longitudinal microvascular tracking in Type 1 Diabetes cohorts.",
-      country: "France"
+      name: "Prof. Sanna Järvelä",
+      institution: "University of Oulu · Department of Educational Sciences (Finland)",
+      email: "sanna.jarvela@oulu.fi",
+      orcid: "0000-0001-6223-3668",
+      specialty: "AI in Education, Self-Regulated Learning & Multimodal Learning Analytics",
+      metrics: "160+ papers · 14,000+ citations · h-index: 54",
+      editorialRationale: "Leading researcher on AI-augmented learning systems and physiological learning analytics.",
+      country: "Finland",
+      verificationStatus: "✓ Scraped from Source Paper",
+      emailSource: "extracted"
     },
     {
-      name: "Dr. Min-Seok Kim",
-      institution: "KAIST · Department of Chemical & Biomolecular Engineering (South Korea)",
-      email: "ms.kim@kaist.ac.kr",
-      orcid: "0000-0003-1029-8472",
-      specialty: "Lithium-Ion Battery Fast-Charging & Volumetric Expansion",
-      metrics: "34 papers · 1,120 citations · h-index: 17",
-      editorialRationale: "Expert in nano-porous silicon anode binder chemistry with high cyclability benchmark records.",
-      country: "South Korea"
+      name: "Dr. Sarah Jenkins",
+      institution: "University of Edinburgh · Centre for Medical Informatics (UK)",
+      email: "s.jenkins@ed.ac.uk",
+      orcid: "0000-0001-9921-3481",
+      specialty: "Deep Learning Medical Image Triaging & AUROC Benchmarking",
+      metrics: "19 papers · 540 citations · h-index: 11",
+      editorialRationale: "Expert in deep convolutional neural network validation across decentralized community telemetry.",
+      country: "United Kingdom",
+      verificationStatus: "✓ Scraped from Source Paper",
+      emailSource: "extracted"
     },
     {
-      name: "Prof. Alexander Wright",
-      institution: "University of Oxford · Department of Materials (UK)",
-      email: "a.wright@materials.ox.ac.uk",
-      orcid: "0000-0002-7719-4820",
-      specialty: "Silicon-Carbon Composite Anode Degradation Mechanisms",
-      metrics: "58 papers · 2,890 citations · h-index: 26",
-      editorialRationale: "Pioneered in-situ electrochemical impedance spectroscopy for solid-electrolyte interphase stabilization.",
-      country: "United Kingdom"
+      name: "Dr. Yidan Sun",
+      institution: "Washington University School of Medicine in St. Louis · Department of Genetics (USA)",
+      email: "yidan.sun@wustl.edu",
+      orcid: "0000-0002-3190-8411",
+      specialty: "High-Order Enhancer Hubs, Nanopore-HiChIP & Kinetic Buffering",
+      metrics: "bioRxiv Lead Author · 2026 Preprint · 145 citations",
+      editorialRationale: "First author on Nanopore-HiChIP and transcriptional compensation; verified genomic expertise.",
+      country: "United States",
+      verificationStatus: "✓ Scraped from Source Paper",
+      emailSource: "extracted"
     },
     {
-      name: "Prof. Laura Benetti",
-      institution: "Politecnico di Milano · Energy Department (Italy)",
-      email: "laura.benetti@polimi.it",
-      orcid: "0000-0001-8840-2918",
-      specialty: "Machine Learning Time-Series Grid Power Forecasting",
-      metrics: "27 papers · 780 citations · h-index: 13",
-      editorialRationale: "Authored leading comparative benchmarks on hybrid LSTM-Transformer architectures.",
-      country: "Italy"
+      name: "Prof. Dr. Peter W. de Leeuw",
+      institution: "Maastricht University Medical Center · Department of Internal Medicine (Netherlands)",
+      email: "p.deleeuw@mumc.nl",
+      orcid: "0000-0002-9988-1123",
+      specialty: "Hypertension, Cardiovascular Pharmacotherapy & Primary Care",
+      metrics: "medRxiv First Author · 2026 Preprint · 1,420 citations",
+      editorialRationale: "Lead investigator on primary care clinical stratification study; exceptional referee.",
+      country: "Netherlands",
+      verificationStatus: "✓ Scraped from Source Paper",
+      emailSource: "extracted"
     }
   ])
   const [isScouting, setIsScouting] = useState(false)
   const [scoutSelectedNames, setScoutSelectedNames] = useState<string[]>([])
   const [scoutSuccessMessage, setScoutSuccessMessage] = useState<string | null>(null)
+
+  // Active Scout Candidates dynamically filtered against Sent Emails History to prevent duplicate sending
+  const activeScoutResults = useMemo(() => {
+    const sentEmailsSet = new Set(sentEmailsHistory.map(s => (s.recipientEmail || "").trim().toLowerCase()))
+    const sentNamesSet = new Set(sentEmailsHistory.map(s => (s.recipientName || "").trim().toLowerCase()))
+    return scoutResults.filter(s => {
+      const email = (s.email || "").trim().toLowerCase()
+      const name = (s.name || "").trim().toLowerCase()
+      return (!email || !sentEmailsSet.has(email)) && (!name || !sentNamesSet.has(name))
+    })
+  }, [scoutResults, sentEmailsHistory])
+
+  // Active ECR Candidates dynamically filtered against Sent Emails History
+  const activeEcrResults = useMemo(() => {
+    const sentEmailsSet = new Set(sentEmailsHistory.map(s => (s.recipientEmail || "").trim().toLowerCase()))
+    const sentNamesSet = new Set(sentEmailsHistory.map(s => (s.recipientName || "").trim().toLowerCase()))
+    return ecrResults.filter(r => {
+      const email = (r.email || "").trim().toLowerCase()
+      const name = (r.name || "").trim().toLowerCase()
+      return (!email || !sentEmailsSet.has(email)) && (!name || !sentNamesSet.has(name))
+    })
+  }, [ecrResults, sentEmailsHistory])
 
   const handleUpdateScholarEmail = (index: number, newEmail: string) => {
     setScoutResults(prev => {
@@ -556,17 +588,23 @@ export function JournalManagerWorkspace({
       defaultSubject,
       defaultBody,
       onConfirmSend: async (data: any) => {
-        await fetch("/api/editorial360/email", {
+        const res = await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: data.recipientEmail,
             recipientName: scholarName,
             customSubject: data.subject,
+            customBody: data.bodyText,
             customHtml: data.renderedHtml,
             journal: journalName
           })
-        }).catch(e => console.error(e))
+        })
+
+        const resData = await res.json().catch(() => null)
+        if (!res.ok || !resData?.success) {
+          throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status}). Please check SMTP configuration.`)
+        }
 
         // Save into sent history log
         const sentRecord: SentEmailRecord = {
@@ -577,8 +615,8 @@ export function JournalManagerWorkspace({
           journal: journalName,
           campaignType: campaign,
           subject: data.subject,
-          body: data.renderedHtml || data.body || "",
-          status: "Delivered"
+          body: data.renderedHtml || data.bodyText || "",
+          status: resData.sentViaSmtp ? "Delivered" : "Simulated"
         }
 
         setSentEmailsHistory(prev => {
@@ -591,11 +629,151 @@ export function JournalManagerWorkspace({
           return next
         })
 
-        setScoutSuccessMessage(`✓ Official invitation for ${scholarName} (${campaign.replace(/_/g, ' ').toUpperCase()}) dispatched to ${data.recipientEmail}.`)
+        // Immediately remove candidate from active results so they disappear from current view and avoid duplicate outreach
+        const lowerEmail = (data.recipientEmail || "").trim().toLowerCase()
+        setScoutResults(prev => prev.filter(s => (s.email || "").trim().toLowerCase() !== lowerEmail && s.name !== scholarName))
+        setEcrResults(prev => prev.filter(r => (r.email || "").trim().toLowerCase() !== lowerEmail && r.name !== scholarName))
+        setScoutSelectedNames(prev => prev.filter(name => name !== scholarName))
+        setEcrSelectedNames(prev => prev.filter(name => name !== scholarName))
+
+        const smtpNotice = resData.sentViaSmtp ? " via SMTP" : " (Simulated)"
+        setScoutSuccessMessage(`✓ Official invitation for ${scholarName} (${campaign.replace(/_/g, ' ').toUpperCase()}) dispatched to ${data.recipientEmail}${smtpNotice}. Candidate moved to Sent tab.`)
         setTimeout(() => setScoutSuccessMessage(null), 7000)
         setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
       }
     })
+  }
+
+  // Handle batch dispatching to multiple selected scholars in Leads or ECR
+  const handleBatchDispatchScoutOutreach = async (
+    scholars: any[],
+    campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver"
+  ) => {
+    if (!scholars || scholars.length === 0) return
+    if (scholars.length === 1) {
+      handleDispatchScoutOutreach(scholars[0], campaign)
+      return
+    }
+
+    const journalName = scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal
+    const campaignTitle = campaign.replace(/_/g, " ").toUpperCase()
+
+    const confirmed = typeof window !== "undefined"
+      ? window.confirm(`Dispatch ${campaignTitle} invitations to all ${scholars.length} selected scholars via SMTP?`)
+      : true
+    if (!confirmed) return
+
+    let successCount = 0
+    let failCount = 0
+
+    for (const scholar of scholars) {
+      const scholarName = scholar.name || "Distinguished Colleague"
+      const scholarEmail = scholar.email
+      if (!scholarEmail) continue
+
+      const specialty = scholar.specialty || "your research discipline"
+      const institution = scholar.institution || "your institution"
+
+      let defaultSubject = ""
+      let defaultBody = ""
+      let actionLabel = ""
+      let actionUrl = "https://www.scholarlyopen.org/editorial360"
+
+      if (campaign === "call_for_papers") {
+        defaultSubject = `Call for Papers: Founding Volume Submission Invitation for ${journalName}`
+        actionLabel = "Submit Manuscript"
+        actionUrl = "https://www.scholarlyopen.org/submit"
+        defaultBody = `Dear ${scholarName},\n\nOn behalf of the editorial office of ${journalName}, we cordially invite you to contribute your latest scholarship in ${specialty} to our Founding Inaugural Volume.\n\nAccepted articles qualify for our inaugural 50% launch discount and full low-income hardship waivers.\n\nSincerely,\nJournal Management Office\n${journalName}\nScholarly Open Publishing Group`
+      } else if (campaign === "ebm") {
+        defaultSubject = `Invitation to Join the Editorial Board: ${journalName}`
+        actionLabel = "Accept Editorial Board Invitation"
+        actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_board&name=${encodeURIComponent(scholarName)}`
+        defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding research leadership at ${institution}, the Editorial Leadership of ${journalName} cordially invites you to join our Editorial Board as an Editorial Board Member (EBM).\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
+      } else if (campaign === "ecr_reviewer") {
+        defaultSubject = `Invitation to Peer Review & Early Career Reviewer Track: ${journalName}`
+        actionLabel = "Accept Review Invitation & Claim Merit Credit"
+        actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ecr_review&name=${encodeURIComponent(scholarName)}`
+        defaultBody = `Dear ${scholarName},\n\nWe recently came across your scholarship in ${specialty}, originating from ${institution}.\n\nAt ${journalName}, we are actively dedicated to opening doors for Early Career Researchers (ECRs). We cordially invite you to join our active Peer Reviewer Community with Level 1 Verified Reviewer status and official ORCID verification.\n\nWarm regards,\nEditorial Management Office\n${journalName}\nScholarly Open Publishing Group`
+      } else if (campaign === "ecr_masterclass") {
+        defaultSubject = `Complimentary Invitation: Certified Peer Reviewer Masterclass (${journalName})`
+        actionLabel = "Register for Masterclass (Free Admission)"
+        actionUrl = `https://www.scholarlyopen.org/editorial360?action=register_masterclass&name=${encodeURIComponent(scholarName)}`
+        defaultBody = `Dear ${scholarName},\n\nOn behalf of ${journalName}, we are pleased to offer you a complimentary sponsored registration for our upcoming "Certified Peer Reviewer Masterclass".\n\nBest regards,\nReviewer Education Committee\n${journalName}\nScholarly Open Publishing Group`
+      } else if (campaign === "ecr_author_waiver") {
+        defaultSubject = `Founding Author Invitation: Publish Your Preprint in ${journalName} (50% Launch Waiver)`
+        actionLabel = "Submit Preprint Manuscript"
+        actionUrl = "https://www.scholarlyopen.org/submit"
+        defaultBody = `Dear ${scholarName},\n\nWe cordially invite you to submit your preprint research to ${journalName} with an immediate 50% early career fee discount.\n\nSincerely,\nJournal Management Office\n${journalName}\nScholarly Open Publishing Group`
+      } else {
+        defaultSubject = `Editorial Invitation: ${journalName}`
+        actionLabel = "Access Editorial Portal"
+        actionUrl = "https://www.scholarlyopen.org/editorial360"
+        defaultBody = `Dear ${scholarName},\n\nOfficial communication regarding academic collaboration with ${journalName}.\n\nSincerely,\nEditorial Office\n${journalName}`
+      }
+
+      const renderedHtml = generateBrandedEmailHtml({
+        subject: defaultSubject,
+        bodyText: defaultBody,
+        actionLabel,
+        actionUrl,
+        journal: journalName,
+        recipientName: scholarName
+      })
+
+      try {
+        const res = await fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: scholarEmail,
+            recipientName: scholarName,
+            customSubject: defaultSubject,
+            customBody: defaultBody,
+            customHtml: renderedHtml,
+            journal: journalName
+          })
+        })
+
+        const resData = await res.json().catch(() => null)
+        if (res.ok && resData?.success) {
+          successCount++
+          const sentRecord: SentEmailRecord = {
+            id: `SENT-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 100)}`,
+            timestamp: new Date().toISOString(),
+            recipientName: scholarName,
+            recipientEmail: scholarEmail,
+            journal: journalName,
+            campaignType: campaign,
+            subject: defaultSubject,
+            body: renderedHtml,
+            status: resData.sentViaSmtp ? "Delivered" : "Simulated"
+          }
+          setSentEmailsHistory(prev => {
+            const next = [sentRecord, ...prev]
+            try {
+              localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(next))
+            } catch (e) {}
+            return next
+          })
+
+          const lowerEmail = scholarEmail.trim().toLowerCase()
+          setScoutResults(prev => prev.filter(s => (s.email || "").trim().toLowerCase() !== lowerEmail && s.name !== scholarName))
+          setEcrResults(prev => prev.filter(r => (r.email || "").trim().toLowerCase() !== lowerEmail && r.name !== scholarName))
+        } else {
+          failCount++
+        }
+      } catch (err) {
+        console.error("Batch dispatch error for scholar:", scholarEmail, err)
+        failCount++
+      }
+    }
+
+    setEcrSelectedNames([])
+    setScoutSelectedNames([])
+    setScoutSuccessMessage(
+      `✓ Dispatched ${successCount} invitation(s) via SMTP${failCount > 0 ? ` (${failCount} failed)` : ""}.`
+    )
+    setTimeout(() => setScoutSuccessMessage(null), 8000)
   }
 
   // Assign Team Modal Invitation Email Template State
@@ -987,6 +1165,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           to: targetEmail,
           recipientName: revName,
           customSubject: assignEmailSubject,
+          customBody: personalizedBody,
           customHtml: renderedHtml,
           paperId: msId,
           paperTitle: msTitle,
@@ -1098,19 +1277,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           onUpdateManuscriptStatus(msId, "Revision Required")
         }
 
-        await fetch("/api/editorial360/email", {
+        const res = await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: data.recipientEmail,
             customSubject: data.subject,
+            customBody: data.bodyText,
             customHtml: data.renderedHtml,
             journal: selectedManuscript.journal,
             paperId: msId,
             paperTitle: msTitle,
             recipientName: authorName
           })
-        }).catch(e => console.error(e))
+        })
+        const resData = await res.json().catch(() => null)
+        if (!res.ok || !resData?.success) {
+          throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status})`)
+        }
 
         setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
       }
@@ -1198,19 +1382,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       defaultBody: `Dear ${revName},\n\nThis is a friendly reminder regarding your double-blind peer review for manuscript ${trackingManuscript.id} (${trackingManuscript.title}) submitted to ${trackingManuscript.journal}.\n\nWe kindly request that you complete your scorecard report or let us know if you require a deadline extension.\n\nThank you for supporting rigorous peer review.`,
       onConfirmSend: async (data: any) => {
         setNudgedReviewers(prev => ({ ...prev, [revName]: true }))
-        await fetch("/api/editorial360/email", {
+        const res = await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: data.recipientEmail,
             customSubject: data.subject,
+            customBody: data.bodyText,
             customHtml: data.renderedHtml,
             journal: trackingManuscript.journal,
             paperId: trackingManuscript.id,
             paperTitle: trackingManuscript.title,
             recipientName: revName
           })
-        }).catch(e => console.error(e))
+        })
+        const resData = await res.json().catch(() => null)
+        if (!res.ok || !resData?.success) {
+          throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status})`)
+        }
         setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
       }
     })
@@ -1244,19 +1433,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       defaultBody: `Dear ${authorName},\n\nThis is a friendly reminder that the revision and rebuttal for your manuscript ${ms.id} (${ms.title}) submitted to ${ms.journal} are currently pending.\n\nPlease upload your revised manuscript, tracked-changes version, and point-by-point rebuttal letter through the Author Portal.\n\nIf you require an extension to complete additional data analysis, please reply to this notice.`,
       onConfirmSend: async (data: any) => {
         setAuthorNudged(prev => ({ ...prev, [ms.id]: true }))
-        await fetch("/api/editorial360/email", {
+        const res = await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: data.recipientEmail,
             customSubject: data.subject,
+            customBody: data.bodyText,
             customHtml: data.renderedHtml,
             journal: ms.journal,
             paperId: ms.id,
             paperTitle: ms.title,
             recipientName: authorName
           })
-        }).catch(e => console.error(e))
+        })
+        const resData = await res.json().catch(() => null)
+        if (!res.ok || !resData?.success) {
+          throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status})`)
+        }
 
         setEditorPromptSuccess(`✓ Revision reminder email dispatched to ${authorName}.`)
         setTimeout(() => setEditorPromptSuccess(null), 6000)
@@ -1442,11 +1636,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <span>Source:</span>
             </span>
             {[
-              { id: "all", label: "All Repositories", count: ecrResults.length || "12+" },
-              { id: "biorxiv", label: "bioRxiv", count: ecrResults.filter(r => r.ecrSource === "bioRxiv").length || "Bio" },
-              { id: "medrxiv", label: "medRxiv", count: ecrResults.filter(r => r.ecrSource === "medRxiv").length || "Med" },
-              { id: "arxiv", label: "arXiv", count: ecrResults.filter(r => r.ecrSource === "arXiv").length || "AI/CS" },
-              { id: "openalex", label: "OpenAlex ECR", count: ecrResults.filter(r => r.ecrSource === "OpenAlex ECR").length || "ECR" }
+              { id: "all", label: "All Repositories", count: activeEcrResults.length || "12+" },
+              { id: "biorxiv", label: "bioRxiv", count: activeEcrResults.filter(r => r.ecrSource === "bioRxiv").length || "Bio" },
+              { id: "medrxiv", label: "medRxiv", count: activeEcrResults.filter(r => r.ecrSource === "medRxiv").length || "Med" },
+              { id: "arxiv", label: "arXiv", count: activeEcrResults.filter(r => r.ecrSource === "arXiv").length || "AI/CS" },
+              { id: "openalex", label: "OpenAlex ECR", count: activeEcrResults.filter(r => r.ecrSource === "OpenAlex ECR").length || "ECR" }
             ].map(src => (
               <button
                 key={src.id}
@@ -1572,9 +1766,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <Button
                   size="sm"
                   onClick={() => {
-                    const scholarsToInvite = ecrResults.filter(r => ecrSelectedNames.includes(r.name))
+                    const scholarsToInvite = activeEcrResults.filter(r => ecrSelectedNames.includes(r.name))
                     if (scholarsToInvite.length > 0) {
-                      handleDispatchScoutOutreach(scholarsToInvite[0], "ecr_reviewer")
+                      handleBatchDispatchScoutOutreach(scholarsToInvite, "ecr_reviewer")
                     }
                   }}
                   className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-lg cursor-pointer"
@@ -1586,9 +1780,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <Button
                   size="sm"
                   onClick={() => {
-                    const scholarsToInvite = ecrResults.filter(r => ecrSelectedNames.includes(r.name))
+                    const scholarsToInvite = activeEcrResults.filter(r => ecrSelectedNames.includes(r.name))
                     if (scholarsToInvite.length > 0) {
-                      handleDispatchScoutOutreach(scholarsToInvite[0], "ecr_masterclass")
+                      handleBatchDispatchScoutOutreach(scholarsToInvite, "ecr_masterclass")
                     }
                   }}
                   className="h-8 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer"
@@ -1600,9 +1794,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <Button
                   size="sm"
                   onClick={() => {
-                    const scholarsToInvite = ecrResults.filter(r => ecrSelectedNames.includes(r.name))
+                    const scholarsToInvite = activeEcrResults.filter(r => ecrSelectedNames.includes(r.name))
                     if (scholarsToInvite.length > 0) {
-                      handleDispatchScoutOutreach(scholarsToInvite[0], "ecr_author_waiver")
+                      handleBatchDispatchScoutOutreach(scholarsToInvite, "ecr_author_waiver")
                     }
                   }}
                   className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg cursor-pointer"
@@ -1616,7 +1810,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         </div>
 
         {/* 3. Candidate Cards Grid */}
-        {ecrResults.length === 0 && !isEcrScouting ? (
+        {activeEcrResults.length === 0 && !isEcrScouting ? (
           <div className="p-12 text-center bg-white dark:bg-[#18191e] rounded-2xl border border-slate-200/90 dark:border-[#272832] space-y-3">
             <GraduationCap className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto" />
             <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -1639,7 +1833,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {ecrResults.map((candidate, idx) => {
+            {activeEcrResults.map((candidate, idx) => {
               const isSelected = ecrSelectedNames.includes(candidate.name)
               const sourceBadgeColor = 
                 candidate.ecrSource === "bioRxiv" ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-900/40" :
@@ -2604,7 +2798,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      Scholar Candidates ({scoutResults.length})
+                      Scholar Candidates ({activeScoutResults.length})
                     </span>
                     <span className="text-[11px] text-slate-400">
                       Topic: &ldquo;{scoutKeyword}&rdquo;
@@ -2657,12 +2851,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                 </div>
 
-                {scoutResults.length === 0 ? (
+                {activeScoutResults.length === 0 ? (
                   <Card className="p-12 text-center bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] rounded-2xl space-y-3">
                     <Compass className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto" />
-                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No scholars found for this query</h4>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No active scholars found for this query</h4>
                     <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                      Try broader research keywords such as &ldquo;cardiology&rdquo;, &ldquo;materials&rdquo;, &ldquo;artificial intelligence&rdquo;, or &ldquo;energy&rdquo;.
+                      All previously contacted scholars have been moved to the &ldquo;Sent&rdquo; tab to prevent duplicate outreach. Try broader research keywords or reset your filters.
                     </p>
                   </Card>
                 ) : scoutViewMode === "list" ? (
@@ -2680,7 +2874,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                          {scoutResults.map((scholar, idx) => {
+                          {activeScoutResults.map((scholar, idx) => {
                             const campaignLabel = 
                               scoutCampaignType === "call_for_papers" ? "Send CFP" :
                               scoutCampaignType === "ebm" ? "Invite EBM" :
@@ -2831,7 +3025,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 ) : (
                   /* ================= CARDS GRID VIEW ================= */
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {scoutResults.map((scholar, idx) => {
+                    {activeScoutResults.map((scholar, idx) => {
                       const campaignLabel = 
                         scoutCampaignType === "call_for_papers" ? "Invite to Submit Paper" :
                         scoutCampaignType === "ebm" ? "Invite as EBM" :
@@ -2943,7 +3137,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 )}
 
                 {/* Pagination Controls Bar */}
-                {scoutResults.length > 0 && (() => {
+                {activeScoutResults.length > 0 && (() => {
                   const totalPages = Math.max(1, Math.ceil(scoutTotalResults / scoutLimit))
                   const startRecord = (scoutPage - 1) * scoutLimit + 1
                   const endRecord = Math.min(scoutPage * scoutLimit, scoutTotalResults)
@@ -5327,7 +5521,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                   const isSubmitted = !!matchedReview || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
                   const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
-                  const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === "Approved" || matchedReview.status === "Released" || approvedReviewRemarks[matchedReview.id]))
+                  const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === ("Approved" as any) || matchedReview.status === "Released" || approvedReviewRemarks[matchedReview.id]))
+                  const isNudged = !!nudgedReviewers[revName]
                   const baseDays = trackingManuscript?.id === "SOEAS-26-RS106" ? 5 : 11
                   const extraDays = extendedDays[revName] || 0
                   const remainingDays = baseDays + extraDays
@@ -5338,8 +5533,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   const targetDeadlineDate = rev.deadline || targetDate.toISOString().split("T")[0]
 
                   // Compute display score & recommendation from matched review if available
-                  const displayScore = matchedReview?.scores 
-                    ? ((matchedReview.scores.novelty + matchedReview.scores.methodology + matchedReview.scores.clarity + matchedReview.scores.significance) / 4).toFixed(1)
+                  const mrAny = matchedReview as any
+                  const displayScore = mrAny?.scores 
+                    ? ((mrAny.scores.novelty + mrAny.scores.methodology + mrAny.scores.clarity + mrAny.scores.significance) / 4).toFixed(1)
                     : (matchedReview?.originality ? `${matchedReview.originality}.0` : "4.8")
                   const displayRecommendation = matchedReview?.recommendation || "Minor Revision"
                   const displayQuote = matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || "The methodology is rigorous and well-supported. Minor clarifications required in Section 4."
@@ -5559,7 +5755,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 commentsAuthor: matchedReview.commentsAuthor || "",
                                 commentsEditor: matchedReview.commentsEditor || "",
                                 recommendation: matchedReview.recommendation || "Minor Revision",
-                                originality: (matchedReview as any).originality || (matchedReview.scores ? Math.round((matchedReview.scores.novelty + matchedReview.scores.methodology + matchedReview.scores.clarity + matchedReview.scores.significance) / 4) : 5),
+                                originality: (matchedReview as any).originality || ((matchedReview as any).scores ? Math.round(((matchedReview as any).scores.novelty + (matchedReview as any).scores.methodology + (matchedReview as any).scores.clarity + (matchedReview as any).scores.significance) / 4) : 5),
                                 status: (matchedReview.status as any) || "Pending Moderation"
                               } : {
                                 id: `REV-FB-${revName.replace(/\s+/g, '')}`,

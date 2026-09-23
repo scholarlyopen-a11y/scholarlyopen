@@ -3534,10 +3534,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <div className="space-y-2">
                 {[
                   { 
-                    name: selectedRevisionPaper?.revisedFileName || selectedRevisionPaper?.fileName || "Revised_Manuscript_Clean_R1.pdf", 
+                    name: (selectedRevisionForEvaluation as any)?.revisedFileName || (selectedRevisionForEvaluation as any)?.fileName || "Revised_Manuscript_Clean_R1.pdf", 
                     type: "Clean Manuscript PDF (Submitted by Author)", 
-                    size: selectedRevisionPaper?.revisedFileSize || selectedRevisionPaper?.fileSize || "2.8 MB",
-                    url: selectedRevisionPaper?.revisedFileUrl || selectedRevisionPaper?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"
+                    size: (selectedRevisionForEvaluation as any)?.revisedFileSize || (selectedRevisionForEvaluation as any)?.fileSize || "2.8 MB",
+                    url: (selectedRevisionForEvaluation as any)?.revisedFileUrl || (selectedRevisionForEvaluation as any)?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"
                   },
                   { 
                     name: "Track_Changes_Comparison_Doc.pdf", 
