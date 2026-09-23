@@ -5443,11 +5443,11 @@ export default function Editorial360Page() {
                         : role === "jm" 
                         ? jmStaffRole
                         : role === "reviewer" 
-                        : (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
+                        ? (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
                         : role === "author" 
-                        : (language === "de" ? "Hauptautor" : "Principal Author") 
+                        ? (language === "de" ? "Hauptautor" : "Principal Author") 
                         : (role === "im" || role === "ria") 
-                        : (language === "de" ? "Integritätsmanager" : "Integrity Manager") 
+                        ? (language === "de" ? "Integritätsmanager" : "Integrity Manager") 
                         : "System Admin"}
                     </span>
                   </div>
