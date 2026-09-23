@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { ALL_COUNTRY_OPTIONS } from "@/lib/data/countries"
 
 export interface MatchedReviewerItem {
   name: string
@@ -65,29 +66,16 @@ export function cleanAffiliationText(rawAff: string): string {
 export function getEuropePmcCountryFilter(countryCode: string): string {
   const c = countryCode.toLowerCase().trim()
   if (c === "all" || !c) return ""
-  if (c === "dach") return " AND (AFF:Germany OR AFF:Austria OR AFF:Switzerland)"
-  if (c === "de") return " AND AFF:Germany"
-  if (c === "at") return " AND AFF:Austria"
-  if (c === "ch") return " AND AFF:Switzerland"
-  if (c === "gb") return " AND (AFF:\"United Kingdom\" OR AFF:UK OR AFF:England OR AFF:Scotland)"
-  if (c === "us") return " AND (AFF:\"United States\" OR AFF:USA)"
-  if (c === "ca") return " AND AFF:Canada"
-  if (c === "au") return " AND AFF:Australia"
-  if (c === "fr") return " AND AFF:France"
-  if (c === "nl") return " AND (AFF:Netherlands OR AFF:Holland)"
-  if (c === "se") return " AND AFF:Sweden"
-  if (c === "no") return " AND AFF:Norway"
-  if (c === "dk") return " AND AFF:Denmark"
-  if (c === "fi") return " AND AFF:Finland"
-  if (c === "it") return " AND AFF:Italy"
-  if (c === "es") return " AND AFF:Spain"
-  if (c === "jp") return " AND AFF:Japan"
-  if (c === "cn") return " AND AFF:China"
-  if (c === "kr") return " AND (AFF:Korea OR AFF:\"South Korea\")"
-  if (c === "sg") return " AND AFF:Singapore"
-  if (c === "in") return " AND AFF:India"
-  if (c === "br") return " AND AFF:Brazil"
-  if (c === "za") return " AND (AFF:\"South Africa\" OR AFF:RSA)"
+  
+  const found = ALL_COUNTRY_OPTIONS.find(item => item.code.toLowerCase() === c)
+  if (found && found.searchName) {
+    if (found.searchName.includes(" OR ")) {
+      const parts = found.searchName.split(" OR ").map(p => `AFF:"${p.trim()}"`).join(" OR ")
+      return ` AND (${parts})`
+    }
+    return ` AND AFF:"${found.searchName}"`
+  }
+
   return ` AND AFF:${countryCode.toUpperCase()}`
 }
 
@@ -227,6 +215,10 @@ async function fetchOpenAlexScholars(
   if (countryCode && countryCode !== "all") {
     if (countryCode === "dach") {
       filter += ",institutions.country_code:de|at|ch"
+    } else if (countryCode === "nordic") {
+      filter += ",institutions.country_code:se|no|dk|fi|is"
+    } else if (countryCode === "eu") {
+      filter += ",institutions.country_code:de|fr|it|es|nl|be|se|pl|at|dk|fi|ie|pt|gr|cz"
     } else {
       filter += `,institutions.country_code:${countryCode.toLowerCase()}`
     }

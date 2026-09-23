@@ -66,6 +66,7 @@ import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activ
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 import { OFFICIAL_JOURNALS, getJournalReplyTo } from "@/lib/data/journal-contacts"
+import { REGIONAL_COUNTRY_GROUPS, GLOBAL_COUNTRIES } from "@/lib/data/countries"
 
 export interface SentEmailRecord {
   id: string
@@ -1514,30 +1515,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 className="w-full px-3 py-2.5 text-xs bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] cursor-pointer"
                 title="Filter by country or region"
               >
-                <option value="all">🌍 All Countries</option>
-                <option value="dach">🇩🇪🇦🇹🇨🇭 DACH Region</option>
-                <option value="de">🇩🇪 Germany (DE)</option>
-                <option value="at">🇦🇹 Austria (AT)</option>
-                <option value="ch">🇨🇭 Switzerland (CH)</option>
-                <option value="gb">🇬🇧 United Kingdom (GB)</option>
-                <option value="us">🇺🇸 United States (US)</option>
-                <option value="ca">🇨🇦 Canada (CA)</option>
-                <option value="au">🇦🇺 Australia (AU)</option>
-                <option value="fr">🇫🇷 France (FR)</option>
-                <option value="nl">🇳🇱 Netherlands (NL)</option>
-                <option value="se">🇸🇪 Sweden (SE)</option>
-                <option value="no">🇳🇴 Norway (NO)</option>
-                <option value="dk">🇩🇰 Denmark (DK)</option>
-                <option value="fi">🇫🇮 Finland (FI)</option>
-                <option value="it">🇮🇹 Italy (IT)</option>
-                <option value="es">🇪🇸 Spain (ES)</option>
-                <option value="jp">🇯🇵 Japan (JP)</option>
-                <option value="cn">🇨🇳 China (CN)</option>
-                <option value="kr">🇰🇷 South Korea (KR)</option>
-                <option value="sg">🇸🇬 Singapore (SG)</option>
-                <option value="in">🇮🇳 India (IN)</option>
-                <option value="br">🇧🇷 Brazil (BR)</option>
-                <option value="za">🇿🇦 South Africa (ZA)</option>
+                <optgroup label="🌍 Regional Groupings">
+                  {REGIONAL_COUNTRY_GROUPS.map((g) => (
+                    <option key={g.code} value={g.code}>
+                      {g.flag} {g.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="🌐 All Countries (A - Z)">
+                  {GLOBAL_COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.flag} {c.name} ({c.code.toUpperCase()})
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </div>
 
@@ -2485,30 +2476,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] font-medium cursor-pointer"
                       title="Filter scholar harvest by country or region"
                     >
-                      <option value="all">🌍 All Countries (Global)</option>
-                      <option value="dach">🇩🇪🇦🇹🇨🇭 DACH Region (DE, AT, CH)</option>
-                      <option value="de">🇩🇪 Germany (DE)</option>
-                      <option value="at">🇦🇹 Austria (AT)</option>
-                      <option value="ch">🇨🇭 Switzerland (CH)</option>
-                      <option value="gb">🇬🇧 United Kingdom (GB)</option>
-                      <option value="us">🇺🇸 United States (US)</option>
-                      <option value="ca">🇨🇦 Canada (CA)</option>
-                      <option value="au">🇦🇺 Australia (AU)</option>
-                      <option value="fr">🇫🇷 France (FR)</option>
-                      <option value="nl">🇳🇱 Netherlands (NL)</option>
-                      <option value="se">🇸🇪 Sweden (SE)</option>
-                      <option value="no">🇳🇴 Norway (NO)</option>
-                      <option value="dk">🇩🇰 Denmark (DK)</option>
-                      <option value="fi">🇫🇮 Finland (FI)</option>
-                      <option value="it">🇮🇹 Italy (IT)</option>
-                      <option value="es">🇪🇸 Spain (ES)</option>
-                      <option value="jp">🇯🇵 Japan (JP)</option>
-                      <option value="cn">🇨🇳 China (CN)</option>
-                      <option value="kr">🇰🇷 South Korea (KR)</option>
-                      <option value="sg">🇸🇬 Singapore (SG)</option>
-                      <option value="in">🇮🇳 India (IN)</option>
-                      <option value="br">🇧🇷 Brazil (BR)</option>
-                      <option value="za">🇿🇦 South Africa (ZA)</option>
+                      <optgroup label="🌍 Regional Groupings">
+                        {REGIONAL_COUNTRY_GROUPS.map((g) => (
+                          <option key={g.code} value={g.code}>
+                            {g.flag} {g.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🌐 All Countries (A - Z)">
+                        {GLOBAL_COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.flag} {c.name} ({c.code.toUpperCase()})
+                          </option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
 
@@ -2631,7 +2612,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     {scoutCountry !== "all" && (
                       <span className="text-[11px] text-[#0b99ff] font-semibold bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800 flex items-center gap-1">
                         <Globe className="h-3 w-3" />
-                        <span>Region: {scoutCountry === "dach" ? "🇩🇪🇦🇹🇨🇭 DACH" : scoutCountry.toUpperCase()}</span>
+                        <span>Region: {
+                          scoutCountry === "dach" ? "🇩🇪🇦🇹🇨🇭 DACH" :
+                          scoutCountry === "nordic" ? "🇸🇪🇳🇴🇩🇰🇫🇮 Nordic" :
+                          scoutCountry === "eu" ? "🇪🇺 European Union" :
+                          (GLOBAL_COUNTRIES.find(c => c.code === scoutCountry)?.name || scoutCountry.toUpperCase())
+                        }</span>
                       </span>
                     )}
                     <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
