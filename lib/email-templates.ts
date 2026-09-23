@@ -869,27 +869,20 @@ export function generateBrandedEmailHtml(options: {
             <a href="${baseUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
               <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" height="34" style="height: 34px; max-height: 34px; width: auto; max-width: 170px; display: block; border: 0;" />
             </a>
-            <div style="font-size: 10px; font-weight: 600; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-              Open Access Publishing Group
-            </div>
           </td>
           <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-left: auto;">
               <tr>
                 <td valign="middle" align="right" style="text-align: right; padding-right: 12px; vertical-align: middle;">
-                  <div style="font-size: 13px; font-weight: 700; color: ${branding.textColor}; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                  <div style="font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                     ${branding.cleanName}
                   </div>
                   <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                     Peer-Reviewed Series
                   </div>
                 </td>
-                <td valign="middle" align="center" style="vertical-align: middle; text-align: center; width: 40px;">
-                  <div style="width: 38px; height: 38px; min-width: 38px; border-radius: 50%; background-color: ${branding.bgColor}; border: 1.5px solid ${branding.borderColor}; text-align: center; line-height: 36px; display: inline-block; vertical-align: middle;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${branding.iconStroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-top: 8px;">
-                      ${branding.svgPath}
-                    </svg>
-                  </div>
+                <td valign="middle" align="center" style="vertical-align: middle; text-align: center; width: 32px;">
+                  <img src="${baseUrl}/journal-icons/${branding.slug}.svg" width="30" height="30" alt="${branding.cleanName}" style="display: block; width: 30px; height: 30px; border: 0;" />
                 </td>
               </tr>
             </table>
