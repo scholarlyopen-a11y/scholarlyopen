@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers } from "lucide-react"
+import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
