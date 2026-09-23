@@ -5601,6 +5601,19 @@ export default function Editorial360Page() {
 
                       <button 
                         type="button"
+                        onClick={() => setActiveJmTab("sent")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "sent"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
+                        }`}
+                      >
+                        <Send className="h-4 w-4 text-[#0b99ff]" />
+                        <span>{language === "de" ? "Gesendete E-Mails" : "Sent Items"}</span>
+                      </button>
+
+                      <button 
+                        type="button"
                         onClick={() => setActiveJmTab("users")}
                         className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "users"

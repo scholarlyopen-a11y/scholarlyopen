@@ -339,6 +339,7 @@ Term & Benefits:
 • Initial 2-year renewable appointment.
 • 25% discount on Article Processing Charges (APCs) for your own submissions.
 • Full academic independence and official recognition on the journal masthead and web registry.
+• Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).
 
 We would be honored by your acceptance. Please use the button below to confirm your appointment.`,
     actionLabel: "Accept Editorial Board Invitation",
@@ -358,7 +359,7 @@ im Namen des Editorial Leadership von {{journal}} und des Verlags Scholarly Open
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Bitte beachten Sie, dass die offizielle Arbeitssprache der Zeitschrift, das Manuskript-Handling sowie alle Veröffentlichungen und Begutachtungsprozesse ausschließlich auf Englisch geführt werden (Working language & publications: English).
 
-Nachfolgend finden Sie die formalen Aufgaben, Konditionen (u. a. 2-jährige erneuerbare Ernennung, 25% APC-Ermäßigung für eigene Einreichungen) sowie die Richtlinien gemäß COPE-Standards auf Englisch:
+Nachfolgend finden Sie die formalen Aufgaben, Konditionen (u. a. 2-jährige erneuerbare Ernennung, 25% APC-Ermäßigung, leistungsbezogenes Honorar je betreutem Artikel: https://www.scholarlyopen.org/peer-review) sowie die Richtlinien gemäß COPE-Standards auf Englisch:
 ────────────────────────────────────────────────────
 Dear {{recipientName}},
 
@@ -374,6 +375,7 @@ Term & Benefits:
 • Initial 2-year renewable appointment.
 • 25% discount on Article Processing Charges (APCs) for your own submissions.
 • Full academic independence and official recognition on the journal masthead and web registry.
+• Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).
 
 We would be honored by your acceptance. Please use the button below to confirm your appointment.`,
     actionLabel: "Accept Editorial Board Invitation",
@@ -396,17 +398,22 @@ As Editor-in-Chief, you will guide the strategic and editorial direction of the 
 Key responsibilities include:
 • Overseeing the peer-review process and making final decisions on manuscript acceptance.
 • Collaborating with the internal editorial office to uphold strict ethical standards and COPE academic integrity.
-• Leading journal development initiatives and proposing new strategic directions.
+• Leading journal development initiatives, special issues, and strategic scope expansion.
 • Serving as the primary ambassador for the journal within the academic community.
+• Encouraging high-quality submissions and contributing your own scholarly work where appropriate.
 
 Term & Benefits:
 • Initial 2-year renewable appointment.
 • 25% discount on Article Processing Charges (APCs) for your own submissions.
 • Full academic independence and permanent recognition on the journal masthead and web registry.
+• Receive a performance-based honorarium for each handled article (for more information, see the link: https://www.scholarlyopen.org/peer-review).
 
-We would welcome an initial discussion regarding this appointment.`,
-    actionLabel: "Express Interest in Leadership Post",
-    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_inquiry&name={{recipientName}}",
+We kindly ask for your decision regarding this appointment:
+1. Accept (Yes): If you are delighted to accept this appointment, please confirm using the button below.
+2. Conditional (Maybe): If you would like to explore specific arrangements, scope, or time commitments, please reply to this message.
+3. Decline (No) / Suggestions: If you cannot accept at this time, we would greatly appreciate your recommendation of an esteemed colleague.`,
+    actionLabel: "Confirm EiC Appointment (Yes)",
+    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
   },
   {
@@ -422,7 +429,7 @@ das Executive Publishing Board von Scholarly Open (Berlin/Deutschland) sucht fü
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Die offizielle Publikations- und Arbeitssprache der Zeitschrift, alle redaktionellen Entscheidungen sowie die Kommunikation im Begutachtungsverfahren werden vollständig auf Englisch geführt (Working language & publications: English).
 
-Nachfolgend finden Sie das Anforderungsprofil, die redaktionellen Leitlinien und die Rahmenbedingungen der Position auf Englisch:
+Nachfolgend finden Sie das Anforderungsprofil, die redaktionellen Leitlinien, die Konditionen (inkl. leistungsbezogenem Honorar: https://www.scholarlyopen.org/peer-review) und die Entscheidungsoptionen auf Englisch:
 ────────────────────────────────────────────────────
 Dear {{recipientName}},
 
@@ -432,17 +439,23 @@ Given your distinguished track record and international recognition, the nominat
 
 Key Responsibilities:
 • Overseeing the peer-review process and making final decisions on manuscript acceptance.
-• Collaborating with the editorial office to uphold strict ethical standards and COPE academic integrity.
-• Leading journal development initiatives and proposing new strategic directions.
+• Collaborating with the internal editorial office to uphold strict ethical standards and COPE academic integrity.
+• Leading journal development initiatives, special issues, and strategic scope expansion.
+• Serving as the primary ambassador for the journal within the academic community.
+• Encouraging high-quality submissions and contributing your own scholarly work where appropriate.
 
 Term & Benefits:
 • Initial 2-year renewable appointment.
 • 25% discount on Article Processing Charges (APCs) for your own submissions.
-• Full academic independence and permanent recognition on the journal masthead.
+• Full academic independence and permanent recognition on the journal masthead and web registry.
+• Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).
 
-We would welcome an initial discussion regarding this appointment.`,
-    actionLabel: "Express Interest in Leadership Post",
-    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_inquiry&name={{recipientName}}",
+We kindly ask for your decision regarding this appointment:
+1. Accept (Yes): Confirm your acceptance via the button below.
+2. Conditional (Maybe): Inquire about scope or specific arrangements.
+3. Decline (No) / Suggestions: Let us know or suggest an esteemed colleague.`,
+    actionLabel: "Confirm EiC Appointment (Yes)",
+    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
   },
   {
@@ -794,6 +807,7 @@ export function generateBrandedEmailHtml(options: {
   paperId?: string
   paperTitle?: string
   recipientName?: string
+  recipientEmail?: string
   baseUrl?: string
   includeEditorial360Logo?: boolean
 }): string {
@@ -808,6 +822,7 @@ export function generateBrandedEmailHtml(options: {
     paperId,
     paperTitle,
     recipientName = "Colleague",
+    recipientEmail,
     baseUrl = "https://www.scholarlyopen.org",
     includeEditorial360Logo = false
   } = options
@@ -867,21 +882,21 @@ export function generateBrandedEmailHtml(options: {
         <tr>
           <td valign="middle" align="left" style="text-align: left; vertical-align: middle;">
             <a href="${baseUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
-              <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" height="34" style="height: 34px; max-height: 34px; width: auto; max-width: 170px; display: block; border: 0;" />
+              <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" height="44" style="height: 44px; max-height: 44px; width: auto; max-width: 220px; display: block; border: 0;" />
             </a>
           </td>
           <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-left: auto;">
               <tr>
                 <td valign="middle" align="right" style="text-align: right; padding-right: 12px; vertical-align: middle;">
-                  <div style="font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                  <div style="font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                     ${branding.cleanName}
                   </div>
                   <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                    Peer-Reviewed Series
+                    Peer-Reviewed Journal
                   </div>
                 </td>
-                <td valign="middle" align="center" style="vertical-align: middle; text-align: center; width: 32px;">
+                <td valign="middle" align="center" style="vertical-align: middle; text-align: center; width: 34px;">
                   <img src="${baseUrl}/journal-icons/${branding.slug}.svg" width="30" height="30" alt="${branding.cleanName}" style="display: block; width: 30px; height: 30px; border: 0;" />
                 </td>
               </tr>
@@ -910,6 +925,16 @@ export function generateBrandedEmailHtml(options: {
       <div style="margin-top: 8px;">
         <a href="${baseUrl}/editorial360" style="color: #0b99ff; text-decoration: none; font-weight: 600;">Access editorial360 Portal</a> • 
         <a href="${baseUrl}/about" style="color: #64748b; text-decoration: none;">Ethics &amp; Malpractice Policies</a>
+      </div>
+
+      <!-- Anti-Spam / Solicitation Compliance (CAN-SPAM / GDPR) -->
+      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-size: 10px; color: #94a3b8; line-height: 1.5; text-align: center;">
+        You received this academic invitation based on your published scholarship and expertise in this field. 
+        If you do not wish to receive further invitations or editorial notices from ${branding.cleanName}, please 
+        <a href="${baseUrl}/editorial360?action=unsubscribe&email=${encodeURIComponent(recipientEmail || "")}&journal=${encodeURIComponent(journal)}" style="color: #64748b; text-decoration: underline; font-weight: 600;">unsubscribe here</a> 
+        or reply to this email with &ldquo;Unsubscribe&rdquo;.
+        <br>
+        Scholarly Open Publishing Group &bull; Editorial Office &bull; Basel / London &bull; <a href="${baseUrl}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>
       </div>
     </div>
   </div>

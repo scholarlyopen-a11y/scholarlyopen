@@ -102,6 +102,7 @@ export async function POST(req: Request) {
         paperId: paperId !== "N/A" ? paperId : undefined,
         paperTitle: paperTitle !== "Manuscript" ? paperTitle : undefined,
         recipientName,
+        recipientEmail: body.to,
         baseUrl,
         includeEditorial360Logo
       })
@@ -130,6 +131,8 @@ export async function POST(req: Request) {
       .replace(/&quot;/g, '"')
       .replace(/\s+/g, " ")
       .trim()).trim()
+
+    const plainTextWithOptOut = plainTextBody + `\n\n---\nTo unsubscribe from future invitations for ${journal}, reply to this email with "Unsubscribe" or visit: ${baseUrl}/editorial360?action=unsubscribe&email=${encodeURIComponent(body.to)}&journal=${encodeURIComponent(journal)}`
 
     let sentViaSmtp = false
     let messageId = `MSG-SIM-${Date.now()}`
@@ -182,8 +185,13 @@ export async function POST(req: Request) {
         from: formattedFrom,
         to: body.to.trim(),
         replyTo: replyToEmail,
+        sender: activeSenderEmail,
+        envelope: {
+          from: activeSenderEmail,
+          to: [body.to.trim(), ...(ccRecipient ? [ccRecipient] : [])]
+        },
         subject: finalSubject,
-        text: plainTextBody,
+        text: plainTextWithOptOut,
         html: finalHtml
       }
 

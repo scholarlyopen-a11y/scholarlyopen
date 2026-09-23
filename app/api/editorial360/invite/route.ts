@@ -119,6 +119,11 @@ export async function POST(request: Request) {
       from: senderFrom,
       to: recipientEmail,
       replyTo: replyToEmail,
+      sender: activeSenderEmail,
+      envelope: {
+        from: activeSenderEmail,
+        to: [recipientEmail]
+      },
       subject,
       text,
     })

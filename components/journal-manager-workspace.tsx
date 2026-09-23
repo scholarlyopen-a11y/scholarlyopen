@@ -57,7 +57,8 @@ import {
   Server,
   ChevronLeft,
   ChevronRight,
-  GraduationCap
+  GraduationCap,
+  UserX
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -418,27 +419,176 @@ export function JournalManagerWorkspace({
   const [scoutSelectedNames, setScoutSelectedNames] = useState<string[]>([])
   const [scoutSuccessMessage, setScoutSuccessMessage] = useState<string | null>(null)
 
-  // Active Scout Candidates dynamically filtered against Sent Emails History to prevent duplicate sending
+  // Unsubscribed / Do Not Contact Registry state
+  const [unsubscribedList, setUnsubscribedList] = useState<{ email: string; journal?: string; timestamp: string; reason?: string }[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("editorial360_unsubscribed_list")
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        console.error("Failed to load unsubscribed list:", e)
+      }
+    }
+    return [
+      { email: "optout-sample@university.edu", journal: "All Journals", timestamp: "2026-09-21T09:30:00Z", reason: "Direct opt-out request" }
+    ]
+  })
+
+  // Dismissed / Skipped candidate emails or names (e.g. deceased or not suitable)
+  const [dismissedCandidates, setDismissedCandidates] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("editorial360_dismissed_candidates")
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        console.error("Failed to load dismissed candidates:", e)
+      }
+    }
+    return []
+  })
+
+  const [sentAuditSubTab, setSentAuditSubTab] = useState<"sent_emails" | "unsubscribed">("sent_emails")
+  const [newUnsubEmail, setNewUnsubEmail] = useState("")
+  const [newUnsubReason, setNewUnsubReason] = useState("")
+  const [isAddUnsubModalOpen, setIsAddUnsubModalOpen] = useState(false)
+
+  // Sync unsubscribed list with backend API on mount
+  useEffect(() => {
+    fetch("/api/editorial360/unsubscribe?format=json")
+      .then(res => res.json())
+      .then(data => {
+        if (data.unsubscribed && Array.isArray(data.unsubscribed) && data.unsubscribed.length > 0) {
+          setUnsubscribedList(prev => {
+            const existing = new Set(prev.map(u => u.email.toLowerCase()))
+            const merged = [...prev]
+            for (const item of data.unsubscribed) {
+              if (item.email && !existing.has(item.email.toLowerCase())) {
+                existing.add(item.email.toLowerCase())
+                merged.push(item)
+              }
+            }
+            try {
+              if (typeof window !== "undefined") {
+                localStorage.setItem("editorial360_unsubscribed_list", JSON.stringify(merged))
+              }
+            } catch (e) {}
+            return merged
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  // Automatically switch scoutSubTab to history when activeTab is "sent"
+  useEffect(() => {
+    if (activeTab === "sent") {
+      setScoutSubTab("history")
+    }
+  }, [activeTab])
+
+  // Active Scout Candidates dynamically filtered against Sent History, Unsubscribed List, and Dismissed Candidates
   const activeScoutResults = useMemo(() => {
     const sentEmailsSet = new Set(sentEmailsHistory.map(s => (s.recipientEmail || "").trim().toLowerCase()))
     const sentNamesSet = new Set(sentEmailsHistory.map(s => (s.recipientName || "").trim().toLowerCase()))
+    const unsubSet = new Set(unsubscribedList.map(u => (u.email || "").trim().toLowerCase()))
+    const dismissedSet = new Set(dismissedCandidates.map(d => d.trim().toLowerCase()))
+
     return scoutResults.filter(s => {
       const email = (s.email || "").trim().toLowerCase()
       const name = (s.name || "").trim().toLowerCase()
-      return (!email || !sentEmailsSet.has(email)) && (!name || !sentNamesSet.has(name))
+      const isSent = (email && sentEmailsSet.has(email)) || (name && sentNamesSet.has(name))
+      const isUnsub = email && unsubSet.has(email)
+      const isDismissed = (email && dismissedSet.has(email)) || (name && dismissedSet.has(name))
+      return !isSent && !isUnsub && !isDismissed
     })
-  }, [scoutResults, sentEmailsHistory])
+  }, [scoutResults, sentEmailsHistory, unsubscribedList, dismissedCandidates])
 
-  // Active ECR Candidates dynamically filtered against Sent Emails History
+  // Active ECR Candidates dynamically filtered
   const activeEcrResults = useMemo(() => {
     const sentEmailsSet = new Set(sentEmailsHistory.map(s => (s.recipientEmail || "").trim().toLowerCase()))
     const sentNamesSet = new Set(sentEmailsHistory.map(s => (s.recipientName || "").trim().toLowerCase()))
+    const unsubSet = new Set(unsubscribedList.map(u => (u.email || "").trim().toLowerCase()))
+    const dismissedSet = new Set(dismissedCandidates.map(d => d.trim().toLowerCase()))
+
     return ecrResults.filter(r => {
       const email = (r.email || "").trim().toLowerCase()
       const name = (r.name || "").trim().toLowerCase()
-      return (!email || !sentEmailsSet.has(email)) && (!name || !sentNamesSet.has(name))
+      const isSent = (email && sentEmailsSet.has(email)) || (name && sentNamesSet.has(name))
+      const isUnsub = email && unsubSet.has(email)
+      const isDismissed = (email && dismissedSet.has(email)) || (name && dismissedSet.has(name))
+      return !isSent && !isUnsub && !isDismissed
     })
-  }, [ecrResults, sentEmailsHistory])
+  }, [ecrResults, sentEmailsHistory, unsubscribedList, dismissedCandidates])
+
+  const handleDismissCandidate = (scholar: any, reason = "Dismissed by Journal Manager") => {
+    const key = (scholar.email || scholar.name || "").trim().toLowerCase()
+    if (!key) return
+    setDismissedCandidates(prev => {
+      if (prev.includes(key)) return prev
+      const updated = [...prev, key]
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("editorial360_dismissed_candidates", JSON.stringify(updated))
+        }
+      } catch (e) {}
+      return updated
+    })
+    setScoutSuccessMessage(`Candidate "${scholar.name || scholar.email}" dismissed and removed from candidate pool.`)
+    setTimeout(() => setScoutSuccessMessage(null), 4000)
+  }
+
+  const handleAddUnsubscribe = (emailToAdd: string, reason = "Manual entry by Journal Manager") => {
+    const clean = emailToAdd.trim().toLowerCase()
+    if (!clean || !clean.includes("@")) return
+    const newRecord = {
+      email: clean,
+      journal: scoutTargetJournal,
+      timestamp: new Date().toISOString(),
+      reason
+    }
+    setUnsubscribedList(prev => {
+      if (prev.some(u => u.email === clean)) return prev
+      const updated = [newRecord, ...prev]
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("editorial360_unsubscribed_list", JSON.stringify(updated))
+        }
+      } catch (e) {}
+      return updated
+    })
+    fetch("/api/editorial360/unsubscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newRecord)
+    }).catch(e => console.error("Unsubscribe sync error:", e))
+
+    setScoutSuccessMessage(`Added "${clean}" to Do-Not-Contact list. They will never receive future invitations.`)
+    setIsAddUnsubModalOpen(false)
+    setNewUnsubEmail("")
+    setNewUnsubReason("")
+    setTimeout(() => setScoutSuccessMessage(null), 4000)
+  }
+
+  const handleRemoveUnsubscribe = (emailToRemove: string) => {
+    const clean = emailToRemove.trim().toLowerCase()
+    setUnsubscribedList(prev => {
+      const updated = prev.filter(u => u.email !== clean)
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("editorial360_unsubscribed_list", JSON.stringify(updated))
+        }
+      } catch (e) {}
+      return updated
+    })
+    fetch("/api/editorial360/unsubscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: clean, action: "remove" })
+    }).catch(e => console.error("Unsubscribe remove error:", e))
+
+    setScoutSuccessMessage(`Removed "${clean}" from Do-Not-Contact list.`)
+    setTimeout(() => setScoutSuccessMessage(null), 3000)
+  }
 
   const handleUpdateScholarEmail = (index: number, newEmail: string) => {
     setScoutResults(prev => {
@@ -544,12 +694,12 @@ export function JournalManagerWorkspace({
       defaultSubject = `Invitation to Join the Editorial Board: ${journalName}`
       actionLabel = "Accept Editorial Board Invitation"
       actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_board&name=${encodeURIComponent(scholarName)}`
-      defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding scholarship and research leadership at ${institution} in ${specialty}, the Editorial Leadership of ${journalName} cordially invites you to join our distinguished Editorial Board as an Editorial Board Member (EBM).\n\nAs an Editorial Board Member, you will play a vital role in maintaining the journal's academic rigor and strategic direction.\nKey responsibilities include:\n• Providing expert, timely reviews for submitted manuscripts within your field (approximately 1–2 per quarter).\n• Upholding COPE publication ethics and academic integrity in all decisions.\n• Supporting the journal's scope, quality, and strategic development.\n• Promoting the journal and encouraging high-quality submissions through academic and professional networks.\n• Contributing your own high-quality scholarly work where appropriate.\n• Mentoring young scientists in the peer-review process.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead and web registry.\n\nWe would be honored by your acceptance.\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
+      defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding scholarship and research leadership at ${institution} in ${specialty}, the Editorial Leadership of ${journalName} cordially invites you to join our distinguished Editorial Board as an Editorial Board Member (EBM).\n\nAs an Editorial Board Member, you will play a vital role in maintaining the journal's academic rigor and strategic direction.\nKey responsibilities include:\n• Providing expert, timely reviews for submitted manuscripts within your field (approximately 1–2 per quarter).\n• Upholding COPE publication ethics and academic integrity in all decisions.\n• Supporting the journal's scope, quality, and strategic development.\n• Promoting the journal and encouraging high-quality submissions through academic and professional networks.\n• Contributing your own high-quality scholarly work where appropriate.\n• Mentoring young scientists in the peer-review process.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead and web registry.\n• Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).\n\nWe would be honored by your acceptance.\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
     } else if (campaign === "eic") {
       defaultSubject = `Leadership Appointment: Invitation to Serve as Editor-in-Chief for ${journalName}`
-      actionLabel = "Express Interest in Leadership Post"
-      actionUrl = `https://www.scholarlyopen.org/editorial360?action=eic_inquiry&name=${encodeURIComponent(scholarName)}`
-      defaultBody = `Dear ${scholarName},\n\nThe Executive Publishing Board of Scholarly Open is currently seeking a visionary academic leader to serve as Editor-in-Chief (EiC) for ${journalName}.\n\nGiven your distinguished track record at ${institution} and international recognition in ${specialty}, the nominations committee has unanimously selected you as a leading candidate for this pivotal leadership post.\n\nAs Editor-in-Chief, you will guide the strategic and editorial direction of the journal.\nKey responsibilities include:\n• Overseeing the peer-review process and making final decisions on manuscript acceptance.\n• Collaborating with the internal editorial office to uphold strict ethical standards and COPE academic integrity.\n• Leading journal development initiatives and proposing new strategic directions.\n• Serving as the primary ambassador for the journal within the academic community.\n• Encouraging high-quality submissions and contributing your own scholarly work where appropriate.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and permanent recognition on the journal masthead and web registry.\n\nWe would welcome an initial discussion regarding this appointment.\n\nSincerely,\nExecutive Editorial Committee\nScholarly Open Publishing Group`
+      actionLabel = "Confirm EiC Appointment (Yes)"
+      actionUrl = `https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name=${encodeURIComponent(scholarName)}`
+      defaultBody = `Dear ${scholarName},\n\nThe Executive Publishing Board of Scholarly Open is currently seeking a visionary academic leader to serve as Editor-in-Chief (EiC) for ${journalName}.\n\nGiven your distinguished track record at ${institution} and international recognition in ${specialty}, the nominations committee has unanimously selected you as a leading candidate for this pivotal leadership post.\n\nAs Editor-in-Chief, you will guide the strategic and editorial direction of the journal.\nKey responsibilities include:\n• Overseeing the peer-review process and making final decisions on manuscript acceptance.\n• Collaborating with the internal editorial office to uphold strict ethical standards and COPE academic integrity.\n• Leading journal development initiatives, special issues, and strategic scope expansion.\n• Serving as the primary ambassador for the journal within the academic community.\n• Encouraging high-quality submissions and contributing your own scholarly work where appropriate.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and permanent recognition on the journal masthead and web registry.\n• Receive a performance-based honorarium for each handled article (for more information, see the link: https://www.scholarlyopen.org/peer-review).\n\nWe kindly ask for your decision regarding this appointment:\n1. Accept (Yes): Confirm your acceptance using the button below.\n2. Conditional (Maybe): If you would like to explore specific arrangements or time commitments, simply reply to this email.\n3. Decline (No) / Suggestions: If you cannot accept at this time, we would greatly appreciate your recommendation of an esteemed colleague.\n\nSincerely,\nExecutive Editorial Committee\nScholarly Open Publishing Group`
     } else if (campaign === "follow_up") {
       defaultSubject = `Follow-up: Academic Collaboration & Editorial Invitation for ${journalName}`
       actionLabel = "Review Previous Invitation"
@@ -559,7 +709,7 @@ export function JournalManagerWorkspace({
       defaultSubject = `Editorial Invitation: Associate Editor Appointment for ${journalName}`
       actionLabel = "Accept Associate Editor Role"
       actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ae&name=${encodeURIComponent(scholarName)}`
-      defaultBody = `Dear ${scholarName},\n\n${journalName} is expanding its editorial leadership to support increasing submission volumes in ${specialty}. In recognition of your authoritative scholarship at ${institution}, we would be delighted to invite you to join us as an Associate Editor.\n\nIn this role, you will support the Editor-in-Chief by managing the peer-review process for assigned manuscripts within your domain (approximately 1–2 manuscripts per month).\nKey responsibilities include:\n• Managing the peer review process, including identifying and inviting qualified reviewers.\n• Evaluating reviewer reports and formulating detailed editorial recommendations.\n• Upholding ethical standards and academic integrity in all decisions.\n• Promoting the journal and encouraging high-quality submissions within your network.\n• Mentoring Early Career Editorial Board members through transparent co-reviewing.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead.\n\nPlease let us know if you would be delighted to accept this appointment.\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
+      defaultBody = `Dear ${scholarName},\n\n${journalName} is expanding its editorial leadership to support increasing submission volumes in ${specialty}. In recognition of your authoritative scholarship at ${institution}, we would be delighted to invite you to join us as an Associate Editor.\n\nIn this role, you will support the Editor-in-Chief by managing the peer-review process for assigned manuscripts within your domain (approximately 1–2 manuscripts per month).\nKey responsibilities include:\n• Managing the peer review process, including identifying and inviting qualified reviewers.\n• Evaluating reviewer reports and formulating detailed editorial recommendations.\n• Upholding ethical standards and academic integrity in all decisions.\n• Promoting the journal and encouraging high-quality submissions within your network.\n• Mentoring Early Career Editorial Board members through transparent co-reviewing.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead.\n• Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).\n\nPlease let us know if you would be delighted to accept this appointment.\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
     } else if (campaign === "ecr_reviewer") {
       defaultSubject = `Invitation to Peer Review & Early Career Reviewer Track: ${journalName}`
       actionLabel = "Accept Review Invitation & Claim Merit Credit"
@@ -597,7 +747,9 @@ export function JournalManagerWorkspace({
             customSubject: data.subject,
             customBody: data.bodyText,
             customHtml: data.renderedHtml,
-            journal: journalName
+            journal: journalName,
+            fromEmail: getJournalReplyTo(journalName),
+            senderName: `${journalName} Editorial Office`
           })
         })
 
@@ -688,7 +840,17 @@ export function JournalManagerWorkspace({
         defaultSubject = `Invitation to Join the Editorial Board: ${journalName}`
         actionLabel = "Accept Editorial Board Invitation"
         actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_board&name=${encodeURIComponent(scholarName)}`
-        defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding research leadership at ${institution}, the Editorial Leadership of ${journalName} cordially invites you to join our Editorial Board as an Editorial Board Member (EBM).\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
+        defaultBody = `Dear ${scholarName},\n\nIn recognition of your outstanding research leadership at ${institution} in ${specialty}, the Editorial Leadership of ${journalName} cordially invites you to join our Editorial Board as an Editorial Board Member (EBM).\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead.\n• Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
+      } else if (campaign === "eic") {
+        defaultSubject = `Leadership Appointment: Invitation to Serve as Editor-in-Chief for ${journalName}`
+        actionLabel = "Confirm EiC Appointment (Yes)"
+        actionUrl = `https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name=${encodeURIComponent(scholarName)}`
+        defaultBody = `Dear ${scholarName},\n\nThe Executive Publishing Board of Scholarly Open is currently seeking a visionary academic leader to serve as Editor-in-Chief (EiC) for ${journalName}.\n\nKey responsibilities include:\n• Overseeing the peer-review process and making final decisions on manuscript acceptance.\n• Collaborating with the internal editorial office to uphold strict ethical standards and COPE academic integrity.\n• Leading journal development initiatives, special issues, and strategic scope expansion.\n• Serving as the primary ambassador for the journal within the academic community.\n• Encouraging high-quality submissions and contributing your own scholarly work where appropriate.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and permanent recognition on the journal masthead and web registry.\n• Receive a performance-based honorarium for each handled article (for more information, see the link: https://www.scholarlyopen.org/peer-review).\n\nWe kindly ask for your decision regarding this appointment:\n1. Accept (Yes): Confirm your acceptance via the link below.\n2. Conditional (Maybe): If you would like to explore arrangements or time commitments, simply reply to this email.\n3. Decline (No) / Suggestions: Please let us know or recommend an esteemed colleague.\n\nSincerely,\nExecutive Editorial Committee\nScholarly Open Publishing Group`
+      } else if (campaign === "associate_editor") {
+        defaultSubject = `Editorial Invitation: Associate Editor Appointment for ${journalName}`
+        actionLabel = "Accept Associate Editor Role"
+        actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ae&name=${encodeURIComponent(scholarName)}`
+        defaultBody = `Dear ${scholarName},\n\n${journalName} cordially invites you to join us as an Associate Editor for ${specialty}.\n\nTerm & Benefits:\n• Initial 2-year renewable appointment.\n• 25% discount on Article Processing Charges (APCs) for your own submissions.\n• Full academic independence and official recognition on the journal masthead.\n• Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).\n\nSincerely,\nEditorial Office\n${journalName}\nScholarly Open Publishing Group`
       } else if (campaign === "ecr_reviewer") {
         defaultSubject = `Invitation to Peer Review & Early Career Reviewer Track: ${journalName}`
         actionLabel = "Accept Review Invitation & Claim Merit Credit"
@@ -730,7 +892,9 @@ export function JournalManagerWorkspace({
             customSubject: defaultSubject,
             customBody: defaultBody,
             customHtml: renderedHtml,
-            journal: journalName
+            journal: journalName,
+            fromEmail: getJournalReplyTo(journalName),
+            senderName: `${journalName} Editorial Office`
           })
         })
 
@@ -1865,21 +2029,32 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </span>
                     </div>
 
-                    <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setEcrSelectedNames(prev => [...prev, candidate.name])
-                          } else {
-                            setEcrSelectedNames(prev => prev.filter(n => n !== candidate.name))
-                          }
-                        }}
-                        className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff]"
-                      />
-                      <span className="text-[11px] text-slate-400 select-none">Select</span>
-                    </label>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDismissCandidate(candidate)}
+                        className="h-6 w-6 p-0 text-slate-400 hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-900 rounded-md cursor-pointer transition-colors"
+                        title="Dismiss candidate (deceased or unsuitable)"
+                      >
+                        <UserX className="h-3 w-3" />
+                      </Button>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setEcrSelectedNames(prev => [...prev, candidate.name])
+                            } else {
+                              setEcrSelectedNames(prev => prev.filter(n => n !== candidate.name))
+                            }
+                          }}
+                          className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff]"
+                        />
+                        <span className="text-[11px] text-slate-400 select-none">Select</span>
+                      </label>
+                    </div>
                   </div>
 
                   {/* Scholar Info with Clickable ORCID and Google Scholar Cross-Verification */}
@@ -2494,7 +2669,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* 3. SCHOLAR SCOUT (LEAD FINDER & EDITORIAL OUTREACH SUITE)                 */}
       {/* ========================================================================= */}
-      {activeTab === "scout" && (
+      {(activeTab === "scout" || activeTab === "sent") && (
         <div className="space-y-5 animate-in fade-in duration-200">
           
           {/* Header Banner: Clean, Standardized, International Scholarly Style */}
@@ -2589,18 +2764,46 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
               <button
                 type="button"
-                onClick={() => setScoutSubTab("history")}
+                onClick={() => {
+                  setScoutSubTab("history")
+                  setSentAuditSubTab("sent_emails")
+                }}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
-                  scoutSubTab === "history"
+                  scoutSubTab === "history" && sentAuditSubTab === "sent_emails"
                     ? "bg-[#0b99ff] text-white shadow-xs"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <History className="h-3.5 w-3.5" />
-                <span>Outreach Log</span>
+                <span>Sent Items</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 dark:bg-white/10 font-mono">
                   {sentEmailsHistory.length}
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setScoutSubTab("history")
+                  setSentAuditSubTab("unsubscribed")
+                }}
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
+                  scoutSubTab === "history" && sentAuditSubTab === "unsubscribed"
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <UserX className="h-3.5 w-3.5 text-rose-500" />
+                <span>Do Not Contact</span>
+                {unsubscribedList.length > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                    scoutSubTab === "history" && sentAuditSubTab === "unsubscribed"
+                      ? "bg-white/20 text-white"
+                      : "bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300"
+                  }`}>
+                    {unsubscribedList.length}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -2854,9 +3057,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 {activeScoutResults.length === 0 ? (
                   <Card className="p-12 text-center bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] rounded-2xl space-y-3">
                     <Compass className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto" />
-                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No active scholars found for this query</h4>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                      {scoutResults.length > 0 ? "All candidates on this page have been contacted or dismissed" : "No active scholars found for this query"}
+                    </h4>
                     <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                      All previously contacted scholars have been moved to the &ldquo;Sent&rdquo; tab to prevent duplicate outreach. Try broader research keywords or reset your filters.
+                      {scoutResults.length > 0 
+                        ? `All scholars on Page ${scoutPage} have been contacted or dismissed. Use the pagination controls below to explore subsequent pages.`
+                        : "All previously contacted scholars have been moved to the Sent tab to prevent duplicate outreach. Try broader research keywords or reset your filters."}
                     </p>
                   </Card>
                 ) : scoutViewMode === "list" ? (
@@ -2870,7 +3077,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             <th className="py-3 px-3 min-w-[170px]">Profile &amp; ORCID</th>
                             <th className="py-3 px-3 min-w-[240px]">Specialty &amp; Focus</th>
                             <th className="py-3 px-3 min-w-[230px]">Email &amp; Online Verification</th>
-                            <th className="py-3 px-4 text-right min-w-[130px]">Action</th>
+                            <th className="py-3 px-4 text-right min-w-[150px]">Action</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
@@ -3006,14 +3213,25 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                                 {/* Quick Action */}
                                 <td className="py-3.5 px-4 align-top text-right">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
-                                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3 rounded-lg cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
-                                  >
-                                    <Send className="h-3 w-3" />
-                                    <span>{campaignLabel}</span>
-                                  </Button>
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleDismissCandidate(scholar)}
+                                      className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-900 rounded-lg cursor-pointer transition-colors"
+                                      title="Dismiss candidate (deceased or unsuitable)"
+                                    >
+                                      <UserX className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3 rounded-lg cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                                    >
+                                      <Send className="h-3 w-3" />
+                                      <span>{campaignLabel}</span>
+                                    </Button>
+                                  </div>
                                 </td>
                               </tr>
                             )
@@ -3118,9 +3336,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                           {/* Card Action Button */}
                           <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                            <span className="text-[11px] font-medium text-slate-400">
-                              {scholar.country ? `${scholar.country} · ` : ""}COPE Vetted
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDismissCandidate(scholar)}
+                                className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-900 rounded-lg cursor-pointer transition-colors"
+                                title="Dismiss candidate (deceased or unsuitable)"
+                              >
+                                <UserX className="h-3.5 w-3.5" />
+                              </Button>
+                              <span className="text-[11px] font-medium text-slate-400">
+                                {scholar.country ? `${scholar.country} · ` : ""}COPE Vetted
+                              </span>
+                            </div>
                             <Button
                               size="sm"
                               onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
@@ -3137,7 +3366,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 )}
 
                 {/* Pagination Controls Bar */}
-                {activeScoutResults.length > 0 && (() => {
+                {scoutResults.length > 0 && (() => {
                   const totalPages = Math.max(1, Math.ceil(scoutTotalResults / scoutLimit))
                   const startRecord = (scoutPage - 1) * scoutLimit + 1
                   const endRecord = Math.min(scoutPage * scoutLimit, scoutTotalResults)
@@ -3235,134 +3464,265 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           {/* ===================== SUBTAB: ECR TALENT HUB (bioRxiv / medRxiv / arXiv) ===================== */}
           {scoutSubTab === "ecr" && renderEcrTalentHub()}
 
-          {/* ===================== SUBTAB 2: SENT EMAILS HISTORY AUDIT LOG ===================== */}
+          {/* ===================== SUBTAB 2: SENT ITEMS & DO-NOT-CONTACT REGISTRY ===================== */}
           {scoutSubTab === "history" && (
-            <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-6 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+            <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-6 shadow-xs space-y-5">
+              {/* Header with Sub-tab Switcher */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <History className="h-4 w-4 text-[#0b99ff]" />
-                    Sent Outreach History &amp; Dispatch Audit Log
+                    {sentAuditSubTab === "sent_emails" ? (
+                      <>
+                        <History className="h-4 w-4 text-[#0b99ff]" />
+                        <span>Dispatched Outreach History &amp; Audit Log</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserX className="h-4 w-4 text-rose-500" />
+                        <span>Unsubscribed / Do-Not-Contact Registry</span>
+                      </>
+                    )}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Immutable tracking record of all recruitment and Call for Papers emails sent via Editorial360.
+                    {sentAuditSubTab === "sent_emails"
+                      ? "Immutable tracking record of all recruitment, EiC nominations, and Call for Papers emails sent via Editorial360."
+                      : "Strict suppression list. Anyone on this list is permanently blocked from receiving invitations across all journal desks."}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 font-medium">
-                    Total Dispatched: <strong className="text-slate-900 dark:text-white font-mono">{sentEmailsHistory.length}</strong>
-                  </span>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setSentAuditSubTab("sent_emails")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                        sentAuditSubTab === "sent_emails"
+                          ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs font-bold"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      <span>Sent Emails ({sentEmailsHistory.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSentAuditSubTab("unsubscribed")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                        sentAuditSubTab === "unsubscribed"
+                          ? "bg-white dark:bg-[#18191e] text-rose-600 dark:text-rose-400 shadow-xs font-bold"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <UserX className="h-3.5 w-3.5 text-rose-500" />
+                      <span>Do Not Contact ({unsubscribedList.length})</span>
+                    </button>
+                  </div>
+
+                  {sentAuditSubTab === "unsubscribed" && (
+                    <Button
+                      size="sm"
+                      onClick={() => setIsAddUnsubModalOpen(true)}
+                      className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold h-8 px-3 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <UserX className="h-3.5 w-3.5" />
+                      <span>+ Add Email to Opt-Out</span>
+                    </Button>
+                  )}
                 </div>
               </div>
 
-              {sentEmailsHistory.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 text-xs">
-                  No outreach emails dispatched yet. Search candidates and send invitations to populate this audit log.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        <th className="py-3 px-4 min-w-[140px]">Date / Time</th>
-                        <th className="py-3 px-4 min-w-[180px]">Recipient Scholar</th>
-                        <th className="py-3 px-4 min-w-[200px]">Journal Desk</th>
-                        <th className="py-3 px-3 min-w-[130px]">Campaign Type</th>
-                        <th className="py-3 px-4 min-w-[220px]">Subject</th>
-                        <th className="py-3 px-3 min-w-[90px]">Status</th>
-                        <th className="py-3 px-4 text-right min-w-[160px]">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                      {sentEmailsHistory.map((record) => {
-                        const dateFormatted = record.timestamp 
-                          ? new Date(record.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
-                          : "Recent"
-
-                        return (
-                          <tr key={record.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors">
-                            <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
-                              {dateFormatted}
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="space-y-0.5">
-                                <span className="font-bold text-slate-900 dark:text-white block">
-                                  {record.recipientName}
-                                </span>
-                                <span className="text-[11px] font-mono text-slate-500 truncate block">
-                                  {record.recipientEmail}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
-                              <div className="space-y-0.5">
-                                <span className="font-semibold text-slate-900 dark:text-white block">
-                                  {record.journal}
-                                </span>
-                                <span className="text-[11px] font-mono text-[#0b99ff] block">
-                                  {getJournalReplyTo(record.journal)}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                                record.campaignType === "call_for_papers" ? "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200 dark:border-sky-800" :
-                                record.campaignType === "eic" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800" :
-                                record.campaignType === "ebm" ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800" :
-                                record.campaignType === "follow_up" ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800" :
-                                "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                              }`}>
-                                {record.campaignType.replace(/_/g, " ")}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-slate-600 dark:text-slate-300 truncate max-w-[240px]" title={record.subject}>
-                              {record.subject}
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                                <Check className="h-3 w-3 text-emerald-600" />
-                                {record.status}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    handleDispatchScoutOutreach(
-                                      {
-                                        name: record.recipientName,
-                                        email: record.recipientEmail,
-                                        institution: record.journal,
-                                        specialty: "your research field"
-                                      },
-                                      "follow_up"
-                                    )
-                                  }}
-                                  className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-sky-200 dark:border-sky-800 text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 cursor-pointer flex items-center gap-1"
-                                  title="Send a polite follow-up reminder"
-                                >
-                                  <RotateCcw className="h-3 w-3" />
-                                  Follow-up
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setViewingHistoryEmail(record)}
-                                  className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
-                                >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  View
-                                </Button>
-                              </div>
-                            </td>
+              {/* View 1: Sent Emails History Table */}
+              {sentAuditSubTab === "sent_emails" && (
+                <>
+                  {sentEmailsHistory.length === 0 ? (
+                    <div className="p-12 text-center text-slate-400 text-xs">
+                      No outreach emails dispatched yet. Search candidates and send invitations to populate this audit log.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th className="py-3 px-4 min-w-[140px]">Date / Time</th>
+                            <th className="py-3 px-4 min-w-[180px]">Recipient Scholar</th>
+                            <th className="py-3 px-4 min-w-[200px]">Journal Desk</th>
+                            <th className="py-3 px-3 min-w-[130px]">Campaign Type</th>
+                            <th className="py-3 px-4 min-w-[220px]">Subject</th>
+                            <th className="py-3 px-3 min-w-[90px]">Status</th>
+                            <th className="py-3 px-4 text-right min-w-[160px]">Actions</th>
                           </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                          {sentEmailsHistory.map((record) => {
+                            const dateFormatted = record.timestamp 
+                              ? new Date(record.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                              : "Recent"
+
+                            return (
+                              <tr key={record.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors">
+                                <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
+                                  {dateFormatted}
+                                </td>
+                                <td className="py-3 px-4">
+                                  <div className="space-y-0.5">
+                                    <span className="font-bold text-slate-900 dark:text-white block">
+                                      {record.recipientName}
+                                    </span>
+                                    <span className="text-[11px] font-mono text-slate-500 truncate block">
+                                      {record.recipientEmail}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
+                                  <div className="space-y-0.5">
+                                    <span className="font-semibold text-slate-900 dark:text-white block">
+                                      {record.journal}
+                                    </span>
+                                    <span className="text-[11px] font-mono text-[#0b99ff] block">
+                                      {getJournalReplyTo(record.journal)}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-3">
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                                    record.campaignType === "call_for_papers" ? "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200 dark:border-sky-800" :
+                                    record.campaignType === "eic" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800" :
+                                    record.campaignType === "ebm" ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800" :
+                                    record.campaignType === "follow_up" ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800" :
+                                    "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                  }`}>
+                                    {record.campaignType.replace(/_/g, " ")}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-slate-600 dark:text-slate-300 truncate max-w-[240px]" title={record.subject}>
+                                  {record.subject}
+                                </td>
+                                <td className="py-3 px-3">
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                                    <Check className="h-3 w-3 text-emerald-600" />
+                                    {record.status}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-right">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        handleDispatchScoutOutreach(
+                                          {
+                                            name: record.recipientName,
+                                            email: record.recipientEmail,
+                                            institution: record.journal,
+                                            specialty: "your research field"
+                                          },
+                                          "follow_up"
+                                        )
+                                      }}
+                                      className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-sky-200 dark:border-sky-800 text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 cursor-pointer flex items-center gap-1"
+                                      title="Send a polite follow-up reminder"
+                                    >
+                                      <RotateCcw className="h-3 w-3" />
+                                      Follow-up
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setViewingHistoryEmail(record)}
+                                      className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                                    >
+                                      <Eye className="h-3 w-3 mr-1" />
+                                      View
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* View 2: Unsubscribed / Do-Not-Contact Registry */}
+              {sentAuditSubTab === "unsubscribed" && (
+                <div className="space-y-4">
+                  {/* Anti-Spam Compliance Banner */}
+                  <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
+                    <ShieldCheck className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+                      <strong className="font-bold block">Strict Anti-Spam &amp; Solicitation Suppression (CAN-SPAM / GDPR Compliant)</strong>
+                      <p className="text-[11px] text-amber-800/90 dark:text-amber-300">
+                        When a scholar unsubscribes via the 1-click link in any invitation email or requests opt-out, their email address is automatically registered here. The system filters these addresses out of Lead Finder and ECR candidate queries, ensuring Journal Managers never accidentally contact them again.
+                      </p>
+                    </div>
+                  </div>
+
+                  {unsubscribedList.length === 0 ? (
+                    <div className="p-12 text-center text-slate-400 text-xs">
+                      No scholars have unsubscribed yet. Any future opt-out requests will appear here automatically.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th className="py-3 px-4 min-w-[220px]">Suppressed Scholar Email</th>
+                            <th className="py-3 px-4 min-w-[180px]">Journal Scope</th>
+                            <th className="py-3 px-4 min-w-[140px]">Date Logged</th>
+                            <th className="py-3 px-4 min-w-[200px]">Opt-Out Reason / Source</th>
+                            <th className="py-3 px-4 text-right min-w-[140px]">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                          {unsubscribedList.map((item, idx) => {
+                            const dateStr = item.timestamp
+                              ? new Date(item.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                              : "Active"
+
+                            return (
+                              <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors">
+                                <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">
+                                  <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-rose-500 shrink-0" />
+                                    <span>{item.email}</span>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
+                                  <span className="text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-medium">
+                                    {item.journal || "All Journals"}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
+                                  {dateStr}
+                                </td>
+                                <td className="py-3 px-4 text-slate-600 dark:text-slate-300 text-[11px]">
+                                  {item.reason || "1-Click Web Unsubscribe"}
+                                </td>
+                                <td className="py-3 px-4 text-right">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      if (typeof window !== "undefined" && window.confirm(`Remove ${item.email} from Do-Not-Contact list? They will again be eligible for invitations.`)) {
+                                        handleRemoveUnsubscribe(item.email)
+                                      }
+                                    }}
+                                    className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                                    title="Allow contacting this scholar again"
+                                  >
+                                    Remove &amp; Restore
+                                  </Button>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               )}
             </Card>
@@ -6591,6 +6951,72 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </DialogFooter>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Scholar to Do-Not-Contact / Unsubscribed List Modal */}
+      <Dialog open={isAddUnsubModalOpen} onOpenChange={setIsAddUnsubModalOpen}>
+        <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <UserX className="h-5 w-5 text-rose-500" />
+              <span>Add to Do-Not-Contact Registry</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+              Register a scholar's email address to suppress all future automated and manual invitations across editorial desks.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3.5 py-2">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Scholar Email Address <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="email"
+                placeholder="colleague@university.edu"
+                value={newUnsubEmail}
+                onChange={(e) => setNewUnsubEmail(e.target.value)}
+                className="w-full text-xs font-mono px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Reason / Source
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Replied asking to be removed from mailing list"
+                value={newUnsubReason}
+                onChange={(e) => setNewUnsubReason(e.target.value)}
+                className="w-full text-xs px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setIsAddUnsubModalOpen(false)
+                setNewUnsubEmail("")
+                setNewUnsubReason("")
+              }}
+              className="text-xs font-semibold h-8 px-3 rounded-lg border-slate-200 dark:border-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={!newUnsubEmail.trim() || !newUnsubEmail.includes("@")}
+              onClick={() => handleAddUnsubscribe(newUnsubEmail, newUnsubReason || "Manual entry by Journal Manager")}
+              className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer disabled:opacity-40"
+            >
+              Save to Blocklist
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
