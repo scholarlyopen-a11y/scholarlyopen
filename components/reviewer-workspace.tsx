@@ -2753,17 +2753,18 @@ COPE & Plan S Certified Archive
                       </div>
                     </div>
 
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        const rev = activeReviews[0] || { id: "SOMED-26-RS001", title: "Clinical Evaluation of AI Diagnostics in Cardiology", journal: "Medicine & Healthcare", deadline: "2026-06-20", status: "In Progress" }
-                        setSelectedReviewForEval(rev)
-                      }}
-                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-8 px-4 shrink-0 cursor-pointer shadow-xs"
-                    >
-                      <FileText className="h-3.5 w-3.5 mr-1" />
-                      {isDe ? "Manuskript jetzt begutachten" : "Evaluate SOMED-26-RS001"}
-                    </Button>
+                    {activeReviews.length > 0 && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setSelectedReviewForEval(activeReviews[0])
+                        }}
+                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs h-8 px-4 shrink-0 cursor-pointer shadow-xs"
+                      >
+                        <FileText className="h-3.5 w-3.5 mr-1" />
+                        {isDe ? "Manuskript jetzt begutachten" : `Evaluate ${activeReviews[0].id}`}
+                      </Button>
+                    )}
                   </div>
 
                   {/* GATEWAY CERTIFICATE (Earned upon passing the exam) */}

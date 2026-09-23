@@ -3814,14 +3814,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   }}
                   className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
                     reviewerRegistryTab === "gateway"
-                      ? "bg-white dark:bg-[#18191e] text-emerald-600 dark:text-emerald-400 shadow-xs font-bold"
+                      ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  <Award className="h-3.5 w-3.5 text-emerald-500" />
+                  <Award className="h-3.5 w-3.5 text-[#0b99ff]" />
                   <span>Gateway Onboarding</span>
                   {gatewayTests.length > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold">
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#0b99ff]/10 text-[#0b99ff] font-bold">
                       {gatewayTests.length}
                     </span>
                   )}
@@ -3866,16 +3866,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </div>
 
           {reviewerRegistryTab === "gateway" ? (
-            <div className="p-5 space-y-6">
+            <div className="p-5 space-y-6 font-sans">
               {/* Summary KPIs */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60">
                   <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Total Assessments</span>
                   <span className="text-xl font-bold text-slate-900 dark:text-white mt-0.5 block">{gatewayTests.length}</span>
                 </div>
-                <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20">
-                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Passed (≥80%)</span>
-                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                <div className="p-3.5 rounded-xl border border-[#0b99ff]/30 bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10">
+                  <span className="text-[11px] font-semibold text-[#0b99ff] uppercase tracking-wider block">Passed (≥80%)</span>
+                  <span className="text-xl font-bold text-[#0b99ff] mt-0.5 block">
                     {gatewayTests.filter(t => t.passed).length}
                   </span>
                 </div>
@@ -3917,7 +3917,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <Link
                     href="/reviewer-gateway"
                     target="_blank"
-                    className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-xl shadow-xs transition-colors flex items-center gap-1"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     Open Gateway Portal
@@ -3926,29 +3926,29 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               {/* Candidates Table */}
-              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418]">
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418] shadow-xs">
                 <div className="px-4 py-3 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-emerald-500" />
+                    <Award className="w-4 h-4 text-[#0b99ff]" />
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                       Gateway Onboarding & Assessment Records
                     </span>
                   </div>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
                     Threshold: ≥80% Required for Peer Evaluation Privileges
                   </span>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-xs font-sans">
                     <thead>
                       <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 text-slate-500 font-semibold">
-                        <th className="py-2.5 px-4">Candidate / Scholar</th>
-                        <th className="py-2.5 px-4">Affiliation & Field</th>
-                        <th className="py-2.5 px-4">Assessment Score</th>
-                        <th className="py-2.5 px-4">Verification Credential</th>
-                        <th className="py-2.5 px-4">Account Status</th>
-                        <th className="py-2.5 px-4 text-right">Date</th>
+                        <th className="py-3 px-4 whitespace-nowrap min-w-[220px]">Candidate / Scholar</th>
+                        <th className="py-3 px-4 whitespace-nowrap min-w-[220px]">Affiliation & Field</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Assessment Score</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Verification Credential</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Account Status</th>
+                        <th className="py-3 px-4 text-right whitespace-nowrap">Date</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -3969,55 +3969,62 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             <tr 
                               key={test.id} 
                               className={`hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors ${
-                                isDrSun ? "bg-emerald-50/50 dark:bg-emerald-950/20 font-medium" : ""
+                                isDrSun ? "bg-[#0b99ff]/5 font-medium" : ""
                               }`}
                             >
-                              <td className="py-3 px-4">
-                                <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                  {test.candidateName}
+                              <td className="py-3.5 px-4 align-middle">
+                                <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2 whitespace-nowrap">
+                                  <span>{test.candidateName}</span>
                                   {isDrSun && (
-                                    <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
+                                    <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30 whitespace-nowrap">
                                       Registered Referee
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[11px] text-slate-500 font-mono mt-0.5">{test.candidateEmail}</div>
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 whitespace-nowrap">{test.candidateEmail}</div>
                               </td>
-                              <td className="py-3 px-4">
-                                <div className="text-slate-700 dark:text-slate-300 font-medium">{test.institution}</div>
-                                <div className="text-[11px] text-slate-400 capitalize">{test.discipline?.replace("-", " ")}</div>
+                              <td className="py-3.5 px-4 align-middle">
+                                <div className="text-slate-800 dark:text-slate-200 font-medium whitespace-nowrap">{test.institution}</div>
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400 capitalize whitespace-nowrap">{test.discipline?.replace("-", " ")}</div>
                               </td>
-                              <td className="py-3 px-4">
-                                <span className={`inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-full text-[11px] ${
+                              <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                                <span className={`inline-flex items-center gap-1.5 font-bold px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap ${
                                   test.passed
-                                    ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                                    : "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                                    ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30"
+                                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30"
                                 }`}>
-                                  {test.passed ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <XCircle className="w-3 h-3 text-rose-500" />}
+                                  {test.passed ? <CheckCircle2 className="w-3.5 h-3.5 text-[#0b99ff]" /> : <XCircle className="w-3.5 h-3.5 text-rose-500" />}
                                   {test.score}%
                                 </span>
                               </td>
-                              <td className="py-3 px-4">
+                              <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                                 {test.credentialId ? (
-                                  <span className="font-mono text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800">
+                                  <span className="font-mono text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-1 rounded-md border border-[#0b99ff]/25 whitespace-nowrap">
                                     {test.credentialId}
                                   </span>
                                 ) : (
-                                  <span className="text-slate-400 italic text-[11px]">Pending passing</span>
+                                  <span className="text-slate-400 italic text-[11px] whitespace-nowrap">Pending passing</span>
                                 )}
                               </td>
-                              <td className="py-3 px-4">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${
                                   test.status === "Passed - Account Active"
-                                    ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                    ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30"
                                     : test.status === "Passed - Pending Account"
-                                    ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700"
                                 }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                    test.status === "Passed - Account Active"
+                                      ? "bg-[#0b99ff]"
+                                      : test.status === "Passed - Pending Account"
+                                      ? "bg-amber-500"
+                                      : "bg-slate-400"
+                                  }`} />
                                   {test.status}
                                 </span>
                               </td>
-                              <td className="py-3 px-4 text-right text-slate-500 text-[11px]">
+                              <td className="py-3.5 px-4 align-middle text-right text-slate-500 text-[11px] whitespace-nowrap">
                                 {test.date}
                               </td>
                             </tr>
@@ -4029,7 +4036,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               {/* Incoming Official Responses Desk */}
-              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418]">
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418] shadow-xs">
                 <div className="px-4 py-3 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-[#0b99ff]" />
@@ -4037,33 +4044,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       Official Invitation & Onboarding Responses Desk
                     </span>
                   </div>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
                     Real-time acceptances from EiC, AE, Board & Reviewer claims
                   </span>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-xs font-sans">
                     <thead>
                       <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 text-slate-500 font-semibold">
-                        <th className="py-2.5 px-4">Scholar / Appointee</th>
-                        <th className="py-2.5 px-4">Role Appointment</th>
-                        <th className="py-2.5 px-4">Journal Portfolio</th>
-                        <th className="py-2.5 px-4">Decision / Status</th>
-                        <th className="py-2.5 px-4">Credential</th>
-                        <th className="py-2.5 px-4 text-right">Timestamp</th>
+                        <th className="py-3 px-4 whitespace-nowrap min-w-[200px]">Scholar / Appointee</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Role Appointment</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Journal Portfolio</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Decision / Status</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Credential</th>
+                        <th className="py-3 px-4 text-right whitespace-nowrap">Timestamp</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                       {gatewayResponses.map((resp: any) => (
                         <tr key={resp.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                          <td className="py-3 px-4">
+                          <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             <div className="font-bold text-slate-900 dark:text-white">{resp.candidateName}</div>
                             {resp.candidateEmail && (
-                              <div className="text-[11px] text-slate-500 font-mono mt-0.5">{resp.candidateEmail}</div>
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">{resp.candidateEmail}</div>
                             )}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             <span className="font-semibold text-slate-700 dark:text-slate-300">
                               {resp.type === "eic" 
                                 ? "Editor-in-Chief" 
@@ -4074,24 +4081,37 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 : "Editorial Board Member"}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                          <td className="py-3.5 px-4 align-middle whitespace-nowrap text-slate-600 dark:text-slate-400">
                             {resp.journal}
                           </td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${
                               resp.decision === "yes" || resp.decision === "claimed"
-                                ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30"
                                 : resp.decision === "conditional"
-                                ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                                : "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30"
                             }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                resp.decision === "yes" || resp.decision === "claimed"
+                                  ? "bg-[#0b99ff]"
+                                  : resp.decision === "conditional"
+                                  ? "bg-amber-500"
+                                  : "bg-rose-500"
+                              }`} />
                               {resp.decision.toUpperCase()}
                             </span>
                           </td>
-                          <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                            {resp.credentialId || "—"}
+                          <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                            {resp.credentialId ? (
+                              <span className="font-mono text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-1 rounded-md border border-[#0b99ff]/25">
+                                {resp.credentialId}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 italic text-[11px]">—</span>
+                            )}
                           </td>
-                          <td className="py-3 px-4 text-right text-slate-400 text-[11px]">
+                          <td className="py-3.5 px-4 align-middle text-right text-slate-400 text-[11px] whitespace-nowrap">
                             {resp.timestamp ? new Date(resp.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                           </td>
                         </tr>

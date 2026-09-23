@@ -1217,39 +1217,46 @@ export default function Editorial360Page() {
         })
         .catch(err => console.warn("Could not fetch cloud manuscripts:", err))
 
-      // Load any author submissions persisted in browser storage
+      // Load any author submissions persisted in browser storage (purging legacy fake mocks)
       try {
+        const FAKE_MOCK_IDS = new Set([
+          "SOMED-26-RW108",
+          "SOMED-26-RD101",
+          "SOEAS-26-RS102",
+          "SOSOC-26-RS103",
+          "SOBIO-26-RD104",
+          "SOCHM-26-RW105",
+          "SOEAS-26-RS106",
+          "SOSSH-26-SRW107",
+          "SOEAS-26-RS104",
+          "SOEAS-26-TR105",
+          "SOMED-26-RW101",
+          "SOENG-26-RJ110",
+          "SOSOC-26-RV002"
+        ])
         const stored = localStorage.getItem("editorial360_manuscripts")
         if (stored) {
           const parsed = JSON.parse(stored) as Manuscript[]
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setManuscripts(prev => {
-              const storedMap = new Map(parsed.map(p => [p.id, p]))
-              const updatedPrev = prev.map(p => {
-                const storedItem = storedMap.get(p.id)
-                return storedItem ? { ...p, ...storedItem } : p
-              })
-              const existingIds = new Set(prev.map(p => p.id))
-              const newItems = parsed.filter(p => !existingIds.has(p.id))
-              return [...newItems, ...updatedPrev]
-            })
+          if (Array.isArray(parsed)) {
+            const cleanSubmissions = parsed.filter(p => !FAKE_MOCK_IDS.has(p.id))
+            localStorage.setItem("editorial360_manuscripts", JSON.stringify(cleanSubmissions))
+            setManuscripts(cleanSubmissions)
           }
         }
       } catch (err) {
         console.error("Failed to load saved manuscripts from localStorage", err)
       }
 
-      // Load any peer reviews persisted in browser storage
+      // Load any peer reviews persisted in browser storage (purging legacy fake reviews)
       try {
+        const FAKE_REVIEW_IDS = new Set(["REV-FB-01", "REV-FB-02", "REV-FB-03", "REV-FB-04"])
         const storedReviews = localStorage.getItem("editorial360_reviews")
         if (storedReviews) {
           const parsedRev = JSON.parse(storedReviews) as ReviewFeedback[]
-          if (Array.isArray(parsedRev) && parsedRev.length > 0) {
-            setReviews(prev => {
-              const prevMap = new Map(prev.map(r => [r.id, r]))
-              parsedRev.forEach(r => prevMap.set(r.id, r))
-              return Array.from(prevMap.values())
-            })
+          if (Array.isArray(parsedRev)) {
+            const cleanReviews = parsedRev.filter(r => !FAKE_REVIEW_IDS.has(r.id))
+            localStorage.setItem("editorial360_reviews", JSON.stringify(cleanReviews))
+            setReviews(cleanReviews)
           }
         }
       } catch (err) {
@@ -1343,517 +1350,18 @@ export default function Editorial360Page() {
     return () => clearInterval(timer)
   }, [isLoggedIn])
 
-  // Mock Databases in state for interactivity
-  const [manuscripts, setManuscripts] = useState<Manuscript[]>([
-    {
-      id: "SOMED-26-RW108",
-      title: "Advances in Type 1 Diabetes Ocular Remote Tele-Health Screening",
-      journal: "Scholarly Open: Medicine",
-      status: "Awaiting Initial Check",
-      date: "2026-08-23",
-      reviewers: [],
-      integrityStatus: "Clean",
-      plagiarismScore: 3,
-      aiScore: 6,
-      authorFirstName: "Evelyn",
-      authorLastName: "Vane",
-      authorName: "Dr. Evelyn Vane",
-      authorEmail: "e.vane@scholarlyopen.org",
-      authorAffiliation: "Institute of Advanced Medical Sciences",
-      authorCountry: "United States",
-      authorOrcid: "0000-0002-1825-0097",
-      coAuthors: "Prof. Michael H. Klein, Dr. Lauren Bailey",
-      articleType: "Original Research",
-      submissionStage: "Initial Submission",
-      abstract: "Evaluation of non-mydriatic fundus tele-screening protocols and automated convolutional neural networks for early detection of diabetic retinopathy in juvenile Type 1 Diabetes cohorts across rural clinical centers.",
-      keywords: "Type 1 Diabetes, Tele-Health, Retinopathy, Ocular Screening, Deep Learning",
-      fileName: "T1D_Ocular_TeleHealth_Manuscript.pdf",
-      fileSize: "3.4 MB",
-      coverLetter: "Dear Editor-in-Chief,\n\nWe are pleased to submit our original research article titled \"Advances in Type 1 Diabetes Ocular Remote Tele-Health Screening\" for publication consideration in Scholarly Open: Medicine.\n\nSincerely,\nDr. Evelyn Vane",
-      ethicsIrb: "IRB-MED-2026-T1D-092",
-      fundingGrant: "NIH-EY-2026-4401",
-      dataDoi: "doi.org/10.5281/zenodo.882910",
-      editorAssigned: false
-    },
-    {
-      id: "SOMED-26-RD101",
-      title: "Clinical Evaluation of AI-Driven Diagnostic Imaging in Cardiovascular Medicine",
-      journal: "Scholarly Open: Medicine",
-      status: "Revision Required",
-      date: "2026-08-18",
-      reviewers: ["Dr. Evelyn Vane", "Dr. Marcus Vance"],
-      integrityStatus: "Clean",
-      plagiarismScore: 5,
-      aiScore: 12,
-      authorFirstName: "Evelyn",
-      authorLastName: "Vane",
-      authorName: "Dr. Evelyn Vane",
-      authorEmail: "e.vane@scholarlyopen.org",
-      authorAffiliation: "Institute of Advanced Medical Sciences",
-      authorOrcid: "0000-0002-1825-0097",
-      coAuthors: "Prof. Aris Thorne, Dr. Sarah Lin",
-      articleType: "Original Research",
-      submissionStage: "Revision Pending",
-      abstract: "Comprehensive investigation into high-throughput predictive deep learning frameworks for diagnostic cardiology and automated ECG analysis. By leveraging a multi-center cohort of over 45,000 clinical records, we demonstrate that neural ensemble architectures achieve 98.4% diagnostic concordance with senior electrophysiologists.",
-      keywords: "Cardiology, Deep Learning, ECG Analysis, Clinical AI",
-      fileName: "Clinical_AI_Cardio_Manuscript.pdf",
-      fileSize: "2.8 MB",
-      ethicsIrb: "IRB-MED-2026-081-V1",
-      fundingGrant: "NIH-HL-2026-9901",
-      dataDoi: "doi.org/10.5281/zenodo.108921",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Clara Zhang"
-    },
-    {
-      id: "SOEAS-26-RS102",
-      title: "Machine Learning Approaches in Renewable Energy Forecasting",
-      journal: "Engineering & Applied Sciences",
-      status: "Under Review",
-      date: "2026-05-12",
-      reviewers: ["Dr. Evelyn Vane"],
-      integrityStatus: "Clean",
-      plagiarismScore: 8,
-      aiScore: 12,
-      authorFirstName: "Marcus",
-      authorLastName: "Vance",
-      authorName: "Dr. Marcus Vance",
-      authorEmail: "m.vance@scholarlyopen.org",
-      authorAffiliation: "Center for Sustainable Energy Technology",
-      authorOrcid: "0000-0004-7711-2093",
-      coAuthors: "Dr. Clara Zhang",
-      articleType: "Original Research",
-      submissionStage: "Initial Submission",
-      abstract: "Evaluating peer-to-peer carbon offset mechanisms, microgrid validation protocols, and distributed energy transaction ledger architectures under fluctuating load conditions in municipal infrastructures.",
-      keywords: "Renewable Energy, Machine Learning, Smart Grids",
-      fileName: "Renewable_Energy_ML_V1.pdf",
-      fileSize: "3.1 MB",
-      ethicsIrb: "Exempt / Non-human Subject Research",
-      fundingGrant: "EU-Horizon-2026-8812",
-      dataDoi: "doi.org/10.5281/zenodo.220194",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Clara Zhang"
-    },
-    {
-      id: "SOSSH-26-SRW103",
-      title: "Socio-Economic Impacts of Urban Green Spaces in Moderate Climates",
-      journal: "Social Sciences & Humanities",
-      status: "Revision Under Evaluation",
-      date: "2026-05-28",
-      reviewers: ["Prof. Aris Thorne"],
-      integrityStatus: "Clean",
-      plagiarismScore: 11,
-      aiScore: 5,
-      authorFirstName: "Sarah",
-      authorLastName: "Jenkins",
-      authorName: "Dr. Sarah Jenkins",
-      authorEmail: "s.jenkins@scholarlyopen.org",
-      authorAffiliation: "Department of Urban Studies & Environment",
-      authorOrcid: "0000-0001-5524-8891",
-      coAuthors: "Prof. David Miller",
-      articleType: "Original Research",
-      submissionStage: "Revised Submission",
-      abstract: "Assessing empirical wellbeing indices and socio-spatial equity across public park access in European metropolitan areas using multi-wave panel data.",
-      keywords: "Urban Sociology, Green Space, Wellbeing, Spatial Equity",
-      fileName: "Urban_Green_Spaces_Revision.docx",
-      fileSize: "1.9 MB",
-      ethicsIrb: "IRB-SSH-2026-044",
-      fundingGrant: "DFG-URB-2025-019",
-      dataDoi: "Available upon reasonable request",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Aris Thorne"
-    },
-    {
-      id: "SOEAS-26-RS104",
-      title: "A Security Framework for Decentralized Ledgers in Public Records",
-      journal: "Engineering & Applied Sciences",
-      status: "Accepted",
-      date: "2026-04-01",
-      reviewers: ["Dr. Evelyn Vane", "Dr. Marcus Vance"],
-      integrityStatus: "Clean",
-      plagiarismScore: 4,
-      aiScore: 3,
-      authorFirstName: "Aris",
-      authorLastName: "Thorne",
-      authorName: "Prof. Aris Thorne",
-      authorEmail: "a.thorne@scholarlyopen.org",
-      authorAffiliation: "Institute for Distributed Systems & Cryptography",
-      authorOrcid: "0000-0003-9912-4011",
-      coAuthors: "Dr. Evelyn Vane",
-      articleType: "Original Research",
-      submissionStage: "Initial Submission",
-      abstract: "Novel consensus integrity protocol with formal zero-knowledge validation for tamper-proof public record registries.",
-      keywords: "Cryptography, Distributed Ledgers, Public Records, Security",
-      fileName: "Decentralized_Ledgers_Final.pdf",
-      fileSize: "2.2 MB",
-      ethicsIrb: "Not Applicable",
-      fundingGrant: "NSF-SEC-2025-771",
-      dataDoi: "doi.org/10.5281/zenodo.998412",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Clara Zhang"
-    },
-    {
-      id: "SOEAS-26-TR105",
-      title: "Synthesizing Biodegradable Polymers for Soft Robotics",
-      journal: "Engineering & Applied Sciences",
-      status: "Awaiting Initial Check",
-      date: "2026-06-05",
-      reviewers: [],
-      integrityStatus: "Unchecked",
-      authorFirstName: "Clara",
-      authorLastName: "Zhang",
-      authorName: "Prof. Clara Zhang",
-      authorEmail: "c.zhang@scholarlyopen.org",
-      authorAffiliation: "School of Materials Science & Engineering",
-      authorOrcid: "0000-0002-4411-9022",
-      coAuthors: "Dr. Marcus Vance",
-      articleType: "Methodology Paper",
-      submissionStage: "Initial Submission",
-      abstract: "Scalable synthesis protocol of bio-compatible elastomers with high tensile elastic modulus suitable for underwater soft robotics actuation.",
-      keywords: "Biopolymers, Soft Robotics, Materials Synthesis",
-      fileName: "Biodegradable_Polymers_Report.pdf",
-      fileSize: "4.5 MB",
-      ethicsIrb: "None declared / Not applicable",
-      fundingGrant: "No external funding declared",
-      dataDoi: "Available upon reasonable request",
-      editorAssigned: false
-    },
-    {
-      id: "SOSOC-26-RS103",
-      title: "Urban Green Spaces and Socio-Spatial Equity in European Cities",
-      journal: "Social Sciences & Humanities",
-      status: "Under Review",
-      date: "2026-06-03",
-      reviewers: ["Prof. Aris Thorne", "Prof. Hiroshi Tanaka"],
-      integrityStatus: "Clean",
-      plagiarismScore: 6,
-      aiScore: 8,
-      authorFirstName: "Elena",
-      authorLastName: "Rostova",
-      authorName: "Dr. Elena Rostova",
-      authorEmail: "e.rostova@urbanresearch.org",
-      authorAffiliation: "Department of Urban Planning & Social Geography",
-      authorOrcid: "0000-0002-3991-8842",
-      coAuthors: "Prof. Marco Bellini",
-      articleType: "Original Research",
-      submissionStage: "Under Review",
-      abstract: "Spatial analysis and econometric evaluation of park accessibility across 14 European metropolitan regions assessing socio-economic disparity indexes.",
-      keywords: "Urban Planning, Green Spaces, Socio-Spatial Equity, GIS, Public Policy",
-      fileName: "Urban_Green_Spaces_Equity.pdf",
-      fileSize: "5.1 MB",
-      ethicsIrb: "Approved by Institutional Ethics Committee (Ref: ETH-2026-091)",
-      fundingGrant: "EU-HORIZON-URBAN-2025-412",
-      dataDoi: "doi.org/10.5281/zenodo.881290",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Aris Thorne"
-    },
-    {
-      id: "SOMED-26-RW101",
-      title: "Neural Cell Proliferation in Regenerative Therapies",
-      journal: "Scholarly Open: Medicine",
-      status: "Revision Required",
-      date: "2026-05-28",
-      reviewers: ["Dr. Evelyn Vane", "Dr. Marcus Vance"],
-      integrityStatus: "Flagged",
-      plagiarismScore: 12,
-      aiScore: 15,
-      authorFirstName: "Evelyn",
-      authorLastName: "Vane",
-      authorName: "Dr. Evelyn Vane",
-      authorEmail: "e.vane@university-medical.edu",
-      authorAffiliation: "Institute of Neurobiology & Regenerative Medicine",
-      authorOrcid: "0000-0002-1825-0097",
-      coAuthors: "Prof. Thomas Gray",
-      articleType: "Original Research",
-      submissionStage: "Major Revisions",
-      abstract: "Investigation into stem-cell derived neural progenitor proliferation mechanisms with potential implications for acute neurotrauma therapeutics.",
-      keywords: "Neural Proliferation, Regenerative Medicine, Stem Cells, Neurotrauma",
-      fileName: "Neural_Proliferation_Regenerative.pdf",
-      fileSize: "6.8 MB",
-      ethicsIrb: "Approved by Medical Ethics Review Board (MERB-2026-04)",
-      fundingGrant: "NIH-NINDS-2025-88",
-      dataDoi: "doi.org/10.5281/zenodo.772199",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Aris Thorne"
-    },
-    {
-      id: "SOEAS-26-RS106",
-      title: "Optimization of Silicon Anodes for Lithium-Ion Batteries",
-      journal: "Engineering & Applied Sciences",
-      status: "Under Review",
-      date: "2026-06-02",
-      reviewers: [],
-      integrityStatus: "Flagged",
-      plagiarismScore: 18,
-      aiScore: 88,
-      authorFirstName: "Robert",
-      authorLastName: "Lang",
-      authorName: "Prof. Robert Lang",
-      authorEmail: "r.lang@scholarlyopen.org",
-      authorAffiliation: "Electrochemical Energy Institute",
-      authorOrcid: "0000-0001-8822-6719",
-      coAuthors: "None declared",
-      articleType: "Original Research",
-      submissionStage: "Initial Submission",
-      abstract: "Nanostructured silicon-carbon composite design to mitigate volumetric expansion during lithiation cycling.",
-      keywords: "Silicon Anodes, Battery Technology, Electrochemistry",
-      fileName: "Silicon_Anodes_Manuscript.pdf",
-      fileSize: "3.7 MB",
-      ethicsIrb: "Not Applicable",
-      fundingGrant: "DOE-BATT-2026-102",
-      dataDoi: "doi.org/10.5281/zenodo.773121",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Clara Zhang"
-    },
-    {
-      id: "SOSSH-26-SRW107",
-      title: "Gender Wage Disparity: A Multi-Country Meta-Analysis",
-      journal: "Social Sciences & Humanities",
-      status: "Under Review",
-      date: "2026-06-04",
-      reviewers: [],
-      integrityStatus: "Flagged",
-      plagiarismScore: 34,
-      aiScore: 15,
-      authorFirstName: "Helen",
-      authorLastName: "Vance",
-      authorName: "Dr. Helen Vance",
-      authorEmail: "h.vance@scholarlyopen.org",
-      authorAffiliation: "Institute of Social Economics & Labor Policy",
-      authorOrcid: "0000-0002-3399-5510",
-      coAuthors: "Prof. David Miller",
-      articleType: "Review Article",
-      submissionStage: "Initial Submission",
-      abstract: "Harmonized econometric meta-analysis of adjusted gender wage gaps across 42 OECD countries between 2010 and 2024.",
-      keywords: "Labor Economics, Gender Pay Gap, Meta-Analysis, Public Policy",
-      fileName: "Gender_Wage_Disparity_Review.docx",
-      fileSize: "1.6 MB",
-      ethicsIrb: "Exempt - Secondary Data Analysis",
-      fundingGrant: "ILO-RES-2025-09",
-      dataDoi: "Available upon reasonable request",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Aris Thorne"
-    },
-    {
-      id: "SOENG-26-RJ110",
-      title: "High-Frequency Algorithmic Arbitrage in Automated Market Makers",
-      journal: "Engineering & Applied Sciences",
-      status: "Rejected",
-      date: "2026-05-19",
-      reviewers: ["Prof. Aris Thorne", "Dr. Evelyn Vane"],
-      integrityStatus: "Clean",
-      plagiarismScore: 7,
-      aiScore: 9,
-      authorFirstName: "Alexander",
-      authorLastName: "Kovacs",
-      authorName: "Dr. Alexander Kovacs",
-      authorEmail: "a.kovacs@appliedfinance.org",
-      authorAffiliation: "Quantitative Finance & Systems Institute",
-      authorOrcid: "0000-0003-8821-4902",
-      coAuthors: "Dr. Elena Rostova",
-      articleType: "Original Research",
-      submissionStage: "Final Decision Dispatched",
-      abstract: "Empirical latency benchmarking and sandwich-attack vulnerability surface models across decentralized automated market maker pools under high gas price volatility regimes.",
-      keywords: "Algorithmic Trading, Automated Market Makers, Arbitrage, Decentralized Finance",
-      fileName: "AMM_Arbitrage_Framework.pdf",
-      fileSize: "2.7 MB",
-      ethicsIrb: "Exempt - Algorithmic Simulation",
-      fundingGrant: "DeFi-RES-2025-01",
-      dataDoi: "doi.org/10.5281/zenodo.441920",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Clara Zhang"
-    },
-    {
-      id: "SOSOC-26-RV002",
-      title: "Climate Adaptation Strategies in Coastal Communities",
-      journal: "Scholarly Open: Social Sciences & Humanities",
-      status: "Under Review",
-      date: "2026-06-01",
-      reviewers: ["Dr. Marcus Vance", "Dr. Evelyn Vane"],
-      integrityStatus: "Clean",
-      plagiarismScore: 4,
-      aiScore: 5,
-      authorFirstName: "Maria",
-      authorLastName: "Santos",
-      authorName: "Dr. Maria Santos",
-      authorEmail: "m.santos@coastal-research.org",
-      authorAffiliation: "Institute for Marine & Coastal Governance",
-      authorOrcid: "0000-0001-9234-5678",
-      coAuthors: "Prof. Clara Zhang, Dr. David Miller",
-      articleType: "Original Research",
-      submissionStage: "Under Peer Review",
-      abstract: "Comprehensive analysis of socio-ecological resilience metrics, community-led seawall infrastructures, and municipal relocation frameworks in vulnerable coastal settlements.",
-      keywords: "Climate Adaptation, Coastal Resilience, Sea Level Rise, Municipal Planning",
-      fileName: "Coastal_Adaptation_Framework_2026.pdf",
-      fileSize: "3.8 MB",
-      ethicsIrb: "IRB-SOC-2026-041",
-      fundingGrant: "UN-CLIM-2025-99",
-      dataDoi: "doi.org/10.5281/zenodo.552910",
-      editorAssigned: true,
-      assignedEditorName: "Prof. Clara Zhang"
-    }
-  ])
+  // Initial State: Fresh clean start with zero dummy manuscripts or mock papers
+  const [manuscripts, setManuscripts] = useState<Manuscript[]>([])
 
-  const [reviewInvitations, setReviewInvitations] = useState<ReviewInvitation[]>([
-    {
-      id: "SOENG-26-RS001",
-      title: "Decentralized Federated Learning on Non-IID Medical Data",
-      journal: "Engineering & Applied Sciences",
-      deadline: "2026-06-25",
-      abstract: "This paper proposes a novel framework for federated learning in decentralized healthcare environments. By utilizing differential privacy and a custom weight aggregation protocol, we demonstrate high diagnostic accuracy across non-IID datasets without compromising patient confidentiality."
-    }
-  ])
+  const [reviewInvitations, setReviewInvitations] = useState<ReviewInvitation[]>([])
 
-  const [activeReviews, setActiveReviews] = useState<ActiveReview[]>([
-    {
-      id: "SOSOC-26-RV002",
-      title: "Climate Adaptation Strategies in Coastal Communities",
-      journal: "Social Sciences & Humanities",
-      deadline: "2026-06-18",
-      status: "In Progress"
-    },
-    {
-      id: "SOEAS-26-RS102",
-      title: "Machine Learning Approaches in Renewable Energy Forecasting",
-      journal: "Engineering & Applied Sciences",
-      deadline: "2026-06-22",
-      status: "In Progress"
-    }
-  ])
+  const [activeReviews, setActiveReviews] = useState<ActiveReview[]>([])
 
-  const [reviews, setReviews] = useState<ReviewFeedback[]>([
-    {
-      id: "REV-FB-01",
-      paperId: "MS-2026-094",
-      reviewerName: "Prof. Aris Thorne",
-      originality: 3,
-      methodology: 4,
-      clarity: 3,
-      significance: 4,
-      commentsAuthor: "The authors should expand the section on green spaces to detail the specific local climate conditions. The statistical modeling is reasonable but needs more clear equations.",
-      commentsEditor: "A solid study overall. The author is capable of these modifications.",
-      recommendation: "Minor Revision",
-      status: "Released",
-      sanitizedCommentsAuthor: "The authors should expand the section on green spaces to detail the specific local climate conditions. The statistical modeling is reasonable but needs more clear equations."
-    },
-    {
-      id: "REV-FB-02",
-      paperId: "SOMED-26-RW101",
-      reviewerName: "Dr. Evelyn Vane",
-      originality: 4,
-      methodology: 4,
-      clarity: 4,
-      significance: 5,
-      commentsAuthor: "This machine learning framework is highly innovative. However, the author used some extremely harsh words in section 4 criticizing the previous studies, calling them 'foolish and completely flawed'. This should be sanitized before author sees it.",
-      commentsEditor: "Excellent paper, but please edit out the reviewer's reference to the author's tone or vice-versa, and the criticisms in paragraph 3.",
-      recommendation: "Minor Revision",
-      status: "Pending Moderation"
-    },
-    {
-      id: "REV-FB-03",
-      paperId: "SOEAS-26-RS102",
-      reviewerName: "Dr. Marcus Vance",
-      originality: 4,
-      methodology: 4,
-      clarity: 4,
-      significance: 4,
-      commentsAuthor: "Benchmarking against baseline datasets is sound. However, the tone in section 4.1 regarding competing literature is unnecessarily polemical and must be toned down. Also please expand dynamic range annotations on Figure 3.",
-      commentsEditor: "Rigorous paper. Please sanitize the polemical reference in section 4.1 before passing to author.",
-      recommendation: "Minor Revision",
-      status: "Pending Moderation"
-    },
-    {
-      id: "REV-FB-04",
-      paperId: "SOEAS-26-RS102",
-      reviewerName: "Prof. Elena Rostova",
-      originality: 5,
-      methodology: 4,
-      clarity: 4,
-      significance: 5,
-      commentsAuthor: "Excellent study. In Section 3.2, please clarify the sample size calculation and confidence interval in Table 2.",
-      commentsEditor: "Top tier submission. Ready for minor revision.",
-      recommendation: "Accept with Minor Revisions",
-      status: "Pending Moderation"
-    }
-  ])
+  const [reviews, setReviews] = useState<ReviewFeedback[]>([])
 
-  const [integrityAlerts, setIntegrityAlerts] = useState<IntegrityAlert[]>([
-    {
-      id: "ALT-001",
-      paperId: "SOEAS-26-RS106",
-      title: "Optimization of Silicon Anodes for Lithium-Ion Batteries",
-      journal: "Engineering & Applied Sciences",
-      type: "AI Content Index",
-      score: "88% Probability",
-      detail: "Statistical signature mismatch in 'Methodology' suggests large-language model generation.",
-      severity: "warning",
-      status: "Escalated",
-      escalationNotes: "Elevated AI probability (88% Probability) detected in Methodology. Recommend 14-day author inquiry for LLM disclosure.",
-      escalationRecommendation: "inquiry",
-      escalationPriority: "high",
-      escalatedAt: "Aug 31, 2026, 08:00 PM",
-      escalatedBy: "Dr. Helen Vance (Research Integrity Manager)"
-    },
-    {
-      id: "ALT-002",
-      paperId: "SOSSH-26-SRW107",
-      title: "Gender Wage Disparity: A Multi-Country Meta-Analysis",
-      journal: "Social Sciences & Humanities",
-      type: "Plagiarism Match",
-      score: "34% Similarity",
-      detail: "Overlap of 34% detected with 'International Labor Statistics Review (2024)' in Intro and Results sections.",
-      severity: "critical",
-      status: "Flagged"
-    }
-  ])
+  const [integrityAlerts, setIntegrityAlerts] = useState<IntegrityAlert[]>([])
 
-  const [crossDeskNotifications, setCrossDeskNotifications] = useState<CrossDeskNotification[]>([
-    {
-      id: "NOTIF-001",
-      timestamp: "Today · 20:00 UTC",
-      paperId: "SOEAS-26-RS106",
-      paperTitle: "Optimization of Silicon Anodes for Lithium-Ion Batteries",
-      journal: "Engineering & Applied Sciences",
-      type: "im_escalation",
-      severity: "urgent",
-      actorName: "Dr. Helen Vance",
-      actorRole: "Research Integrity Office",
-      headline: "Integrity Flag Escalated",
-      summary: "Elevated AI probability (88%) flagged in methodology.",
-      recipient: "Journal Manager & Editor-in-Chief",
-      isRead: false
-    },
-    {
-      id: "NOTIF-002",
-      timestamp: "Today · 18:30 UTC",
-      paperId: "SOMED-26-RW101",
-      paperTitle: "Neural Cell Proliferation in Regenerative Therapies",
-      journal: "Scholarly Open: Medicine",
-      type: "eic_inquiry",
-      severity: "high",
-      actorName: "Prof. Aris Thorne",
-      actorRole: "Editor-in-Chief",
-      headline: "Author Inquiry Sent",
-      summary: "Image resolution query sent to Dr. Evelyn Vane.",
-      dispatchedLetter: `Dear Dr. Evelyn Vane,\n\nManuscript ID: SOMED-26-RW101\nTitle: "Neural Cell Proliferation in Regenerative Therapies"\n\nPlease provide formal clarification regarding Western blot image resolution within 14 days.\n\nSincerely,\nProf. Aris Thorne\nEditor-in-Chief`,
-      recipient: "Dr. Evelyn Vane",
-      isRead: false
-    },
-    {
-      id: "NOTIF-003",
-      timestamp: "Yesterday · 14:15 UTC",
-      paperId: "SOSOC-26-RS103",
-      paperTitle: "Urban Green Spaces and Socio-Spatial Equity in European Cities",
-      journal: "Social Sciences & Humanities",
-      type: "jm_assignment",
-      severity: "normal",
-      actorName: "Sarah Jenkins",
-      actorRole: "Journal Manager Desk",
-      headline: "Editor Assigned",
-      summary: "Prof. Aris Thorne assigned as Lead Editor.",
-      recipient: "Prof. Aris Thorne",
-      isRead: true
-    }
-  ])
+  const [crossDeskNotifications, setCrossDeskNotifications] = useState<CrossDeskNotification[]>([])
 
   const handleAddCrossDeskNotification = (notif: Partial<CrossDeskNotification>) => {
     const newEntry: CrossDeskNotification = {
@@ -1876,56 +1384,39 @@ export default function Editorial360Page() {
   }
 
   const [users, setUsers] = useState<WorkspaceUser[]>([
-    { id: "USR-01", name: "Dr. Evelyn Vane", email: "e.vane@scholarlyopen.org", role: "reviewer", activeTasks: 2, status: "Active" },
-    { id: "USR-02", name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", role: "reviewer", activeTasks: 1, status: "Active" },
-    { id: "USR-03", name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", role: "editor", activeTasks: 4, status: "Active" },
-    { id: "USR-04", name: "Dr. Sarah Jenkins", email: "s.jenkins@scholarlyopen.org", role: "ria", activeTasks: 2, status: "Active" },
+    { id: "USR-01", name: "Dr. Evelyn Vane", email: "e.vane@scholarlyopen.org", role: "reviewer", activeTasks: 0, status: "Active" },
+    { id: "USR-02", name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", role: "reviewer", activeTasks: 0, status: "Active" },
+    { id: "USR-03", name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", role: "editor", activeTasks: 0, status: "Active" },
+    { id: "USR-04", name: "Dr. Sarah Jenkins", email: "s.jenkins@scholarlyopen.org", role: "ria", activeTasks: 0, status: "Active" },
     { id: "USR-05", name: "Prof. David Miller", email: "d.miller@scholarlyopen.org", role: "editor", activeTasks: 0, status: "Pending Invitation" }
   ])
 
-  const [archiveLogs, setArchiveLogs] = useState<ArchiveLog[]>([
-    {
-      id: "LOG-100",
-      paperId: "SOEAS-26-RS102",
-      actor: "Prof. Aris Thorne (Editor)",
-      action: "Decision Logged",
-      timestamp: "2026-06-01 10:24",
-      details: "Manuscript accepted for publication after review verification."
-    },
-    {
-      id: "LOG-101",
-      paperId: "SOSSH-26-SRW103",
-      actor: "Noor F. (Journal Manager)",
-      action: "Review Verified & Released",
-      timestamp: "2026-06-03 14:15",
-      details: "Released sanitized review feedback by Prof. Aris Thorne to the principal author."
-    }
-  ])
+  const [archiveLogs, setArchiveLogs] = useState<ArchiveLog[]>([])
 
   // Exact 5 suggested reviewer options categorized by status
   const reviewerSuggestions: ReviewerSuggestion[] = [
     { name: "Dr. Evelyn Vane", email: "e.vane@scholarlyopen.org", status: "Active", activeTasks: 0, matchScore: 98, specialization: "Renewable Energy Systems, ML" },
-    { name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", status: "Busy", activeTasks: 2, matchScore: 91, specialization: "Power Grid Optimization" },
-    { name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", status: "Active", activeTasks: 1, matchScore: 85, specialization: "Data Analytics, Climatology" },
+    { name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", status: "Busy", activeTasks: 0, matchScore: 91, specialization: "Power Grid Optimization" },
+    { name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", status: "Active", activeTasks: 0, matchScore: 85, specialization: "Data Analytics, Climatology" },
     { name: "Dr. Sarah Jenkins", email: "s.jenkins@scholarlyopen.org", status: "Inactive", activeTasks: 0, matchScore: 78, specialization: "Algorithms, Signal Processing" },
-    { name: "Prof. Clara Zhang", email: "c.zhang@scholarlyopen.org", status: "Busy", activeTasks: 3, matchScore: 95, specialization: "Biodegradable Polymers" },
+    { name: "Prof. Clara Zhang", email: "c.zhang@scholarlyopen.org", status: "Busy", activeTasks: 0, matchScore: 95, specialization: "Biodegradable Polymers" },
   ]
 
   const [journals, setJournals] = useState<JournalInfo[]>([
-    { name: "Scholarly Open: Engineering & Applied Sciences", code: "EAS", submissions: 142, latency: 22, status: "Active", editorInChief: "Prof. Clara Zhang" },
-    { name: "Scholarly Open: Social Sciences & Humanities", code: "SSH", submissions: 98, latency: 26, status: "Active", editorInChief: "Prof. Aris Thorne" },
-    { name: "Scholarly Open: Social Sciences Open", code: "SSO", submissions: 54, latency: 24, status: "Active", editorInChief: "Dr. Evelyn Vane" },
-    { name: "Scholarly Open: Biology", code: "BIO", submissions: 62, latency: 20, status: "Active", editorInChief: "Dr. Helen Vance" },
-    { name: "Scholarly Open: Chemistry", code: "CHEM", submissions: 75, latency: 21, status: "Active", editorInChief: "Prof. Robert Lang" },
-    { name: "Scholarly Open: Medicine", code: "MED", submissions: 110, latency: 25, status: "Active", editorInChief: "Dr. Sarah Jenkins" },
-    { name: "Scholarly Open: Data Science & Analytics", code: "DSA", submissions: 48, latency: 18, status: "Active", editorInChief: "Dr. Marcus Vance" },
-    { name: "Scholarly Open: Environmental Science", code: "ENV", submissions: 43, latency: 19, status: "Active", editorInChief: "Prof. David Miller" },
-    { name: "Scholarly Open: Clinical AI & Digital Health", code: "CAI", submissions: 89, latency: 15, status: "Active", editorInChief: "Dr. Alex Johnson" },
-    { name: "Scholarly Open: AI Safety & Governance", code: "AIS", submissions: 94, latency: 16, status: "Active", editorInChief: "Dr. Marcus Vance" },
-    { name: "Scholarly Open: Decarbonization & Carbon Tech", code: "DCT", submissions: 37, latency: 23, status: "Active", editorInChief: "Prof. Clara Zhang" },
-    { name: "Scholarly Open: Quantum Engineering", code: "QE", submissions: 29, latency: 17, status: "Active", editorInChief: "Prof. Aris Thorne" },
-    { name: "Scholarly Open: Synthetic Biology & Bio-Design", code: "SBD", submissions: 51, latency: 20, status: "Active", editorInChief: "Dr. Evelyn Vane" },
-    { name: "Scholarly Open: Space Resources & Orbital Economy", code: "SRE", submissions: 33, latency: 28, status: "Active", editorInChief: "Prof. David Miller" }
+    { name: "Scholarly Open: Engineering & Applied Sciences", code: "EAS", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Clara Zhang" },
+    { name: "Scholarly Open: Social Sciences & Humanities", code: "SSH", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Aris Thorne" },
+    { name: "Scholarly Open: Social Sciences Open", code: "SSO", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Evelyn Vane" },
+    { name: "Scholarly Open: Biology", code: "BIO", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Helen Vance" },
+    { name: "Scholarly Open: Chemistry", code: "CHEM", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Robert Lang" },
+    { name: "Scholarly Open: Medicine", code: "MED", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Sarah Jenkins" },
+    { name: "Scholarly Open: Data Science & Analytics", code: "DSA", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Marcus Vance" },
+    { name: "Scholarly Open: Environmental Science", code: "ENV", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. David Miller" },
+    { name: "Scholarly Open: Clinical AI & Digital Health", code: "CAI", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Alex Johnson" },
+    { name: "Scholarly Open: AI Safety & Governance", code: "AIS", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Marcus Vance" },
+    { name: "Scholarly Open: Decarbonization & Carbon Tech", code: "DCT", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Clara Zhang" },
+    { name: "Scholarly Open: Quantum Engineering", code: "QE", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Aris Thorne" },
+    { name: "Scholarly Open: Synthetic Biology & Bio-Design", code: "SBD", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Evelyn Vane" },
+    { name: "Scholarly Open: Space Resources & Orbital Economy", code: "SRE", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. David Miller" }
   ])
 
   // Dialog and Wizard control states
@@ -2096,16 +1587,7 @@ export default function Editorial360Page() {
   const [escalateIncludeAuditLog, setEscalateIncludeAuditLog] = useState(true)
 
   // Co-Reviewing States
-  const [coReviewInvitations, setCoReviewInvitations] = useState<CoReviewInvitation[]>([
-    {
-      id: "COREV-1",
-      paperId: "REV-2026-12",
-      title: "Climate Adaptation Strategies in Coastal Communities",
-      journal: "Social Sciences & Humanities",
-      inviterName: "Dr. Evelyn Vane",
-      status: "Pending Disclosure"
-    }
-  ])
+  const [coReviewInvitations, setCoReviewInvitations] = useState<CoReviewInvitation[]>([])
   const [isInviteCoReviewerOpen, setIsInviteCoReviewerOpen] = useState(false)
   const [inviteCoRevPaperId, setInviteCoRevPaperId] = useState("")
   const [coRevName, setCoRevName] = useState("")
@@ -6157,7 +5639,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <DollarSign className="h-4 w-4 text-emerald-500" />
+                          <DollarSign className="h-4 w-4 text-[#0b99ff]" />
                           <span>{language === "de" ? "Gutachter-Honorare" : "Reviewer Honoraria"}</span>
                         </div>
                         {adminPayouts.filter(p => p.status === "Pending").length > 0 && (
