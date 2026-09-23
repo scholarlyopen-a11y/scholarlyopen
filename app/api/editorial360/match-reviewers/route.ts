@@ -9,6 +9,7 @@ export interface MatchedReviewerItem {
   editorialRationale: string
   coiStatus: string
   email?: string
+  emailSource?: "extracted" | "institutional_domain" | "estimated"
   country?: string
   isEcr?: boolean
   ecrSource?: "bioRxiv" | "medRxiv" | "arXiv" | "OpenAlex ECR" | "Crossref"
@@ -21,65 +22,288 @@ export interface MatchedReviewerItem {
   verificationStatus?: string
 }
 
-export function harvestAuthorEmail(rawAffiliation: string, authorName: string): string {
-  if (!rawAffiliation && !authorName) return "faculty@university.edu"
+// In-memory cache for institution homepage domains across requests
+export const INSTITUTION_DOMAIN_CACHE = new Map<string, string>()
+
+// Common known university & institute domain registry
+export const KNOWN_INSTITUTION_DOMAINS: { keyword: string; domain: string }[] = [
+  // Finland
+  { keyword: "oulu", domain: "oulu.fi" },
+  { keyword: "turku", domain: "utu.fi" },
+  { keyword: "helsinki", domain: "helsinki.fi" },
+  { keyword: "tampere", domain: "tuni.fi" },
+  { keyword: "aalto", domain: "aalto.fi" },
+  { keyword: "eastern finland", domain: "uef.fi" },
+  { keyword: "jyvaskyl", domain: "jyu.fi" },
+  { keyword: "jyväskylä", domain: "jyu.fi" },
+  { keyword: "lappeenranta", domain: "lut.fi" },
+  { keyword: "abo akademi", domain: "abo.fi" },
+  { keyword: "åbo akademi", domain: "abo.fi" },
+  { keyword: "vaasa", domain: "uwasa.fi" },
+  // Sweden & Norway & Denmark
+  { keyword: "karolinska", domain: "ki.se" },
+  { keyword: "uppsala", domain: "uu.se" },
+  { keyword: "lund", domain: "lu.se" },
+  { keyword: "stockholm", domain: "su.se" },
+  { keyword: "kth", domain: "kth.se" },
+  { keyword: "gothenburg", domain: "gu.se" },
+  { keyword: "oslo", domain: "uio.no" },
+  { keyword: "bergen", domain: "uib.no" },
+  { keyword: "tromso", domain: "uit.no" },
+  { keyword: "tromsø", domain: "uit.no" },
+  { keyword: "ntnu", domain: "ntnu.no" },
+  { keyword: "copenhagen", domain: "ku.dk" },
+  { keyword: "aarhus", domain: "au.dk" },
+  // Germany (DACH)
+  { keyword: "heidelberg", domain: "uni-heidelberg.de" },
+  { keyword: "ludwig-maximilians", domain: "lmu.de" },
+  { keyword: "lmu", domain: "lmu.de" },
+  { keyword: "technical university of munich", domain: "tum.de" },
+  { keyword: "tum", domain: "tum.de" },
+  { keyword: "charite", domain: "charite.de" },
+  { keyword: "charité", domain: "charite.de" },
+  { keyword: "humboldt", domain: "hu-berlin.de" },
+  { keyword: "freie universitat", domain: "fu-berlin.de" },
+  { keyword: "freiburg", domain: "uni-freiburg.de" },
+  { keyword: "tubingen", domain: "uni-tuebingen.de" },
+  { keyword: "tübingen", domain: "uni-tuebingen.de" },
+  { keyword: "bonn", domain: "uni-bonn.de" },
+  { keyword: "aachen", domain: "rwth-aachen.de" },
+  { keyword: "rwth", domain: "rwth-aachen.de" },
+  { keyword: "gottingen", domain: "uni-goettingen.de" },
+  { keyword: "göttingen", domain: "uni-goettingen.de" },
+  { keyword: "koln", domain: "uni-koeln.de" },
+  { keyword: "cologne", domain: "uni-koeln.de" },
+  { keyword: "hamburg", domain: "uni-hamburg.de" },
+  { keyword: "dresden", domain: "tu-dresden.de" },
+  { keyword: "frankfurt", domain: "uni-frankfurt.de" },
+  { keyword: "karlsruhe", domain: "kit.edu" },
+  { keyword: "kit", domain: "kit.edu" },
+  { keyword: "erlangen", domain: "fau.de" },
+  { keyword: "wurzburg", domain: "uni-wuerzburg.de" },
+  { keyword: "würzburg", domain: "uni-wuerzburg.de" },
+  { keyword: "leipzig", domain: "uni-leipzig.de" },
+  { keyword: "mainz", domain: "uni-mainz.de" },
+  { keyword: "marburg", domain: "uni-marburg.de" },
+  { keyword: "jena", domain: "uni-jena.de" },
+  { keyword: "stuttgart", domain: "uni-stuttgart.de" },
+  { keyword: "bochum", domain: "rub.de" },
+  { keyword: "dusseldorf", domain: "hhu.de" },
+  { keyword: "düsseldorf", domain: "hhu.de" },
+  { keyword: "munster", domain: "uni-muenster.de" },
+  { keyword: "münster", domain: "uni-muenster.de" },
+  { keyword: "kiel", domain: "uni-kiel.de" },
+  { keyword: "rostock", domain: "uni-rostock.de" },
+  { keyword: "greifswald", domain: "uni-greifswald.de" },
+  { keyword: "halle", domain: "uni-halle.de" },
+  { keyword: "magdeburg", domain: "ovgu.de" },
+  { keyword: "potsdam", domain: "uni-potsdam.de" },
+  { keyword: "hannover", domain: "mhh.de" },
+  { keyword: "mannheim", domain: "uni-mannheim.de" },
+  { keyword: "ulm", domain: "uni-ulm.de" },
+  { keyword: "regensburg", domain: "ur.de" },
+  { keyword: "passau", domain: "uni-passau.de" },
+  { keyword: "bayreuth", domain: "uni-bayreuth.de" },
+  { keyword: "augsburg", domain: "uni-augsburg.de" },
+  { keyword: "giessen", domain: "uni-giessen.de" },
+  { keyword: "gießen", domain: "uni-giessen.de" },
+  { keyword: "kassel", domain: "uni-kassel.de" },
+  { keyword: "darmstadt", domain: "tu-darmstadt.de" },
+  { keyword: "saarland", domain: "uni-saarland.de" },
+  { keyword: "trier", domain: "uni-trier.de" },
+  { keyword: "kaiserslautern", domain: "rptu.de" },
+  { keyword: "bielefeld", domain: "uni-bielefeld.de" },
+  { keyword: "paderborn", domain: "uni-paderborn.de" },
+  { keyword: "siegen", domain: "uni-siegen.de" },
+  { keyword: "wuppertal", domain: "uni-wuppertal.de" },
+  { keyword: "duisburg", domain: "uni-due.de" },
+  { keyword: "essen", domain: "uni-due.de" },
+  { keyword: "dortmund", domain: "tu-dortmund.de" },
+  { keyword: "braunschweig", domain: "tu-braunschweig.de" },
+  { keyword: "clausthal", domain: "tu-clausthal.de" },
+  { keyword: "osnabruck", domain: "uni-osnabrueck.de" },
+  { keyword: "osnabrück", domain: "uni-osnabrueck.de" },
+  { keyword: "oldenburg", domain: "uol.de" },
+  { keyword: "bremen", domain: "uni-bremen.de" },
+  { keyword: "lubeck", domain: "uni-luebeck.de" },
+  { keyword: "lübeck", domain: "uni-luebeck.de" },
+  { keyword: "flensburg", domain: "uni-flensburg.de" },
+  { keyword: "max planck", domain: "mpg.de" },
+  { keyword: "helmholtz", domain: "helmholtz.de" },
+  { keyword: "fraunhofer", domain: "fraunhofer.de" },
+  { keyword: "leibniz", domain: "leibniz-gemeinschaft.de" },
+  // Austria (DACH)
+  { keyword: "wien", domain: "univie.ac.at" },
+  { keyword: "vienna", domain: "univie.ac.at" },
+  { keyword: "innsbruck", domain: "uibk.ac.at" },
+  { keyword: "graz", domain: "uni-graz.at" },
+  { keyword: "salzburg", domain: "plus.ac.at" },
+  { keyword: "linz", domain: "jku.at" },
+  { keyword: "klagenfurt", domain: "aau.at" },
+  // Switzerland (DACH)
+  { keyword: "eth zurich", domain: "ethz.ch" },
+  { keyword: "eth zürich", domain: "ethz.ch" },
+  { keyword: "epfl", domain: "epfl.ch" },
+  { keyword: "zurich", domain: "uzh.ch" },
+  { keyword: "zürich", domain: "uzh.ch" },
+  { keyword: "geneva", domain: "unige.ch" },
+  { keyword: "genève", domain: "unige.ch" },
+  { keyword: "basel", domain: "unibas.ch" },
+  { keyword: "bern", domain: "unibe.ch" },
+  { keyword: "lausanne", domain: "unil.ch" },
+  { keyword: "fribourg", domain: "unifr.ch" },
+  { keyword: "neuchatel", domain: "unine.ch" },
+  { keyword: "neuchâtel", domain: "unine.ch" },
+  { keyword: "svizzera italiana", domain: "usi.ch" },
+  // United Kingdom
+  { keyword: "oxford", domain: "ox.ac.uk" },
+  { keyword: "cambridge", domain: "cam.ac.uk" },
+  { keyword: "imperial", domain: "imperial.ac.uk" },
+  { keyword: "university college london", domain: "ucl.ac.uk" },
+  { keyword: "ucl", domain: "ucl.ac.uk" },
+  { keyword: "edinburgh", domain: "ed.ac.uk" },
+  { keyword: "king's college", domain: "kcl.ac.uk" },
+  { keyword: "manchester", domain: "manchester.ac.uk" },
+  { keyword: "warwick", domain: "warwick.ac.uk" },
+  { keyword: "bristol", domain: "bristol.ac.uk" },
+  { keyword: "glasgow", domain: "gla.ac.uk" },
+  { keyword: "birmingham", domain: "bham.ac.uk" },
+  { keyword: "sheffield", domain: "sheffield.ac.uk" },
+  { keyword: "leeds", domain: "leeds.ac.uk" },
+  { keyword: "southampton", domain: "soton.ac.uk" },
+  { keyword: "nottingham", domain: "nottingham.ac.uk" },
+  // USA & Canada
+  { keyword: "harvard", domain: "harvard.edu" },
+  { keyword: "stanford", domain: "stanford.edu" },
+  { keyword: "mit", domain: "mit.edu" },
+  { keyword: "massachusetts institute", domain: "mit.edu" },
+  { keyword: "berkeley", domain: "berkeley.edu" },
+  { keyword: "ucla", domain: "ucla.edu" },
+  { keyword: "yale", domain: "yale.edu" },
+  { keyword: "princeton", domain: "princeton.edu" },
+  { keyword: "columbia", domain: "columbia.edu" },
+  { keyword: "cornell", domain: "cornell.edu" },
+  { keyword: "johns hopkins", domain: "jhmi.edu" },
+  { keyword: "hopkins", domain: "jhu.edu" },
+  { keyword: "pennsylvania", domain: "upenn.edu" },
+  { keyword: "chicago", domain: "uchicago.edu" },
+  { keyword: "michigan", domain: "umich.edu" },
+  { keyword: "toronto", domain: "utoronto.ca" },
+  { keyword: "mcgill", domain: "mcgill.ca" },
+  { keyword: "british columbia", domain: "ubc.ca" },
+  // France & Netherlands & Spain & Italy
+  { keyword: "sorbonne", domain: "sorbonne-universite.fr" },
+  { keyword: "paris-saclay", domain: "universite-paris-saclay.fr" },
+  { keyword: "amsterdam", domain: "uva.nl" },
+  { keyword: "utrecht", domain: "uu.nl" },
+  { keyword: "leiden", domain: "universiteitleiden.nl" },
+  { keyword: "erasmus", domain: "eur.nl" },
+  { keyword: "groningen", domain: "rug.nl" },
+  { keyword: "maastricht", domain: "mumc.nl" },
+  { keyword: "barcelona", domain: "ub.edu" },
+  { keyword: "madrid", domain: "ucm.es" },
+  { keyword: "alcala", domain: "uah.es" },
+  { keyword: "alcalá", domain: "uah.es" },
+  { keyword: "bologna", domain: "unibo.it" },
+  { keyword: "sapienza", domain: "uniroma1.it" },
+  { keyword: "milano", domain: "unimi.it" },
+  { keyword: "padova", domain: "unipd.it" },
+  // Asia & Oceania
+  { keyword: "tokyo", domain: "u-tokyo.ac.jp" },
+  { keyword: "kyoto", domain: "kyoto-u.ac.jp" },
+  { keyword: "osaka", domain: "osaka-u.ac.jp" },
+  { keyword: "tohoku", domain: "tohoku.ac.jp" },
+  { keyword: "tsinghua", domain: "tsinghua.edu.cn" },
+  { keyword: "peking", domain: "pku.edu.cn" },
+  { keyword: "fudan", domain: "fudan.edu.cn" },
+  { keyword: "zhejiang", domain: "zju.edu.cn" },
+  { keyword: "hong kong", domain: "hku.hk" },
+  { keyword: "singapore", domain: "nus.edu.sg" },
+  { keyword: "nus", domain: "nus.edu.sg" },
+  { keyword: "ntu", domain: "ntu.edu.sg" },
+  { keyword: "kaist", domain: "kaist.ac.kr" },
+  { keyword: "seoul national", domain: "snu.ac.kr" },
+  { keyword: "melbourne", domain: "unimelb.edu.au" },
+  { keyword: "sydney", domain: "sydney.edu.au" },
+  { keyword: "queensland", domain: "uq.edu.au" }
+]
+
+export function cleanAuthorName(name: string): { first: string; last: string; username: string } {
+  const normalized = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove diacritics: ä->a, ö->o, ü->u, ç->c, etc.
+    .replace(/^(dr|prof|phd|md)\.?\s+/i, "")
+    .replace(/[^a-zA-Z\s.-]/g, "")
+    .trim()
+    .toLowerCase()
+
+  const parts = normalized.split(/[\s.-]+/).filter(Boolean)
+  const first = parts[0] || "scholar"
+  const last = parts.length > 1 ? parts[parts.length - 1] : first
+  const username = parts.length > 1 ? `${first[0]}.${last}` : first
+  return { first, last, username }
+}
+
+export function deriveFallbackDomain(instName: string, countryCode?: string): string {
+  const genericWords = new Set([
+    "the", "university", "of", "institute", "technology", "college", "school", "faculty",
+    "hospital", "clinic", "center", "centre", "universitat", "universität", "universite",
+    "université", "universidad", "universita", "università", "universiteit", "national",
+    "state", "federal", "medical", "health", "science", "sciences", "applied", "and",
+    "de", "di", "zu", "der", "fur", "für", "la", "le", "des", "department", "division"
+  ])
+
+  const words = instName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z\s-]/g, "")
+    .split(/[\s-]+/)
+    .filter(w => w.length > 1 && !genericWords.has(w))
+
+  const keyWord = words[0] || "academic"
+  const c = (countryCode || "").toUpperCase().trim()
+
+  let tld = ".edu"
+  if (c === "FI") tld = ".fi"
+  else if (c === "DE") tld = ".de"
+  else if (c === "AT") tld = ".ac.at"
+  else if (c === "CH") tld = ".ch"
+  else if (c === "GB" || c === "UK") tld = ".ac.uk"
+  else if (c === "FR") tld = ".fr"
+  else if (c === "IT") tld = ".it"
+  else if (c === "ES") tld = ".es"
+  else if (c === "NL") tld = ".nl"
+  else if (c === "SE") tld = ".se"
+  else if (c === "NO") tld = ".no"
+  else if (c === "DK") tld = ".dk"
+  else if (c === "AU") tld = ".edu.au"
+  else if (c === "CA") tld = ".ca"
+  else if (c === "JP") tld = ".ac.jp"
+  else if (c === "KR") tld = ".ac.kr"
+  else if (c === "CN") tld = ".edu.cn"
+  else if (c === "IN") tld = ".ac.in"
+  else if (c === "BR") tld = ".edu.br"
+
+  return `${keyWord}${tld}`
+}
+
+export function harvestAuthorEmail(rawAffiliation: string, authorName: string, countryCode?: string): string {
+  if (!rawAffiliation && !authorName) return "faculty@academic-institution.org"
   
-  // 1. Direct regex match from raw affiliation text (often contains email or Electronic address)
+  // 1. Direct regex match from raw affiliation text
   const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i
-  const match = rawAffiliation.match(emailRegex)
+  const match = (rawAffiliation || "").match(emailRegex)
   if (match && match[1]) {
-    return match[1].toLowerCase().replace(/[.,;:]+$/, "")
+    return match[1].toLowerCase().replace(/[.,;:)\]\s]+$/, "")
   }
 
   // 2. High-precision university domain resolution
   const lowAff = (rawAffiliation || "").toLowerCase()
-  let domain = ""
-  if (lowAff.includes("harvard")) domain = "hms.harvard.edu"
-  else if (lowAff.includes("stanford")) domain = "stanford.edu"
-  else if (lowAff.includes("oxford")) domain = "ox.ac.uk"
-  else if (lowAff.includes("cambridge")) domain = "cam.ac.uk"
-  else if (lowAff.includes("mit") || lowAff.includes("massachusetts institute")) domain = "mit.edu"
-  else if (lowAff.includes("berkeley")) domain = "berkeley.edu"
-  else if (lowAff.includes("ucla")) domain = "ucla.edu"
-  else if (lowAff.includes("yale")) domain = "yale.edu"
-  else if (lowAff.includes("princeton")) domain = "princeton.edu"
-  else if (lowAff.includes("columbia")) domain = "columbia.edu"
-  else if (lowAff.includes("cornell")) domain = "cornell.edu"
-  else if (lowAff.includes("toronto")) domain = "utoronto.ca"
-  else if (lowAff.includes("imperial")) domain = "imperial.ac.uk"
-  else if (lowAff.includes("university college london") || lowAff.includes("ucl")) domain = "ucl.ac.uk"
-  else if (lowAff.includes("edinburgh")) domain = "ed.ac.uk"
-  else if (lowAff.includes("manchester")) domain = "manchester.ac.uk"
-  else if (lowAff.includes("washington university")) domain = "wustl.edu"
-  else if (lowAff.includes("alabama")) domain = "uabmc.edu"
-  else if (lowAff.includes("maastricht")) domain = "mumc.nl"
-  else if (lowAff.includes("max planck")) domain = "mpg.de"
-  else if (lowAff.includes("eth zurich") || lowAff.includes("eth zürich")) domain = "ethz.ch"
-  else if (lowAff.includes("epfl")) domain = "epfl.ch"
-  else if (lowAff.includes("karolinska")) domain = "ki.se"
-  else if (lowAff.includes("heidelberg")) domain = "uni-heidelberg.de"
-  else if (lowAff.includes("sorbonne")) domain = "sorbonne-universite.fr"
-  else if (lowAff.includes("tokyo")) domain = "u-tokyo.ac.jp"
-  else if (lowAff.includes("kyoto")) domain = "kyoto-u.ac.jp"
-  else if (lowAff.includes("tsinghua")) domain = "tsinghua.edu.cn"
-  else if (lowAff.includes("peking") || lowAff.includes("pku")) domain = "pku.edu.cn"
-  else if (lowAff.includes("hong kong") || lowAff.includes("hku")) domain = "hku.hk"
-  else if (lowAff.includes("singapore") || lowAff.includes("nus")) domain = "nus.edu.sg"
-  else if (lowAff.includes("ntu")) domain = "ntu.edu.sg"
-  else if (lowAff.includes("melbourne")) domain = "unimelb.edu.au"
-  else if (lowAff.includes("sydney")) domain = "sydney.edu.au"
-  else if (lowAff.includes("charite") || lowAff.includes("charité")) domain = "charite.de"
-  else if (lowAff.includes("hopkins")) domain = "jhmi.edu"
-  else if (lowAff.includes("chicago")) domain = "uchicago.edu"
-  else if (lowAff.includes("penn") || lowAff.includes("pennsylvania")) domain = "upenn.edu"
-  else if (lowAff.includes("nih") || lowAff.includes("national institutes of health")) domain = "nih.gov"
-  else {
-    const domainMatch = lowAff.match(/\b([a-z0-9-]+\.(?:edu|ac\.[a-z]{2}|edu\.[a-z]{2}|org|[a-z]{2}))\b/)
-    domain = domainMatch ? domainMatch[1] : "academic-faculty.org"
-  }
+  const matched = KNOWN_INSTITUTION_DOMAINS.find(k => lowAff.includes(k.keyword))
+  const domain = matched ? matched.domain : deriveFallbackDomain(rawAffiliation, countryCode)
 
-  const cleanParts = authorName.toLowerCase().replace(/^(dr|prof|phd)\.?\s+/i, '').replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-  const username = cleanParts.length > 1 ? `${cleanParts[0][0]}.${cleanParts[cleanParts.length - 1]}` : cleanParts[0] || "author"
+  const { username } = cleanAuthorName(authorName)
   return `${username}@${domain}`
 }
 
@@ -490,6 +714,45 @@ export async function POST(req: Request) {
 
         const candidatesMap = new Map<string, MatchedReviewerItem>()
 
+        // 1. Batch pre-fetch institution domains from OpenAlex in a single fast network call
+        const instIdsToFetch: string[] = []
+        for (const work of works) {
+          for (const a of (work.authorships || [])) {
+            const rawInstId = a.institutions?.[0]?.id
+            if (rawInstId) {
+              const cleanId = rawInstId.replace("https://openalex.org/", "").trim()
+              if (cleanId && !INSTITUTION_DOMAIN_CACHE.has(cleanId) && !instIdsToFetch.includes(cleanId)) {
+                instIdsToFetch.push(cleanId)
+              }
+            }
+          }
+        }
+
+        if (instIdsToFetch.length > 0) {
+          try {
+            const batchUrl = `https://api.openalex.org/institutions?filter=openalex_id:${instIdsToFetch.slice(0, 50).join('|')}&select=id,display_name,homepage_url,country_code&mailto=editorial@scholarlyopen.org`
+            const bRes = await fetch(batchUrl, {
+              headers: { "User-Agent": "ScholarlyOpen-PeerReview/1.0 (mailto:editorial@scholarlyopen.org)" },
+              cache: "force-cache"
+            })
+            if (bRes.ok) {
+              const bData = await bRes.json()
+              for (const inst of (bData.results || [])) {
+                if (inst.homepage_url) {
+                  try {
+                    const dom = new URL(inst.homepage_url).hostname.replace(/^www\./, "").toLowerCase()
+                    const cleanId = (inst.id || "").replace("https://openalex.org/", "").trim()
+                    if (cleanId) INSTITUTION_DOMAIN_CACHE.set(cleanId, dom)
+                    if (inst.display_name) INSTITUTION_DOMAIN_CACHE.set(inst.display_name.toLowerCase(), dom)
+                  } catch (e) {}
+                }
+              }
+            }
+          } catch (err) {
+            console.warn("Failed batch fetching institution domains:", err)
+          }
+        }
+
         for (const work of works) {
           const authorships = work.authorships || []
           for (const a of authorships.slice(0, 4)) {
@@ -530,41 +793,68 @@ export async function POST(req: Request) {
               work.concepts?.[0]?.display_name ||
               searchQuery
 
-            // Derive authentic institutional domain
-            let emailDomain = "university.edu"
-            if (instObj?.homepage_url) {
-              try {
-                const u = new URL(instObj.homepage_url)
-                emailDomain = u.hostname.replace(/^www\./, "")
-              } catch (e) {}
-            } else {
-              const lowInst = instName.toLowerCase()
-              if (lowInst.includes("tokyo")) emailDomain = "u-tokyo.ac.jp"
-              else if (lowInst.includes("sorbonne")) emailDomain = "sorbonne-universite.fr"
-              else if (lowInst.includes("kaist")) emailDomain = "kaist.ac.kr"
-              else if (lowInst.includes("oxford")) emailDomain = "ox.ac.uk"
-              else if (lowInst.includes("cambridge")) emailDomain = "cam.ac.uk"
-              else if (lowInst.includes("stanford")) emailDomain = "stanford.edu"
-              else if (lowInst.includes("harvard")) emailDomain = "harvard.edu"
-              else if (lowInst.includes("mit") || lowInst.includes("massachusetts institute")) emailDomain = "mit.edu"
-              else if (lowInst.includes("charit")) emailDomain = "charite.de"
-              else if (lowInst.includes("max planck")) emailDomain = "mpg.de"
-              else if (lowInst.includes("heidelberg")) emailDomain = "uni-heidelberg.de"
-              else if (lowInst.includes("toronto")) emailDomain = "utoronto.ca"
-              else if (lowInst.includes("eth zurich") || lowInst.includes("eth zürich")) emailDomain = "ethz.ch"
-              else if (lowInst.includes("imperial")) emailDomain = "imperial.ac.uk"
-              else if (lowInst.includes("singapore") || lowInst.includes("nus")) emailDomain = "nus.edu.sg"
-              else if (lowInst.includes("tsinghua")) emailDomain = "tsinghua.edu.cn"
-              else if (lowInst.includes("peking")) emailDomain = "pku.edu.cn"
-              else {
-                const cleanInst = instName.toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-                emailDomain = cleanInst.length > 0 && cleanInst[0].length > 3 ? `${cleanInst[0]}.edu` : "university.edu"
+            // 1. Direct explicit email search in author's affiliations and work
+            let contactEmail = ""
+            let emailSource: "extracted" | "institutional_domain" | "estimated" = "estimated"
+
+            // A. Check author's own raw affiliation strings for explicit email (e.g. Electronic address: scholar@inst.fi)
+            for (const aff of (a.raw_affiliation_strings || [])) {
+              const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i
+              const match = aff.match(emailRegex)
+              if (match && match[1]) {
+                contactEmail = match[1].toLowerCase().replace(/[.,;:)\]\s]+$/, "")
+                emailSource = "extracted"
+                break
               }
             }
 
-            const cleanName = authorDisplayName.toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-            const emailUser = cleanName.length > 1 ? `${cleanName[0][0]}.${cleanName[cleanName.length - 1]}` : cleanName[0] || "scholar"
-            const contactEmail = a.author?.email || `${emailUser}@${emailDomain}`
+            // B. If not found, check all affiliations in this work for this author's surname
+            if (!contactEmail) {
+              const { last } = cleanAuthorName(authorDisplayName)
+              if (last.length > 2) {
+                for (const otherA of authorships) {
+                  for (const aff of (otherA.raw_affiliation_strings || [])) {
+                    if (aff.toLowerCase().includes(last)) {
+                      const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i
+                      const match = aff.match(emailRegex)
+                      if (match && match[1]) {
+                        contactEmail = match[1].toLowerCase().replace(/[.,;:)\]\s]+$/, "")
+                        emailSource = "extracted"
+                        break
+                      }
+                    }
+                  }
+                  if (contactEmail) break
+                }
+              }
+            }
+
+            // C. If still not found, derive verified institutional domain
+            if (!contactEmail) {
+              const cleanInstId = (instObj?.id || "").replace("https://openalex.org/", "").trim()
+              const lowInst = instName.toLowerCase()
+              let emailDomain = ""
+
+              if (cleanInstId && INSTITUTION_DOMAIN_CACHE.has(cleanInstId)) {
+                emailDomain = INSTITUTION_DOMAIN_CACHE.get(cleanInstId)!
+                emailSource = "institutional_domain"
+              } else if (INSTITUTION_DOMAIN_CACHE.has(lowInst)) {
+                emailDomain = INSTITUTION_DOMAIN_CACHE.get(lowInst)!
+                emailSource = "institutional_domain"
+              } else {
+                const matchedKnown = KNOWN_INSTITUTION_DOMAINS.find(k => lowInst.includes(k.keyword))
+                if (matchedKnown) {
+                  emailDomain = matchedKnown.domain
+                  emailSource = "institutional_domain"
+                } else {
+                  emailDomain = deriveFallbackDomain(instName, countryCode)
+                  emailSource = "estimated"
+                }
+              }
+
+              const { username } = cleanAuthorName(authorDisplayName)
+              contactEmail = `${username}@${emailDomain}`
+            }
 
             if (!candidatesMap.has(authorDisplayName)) {
               candidatesMap.set(authorDisplayName, {
@@ -574,6 +864,7 @@ export async function POST(req: Request) {
                 orcid: orcid,
                 specialty: concept,
                 email: contactEmail,
+                emailSource,
                 metrics: `${work.publication_year ? `${work.publication_year} publication` : 'Active Scholar'} · ${citedCount > 0 ? `${citedCount.toLocaleString()} citations` : '12+ citations'}`,
                 editorialRationale: `Active researcher with recent work on "${work.title?.slice(0, 75)}...".`,
                 coiStatus: "Cleared ✓ (OpenAlex Vetted)"
@@ -607,26 +898,46 @@ export async function POST(req: Request) {
                 if (a.display_name && !candidatesMap.has(a.display_name)) {
                   const instObj = a.last_known_institutions?.[0]
                   const inst = instObj?.display_name || "Academic Medical Center"
-                  const cName = a.display_name.toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-                  const eUser = cName.length > 1 ? `${cName[0][0]}.${cName[cName.length - 1]}` : cName[0] || "scholar"
-                  
-                  let eDomain = "institute.org"
-                  if (instObj?.homepage_url) {
-                    try {
-                      eDomain = new URL(instObj.homepage_url).hostname.replace(/^www\./, "")
-                    } catch (e) {}
+                  const cleanInstId = (instObj?.id || "").replace("https://openalex.org/", "").trim()
+                  const lowInst = inst.toLowerCase()
+                  const countryCode = instObj?.country_code || ""
+
+                  let emailDomain = ""
+                  let emailSource: "extracted" | "institutional_domain" | "estimated" = "estimated"
+
+                  if (cleanInstId && INSTITUTION_DOMAIN_CACHE.has(cleanInstId)) {
+                    emailDomain = INSTITUTION_DOMAIN_CACHE.get(cleanInstId)!
+                    emailSource = "institutional_domain"
+                  } else if (INSTITUTION_DOMAIN_CACHE.has(lowInst)) {
+                    emailDomain = INSTITUTION_DOMAIN_CACHE.get(lowInst)!
+                    emailSource = "institutional_domain"
                   } else {
-                    const cInst = inst.toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/)
-                    eDomain = cInst.length > 0 && cInst[0].length > 3 ? `${cInst[0]}.edu` : "institute.org"
+                    const matchedKnown = KNOWN_INSTITUTION_DOMAINS.find(k => lowInst.includes(k.keyword))
+                    if (matchedKnown) {
+                      emailDomain = matchedKnown.domain
+                      emailSource = "institutional_domain"
+                    } else if (instObj?.homepage_url) {
+                      try {
+                        emailDomain = new URL(instObj.homepage_url).hostname.replace(/^www\./, "").toLowerCase()
+                        emailSource = "institutional_domain"
+                      } catch (e) {
+                        emailDomain = deriveFallbackDomain(inst, countryCode)
+                      }
+                    } else {
+                      emailDomain = deriveFallbackDomain(inst, countryCode)
+                    }
                   }
+
+                  const { username } = cleanAuthorName(a.display_name)
 
                   candidatesMap.set(a.display_name, {
                     name: a.display_name,
                     institution: inst,
-                    country: instObj?.country_code || "",
+                    country: countryCode,
                     orcid: a.orcid ? a.orcid.replace("https://orcid.org/", "") : "0000-0002-9912-3401",
                     specialty: a.x_concepts?.[0]?.display_name || searchQuery,
-                    email: `${eUser}@${eDomain}`,
+                    email: `${username}@${emailDomain}`,
+                    emailSource,
                     metrics: `${a.works_count || 28} papers · ${(a.cited_by_count || 520).toLocaleString()} citations`,
                     editorialRationale: `Matched specialist on ${searchQuery} in global author registry.`,
                     coiStatus: "Cleared ✓"

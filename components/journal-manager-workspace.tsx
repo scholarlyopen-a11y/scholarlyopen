@@ -2807,6 +2807,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                         <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                                           ✓ JM Confirmed
                                         </span>
+                                      ) : scholar.emailSource === "extracted" ? (
+                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                          ✓ Affiliation Extracted
+                                        </span>
+                                      ) : scholar.emailSource === "institutional_domain" ? (
+                                        <span className="text-[10px] font-semibold text-sky-600 dark:text-sky-400">
+                                          ✓ Verified Domain
+                                        </span>
                                       ) : (
                                         <span className="text-[10px] text-slate-400">
                                           Domain Match
@@ -2910,6 +2918,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 {scholar.isCustomEmail ? (
                                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
                                     ✓ JM Confirmed
+                                  </span>
+                                ) : scholar.emailSource === "extracted" ? (
+                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                                    ✓ Affiliation Extracted
+                                  </span>
+                                ) : scholar.emailSource === "institutional_domain" ? (
+                                  <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold">
+                                    ✓ Verified Domain
                                   </span>
                                 ) : (
                                   <span className="text-[10px] text-slate-400">
