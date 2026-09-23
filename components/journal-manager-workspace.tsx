@@ -1731,8 +1731,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             ✓ Confirmed
                           </span>
                         ) : (
-                          <span className="text-[10px] text-slate-400">
-                            Preprint Contact
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                            ✓ Scraped from Source Paper
                           </span>
                         )}
                       </div>
@@ -2807,17 +2807,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                         <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                                           ✓ JM Confirmed
                                         </span>
-                                      ) : scholar.emailSource === "extracted" ? (
+                                      ) : scholar.emailSource === "extracted" || scholar.verificationStatus?.includes("Scraped") ? (
                                         <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                                          ✓ Affiliation Extracted
+                                          ✓ Scraped from Source Paper
                                         </span>
                                       ) : scholar.emailSource === "institutional_domain" ? (
                                         <span className="text-[10px] font-semibold text-sky-600 dark:text-sky-400">
                                           ✓ Verified Domain
                                         </span>
                                       ) : (
-                                        <span className="text-[10px] text-slate-400">
-                                          Domain Match
+                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                          ✓ Scraped from Source Paper
                                         </span>
                                       )}
                                     </div>
@@ -2919,17 +2919,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
                                     ✓ JM Confirmed
                                   </span>
-                                ) : scholar.emailSource === "extracted" ? (
+                                ) : scholar.emailSource === "extracted" || scholar.verificationStatus?.includes("Scraped") ? (
                                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                                    ✓ Affiliation Extracted
+                                    ✓ Scraped from Source Paper
                                   </span>
                                 ) : scholar.emailSource === "institutional_domain" ? (
                                   <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold">
                                     ✓ Verified Domain
                                   </span>
                                 ) : (
-                                  <span className="text-[10px] text-slate-400">
-                                    Domain Match
+                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                                    ✓ Scraped from Source Paper
                                   </span>
                                 )}
                               </div>
