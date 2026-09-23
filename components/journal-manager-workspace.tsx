@@ -4092,7 +4092,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             {resp.credentialId || "—"}
                           </td>
                           <td className="py-3 px-4 text-right text-slate-400 text-[11px]">
-                            {new Date(resp.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                            {resp.timestamp ? new Date(resp.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                           </td>
                         </tr>
                       ))}

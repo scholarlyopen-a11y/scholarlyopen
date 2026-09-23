@@ -1,5 +1,7 @@
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 import { NextResponse } from "next/server"
-import nodemailer from "nodemailer"
 
 export interface InvitationResponseRecord {
   id: string
@@ -75,7 +77,9 @@ export async function POST(req: Request) {
       const from = process.env.SMTP_FROM || user
 
       if (host && user && pass) {
-        const transporter = nodemailer.createTransport({
+        const nodemailerModule = await import("nodemailer")
+        const nodemailerInstance = nodemailerModule.default || nodemailerModule
+        const transporter = nodemailerInstance.createTransport({
           host,
           port,
           secure: port === 465,
