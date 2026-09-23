@@ -19,6 +19,21 @@ export interface ReviewerTestRecord {
 // In-memory persistent cache for serverless lifetime
 let reviewerTestStore: ReviewerTestRecord[] = [
   {
+    id: "TEST-2026-9040",
+    candidateName: "Dr. Wenxiong Sun (孙文雄)",
+    candidateEmail: "102500216@hbut.edu.cn",
+    discipline: "engineering-materials",
+    institution: "Hubei University of Technology",
+    score: 92,
+    totalQuestions: 10,
+    passed: true,
+    status: "Passed - Account Active",
+    credentialId: "CERT-SO-2026-9088",
+    date: "Sep 23, 2026",
+    timestamp: "2026-09-23T21:40:00Z",
+    notes: "Completed Reviewer Gateway onboarding and assessment (92%). Verified referee on Editorial360."
+  },
+  {
     id: "TEST-2026-9041",
     candidateName: "Dr. Elena Rostova",
     candidateEmail: "e.rostova@karolinska.se",

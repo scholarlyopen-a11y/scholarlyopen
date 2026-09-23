@@ -934,6 +934,16 @@ export default function Editorial360Page() {
   const [invitationDeadlineDays, setInvitationDeadlineDays] = useState<number>(14)
   const [invitationCustomDeadline, setInvitationCustomDeadline] = useState<string>("")
 
+  // Official Acceptance Confirmation Screen State (EiC, AE, Board, Reviewer Gateway Claim)
+  const [officialConfirmation, setOfficialConfirmation] = useState<{
+    type: "eic" | "ae" | "board" | "reviewer_claim"
+    name: string
+    email?: string
+    journal?: string
+    decision?: string
+    credentialId?: string
+  } | null>(null)
+
   const getInvitationCalculatedDeadline = (days: number) => {
     const d = new Date()
     d.setDate(d.getDate() + days)
@@ -1028,6 +1038,96 @@ export default function Editorial360Page() {
           setInvitedRole(normalizedRole)
         }
         setSuccess(`Welcome to editorial360! You have been officially appointed. Please confirm your credentials below to activate your account.`)
+      }
+
+      // Reviewer Gateway Claim Credential Link Handler
+      const urlCred = params.get("cred") || ""
+      const urlDecision = params.get("decision") || "yes"
+
+      if (urlAction === "claim_reviewer") {
+        setOfficialConfirmation({
+          type: "reviewer_claim",
+          name: urlName || "Verified Peer Reviewer",
+          email: urlEmail,
+          journal: urlJournal || "Scholarly Open",
+          decision: "claimed",
+          credentialId: urlCred
+        })
+        if (urlEmail) {
+          setEmail(urlEmail)
+          setRegEmail(urlEmail)
+        }
+        if (urlName) {
+          setRegName(urlName)
+        }
+        setMode("register")
+        setRole("reviewer")
+        setRegRole("reviewer")
+
+        // Post claim to backend audit log & notify Journal Manager Desk
+        fetch("/api/editorial360/invitation-response", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "reviewer_claim",
+            candidateName: urlName || "Reviewer Candidate",
+            candidateEmail: urlEmail,
+            journal: urlJournal || "Scholarly Open",
+            decision: "claimed",
+            credentialId: urlCred
+          })
+        }).catch(err => console.error("Could not record reviewer claim:", err))
+      }
+
+      // Editor-in-Chief Leadership Decision Link Handler
+      if (urlAction === "eic_decision") {
+        setOfficialConfirmation({
+          type: "eic",
+          name: urlName || "Esteemed Scholar",
+          email: urlEmail,
+          journal: urlJournal || "Scholarly Open",
+          decision: urlDecision
+        })
+        if (urlEmail) setEmail(urlEmail)
+
+        // Post EiC response to backend audit log & notify Journal Manager Desk
+        fetch("/api/editorial360/invitation-response", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "eic",
+            candidateName: urlName || "Editor-in-Chief Nominee",
+            candidateEmail: urlEmail,
+            journal: urlJournal || "Scholarly Open",
+            decision: urlDecision
+          })
+        }).catch(err => console.error("Could not record EiC decision:", err))
+      }
+
+      // Associate Editor & Editorial Board Member Acceptance Link Handler
+      if (urlAction === "accept_ae" || urlAction === "accept_board") {
+        const isAe = urlAction === "accept_ae"
+        setOfficialConfirmation({
+          type: isAe ? "ae" : "board",
+          name: urlName || "Esteemed Scholar",
+          email: urlEmail,
+          journal: urlJournal || "Scholarly Open",
+          decision: "yes"
+        })
+        if (urlEmail) setEmail(urlEmail)
+
+        // Post acceptance to backend audit log & notify Journal Manager Desk
+        fetch("/api/editorial360/invitation-response", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: isAe ? "ae" : "board",
+            candidateName: urlName || "Editorial Nominee",
+            candidateEmail: urlEmail,
+            journal: urlJournal || "Scholarly Open",
+            decision: "yes"
+          })
+        }).catch(err => console.error("Could not record appointment acceptance:", err))
       }
 
       if (urlAction === "submit") {
@@ -4410,6 +4510,148 @@ export default function Editorial360Page() {
                       </div>
                     )
                   )}
+
+                </div>
+              </div>
+            </main>
+            <Footer />
+          </>
+        ) : officialConfirmation ? (
+          // ==========================================
+          // OFFICIAL ACCEPTANCE CONFIRMATION SCREEN
+          // ==========================================
+          <>
+            <Header />
+            <main className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent">
+              <div className="w-full max-w-xl space-y-6 animate-in fade-in duration-300">
+                <div className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+                  
+                  {/* Top Seal & Organization Branding */}
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div className="flex items-center gap-2.5">
+                      <img src="/editorial360.svg" alt="editorial360" className="h-6 w-auto object-contain" />
+                      <span className="text-[11px] font-semibold tracking-wide uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        Official Confirmation
+                      </span>
+                    </div>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      Mainz, Germany
+                    </span>
+                  </div>
+
+                  {/* Hero Checkmark & Headline */}
+                  <div className="text-center py-3 space-y-3">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-xs">
+                      <CheckCircle2 className="w-9 h-9" />
+                    </div>
+
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        {officialConfirmation.type === "reviewer_claim" 
+                          ? (language === "de" ? "Gutachter-Zulassung Bestätigt" : "Reviewer Credential Verified")
+                          : officialConfirmation.type === "eic"
+                          ? (officialConfirmation.decision === "no" 
+                              ? (language === "de" ? "Rückmeldung Erfasst" : "Response Recorded")
+                              : (language === "de" ? "Chefredaktion Bestätigt" : "EiC Appointment Confirmed"))
+                          : officialConfirmation.type === "ae"
+                          ? (language === "de" ? "Associate Editor Bestätigt" : "Associate Editor Confirmed")
+                          : (language === "de" ? "Editorial Board Bestätigt" : "Editorial Board Confirmed")}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+                        {officialConfirmation.type === "reviewer_claim"
+                          ? (language === "de" 
+                              ? "Ihr Gutachter-Zertifikat und Prüfungsergebnis wurden erfolgreich mit editorial360 verknüpft." 
+                              : "Your reviewer test certification has been officially authenticated and linked with editorial360.")
+                          : (language === "de"
+                              ? "Vielen Dank für Ihre Zusage. Ihre Ernennung wurde im Redaktionssystem registriert."
+                              : "Thank you for your formal acceptance. Your appointment has been recorded in the editorial management registry.")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Summary Details Table */}
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 p-4 space-y-2.5 text-xs">
+                    <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                      <span className="text-slate-500 font-medium">Scholar / Nominee:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{officialConfirmation.name}</span>
+                    </div>
+
+                    {officialConfirmation.email && (
+                      <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                        <span className="text-slate-500 font-medium">Designated Email:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300 font-mono">{officialConfirmation.email}</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                      <span className="text-slate-500 font-medium">Role / Assignment:</span>
+                      <span className="font-semibold text-[#0b99ff]">
+                        {officialConfirmation.type === "reviewer_claim"
+                          ? "Certified Peer Reviewer"
+                          : officialConfirmation.type === "eic"
+                          ? "Editor-in-Chief (EiC)"
+                          : officialConfirmation.type === "ae"
+                          ? "Associate Editor"
+                          : "Editorial Board Member (EBM)"}
+                      </span>
+                    </div>
+
+                    {officialConfirmation.credentialId && (
+                      <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                        <span className="text-slate-500 font-medium">Credential Authentication:</span>
+                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/70 dark:border-emerald-800">
+                          {officialConfirmation.credentialId}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center py-1 border-b border-slate-200/60 dark:border-slate-800/80">
+                      <span className="text-slate-500 font-medium">Journal Portfolio:</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{officialConfirmation.journal || "Scholarly Open"}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-slate-500 font-medium">Publishing House:</span>
+                      <span className="text-slate-600 dark:text-slate-400">Scholarly Open Publishing Group · Mainz, Germany</span>
+                    </div>
+                  </div>
+
+                  {/* Real-time Notification Dispatch Confirmation */}
+                  <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 flex items-start gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-[#0b99ff] mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed">
+                      <strong>Automatic Desk Dispatch:</strong> The Journal Management Office (Noor F. · <span className="font-mono">info@scholarlyopen.org</span>) has received your confirmation. Your profile is recognized across the editorial network.
+                    </p>
+                  </div>
+
+                  {/* Next Step Action Buttons */}
+                  <div className="space-y-2.5 pt-2">
+                    <Button
+                      onClick={() => {
+                        const targetType = officialConfirmation.type
+                        setOfficialConfirmation(null)
+                        if (targetType === "reviewer_claim") {
+                          setMode("register")
+                          setRole("reviewer")
+                        } else {
+                          setMode("login")
+                        }
+                      }}
+                      className="w-full bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold h-11 rounded-xl text-sm shadow-sm cursor-pointer"
+                    >
+                      {officialConfirmation.type === "reviewer_claim" 
+                        ? "Activate Account & Set Password" 
+                        : "Proceed to Editorial360 Login"}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => setOfficialConfirmation(null)}
+                      className="w-full border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 h-10 rounded-xl text-xs cursor-pointer"
+                    >
+                      Dismiss / Return to Portal Home
+                    </Button>
+                  </div>
 
                 </div>
               </div>

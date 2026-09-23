@@ -255,8 +255,36 @@ export function JournalManagerWorkspace({
   // Reviewer Registry & History Tracking States
   const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
   const [globalReviewerHistory, setGlobalReviewerHistory] = useState<ReviewerHistoryItem[]>([])
-  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr">("directory")
+  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr" | "gateway">("directory")
   const [isLoadingPaperHistory, setIsLoadingPaperHistory] = useState(false)
+
+  // Reviewer Gateway Tests & Onboarding State
+  const [gatewayTests, setGatewayTests] = useState<any[]>([])
+  const [gatewayResponses, setGatewayResponses] = useState<any[]>([])
+  const [isLoadingGateway, setIsLoadingGateway] = useState(false)
+  const [gatewaySearch, setGatewaySearch] = useState("")
+
+  const fetchGatewayData = async () => {
+    setIsLoadingGateway(true)
+    try {
+      const [testsRes, respRes] = await Promise.all([
+        fetch("/api/editorial360/reviewer-tests"),
+        fetch("/api/editorial360/invitation-response")
+      ])
+      if (testsRes.ok) {
+        const d = await testsRes.json()
+        if (d.success && Array.isArray(d.tests)) setGatewayTests(d.tests)
+      }
+      if (respRes.ok) {
+        const r = await respRes.json()
+        if (r.success && Array.isArray(r.responses)) setGatewayResponses(r.responses)
+      }
+    } catch (e) {
+      console.error("Error loading gateway tests:", e)
+    } finally {
+      setIsLoadingGateway(false)
+    }
+  }
 
   // Early Career Researcher (ECR Talent Hub: bioRxiv / medRxiv / arXiv / OpenAlex) State
   const [ecrSource, setEcrSource] = useState<"all" | "biorxiv" | "medrxiv" | "arxiv" | "openalex">("all")
@@ -672,6 +700,17 @@ export function JournalManagerWorkspace({
       handleSearchEcrScholars()
     }
   }, [scoutSubTab, reviewerRegistryTab])
+
+  // Load Reviewer Gateway & Candidate data
+  useEffect(() => {
+    fetchGatewayData()
+  }, [])
+
+  useEffect(() => {
+    if (reviewerRegistryTab === "gateway") {
+      fetchGatewayData()
+    }
+  }, [reviewerRegistryTab])
 
   const handleDispatchScoutOutreach = (scholar: any, campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver") => {
     const journalName = scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal
@@ -3735,13 +3774,21 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {reviewerRegistryTab === "directory" ? "Reviewer Registry" : reviewerRegistryTab === "ecr" ? "Early Career Researcher (ECR) Invitations" : "Reviewer History"}
+                {reviewerRegistryTab === "directory" 
+                  ? "Reviewer Registry" 
+                  : reviewerRegistryTab === "ecr" 
+                  ? "Early Career Researcher (ECR) Invitations" 
+                  : reviewerRegistryTab === "gateway"
+                  ? "Reviewer Gateway Onboarding & Assessments"
+                  : "Reviewer History"}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {reviewerRegistryTab === "directory"
                   ? "Directory listing of vetted peer reviewers and availability status."
                   : reviewerRegistryTab === "ecr"
                   ? "Source and invite emerging scholars and preprint lead authors from bioRxiv, medRxiv, and arXiv."
+                  : reviewerRegistryTab === "gateway"
+                  ? "Scholars who completed the Reviewer Gateway qualification test (≥80%) and registered referee accounts."
                   : "Complete dispatch, acceptance, and declination log across all journal desks."}
               </p>
             </div>
@@ -3762,6 +3809,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <button
                   type="button"
                   onClick={() => {
+                    setReviewerRegistryTab("gateway")
+                    fetchGatewayData()
+                  }}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                    reviewerRegistryTab === "gateway"
+                      ? "bg-white dark:bg-[#18191e] text-emerald-600 dark:text-emerald-400 shadow-xs font-bold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <Award className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Gateway Onboarding</span>
+                  {gatewayTests.length > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold">
+                      {gatewayTests.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
                     setReviewerRegistryTab("ecr")
                     if (ecrResults.length === 0) handleSearchEcrScholars()
                   }}
@@ -3772,7 +3839,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   }`}
                 >
                   <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
-                  <span>ECR Invitations (bioRxiv / arXiv)</span>
+                  <span>ECR Invitations</span>
                 </button>
                 <button
                   type="button"
@@ -3798,7 +3865,243 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           </div>
 
-          {reviewerRegistryTab === "ecr" ? (
+          {reviewerRegistryTab === "gateway" ? (
+            <div className="p-5 space-y-6">
+              {/* Summary KPIs */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Total Assessments</span>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white mt-0.5 block">{gatewayTests.length}</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Passed (≥80%)</span>
+                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                    {gatewayTests.filter(t => t.passed).length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20">
+                  <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wider block">Accounts Active</span>
+                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5 block">
+                    {gatewayTests.filter(t => t.status === "Passed - Account Active").length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/40 dark:bg-indigo-950/20">
+                  <span className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">Responses Dispatched</span>
+                  <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 block">
+                    {gatewayResponses.length}
+                  </span>
+                </div>
+              </div>
+
+              {/* Search & Actions Bar */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="relative w-full sm:w-80">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search candidate, email, institution, or credential..."
+                    value={gatewaySearch}
+                    onChange={(e) => setGatewaySearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={fetchGatewayData}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-600 dark:text-slate-300 cursor-pointer"
+                  >
+                    <RotateCcw className={`w-3.5 h-3.5 ${isLoadingGateway ? "animate-spin" : ""}`} />
+                    Refresh
+                  </button>
+                  <Link
+                    href="/reviewer-gateway"
+                    target="_blank"
+                    className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Open Gateway Portal
+                  </Link>
+                </div>
+              </div>
+
+              {/* Candidates Table */}
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418]">
+                <div className="px-4 py-3 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      Gateway Onboarding & Assessment Records
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500">
+                    Threshold: ≥80% Required for Peer Evaluation Privileges
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 text-slate-500 font-semibold">
+                        <th className="py-2.5 px-4">Candidate / Scholar</th>
+                        <th className="py-2.5 px-4">Affiliation & Field</th>
+                        <th className="py-2.5 px-4">Assessment Score</th>
+                        <th className="py-2.5 px-4">Verification Credential</th>
+                        <th className="py-2.5 px-4">Account Status</th>
+                        <th className="py-2.5 px-4 text-right">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {gatewayTests
+                        .filter(t => {
+                          if (!gatewaySearch.trim()) return true
+                          const q = gatewaySearch.toLowerCase()
+                          return (
+                            t.candidateName?.toLowerCase().includes(q) ||
+                            t.candidateEmail?.toLowerCase().includes(q) ||
+                            t.institution?.toLowerCase().includes(q) ||
+                            t.credentialId?.toLowerCase().includes(q)
+                          )
+                        })
+                        .map(test => {
+                          const isDrSun = test.candidateEmail === "102500216@hbut.edu.cn"
+                          return (
+                            <tr 
+                              key={test.id} 
+                              className={`hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors ${
+                                isDrSun ? "bg-emerald-50/50 dark:bg-emerald-950/20 font-medium" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-4">
+                                <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                  {test.candidateName}
+                                  {isDrSun && (
+                                    <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
+                                      Registered Referee
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[11px] text-slate-500 font-mono mt-0.5">{test.candidateEmail}</div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="text-slate-700 dark:text-slate-300 font-medium">{test.institution}</div>
+                                <div className="text-[11px] text-slate-400 capitalize">{test.discipline?.replace("-", " ")}</div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className={`inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-full text-[11px] ${
+                                  test.passed
+                                    ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                    : "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                                }`}>
+                                  {test.passed ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <XCircle className="w-3 h-3 text-rose-500" />}
+                                  {test.score}%
+                                </span>
+                              </td>
+                              <td className="py-3 px-4">
+                                {test.credentialId ? (
+                                  <span className="font-mono text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800">
+                                    {test.credentialId}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-400 italic text-[11px]">Pending passing</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  test.status === "Passed - Account Active"
+                                    ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                    : test.status === "Passed - Pending Account"
+                                    ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                                }`}>
+                                  {test.status}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-right text-slate-500 text-[11px]">
+                                {test.date}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Incoming Official Responses Desk */}
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418]">
+                <div className="px-4 py-3 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#0b99ff]" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      Official Invitation & Onboarding Responses Desk
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500">
+                    Real-time acceptances from EiC, AE, Board & Reviewer claims
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 text-slate-500 font-semibold">
+                        <th className="py-2.5 px-4">Scholar / Appointee</th>
+                        <th className="py-2.5 px-4">Role Appointment</th>
+                        <th className="py-2.5 px-4">Journal Portfolio</th>
+                        <th className="py-2.5 px-4">Decision / Status</th>
+                        <th className="py-2.5 px-4">Credential</th>
+                        <th className="py-2.5 px-4 text-right">Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {gatewayResponses.map((resp: any) => (
+                        <tr key={resp.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                          <td className="py-3 px-4">
+                            <div className="font-bold text-slate-900 dark:text-white">{resp.candidateName}</div>
+                            {resp.candidateEmail && (
+                              <div className="text-[11px] text-slate-500 font-mono mt-0.5">{resp.candidateEmail}</div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">
+                              {resp.type === "eic" 
+                                ? "Editor-in-Chief" 
+                                : resp.type === "ae" 
+                                ? "Associate Editor" 
+                                : resp.type === "reviewer_claim" 
+                                ? "Certified Referee" 
+                                : "Editorial Board Member"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                            {resp.journal}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              resp.decision === "yes" || resp.decision === "claimed"
+                                ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                : resp.decision === "conditional"
+                                ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                                : "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                            }`}>
+                              {resp.decision.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                            {resp.credentialId || "—"}
+                          </td>
+                          <td className="py-3 px-4 text-right text-slate-400 text-[11px]">
+                            {new Date(resp.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : reviewerRegistryTab === "ecr" ? (
             <div className="p-5">
               {renderEcrTalentHub()}
             </div>
