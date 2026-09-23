@@ -1795,7 +1795,7 @@ export default function Editorial360Page() {
     {
       id: "LOG-101",
       paperId: "SOSSH-26-SRW103",
-      actor: "Sarah Jenkins (Journal Manager)",
+      actor: "Noor F. (Journal Manager)",
       action: "Review Verified & Released",
       timestamp: "2026-06-03 14:15",
       details: "Released sanitized review feedback by Prof. Aris Thorne to the principal author."
@@ -1905,11 +1905,11 @@ export default function Editorial360Page() {
       const workingLangNotice = "📌 Wichtiger Hinweis zur Arbeitssprache:\nBitte beachten Sie, dass die offizielle Arbeitssprache der Zeitschrift, das Manuskript-Handling sowie alle Veröffentlichungen und Begutachtungsprozesse ausschließlich auf Englisch geführt werden (Working language & publications: English)."
 
       if (r === "reviewer") {
-        return `${deSalutation}\n\nim Namen des Editorial Office von Scholarly Open (Berlin/Deutschland) laden wir Sie herzlich ein, sich unserem verifizierten Gutachter-Netzwerk (Peer Reviewer Registry) auf der editorial360 Publikationsplattform anzuschließen.\n\n${workingLangNotice}\n\nDetails auf Englisch / Invitation Details:\n────────────────────────────────────────────────────\n${salutation}\n\nYou are cordially invited by the Editorial Office of Scholarly Open to join our verified Peer Reviewer Registry on the editorial360 collaborative publishing platform.\n\nRole: ${roleName}\nDesignated Discipline: ${journalStr}\n\nAs a verified reviewer, you will receive invitation requests carefully matched to your discipline and publication history, gain access to double-blind evaluation scorecards, and accumulate verified review credits with publication fee waiver benefits under COPE ethical standards.\n\nPlease accept this invitation to activate your reviewer workspace credentials.`
+        return `${deSalutation}\n\nim Namen des Editorial Office von Scholarly Open (Mainz, Deutschland) laden wir Sie herzlich ein, sich unserem verifizierten Gutachter-Netzwerk (Peer Reviewer Registry) auf der editorial360 Publikationsplattform anzuschließen.\n\n${workingLangNotice}\n\nDetails auf Englisch / Invitation Details:\n────────────────────────────────────────────────────\n${salutation}\n\nYou are cordially invited by the Editorial Office of Scholarly Open to join our verified Peer Reviewer Registry on the editorial360 collaborative publishing platform.\n\nRole: ${roleName}\nDesignated Discipline: ${journalStr}\n\nAs a verified reviewer, you will receive invitation requests carefully matched to your discipline and publication history, gain access to double-blind evaluation scorecards, and accumulate verified review credits with publication fee waiver benefits under COPE ethical standards.\n\nPlease accept this invitation to activate your reviewer workspace credentials.`
       }
 
       if (r === "editor") {
-        return `${deSalutation}\n\nim Namen von Scholarly Open (Berlin/Deutschland) möchten wir Sie herzlich einladen, dem Editorial Board als ${roleName} für ${journalStr} beizutreten.\n\n${workingLangNotice}\n\nDetails auf Englisch / Role Specifications:\n────────────────────────────────────────────────────\n${salutation}\n\nOn behalf of Scholarly Open, we are honored to invite you to join the Editorial Board as a ${roleName} for ${journalStr}.\n\nRole: ${roleName}\nEditorial Suite: editorial360 Unified Editorial Management\n\nThrough editorial360, you will manage manuscript triage, oversee peer review evaluation rounds, and issue final publication recommendations with full editorial autonomy.\n\nPlease accept this invitation to activate your editor workspace.`
+        return `${deSalutation}\n\nim Namen von Scholarly Open (Mainz, Deutschland) möchten wir Sie herzlich einladen, dem Editorial Board als ${roleName} für ${journalStr} beizutreten.\n\n${workingLangNotice}\n\nDetails auf Englisch / Role Specifications:\n────────────────────────────────────────────────────\n${salutation}\n\nOn behalf of Scholarly Open, we are honored to invite you to join the Editorial Board as a ${roleName} for ${journalStr}.\n\nRole: ${roleName}\nEditorial Suite: editorial360 Unified Editorial Management\n\nThrough editorial360, you will manage manuscript triage, oversee peer review evaluation rounds, and issue final publication recommendations with full editorial autonomy.\n\nPlease accept this invitation to activate your editor workspace.`
       }
 
       if (r === "ria" || r === "im") {
@@ -2689,10 +2689,10 @@ export default function Editorial360Page() {
   const [orcidSyncMessage, setOrcidSyncMessage] = useState("")
 
   // Journal Manager in-house staff profile states
-  const [jmFullName, setJmFullName] = useState("Sarah Jenkins")
+  const [jmFullName, setJmFullName] = useState("Noor F.")
   const [jmStaffRole, setJmStaffRole] = useState("Editorial Manager")
   const [jmDepartment, setJmDepartment] = useState("Editorial & Publishing Operations")
-  const [jmOfficeLocation, setJmOfficeLocation] = useState("Scholarly Open Headquarters (Basel / London)")
+  const [jmOfficeLocation, setJmOfficeLocation] = useState("Scholarly Open Headquarters (Mainz, Germany)")
   const [jmDeskEmail, setJmDeskEmail] = useState("scholarlyopen@gmail.com")
   const [jmCcReminders, setJmCcReminders] = useState(true)
   const [jmIntegrityAlerts, setJmIntegrityAlerts] = useState(true)
@@ -5180,7 +5180,7 @@ export default function Editorial360Page() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || profFullName || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || profFullName || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                       )}
                     </div>
                     {/* Full unclipped Online (Green) / Offline (Grey) Status Dot */}
@@ -5193,7 +5193,7 @@ export default function Editorial360Page() {
                   </div>
                   <div className="hidden lg:flex flex-col text-left pr-1">
                     <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 leading-tight">
-                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                     </span>
                     <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
                       {role === "editor"
@@ -5201,11 +5201,11 @@ export default function Editorial360Page() {
                         : role === "jm" 
                         ? jmStaffRole
                         : role === "reviewer" 
-                        ? (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
+                        : (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
                         : role === "author" 
-                        ? (language === "de" ? "Hauptautor" : "Principal Author") 
+                        : (language === "de" ? "Hauptautor" : "Principal Author") 
                         : (role === "im" || role === "ria") 
-                        ? (language === "de" ? "Integritätsmanager" : "Integrity Manager") 
+                        : (language === "de" ? "Integritätsmanager" : "Integrity Manager") 
                         : "System Admin"}
                     </span>
                   </div>
@@ -5244,13 +5244,13 @@ export default function Editorial360Page() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "SJ") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                           )}
                           <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#18191e] ${userStatus === "online" ? "bg-emerald-500" : "bg-slate-400"}`} />
                         </div>
                         <div className="space-y-0.5 overflow-hidden text-left flex-1">
                           <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Sarah Jenkins") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                           </h4>
                           <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : role === "reviewer" ? (reviewerProfile?.email || email) : email}</p>
                           <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
@@ -7984,7 +7984,7 @@ export default function Editorial360Page() {
                             </span>
                           </div>
                           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Research Integrity & Forensics Office (Basel / Berlin) • Germany • <span className="text-[#0b99ff] font-medium">integrity@scholarlyopen.org</span>
+                            Research Integrity & Forensics Office (Mainz, Germany) • Germany • <span className="text-[#0b99ff] font-medium">integrity@scholarlyopen.org</span>
                           </p>
                         </div>
                       </div>
@@ -11950,7 +11950,7 @@ export default function Editorial360Page() {
                           value={jmFullName}
                           onChange={(e) => setJmFullName(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
-                          placeholder="Sarah Jenkins"
+                          placeholder="Noor F."
                         />
                       </div>
 
@@ -11982,7 +11982,7 @@ export default function Editorial360Page() {
                           value={jmOfficeLocation}
                           onChange={(e) => setJmOfficeLocation(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
-                          placeholder="Scholarly Open Headquarters (Basel / London)"
+                          placeholder="Scholarly Open Headquarters (Mainz, Germany)"
                         />
                       </div>
 
@@ -12780,7 +12780,7 @@ function UserProfileHeader({ role }: { role: string }) {
         };
       case 'jm':
         return {
-          name: 'Sarah Jenkins',
+          name: 'Noor F.',
           title: 'Senior Journal Manager',
           orcid: '0000-9988-7766',
           avatar: '',

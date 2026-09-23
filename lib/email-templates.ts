@@ -47,7 +47,13 @@ Title: {{paperTitle}}
 
 This evaluation will be conducted under double-blind peer review standards in full compliance with COPE guidelines. We kindly request that you complete your evaluation within 14 calendar days of acceptance.
 
-Please use the buttons below to accept or decline this invitation:`,
+Please use the buttons below to accept or decline this invitation:
+
+Sincerely,
+Noor F.
+Editorial Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Accept Review Invitation",
     actionUrlPlaceholder: "{{portalUrl}}?action=accept&id={{paperId}}",
     placeholders: [
@@ -70,7 +76,13 @@ This is a polite reminder regarding your double-blind peer review for manuscript
 
 Your timely assessment is essential to maintain rapid, rigorous editorial turnaround for the authors. If you require a brief deadline extension or encounter any technical difficulties, please let us know immediately.
 
-You can access your reviewer scorecard through the link below:`,
+You can access your reviewer scorecard through the link below:
+
+Sincerely,
+Noor F.
+Editorial Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Access Reviewer Scorecard",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -87,7 +99,13 @@ Welcome to editorial360's verified reviewer registry. Your academic profile has 
 
 As a registered reviewer, you will receive invitation requests carefully matched to your discipline, keywords, and publication history. You maintain complete control over your workload and may set sabbatical periods at any time.
 
-Thank you for supporting transparent, rigorous open-access peer review.`,
+Thank you for supporting transparent, rigorous open-access peer review.
+
+Sincerely,
+Noor F.
+Journal Management Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Access Reviewer Dashboard",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -108,7 +126,12 @@ Designated Email: {{recipientEmail}}
 
 As an active {{role}} in the editorial360 ecosystem, you will have access to real-time manuscript queues, double-blind peer review tools, and automated editorial decision support adhering to COPE ethical standards.
 
-Please use the secure button below to accept this invitation, complete your profile, and activate your workspace credentials:`,
+Please use the secure button below to accept this invitation, complete your profile, and activate your workspace credentials:
+
+Sincerely,
+Noor F.
+Editorial Operations & Administration
+Scholarly Open Publishing Group`,
     actionLabel: "Accept Invitation & Activate Account",
     actionUrlPlaceholder: "{{portalUrl}}?action=activate_invite&role={{roleKey}}&email={{recipientEmail}}&name={{recipientName}}",
     includeEditorial360Logo: true,
@@ -134,7 +157,13 @@ Title: {{paperTitle}}
 
 Your paper has entered technical pre-check triage with the Journal Manager. You can track real-time editorial workflow milestones, review reports, and timeline benchmarks through your Author Workspace.
 
-We will keep you informed as your manuscript advances through the double-blind peer review process.`,
+We will keep you informed as your manuscript advances through the double-blind peer review process.
+
+Sincerely,
+Noor F.
+Journal Management Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Track Submission Status",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -153,7 +182,13 @@ During the initial technical pre-check by our editorial office, the following it
 
 {{customMessage}}
 
-Please log into your editorial360 Author Workspace and upload the corrected files or supplementary statements.`,
+Please log into your editorial360 Author Workspace and upload the corrected files or supplementary statements.
+
+Sincerely,
+Noor F.
+Editorial Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Upload Corrected Files",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -172,7 +207,13 @@ This is a friendly reminder that the revision and rebuttal for your manuscript {
 
 Please ensure that you upload your clean manuscript files, tracked-changes version, and point-by-point response to reviewer evaluations through the Author Portal.
 
-If you require an extension to complete additional experimental validation or data re-analysis, please reply to this email or request an extension in the portal.`,
+If you require an extension to complete additional experimental validation or data re-analysis, please reply to this email or request an extension in the portal.
+
+Sincerely,
+Noor F.
+Editorial Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Upload Revised Manuscript",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -341,7 +382,13 @@ Term & Benefits:
 • Full academic independence and official recognition on the journal masthead and web registry.
 • Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).
 
-We would be honored by your acceptance. Please use the button below to confirm your appointment.`,
+We would be honored by your acceptance. Please use the button below to confirm your appointment.
+
+Sincerely,
+Noor F.
+Journal Management Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Accept Editorial Board Invitation",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -354,7 +401,7 @@ We would be honored by your acceptance. Please use the button below to confirm y
     defaultSubject: "[Einladung / Invitation] Editorial Board Member: {{journal}}",
     defaultBody: `Sehr geehrte(r) Frau/Herr {{recipientName}},
 
-im Namen des Editorial Leadership von {{journal}} und des Verlags Scholarly Open (Berlin/Deutschland) möchten wir Sie aufgrund Ihrer anerkannten Expertise herzlich einladen, unserem internationalen Editorial Board als Editorial Board Member (EBM) beizutreten.
+im Namen des Editorial Leadership von {{journal}} und des Verlags Scholarly Open (Mainz, Deutschland) möchten wir Sie aufgrund Ihrer anerkannten Expertise herzlich einladen, unserem internationalen Editorial Board als Editorial Board Member (EBM) beizutreten.
 
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Bitte beachten Sie, dass die offizielle Arbeitssprache der Zeitschrift, das Manuskript-Handling sowie alle Veröffentlichungen und Begutachtungsprozesse ausschließlich auf Englisch geführt werden (Working language & publications: English).
@@ -377,7 +424,13 @@ Term & Benefits:
 • Full academic independence and official recognition on the journal masthead and web registry.
 • Receive a performance-based honorarium for each handled article (for more information, see: https://www.scholarlyopen.org/peer-review).
 
-We would be honored by your acceptance. Please use the button below to confirm your appointment.`,
+We would be honored by your acceptance. Please use the button below to confirm your appointment.
+
+Mit freundlichen Grüßen / Sincerely,
+Noor F.
+Journal Management Office
+{{journal}}
+Scholarly Open Publishing Group (Mainz, Deutschland)`,
     actionLabel: "Accept Editorial Board Invitation",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -411,7 +464,13 @@ Term & Benefits:
 We kindly ask for your decision regarding this appointment:
 1. Accept (Yes): If you are delighted to accept this appointment, please confirm using the button below.
 2. Conditional (Maybe): If you would like to explore specific arrangements, scope, or time commitments, please reply to this message.
-3. Decline (No) / Suggestions: If you cannot accept at this time, we would greatly appreciate your recommendation of an esteemed colleague.`,
+3. Decline (No) / Suggestions: If you cannot accept at this time, we would greatly appreciate your recommendation of an esteemed colleague.
+
+Sincerely,
+Noor F.
+Executive Nominations Committee
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Confirm EiC Appointment (Yes)",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -424,7 +483,7 @@ We kindly ask for your decision regarding this appointment:
     defaultSubject: "[Berufung / Appointment] Editor-in-Chief Leadership: {{journal}}",
     defaultBody: `Sehr geehrte(r) Frau/Herr {{recipientName}},
 
-das Executive Publishing Board von Scholarly Open (Berlin/Deutschland) sucht für die Fachzeitschrift {{journal}} eine herausragende wissenschaftliche Führungspersönlichkeit für die Position des Editor-in-Chief (Chefredakteur/in). In Anbetracht Ihrer herausragenden wissenschaftlichen Reputation möchten wir Sie sehr gerne für diese leitende Funktion anfragen.
+das Executive Publishing Board von Scholarly Open (Mainz, Deutschland) sucht für die Fachzeitschrift {{journal}} eine herausragende wissenschaftliche Führungspersönlichkeit für die Position des Editor-in-Chief (Chefredakteur/in). In Anbetracht Ihrer herausragenden wissenschaftlichen Reputation möchten wir Sie sehr gerne für diese leitende Funktion anfragen.
 
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Die offizielle Publikations- und Arbeitssprache der Zeitschrift, alle redaktionellen Entscheidungen sowie die Kommunikation im Begutachtungsverfahren werden vollständig auf Englisch geführt (Working language & publications: English).
@@ -453,7 +512,13 @@ Term & Benefits:
 We kindly ask for your decision regarding this appointment:
 1. Accept (Yes): Confirm your acceptance via the button below.
 2. Conditional (Maybe): Inquire about scope or specific arrangements.
-3. Decline (No) / Suggestions: Let us know or suggest an esteemed colleague.`,
+3. Decline (No) / Suggestions: Let us know or suggest an esteemed colleague.
+
+Mit freundlichen Grüßen / Sincerely,
+Noor F.
+Executive Nominations Committee
+{{journal}}
+Scholarly Open Publishing Group (Mainz, Deutschland)`,
     actionLabel: "Confirm EiC Appointment (Yes)",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -478,7 +543,13 @@ In alignment with our official APC & Waiver Policy:
 
 Given your distinguished track record, we cordially invite you and your research team to contribute your latest findings to this founding milestone volume.
 
-Please use the button below to submit your manuscript to our editorial desk.`,
+Please use the button below to submit your manuscript to our editorial desk.
+
+Sincerely,
+Noor F.
+Journal Management Office
+{{journal}}
+Scholarly Open Publishing Group`,
     actionLabel: "Submit Manuscript",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/submit",
     placeholders: COMMON_PLACEHOLDERS
@@ -491,7 +562,7 @@ Please use the button below to submit your manuscript to our editorial desk.`,
     defaultSubject: "[Call for Papers / Einladung] Founding Volume: {{journal}}",
     defaultBody: `Sehr geehrte(r) Frau/Herr {{recipientName}},
 
-im Namen der Redaktion von {{journal}} (Scholarly Open, Berlin) verfolgen wir Ihre Forschungsarbeiten mit großem Interesse. Wir möchten Sie und Ihr Forschungsteam herzlich einladen, ein Originalmanuskript oder Review für unseren kommenden Gründungsband (Inaugural Volume) einzureichen.
+im Namen der Redaktion von {{journal}} (Scholarly Open, Mainz) verfolgen wir Ihre Forschungsarbeiten mit großem Interesse. Wir möchten Sie und Ihr Forschungsteam herzlich einladen, ein Originalmanuskript oder Review für unseren kommenden Gründungsband (Inaugural Volume) einzureichen.
 
 📌 Wichtiger Hinweis zur Publikationssprache:
 Bitte beachten Sie, dass alle Manuskripte, der gesamte Begutachtungsprozess sowie die finalen Open-Access-Publikationen (CC BY 4.0) auf Englisch verfasst sein müssen (Working language & publications: English).
@@ -510,7 +581,13 @@ Key Features & APC Policy:
 • Immediate Gold Open Access: Published under CC BY 4.0 with Crossref DOI upon acceptance.
 • Author Retention of Rights: You retain 100% copyright over your work and raw datasets.
 
-We cordially invite you and your research team to submit your manuscript for consideration.`,
+We cordially invite you and your research team to submit your manuscript for consideration.
+
+Mit freundlichen Grüßen / Sincerely,
+Noor F.
+Journal Management Office
+{{journal}}
+Scholarly Open Publishing Group (Mainz, Deutschland)`,
     actionLabel: "Submit Manuscript",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/submit",
     placeholders: COMMON_PLACEHOLDERS
@@ -523,7 +600,7 @@ We cordially invite you and your research team to submit your manuscript for con
     defaultSubject: "[Peer Review Einladung / Review Invitation] {{paperId}} - {{paperTitle}}",
     defaultBody: `Sehr geehrte(r) Frau/Herr {{recipientName}},
 
-das Editorial Office von {{journal}} (Scholarly Open, Berlin) lädt Sie hiermit herzlich ein, das nachfolgende wissenschaftliche Manuskript im Rahmen unseres Double-Blind Peer Review Verfahrens als Gutachter/in zu evaluieren.
+das Editorial Office von {{journal}} (Scholarly Open, Mainz) lädt Sie hiermit herzlich ein, das nachfolgende wissenschaftliche Manuskript im Rahmen unseres Double-Blind Peer Review Verfahrens als Gutachter/in zu evaluieren.
 
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Das Manuskript, der strukturierte Begutachtungsbogen und alle Kommentare an Autoren und Herausgeber sind in englischer Sprache verfasst und zu beantworten (Working language & evaluation reports: English).
@@ -541,7 +618,13 @@ Title: {{paperTitle}}
 
 This evaluation will be conducted under double-blind peer review standards in full compliance with COPE guidelines. We kindly request that you complete your evaluation within 14 calendar days of acceptance.
 
-Please use the buttons below to accept or decline this invitation:`,
+Please use the buttons below to accept or decline this invitation:
+
+Mit freundlichen Grüßen / Sincerely,
+Noor F.
+Editorial Office
+{{journal}}
+Scholarly Open Publishing Group (Mainz, Deutschland)`,
     actionLabel: "Accept Review Invitation",
     actionUrlPlaceholder: "{{portalUrl}}?action=accept&id={{paperId}}",
     placeholders: [
@@ -570,7 +653,7 @@ export function getBilingualGermanIntro(
   if (type === "ebm") {
     return `${salutation}
 
-im Namen des Editorial Leadership von ${journal} und des Verlags Scholarly Open (Berlin/Deutschland) möchten wir Sie aufgrund Ihrer anerkannten Expertise${specialtyStr}${instStr} herzlich einladen, unserem internationalen Editorial Board als Editorial Board Member (EBM) beizutreten.
+im Namen des Editorial Leadership von ${journal} und des Verlags Scholarly Open (Mainz, Deutschland) möchten wir Sie aufgrund Ihrer anerkannten Expertise${specialtyStr}${instStr} herzlich einladen, unserem internationalen Editorial Board als Editorial Board Member (EBM) beizutreten.
 
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Bitte beachten Sie, dass die offizielle Arbeitssprache der Zeitschrift, das Manuskript-Handling sowie alle Veröffentlichungen und Begutachtungsprozesse ausschließlich auf Englisch geführt werden (Working language & publications: English).
@@ -582,7 +665,7 @@ Nachfolgend finden Sie die formalen Aufgaben, Konditionen (u. a. 2-jährige erne
   if (type === "eic") {
     return `${salutation}
 
-das Executive Publishing Board von Scholarly Open (Berlin/Deutschland) sucht für die Zeitschrift ${journal} eine herausragende wissenschaftliche Führungspersönlichkeit für die Position des Editor-in-Chief (Chefredakteur/in). In Anbetracht Ihrer herausragenden wissenschaftlichen Laufbahn${specialtyStr}${instStr} möchten wir Sie sehr gerne für diese leitende Funktion anfragen.
+das Executive Publishing Board von Scholarly Open (Mainz, Deutschland) sucht für die Zeitschrift ${journal} eine herausragende wissenschaftliche Führungspersönlichkeit für die Position des Editor-in-Chief (Chefredakteur/in). In Anbetracht Ihrer herausragenden wissenschaftlichen Laufbahn${specialtyStr}${instStr} möchten wir Sie sehr gerne für diese leitende Funktion anfragen.
 
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Die offizielle Publikations- und Arbeitssprache der Zeitschrift, alle redaktionellen Entscheidungen sowie die Kommunikation im Begutachtungsverfahren werden vollständig auf Englisch geführt (Working language & publications: English).
@@ -594,7 +677,7 @@ Nachfolgend finden Sie das Anforderungsprofil, die redaktionellen Leitlinien und
   if (type === "author") {
     return `${salutation}
 
-im Namen der Redaktion von ${journal} (Scholarly Open, Berlin) verfolgen wir Ihre Forschungsarbeiten${specialtyStr}${instStr} mit großem Interesse. Wir möchten Sie und Ihr Forschungsteam herzlich einladen, ein Originalmanuskript oder Review für unseren kommenden Gründungsband (Inaugural Volume) einzureichen.
+im Namen der Redaktion von ${journal} (Scholarly Open, Mainz) verfolgen wir Ihre Forschungsarbeiten${specialtyStr}${instStr} mit großem Interesse. Wir möchten Sie und Ihr Forschungsteam herzlich einladen, ein Originalmanuskript oder Review für unseren kommenden Gründungsband (Inaugural Volume) einzureichen.
 
 📌 Wichtiger Hinweis zur Publikationssprache:
 Bitte beachten Sie, dass alle Manuskripte, der gesamte Begutachtungsprozess sowie die finalen Open-Access-Publikationen (CC BY 4.0) auf Englisch verfasst sein müssen (Working language & publications: English).
@@ -606,7 +689,7 @@ Für den Gründungsband 2026 bieten wir einen 50%igen Erlass der Publikationsgeb
   if (type === "reviewer") {
     return `${salutation}
 
-das Editorial Office von ${journal} (Scholarly Open, Berlin) lädt Sie hiermit herzlich ein, ein eingereichtes Fachmanuskript im Rahmen unseres Double-Blind Peer Review Verfahrens als Gutachter/in zu evaluieren.
+das Editorial Office von ${journal} (Scholarly Open, Mainz) lädt Sie hiermit herzlich ein, ein eingereichtes Fachmanuskript im Rahmen unseres Double-Blind Peer Review Verfahrens als Gutachter/in zu evaluieren.
 
 📌 Wichtiger Hinweis zur Arbeitssprache:
 Das Manuskript, der strukturierte Begutachtungsbogen und alle Kommentare an Autoren und Herausgeber sind in englischer Sprache verfasst und zu beantworten (Working language & evaluation reports: English).
@@ -617,7 +700,7 @@ Nachfolgend finden Sie den Titel des Manuskripts, die Zusammenfassung sowie die 
 
   return `${salutation}
 
-wir kontaktieren Sie im Namen von ${journal} (Scholarly Open, Berlin/Deutschland). Bitte beachten Sie, dass die Arbeitssprache unserer Fachzeitschriften und aller Begutachtungsprozesse Englisch ist. Nachfolgend finden Sie alle relevanten Details:
+wir kontaktieren Sie im Namen von ${journal} (Scholarly Open, Mainz, Deutschland). Bitte beachten Sie, dass die Arbeitssprache unserer Fachzeitschriften und aller Begutachtungsprozesse Englisch ist. Nachfolgend finden Sie alle relevanten Details:
 ────────────────────────────────────────────────────`
 }
 
@@ -934,7 +1017,7 @@ export function generateBrandedEmailHtml(options: {
         <a href="${baseUrl}/editorial360?action=unsubscribe&email=${encodeURIComponent(recipientEmail || "")}&journal=${encodeURIComponent(journal)}" style="color: #64748b; text-decoration: underline; font-weight: 600;">unsubscribe here</a> 
         or reply to this email with &ldquo;Unsubscribe&rdquo;.
         <br>
-        Scholarly Open Publishing Group &bull; Editorial Office &bull; Basel / London &bull; <a href="${baseUrl}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>
+        Scholarly Open Publishing Group &bull; Editorial Office &bull; Mainz, Germany &bull; <a href="${baseUrl}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>
       </div>
     </div>
   </div>
