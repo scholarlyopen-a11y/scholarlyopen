@@ -178,7 +178,7 @@ export default function HomePage() {
                 </p>
                 <div className="mt-10 flex flex-col sm:flex-row gap-4">
                   <Button size="lg" variant="accent" asChild className="font-semibold">
-                    <Link href="/editorial360?role=author&action=submit">
+                    <Link href="/submit">
                       {t("hero.cta.submit")}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -388,7 +388,7 @@ export default function HomePage() {
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <Link href="/editorial360?role=author&action=submit">
+                  <Link href="/submit">
                     {t("cta.submit")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

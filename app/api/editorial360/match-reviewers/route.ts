@@ -86,8 +86,9 @@ export function harvestAuthorEmail(rawAffiliation: string, authorName: string): 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { title, abstract, keywords, authorName, authorAffiliation, journal, customQuery, query, isEcr, ecrSource, source } = body
+    const { title, abstract, keywords, authorName, authorAffiliation, journal, customQuery, query, isEcr, ecrSource, source, country } = body
 
+    const selectedCountry = (country || "all").toLowerCase().trim()
     const selectedEcrSource = (ecrSource || source || "all").toLowerCase()
     const searchQuery = (customQuery || query || keywords || title?.slice(0, 80) || "").trim() || (isEcr ? "machine learning biology medicine" : "clinical medicine engineering")
 
@@ -433,6 +434,14 @@ export async function POST(req: Request) {
         filteredEcr = filteredEcr.filter(c => c.ecrSource?.toLowerCase().includes(selectedEcrSource))
       }
 
+      if (selectedCountry && selectedCountry !== "all") {
+        if (selectedCountry === "dach") {
+          filteredEcr = filteredEcr.filter(c => ["de", "at", "ch"].includes((c.country || "").toLowerCase()))
+        } else {
+          filteredEcr = filteredEcr.filter(c => (c.country || "").toLowerCase() === selectedCountry)
+        }
+      }
+
       if (searchQuery && searchQuery !== "machine learning biology medicine" && searchQuery !== "clinical medicine engineering") {
         const q = searchQuery.toLowerCase()
         const keywordMatches = filteredEcr.filter(c => 
@@ -457,9 +466,18 @@ export async function POST(req: Request) {
       })
     }
 
-    // 1. Query OpenAlex Works API (Open Scholarly Graph - 250M+ Papers) with true search relevance
+    // 1. Query OpenAlex Works API (Open Scholarly Graph - 250M+ Papers) with true search relevance and optional country filter
     try {
-      const openAlexUrl = `https://api.openalex.org/works?search=${encodeURIComponent(searchQuery)}&per_page=${Math.min(limit * 2, 100)}&page=${page}&mailto=editorial@scholarlyopen.org`
+      let openAlexFilter = ""
+      if (selectedCountry && selectedCountry !== "all") {
+        if (selectedCountry === "dach") {
+          openAlexFilter = "&filter=institutions.country_code:de|at|ch"
+        } else {
+          openAlexFilter = `&filter=institutions.country_code:${selectedCountry}`
+        }
+      }
+
+      const openAlexUrl = `https://api.openalex.org/works?search=${encodeURIComponent(searchQuery)}${openAlexFilter}&per_page=${Math.min(limit * 2, 100)}&page=${page}&mailto=editorial@scholarlyopen.org`
       const openAlexRes = await fetch(openAlexUrl, {
         headers: { "User-Agent": "ScholarlyOpen-PeerReview/1.0 (mailto:editorial@scholarlyopen.org)" },
         cache: "no-store"
@@ -488,6 +506,16 @@ export async function POST(req: Request) {
             const instName = instObj?.display_name || a.raw_affiliation_strings?.[0] || "International Research Institution"
             const countryCode = instObj?.country_code || ""
             
+            // Enforce country match if filter active
+            if (selectedCountry && selectedCountry !== "all") {
+              const cLower = countryCode.toLowerCase()
+              if (selectedCountry === "dach") {
+                if (!["de", "at", "ch"].includes(cLower)) continue
+              } else if (cLower !== selectedCountry) {
+                continue
+              }
+            }
+
             // Exclude same institution
             if (authorAffiliation && instName.toLowerCase().includes(authorAffiliation.toLowerCase())) {
               continue
@@ -560,7 +588,15 @@ export async function POST(req: Request) {
         // If works didn't yield enough or user searched an author name directly, check authors endpoint
         if (candidatesMap.size < limit / 2) {
           try {
-            const authorUrl = `https://api.openalex.org/authors?search=${encodeURIComponent(searchQuery)}&per_page=15&mailto=editorial@scholarlyopen.org`
+            let authorFilter = ""
+            if (selectedCountry && selectedCountry !== "all") {
+              if (selectedCountry === "dach") {
+                authorFilter = "&filter=last_known_institutions.country_code:de|at|ch"
+              } else {
+                authorFilter = `&filter=last_known_institutions.country_code:${selectedCountry}`
+              }
+            }
+            const authorUrl = `https://api.openalex.org/authors?search=${encodeURIComponent(searchQuery)}${authorFilter}&per_page=15&mailto=editorial@scholarlyopen.org`
             const authorRes = await fetch(authorUrl, {
               headers: { "User-Agent": "ScholarlyOpen-PeerReview/1.0 (mailto:editorial@scholarlyopen.org)" },
               cache: "no-store"

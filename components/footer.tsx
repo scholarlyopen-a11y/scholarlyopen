@@ -136,7 +136,7 @@ export function Footer() {
     ],
     forAuthors: [
       { name: t("nav.authorGuidelines"), href: "/author-guidelines" },
-      { name: t("nav.submitManuscript"), href: "/editorial360?role=author&action=submit" },
+      { name: t("nav.submitManuscript"), href: "/submit" },
       { name: t("nav.apcFees"), href: "/apc-fees" },
       { name: t("nav.peerReview"), href: "/peer-review" },
       { name: t("nav.trainings"), href: "/trainings" },

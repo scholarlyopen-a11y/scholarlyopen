@@ -1031,8 +1031,8 @@ export default function Editorial360Page() {
       }
 
       if (urlAction === "submit") {
-        setRole("author")
-        setRegRole("author")
+        window.location.replace("/submit")
+        return
       }
 
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
@@ -1889,6 +1889,9 @@ export default function Editorial360Page() {
 
   const getDefaultInviteSubject = (r: UserRole | string, name?: string): string => {
     const roleName = getRoleDisplayName(r)
+    if (language === "de") {
+      return `[Einladung / Invitation] Beitritt zum editorial360 Workspace als ${roleName} - Scholarly Open`
+    }
     return `Official Invitation: Join editorial360 Workspace as ${roleName} - Scholarly Open`
   }
 
@@ -1896,6 +1899,29 @@ export default function Editorial360Page() {
     const salutation = name ? `Dear ${name},` : "Dear Colleague,"
     const roleName = getRoleDisplayName(r)
     const journalStr = journalName || "Scholarly Open"
+
+    if (language === "de") {
+      const deSalutation = name ? `Sehr geehrte(r) Frau/Herr ${name},` : "Sehr geehrte Kolleginnen und Kollegen,"
+      const workingLangNotice = "📌 Wichtiger Hinweis zur Arbeitssprache:\nBitte beachten Sie, dass die offizielle Arbeitssprache der Zeitschrift, das Manuskript-Handling sowie alle Veröffentlichungen und Begutachtungsprozesse ausschließlich auf Englisch geführt werden (Working language & publications: English)."
+
+      if (r === "reviewer") {
+        return `${deSalutation}\n\nim Namen des Editorial Office von Scholarly Open (Berlin/Deutschland) laden wir Sie herzlich ein, sich unserem verifizierten Gutachter-Netzwerk (Peer Reviewer Registry) auf der editorial360 Publikationsplattform anzuschließen.\n\n${workingLangNotice}\n\nDetails auf Englisch / Invitation Details:\n────────────────────────────────────────────────────\n${salutation}\n\nYou are cordially invited by the Editorial Office of Scholarly Open to join our verified Peer Reviewer Registry on the editorial360 collaborative publishing platform.\n\nRole: ${roleName}\nDesignated Discipline: ${journalStr}\n\nAs a verified reviewer, you will receive invitation requests carefully matched to your discipline and publication history, gain access to double-blind evaluation scorecards, and accumulate verified review credits with publication fee waiver benefits under COPE ethical standards.\n\nPlease accept this invitation to activate your reviewer workspace credentials.`
+      }
+
+      if (r === "editor") {
+        return `${deSalutation}\n\nim Namen von Scholarly Open (Berlin/Deutschland) möchten wir Sie herzlich einladen, dem Editorial Board als ${roleName} für ${journalStr} beizutreten.\n\n${workingLangNotice}\n\nDetails auf Englisch / Role Specifications:\n────────────────────────────────────────────────────\n${salutation}\n\nOn behalf of Scholarly Open, we are honored to invite you to join the Editorial Board as a ${roleName} for ${journalStr}.\n\nRole: ${roleName}\nEditorial Suite: editorial360 Unified Editorial Management\n\nThrough editorial360, you will manage manuscript triage, oversee peer review evaluation rounds, and issue final publication recommendations with full editorial autonomy.\n\nPlease accept this invitation to activate your editor workspace.`
+      }
+
+      if (r === "ria" || r === "im") {
+        return `${deSalutation}\n\nSie wurden als Integrity Manager für ${journalStr} auf editorial360 berufen.\n\n${workingLangNotice}\n\nDetails auf Englisch:\n────────────────────────────────────────────────────\n${salutation}\n\nYou have been appointed as Integrity Manager for ${journalStr} on editorial360.\n\nRole: ${roleName}\nFocus: Research Integrity, COPE Ethical Guidelines, Plagiarism Screening & Image Forensics\n\nPlease activate your account below to access the integrity review and triage queue.`
+      }
+
+      if (r === "jm") {
+        return `${deSalutation}\n\nSie wurden als Journal Manager für ${journalStr} auf editorial360 berufen.\n\n${workingLangNotice}\n\nDetails auf Englisch:\n────────────────────────────────────────────────────\n${salutation}\n\nYou have been appointed as Journal Manager for ${journalStr} on editorial360.\n\nRole: ${roleName}\nFocus: Operational Workflows, ECR Talent Pool Outreach & Author Communications\n\nPlease accept this invitation to activate your management portal.`
+      }
+
+      return `${deSalutation}\n\nwir laden Sie hiermit herzlich ein, dem editorial360 Workspace von Scholarly Open in der Funktion als ${roleName} für ${journalStr} beizutreten.\n\n${workingLangNotice}\n\nDetails auf Englisch:\n────────────────────────────────────────────────────\n${salutation}\n\nYou have been formally invited to join the editorial360 workspace for Scholarly Open in the official capacity of ${roleName}.\n\nRole: ${roleName}\nAssociated Portfolio: ${journalStr}\n\nPlease click the button below to accept your invitation and activate your workspace credentials.`
+    }
 
     if (r === "reviewer") {
       return `${salutation}\n\nYou are cordially invited by the Editorial Office of Scholarly Open to join our verified Peer Reviewer Registry on the editorial360 collaborative publishing platform.\n\nRole: ${roleName}\nDesignated Discipline: ${journalStr}\n\nAs a verified reviewer, you will receive invitation requests carefully matched to your discipline and publication history, gain access to double-blind evaluation scorecards, and accumulate verified review credits with publication fee waiver benefits under COPE ethical standards.\n\nPlease accept this invitation to activate your reviewer workspace credentials.`

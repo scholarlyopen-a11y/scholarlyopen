@@ -240,6 +240,7 @@ export function JournalManagerWorkspace({
   // Scholar Scout (Lead Finder & Editorial Outreach Suite) State
   const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
   const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine")
+  const [scoutCountry, setScoutCountry] = useState<string>("all")
   const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver">("call_for_papers")
   const [scoutViewMode, setScoutViewMode] = useState<"list" | "cards">("list")
   const [scoutSubTab, setScoutSubTab] = useState<"finder" | "ecr" | "history">("finder")
@@ -422,7 +423,7 @@ export function JournalManagerWorkspace({
     })
   }
 
-  const handleSearchScoutScholars = async (queryToSearch?: string, pageToSearch = 1, limitToSearch = scoutLimit) => {
+  const handleSearchScoutScholars = async (queryToSearch?: string, pageToSearch = 1, limitToSearch = scoutLimit, countryToSearch = scoutCountry) => {
     const term = (queryToSearch !== undefined ? queryToSearch : scoutKeyword).trim()
     if (!term) return
     setIsScouting(true)
@@ -433,6 +434,7 @@ export function JournalManagerWorkspace({
         body: JSON.stringify({
           customQuery: term,
           journal: scoutTargetJournal,
+          country: countryToSearch,
           page: pageToSearch,
           limit: limitToSearch
         })
@@ -452,7 +454,7 @@ export function JournalManagerWorkspace({
     }
   }
 
-  const handleSearchEcrScholars = async (termToSearch?: string, srcToSearch = ecrSource) => {
+  const handleSearchEcrScholars = async (termToSearch?: string, srcToSearch = ecrSource, countryToSearch = scoutCountry) => {
     const term = (termToSearch !== undefined ? termToSearch : ecrKeyword).trim()
     setIsEcrScouting(true)
     try {
@@ -464,6 +466,7 @@ export function JournalManagerWorkspace({
           ecrSource: srcToSearch,
           customQuery: term || "biomedical engineering artificial intelligence",
           journal: scoutTargetJournal,
+          country: countryToSearch,
           limit: 25
         })
       })
@@ -502,7 +505,7 @@ export function JournalManagerWorkspace({
     if (campaign === "call_for_papers") {
       defaultSubject = `Call for Papers: Founding Volume Submission Invitation for ${journalName}`
       actionLabel = "Submit Manuscript"
-      actionUrl = "https://www.scholarlyopen.org/editorial360?action=submit"
+      actionUrl = "https://www.scholarlyopen.org/submit"
       defaultBody = `Dear ${scholarName},\n\nOn behalf of the editorial office of ${journalName}, we have followed your influential scholarship in ${specialty} with great admiration.\n\n${journalName} is currently assembling high-impact original research articles, reviews, and rapid communications for our Founding Inaugural Volume. This foundational issue is pivotal in securing international ISSN registration and establishing our baseline citation record for upcoming indexing applications (DOAJ, Crossref, and major bibliographic registries).\n\nIn alignment with our official APC & Waiver Policy:\n• Inaugural 50% Launch Discount: All accepted manuscripts in 2026 automatically receive a 50% fee discount across our entire portfolio.\n• Equitable Waivers: Authors from World Bank-classified low-income countries receive a 100% full fee waiver. Researchers without grant or institutional backing are eligible to apply for discretionary financial hardship waivers.\n• Rigorous Double-Blind Peer Review: Expedited initial decision target within 14 days.\n• Immediate Gold Open Access: Published under Creative Commons CC BY 4.0 with Crossref DOI registration upon acceptance.\n\nGiven your distinguished track record, we cordially invite you and your research team to contribute your latest findings to this founding milestone volume.\n\nPlease use the button below to review our author guidelines or submit your manuscript to our editorial desk.\n\nSincerely,\nJournal Management Office\n${journalName}\nScholarly Open Publishing Group`
     } else if (campaign === "ebm") {
       defaultSubject = `Invitation to Join the Editorial Board: ${journalName}`
@@ -537,7 +540,7 @@ export function JournalManagerWorkspace({
     } else if (campaign === "ecr_author_waiver") {
       defaultSubject = `Founding Author Invitation: Publish Your Preprint in ${journalName} (50% Launch Waiver)`
       actionLabel = "Submit Preprint Manuscript"
-      actionUrl = "https://www.scholarlyopen.org/editorial360?action=submit"
+      actionUrl = "https://www.scholarlyopen.org/submit"
       defaultBody = `Dear ${scholarName},\n\nWe recently reviewed your preprint${scholar.preprintTitle ? ` ("${scholar.preprintTitle}")` : ""} and were impressed by the originality and methodological rigor demonstrated by your research team at ${institution}.\n\nAs you consider permanent journal venues for this work, we cordially invite you to submit your manuscript for peer review in ${journalName}.\n\nWhy Publish Your Preprint with Scholarly Open?\n• Inaugural 50% Fee Discount: As an Early Career lead author, your submission will automatically qualify for our 50% APC fee waiver, with full hardship waivers available for unfunded researchers.\n• Rapid Double-Blind Peer Review: Expedited initial editorial decision within 14 days by specialists in ${specialty}.\n• Immediate Gold Open Access: Published under Creative Commons CC BY 4.0 with Crossref DOI registration, indexed across international open discovery engines.\n• Author Retention of Rights: You retain 100% copyright over your work and raw datasets.\n\nWe would be thrilled to feature your cutting-edge findings in our upcoming volume.\n\nPlease use the link below to submit your manuscript or review our author guidelines.\n\nSincerely,\nJournal Management Office\n${journalName}\nScholarly Open Publishing Group`
     }
 
@@ -545,6 +548,7 @@ export function JournalManagerWorkspace({
       templateId: campaign,
       recipientEmail: scholarEmail,
       recipientName: scholarName,
+      recipientCountry: scholar.country || (scoutCountry !== "all" ? scoutCountry : undefined),
       journal: journalName,
       actionLabel,
       actionUrl,
@@ -1470,7 +1474,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         {/* 2. Interactive Search & Journal Target Suite */}
         <div className="p-4 rounded-xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] space-y-3 shadow-2xs">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-            <div className="md:col-span-6 relative">
+            <div className="md:col-span-5 relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
@@ -1484,7 +1488,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               />
             </div>
 
-            <div className="md:col-span-4">
+            <div className="md:col-span-3">
               <select
                 value={scoutTargetJournal}
                 onChange={(e) => setScoutTargetJournal(e.target.value)}
@@ -1496,6 +1500,44 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     {j.name} ({j.email})
                   </option>
                 ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <select
+                value={scoutCountry}
+                onChange={(e) => {
+                  const newCountry = e.target.value
+                  setScoutCountry(newCountry)
+                  handleSearchEcrScholars(undefined, undefined, newCountry)
+                }}
+                className="w-full px-3 py-2.5 text-xs bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] cursor-pointer"
+                title="Filter by country or region"
+              >
+                <option value="all">🌍 All Countries</option>
+                <option value="dach">🇩🇪🇦🇹🇨🇭 DACH Region</option>
+                <option value="de">🇩🇪 Germany (DE)</option>
+                <option value="at">🇦🇹 Austria (AT)</option>
+                <option value="ch">🇨🇭 Switzerland (CH)</option>
+                <option value="gb">🇬🇧 United Kingdom (GB)</option>
+                <option value="us">🇺🇸 United States (US)</option>
+                <option value="ca">🇨🇦 Canada (CA)</option>
+                <option value="au">🇦🇺 Australia (AU)</option>
+                <option value="fr">🇫🇷 France (FR)</option>
+                <option value="nl">🇳🇱 Netherlands (NL)</option>
+                <option value="se">🇸🇪 Sweden (SE)</option>
+                <option value="no">🇳🇴 Norway (NO)</option>
+                <option value="dk">🇩🇰 Denmark (DK)</option>
+                <option value="fi">🇫🇮 Finland (FI)</option>
+                <option value="it">🇮🇹 Italy (IT)</option>
+                <option value="es">🇪🇸 Spain (ES)</option>
+                <option value="jp">🇯🇵 Japan (JP)</option>
+                <option value="cn">🇨🇳 China (CN)</option>
+                <option value="kr">🇰🇷 South Korea (KR)</option>
+                <option value="sg">🇸🇬 Singapore (SG)</option>
+                <option value="in">🇮🇳 India (IN)</option>
+                <option value="br">🇧🇷 Brazil (BR)</option>
+                <option value="za">🇿🇦 South Africa (ZA)</option>
               </select>
             </div>
 
@@ -2395,7 +2437,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               {/* Search & Campaign Control Suite */}
               <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-5 shadow-xs space-y-4">
                 
-                {/* Top Row: Search Input + 13 Official Journals Dropdown + Page Size Limit */}
+                {/* Top Row: Search Input + 13 Official Journals Dropdown + Country Filter + Page Size Limit */}
                 <div className="flex flex-col md:flex-row items-center gap-3">
                   <div className="relative flex-1 w-full">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -2415,7 +2457,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
 
                   {/* 13 Official Journals Dropdown */}
-                  <div className="w-full md:w-80 shrink-0">
+                  <div className="w-full md:w-72 shrink-0">
                     <select
                       value={scoutTargetJournal}
                       onChange={(e) => setScoutTargetJournal(e.target.value)}
@@ -2431,22 +2473,61 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </select>
                   </div>
 
+                  {/* Country / Region Filter Dropdown */}
+                  <div className="w-full md:w-56 shrink-0">
+                    <select
+                      value={scoutCountry}
+                      onChange={(e) => {
+                        const newCountry = e.target.value
+                        setScoutCountry(newCountry)
+                        handleSearchScoutScholars(undefined, 1, scoutLimit, newCountry)
+                      }}
+                      className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] font-medium cursor-pointer"
+                      title="Filter scholar harvest by country or region"
+                    >
+                      <option value="all">🌍 All Countries (Global)</option>
+                      <option value="dach">🇩🇪🇦🇹🇨🇭 DACH Region (DE, AT, CH)</option>
+                      <option value="de">🇩🇪 Germany (DE)</option>
+                      <option value="at">🇦🇹 Austria (AT)</option>
+                      <option value="ch">🇨🇭 Switzerland (CH)</option>
+                      <option value="gb">🇬🇧 United Kingdom (GB)</option>
+                      <option value="us">🇺🇸 United States (US)</option>
+                      <option value="ca">🇨🇦 Canada (CA)</option>
+                      <option value="au">🇦🇺 Australia (AU)</option>
+                      <option value="fr">🇫🇷 France (FR)</option>
+                      <option value="nl">🇳🇱 Netherlands (NL)</option>
+                      <option value="se">🇸🇪 Sweden (SE)</option>
+                      <option value="no">🇳🇴 Norway (NO)</option>
+                      <option value="dk">🇩🇰 Denmark (DK)</option>
+                      <option value="fi">🇫🇮 Finland (FI)</option>
+                      <option value="it">🇮🇹 Italy (IT)</option>
+                      <option value="es">🇪🇸 Spain (ES)</option>
+                      <option value="jp">🇯🇵 Japan (JP)</option>
+                      <option value="cn">🇨🇳 China (CN)</option>
+                      <option value="kr">🇰🇷 South Korea (KR)</option>
+                      <option value="sg">🇸🇬 Singapore (SG)</option>
+                      <option value="in">🇮🇳 India (IN)</option>
+                      <option value="br">🇧🇷 Brazil (BR)</option>
+                      <option value="za">🇿🇦 South Africa (ZA)</option>
+                    </select>
+                  </div>
+
                   {/* Search Limit Dropdown */}
-                  <div className="w-full md:w-32 shrink-0">
+                  <div className="w-full md:w-28 shrink-0">
                     <select
                       value={scoutLimit}
                       onChange={(e) => {
                         const newLimit = parseInt(e.target.value, 10)
                         setScoutLimit(newLimit)
-                        handleSearchScoutScholars(undefined, 1, newLimit)
+                        handleSearchScoutScholars(undefined, 1, newLimit, scoutCountry)
                       }}
                       className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                       title="Result batch limit per search"
                     >
-                      <option value="10">10 per page</option>
-                      <option value="25">25 per page</option>
-                      <option value="50">50 per page</option>
-                      <option value="100">100 per page</option>
+                      <option value="10">10 / pg</option>
+                      <option value="25">25 / pg</option>
+                      <option value="50">50 / pg</option>
+                      <option value="100">100 / pg</option>
                     </select>
                   </div>
 
@@ -2547,6 +2628,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <span className="text-[11px] text-slate-400">
                       Topic: &ldquo;{scoutKeyword}&rdquo;
                     </span>
+                    {scoutCountry !== "all" && (
+                      <span className="text-[11px] text-[#0b99ff] font-semibold bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800 flex items-center gap-1">
+                        <Globe className="h-3 w-3" />
+                        <span>Region: {scoutCountry === "dach" ? "🇩🇪🇦🇹🇨🇭 DACH" : scoutCountry.toUpperCase()}</span>
+                      </span>
+                    )}
                     <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
                       OpenAlex &amp; ROR Verified Affiliations
                     </span>

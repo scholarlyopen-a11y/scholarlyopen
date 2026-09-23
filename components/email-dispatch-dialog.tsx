@@ -10,11 +10,12 @@ import {
   AlertCircle,
   RefreshCw,
   X,
-  FileText
+  FileText,
+  Globe
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES } from "@/lib/email-templates"
+import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES, getBilingualGermanIntro } from "@/lib/email-templates"
 import { getJournalReplyTo } from "@/lib/data/journal-contacts"
 
 export interface EmailDispatchConfig {
@@ -22,6 +23,7 @@ export interface EmailDispatchConfig {
   templateId?: string
   recipientEmail: string
   recipientName: string
+  recipientCountry?: string
   defaultSubject?: string
   defaultBody?: string
   paperId?: string
@@ -53,6 +55,47 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
   const [recipientEmail, setRecipientEmail] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [languagePreset, setLanguagePreset] = useState<"en" | "de">("en")
+
+  const getTemplateCategory = (templateId?: string): "ebm" | "eic" | "author" | "reviewer" | "general" => {
+    if (!templateId) return "general"
+    const lower = templateId.toLowerCase()
+    if (lower.includes("ebm") || lower.includes("board")) return "ebm"
+    if (lower.includes("eic") || lower.includes("chief")) return "eic"
+    if (lower.includes("paper") || lower.includes("author") || lower.includes("waiver") || lower.includes("submission")) return "author"
+    if (lower.includes("reviewer") || lower.includes("review") || lower.includes("invitation")) return "reviewer"
+    return "general"
+  }
+
+  const handleSwitchLanguagePreset = (preset: "en" | "de") => {
+    setLanguagePreset(preset)
+    const category = getTemplateCategory(config.templateId)
+    const separator = "────────────────────────────────────────────────────"
+
+    if (preset === "de") {
+      if (!bodyText.includes(separator)) {
+        const intro = getBilingualGermanIntro(
+          category,
+          config.recipientName,
+          config.journal || "Scholarly Open",
+          { paperId: config.paperId }
+        )
+        setBodyText(`${intro}\n\n${bodyText}`)
+        if (!subject.includes("[Einladung") && !subject.includes("[Berufung") && !subject.includes("[Call for Papers")) {
+          const prefix = category === "eic" ? "[Berufung / Appointment] " : category === "author" ? "[Call for Papers / Einladung] " : "[Einladung / Invitation] "
+          setSubject(`${prefix}${subject}`)
+        }
+      }
+    } else {
+      if (bodyText.includes(separator)) {
+        const parts = bodyText.split(separator)
+        if (parts.length > 1) {
+          setBodyText(parts[1].trim())
+        }
+        setSubject(subject.replace(/^\[[^\]]+\]\s*/, ""))
+      }
+    }
+  }
 
   // Initialize or update fields when dialog opens
   useEffect(() => {
@@ -73,21 +116,56 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
       }
 
       // Subject
+      let initialSubject = ""
       if (config.defaultSubject) {
-        setSubject(interpolateTokens(config.defaultSubject, tokens))
+        initialSubject = interpolateTokens(config.defaultSubject, tokens)
       } else if (templateDef) {
-        setSubject(interpolateTokens(templateDef.defaultSubject, tokens))
+        initialSubject = interpolateTokens(templateDef.defaultSubject, tokens)
       } else {
-        setSubject(`Editorial Update: ${config.paperId || ''} - ${config.journal || 'Scholarly Open'}`)
+        initialSubject = `Editorial Update: ${config.paperId || ''} - ${config.journal || 'Scholarly Open'}`
       }
 
       // Body
+      let initialBody = ""
       if (config.defaultBody) {
-        setBodyText(interpolateTokens(config.defaultBody, tokens))
+        initialBody = interpolateTokens(config.defaultBody, tokens)
       } else if (templateDef) {
-        setBodyText(interpolateTokens(templateDef.defaultBody, tokens))
+        initialBody = interpolateTokens(templateDef.defaultBody, tokens)
       } else {
-        setBodyText(`Dear ${config.recipientName || 'Colleague'},\n\nWe are contacting you regarding manuscript ${config.paperId || ''} (${config.paperTitle || ''}).`)
+        initialBody = `Dear ${config.recipientName || 'Colleague'},\n\nWe are contacting you regarding manuscript ${config.paperId || ''} (${config.paperTitle || ''}).`
+      }
+
+      // Auto-detect DACH / German context from recipient email or country
+      const emailDomain = (config.recipientEmail || "").toLowerCase().trim()
+      const c = (config.recipientCountry || "").toLowerCase().trim()
+      const isGermanTarget =
+        language === "de" ||
+        ["de", "at", "ch", "germany", "deutschland", "austria", "österreich", "switzerland", "schweiz", "dach"].includes(c) ||
+        emailDomain.endsWith(".de") ||
+        emailDomain.endsWith(".at") ||
+        emailDomain.endsWith(".ch")
+
+      const category = getTemplateCategory(config.templateId)
+
+      if (isGermanTarget) {
+        setLanguagePreset("de")
+        const intro = getBilingualGermanIntro(
+          category,
+          config.recipientName || "Kollege",
+          config.journal || "Scholarly Open",
+          { paperId: config.paperId }
+        )
+        setBodyText(`${intro}\n\n${initialBody}`)
+        const prefix = category === "eic" ? "[Berufung / Appointment] " : category === "author" ? "[Call for Papers / Einladung] " : "[Einladung / Invitation] "
+        if (!initialSubject.startsWith("[")) {
+          setSubject(`${prefix}${initialSubject}`)
+        } else {
+          setSubject(initialSubject)
+        }
+      } else {
+        setLanguagePreset("en")
+        setBodyText(initialBody)
+        setSubject(initialSubject)
       }
 
       setRecipientEmail(config.recipientEmail)
@@ -95,7 +173,7 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
       setErrorMsg(null)
       setIsSending(false)
     }
-  }, [config.isOpen, config.templateId, config.recipientEmail, config.recipientName, config.defaultSubject, config.defaultBody, config.paperId, config.paperTitle, config.journal])
+  }, [config.isOpen, config.templateId, config.recipientEmail, config.recipientName, config.recipientCountry, config.defaultSubject, config.defaultBody, config.paperId, config.paperTitle, config.journal, language])
 
   // Generate preview HTML
   const renderedHtml = useMemo(() => {
@@ -243,6 +321,41 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
           {/* TAB 1: COMPOSE / EDIT */}
           {activeTab === "compose" && (
             <div className="space-y-3">
+              {/* Language Preset Switcher */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-[#20222a] border border-slate-200 dark:border-[#272832]">
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <Globe className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
+                  <span>{isDe ? "Sprachmodus für diesen Empfänger:" : "Language Preset for Scholar:"}</span>
+                  <span className="text-[11px] font-normal text-muted-foreground hidden sm:inline">
+                    {isDe ? "(Deutsche Einleitung, Fachtext auf Englisch)" : "(German intro + English academic core)"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchLanguagePreset("en")}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                      languagePreset === "en"
+                        ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-2xs border border-slate-200 dark:border-[#272832]"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    🇬🇧 English
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchLanguagePreset("de")}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                      languagePreset === "de"
+                        ? "bg-emerald-500 text-white shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    🇩🇪 Deutsch (Bilingual Intro)
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   {isDe ? "Betreffzeile" : "Subject Line"}

@@ -313,6 +313,7 @@ export function EmailTemplatesManager({ language, currentUserEmail = "scholarlyo
 
   const categoryLabels: Record<string, { en: string; de: string }> = {
     all: { en: "All Templates", de: "Alle Vorlagen" },
+    board: { en: "Editorial Board & EiC", de: "Editorial Board & EiC" },
     reviewers: { en: "Reviewer Communications", de: "Gutachter-Kommunikation" },
     authors: { en: "Author Communications", de: "Autoren-Kommunikation" },
     decisions: { en: "Editorial Decisions", de: "Redaktionelle Entscheidungen" },

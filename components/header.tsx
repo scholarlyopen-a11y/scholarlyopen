@@ -58,7 +58,7 @@ export function Header() {
       href: "#",
       children: [
         { name: t("nav.authorGuidelines"), href: "/author-guidelines" },
-        { name: t("nav.submitManuscript"), href: "/editorial360?role=author&action=submit" },
+        { name: t("nav.submitManuscript"), href: "/submit" },
         { name: t("nav.apcFees"), href: "/apc-fees" },
       ],
     },
@@ -221,7 +221,7 @@ export function Header() {
           </DropdownMenu>
           
           <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1.5 xl:px-3.5 xl:py-2 whitespace-nowrap shrink-0">
-            <Link href="/editorial360?role=author&action=submit">{t("nav.submitManuscript")}</Link>
+            <Link href="/submit">{t("nav.submitManuscript")}</Link>
           </Button>
         </div>
       </nav>
@@ -291,7 +291,7 @@ export function Header() {
             )}
             <div className="pt-4 flex flex-col gap-2">
               <Button variant="accent" asChild className="w-full border border-accent/60">
-                <Link href="/editorial360?role=author&action=submit" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/submit" onClick={() => setMobileMenuOpen(false)}>
                   {t("nav.submitManuscript")}
                 </Link>
               </Button>

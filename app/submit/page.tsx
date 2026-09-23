@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers } from "lucide-react"
+import { Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -60,23 +60,6 @@ export default function SubmitPage() {
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
                 Submit your research to {t("brand.name")}. Our editorial team will guide your manuscript through our rigorous peer review process.
               </p>
-
-              <div className="mt-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#0b99ff]/10 via-[#0b99ff]/5 to-transparent border border-[#0b99ff]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-                <div className="space-y-1">
-                  <h3 className="text-base sm:text-lg font-bold text-foreground">
-                    Submit Online via editorial360 Portal
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
-                    Track manuscript triage in real time, view referee scorecards, upload revised drafts, and receive official decision notices directly within your editorial360 author dashboard.
-                  </p>
-                </div>
-                <Button asChild className="bg-[#0b99ff] hover:bg-[#0088e0] active:bg-[#0077cc] text-white font-bold px-5 py-2.5 rounded-xl shadow-xs shrink-0 cursor-pointer">
-                  <Link href="/editorial360?role=author&action=submit">
-                    <span>Launch editorial360</span>
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
             </div>
           </div>
         </section>
@@ -204,45 +187,15 @@ export default function SubmitPage() {
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tight">Start Your Submission</h2>
                 <p className="mt-4 text-muted-foreground">
-                  Follow international publisher standards by registering an author account in editorial360 or complete the submission details below.
+                  Complete the manuscript and corresponding author details below to submit your paper directly to our editorial office for peer review.
                 </p>
               </div>
-
-              {/* International Publisher Standard Notice (localhost only) */}
-              {process.env.NODE_ENV === "development" && (
-                <div className="mb-8 rounded-xl border border-primary/20 bg-primary/5 p-6 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-                      <User className="h-5 w-5" />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="font-bold text-base text-foreground">Recommended: Author Account Registration in editorial360</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        In accordance with top international publisher standards (Elsevier, Springer Nature, Wiley, Frontiers), registering an author account connects your <strong>ORCID iD</strong>, verifies institutional affiliation, and provides a persistent dashboard to track peer review, manage co-authors, and upload revisions.
-                      </p>
-                      <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                        <Button asChild variant="default" size="sm">
-                          <Link href="/editorial360?mode=register&role=author">
-                            Register Author Account in editorial360
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button asChild variant="outline" size="sm">
-                          <Link href="/editorial360?mode=login&role=author">
-                            Sign In to Existing Account
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Direct Corresponding Author Submission</CardTitle>
+                  <CardTitle>Manuscript Submission Form</CardTitle>
                   <CardDescription>
-                    Alternatively, fill in the corresponding author details below to start your submission.
+                    Please provide complete and accurate information for the corresponding author and manuscript files.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -558,16 +511,6 @@ export default function SubmitPage() {
                           An automated confirmation email has been dispatched to your email address with full submission details.
                           Our editorial office will conduct an initial quality check and assign a handling editor.
                         </p>
-                        {process.env.NODE_ENV === "development" && (
-                          <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                            <Button asChild variant="default" className="w-full sm:w-auto">
-                              <Link href={`/editorial360?manuscriptId=${trackingId || ""}&role=author`}>
-                                Track in editorial360 Workspace (Localhost Preview)
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </Link>
-                            </Button>
-                          </div>
-                        )}
                       </div>
                     )}
                     {status === "error" && (
