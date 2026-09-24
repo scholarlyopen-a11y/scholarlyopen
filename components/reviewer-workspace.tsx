@@ -690,6 +690,12 @@ export function ReviewerWorkspace({
       localStorage.setItem(`so_reviewer_profile_${formEmail}`, JSON.stringify(updated))
       localStorage.setItem("so_reviewer_profile_default", JSON.stringify(updated))
     } catch (err) {}
+    // Sync with central editorial360 database
+    fetch("/api/editorial360/reviewer-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated)
+    }).catch(err => console.error("Could not sync reviewer profile:", err))
     if (onSaveProfile) {
       onSaveProfile(updated)
     }

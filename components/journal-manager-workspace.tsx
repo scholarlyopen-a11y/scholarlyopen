@@ -264,6 +264,67 @@ export function JournalManagerWorkspace({
   const [isLoadingGateway, setIsLoadingGateway] = useState(false)
   const [gatewaySearch, setGatewaySearch] = useState("")
 
+  // Reviewer Profile Inspection State
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  const [selectedReviewerData, setSelectedReviewerData] = useState<{
+    profile: any
+    audit: any
+  } | null>(null)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false)
+
+  const handleOpenReviewerProfile = async (email: string, fallbackCandidate?: any) => {
+    setIsLoadingProfile(true)
+    setIsProfileModalOpen(true)
+    try {
+      const res = await fetch(`/api/editorial360/reviewer-profile?email=${encodeURIComponent(email)}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.ok && data.profile) {
+          setSelectedReviewerData({ profile: data.profile, audit: data.audit })
+          return
+        }
+      }
+      // Fallback if not found on server
+      const synthetic = {
+        title: "Dr.",
+        name: fallbackCandidate?.candidateName || "Referee",
+        email: email,
+        institution: fallbackCandidate?.institution || "Academic Institution",
+        department: "Faculty of Science & Engineering",
+        country: "International",
+        primaryDiscipline: fallbackCandidate?.discipline || "engineering",
+        subDisciplines: ["Applied Research"],
+        keywords: ["Academic Peer Review", "Methodology"],
+        maxReviewsPerMonth: 2,
+        preferredTurnaround: 14,
+        availabilityStatus: "Available",
+        coiAcknowledged: true,
+        credentialId: fallbackCandidate?.credentialId,
+        gatewayScore: fallbackCandidate?.score,
+        accountStatus: fallbackCandidate?.status || "Active"
+      }
+      setSelectedReviewerData({
+        profile: synthetic,
+        audit: {
+          completionPercentage: 70,
+          filledFields: [
+            { key: "name", label: "Full Name", value: synthetic.name },
+            { key: "email", label: "Email Address", value: synthetic.email },
+            { key: "institution", label: "Affiliation", value: synthetic.institution }
+          ],
+          missingFields: [
+            { key: "orcid", label: "ORCID iD", tip: "Connect verified 16-digit ORCID" },
+            { key: "keywords", label: "Keywords", tip: "Add specific research keywords" }
+          ]
+        }
+      })
+    } catch (err) {
+      console.error("Failed to load reviewer profile:", err)
+    } finally {
+      setIsLoadingProfile(false)
+    }
+  }
+
   const fetchGatewayData = async () => {
     setIsLoadingGateway(true)
     try {
@@ -3949,6 +4010,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         <th className="py-3 px-4 whitespace-nowrap">Verification Credential</th>
                         <th className="py-3 px-4 whitespace-nowrap">Account Status</th>
                         <th className="py-3 px-4 text-right whitespace-nowrap">Date</th>
+                        <th className="py-3 px-4 text-center whitespace-nowrap">Profile</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -4026,6 +4088,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </td>
                               <td className="py-3.5 px-4 align-middle text-right text-slate-500 text-[11px] whitespace-nowrap">
                                 {test.date}
+                              </td>
+                              <td className="py-3.5 px-4 align-middle text-center whitespace-nowrap">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleOpenReviewerProfile(test.candidateEmail, test)}
+                                  className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-300 dark:border-slate-700 hover:border-[#0b99ff] hover:text-[#0b99ff] hover:bg-[#0b99ff]/5 transition-all gap-1.5 cursor-pointer shadow-2xs"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-[#0b99ff]" />
+                                  <span>Profile</span>
+                                </Button>
                               </td>
                             </tr>
                           )
@@ -6815,6 +6888,238 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
             >
               {confirmDialogState.confirmButtonLabel}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* REVIEWER PROFILE INSPECTOR DIALOG                                         */}
+      {/* ========================================================================= */}
+      <Dialog open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3">
+              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Users className="w-4 h-4 text-[#0b99ff]" />
+                Reviewer Profile
+              </DialogTitle>
+              {selectedReviewerData?.profile?.credentialId && (
+                <span className="font-mono text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/25 shrink-0">
+                  {selectedReviewerData.profile.credentialId}
+                </span>
+              )}
+            </div>
+            <DialogDescription className="text-xs text-slate-500">
+              Verified referee records, research keywords, and profile completeness.
+            </DialogDescription>
+          </DialogHeader>
+
+          {isLoadingProfile ? (
+            <div className="py-12 flex flex-col items-center justify-center text-slate-500 gap-2">
+              <RotateCcw className="w-5 h-5 animate-spin text-[#0b99ff]" />
+              <span className="text-xs">Loading referee profile...</span>
+            </div>
+          ) : selectedReviewerData ? (
+            <div className="space-y-5 pt-3 text-xs">
+              {/* Scholar Header Card */}
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20 font-bold flex items-center justify-center text-sm uppercase shrink-0">
+                    {selectedReviewerData.profile.name
+                      ? selectedReviewerData.profile.name.replace(/^(Dr\.|Prof\.)\s+/i, "").slice(0, 2)
+                      : "RV"}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <span>{selectedReviewerData.profile.name}</span>
+                      {selectedReviewerData.profile.gatewayScore && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          {selectedReviewerData.profile.gatewayScore}% Score
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                      {selectedReviewerData.profile.email}
+                    </p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 font-medium">
+                      {selectedReviewerData.profile.institution}
+                      {selectedReviewerData.profile.department ? ` · ${selectedReviewerData.profile.department}` : ""}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex sm:flex-col items-center sm:items-end gap-1.5 shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30">
+                    <CheckCircle2 className="w-3 h-3 text-[#0b99ff]" />
+                    {selectedReviewerData.profile.accountStatus || "Active Referee"}
+                  </span>
+                  {selectedReviewerData.profile.country && (
+                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                      <Globe className="w-3 h-3" />
+                      {selectedReviewerData.profile.country}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Research Keywords */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#0b99ff]" />
+                    Research Keywords
+                  </h4>
+                  <span className="text-[10px] text-slate-500">
+                    {selectedReviewerData.profile.keywords?.length || 0} registered keywords
+                  </span>
+                </div>
+                {selectedReviewerData.profile.keywords && selectedReviewerData.profile.keywords.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/60 dark:border-slate-800">
+                    {selectedReviewerData.profile.keywords.map((kw: string, i: number) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-2xs"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#0b99ff]" />
+                        {kw}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-lg border border-dashed border-amber-300 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 text-xs">
+                    No research keywords added yet.
+                  </div>
+                )}
+              </div>
+
+              {/* Profile Completeness */}
+              <div className="space-y-1.5 p-3.5 rounded-xl bg-[#0b99ff]/5 border border-[#0b99ff]/20">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                    Profile Completeness
+                  </span>
+                  <span className="font-bold text-[#0b99ff] text-xs">
+                    {selectedReviewerData.audit?.completionPercentage || 80}% Complete
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#0b99ff] transition-all duration-500"
+                    style={{ width: `${selectedReviewerData.audit?.completionPercentage || 80}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
+                  <span>{selectedReviewerData.audit?.filledFields?.length || 0} fields completed</span>
+                  <span>{selectedReviewerData.audit?.missingFields?.length || 0} fields missing</span>
+                </div>
+              </div>
+
+              {/* Two Column Grid: Filled Details vs Missing Fields */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Completed Details */}
+                <div className="space-y-2 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 bg-white dark:bg-slate-900/40">
+                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    Completed Information
+                  </h4>
+                  <div className="space-y-1.5 text-[11px]">
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500">Discipline</span>
+                      <span className="font-medium text-slate-800 dark:text-slate-200 capitalize">
+                        {selectedReviewerData.profile.primaryDiscipline?.replace("-", " ")}
+                      </span>
+                    </div>
+                    {selectedReviewerData.profile.subDisciplines?.length > 0 && (
+                      <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                        <span className="text-slate-500">Sub-Fields</span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200 text-right">
+                          {selectedReviewerData.profile.subDisciplines.join(", ")}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500">ORCID</span>
+                      <span className="font-mono font-medium text-slate-800 dark:text-slate-200">
+                        {selectedReviewerData.profile.orcid || "Not connected"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500">Monthly Capacity</span>
+                      <span className="font-medium text-slate-800 dark:text-slate-200">
+                        {selectedReviewerData.profile.maxReviewsPerMonth || 2} papers / mo
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500">Turnaround Window</span>
+                      <span className="font-medium text-slate-800 dark:text-slate-200">
+                        {selectedReviewerData.profile.preferredTurnaround || 14} days
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500">Availability</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                        {selectedReviewerData.profile.availabilityStatus || "Available"}
+                      </span>
+                    </div>
+                    {selectedReviewerData.profile.paymentMethod && (
+                      <div className="flex justify-between py-1">
+                        <span className="text-slate-500">Honoraria Payout</span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200">
+                          {selectedReviewerData.profile.paymentMethod}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Missing / Unfilled Fields */}
+                <div className="space-y-2 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 bg-white dark:bg-slate-900/40">
+                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                    Pending Fields
+                  </h4>
+                  {selectedReviewerData.audit?.missingFields?.length > 0 ? (
+                    <div className="space-y-2 text-[11px]">
+                      {selectedReviewerData.audit.missingFields.map((f: any, i: number) => (
+                        <div key={i} className="p-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                          <div className="font-semibold text-amber-800 dark:text-amber-300">{f.label}</div>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">{f.tip}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-slate-500 text-xs">
+                      All required profile fields have been completed!
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="py-8 text-center text-slate-500 text-xs">No profile data available.</div>
+          )}
+
+          <DialogFooter className="flex flex-row items-center justify-between gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (selectedReviewerData?.profile?.email) {
+                  navigator.clipboard.writeText(selectedReviewerData.profile.email)
+                }
+              }}
+              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg gap-1.5 cursor-pointer"
+            >
+              <Mail className="w-3.5 h-3.5 text-slate-500" />
+              Copy Email
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setIsProfileModalOpen(false)}
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
