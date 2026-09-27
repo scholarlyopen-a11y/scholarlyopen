@@ -905,6 +905,7 @@ export default function Editorial360Page() {
   // Registration States
   const [regName, setRegName] = useState("")
   const [regEmail, setRegEmail] = useState("")
+  const [regCountry, setRegCountry] = useState("")
   const [regOrcid, setRegOrcid] = useState("")
   const [regPassword, setRegPassword] = useState("")
   const [regRole, setRegRole] = useState<UserRole>("author")
@@ -2278,7 +2279,7 @@ export default function Editorial360Page() {
   const [profFullName, setProfFullName] = useState("Dr. Evelyn Vane")
   const [profRank, setProfRank] = useState("Senior Researcher & Faculty Lead")
   const [profInstitution, setProfInstitution] = useState("Institute of Advanced Medical Sciences")
-  const [profCountry, setProfCountry] = useState("United Kingdom")
+  const [profCountry, setProfCountry] = useState("")
   const [profOrcid, setProfOrcid] = useState("0000-0002-1825-0097")
   const [profSpecialization, setProfSpecialization] = useState("Cardiology, Clinical AI, Diagnostic Imaging")
   const [profPhotoUrl, setProfPhotoUrl] = useState<string>("")
@@ -2579,12 +2580,14 @@ export default function Editorial360Page() {
       setRole(regRole)
       setEmail(regEmail)
       setIsLoggedIn(true)
+      const finalCountry = regCountry || "International"
+      setProfCountry(finalCountry)
       if (regRole === "editor") {
         setEditorName(regName)
         setEditorEmail(regEmail)
         setEditorJournal(invitedJournal || "Scholarly Open")
         setEditorInstitution("Academic Institution")
-        setEditorCountry("International")
+        setEditorCountry(finalCountry)
         setEditorOrcid(regOrcid || "")
         setEditorRank("Editorial Board Member & Handling Editor")
         setActiveEditorTab("desk")
@@ -2598,7 +2601,7 @@ export default function Editorial360Page() {
             journal: invitedJournal || "Scholarly Open",
             role: "Editorial Board Member & Handling Editor",
             affiliation: "Academic Institution",
-            country: "International",
+            country: finalCountry,
             orcid: regOrcid || ""
           })
         }).catch(err => console.error("Error persisting registered editor:", err))
@@ -2613,7 +2616,7 @@ export default function Editorial360Page() {
           email: regEmail,
           institution: isBolutife ? "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria" : "Scholarly Open Verified Reviewer Community",
           department: isBolutife ? "Department of Physics and Engineering Physics" : "Peer Review Faculty",
-          country: isBolutife ? "Nigeria" : "International",
+          country: isBolutife ? "Nigeria" : finalCountry,
           orcid: regOrcid || (isBolutife ? "0000-0002-3652-3213" : ""),
           badges: isBolutife 
             ? ["Gateway Certified (95%)", "Verified Referee", "COPE Ethics Verified"]
@@ -2650,7 +2653,7 @@ export default function Editorial360Page() {
             editorRank: regRole === "editor" ? "Editorial Board Member & Handling Editor" : editorRank,
             editorJournal: regRole === "editor" ? (invitedJournal || "Scholarly Open") : editorJournal,
             editorInstitution: regRole === "editor" ? "Academic Institution" : editorInstitution,
-            editorCountry: regRole === "editor" ? "International" : editorCountry,
+            editorCountry: regRole === "editor" ? finalCountry : editorCountry,
             editorOrcid: regRole === "editor" ? (regOrcid || "") : editorOrcid,
             editorEmail: regRole === "editor" ? regEmail : editorEmail,
             reviewerProfile: regRole === "reviewer" ? newReviewerProfile : reviewerProfile,
@@ -4748,6 +4751,47 @@ export default function Editorial360Page() {
                         />
                       </div>
 
+                      {/* Country / Region */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="reg-country" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          Country / Region <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="reg-country"
+                          required
+                          value={regCountry}
+                          onChange={(e) => {
+                            setRegCountry(e.target.value)
+                            setProfCountry(e.target.value)
+                            setEditorCountry(e.target.value)
+                          }}
+                          className="w-full px-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all cursor-pointer"
+                        >
+                          <option value="">Select Country / Region...</option>
+                          <option value="United States">United States</option>
+                          <option value="United Kingdom">United Kingdom</option>
+                          <option value="Germany">Germany (Deutschland)</option>
+                          <option value="Nigeria">Nigeria</option>
+                          <option value="China">China (中国)</option>
+                          <option value="India">India</option>
+                          <option value="Canada">Canada</option>
+                          <option value="Australia">Australia</option>
+                          <option value="France">France</option>
+                          <option value="Switzerland">Switzerland (Schweiz)</option>
+                          <option value="Austria">Austria (Österreich)</option>
+                          <option value="Netherlands">Netherlands</option>
+                          <option value="Japan">Japan (日本)</option>
+                          <option value="Singapore">Singapore</option>
+                          <option value="South Korea">South Korea (대한민국)</option>
+                          <option value="Brazil">Brazil (Brasil)</option>
+                          <option value="South Africa">South Africa</option>
+                          <option value="Italy">Italy (Italia)</option>
+                          <option value="Spain">Spain (España)</option>
+                          <option value="Sweden">Sweden (Sverige)</option>
+                          <option value="Other">Other / International</option>
+                        </select>
+                      </div>
+
                       {/* Password input */}
                       <div className="space-y-1.5">
                         <label htmlFor="reg-pass" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -5539,19 +5583,6 @@ export default function Editorial360Page() {
 
                       <button 
                         type="button"
-                        onClick={() => setActiveJmTab("sent")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "sent"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <Send className="h-4 w-4 text-[#0b99ff]" />
-                        <span>{language === "de" ? "Gesendete E-Mails" : "Sent Items"}</span>
-                      </button>
-
-                      <button 
-                        type="button"
                         onClick={() => setActiveJmTab("users")}
                         className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeJmTab === "users"
@@ -6081,16 +6112,16 @@ export default function Editorial360Page() {
                   <ReviewerWorkspace
                     language={language}
                     user={{
-                      name: reviewerProfile?.name || profFullName || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || "Dr. Marcus Vance")),
-                      email: reviewerProfile?.email || email || regEmail || "m.vance@university-charite.de",
-                      orcid: reviewerProfile?.orcid || profOrcid || regOrcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : ""),
-                      institution: reviewerProfile?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
+                      name: reviewerProfile?.name || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || profFullName || "Academic Referee")),
+                      email: reviewerProfile?.email || email || regEmail || (email.includes("reviewer") ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
+                      orcid: reviewerProfile?.orcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : (profOrcid || regOrcid || "")),
+                      institution: reviewerProfile?.institution || (email.includes("reviewer") ? "Charité – Universitätsmedizin Berlin" : (profInstitution || "Academic Institution")),
                       photoUrl: reviewerProfile?.photoUrl || profPhotoUrl
                     }}
-                    initialProfile={reviewerProfile || (profPhotoUrl ? {
-                      name: profFullName || "Dr. Marcus Vance",
-                      email: email || "reviewer@scholarlyopen.org",
-                      institution: profInstitution || "Charité – Universitätsmedizin Berlin",
+                    initialProfile={reviewerProfile || (email.includes("reviewer") ? {
+                      name: "Dr. Marcus Vance",
+                      email: "m.vance@university-charite.de",
+                      institution: "Charité – Universitätsmedizin Berlin",
                       photoUrl: profPhotoUrl,
                       badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"]
                     } : undefined)}
@@ -6114,9 +6145,16 @@ export default function Editorial360Page() {
                 {/* ================= 4. AUTHOR WORKSPACE ================= */}
                 {role === "author" && (() => {
                   const isDe = language === "de"
+                  const isDemoAuthor = email === "author@scholarlyopen.org" || email === "author@example.com" || email === "e.vane@university.edu" || email.toLowerCase().includes("sam.lee")
+                  const authorFiltered = isDemoAuthor 
+                    ? manuscripts 
+                    : manuscripts.filter(m => 
+                        (m.authorEmail && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
+                        (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase()))
+                      )
                   // Deduplicate manuscripts array by ID and Title and sort by newest status update / activity first
                   const uniqueManuscripts = Array.from(
-                    new Map(manuscripts.map(m => [m.id ? m.id : m.title, m])).values()
+                    new Map(authorFiltered.map(m => [m.id ? m.id : m.title, m])).values()
                   ).sort((a, b) => {
                     const timeA = new Date(a.updatedAt || a.lastActivity || a.revisionDate || a.date || 0).getTime()
                     const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()

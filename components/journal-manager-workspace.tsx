@@ -345,9 +345,18 @@ export function JournalManagerWorkspace({
         const rv = await revsRes.json()
         if (rv.ok && Array.isArray(rv.registeredReviewers)) {
           setReviewersList(prev => {
-            const existingEmails = new Set(prev.map(p => p.email?.toLowerCase()))
-            const toAdd = rv.registeredReviewers.filter((nr: any) => nr.email && !existingEmails.has(nr.email.toLowerCase()))
-            return [...toAdd, ...prev]
+            const existingEmails = new Set(prev.map(p => (p.email || "").toLowerCase().trim()))
+            const existingNames = new Set(prev.map(p => (p.name || "").toLowerCase().trim()))
+            const toAdd = rv.registeredReviewers.filter((nr: any) => {
+              const normEmail = (nr.email || "").toLowerCase().trim()
+              const normName = (nr.name || "").toLowerCase().trim()
+              const isAlreadyPresent = existingEmails.has(normEmail) || 
+                existingNames.has(normName) ||
+                (normName.includes("wenxiong") && Array.from(existingNames).some(n => n.includes("wenxiong"))) ||
+                (normName.includes("bolutife") && Array.from(existingNames).some(n => n.includes("bolutife")))
+              return normEmail && !isAlreadyPresent
+            })
+            return [...prev, ...toAdd]
           })
         }
       }
@@ -366,52 +375,46 @@ export function JournalManagerWorkspace({
   const [ecrSelectedNames, setEcrSelectedNames] = useState<string[]>([])
   const [ecrCampaignType, setEcrCampaignType] = useState<"ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver">("ecr_reviewer")
 
-  // Sent Emails History (Audit Log) with LocalStorage persistence
+  // Sent Emails History (Audit Log) with LocalStorage persistence & API sync
   const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>(() => {
     if (typeof window !== "undefined") {
       try {
         const saved = localStorage.getItem("editorial360_scout_sent_history")
-        if (saved) return JSON.parse(saved)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed)) {
+            // Purge any mock/test email records
+            return parsed.filter((r: any) => !["SENT-1090", "SENT-1091", "SENT-1092"].includes(r.id))
+          }
+        }
       } catch (e) {
         console.error("Failed to load sent emails history:", e)
       }
     }
-    return [
-      {
-        id: "SENT-1092",
-        timestamp: "2026-09-20T14:22:00Z",
-        recipientName: "Prof. Hiroshi Tanaka",
-        recipientEmail: "h.tanaka@tokyo-institute.ac.jp",
-        journal: "Scholarly Open: Medicine",
-        campaignType: "call_for_papers",
-        subject: "Call for Papers: Founding Volume Submission Invitation for Scholarly Open: Medicine",
-        body: "Dear Prof. Hiroshi Tanaka,\n\nOn behalf of the editorial office of Scholarly Open: Medicine, we have followed your influential scholarship in Non-Mydriatic Fundus Tele-Screening Protocols & AI Triage with great admiration.\n\nScholarly Open: Medicine is currently assembling high-impact original research articles for our Founding Inaugural Volume. This foundational issue is pivotal in securing international ISSN registration and establishing our baseline citation record for upcoming indexing applications.\n\nIn alignment with our official APC & Waiver Policy:\n• Inaugural 50% Launch Discount: All accepted manuscripts in 2026 automatically receive a 50% fee discount across our portfolio.\n• Low-Income Waivers: Authors from World Bank low-income countries receive 100% full fee waivers; discretionary hardship waivers are available for unfunded researchers.\n• Rigorous Double-Blind Peer Review with 14-day rapid turnaround target.\n\nSincerely,\nNoor F.\nJournal Management Office",
-        status: "Delivered"
-      },
-      {
-        id: "SENT-1091",
-        timestamp: "2026-09-20T11:05:00Z",
-        recipientName: "Prof. Claire Dupond",
-        recipientEmail: "c.dupond@sorbonne-universite.fr",
-        journal: "Scholarly Open: Medicine",
-        campaignType: "ebm",
-        subject: "Invitation to Join the Editorial Board: Scholarly Open: Medicine",
-        body: "Dear Prof. Claire Dupond,\n\nIn recognition of your outstanding scholarship at Sorbonne Université, we cordially invite you to join our Editorial Board.\n\nTerm & Benefits: Initial 2-year appointment, 25% discount on APCs for your own submissions, full academic independence and masthead recognition.\n\nSincerely,\nNoor F.\nEditorial Office",
-        status: "Delivered"
-      },
-      {
-        id: "SENT-1090",
-        timestamp: "2026-09-19T16:45:00Z",
-        recipientName: "Prof. Alexander Wright",
-        recipientEmail: "a.wright@materials.ox.ac.uk",
-        journal: "Scholarly Open: Engineering & Applied Sciences",
-        campaignType: "associate_editor",
-        subject: "Editorial Invitation: Associate Editor Appointment for Scholarly Open: Engineering & Applied Sciences",
-        body: "Dear Prof. Alexander Wright,\n\nWe cordially invite you to join us as an Associate Editor for Scholarly Open: Engineering & Applied Sciences.\n\nTerm & Benefits: Initial 2-year appointment, 25% discount on APCs, recognition on journal masthead.\n\nSincerely,\nNoor F.\nEditorial Office",
-        status: "Delivered"
-      }
-    ]
+    return []
   })
+
+  // Synchronize live sent invitations from the persistent API
+  useEffect(() => {
+    fetch("/api/editorial360/sent-invitations")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSentEmailsHistory(prev => {
+            const existingIds = new Set(prev.map(p => p.id))
+            const newItems = data.filter((d: SentEmailRecord) => !existingIds.has(d.id) && !["SENT-1090", "SENT-1091", "SENT-1092"].includes(d.id))
+            const combined = [...prev, ...newItems].filter(d => !["SENT-1090", "SENT-1091", "SENT-1092"].includes(d.id))
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(combined))
+              } catch (e) {}
+            }
+            return combined
+          })
+        }
+      })
+      .catch(err => console.error("Failed to fetch persistent sent invitations:", err))
+  }, [])
 
   // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 3,250/day across all 13 journals)
   const quotaInfo = useMemo(() => {
@@ -882,6 +885,12 @@ export function JournalManagerWorkspace({
           status: resData.sentViaSmtp ? "Delivered" : "Simulated"
         }
 
+        fetch("/api/editorial360/sent-invitations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sentRecord)
+        }).catch(e => console.error("Failed to persist sent record:", e))
+
         setSentEmailsHistory(prev => {
           const next = [sentRecord, ...prev]
           if (typeof window !== "undefined") {
@@ -1023,6 +1032,12 @@ export function JournalManagerWorkspace({
             body: renderedHtml,
             status: resData.sentViaSmtp ? "Delivered" : "Simulated"
           }
+          fetch("/api/editorial360/sent-invitations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(sentRecord)
+          }).catch(e => console.error("Failed to persist sent record:", e))
+
           setSentEmailsHistory(prev => {
             const next = [sentRecord, ...prev]
             try {
@@ -1153,7 +1168,7 @@ export function JournalManagerWorkspace({
   // Reviewer Registry List
   const [reviewersList, setReviewersList] = useState<JmReviewer[]>([
     {
-      id: "REV-REG-05",
+      id: "REV-REG-01",
       name: "Prof. Bolutife Olofinjana",
       email: "b.olofinjana@oauife.edu.ng",
       status: "Active",
@@ -1162,70 +1177,27 @@ export function JournalManagerWorkspace({
       matchScore: 95,
       specialization: "Materials Science, Nanostructured Materials, Thin Films, Energy Storage",
       discipline: "Engineering",
+      institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
       orcid: "0000-0002-3652-3213",
       completedReviews: 0,
       onTimeRate: 100,
       keywords: ["materials science", "nanostructured materials", "thin films", "sensors", "energy storage", "physics"]
     },
     {
-      id: "REV-REG-01",
-      name: "Dr. Evelyn Vane",
-      email: "e.vane@university-medical.edu",
-      status: "Active",
-      activeTasks: 1,
-      maxTasks: 3,
-      matchScore: 98,
-      specialization: "AI Diagnostics, Clinical Imaging, Oncology",
-      discipline: "Medicine",
-      orcid: "0000-0002-1825-0097",
-      completedReviews: 18,
-      onTimeRate: 98,
-      keywords: ["ai diagnostics", "clinical imaging", "oncology", "cardiovascular", "machine learning"]
-    },
-    {
       id: "REV-REG-02",
-      name: "Dr. Marcus Vance",
-      email: "m.vance@university-charite.de",
-      status: "Busy",
-      activeTasks: 2,
-      maxTasks: 2,
-      matchScore: 94,
-      specialization: "Renewable Energy, Silicon Anodes, Battery Engineering",
-      discipline: "Engineering",
-      orcid: "0000-0004-7711-2093",
-      completedReviews: 24,
-      onTimeRate: 100,
-      keywords: ["renewable energy", "silicon anodes", "battery", "energy storage", "polymers"]
-    },
-    {
-      id: "REV-REG-03",
-      name: "Prof. Hiroshi Tanaka",
-      email: "h.tanaka@tokyo-institute.ac.jp",
+      name: "Dr. Wenxiong Sun (孙文雄)",
+      email: "102500216@hbut.edu.cn",
       status: "Active",
       activeTasks: 0,
       maxTasks: 3,
-      matchScore: 91,
-      specialization: "Urban Planning, Green Spaces, Socio-Economics",
-      discipline: "Social Sciences",
-      orcid: "0000-0001-9284-7719",
-      completedReviews: 12,
-      onTimeRate: 94,
-      keywords: ["urban green spaces", "socio-economic", "urban planning", "public policy"]
-    },
-    {
-      id: "REV-REG-04",
-      name: "Prof. Elena Rostova",
-      email: "e.rostova@sorbonne-universite.fr",
-      status: "Inactive",
-      activeTasks: 0,
-      maxTasks: 2,
-      matchScore: 82,
-      specialization: "Decentralized Ledgers, Cryptographic Security",
+      matchScore: 96,
+      specialization: "Nanomaterials, Polymer Chemistry, Composite Materials",
       discipline: "Engineering",
-      orcid: "0000-0002-6019-3388",
-      completedReviews: 15,
-      onTimeRate: 92,
-      keywords: ["decentralized ledgers", "blockchain", "security", "cryptography"]
+      institution: "Hubei University of Technology",
+      orcid: "0009-0002-8812-4190",
+      completedReviews: 0,
+      onTimeRate: 100,
+      keywords: ["nanomaterials", "smart grids", "additive manufacturing", "composite materials", "fluid dynamics"]
     }
   ])
 
@@ -4136,15 +4108,18 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
               {/* Incoming Official Responses Desk */}
               <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418] shadow-xs">
-                <div className="px-4 py-3 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="px-4 py-3 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-[#0b99ff]" />
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                       Official Invitation & Onboarding Responses Desk
                     </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                      Live Telemetry
+                    </span>
                   </div>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Real-time acceptances from EiC, AE, Board & Reviewer claims
+                    Live audit desk tracking accepted invitations and onboarding confirmations (EiC, Associate Editors, Board Members & Referees)
                   </span>
                 </div>
 

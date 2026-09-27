@@ -1129,6 +1129,10 @@ COPE & Plan S Certified Archive
   }
 
   const handlePrintCertificate = () => {
+    if (reviewsDone === 0) {
+      alert(isDe ? "Das Peer-Review-Zertifikat ist gesperrt, bis Sie mindestens ein zugewiesenes Manuskript begutachtet haben." : "Peer review certificate is locked until you complete at least 1 manuscript evaluation.")
+      return
+    }
     const printWindow = window.open("", "_blank", "width=850,height=750")
     if (!printWindow) return
 
@@ -2789,13 +2793,24 @@ COPE & Plan S Certified Archive
                     </Button>
                   )}
 
-                  <Button
-                    onClick={handlePrintCertificate}
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    {isDe ? "Zertifikat drucken (PDF)" : "Print Certificate (PDF)"}
-                  </Button>
+                  {reviewsDone === 0 ? (
+                    <Button
+                      disabled
+                      className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-xs font-semibold px-3.5 h-8 cursor-not-allowed shadow-none flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
+                      title={isDe ? "Gesperrt: Erfordert mindestens 1 abgeschlossenes Gutachten" : "Locked: Complete at least 1 peer review to unlock certificate"}
+                    >
+                      <Lock className="h-3.5 w-3.5 text-slate-400" />
+                      {isDe ? "Zertifikat gesperrt (0 Gutachten)" : "Certificate Locked (0 Reviews)"}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handlePrintCertificate}
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      {isDe ? "Zertifikat drucken (PDF)" : "Print Certificate (PDF)"}
+                    </Button>
+                  )}
                 </div>
               </div>
 
