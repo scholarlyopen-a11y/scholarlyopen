@@ -164,7 +164,7 @@ export async function POST(req: Request) {
       decision,
       credentialId,
       timestamp: new Date().toISOString(),
-      notes: notes || `Action logged via Editorial360 invitation link (${type}: ${decision})`,
+      notes: notes || `Action logged via editorial360 invitation link (${type}: ${decision})`,
       affiliation,
       department,
       country,
@@ -252,7 +252,7 @@ export async function POST(req: Request) {
         const htmlContent = `
           <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
             <div style="border-bottom: 3px solid #0b99ff; padding-bottom: 16px; margin-bottom: 20px;">
-              <h2 style="color: #0f172a; margin: 0 0 6px 0; font-size: 20px;">Editorial360 Notification: Appointment & Profile Acceptance</h2>
+              <h2 style="color: #0f172a; margin: 0 0 6px 0; font-size: 20px;">editorial360 Notification: Appointment & Profile Acceptance</h2>
               <span style="display: inline-block; background-color: #ecfdf5; color: #047857; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
                 Official Consent & Profile Submitted
               </span>
@@ -283,13 +283,13 @@ export async function POST(req: Request) {
             ` : ""}
 
             <div style="background-color: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 12px; color: #64748b; margin-top: 20px;">
-              This record has been synchronized into the Editorial360 Handling Editor & Reviewer registry and is ready for assignment in the Journal Manager desk.
+              This record has been synchronized into the editorial360 Handling Editor & Reviewer registry and is ready for assignment in the Journal Manager desk.
             </div>
           </div>
         `
 
         await transporter.sendMail({
-          from: `"Editorial360 Notifications" <${from}>`,
+          from: `"editorial360 Notifications" <${from}>`,
           to: "info@scholarlyopen.org",
           replyTo: candidateEmail || "info@scholarlyopen.org",
           subject,

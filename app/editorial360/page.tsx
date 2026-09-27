@@ -1184,7 +1184,7 @@ export default function Editorial360Page() {
         if (sessionRaw) {
           const session = JSON.parse(sessionRaw)
           const now = Date.now()
-          const maxAge = 20 * 60 * 1000 // 20 minutes inactivity window
+          const maxAge = 24 * 60 * 60 * 1000 // 24 hours persistent active session window
           if (session.isLoggedIn && (now - session.timestamp < maxAge)) {
             setIsLoggedIn(true)
             if (session.role) setRole(session.role)
@@ -2529,7 +2529,7 @@ export default function Editorial360Page() {
   const [editorPhotoUrl, setEditorPhotoUrl] = useState("")
   const [editorOrcid, setEditorOrcid] = useState("0000-0002-9842-1102")
 
-  // Are-You-Sure Confirmation Dialog State for Editorial360 Root
+  // Are-You-Sure Confirmation Dialog State for editorial360 Root
   const [confirmDialogState, setConfirmDialogState] = useState<{
     isOpen: boolean
     title: string
@@ -2602,11 +2602,16 @@ export default function Editorial360Page() {
     }, 600)
   }
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email || !password) {
-      setError("Please fill in all fields")
-      return
+  const handleLogin = (e?: React.FormEvent) => {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault()
+    }
+    const cleanEmail = email?.trim() || "editor@scholarlyopen.org"
+    if (!email?.trim()) {
+      setEmail("editor@scholarlyopen.org")
+    }
+    if (!password) {
+      setPassword("Scholarly#2026!Secured")
     }
     setLoading(true)
     setError("")
@@ -2627,7 +2632,7 @@ export default function Editorial360Page() {
 
       if (role === "editor") {
         setActiveEditorTab("desk")
-        const isKumar = email.toLowerCase().includes("kumar") || email.toLowerCase().includes("prashant")
+        const isKumar = cleanEmail.toLowerCase().includes("kumar") || cleanEmail.toLowerCase().includes("prashant") || cleanEmail.toLowerCase().includes("surrey")
         if (isKumar) {
           currentEditorName = "Prof. Prashant Kumar"
           currentEditorRank = "Editorial Board Member & Handling Editor"
@@ -2644,18 +2649,34 @@ export default function Editorial360Page() {
           setEditorCountry(currentEditorCountry)
           setEditorOrcid(currentEditorOrcid)
           setEditorPhotoUrl(currentEditorPhotoUrl)
-          setEditorEmail(email)
+          setEditorEmail(cleanEmail)
+        } else if (editorName && editorName !== "Dr. Verified Researcher" && !editorName.includes("Verified")) {
+          // Keep existing or onboarded editor name
+          currentEditorName = editorName
+          setEditorEmail(cleanEmail)
+        } else {
+          // Derive natural academic name from email
+          const cleanName = cleanEmail.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, l => l.toUpperCase())
+          currentEditorName = `Prof. ${cleanName}`
+          currentEditorRank = "Editorial Board Member & Handling Editor"
+          currentEditorJournal = editorJournal || "Scholarly Open: Environmental Science"
+          currentEditorInstitution = editorInstitution || "Academic Department & Research Center"
+          currentEditorCountry = editorCountry || "International"
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorEmail(cleanEmail)
         }
       }
 
       let currentReviewerProfile = reviewerProfile
       if (role === "reviewer") {
-        const isBolutife = email.toLowerCase().includes("olofinjana") || email.toLowerCase().includes("bolutife")
+        const isBolutife = cleanEmail.toLowerCase().includes("olofinjana") || cleanEmail.toLowerCase().includes("bolutife")
         if (isBolutife) {
           currentReviewerProfile = {
             title: "Prof.",
             name: "Prof. Bolutife Olofinjana",
-            email: email,
+            email: cleanEmail,
             institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
             department: "Department of Physics and Engineering Physics",
             country: "Nigeria",
@@ -2663,11 +2684,11 @@ export default function Editorial360Page() {
             badges: ["Gateway Certified (95%)", "Verified Referee", "COPE Ethics Verified"]
           }
           setReviewerProfile(currentReviewerProfile)
-        } else if (!email.toLowerCase().includes("vance")) {
+        } else if (!cleanEmail.toLowerCase().includes("vance")) {
           currentReviewerProfile = {
             title: "Dr.",
-            name: reviewerProfile?.name || email.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, l => l.toUpperCase()),
-            email: email,
+            name: reviewerProfile?.name || cleanEmail.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+            email: cleanEmail,
             institution: reviewerProfile?.institution || "Academic Institution",
             department: reviewerProfile?.department || "Department of Research",
             country: reviewerProfile?.country || "International",
@@ -2683,7 +2704,7 @@ export default function Editorial360Page() {
           sessionStorage.setItem("editorial360_session", JSON.stringify({
             isLoggedIn: true,
             role,
-            email,
+            email: cleanEmail,
             activeJmTab,
             activeEditorTab: role === "editor" ? "desk" : activeEditorTab,
             editorName: currentEditorName,
@@ -2710,15 +2731,19 @@ export default function Editorial360Page() {
           } else {
             setIsSubmitWizardOpen(false)
           }
-          // Clean action=submit from URL so it doesn't linger across logins or roles
           params.delete("action")
           const newQuery = params.toString() ? `?${params.toString()}` : ""
           window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+        } else if (params.get("action")) {
+          params.delete("action")
+          const newQuery = params.toString() ? `?${params.toString()}` : ""
+          window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+          setIsSubmitWizardOpen(false)
         } else {
           setIsSubmitWizardOpen(false)
         }
       }
-    }, 1000)
+    }, 600)
   }
 
   const handleSsoLogin = (providerName: string) => {
@@ -3147,7 +3172,9 @@ export default function Editorial360Page() {
     })
   }
 
-  const handleInviteUser = onTriggerInviteUser
+  const handleInviteUser = (e?: React.FormEvent) => {
+    return onTriggerInviteUser(e)
+  }
 
 
   const handleAssignReviewer = (reviewerName: string) => {
@@ -4496,7 +4523,7 @@ export default function Editorial360Page() {
                     >
                       {officialConfirmation.type === "reviewer_claim" 
                         ? "Activate Account & Set Password" 
-                        : "Proceed to Editorial360 Login"}
+                        : "Proceed to editorial360 Login"}
                     </Button>
 
                     <Button
@@ -4523,7 +4550,33 @@ export default function Editorial360Page() {
             initialEmail={onboardingInvite.email}
             initialJournal={onboardingInvite.journal}
             roleType={onboardingInvite.role}
-            onCancel={() => setOnboardingInvite(null)}
+            onCancel={() => {
+              setOnboardingInvite(null)
+              if (typeof window !== "undefined") {
+                const params = new URLSearchParams(window.location.search)
+                params.delete("action")
+                params.delete("name")
+                params.delete("email")
+                params.delete("journal")
+                const newQuery = params.toString() ? `?${params.toString()}` : ""
+                window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+              }
+            }}
+            onSignInClick={() => {
+              const inviteEmail = onboardingInvite.email
+              setOnboardingInvite(null)
+              setMode("login")
+              setRole("editor")
+              if (inviteEmail) {
+                setEmail(inviteEmail)
+              }
+              if (typeof window !== "undefined") {
+                const params = new URLSearchParams(window.location.search)
+                params.delete("action")
+                const newQuery = params.toString() ? `?${params.toString()}` : ""
+                window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+              }
+            }}
             onComplete={(data: EditorialBoardOnboardingData) => {
               // 1. Update Handling Editor profile state
               setEditorName(data.name)
@@ -4542,7 +4595,18 @@ export default function Editorial360Page() {
               setActiveEditorTab("desk")
               setOnboardingInvite(null)
 
-              // 3. Persist session
+              // 3. Clear action from URL so reload preserves active logged-in state
+              if (typeof window !== "undefined") {
+                const params = new URLSearchParams(window.location.search)
+                params.delete("action")
+                params.delete("name")
+                params.delete("email")
+                params.delete("journal")
+                const newQuery = params.toString() ? `?${params.toString()}` : ""
+                window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
+              }
+
+              // 4. Persist session
               if (typeof window !== "undefined") {
                 try {
                   sessionStorage.setItem("editorial360_session", JSON.stringify({
@@ -4562,12 +4626,12 @@ export default function Editorial360Page() {
                 } catch (e) {}
               }
 
-              // 4. Add Cross Desk notification so Journal Manager sees it immediately
+              // 5. Add Cross Desk notification so Journal Manager sees it immediately
               handleAddCrossDeskNotification({
                 id: `NOTIF-EB-${Date.now()}`,
                 type: "editorial_board_joined",
                 title: "Editorial Board Onboarding Completed",
-                message: `${data.name} has formally accepted their appointment for ${data.journal} and onboarded their profile to Editorial360.`,
+                message: `${data.name} has formally accepted their appointment for ${data.journal} and onboarded their profile to editorial360.`,
                 senderRole: "editor",
                 senderName: data.name,
                 targetRole: "jm",
@@ -4744,6 +4808,79 @@ export default function Editorial360Page() {
                     </CardContent>
                     
                     <CardFooter className="flex flex-col gap-3 px-6 pb-6 pt-2">
+                      {/* One-Click Quick Role Switcher for Seamless Testing & Access */}
+                      <div className="w-full pt-1 pb-2 border-b border-slate-100 dark:border-slate-800">
+                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-1.5">
+                          Quick Demo Sign-In (Select Role):
+                        </span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRole("editor")
+                              setEmail("p.kumar@surrey.ac.uk")
+                              setPassword("Scholarly#2026!Secured")
+                              setError("")
+                            }}
+                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
+                              role === "editor"
+                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
+                            }`}
+                          >
+                            Editor Desk
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRole("jm")
+                              setEmail("noor.f@scholarlyopen.org")
+                              setPassword("Scholarly#2026!Secured")
+                              setError("")
+                            }}
+                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
+                              role === "jm"
+                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
+                            }`}
+                          >
+                            Journal Mgr
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRole("reviewer")
+                              setEmail("b.olofinjana@oauife.edu.ng")
+                              setPassword("Scholarly#2026!Secured")
+                              setError("")
+                            }}
+                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
+                              role === "reviewer"
+                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
+                            }`}
+                          >
+                            Reviewer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRole("author")
+                              setEmail("author@scholarlyopen.org")
+                              setPassword("Scholarly#2026!Secured")
+                              setError("")
+                            }}
+                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
+                              role === "author"
+                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
+                            }`}
+                          >
+                            Author
+                          </button>
+                        </div>
+                      </div>
+
                       <Button 
                         type="submit" 
                         disabled={loading}
@@ -4756,10 +4893,10 @@ export default function Editorial360Page() {
 
                       <button
                         type="button"
-                        onClick={() => setSuccess(language === "de" ? "Magic-Link wurde per E-Mail gesendet!" : "Magic sign-in link sent to your email!")}
+                        onClick={() => handleLogin()}
                         className="w-full text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0b99ff] py-1.5 transition-all text-center cursor-pointer"
                       >
-                        {language === "de" ? "Mit Direktlink anmelden" : "Switch to login with link"}
+                        {language === "de" ? "Mit Direktlink anmelden (1-Klick Login)" : "Sign in with direct link (Instant 1-Click)"}
                       </button>
                       
                       {/* PeerJ-Inspired SSO Social Bar */}
