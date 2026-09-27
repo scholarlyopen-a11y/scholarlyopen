@@ -209,6 +209,7 @@ export function JournalManagerWorkspace({
   user
 }: JournalManagerWorkspaceProps) {
   const isDe = language === "de"
+  const manuscripts = initialManuscripts || []
 
   // Stage filter for Submissions Pipeline
   const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "revisions" | "decisions" | "production" | "integrity">("all")
@@ -1594,7 +1595,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     const revOrcid = newRevOrcid.trim() || "0000-0002-1825-0097"
     const revJournal = newRevJournal || "Scholarly Open: Medicine"
     const revPaperId = newRevPaperId || "general"
-    const assignedManuscript = revPaperId !== "general" ? manuscripts.find(m => m.id === revPaperId) : null
+    const assignedManuscript = revPaperId !== "general" ? (initialManuscripts || []).find(m => m.id === revPaperId) : null
 
     // Check Do Not Contact list
     if (unsubscribedList.some(u => u.email.toLowerCase() === revEmail)) {
@@ -6368,7 +6369,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 text-xs"
                     >
                       <option value="general">★ General Accredited Reviewer Pool (No specific paper yet)</option>
-                      {manuscripts.map((m) => (
+                      {(initialManuscripts || []).map((m) => (
                         <option key={m.id} value={m.id}>
                           {m.id} · {m.title.slice(0, 48)}...
                         </option>
