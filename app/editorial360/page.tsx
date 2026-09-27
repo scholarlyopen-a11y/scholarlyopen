@@ -159,6 +159,7 @@ interface Manuscript {
   integrityStatus: "Clean" | "Flagged" | "Unchecked"
   plagiarismScore?: number
   aiScore?: number
+  author?: string
   authorFirstName?: string
   authorLastName?: string
   authorName?: string
@@ -166,6 +167,7 @@ interface Manuscript {
   authorAffiliation?: string
   authorCountry?: string
   authorOrcid?: string
+  coAuthors?: string
   articleType?: string
   submissionStage?: string
   abstract?: string
@@ -241,7 +243,10 @@ interface WorkspaceUser {
   email: string
   role: UserRole
   activeTasks: number
-  status: "Active" | "Pending Invitation"
+  status: "Active" | "Pending Invitation" | "Invited (Live Email Sent)" | string
+  affiliation?: string
+  country?: string
+  createdAt?: string
 }
 
 // Review Feedback and Comments Moderation data
@@ -257,7 +262,7 @@ interface ReviewFeedback {
   commentsAuthor: string
   commentsEditor: string
   recommendation: string
-  status: "Pending Moderation" | "Released"
+  status: "Pending Moderation" | "Released" | string
   sanitizedCommentsAuthor?: string
 }
 
@@ -910,6 +915,7 @@ export default function Editorial360Page() {
   // Registration States
   const [regName, setRegName] = useState("")
   const [regEmail, setRegEmail] = useState("")
+  const [regAffiliation, setRegAffiliation] = useState("")
   const [regCountry, setRegCountry] = useState("")
   const [regOrcid, setRegOrcid] = useState("")
   const [regPassword, setRegPassword] = useState("")
@@ -967,10 +973,13 @@ export default function Editorial360Page() {
   }
 
   const [reviewerProfile, setReviewerProfile] = useState<{
+    title?: string
     name: string
     email: string
     institution: string
     department?: string
+    country?: string
+    specialization?: string
     orcid?: string
     photoUrl?: string
     badges?: string[]
@@ -1193,6 +1202,18 @@ export default function Editorial360Page() {
         return
       }
 
+      if (urlAction === "claim_submission") {
+        const claimId = params.get("id") || ""
+        const claimEmail = params.get("email") || ""
+        const claimName = params.get("name") || ""
+        setRole("author")
+        if (claimEmail) setEmail(claimEmail)
+        if (claimName) setProfFullName(claimName)
+        setIsLoggedIn(true)
+        setActiveAuthorTab("submissions")
+        setSuccess(`Welcome ${claimName ? claimName : "Author"}! Manuscript ${claimId} has been linked to your active Author Desk.`)
+      }
+
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
         const normalizedRole = (urlRole === "im" ? "ria" : urlRole) as UserRole
         setRole(normalizedRole)
@@ -1202,6 +1223,29 @@ export default function Editorial360Page() {
       }
       if (urlMode && ["login", "register"].includes(urlMode)) {
         setMode(urlMode)
+      }
+      if (urlName) {
+        setRegName(urlName)
+        if (urlRole === "author") setProfFullName(urlName)
+      }
+      if (urlEmail) {
+        setRegEmail(urlEmail)
+        setEmail(urlEmail)
+      }
+      const urlAffil = params.get("affiliation") || ""
+      if (urlAffil) {
+        setRegAffiliation(urlAffil)
+        if (urlRole === "author") setProfInstitution(urlAffil)
+      }
+
+      const urlTab = params.get("tab") || params.get("view")
+      const isScoutDirect = urlTab === "scout" || urlTab === "lead_finder" || urlAction === "scout"
+      const isClaimDirect = urlAction === "claim_submission"
+
+      if (isScoutDirect) {
+        setRole("jm")
+        setActiveJmTab("scout")
+        setIsLoggedIn(true)
       }
 
       // German BSI TR-03107 & OWASP Compliant Session Recovery
@@ -1213,9 +1257,9 @@ export default function Editorial360Page() {
           const maxAge = 24 * 60 * 60 * 1000 // 24 hours persistent active session window
           if (session.isLoggedIn && (now - session.timestamp < maxAge)) {
             setIsLoggedIn(true)
-            if (session.role) setRole(session.role)
-            if (session.email) setEmail(session.email)
-            if (session.activeJmTab) setActiveJmTab(session.activeJmTab)
+            if (!isScoutDirect && !isClaimDirect && session.role) setRole(session.role)
+            if (!isClaimDirect && session.email) setEmail(session.email)
+            if (!isScoutDirect && session.activeJmTab) setActiveJmTab(session.activeJmTab)
             if (session.activeEditorTab) setActiveEditorTab(session.activeEditorTab)
             if (session.editorName) setEditorName(session.editorName)
             if (session.editorRank) setEditorRank(session.editorRank)
@@ -1243,9 +1287,9 @@ export default function Editorial360Page() {
           }
         }
 
-        // Restore global persistent user photo if set
+        // Restore persistent user photo specifically for JM/Staff (never bleed to authors)
         const savedPhoto = localStorage.getItem("editorial360_user_photo")
-        if (savedPhoto) setProfPhotoUrl(savedPhoto)
+        if (savedPhoto && (role === "jm" || role === "admin")) setProfPhotoUrl(savedPhoto)
 
         // Restore JM profile if saved
         const savedJm = localStorage.getItem("editorial360_jm_profile")
@@ -1258,12 +1302,38 @@ export default function Editorial360Page() {
             if (pj.jmOfficeLocation) setJmOfficeLocation(pj.jmOfficeLocation)
             if (pj.jmDeskEmail) setJmDeskEmail(pj.jmDeskEmail)
             if (pj.profCountry) setProfCountry(pj.profCountry)
-            if (pj.photoUrl) setProfPhotoUrl(pj.photoUrl)
+            if (pj.photoUrl && role === "jm") setProfPhotoUrl(pj.photoUrl)
           } catch (e) {}
         }
       } catch (e) {
         console.error("Failed to parse editorial360_session", e)
       }
+
+      // Load registered users from API so Admin Console sees newly registered authors & members
+      fetch("/api/editorial360/users")
+        .then(res => res.json())
+        .then(data => {
+          if (data?.users && Array.isArray(data.users)) {
+            setUsers(prev => {
+              const existingEmails = new Set(prev.map(u => u.email.toLowerCase()))
+              const newFromApi: WorkspaceUser[] = data.users
+                .filter((u: any) => !existingEmails.has(u.email.toLowerCase()))
+                .map((u: any) => ({
+                  id: u.id,
+                  name: u.name,
+                  email: u.email,
+                  role: u.role as UserRole,
+                  affiliation: u.affiliation,
+                  country: u.country,
+                  createdAt: u.createdAt,
+                  activeTasks: 0,
+                  status: (u.status as any) || "Active"
+                }))
+              return [...prev, ...newFromApi]
+            })
+          }
+        })
+        .catch(err => console.warn("Could not background load users registry:", err))
 
       // Load shared live cloud manuscripts from Supabase (for remote multi-user sync)
       fetch("/api/editorial360/manuscripts")
@@ -1477,28 +1547,27 @@ export default function Editorial360Page() {
   }
 
   const [users, setUsers] = useState<WorkspaceUser[]>([
-    { id: "USR-01", name: "Dr. Evelyn Vane", email: "e.vane@scholarlyopen.org", role: "reviewer", activeTasks: 0, status: "Active" },
-    { id: "USR-02", name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", role: "reviewer", activeTasks: 0, status: "Active" },
-    { id: "USR-03", name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", role: "editor", activeTasks: 0, status: "Active" },
-    { id: "USR-04", name: "Dr. Sarah Jenkins", email: "s.jenkins@scholarlyopen.org", role: "ria", activeTasks: 0, status: "Active" },
-    { id: "USR-05", name: "Prof. David Miller", email: "d.miller@scholarlyopen.org", role: "editor", activeTasks: 0, status: "Pending Invitation" }
+    { id: "USR-01", name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", role: "reviewer", activeTasks: 0, status: "Active" },
+    { id: "USR-02", name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", role: "editor", activeTasks: 0, status: "Active" },
+    { id: "USR-03", name: "Dr. Sarah Jenkins", email: "s.jenkins@scholarlyopen.org", role: "ria", activeTasks: 0, status: "Active" },
+    { id: "USR-04", name: "Prof. David Miller", email: "d.miller@scholarlyopen.org", role: "editor", activeTasks: 0, status: "Pending Invitation" }
   ])
 
   const [archiveLogs, setArchiveLogs] = useState<ArchiveLog[]>([])
 
   // Exact 5 suggested reviewer options categorized by status
   const reviewerSuggestions: ReviewerSuggestion[] = [
-    { name: "Dr. Evelyn Vane", email: "e.vane@scholarlyopen.org", status: "Active", activeTasks: 0, matchScore: 98, specialization: "Renewable Energy Systems, ML" },
-    { name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", status: "Busy", activeTasks: 0, matchScore: 91, specialization: "Power Grid Optimization" },
-    { name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", status: "Active", activeTasks: 0, matchScore: 85, specialization: "Data Analytics, Climatology" },
-    { name: "Dr. Sarah Jenkins", email: "s.jenkins@scholarlyopen.org", status: "Inactive", activeTasks: 0, matchScore: 78, specialization: "Algorithms, Signal Processing" },
+    { name: "Dr. Marcus Vance", email: "m.vance@scholarlyopen.org", status: "Active", activeTasks: 0, matchScore: 98, specialization: "Renewable Energy Systems, ML" },
+    { name: "Prof. Aris Thorne", email: "a.thorne@scholarlyopen.org", status: "Active", activeTasks: 0, matchScore: 91, specialization: "Power Grid Optimization" },
+    { name: "Dr. Sarah Jenkins", email: "s.jenkins@scholarlyopen.org", status: "Active", activeTasks: 0, matchScore: 85, specialization: "Data Analytics, Climatology" },
+    { name: "Dr. Alex Johnson", email: "a.johnson@scholarlyopen.org", status: "Inactive", activeTasks: 0, matchScore: 78, specialization: "Algorithms, Signal Processing" },
     { name: "Prof. Clara Zhang", email: "c.zhang@scholarlyopen.org", status: "Busy", activeTasks: 0, matchScore: 95, specialization: "Biodegradable Polymers" },
   ]
 
   const [journals, setJournals] = useState<JournalInfo[]>([
     { name: "Scholarly Open: Engineering & Applied Sciences", code: "EAS", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Clara Zhang" },
     { name: "Scholarly Open: Social Sciences & Humanities", code: "SSH", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Aris Thorne" },
-    { name: "Scholarly Open: Social Sciences Open", code: "SSO", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Evelyn Vane" },
+    { name: "Scholarly Open: Social Sciences Open", code: "SSO", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Aris Thorne" },
     { name: "Scholarly Open: Biology", code: "BIO", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Helen Vance" },
     { name: "Scholarly Open: Chemistry", code: "CHEM", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Robert Lang" },
     { name: "Scholarly Open: Medicine", code: "MED", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Sarah Jenkins" },
@@ -1508,19 +1577,19 @@ export default function Editorial360Page() {
     { name: "Scholarly Open: AI Safety & Governance", code: "AIS", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Marcus Vance" },
     { name: "Scholarly Open: Decarbonization & Carbon Tech", code: "DCT", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Clara Zhang" },
     { name: "Scholarly Open: Quantum Engineering", code: "QE", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Aris Thorne" },
-    { name: "Scholarly Open: Synthetic Biology & Bio-Design", code: "SBD", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Evelyn Vane" },
+    { name: "Scholarly Open: Synthetic Biology & Bio-Design", code: "SBD", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Helen Vance" },
     { name: "Scholarly Open: Space Resources & Orbital Economy", code: "SRE", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. David Miller" }
   ])
 
   // Dialog and Wizard control states
   const [isSubmitWizardOpen, setIsSubmitWizardOpen] = useState(false)
   const [submitStep, setSubmitStep] = useState(1)
-  const [newFirstName, setNewFirstName] = useState("Evelyn")
-  const [newLastName, setNewLastName] = useState("Vane")
-  const [newAuthorEmail, setNewAuthorEmail] = useState("e.vane@scholarlyopen.org")
-  const [newAuthorAffiliation, setNewAuthorAffiliation] = useState("Institute of Advanced Medical Sciences")
-  const [newAuthorCountry, setNewAuthorCountry] = useState("United States")
-  const [newAuthorOrcid, setNewAuthorOrcid] = useState("0000-0002-1825-0097")
+  const [newFirstName, setNewFirstName] = useState("")
+  const [newLastName, setNewLastName] = useState("")
+  const [newAuthorEmail, setNewAuthorEmail] = useState("")
+  const [newAuthorAffiliation, setNewAuthorAffiliation] = useState("")
+  const [newAuthorCountry, setNewAuthorCountry] = useState("")
+  const [newAuthorOrcid, setNewAuthorOrcid] = useState("")
   const [newArticleType, setNewArticleType] = useState("Original Research")
   const [newTitle, setNewTitle] = useState("")
   const [newJournal, setNewJournal] = useState("Scholarly Open: Medicine")
@@ -2549,16 +2618,17 @@ export default function Editorial360Page() {
 
   // First-Time Profile Builder States
   const [isAuthorProfileSetupOpen, setIsAuthorProfileSetupOpen] = useState(false)
-  const [isAuthorProfileCompleted, setIsAuthorProfileCompleted] = useState(true)
-  const [profFullName, setProfFullName] = useState("Dr. Evelyn Vane")
-  const [profRank, setProfRank] = useState("Senior Researcher & Faculty Lead")
-  const [profInstitution, setProfInstitution] = useState("Institute of Advanced Medical Sciences")
+  const [isAuthorProfileCompleted, setIsAuthorProfileCompleted] = useState(false)
+  const [profFullName, setProfFullName] = useState("")
+  const [profRank, setProfRank] = useState("Contributing Author")
+  const [profInstitution, setProfInstitution] = useState("")
   const [profCountry, setProfCountry] = useState("")
-  const [profOrcid, setProfOrcid] = useState("0000-0002-1825-0097")
-  const [profSpecialization, setProfSpecialization] = useState("Cardiology, Clinical AI, Diagnostic Imaging")
+  const [profOrcid, setProfOrcid] = useState("")
+  const [profSpecialization, setProfSpecialization] = useState("")
+  const [authorPhotoUrl, setAuthorPhotoUrl] = useState<string>("")
   const [profPhotoUrl, setProfPhotoUrl] = useState<string>("")
-  const [profReviewOptIn, setProfReviewOptIn] = useState(true)
-  const [isOrcidVerified, setIsOrcidVerified] = useState(true)
+  const [profReviewOptIn, setProfReviewOptIn] = useState(false)
+  const [isOrcidVerified, setIsOrcidVerified] = useState(false)
   const [isSyncingOrcid, setIsSyncingOrcid] = useState(false)
   const [orcidSyncMessage, setOrcidSyncMessage] = useState("")
 
@@ -2873,21 +2943,52 @@ export default function Editorial360Page() {
       setLoading(false)
       const roleTitle = getRoleDisplayName(regRole)
       setSuccess(`Account activated successfully! Logged in as ${roleTitle}.`)
+      const finalCountry = regCountry || "International"
       // Add user to the registry
       const newUser: WorkspaceUser = {
         id: `USR-${Math.floor(Math.random() * 100) + 10}`,
         name: regName,
         email: regEmail,
         role: regRole,
+        affiliation: regAffiliation || "",
+        country: finalCountry,
+        createdAt: new Date().toISOString(),
         activeTasks: 0,
         status: "Active"
       }
-      setUsers(prev => [...prev, newUser])
+      setUsers(prev => [newUser, ...prev.filter(u => u.email.toLowerCase() !== regEmail.toLowerCase())])
       setRole(regRole)
       setEmail(regEmail)
       setIsLoggedIn(true)
-      const finalCountry = regCountry || "International"
       setProfCountry(finalCountry)
+
+      // Persist to users registry API so Admin Console has real-time visibility
+      fetch("/api/editorial360/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: regName,
+          email: regEmail,
+          role: regRole,
+          affiliation: regAffiliation || (regRole === "author" ? "Academic Institution" : ""),
+          country: finalCountry,
+          orcid: regOrcid || "",
+          password: regPassword,
+          status: "Active"
+        })
+      }).catch(err => console.error("Error persisting registered user:", err))
+
+      if (regRole === "author") {
+        setProfFullName(regName)
+        setProfInstitution(regAffiliation || "")
+        setProfCountry(finalCountry)
+        setProfOrcid(regOrcid || "")
+        setProfRank("Contributing Author")
+        setAuthorPhotoUrl("")
+        setProfSpecialization("")
+        setActiveAuthorTab("submissions")
+      }
+
       if (regRole === "editor") {
         setEditorName(regName)
         setEditorEmail(regEmail)
@@ -2940,9 +3041,9 @@ export default function Editorial360Page() {
             score: isBolutife ? 95 : 100,
             passed: true,
             status: "Passed - Account Active",
-            institution: newReviewerProfile.institution,
-            country: newReviewerProfile.country,
-            orcid: newReviewerProfile.orcid,
+            institution: newReviewerProfile?.institution || "Scholarly Open Verified Reviewer Community",
+            country: newReviewerProfile?.country || finalCountry,
+            orcid: newReviewerProfile?.orcid || "",
             certificateId: `CERT-SO-2026-${Math.floor(1000 + Math.random() * 9000)}`
           })
         }).catch(err => console.error("Error auto-registering reviewer:", err))
@@ -2954,6 +3055,9 @@ export default function Editorial360Page() {
             role: regRole,
             email: regEmail,
             isLoggedIn: true,
+            profFullName: regRole === "author" ? regName : profFullName,
+            profInstitution: regRole === "author" ? (regAffiliation || "") : profInstitution,
+            authorPhotoUrl: "",
             activeEditorTab: regRole === "editor" ? "desk" : undefined,
             editorName: regRole === "editor" ? regName : editorName,
             editorRank: regRole === "editor" ? "Editorial Board Member & Handling Editor" : editorRank,
@@ -3051,7 +3155,7 @@ export default function Editorial360Page() {
       ? "SOSSH" 
       : "SO"
     const newMsId = `${journalPrefix}-${shortYear}-RW${randomNum}`
-    const authorFullName = `${newFirstName.trim()} ${newLastName.trim()}`.trim() || profFullName || "Dr. Evelyn Vane"
+    const authorFullName = `${newFirstName.trim()} ${newLastName.trim()}`.trim() || profFullName || (email ? email.split('@')[0] : "Author")
 
     const newMs: Manuscript = {
       id: newMsId,
@@ -3064,10 +3168,10 @@ export default function Editorial360Page() {
       authorFirstName: newFirstName,
       authorLastName: newLastName,
       authorName: authorFullName,
-      authorEmail: newAuthorEmail || email || "e.vane@scholarlyopen.org",
-      authorAffiliation: newAuthorAffiliation || profInstitution || "Institute of Advanced Medical Sciences",
-      authorCountry: newAuthorCountry || profCountry || "United States",
-      authorOrcid: newAuthorOrcid || profOrcid || "0000-0002-1825-0097",
+      authorEmail: newAuthorEmail || email || "",
+      authorAffiliation: newAuthorAffiliation || profInstitution || "",
+      authorCountry: newAuthorCountry || profCountry || "",
+      authorOrcid: newAuthorOrcid || profOrcid || "",
       coAuthors: newCoAuthors || "None declared",
       articleType: newArticleType || "Original Research",
       submissionStage: newSubmissionStage || "Initial Submission",
@@ -3107,10 +3211,10 @@ export default function Editorial360Page() {
         author_first_name: newFirstName,
         author_last_name: newLastName,
         author_name: authorFullName,
-        author_email: newAuthorEmail || email || "author@scholarlyopen.org",
-        author_affiliation: newAuthorAffiliation || profInstitution || "Institute of Advanced Medical Sciences",
-        author_country: newAuthorCountry || profCountry || "United States",
-        author_orcid: newAuthorOrcid || profOrcid || "0000-0002-1825-0097",
+        author_email: newAuthorEmail || email || "",
+        author_affiliation: newAuthorAffiliation || profInstitution || "",
+        author_country: newAuthorCountry || profCountry || "",
+        author_orcid: newAuthorOrcid || profOrcid || "",
         co_authors: newCoAuthors || "None declared",
         article_type: newArticleType || "Original Research",
         submission_stage: newSubmissionStage || "Initial Submission",
@@ -3604,19 +3708,17 @@ export default function Editorial360Page() {
       })
 
       // Send CrossDeskNotification so JM and Handling Editor immediately see the submitted review
-      const newNotif: CrossDeskNotification = {
-        id: `NOTIF-${Date.now()}`,
-        timestamp: "Just now",
+      handleAddCrossDeskNotification({
         paperId: paperId,
         paperTitle: targetPaper?.title || scorecardData.title || "Manuscript",
         journal: targetPaper?.journal || scorecardData.journal || "Scholarly Open",
-        sender: `${activeReviewerName} (Reviewer)`,
+        actorName: activeReviewerName,
+        actorRole: "Peer Review Desk",
         type: "review_complete",
-        title: `Peer Review Evaluation Submitted for ${paperId}`,
-        message: `Verdict: "${scorecardData.recommendation}". Priority: ${scorecardData.priorityRating}/10. Scorecard and comments delivered to Handling Editor and Journal Manager.`,
-        priority: "high"
-      }
-      setCrossDeskNotifications(prev => [newNotif, ...prev])
+        headline: `Peer Review Evaluation Submitted for ${paperId}`,
+        summary: `Verdict: "${scorecardData.recommendation}". Priority: ${scorecardData.priorityRating}/10. Scorecard and comments delivered to Handling Editor and Journal Manager.`,
+        severity: "high"
+      })
       
       const newLog: ArchiveLog = {
         id: `LOG-${Math.floor(Math.random() * 100) + 200}`,
@@ -3747,7 +3849,7 @@ export default function Editorial360Page() {
       
       // Change target manuscript status to Revision Required to simulate active flow
       setManuscripts(prev => {
-        const updated = prev.map(m => m.id === revObj.paperId ? { ...m, status: "Revision Required" } : m)
+        const updated = prev.map(m => m.id === revObj.paperId ? { ...m, status: "Revision Required" as const } : m)
         try {
           if (typeof window !== "undefined") {
             localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
@@ -4685,16 +4787,16 @@ export default function Editorial360Page() {
 
               // 5. Add Cross Desk notification so Journal Manager sees it immediately
               handleAddCrossDeskNotification({
-                id: `NOTIF-EB-${Date.now()}`,
+                paperId: "ONBOARDING",
+                paperTitle: "Board Appointment Acceptance",
+                journal: data.journal || "Scholarly Open",
                 type: "editorial_board_joined",
-                title: "Editorial Board Onboarding Completed",
-                message: `${data.name} has formally accepted their appointment for ${data.journal} and created credentials. Pending JM verification.`,
-                senderRole: "editor",
-                senderName: data.name,
-                targetRole: "jm",
-                timestamp: new Date().toISOString(),
-                read: false,
-                urgent: false
+                headline: "Editorial Board Onboarding Completed",
+                summary: `${data.name} has formally accepted their appointment for ${data.journal} and created credentials. Pending JM verification.`,
+                actorRole: "Editorial Board",
+                actorName: data.name,
+                recipient: "Journal Manager Desk",
+                severity: "normal"
               })
 
               setSuccess(`Account registered successfully! Welcome, ${data.name}. Please click "Sign In" below using your created credentials to access your Handling Editor Desk.`)
@@ -5504,16 +5606,17 @@ export default function Editorial360Page() {
                 >
                   <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
                     <div className="h-full w-full rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
-                      {((role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl)) ||
-                        (role === "editor" && (editorPhotoUrl || profPhotoUrl)) ||
-                        profPhotoUrl) ? (
+                      {((role === "reviewer" && reviewerProfile?.photoUrl) ||
+                        (role === "editor" && editorPhotoUrl) ||
+                        (role === "jm" && profPhotoUrl) ||
+                        (role === "author" && authorPhotoUrl)) ? (
                         <img 
-                          src={(role === "reviewer" ? (reviewerProfile?.photoUrl || profPhotoUrl) : (role === "editor" ? (editorPhotoUrl || profPhotoUrl) : profPhotoUrl))} 
+                          src={role === "reviewer" ? reviewerProfile?.photoUrl : role === "editor" ? editorPhotoUrl : role === "jm" ? profPhotoUrl : authorPhotoUrl} 
                           alt="Avatar" 
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || profFullName || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                       )}
                     </div>
                   </div>
@@ -5550,22 +5653,23 @@ export default function Editorial360Page() {
                     >
                       {/* User Header */}
                       <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
-                        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                          {((role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl)) ||
-                            (role === "editor" && (editorPhotoUrl || profPhotoUrl)) ||
-                            profPhotoUrl) ? (
+                        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
+                          {((role === "reviewer" && reviewerProfile?.photoUrl) ||
+                            (role === "editor" && editorPhotoUrl) ||
+                            (role === "jm" && profPhotoUrl) ||
+                            (role === "author" && authorPhotoUrl)) ? (
                             <img 
-                              src={(role === "reviewer" ? (reviewerProfile?.photoUrl || profPhotoUrl) : (role === "editor" ? (editorPhotoUrl || profPhotoUrl) : profPhotoUrl))} 
+                              src={role === "reviewer" ? reviewerProfile?.photoUrl : role === "editor" ? editorPhotoUrl : role === "jm" ? profPhotoUrl : authorPhotoUrl} 
                               alt="Avatar" 
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "EV") : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                           )}
                         </div>
                         <div className="space-y-0.5 overflow-hidden text-left flex-1">
                           <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? (profFullName || (email ? email.split('@')[0] : "Author")) : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                           </h4>
                           <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : role === "reviewer" ? (reviewerProfile?.email || email) : email}</p>
                           <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
@@ -6314,6 +6418,9 @@ export default function Editorial360Page() {
                     activeTab={activeJmTab}
                     onTabChange={setActiveJmTab}
                     manuscripts={manuscripts as any}
+                    onAddManuscript={(newMs) => {
+                      setManuscripts(prev => [newMs as any, ...prev.filter(m => m.id !== newMs.id)])
+                    }}
                     onUpdateManuscriptStatus={(id, st) => {
                       const nowIso = new Date().toISOString()
                       setManuscripts(prev => {

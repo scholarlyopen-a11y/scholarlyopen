@@ -383,7 +383,7 @@ export function EditorialBoardOnboarding({
             </div>
 
             <div className="text-xs text-slate-500">
-              Mainz, Germany · International Publishing House
+              Mainz, Germany
             </div>
           </div>
 
@@ -633,8 +633,8 @@ export function EditorialBoardOnboarding({
               {/* Profile Photo */}
               <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-800 dark:text-slate-200">Profile Photo (Optional)</span>
-                  <span className="text-[10px] text-slate-400">Masthead avatar</span>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Profile Photo (Recommended)</span>
+                  <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">Recommended for masthead avatar & public listing</span>
                 </div>
 
                 <input 

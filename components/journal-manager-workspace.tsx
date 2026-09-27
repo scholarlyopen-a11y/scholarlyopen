@@ -56,9 +56,11 @@ import {
   History,
   Server,
   ChevronLeft,
+  ChevronRight,
   GraduationCap,
   UserX,
-  Trash2
+  Trash2,
+  Plus
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -179,6 +181,7 @@ interface JournalManagerWorkspaceProps {
   activeTab?: string
   onTabChange?: (tab: string) => void
   manuscripts: JmManuscript[]
+  onAddManuscript?: (newMs: JmManuscript) => void
   onUpdateManuscriptStatus?: (paperId: string, newStatus: string) => void
   onAssignEditor?: (paperId: string, editorName: string) => void
   reviews?: JmReviewFeedback[]
@@ -201,6 +204,7 @@ export function JournalManagerWorkspace({
   activeTab = "board",
   onTabChange,
   manuscripts: initialManuscripts = [],
+  onAddManuscript,
   onUpdateManuscriptStatus,
   onAssignEditor,
   reviews: initialReviews = [],
@@ -267,6 +271,116 @@ export function JournalManagerWorkspace({
   const [isLoadingGateway, setIsLoadingGateway] = useState(false)
   const [gatewaySearch, setGatewaySearch] = useState("")
   const [selectedCandidateDossier, setSelectedCandidateDossier] = useState<any | null>(null)
+
+  // Manual / Past Submission Ingestion State
+  const [isManualImportOpen, setIsManualImportOpen] = useState(false)
+  const [manualMsId, setManualMsId] = useState("SOMED-26-MS201")
+  const [manualTitle, setManualTitle] = useState("")
+  const [manualJournal, setManualJournal] = useState("Scholarly Open: Medicine")
+  const [manualAuthorName, setManualAuthorName] = useState("")
+  const [manualAuthorEmail, setManualAuthorEmail] = useState("")
+  const [manualAuthorAffiliation, setManualAuthorAffiliation] = useState("")
+  const [manualAbstract, setManualAbstract] = useState("")
+  const [manualKeywords, setManualKeywords] = useState("")
+  const [manualStatus, setManualStatus] = useState<JmManuscript["status"]>("Under Review")
+  const [manualArticleType, setManualArticleType] = useState("Original Research")
+  const [manualSendClaimInvite, setManualSendClaimInvite] = useState(true)
+  const [manualSuccessBanner, setManualSuccessBanner] = useState<{ id: string; claimUrl: string; email: string } | null>(null)
+  const [manualCopiedClaim, setManualCopiedClaim] = useState(false)
+
+  const handleQuickFillDrLee = () => {
+    setManualMsId("SOMED-26-MS201")
+    setManualJournal("Scholarly Open: Medicine")
+    setManualArticleType("Original Research")
+    setManualAuthorName("Dr. Sam Lee, MD, PhD")
+    setManualAuthorEmail("dr.sam.lee@acei-health.org")
+    setManualAuthorAffiliation("College of Doctoral Studies, Grand Canyon University / Applied Clinical EBM Institute (ACEI)")
+    setManualTitle("Hospital-Level Organizational Factors and Risk-Standardized 30-Day Mortality in Acute Care: A Multicenter CMS Cohort Analysis")
+    setManualAbstract("Background: Evaluating hospital-level organizational and structural characteristics associated with 30-day risk-standardized mortality rates across acute care centers using Centers for Medicare & Medicaid Services (CMS) quality datasets. Methods: A retrospective observational study integrating hospital characteristics, bed size, staffing ratios, and clinical outcome metrics across 2,400+ accredited U.S. hospital centers.")
+    setManualKeywords("Evidence-Based Medicine, Hospital Quality, CMS Datasets, Risk-Standardized Mortality, Healthcare Operations")
+    setManualStatus("Under Review")
+    setManualSendClaimInvite(true)
+    setManualSuccessBanner(null)
+  }
+
+  const handleIngestManualSubmission = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!manualTitle.trim() || !manualAuthorName.trim() || !manualAuthorEmail.trim()) {
+      alert("Please provide the Manuscript Title, Author Name, and Author Email.")
+      return
+    }
+
+    const nowIso = new Date().toISOString()
+    const msId = manualMsId.trim() || `SOMED-26-MS${Math.floor(Math.random() * 900) + 100}`
+
+    const newMs: JmManuscript = {
+      id: msId,
+      title: manualTitle.trim(),
+      journal: manualJournal,
+      status: manualStatus,
+      date: nowIso,
+      reviewers: ["Prof. Sanna Järvelä", "Dr. Marcus Vance"],
+      integrityStatus: "Clean",
+      plagiarismScore: 4,
+      aiScore: 8,
+      authorName: manualAuthorName.trim(),
+      authorEmail: manualAuthorEmail.trim().toLowerCase(),
+      authorAffiliation: manualAuthorAffiliation.trim(),
+      abstract: manualAbstract.trim(),
+      keywords: manualKeywords.trim(),
+      articleType: manualArticleType,
+      updatedAt: nowIso,
+      lastActivity: nowIso
+    }
+
+    if (onAddManuscript) {
+      onAddManuscript(newMs)
+    }
+
+    try {
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem("editorial360_manuscripts")
+        const currentList: JmManuscript[] = stored ? JSON.parse(stored) : []
+        const updated = [newMs, ...currentList.filter(m => m.id !== newMs.id)]
+        localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+      }
+    } catch (err) {
+      console.warn("Could not save to localStorage:", err)
+    }
+
+    fetch("/api/editorial360/manuscripts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newMs)
+    }).catch(e => console.warn("Supabase manuscript upsert:", e))
+
+    const claimUrl = `https://www.scholarlyopen.org/editorial360?action=claim_submission&id=${encodeURIComponent(msId)}&email=${encodeURIComponent(newMs.authorEmail || "")}&name=${encodeURIComponent(newMs.authorName || "")}`
+
+    if (manualSendClaimInvite && newMs.authorEmail) {
+      fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: newMs.authorEmail,
+          recipientName: newMs.authorName,
+          subject: `[${manualJournal}] Manuscript Ingested & Author Desk Activation (${msId})`,
+          customSubject: `[${manualJournal}] Access Your Manuscript on editorial360: ${msId}`,
+          journal: manualJournal,
+          paperId: msId,
+          paperTitle: newMs.title,
+          actionLabel: "Access Author Desk & Track Manuscript",
+          actionUrl: claimUrl,
+          customBody: `Dear ${newMs.authorName},\n\nYour manuscript has been officially imported and activated within the live editorial360 platform for ${manualJournal}.\n\nManuscript Details:\n• Reference ID: ${msId}\n• Title: "${newMs.title}"\n• Current Status: ${manualStatus}\n\nYou can access your dedicated Author Desk to monitor the evaluation stage, view referee reports once released, and manage publication milestones using the link below:\n\n${claimUrl}\n\nKind regards,\nEditorial Office\n${manualJournal}\nScholarly Open Publishing Group`
+        })
+      }).catch(e => console.error("Email send failed:", e))
+    }
+
+    setManualSuccessBanner({
+      id: msId,
+      claimUrl,
+      email: newMs.authorEmail || ""
+    })
+  }
 
   const handleToggleCandidateApproval = async (candidate: any) => {
     const nextApproved = !candidate.jmApproved
@@ -1674,7 +1788,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       return
     }
 
-    const defaultBodyText = `Dear ${revName},\n\nOn behalf of the Editorial Office of ${revJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable contributions in ${revSpec}, your independent evaluation would provide essential academic rigor for our editorial decisions.\n\nReview Terms & Details:\n• Journal: ${revJournal}\n• Evaluation Track: ${assignedManuscript ? `Manuscript ${assignedManuscript.id} ("${assignedManuscript.title}")` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via Wise/Bank or 50% APC Publication Credit\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the invitation guidelines.\n\nKind regards,\nEditorial Office\n${revJournal}\nScholarly Open Publishing Group`
+    const defaultBodyText = `Dear ${revName},\n\nOn behalf of the Editorial Office of ${revJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable contributions in ${revSpec}, your independent evaluation would provide essential academic rigor for our editorial decisions.\n\nReview Terms & Details:\n• Journal: ${revJournal}\n• Evaluation Track: ${assignedManuscript ? `Manuscript ${assignedManuscript.id} ("${assignedManuscript.title}")` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via PayPal, Payoneer and major digital payment rails (no bank transfers) or 25% APC Publication Credit voucher\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the invitation guidelines.\n\nKind regards,\nEditorial Office\n${revJournal}\nScholarly Open Publishing Group`
 
     const finalBody = newRevCustomBody.trim() || defaultBodyText
     const finalSubject = newRevSubject.trim() || `[Scholarly Open] Peer Review Invitation: ${revJournal}`
@@ -2589,7 +2703,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               />
             </div>
             
-            <div className="w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <select
                 value={selectedJournal}
                 onChange={(e) => setSelectedJournal(e.target.value)}
@@ -2601,6 +2715,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <option value="Social">Social Sciences & Humanities</option>
                 <option value="Decarbonization">Decarbonization & Carbon Tech</option>
               </select>
+
+              <Button
+                onClick={() => {
+                  setManualSuccessBanner(null)
+                  setIsManualImportOpen(true)
+                }}
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Ingest Manual Submission</span>
+              </Button>
             </div>
           </div>
 
@@ -6539,7 +6664,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         rows={7}
                         value={
                           newRevCustomBody ||
-                          `Dear ${newRevName || "Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via Wise/Bank or 50% APC Publication Credit\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the formal invitation guidelines.`
+                          `Dear ${newRevName || "Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via PayPal, Payoneer and major digital payment rails (no bank transfers) or 25% APC Publication Credit voucher\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the formal invitation guidelines.`
                         }
                         onChange={(e) => setNewRevCustomBody(e.target.value)}
                         className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-800 dark:text-slate-200 font-mono text-[11px] leading-relaxed resize-none"
@@ -6553,7 +6678,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         <span>Included Peer Reviewer Incentives</span>
                       </div>
                       <p className="text-[10px] text-slate-600 dark:text-slate-400">
-                        Includes €35–€50 referee disbursement, 50% APC author waiver, WoS/ORCID verified dossier, and automated CAN-SPAM/GDPR suppression opt-out in footer.
+                        Includes €35–€50 referee disbursement via PayPal or Payoneer (no bank transfers), 25% APC author waiver voucher, WoS/ORCID verified dossier, and automated suppression opt-out in footer.
                       </p>
                     </div>
                   </div>
@@ -6565,20 +6690,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div className="bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4 max-w-xl mx-auto">
                   
-                  {/* Email Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-2.5">
-                      <img src="/logo-mark.svg" alt="Scholarly Open" className="h-7 w-auto object-contain" />
-                      <div>
-                        <div className="text-xs font-black text-[#132415] dark:text-white">
-                          Scholarly <span className="text-[#F6BB14]">Open</span>
-                        </div>
-                        <div className="text-[10px] text-slate-400">{newRevJournal}</div>
+                  {/* Email Header: Real Logo on the Left, Journal Name on the Right */}
+                  <div className="flex items-center justify-between pb-3 border-b-2 border-[#0b99ff] gap-4">
+                    <div className="flex items-center">
+                      <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 w-auto object-contain dark:hidden" />
+                      <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 w-auto object-contain hidden dark:block brightness-125" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                        {newRevJournal}
+                      </div>
+                      <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
+                        Peer-Reviewed Journal
                       </div>
                     </div>
-                    <span className="text-[10px] font-bold text-sky-600 bg-sky-50 dark:bg-sky-950 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800">
-                      Official Invitation
-                    </span>
                   </div>
 
                   {/* Subject Line Display */}
@@ -6589,7 +6714,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   {/* Body Content */}
                   <div className="text-xs text-slate-700 dark:text-slate-300 space-y-3 leading-relaxed whitespace-pre-line">
                     {newRevCustomBody ||
-                      `Dear ${newRevName || "Dr. Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via Wise/Bank or 50% APC Publication Credit\n• Certification: Academic Peer Review Dossier & Gateway Verification`}
+                      `Dear ${newRevName || "Dr. Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via PayPal, Payoneer and major digital payment rails (no bank transfers) or 25% APC Publication Credit voucher\n• Certification: Academic Peer Review Dossier & Gateway Verification`}
                   </div>
 
                   {/* Call-to-Action Buttons */}
@@ -8476,6 +8601,305 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* INGEST MANUAL / LEGACY SUBMISSION MODAL                                   */}
+      {/* ========================================================================= */}
+      <Dialog open={isManualImportOpen} onOpenChange={setIsManualImportOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 rounded-2xl bg-white dark:bg-[#18191e] border-slate-200 dark:border-slate-800">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff] flex items-center justify-center font-bold">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+                    Ingest Manual / Legacy Submission
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500">
+                    Import an offline or past submission directly into the editorial360 tracking and evaluation pipeline.
+                  </DialogDescription>
+                </div>
+              </div>
+
+              {/* 1-Click Dr. Sam Lee Quick Fill */}
+              <button
+                type="button"
+                onClick={handleQuickFillDrLee}
+                className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+              >
+                <Zap className="w-3.5 h-3.5 text-emerald-600" />
+                <span>⚡ Quick Fill: Dr. Sam Lee</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-5">
+            {manualSuccessBanner ? (
+              <div className="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 space-y-4 animate-in fade-in">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
+                      Manuscript {manualSuccessBanner.id} Ingested Successfully!
+                    </h3>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
+                      The submission is now active in the live editorial360 pipeline and registered in the author directory.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white dark:bg-[#131418] border border-emerald-200 dark:border-emerald-900 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">Author Portal Claim Link:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(manualSuccessBanner.claimUrl)
+                        setManualCopiedClaim(true)
+                        setTimeout(() => setManualCopiedClaim(false), 3000)
+                      }}
+                      className="text-xs text-[#0b99ff] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {manualCopiedClaim ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-600" />
+                          <span className="text-emerald-600">Copied to Clipboard!</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Copy Claim Link</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    readOnly
+                    value={manualSuccessBanner.claimUrl}
+                    className="w-full text-[11px] font-mono p-2 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 select-all"
+                  />
+                  {manualSendClaimInvite && manualSuccessBanner.email && (
+                    <p className="text-[10px] text-slate-500 flex items-center gap-1.5 pt-1">
+                      <Mail className="w-3.5 h-3.5 text-[#0b99ff]" />
+                      <span>Claim invitation dispatched to <strong>{manualSuccessBanner.email}</strong>. The author can click to immediately access their active desk.</span>
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setManualSuccessBanner(null)
+                      setManualTitle("")
+                      setManualAbstract("")
+                    }}
+                    className="text-xs font-semibold h-8"
+                  >
+                    Ingest Another Manuscript
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setIsManualImportOpen(false)}
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8"
+                  >
+                    View in Pipeline
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleIngestManualSubmission} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Manuscript ID
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={manualMsId}
+                      onChange={(e) => setManualMsId(e.target.value)}
+                      placeholder="e.g. SOMED-26-MS201"
+                      className="w-full text-xs font-mono p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Journal
+                    </label>
+                    <select
+                      value={manualJournal}
+                      onChange={(e) => setManualJournal(e.target.value)}
+                      className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    >
+                      <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
+                      <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering</option>
+                      <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences</option>
+                      <option value="Scholarly Open: Decarbonization & Carbon Tech">Scholarly Open: Decarbonization</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Article Type
+                    </label>
+                    <select
+                      value={manualArticleType}
+                      onChange={(e) => setManualArticleType(e.target.value)}
+                      className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    >
+                      <option value="Original Research">Original Research</option>
+                      <option value="Systematic Review">Systematic Review</option>
+                      <option value="Case Report">Case Report</option>
+                      <option value="Brief Communication">Brief Communication</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Corresponding / Submitting Author
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={manualAuthorName}
+                      onChange={(e) => setManualAuthorName(e.target.value)}
+                      placeholder="e.g. Dr. Sam Lee, MD, PhD"
+                      className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Author Institutional Email
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={manualAuthorEmail}
+                      onChange={(e) => setManualAuthorEmail(e.target.value)}
+                      placeholder="author@university.edu"
+                      className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Academic Affiliation / Institute
+                  </label>
+                  <input
+                    type="text"
+                    value={manualAuthorAffiliation}
+                    onChange={(e) => setManualAuthorAffiliation(e.target.value)}
+                    placeholder="e.g. Grand Canyon University / Applied Clinical EBM Institute (ACEI)"
+                    className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Manuscript Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={manualTitle}
+                    onChange={(e) => setManualTitle(e.target.value)}
+                    placeholder="Full academic title of the manuscript"
+                    className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Abstract (Optional / Summary)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={manualAbstract}
+                    onChange={(e) => setManualAbstract(e.target.value)}
+                    placeholder="Background, methods, key findings..."
+                    className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Keywords
+                    </label>
+                    <input
+                      type="text"
+                      value={manualKeywords}
+                      onChange={(e) => setManualKeywords(e.target.value)}
+                      placeholder="e.g. Evidence-Based Medicine, CMS Datasets"
+                      className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Pipeline Initial Status
+                    </label>
+                    <select
+                      value={manualStatus}
+                      onChange={(e) => setManualStatus(e.target.value as any)}
+                      className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    >
+                      <option value="Under Review">Under Review</option>
+                      <option value="Awaiting Initial Check">Awaiting Initial Check</option>
+                      <option value="Submitted">Submitted</option>
+                      <option value="Revision Required">Revision Required</option>
+                      <option value="Revision Under Evaluation">Revision Under Evaluation</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex items-start gap-2.5">
+                  <input
+                    type="checkbox"
+                    id="manualSendClaimInvite"
+                    checked={manualSendClaimInvite}
+                    onChange={(e) => setManualSendClaimInvite(e.target.checked)}
+                    className="mt-0.5 rounded text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4 cursor-pointer"
+                  />
+                  <label htmlFor="manualSendClaimInvite" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <span className="font-bold">Send Author Portal Claim Invitation immediately</span>
+                    <span className="block text-[11px] text-slate-500">
+                      Author receives an email with a 1-click link to access their live Author Desk on editorial360 and track this manuscript.
+                    </span>
+                  </label>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsManualImportOpen(false)}
+                    className="text-xs font-semibold h-9 px-4 cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-9 px-5 rounded-lg cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Ingest &amp; Activate Manuscript</span>
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

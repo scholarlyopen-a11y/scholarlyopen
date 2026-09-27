@@ -15,6 +15,7 @@ interface EmailPayload {
   paperTitle?: string
   customMessage?: string
   customBody?: string
+  bodyText?: string
   customHtml?: string
   journal?: string
   actionLabel?: string
@@ -120,7 +121,7 @@ export async function POST(req: Request) {
     }
 
     // Build plain text alternative for optimal deliverability (eliminates MIME_HTML_ONLY spam penalty)
-    const plainTextBody = (body.customBody || bodyText || finalHtml
+    const plainTextBody = (body.customBody || body.bodyText || finalHtml
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
       .replace(/<[^>]+>/g, " ")
