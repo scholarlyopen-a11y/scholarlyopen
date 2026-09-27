@@ -48,6 +48,40 @@ let responseStore: InvitationResponseRecord[] = [
 
 const EDITORS_FILE_PATH = path.join(process.cwd(), "lib", "data", "editorial-board-onboarding.json")
 const REVIEWERS_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
+const SENT_FILE_PATH = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
+
+function updateSentInvitationStatus(candidateEmail: string, candidateName: string) {
+  try {
+    if (fs.existsSync(SENT_FILE_PATH)) {
+      const raw = fs.readFileSync(SENT_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed.sentInvitations)) {
+        let matched = false
+        parsed.sentInvitations = parsed.sentInvitations.map((item: any) => {
+          const matchEmail = candidateEmail && item.recipientEmail && item.recipientEmail.toLowerCase() === candidateEmail.toLowerCase()
+          const cleanCandName = (candidateName || "").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().toLowerCase()
+          const cleanRecipName = (item.recipientName || "").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().toLowerCase()
+          const matchName = cleanCandName.length > 2 && (cleanCandName.includes(cleanRecipName) || cleanRecipName.includes(cleanCandName))
+
+          if (matchEmail || matchName) {
+            matched = true
+            return {
+              ...item,
+              status: "Accepted",
+              acceptedAt: new Date().toISOString()
+            }
+          }
+          return item
+        })
+        if (matched) {
+          fs.writeFileSync(SENT_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error updating sent invitation status:", e)
+  }
+}
 
 function saveEditorToDisk(editor: any) {
   try {
@@ -212,6 +246,7 @@ export async function POST(req: Request) {
         status: "Active Handling Editor",
         acceptedAt: new Date().toISOString()
       })
+      updateSentInvitationStatus(candidateEmail, candidateName)
     }
 
     // If reviewer claim, update reviewer on disk

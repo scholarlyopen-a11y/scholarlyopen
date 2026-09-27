@@ -1151,15 +1151,37 @@ export default function Editorial360Page() {
       // Associate Editor & Editorial Board Member Acceptance Link Handler
       if (urlAction === "accept_ae" || urlAction === "accept_board") {
         const isAe = urlAction === "accept_ae"
-        const defaultScholarName = urlName || (urlJournal?.includes("Environmental") ? "Dr. Prashant Kumar" : "Esteemed Scholar")
+        const isSanna = (urlName || "").toLowerCase().includes("sanna") || (urlName || "").toLowerCase().includes("järvelä") || (urlName || "").toLowerCase().includes("jarvela")
+        const isPrashant = (urlName || "").toLowerCase().includes("prashant") || (urlName || "").toLowerCase().includes("kumar")
+        
+        const defaultJournal = urlJournal || (isSanna ? "Scholarly Open: Medicine" : isPrashant ? "Scholarly Open: Environmental Science" : "Scholarly Open: Medicine")
+        const defaultScholarName = urlName || (isSanna ? "Prof. Sanna Järvelä" : isPrashant ? "Prof. Prashant Kumar" : "Esteemed Scholar")
+        const defaultScholarEmail = urlEmail || (isSanna ? "sanna.jarvela@oulu.fi" : isPrashant ? "p.kumar@surrey.ac.uk" : "")
+
         setOnboardingInvite({
           isOpen: true,
           role: isAe ? "ae" : "board",
           name: defaultScholarName,
-          email: urlEmail || (urlJournal?.includes("Environmental") ? "p.kumar@surrey.ac.uk" : ""),
-          journal: urlJournal || "Scholarly Open: Environmental Science"
+          email: defaultScholarEmail,
+          journal: defaultJournal
         })
-        if (urlEmail) setEmail(urlEmail)
+        if (defaultScholarEmail) setEmail(defaultScholarEmail)
+
+        // Async resolve from verified sent-invitations
+        fetch(`/api/editorial360/invitation-verify?name=${encodeURIComponent(urlName || "")}&email=${encodeURIComponent(urlEmail || "")}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data?.invite) {
+              setOnboardingInvite(prev => prev ? {
+                ...prev,
+                journal: data.invite.journal || prev.journal,
+                email: data.invite.recipientEmail || prev.email,
+                name: data.invite.recipientName || prev.name
+              } : null)
+              if (data.invite.recipientEmail) setEmail(data.invite.recipientEmail)
+            }
+          })
+          .catch(err => console.warn("Could not background-verify invite params:", err))
       }
 
       if (urlAction === "submit") {

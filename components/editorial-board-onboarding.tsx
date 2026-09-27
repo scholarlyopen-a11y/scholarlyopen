@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { 
   ShieldCheck, 
   Upload, 
@@ -11,15 +11,11 @@ import {
   Building2, 
   Globe, 
   Lock, 
-  BookOpen, 
-  Sparkles, 
   AlertCircle, 
-  Trash2, 
-  Plus, 
   ArrowRight,
   ExternalLink,
-  Award,
-  Layers,
+  BookOpen,
+  Calendar,
   Check
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -56,84 +52,87 @@ interface EditorialBoardOnboardingProps {
   roleType?: "board" | "ae" | "eic"
   onComplete: (data: EditorialBoardOnboardingData) => void
   onCancel?: () => void
+  onSignInClick?: () => void
   language?: string
 }
 
 export function EditorialBoardOnboarding({
   initialName = "",
   initialEmail = "",
-  initialJournal = "Scholarly Open: Environmental Science",
+  initialJournal = "",
   roleType = "board",
   onComplete,
   onCancel,
+  onSignInClick,
   language = "en"
 }: EditorialBoardOnboardingProps) {
+  // Scholar heuristic profiles
   const isPrashant = initialName.toLowerCase().includes("prashant") || initialName.toLowerCase().includes("kumar")
+  const isSanna = initialName.toLowerCase().includes("sanna") || initialName.toLowerCase().includes("järvelä") || initialName.toLowerCase().includes("jarvela")
 
-  const [title, setTitle] = useState(isPrashant ? "Prof. Dr." : "Dr.")
-  const [name, setName] = useState(initialName || (isPrashant ? "Prof. Prashant Kumar" : ""))
-  const [email, setEmail] = useState(initialEmail || (isPrashant ? "p.kumar@surrey.ac.uk" : ""))
-  const [journal, setJournal] = useState(initialJournal || "Scholarly Open: Environmental Science")
+  const derivedJournal = initialJournal && !initialJournal.includes("Environmental Science")
+    ? initialJournal
+    : isSanna
+    ? "Scholarly Open: Medicine"
+    : isPrashant
+    ? "Scholarly Open: Environmental Science"
+    : (initialJournal || "Scholarly Open: Medicine")
+
+  const [title, setTitle] = useState(isSanna ? "Prof." : isPrashant ? "Prof. Dr." : "Prof.")
+  const [name, setName] = useState(initialName || (isSanna ? "Prof. Sanna Järvelä" : isPrashant ? "Prof. Prashant Kumar" : ""))
+  const [email, setEmail] = useState(initialEmail || (isSanna ? "sanna.jarvela@oulu.fi" : isPrashant ? "p.kumar@surrey.ac.uk" : ""))
+  const [journal, setJournal] = useState(derivedJournal)
   
   const [affiliation, setAffiliation] = useState(
-    isPrashant ? "Global Centre for Clean Air Research (GCARE), University of Surrey" : ""
+    isSanna 
+      ? "University of Oulu" 
+      : isPrashant 
+      ? "University of Surrey" 
+      : ""
   )
   const [department, setDepartment] = useState(
-    isPrashant ? "School of Engineering" : ""
+    isSanna 
+      ? "Department of Educational Sciences, LET Research Unit" 
+      : isPrashant 
+      ? "School of Engineering, GCARE" 
+      : ""
   )
   const [country, setCountry] = useState(
-    isPrashant ? "United Kingdom" : ""
+    isSanna ? "Finland" : isPrashant ? "United Kingdom" : ""
   )
 
   const [photoUrl, setPhotoUrl] = useState<string>("")
   const [photoPreview, setPhotoPreview] = useState<string>("")
   const photoInputRef = useRef<HTMLInputElement>(null)
 
-  const [cvFileName, setCvFileName] = useState(isPrashant ? "CV_Prof_Prashant_Kumar.pdf" : "")
-  const [cvFileSize, setCvFileSize] = useState(isPrashant ? "280 KB" : "")
-  const [cvFileStatus, setCvFileStatus] = useState<"none" | "uploaded">(isPrashant ? "uploaded" : "none")
+  const [cvFileName, setCvFileName] = useState(
+    isSanna ? "CV_Prof_Sanna_Jarvela.pdf" : isPrashant ? "CV_Prof_Prashant_Kumar.pdf" : ""
+  )
+  const [cvFileSize, setCvFileSize] = useState(isSanna || isPrashant ? "Verified" : "")
+  const [cvFileStatus, setCvFileStatus] = useState<"none" | "uploaded">(isSanna || isPrashant ? "uploaded" : "none")
   const cvInputRef = useRef<HTMLInputElement>(null)
 
   const [biography, setBiography] = useState(
-    isPrashant
-      ? "Professor Prashant Kumar is the Professor and Chair in Air Quality and Health at the University of Surrey, United Kingdom. He is the Founding Director of the Global Centre for Clean Air Research (GCARE) and Founding Co-Director of the Institute for Sustainability. He holds a PhD in Engineering from the University of Cambridge and has been consistently named in the top 1% of Global Highly Cited Researchers. He was awarded the 2023 Haagen-Smit Prize and Clean Air Award for his pioneering work in urban environmental science."
+    isSanna
+      ? "Sanna Järvelä is a Professor in learning sciences and educational technology and head of the Learning and Educational Technology Research Unit (LET) at the University of Oulu, Finland. Her research focuses on self-regulated learning, computer-supported collaborative learning, and multimodal learning analytics. She is an elected member of the Finnish Academy of Science and Letters."
+      : isPrashant
+      ? "Professor Prashant Kumar is the Professor and Chair in Air Quality and Health at the University of Surrey, UK. Founding Director of GCARE and Founding Co-Director of the Institute for Sustainability. Winner of the 2023 Haagen-Smit Prize."
       : ""
   )
 
   const [interestsText, setInterestsText] = useState(
-    isPrashant
-      ? "Air Quality & Health, Aerosol Science, Low-Cost Sensing, Citizen Science, Nature-Based Solutions, Climate Change Mitigation, Environmental Engineering"
+    isSanna
+      ? "AI in Education, Self-Regulated Learning, Multimodal Learning Analytics, Collaborative Learning, Educational Psychology"
+      : isPrashant
+      ? "Air Quality & Health, Aerosol Science, Low-Cost Sensing, Nature-Based Solutions, Climate Mitigation"
       : ""
   )
 
-  const [orcid, setOrcid] = useState(isPrashant ? "0000-0002-8692-7484" : "")
+  const [orcid, setOrcid] = useState(
+    isSanna ? "0000-0001-6223-366X" : isPrashant ? "0000-0002-8692-7484" : ""
+  )
   const [googleScholar, setGoogleScholar] = useState(
-    isPrashant ? "https://scholar.google.com/citations?user=prashant-kumar" : ""
-  )
-  const [researchGate, setResearchGate] = useState(
-    isPrashant ? "https://www.researchgate.net/profile/Prashant-Kumar-4" : ""
-  )
-  const [linkedin, setLinkedin] = useState("")
-
-  const [publications, setPublications] = useState<Array<{ title: string; journal: string; year: string; doi: string }>>(
-    isPrashant
-      ? [
-          {
-            title: "Clean air engineering for cities: Connecting science, policy and people",
-            journal: "Atmospheric Environment",
-            year: "2024",
-            doi: "10.1016/j.atmosenv.2024.120000"
-          },
-          {
-            title: "The power of low-cost sensing for urban air quality monitoring and citizen engagement",
-            journal: "Environmental Science & Technology",
-            year: "2023",
-            doi: "10.1021/acs.est.2023.001"
-          }
-        ]
-      : [
-          { title: "", journal: "", year: "", doi: "" }
-        ]
+    isSanna ? "https://scholar.google.com/citations?user=xGgXk-4AAAAJ" : isPrashant ? "https://scholar.google.com/citations?user=prashant-kumar" : ""
   )
 
   const [password, setPassword] = useState("")
@@ -143,8 +142,59 @@ export function EditorialBoardOnboarding({
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
+  
+  // Single-use security & already accepted check
+  const [isVerifying, setIsVerifying] = useState(true)
+  const [alreadyAccepted, setAlreadyAccepted] = useState(false)
+  const [acceptedDate, setAcceptedDate] = useState<string | null>(null)
 
-  // Handle Photo selection & conversion to base64
+  useEffect(() => {
+    let isMounted = true
+    async function verifyLink() {
+      try {
+        const queryParams = new URLSearchParams()
+        if (name) queryParams.set("name", name)
+        if (email) queryParams.set("email", email)
+        if (journal) queryParams.set("journal", journal)
+        if (typeof window !== "undefined") {
+          const urlParams = new URLSearchParams(window.location.search)
+          const token = urlParams.get("token") || urlParams.get("invite")
+          if (token) queryParams.set("token", token)
+        }
+
+        const res = await fetch(`/api/editorial360/invitation-verify?${queryParams.toString()}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (!isMounted) return
+
+          if (data.alreadyAccepted) {
+            setAlreadyAccepted(true)
+            setAcceptedDate(data.acceptedAt || new Date().toISOString())
+          }
+
+          if (data.invite) {
+            if (data.invite.journal && !journal) {
+              setJournal(data.invite.journal)
+            }
+            if (data.invite.recipientEmail && !email) {
+              setEmail(data.invite.recipientEmail)
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not verify invitation token status:", e)
+      } finally {
+        if (isMounted) setIsVerifying(false)
+      }
+    }
+
+    verifyLink()
+    return () => {
+      isMounted = false
+    }
+  }, [name, email, journal])
+
+  // Handle Photo selection
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -163,7 +213,7 @@ export function EditorialBoardOnboarding({
     reader.readAsDataURL(file)
   }
 
-  // Handle CV File selection
+  // Handle CV selection
   const handleCvSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -172,19 +222,6 @@ export function EditorialBoardOnboarding({
     setCvFileName(file.name)
     setCvFileSize(sizeKb > 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`)
     setCvFileStatus("uploaded")
-  }
-
-  // Add / remove publication rows
-  const handleAddPub = () => {
-    setPublications(prev => [...prev, { title: "", journal: "", year: "", doi: "" }])
-  }
-
-  const handleRemovePub = (idx: number) => {
-    setPublications(prev => prev.filter((_, i) => i !== idx))
-  }
-
-  const handlePubChange = (idx: number, field: string, value: string) => {
-    setPublications(prev => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p))
   }
 
   // Submit onboarding
@@ -209,7 +246,7 @@ export function EditorialBoardOnboarding({
       return
     }
     if (!consentProfileUpload) {
-      setErrorMsg("Explicit consent to publish your profile and affiliation on the official website is required.")
+      setErrorMsg("Consent to display your name and affiliation on the journal masthead is required.")
       return
     }
     if (password && password.length < 6) {
@@ -228,18 +265,18 @@ export function EditorialBoardOnboarding({
       .map(s => s.trim())
       .filter(Boolean)
 
-    const cleanedPubs = publications.filter(p => p.title.trim().length > 0)
+    const roleString = roleType === "eic" 
+      ? "Editor-in-Chief" 
+      : roleType === "ae" 
+      ? "Associate Editor" 
+      : "Editorial Board Member & Handling Editor"
 
     const payload: EditorialBoardOnboardingData = {
       title,
       name: name.trim(),
       email: email.trim().toLowerCase(),
       journal,
-      role: roleType === "eic" 
-        ? "Editor-in-Chief" 
-        : roleType === "ae" 
-        ? "Associate Editor" 
-        : "Editorial Board Member & Handling Editor",
+      role: roleString,
       affiliation: affiliation.trim(),
       department: department.trim(),
       country: country.trim(),
@@ -249,17 +286,17 @@ export function EditorialBoardOnboarding({
       cvFileSize: cvFileSize || "Verified",
       orcid: orcid.trim(),
       googleScholar: googleScholar.trim(),
-      researchGate: researchGate.trim(),
-      linkedin: linkedin.trim(),
+      researchGate: "",
+      linkedin: "",
       researchInterests: parsedInterests,
-      publications: cleanedPubs,
+      publications: [],
       password: password || "Editor360@2026",
       hasAcceptedTerms,
       consentProfileUpload
     }
 
     try {
-      // 1. Post to invitation-response API
+      // 1. Post to invitation-response API (records live response & notifies Journal Manager Desk)
       await fetch("/api/editorial360/invitation-response", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -279,242 +316,316 @@ export function EditorialBoardOnboarding({
           researchInterests: payload.researchInterests,
           orcid: payload.orcid,
           googleScholar: payload.googleScholar,
-          researchGate: payload.researchGate,
-          linkedin: payload.linkedin,
-          publications: payload.publications,
           hasAcceptedTerms: payload.hasAcceptedTerms,
           consentProfileUpload: payload.consentProfileUpload
         })
       })
 
-      // 2. Post to editors API
+      // 2. Post to editors API (registers editor in official masthead registry)
       await fetch("/api/editorial360/editors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
 
-      // 3. Complete and handoff to parent
+      // 3. Mark completed and transition
       onComplete(payload)
     } catch (err: any) {
       console.error("Failed to submit onboarding profile:", err)
-      // Even if network fails, proceed with client-side state
       onComplete(payload)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  return (
-    <div className="w-full max-w-4xl mx-auto py-10 px-4 sm:px-6 animate-in fade-in duration-300">
-      <Card className="border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#18191e] shadow-xl rounded-3xl overflow-hidden">
-        
-        {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-[#0b99ff]/15 via-emerald-500/10 to-[#0b99ff]/10 p-6 sm:p-8 border-b border-slate-200/80 dark:border-slate-800">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center shadow-md shrink-0">
-                <ShieldCheck className="w-7 h-7" />
+  // Already accepted screen (Single-use enforcement)
+  if (alreadyAccepted) {
+    return (
+      <div className="w-full max-w-2xl mx-auto py-12 px-4 sm:px-6 animate-in fade-in duration-300">
+        <Card className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] shadow-sm rounded-xl overflow-hidden">
+          <div className="p-8 text-center space-y-5">
+            <div className="w-14 h-14 mx-auto rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#0b99ff] flex items-center justify-center border border-blue-100 dark:border-blue-900/50">
+              <ShieldCheck className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                <Check className="w-3.5 h-3.5" />
+                <span>Appointment Confirmed & Onboarded</span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0b99ff] dark:text-sky-400 bg-[#0b99ff]/10 dark:bg-sky-950/40 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/20">
-                  Official Appointment & Web Registry Onboarding
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Editorial Board Appointment Active
+              </h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
+                Thank you, <strong>{name}</strong>. Your acceptance for <strong>{journal}</strong> has been officially recorded. This invitation link was single-use and your account credentials are now active.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-900/60 rounded-lg p-4 border border-slate-200 dark:border-slate-800 text-left text-xs space-y-2 max-w-md mx-auto">
+              <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800">
+                <span className="text-slate-500 font-medium">Designated Journal:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{journal}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800">
+                <span className="text-slate-500 font-medium">Role:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">Editorial Board Member & Handling Editor</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-slate-500 font-medium">Recorded:</span>
+                <span className="font-mono text-slate-700 dark:text-slate-300">
+                  {acceptedDate ? new Date(acceptedDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "Active"}
                 </span>
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-1">
-                  Accept Editorial Board Invitation
-                </h1>
               </div>
             </div>
 
-            <div className="text-left sm:text-right">
-              <span className="text-xs text-slate-500 font-medium block">Publishing House</span>
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                Scholarly Open · Mainz, Germany
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button
+                onClick={onSignInClick || onCancel}
+                className="w-full sm:w-auto bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-10 px-6 rounded-lg cursor-pointer"
+              >
+                Sign In to editorial360
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-full max-w-3xl mx-auto py-10 px-4 sm:px-6 animate-in fade-in duration-200 font-sans text-slate-900 dark:text-slate-100">
+      
+      {/* Publisher Clean Card */}
+      <Card className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] shadow-sm rounded-xl overflow-hidden">
+        
+        {/* Header: Publisher Standard */}
+        <div className="px-6 py-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/editorial360.svg" 
+                alt="editorial360" 
+                className="h-7 w-auto" 
+              />
+              <span className="text-slate-300 dark:text-slate-700">|</span>
+              <span className="text-xs font-semibold text-slate-500 tracking-wide uppercase">
+                Scholarly Open Editorial Office
               </span>
+            </div>
+
+            <div className="text-xs text-slate-500">
+              Mainz, Germany · ISSN Registered
             </div>
           </div>
 
-          <div className="mt-5 p-4 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div>
-              <div className="text-xs text-slate-500 font-medium">Designated Journal Portfolio</div>
-              <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mt-0.5">
-                <BookOpen className="w-4 h-4 text-[#0b99ff]" />
-                <span>{journal}</span>
+          <div className="pt-4 space-y-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Editorial Board Appointment Acceptance
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Please review and confirm your academic details to complete your appointment for <span className="font-semibold text-slate-800 dark:text-slate-200">{journal}</span>.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 text-[11px] text-slate-600 dark:text-slate-400">
+              <div>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Role:</span>{" "}
+                {roleType === "eic" ? "Editor-in-Chief" : roleType === "ae" ? "Associate Editor" : "Editorial Board Member & Handling Editor"}
               </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-500 font-medium">Role Assignment</div>
-              <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mt-0.5">
-                <Award className="w-4 h-4" />
-                <span>Editorial Board Member & Handling Editor</span>
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <div>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Term:</span> 2-Year Renewable (COPE-Governed)
               </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-500 font-medium">Appointment Term</div>
-              <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-0.5">
-                2-Year Renewable (COPE Governed)
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <div>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Privileges:</span> 25% APC Remission & Editor Honorarium
               </div>
             </div>
           </div>
         </div>
 
-        {/* Onboarding Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
+        {/* Clean Form Body */}
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-7">
           
           {errorMsg && (
-            <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs font-medium flex items-center gap-2.5">
+            <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs font-medium flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Section 1: Academic Identity */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <User className="w-4 h-4 text-[#0b99ff]" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                1. Academic Identity & Institutional Affiliation
+          {/* 1. Academic Details */}
+          <div className="space-y-3.5">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Academic Identity & Affiliation
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
               <div className="space-y-1 sm:col-span-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Academic Title</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Title</label>
                 <select
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 >
-                  <option value="Prof. Dr.">Prof. Dr.</option>
                   <option value="Prof.">Prof.</option>
+                  <option value="Prof. Dr.">Prof. Dr.</option>
                   <option value="Dr.">Dr.</option>
                   <option value="Assoc. Prof.">Assoc. Prof.</option>
                   <option value="Assist. Prof.">Assist. Prof.</option>
                 </select>
               </div>
 
-              <div className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Full Academic Name</label>
+              <div className="space-y-1 sm:col-span-3">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Full Academic Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Prof. Prashant Kumar"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  placeholder="e.g. Prof. Sanna Järvelä"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Primary Academic Email</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Primary Institutional Email</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="p.kumar@surrey.ac.uk"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  placeholder="name@university.edu"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Country</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Country</label>
                 <input
                   type="text"
                   required
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  placeholder="e.g. United Kingdom"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  placeholder="e.g. Finland, United Kingdom, Germany"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Current University / Institution</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">University / Institution</label>
                 <input
                   type="text"
                   required
                   value={affiliation}
                   onChange={(e) => setAffiliation(e.target.value)}
-                  placeholder="e.g. Global Centre for Clean Air Research (GCARE), University of Surrey"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  placeholder="e.g. University of Oulu"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Department / Centre</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Faculty / Department</label>
                 <input
                   type="text"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="e.g. School of Engineering"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  placeholder="e.g. Faculty of Education, LET Unit"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 2: Photo & CV Uploads */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <Upload className="w-4 h-4 text-[#0b99ff]" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                2. High-Resolution Photo & Curriculum Vitae (CV)
+          {/* 2. Research Profile & ORCID */}
+          <div className="space-y-3.5">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Research Scope & Scholarly Profile
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              
-              {/* Photo Upload Box */}
-              <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Academic Profile Photo</label>
-                  <span className="text-[10px] text-slate-400 font-medium">JPEG / PNG / WebP</span>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-full border-2 border-[#0b99ff]/30 overflow-hidden bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-xs">
-                    {photoPreview ? (
-                      <img src={photoPreview} alt="Preview" className="w-full h-full object-cover object-center" />
-                    ) : (
-                      <User className="w-8 h-8 text-slate-400" />
-                    )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                  <span>ORCID iD</span>
+                  <span className="text-[10px] text-slate-400">16-digit</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[#a6ce39] font-bold text-xs select-none">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#a6ce39] inline-block" />
+                    <span className="text-[10px] text-slate-400 font-mono">id/</span>
                   </div>
-
-                  <div className="space-y-2 flex-1">
-                    <input 
-                      type="file" 
-                      ref={photoInputRef}
-                      accept="image/*"
-                      onChange={handlePhotoSelect}
-                      className="hidden" 
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => photoInputRef.current?.click()}
-                      className="h-8 text-xs font-semibold rounded-xl border-slate-300 dark:border-slate-700 w-full flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Upload className="w-3.5 h-3.5 text-[#0b99ff]" />
-                      {photoPreview ? "Change Photo" : "Upload Photo File"}
-                    </Button>
-                    <p className="text-[11px] text-slate-400 leading-tight">
-                      To be displayed on the journal masthead and your public editor profile.
-                    </p>
-                  </div>
+                  <input
+                    type="text"
+                    value={orcid}
+                    onChange={(e) => setOrcid(e.target.value)}
+                    placeholder="0000-0001-6223-366X"
+                    className="w-full pl-12 pr-3 py-2 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                  />
                 </div>
               </div>
 
-              {/* CV File Upload Box */}
-              <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Google Scholar / Academic URL (Optional)</label>
+                <input
+                  type="url"
+                  value={googleScholar}
+                  onChange={(e) => setGoogleScholar(e.target.value)}
+                  placeholder="https://scholar.google.com/citations?user=..."
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                Primary Keywords & Research Areas
+              </label>
+              <input
+                type="text"
+                required
+                value={interestsText}
+                onChange={(e) => setInterestsText(e.target.value)}
+                placeholder="e.g. AI in Education, Learning Analytics, Medicine, Clinical Trials"
+                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+              />
+              <p className="text-[11px] text-slate-400">Used by the editorial office to match relevant manuscripts for handling.</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                Brief Academic Biography (for Journal Masthead)
+              </label>
+              <textarea
+                rows={3}
+                value={biography}
+                onChange={(e) => setBiography(e.target.value)}
+                placeholder="Brief summary of academic appointments, chairships, research focus, and notable honors..."
+                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white leading-relaxed focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+              />
+            </div>
+          </div>
+
+          {/* 3. Supporting Documents */}
+          <div className="space-y-3.5">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Supporting Documents
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* CV File Upload */}
+              <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Curriculum Vitae (CV)</label>
-                  <span className="text-[10px] text-slate-400 font-medium">PDF or DOCX</span>
+                  <span className="text-xs font-medium text-slate-800 dark:text-slate-200">Curriculum Vitae (CV)</span>
+                  <span className="text-[10px] text-slate-400">PDF or DOCX</span>
                 </div>
 
                 <input 
@@ -526,303 +637,165 @@ export function EditorialBoardOnboarding({
                 />
 
                 {cvFileStatus === "uploaded" ? (
-                  <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <div className="overflow-hidden">
-                        <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200 truncate">{cvFileName}</div>
-                        <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">{cvFileSize}</div>
-                      </div>
+                  <div className="p-2.5 rounded-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <FileText className="w-4 h-4 text-[#0b99ff] shrink-0" />
+                      <div className="truncate text-xs font-medium text-slate-900 dark:text-white">{cvFileName}</div>
                     </div>
-                    <Button
+                    <button
                       type="button"
-                      size="sm"
-                      variant="ghost"
                       onClick={() => cvInputRef.current?.click()}
-                      className="text-xs text-slate-500 hover:text-slate-800 h-7 px-2"
+                      className="text-xs text-[#0b99ff] hover:underline font-semibold shrink-0 cursor-pointer ml-2"
                     >
-                      Replace
-                    </Button>
+                      Change
+                    </button>
                   </div>
                 ) : (
-                  <div 
+                  <button
+                    type="button"
                     onClick={() => cvInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer hover:border-[#0b99ff] transition-colors"
+                    className="w-full py-2.5 px-3 border border-dashed border-slate-300 dark:border-slate-700 rounded-md text-center hover:border-[#0b99ff] transition-colors cursor-pointer text-xs text-slate-600 dark:text-slate-400"
                   >
-                    <FileText className="w-6 h-6 text-slate-400 mx-auto mb-1" />
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Click to upload CV document</span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Used for accreditation and editorial archiving</span>
-                  </div>
+                    Attach CV document
+                  </button>
                 )}
               </div>
 
-            </div>
-          </div>
+              {/* Profile Photo */}
+              <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-800 dark:text-slate-200">Profile Photo (Optional)</span>
+                  <span className="text-[10px] text-slate-400">Masthead avatar</span>
+                </div>
 
-          {/* Section 3: Biography & Research Interests */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <BookOpen className="w-4 h-4 text-[#0b99ff]" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                3. Academic Biography & Research Interests
-              </h2>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Public Academic Biography (for Website)</label>
-                <span className="text-[11px] text-slate-400">Recommended: 100–300 words</span>
-              </div>
-              <textarea
-                required
-                rows={4}
-                value={biography}
-                onChange={(e) => setBiography(e.target.value)}
-                placeholder="Briefly describe your academic background, professorship, major milestones, and leadership in research..."
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white leading-relaxed focus:ring-1 focus:ring-[#0b99ff]"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Research Interests & Keywords (Comma-Separated)
-              </label>
-              <input
-                type="text"
-                required
-                value={interestsText}
-                onChange={(e) => setInterestsText(e.target.value)}
-                placeholder="e.g. Air Quality, Aerosol Science, Low-Cost Sensing, Climate Mitigation"
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
-              />
-              <p className="text-[11px] text-slate-400">
-                These keywords will be used to automatically match relevant submissions to your Handling Editor desk.
-              </p>
-            </div>
-          </div>
-
-          {/* Section 4: ORCID & Online Profiles */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <Globe className="w-4 h-4 text-[#0b99ff]" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                4. ORCID iD & Academic Scholarly Links
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">ORCID iD (16-digit)</label>
-                <input
-                  type="text"
-                  value={orcid}
-                  onChange={(e) => setOrcid(e.target.value)}
-                  placeholder="0000-0002-8692-7484"
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                <input 
+                  type="file" 
+                  ref={photoInputRef}
+                  accept="image/*"
+                  onChange={handlePhotoSelect}
+                  className="hidden" 
                 />
-              </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Google Scholar URL</label>
-                <input
-                  type="url"
-                  value={googleScholar}
-                  onChange={(e) => setGoogleScholar(e.target.value)}
-                  placeholder="https://scholar.google.com/citations?user=..."
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">ResearchGate / LinkedIn URL</label>
-                <input
-                  type="url"
-                  value={researchGate || linkedin}
-                  onChange={(e) => {
-                    setResearchGate(e.target.value)
-                    setLinkedin(e.target.value)
-                  }}
-                  placeholder="https://researchgate.net/profile/..."
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 5: Key Publications */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-              <div className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-[#0b99ff]" />
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  5. Key Landmark Publications (Featured on Web Profile)
-                </h2>
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={handleAddPub}
-                className="h-7 text-xs px-2.5 rounded-lg border-slate-300 dark:border-slate-700 text-[#0b99ff] hover:bg-[#0b99ff]/10 gap-1 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add Publication
-              </Button>
-            </div>
-
-            <div className="space-y-3">
-              {publications.map((pub, idx) => (
-                <div key={idx} className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-bold text-slate-500">Publication #{idx + 1}</span>
-                    {publications.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePub(idx)}
-                        className="text-slate-400 hover:text-red-500 transition-colors p-1"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-800 flex items-center justify-center shrink-0">
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 text-slate-400" />
                     )}
                   </div>
-
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={pub.title}
-                      onChange={(e) => handlePubChange(idx, "title", e.target.value)}
-                      placeholder="Article Title (e.g. Clean air engineering for cities...)"
-                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white"
-                    />
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <input
-                        type="text"
-                        value={pub.journal}
-                        onChange={(e) => handlePubChange(idx, "journal", e.target.value)}
-                        placeholder="Journal (e.g. Atmospheric Environment)"
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white"
-                      />
-                      <input
-                        type="text"
-                        value={pub.year}
-                        onChange={(e) => handlePubChange(idx, "year", e.target.value)}
-                        placeholder="Year (e.g. 2024)"
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white"
-                      />
-                      <input
-                        type="text"
-                        value={pub.doi}
-                        onChange={(e) => handlePubChange(idx, "doi", e.target.value)}
-                        placeholder="DOI or URL (e.g. 10.1016/...)"
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white"
-                      />
-                    </div>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => photoInputRef.current?.click()}
+                    className="h-8 text-xs font-medium border-slate-200 dark:border-slate-800 rounded-md cursor-pointer"
+                  >
+                    {photoPreview ? "Change Photo" : "Upload Photo"}
+                  </Button>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
-          {/* Section 6: Handling Editor Credentials Setup */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <Lock className="w-4 h-4 text-[#0b99ff]" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                6. Editorial360 Workspace Credentials (Handling Editor Account)
+          {/* 4. editorial360 Credentials */}
+          <div className="space-y-3.5">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                editorial360 Portal Access
               </h2>
             </div>
-
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Create your secure login password for your newly appointed <strong>Handling Editor Desk</strong> on Editorial360. This enables you to review submissions, assign reviewers, and render editorial decisions.
+            <p className="text-xs text-slate-500">
+              Set a secure password to access your handling editor desk on the editorial360 portal.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Set Account Password</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Confirm Password</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Confirm Password</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 7: Mandatory Consent & Legal Transparency */}
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              7. Mandatory Consent & Governance Agreements
-            </h3>
+          {/* 5. Acceptance & Ethics Declaration */}
+          <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 space-y-3">
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasAcceptedTerms}
+                onChange={(e) => setHasAcceptedTerms(e.target.checked)}
+                className="mt-0.5 rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4"
+              />
+              <span className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                I accept the appointment to the Editorial Board of <strong>{journal}</strong> and agree to uphold COPE publication ethics, declare conflicts of interest, and maintain editorial rigor.
+              </span>
+            </label>
 
-            <div className="space-y-3 pt-1">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasAcceptedTerms}
-                  onChange={(e) => setHasAcceptedTerms(e.target.checked)}
-                  className="mt-0.5 rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4"
-                />
-                <span className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  <strong>Terms of Editorial Appointment:</strong> I accept the 2-year renewable appointment as Editorial Board Member / Handling Editor for <em>{journal}</em>. I agree to uphold COPE publication ethics, maintain academic independence, and adhere to Scholarly Open editorial guidelines.
-                </span>
-              </label>
-
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={consentProfileUpload}
-                  onChange={(e) => setConsentProfileUpload(e.target.checked)}
-                  className="mt-0.5 rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4"
-                />
-                <span className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  <strong>Website Profile Publication Consent:</strong> I grant formal consent for Scholarly Open Publishing Group to publish my name, academic affiliation, photo, biography, ORCID, and research profile on the official journal website masthead and public registry in accordance with GDPR and open-access transparency standards.
-                </span>
-              </label>
-            </div>
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consentProfileUpload}
+                onChange={(e) => setConsentProfileUpload(e.target.checked)}
+                className="mt-0.5 rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4"
+              />
+              <span className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                I consent to the publication of my name, affiliation, and academic profile on the journal masthead in accordance with international open-access standards.
+              </span>
+            </label>
           </div>
 
           {/* Actions CTA */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-            {onCancel && (
+            {onSignInClick ? (
+              <button
+                type="button"
+                onClick={onSignInClick}
+                className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 underline cursor-pointer"
+              >
+                Already have an account? Sign in to editorial360
+              </button>
+            ) : onCancel ? (
               <Button
                 type="button"
                 variant="outline"
                 onClick={onCancel}
-                className="w-full sm:w-auto border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 h-11 px-6 rounded-xl text-xs cursor-pointer"
+                className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-9 px-4 rounded-lg cursor-pointer"
               >
                 Back / Cancel
               </Button>
-            )}
+            ) : <div />}
 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto sm:ml-auto bg-gradient-to-r from-[#0b99ff] to-[#0088e0] hover:from-[#0088e0] hover:to-[#0077cc] text-white font-bold h-12 px-8 rounded-xl text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]"
+              className="w-full sm:w-auto bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold h-10 px-6 rounded-lg text-xs shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Activating Handling Editor Account...</span>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Submitting Acceptance...</span>
                 </>
               ) : (
                 <>
-                  <span>Submit Profile & Onboard to Editorial360</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Accept Appointment & Activate Account</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
             </Button>
@@ -830,6 +803,10 @@ export function EditorialBoardOnboarding({
 
         </form>
       </Card>
+
+      <div className="text-center text-[11px] text-slate-400 mt-6">
+        Scholarly Open Publishing Group · Mainz, Germany · COPE Guidelines Governed · All Rights Reserved
+      </div>
     </div>
   )
 }

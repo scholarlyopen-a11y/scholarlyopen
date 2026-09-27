@@ -390,7 +390,7 @@ Journal Management Office
 {{journal}}
 Scholarly Open Publishing Group`,
     actionLabel: "Accept Editorial Board Invitation",
-    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}",
+    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}&email={{recipientEmail}}&journal={{journal}}",
     placeholders: COMMON_PLACEHOLDERS
   },
   {
@@ -432,7 +432,7 @@ Journal Management Office
 {{journal}}
 Scholarly Open Publishing Group (Mainz, Deutschland)`,
     actionLabel: "Accept Editorial Board Invitation",
-    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}",
+    actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}&email={{recipientEmail}}&journal={{journal}}",
     placeholders: COMMON_PLACEHOLDERS
   },
   {
