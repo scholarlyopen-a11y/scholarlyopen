@@ -79,7 +79,8 @@ import {
   FileCheck2,
   DollarSign,
   CreditCard,
-  Landmark
+  Landmark,
+  Printer
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -897,7 +898,7 @@ export default function Editorial360Page() {
   const [mode, setMode] = useState<"login" | "register">("login")
   const [role, setRole] = useState<UserRole>("editor")
   const [email, setEmail] = useState("editor@scholarlyopen.org")
-  const [password, setPassword] = useState("password123")
+  const [password, setPassword] = useState("Scholarly#2026!Secured")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
@@ -1009,6 +1010,28 @@ export default function Editorial360Page() {
         if (urlName) {
           setInvitationReviewerName(urlName)
         }
+      }
+
+      if (urlAction === "unsubscribe" && urlEmail) {
+        try {
+          const stored = localStorage.getItem("editorial360_unsubscribed_list")
+          const list = stored ? JSON.parse(stored) : []
+          if (!list.some((u: any) => u.email?.toLowerCase() === urlEmail.toLowerCase())) {
+            list.push({
+              email: urlEmail.toLowerCase(),
+              journal: urlJournal || "All Journals",
+              timestamp: new Date().toISOString(),
+              reason: "Direct candidate opt-out via email footer link"
+            })
+            localStorage.setItem("editorial360_unsubscribed_list", JSON.stringify(list))
+          }
+          fetch("/api/editorial360/unsubscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: urlEmail, journal: urlJournal, reason: "Direct opt-out via email link" })
+          }).catch(() => {})
+          setSuccess(`Opt-out confirmed: ${urlEmail} has been recorded in the Do Not Contact registry.`)
+        } catch (e) {}
       }
 
       const urlStatus = params.get("status")
@@ -1816,6 +1839,205 @@ export default function Editorial360Page() {
     } catch (e) {}
     setPayoutReleaseSuccess(language === "de" ? `Zahlung ${id} erfolgreich autorisiert und freigegeben!` : `Payment ${id} authorized and released successfully!`)
     setTimeout(() => setPayoutReleaseSuccess(null), 4500)
+  }
+
+  // Admin APC Invoicing & Financial Ledger State
+  const [adminInvoices, setAdminInvoices] = useState<Array<{
+    id: string
+    invoiceNumber: string
+    manuscriptId: string
+    title: string
+    authorName: string
+    authorEmail: string
+    institution: string
+    journal: string
+    standardApc: number
+    discountAmount: number
+    discountReason: string
+    waiverAmount: number
+    netPayable: number
+    currency: string
+    status: "Paid" | "Pending" | "Waived"
+    issuedDate: string
+    dueDate: string
+    paidDate?: string
+    paymentMethod: "Stripe Online" | "SEPA Bank Wire" | "Institutional Purchase Order" | "Inaugural Launch Waiver"
+    billingAddress: string
+    vatNumber?: string
+  }>>([])
+  const [invoiceFilter, setInvoiceFilter] = useState<"all" | "paid" | "pending" | "waived">("all")
+  const [invoiceSearch, setInvoiceSearch] = useState("")
+  const [selectedInvoiceForPdf, setSelectedInvoiceForPdf] = useState<any | null>(null)
+  const [invoiceSuccessMsg, setInvoiceSuccessMsg] = useState<string | null>(null)
+
+  // Seed & sync Admin Invoices with localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("editorial360_admin_invoices")
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAdminInvoices(parsed)
+          return
+        }
+      }
+      const initialInvoiceSeed = [
+        {
+          id: "INV-001",
+          invoiceNumber: "SO-INV-2026-0819",
+          manuscriptId: "SO-ENG-2026-104",
+          title: "Low-Carbon Cementitious Composites via Alkaline Pozzolan Activation",
+          authorName: "Prof. Clara Zhang",
+          authorEmail: "c.zhang@scholarlyopen.org",
+          institution: "Max Planck Institute for Polymer Research",
+          journal: "Scholarly Open: Engineering & Applied Sciences",
+          standardApc: 1200,
+          discountAmount: 600,
+          discountReason: "50% Inaugural Issue Launch Discount",
+          waiverAmount: 0,
+          netPayable: 600,
+          currency: "EUR",
+          status: "Paid" as const,
+          issuedDate: "2026-09-12",
+          dueDate: "2026-09-26",
+          paidDate: "2026-09-18",
+          paymentMethod: "SEPA Bank Wire" as const,
+          billingAddress: "Ackermannweg 10, 55128 Mainz, Germany",
+          vatNumber: "DE123456789"
+        },
+        {
+          id: "INV-002",
+          invoiceNumber: "SO-INV-2026-0824",
+          manuscriptId: "SO-MED-2026-081",
+          title: "Clinical Applications of Multimodal Foundation Models in Cardiac Imaging",
+          authorName: "Dr. Evelyn Vane",
+          authorEmail: "e.vane@scholarlyopen.org",
+          institution: "Charité – Universitätsmedizin Berlin",
+          journal: "Scholarly Open: Medicine",
+          standardApc: 1200,
+          discountAmount: 600,
+          discountReason: "50% Inaugural Issue Launch Discount",
+          waiverAmount: 0,
+          netPayable: 600,
+          currency: "EUR",
+          status: "Paid" as const,
+          issuedDate: "2026-09-15",
+          dueDate: "2026-09-29",
+          paidDate: "2026-09-21",
+          paymentMethod: "Stripe Online" as const,
+          billingAddress: "Charitéplatz 1, 10117 Berlin, Germany",
+          vatNumber: "DE228841902"
+        },
+        {
+          id: "INV-003",
+          invoiceNumber: "SO-INV-2026-0831",
+          manuscriptId: "SO-DSA-2026-118",
+          title: "Zero-Knowledge Verifiable Audit Frameworks for Autonomous Financial Agents",
+          authorName: "Dr. Marcus Vance",
+          authorEmail: "m.vance@scholarlyopen.org",
+          institution: "Oxford Internet Institute",
+          journal: "Scholarly Open: Data Science & Analytics",
+          standardApc: 1200,
+          discountAmount: 600,
+          discountReason: "50% Inaugural Issue Launch Discount",
+          waiverAmount: 0,
+          netPayable: 600,
+          currency: "EUR",
+          status: "Pending" as const,
+          issuedDate: "2026-09-23",
+          dueDate: "2026-10-07",
+          paymentMethod: "Institutional Purchase Order" as const,
+          billingAddress: "1 St Giles', Oxford OX1 3JS, United Kingdom",
+          vatNumber: "GB125489632"
+        },
+        {
+          id: "INV-004",
+          invoiceNumber: "SO-INV-2026-0840",
+          manuscriptId: "SO-ENV-2026-142",
+          title: "Decentralized Solar Desalination for Arid Agricultural Basins",
+          authorName: "Prof. David Miller",
+          authorEmail: "d.miller@scholarlyopen.org",
+          institution: "Cambridge Energy Futures Lab",
+          journal: "Scholarly Open: Environmental Science",
+          standardApc: 1200,
+          discountAmount: 600,
+          discountReason: "50% Inaugural Issue Launch Discount",
+          waiverAmount: 0,
+          netPayable: 600,
+          currency: "EUR",
+          status: "Pending" as const,
+          issuedDate: "2026-09-25",
+          dueDate: "2026-10-09",
+          paymentMethod: "SEPA Bank Wire" as const,
+          billingAddress: "Trinity Lane, Cambridge CB2 1TN, United Kingdom",
+          vatNumber: "GB882310941"
+        },
+        {
+          id: "INV-005",
+          invoiceNumber: "SO-INV-2026-0855",
+          manuscriptId: "SO-BIO-2026-155",
+          title: "Genomic Surveillance of Multi-Drug Resistant Mycobacterial Strains in Rural Sub-Saharan Clinics",
+          authorName: "Dr. Samuel Osei",
+          authorEmail: "s.osei@ug.edu.gh",
+          institution: "University of Ghana Medical School",
+          journal: "Scholarly Open: Biology",
+          standardApc: 1200,
+          discountAmount: 600,
+          discountReason: "50% Inaugural Issue Launch Discount",
+          waiverAmount: 600,
+          netPayable: 0,
+          currency: "EUR",
+          status: "Waived" as const,
+          issuedDate: "2026-09-19",
+          dueDate: "2026-10-03",
+          paidDate: "2026-09-19",
+          paymentMethod: "Inaugural Launch Waiver" as const,
+          billingAddress: "Legon Campus, Accra, Ghana"
+        }
+      ]
+      setAdminInvoices(initialInvoiceSeed)
+      localStorage.setItem("editorial360_admin_invoices", JSON.stringify(initialInvoiceSeed))
+    } catch (e) {}
+  }, [])
+
+  const handleMarkInvoicePaid = (invId: string) => {
+    const updated = adminInvoices.map(inv => {
+      if (inv.id === invId) {
+        return {
+          ...inv,
+          status: "Paid" as const,
+          paidDate: new Date().toISOString().split("T")[0]
+        }
+      }
+      return inv
+    })
+    setAdminInvoices(updated)
+    try {
+      localStorage.setItem("editorial360_admin_invoices", JSON.stringify(updated))
+    } catch (e) {}
+    setInvoiceSuccessMsg(`Invoice ${invId} marked as Paid. Receipt logged in audit trail.`)
+    setTimeout(() => setInvoiceSuccessMsg(null), 4000)
+  }
+
+  const handleGrantInvoiceWaiver = (invId: string) => {
+    const updated = adminInvoices.map(inv => {
+      if (inv.id === invId) {
+        return {
+          ...inv,
+          waiverAmount: inv.netPayable,
+          netPayable: 0,
+          status: "Waived" as const,
+          paidDate: new Date().toISOString().split("T")[0]
+        }
+      }
+      return inv
+    })
+    setAdminInvoices(updated)
+    try {
+      localStorage.setItem("editorial360_admin_invoices", JSON.stringify(updated))
+    } catch (e) {}
+    setInvoiceSuccessMsg(`Granted 100% Solidarity Waiver for invoice ${invId}.`)
+    setTimeout(() => setInvoiceSuccessMsg(null), 4000)
   }
 
   // Automatic scroll-to-top whenever logging in, switching role, or switching desk tabs
@@ -5905,6 +6127,24 @@ export default function Editorial360Page() {
                           </span>
                         )}
                       </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveAdminTab("invoicing")}
+                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeAdminTab === "invoicing"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Receipt className="h-4 w-4 text-[#0b99ff]" />
+                          <span>{language === "de" ? "APC-Rechnungen & Finanzen" : "APC Invoicing & Ledger"}</span>
+                        </div>
+                        <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                          50% Off
+                        </span>
+                      </button>
                     </>
                   )}
                 </div>
@@ -6310,15 +6550,15 @@ export default function Editorial360Page() {
                               <div className="space-y-1 sm:pl-4 pt-3 sm:pt-0">
                                 <div className="flex items-center justify-between">
                                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                                    {isDe ? "APC-Erlass" : "APC Waiver"}
+                                    {isDe ? "Inaugural-Rabatt (APC)" : "Inaugural APC Discount"}
                                   </span>
                                   <Check className="h-4 w-4 text-emerald-500" />
                                 </div>
-                                <div className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                                  25%
+                                <div className="text-2xl sm:text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
+                                  50% Off
                                 </div>
                                 <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block">
-                                  {isDe ? "Stufe 2 aktiv" : "Tier 2 active"}
+                                  {isDe ? "Gründungsband-Erlass aktiv" : "Inaugural Issue Launch Offer"}
                                 </span>
                               </div>
 
@@ -6426,7 +6666,7 @@ export default function Editorial360Page() {
                                       <span className="font-normal text-slate-600 dark:text-slate-400">
                                         {isDe ? "APC-Rabatt (Waiver)" : "APC Waiver Grant"}
                                       </span>
-                                      <span className="font-bold text-[#0b99ff] tabular-nums text-sm">25%</span>
+                                      <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums text-sm">50% (Inaugural Issue)</span>
                                     </div>
 
                                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
@@ -9650,6 +9890,252 @@ export default function Editorial360Page() {
                       </div>
                     )}
 
+                    {/* ================= VIEW F: APC INVOICING & FINANCIAL LEDGER ================= */}
+                    {activeAdminTab === "invoicing" && (
+                      <div className="space-y-6 animate-in fade-in">
+                        {/* Header Banner */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <Receipt className="h-6 w-6 text-[#0b99ff]" />
+                              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                {language === "de" ? "APC-Rechnungsverwaltung & Finanzbuch" : "APC Invoicing & Financial Ledger"}
+                              </h3>
+                              <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                50% Inaugural Launch Offer
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">
+                              Track Article Processing Charges across all journals, record 50% inaugural launch discounts, manage institutional purchase orders, and export Plan S compliant official PDF tax invoices.
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const csvContent = "data:text/csv;charset=utf-8," + 
+                                  ["Invoice Number,Manuscript ID,Author,Journal,Gross APC,50% Discount,Net Payable,Status,Payment Method,Issued Date"]
+                                    .concat(adminInvoices.map(i => `${i.invoiceNumber},${i.manuscriptId},"${i.authorName}","${i.journal}",${i.standardApc},${i.discountAmount},${i.netPayable},${i.status},"${i.paymentMethod}",${i.issuedDate}`))
+                                    .join("\n")
+                                const encodedUri = encodeURI(csvContent)
+                                const link = document.createElement("a")
+                                link.setAttribute("href", encodedUri)
+                                link.setAttribute("download", `scholarlyopen_apc_ledger_${new Date().toISOString().split("T")[0]}.csv`)
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                              }}
+                              className="text-xs font-semibold rounded-xl gap-1.5 cursor-pointer"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              <span>Export Ledger (CSV)</span>
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Success Notification */}
+                        {invoiceSuccessMsg && (
+                          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center gap-3 animate-in fade-in text-xs font-semibold">
+                            <CheckCircle2 className="h-4 w-4 shrink-0" />
+                            <span>{invoiceSuccessMsg}</span>
+                          </div>
+                        )}
+
+                        {/* 4 Financial KPI Cards */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                          <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gross Invoiced (Standard APC)</span>
+                            <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+                              €{adminInvoices.reduce((acc, i) => acc + i.standardApc, 0).toLocaleString()}
+                            </div>
+                            <span className="text-[10px] text-slate-500 mt-0.5 block">{adminInvoices.length} Registered Invoices</span>
+                          </Card>
+
+                          <Card className="bg-white dark:bg-slate-950 border border-emerald-500/30 p-4">
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">50% Inaugural Discounts Granted</span>
+                            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                              -€{adminInvoices.reduce((acc, i) => acc + i.discountAmount, 0).toLocaleString()}
+                            </div>
+                            <span className="text-[10px] text-emerald-600/80 mt-0.5 block">Founding Issue Incentive Applied</span>
+                          </Card>
+
+                          <Card className="bg-white dark:bg-slate-950 border border-sky-500/30 p-4">
+                            <span className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider block">Net Collected & Settled</span>
+                            <div className="text-2xl font-bold text-[#0b99ff] mt-1">
+                              €{adminInvoices.filter(i => i.status === "Paid").reduce((acc, i) => acc + i.netPayable, 0).toLocaleString()}
+                            </div>
+                            <span className="text-[10px] text-slate-500 mt-0.5 block">
+                              {adminInvoices.filter(i => i.status === "Paid").length} Settled Transactions
+                            </span>
+                          </Card>
+
+                          <Card className="bg-white dark:bg-slate-950 border border-amber-500/30 p-4">
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Pending Receivables</span>
+                            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                              €{adminInvoices.filter(i => i.status === "Pending").reduce((acc, i) => acc + i.netPayable, 0).toLocaleString()}
+                            </div>
+                            <span className="text-[10px] text-amber-600/80 mt-0.5 block">
+                              {adminInvoices.filter(i => i.status === "Pending").length} Invoices Due within Terms
+                            </span>
+                          </Card>
+                        </div>
+
+                        {/* Search & Filter Bar */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                          <div className="relative w-full sm:w-80">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                            <input
+                              type="text"
+                              value={invoiceSearch}
+                              onChange={(e) => setInvoiceSearch(e.target.value)}
+                              placeholder="Search by invoice #, author, manuscript, institution..."
+                              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+                            {(["all", "paid", "pending", "waived"] as const).map((f) => (
+                              <button
+                                key={f}
+                                onClick={() => setInvoiceFilter(f)}
+                                className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-colors cursor-pointer ${
+                                  invoiceFilter === f
+                                    ? "bg-[#0b99ff] text-white"
+                                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900"
+                                }`}
+                              >
+                                {f === "all" ? "All Invoices" : f === "paid" ? "Paid & Settled" : f === "pending" ? "Pending Due" : "Solidarity Waivers"}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Invoices Table */}
+                        <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead>
+                                <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                  <th className="py-3 px-4">Invoice # & Manuscript</th>
+                                  <th className="py-3 px-4">Author & Institution</th>
+                                  <th className="py-3 px-4">Journal</th>
+                                  <th className="py-3 px-4 text-right">Standard APC</th>
+                                  <th className="py-3 px-4 text-right">50% Launch Discount</th>
+                                  <th className="py-3 px-4 text-right">Net Payable</th>
+                                  <th className="py-3 px-4 text-center">Status</th>
+                                  <th className="py-3 px-4 text-right">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                                {adminInvoices
+                                  .filter(inv => {
+                                    if (invoiceFilter === "paid") return inv.status === "Paid"
+                                    if (invoiceFilter === "pending") return inv.status === "Pending"
+                                    if (invoiceFilter === "waived") return inv.status === "Waived"
+                                    return true
+                                  })
+                                  .filter(inv => {
+                                    if (!invoiceSearch.trim()) return true
+                                    const q = invoiceSearch.toLowerCase()
+                                    return (
+                                      inv.invoiceNumber.toLowerCase().includes(q) ||
+                                      inv.manuscriptId.toLowerCase().includes(q) ||
+                                      inv.authorName.toLowerCase().includes(q) ||
+                                      inv.authorEmail.toLowerCase().includes(q) ||
+                                      inv.institution.toLowerCase().includes(q) ||
+                                      inv.title.toLowerCase().includes(q)
+                                    )
+                                  })
+                                  .map((inv) => (
+                                    <tr key={inv.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors">
+                                      <td className="py-3.5 px-4 align-top">
+                                        <div className="font-bold text-slate-900 dark:text-white font-mono">{inv.invoiceNumber}</div>
+                                        <div className="text-[11px] font-mono text-[#0b99ff] mt-0.5">{inv.manuscriptId}</div>
+                                        <div className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-1 max-w-[220px] mt-0.5" title={inv.title}>
+                                          {inv.title}
+                                        </div>
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top">
+                                        <div className="font-semibold text-slate-900 dark:text-white">{inv.authorName}</div>
+                                        <div className="text-[11px] text-slate-500 line-clamp-1">{inv.institution}</div>
+                                        <div className="text-[10px] text-slate-400 font-mono">{inv.authorEmail}</div>
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top">
+                                        <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{inv.journal}</div>
+                                        <div className="text-[10px] text-slate-400 mt-0.5">Issued: {inv.issuedDate} · Due: {inv.dueDate}</div>
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-right font-mono text-slate-500">
+                                        €{inv.standardApc.toFixed(2)}
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-right font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                                        -€{inv.discountAmount.toFixed(2)}
+                                        <span className="block text-[9px] text-emerald-600/70 font-sans font-normal">50% Inaugural</span>
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-right font-mono text-base font-bold text-slate-900 dark:text-white">
+                                        €{inv.netPayable.toFixed(2)}
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-center">
+                                        {inv.status === "Paid" ? (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                            <CheckCircle2 className="h-3 w-3" /> Paid ({inv.paymentMethod})
+                                          </span>
+                                        ) : inv.status === "Pending" ? (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                            <Clock className="h-3 w-3" /> Due {inv.dueDate}
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                            <Award className="h-3 w-3" /> 100% Solidaritäts-Waiver
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="py-3.5 px-4 align-top text-right space-y-1">
+                                        <div className="flex items-center justify-end gap-1.5">
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setSelectedInvoiceForPdf(inv)}
+                                            className="h-7 px-2.5 text-[11px] font-semibold rounded-lg gap-1 cursor-pointer"
+                                          >
+                                            <Printer className="h-3 w-3" />
+                                            <span>PDF Invoice</span>
+                                          </Button>
+
+                                          {inv.status === "Pending" && (
+                                            <Button
+                                              size="sm"
+                                              onClick={() => handleMarkInvoicePaid(inv.id)}
+                                              className="h-7 px-2.5 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg gap-1 cursor-pointer"
+                                            >
+                                              <Check className="h-3 w-3" />
+                                              <span>Mark Paid</span>
+                                            </Button>
+                                          )}
+
+                                          {inv.status === "Pending" && (
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => handleGrantInvoiceWaiver(inv.id)}
+                                              className="h-7 px-2 text-[10px] text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/30 rounded-lg cursor-pointer"
+                                              title="Grant 100% Solidarity / Research4Life waiver"
+                                            >
+                                              Waiver
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </Card>
+                      </div>
+                    )}
+
                     {/* ================= VIEW B: SYSTEM OVERVIEW (DEFAULT) ================= */}
                     {(activeAdminTab === "overview" || activeAdminTab === "policy") && (
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -12683,6 +13169,189 @@ export default function Editorial360Page() {
                   {language === "de" ? "Sitzung verlängern" : "Extend Session"}
                 </Button>
               </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* 13. ADMIN: OFFICIAL PLAN S TAX INVOICE & PDF EXPORT MODAL */}
+          <Dialog open={!!selectedInvoiceForPdf} onOpenChange={(open) => !open && setSelectedInvoiceForPdf(null)}>
+            <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-3xl max-h-[92vh] flex flex-col p-0 overflow-hidden shadow-2xl transition-colors">
+              {/* Modal Top Actions */}
+              <div className="flex items-center justify-between p-4 px-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Receipt className="h-5 w-5 text-[#0b99ff]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Official Tax Invoice · Plan S Compliant
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        window.print()
+                      }
+                    }}
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold gap-1.5 h-8 px-3.5 rounded-lg cursor-pointer shadow-sm"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    <span>Print / Save PDF</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSelectedInvoiceForPdf(null)}
+                    className="h-8 px-3 text-xs font-semibold rounded-lg cursor-pointer"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+
+              {/* Printable Invoice Body */}
+              {selectedInvoiceForPdf && (
+                <div className="p-8 sm:p-10 overflow-y-auto space-y-8 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 [scrollbar-width:thin]">
+                  {/* Header Lockup & Publisher Metadata */}
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b-2 border-slate-200 dark:border-slate-800">
+                    <div>
+                      <div className="flex items-center mb-3">
+                        <img 
+                          src="/logo-full-color.svg" 
+                          alt="Scholarly Open" 
+                          className="h-12 w-auto object-contain dark:hidden"
+                          onError={(e) => {
+                            ;(e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
+                          }}
+                        />
+                        <img 
+                          src="/logo-full.svg" 
+                          alt="Scholarly Open" 
+                          className="h-12 w-auto object-contain hidden dark:block"
+                        />
+                      </div>
+                      <div className="text-xs text-slate-500 space-y-0.5 font-sans">
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">Scholarly Open Publishing Group</p>
+                        <p>Rheinallee 88, 55120 Mainz, Germany</p>
+                        <p>USt-IdNr / VAT: DE 349 812 048 · Tax Ref: 26/671/09214</p>
+                        <p>editorial@scholarlyopen.org · www.scholarlyopen.org</p>
+                      </div>
+                    </div>
+
+                    <div className="text-left sm:text-right">
+                      <span className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight block">
+                        INVOICE
+                      </span>
+                      <div className="text-xs text-slate-500 mt-1 space-y-1 font-mono">
+                        <p><strong className="text-slate-700 dark:text-slate-300">Invoice No:</strong> {selectedInvoiceForPdf.invoiceNumber}</p>
+                        <p><strong className="text-slate-700 dark:text-slate-300">Date of Issue:</strong> {selectedInvoiceForPdf.issuedDate}</p>
+                        <p><strong className="text-slate-700 dark:text-slate-300">Due Date:</strong> {selectedInvoiceForPdf.dueDate}</p>
+                        <p><strong className="text-slate-700 dark:text-slate-300">Status:</strong> <span className={selectedInvoiceForPdf.status === "Paid" ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"}>{selectedInvoiceForPdf.status.toUpperCase()}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bill To & Manuscript Coordinates */}
+                  <div className="grid sm:grid-cols-2 gap-6 text-xs">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed To (Corresponding Author)</span>
+                      <p className="font-bold text-slate-900 dark:text-white text-sm">{selectedInvoiceForPdf.authorName}</p>
+                      <p className="text-slate-600 dark:text-slate-300">{selectedInvoiceForPdf.institution}</p>
+                      <p className="text-slate-500 font-mono text-[11px]">{selectedInvoiceForPdf.billingAddress}</p>
+                      <p className="text-slate-500 font-mono text-[11px] pt-1">Email: {selectedInvoiceForPdf.authorEmail}</p>
+                      {selectedInvoiceForPdf.vatNumber && (
+                        <p className="text-slate-500 font-mono text-[11px]">VAT ID: {selectedInvoiceForPdf.vatNumber}</p>
+                      )}
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Publication Details</span>
+                      <p><strong className="text-slate-700 dark:text-slate-300">Journal:</strong> {selectedInvoiceForPdf.journal}</p>
+                      <p><strong className="text-slate-700 dark:text-slate-300">Manuscript ID:</strong> <span className="font-mono text-[#0b99ff]">{selectedInvoiceForPdf.manuscriptId}</span></p>
+                      <p><strong className="text-slate-700 dark:text-slate-300">Title:</strong> <span className="italic">{selectedInvoiceForPdf.title}</span></p>
+                      <p><strong className="text-slate-700 dark:text-slate-300">Licensing:</strong> Creative Commons CC-BY 4.0 Open Access</p>
+                    </div>
+                  </div>
+
+                  {/* Itemized Financial Breakdown Table */}
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider text-[10px]">
+                          <th className="py-3 px-4">Item Description</th>
+                          <th className="py-3 px-4 text-center">Qty</th>
+                          <th className="py-3 px-4 text-right">Standard Rate</th>
+                          <th className="py-3 px-4 text-right">Discount / Waiver</th>
+                          <th className="py-3 px-4 text-right">Net Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
+                        <tr>
+                          <td className="py-4 px-4 font-sans">
+                            <div className="font-bold text-slate-900 dark:text-white">Gold Open Access Article Processing Charge (APC)</div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">
+                              Plan S & DOAJ compliant peer review, high-performance XML typesetting, CrossRef DOI deposit, permanent archival on CLOCKSS / PubMed Central.
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-center">1</td>
+                          <td className="py-4 px-4 text-right">€{selectedInvoiceForPdf.standardApc.toFixed(2)}</td>
+                          <td className="py-4 px-4 text-right text-emerald-600 font-bold">
+                            -€{(selectedInvoiceForPdf.discountAmount + selectedInvoiceForPdf.waiverAmount).toFixed(2)}
+                            <span className="block text-[9px] font-sans text-emerald-600/80">
+                              {selectedInvoiceForPdf.status === "Waived" ? "100% Solidaritäts-Waiver" : "50% Inaugural Founding Offer"}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4 text-right font-bold text-slate-900 dark:text-white">
+                            €{selectedInvoiceForPdf.netPayable.toFixed(2)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Summary Totals Calculation */}
+                  <div className="flex flex-col sm:flex-row justify-between gap-6 pt-2 text-xs">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-w-sm space-y-1.5 font-sans">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Banking & Wire Settlement</span>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                        <strong>Bank:</strong> Deutsche Bank AG, Frankfurt am Main<br />
+                        <strong>IBAN:</strong> DE89 5007 0010 0987 6543 21<br />
+                        <strong>BIC / SWIFT:</strong> DEUTDEDBFXX<br />
+                        <strong>Payment Reference:</strong> <span className="font-mono text-[#0b99ff] font-bold">{selectedInvoiceForPdf.invoiceNumber}</span>
+                      </p>
+                    </div>
+
+                    <div className="w-full sm:w-64 space-y-2 font-mono">
+                      <div className="flex justify-between text-slate-500">
+                        <span>Standard Subtotal:</span>
+                        <span>€{selectedInvoiceForPdf.standardApc.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-emerald-600 font-semibold">
+                        <span>50% Launch Discount:</span>
+                        <span>-€{selectedInvoiceForPdf.discountAmount.toFixed(2)}</span>
+                      </div>
+                      {selectedInvoiceForPdf.waiverAmount > 0 && (
+                        <div className="flex justify-between text-purple-600 font-semibold">
+                          <span>Hardship Waiver:</span>
+                          <span>-€{selectedInvoiceForPdf.waiverAmount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-slate-500">
+                        <span>VAT (0% Academic / Sec. 19 UStG):</span>
+                        <span>€0.00</span>
+                      </div>
+                      <div className="flex justify-between text-base font-bold text-slate-900 dark:text-white pt-2 border-t-2 border-slate-200 dark:border-slate-800">
+                        <span>Total Due:</span>
+                        <span>€{selectedInvoiceForPdf.netPayable.toFixed(2)} EUR</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Legal Footer */}
+                  <div className="pt-6 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 text-center space-y-1 font-sans">
+                    <p>Scholarly Open is committed to transparent, equitable open access publication under Plan S guidelines.</p>
+                    <p>Thank you for contributing to open scientific dissemination. All papers are archived permanently under Creative Commons CC-BY 4.0.</p>
+                  </div>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
 

@@ -1010,14 +1010,21 @@ export function generateBrandedEmailHtml(options: {
         <a href="${baseUrl}/about" style="color: #64748b; text-decoration: none;">Ethics &amp; Malpractice Policies</a>
       </div>
 
-      <!-- Anti-Spam / Solicitation Compliance (CAN-SPAM / GDPR) -->
+      <!-- Anti-Spam / Solicitation Compliance (CAN-SPAM / GDPR) & Opt-Out Button -->
       <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-size: 10px; color: #94a3b8; line-height: 1.5; text-align: center;">
-        You received this academic invitation based on your published scholarship and expertise in this field. 
-        If you do not wish to receive further invitations or editorial notices from ${branding.cleanName}, please 
-        <a href="${baseUrl}/editorial360?action=unsubscribe&email=${encodeURIComponent(recipientEmail || "")}&journal=${encodeURIComponent(journal)}" style="color: #64748b; text-decoration: underline; font-weight: 600;">unsubscribe here</a> 
-        or reply to this email with &ldquo;Unsubscribe&rdquo;.
-        <br>
-        Scholarly Open Publishing Group &bull; Editorial Office &bull; Mainz, Germany &bull; <a href="${baseUrl}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>
+        <p style="margin: 0 0 8px 0;">
+          You received this academic invitation based on your published scholarship and expertise in this field. 
+          If you do not wish to receive further invitations or editorial notices from ${branding.cleanName}, you may opt out at any time:
+        </p>
+        <div style="margin: 8px 0 10px 0;">
+          <a href="${baseUrl}/api/editorial360/unsubscribe?email=${encodeURIComponent(recipientEmail || "")}&journal=${encodeURIComponent(journal)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 6px; text-decoration: none;">
+            ✕ Opt-Out / Do Not Contact
+          </a>
+        </div>
+        <p style="margin: 0; font-size: 10px; color: #94a3b8;">
+          Clicking the button immediately records your preference in our suppression register to refrain from all future contacts.<br>
+          Scholarly Open Publishing Group &bull; Editorial Office &bull; Mainz, Germany &bull; <a href="${baseUrl}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>
+        </p>
       </div>
     </div>
   </div>

@@ -2879,18 +2879,20 @@ COPE & Plan S Certified Archive
 
                   {/* GATEWAY CERTIFICATE (Earned upon passing the exam) */}
                   <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/80 dark:border-sky-500/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
-                    <div className="flex items-center justify-center gap-3">
+                    <div className="flex items-center justify-center">
                       <img 
-                        src="/logo-mark.svg" 
+                        src="/logo-full-color.svg" 
                         alt="Scholarly Open" 
-                        className="h-12 w-auto object-contain"
+                        className="h-14 sm:h-16 w-auto object-contain dark:hidden"
                         onError={(e) => {
-                          ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                          ;(e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
                         }}
                       />
-                      <div className="text-2xl font-black text-[#132415] dark:text-white tracking-tight">
-                        Scholarly <span className="text-[#F6BB14]">Open</span>
-                      </div>
+                      <img 
+                        src="/logo-full.svg" 
+                        alt="Scholarly Open" 
+                        className="h-14 sm:h-16 w-auto object-contain hidden dark:block"
+                      />
                     </div>
 
                     <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
@@ -3045,20 +3047,21 @@ COPE & Plan S Certified Archive
               {/* Complete Academic CV Layout */}
               <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
                 
-                {/* CV Header with Green & Yellow Logo */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b-2 border-[#166534] dark:border-emerald-600">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center">
                     <img 
-                      src="/logo-mark.svg" 
+                      src="/logo-full-color.svg" 
                       alt="Scholarly Open" 
-                      className="h-10 w-auto object-contain"
+                      className="h-10 sm:h-12 w-auto object-contain dark:hidden"
                       onError={(e) => {
-                        ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                        ;(e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
                       }}
                     />
-                    <div className="text-xl font-black text-[#132415] dark:text-white">
-                      Scholarly <span className="text-[#F6BB14]">Open</span>
-                    </div>
+                    <img 
+                      src="/logo-full.svg" 
+                      alt="Scholarly Open" 
+                      className="h-10 sm:h-12 w-auto object-contain hidden dark:block"
+                    />
                   </div>
 
                   <div className="text-left sm:text-right text-xs">

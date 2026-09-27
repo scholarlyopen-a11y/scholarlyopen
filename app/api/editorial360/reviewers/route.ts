@@ -26,56 +26,8 @@ export interface ReviewerHistoryItem {
   awardedBy?: string
 }
 
-// In-memory store for active session with mock data pre-populated
-const globalReviewerHistory: ReviewerHistoryItem[] = [
-  {
-    id: "REV-HIST-01",
-    paperId: "SOEAS-26-RS102",
-    paperTitle: "Generative Diffusion Models for High-Entropy Alloys",
-    journal: "Scholarly Open: Engineering & Applied Sciences",
-    reviewerName: "Dr. Evelyn Vane",
-    reviewerEmail: "e.vane@university-medical.edu",
-    invitedDate: "2026-08-20",
-    status: "Completed",
-    deadline: "2026-09-03",
-    respondedAt: "2026-08-21"
-  },
-  {
-    id: "REV-HIST-02",
-    paperId: "SOEAS-26-RS102",
-    paperTitle: "Generative Diffusion Models for High-Entropy Alloys",
-    journal: "Scholarly Open: Engineering & Applied Sciences",
-    reviewerName: "Dr. Marcus Vance",
-    reviewerEmail: "m.vance@university-charite.de",
-    invitedDate: "2026-08-20",
-    status: "Completed",
-    deadline: "2026-09-03",
-    respondedAt: "2026-08-21"
-  },
-  {
-    id: "REV-HIST-03",
-    paperId: "SOMED-26-RW101",
-    paperTitle: "Advances in Type 1 Diabetes Ocular Remote Tele-Health Screening",
-    journal: "Scholarly Open: Medicine",
-    reviewerName: "Dr. Evelyn Vane",
-    reviewerEmail: "e.vane@university-medical.edu",
-    invitedDate: "2026-08-28",
-    status: "Accepted",
-    deadline: "2026-09-11",
-    respondedAt: "2026-08-28"
-  },
-  {
-    id: "REV-HIST-04",
-    paperId: "SOSSH-26-SRW107",
-    paperTitle: "Gender Wage Disparity: A Multi-Country Meta-Analysis",
-    journal: "Scholarly Open: Social Sciences & Humanities",
-    reviewerName: "Prof. Hiroshi Tanaka",
-    reviewerEmail: "h.tanaka@tokyo-institute.ac.jp",
-    invitedDate: "2026-08-25",
-    status: "Invited",
-    deadline: "2026-09-08"
-  }
-]
+// In-memory store for reviewer invitations dispatched during active session (starts clean)
+const globalReviewerHistory: ReviewerHistoryItem[] = []
 
 import fs from "fs"
 import path from "path"

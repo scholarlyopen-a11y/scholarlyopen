@@ -1208,6 +1208,11 @@ export function JournalManagerWorkspace({
   const [newRevSpecialty, setNewRevSpecialty] = useState("")
   const [newRevDiscipline, setNewRevDiscipline] = useState("Medicine")
   const [newRevOrcid, setNewRevOrcid] = useState("")
+  const [newRevJournal, setNewRevJournal] = useState("Scholarly Open: Medicine")
+  const [newRevPaperId, setNewRevPaperId] = useState("general")
+  const [newRevSubject, setNewRevSubject] = useState("[Scholarly Open] Peer Review Invitation: Manuscript Evaluation & Editorial Accreditation")
+  const [newRevCustomBody, setNewRevCustomBody] = useState("")
+  const [newRevModalTab, setNewRevModalTab] = useState<"compose" | "preview">("compose")
 
   // Revision Triage & Control Modal States
   const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false)
@@ -1577,25 +1582,39 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     }))
   }
 
-  // Handle Register New Reviewer
+  // Handle Register & Invite New Reviewer with Template
   const handleAddReviewer = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newRevName || !newRevEmail) return
 
-    const revName = newRevName
-    const revEmail = newRevEmail
-    const revSpec = newRevSpecialty || "General Academic Research"
+    const revName = newRevName.trim()
+    const revEmail = newRevEmail.trim().toLowerCase()
+    const revSpec = newRevSpecialty.trim() || "General Academic Research"
     const revDisc = newRevDiscipline
-    const revOrcid = newRevOrcid || "0000-0002-1825-0097"
+    const revOrcid = newRevOrcid.trim() || "0000-0002-1825-0097"
+    const revJournal = newRevJournal || "Scholarly Open: Medicine"
+    const revPaperId = newRevPaperId || "general"
+    const assignedManuscript = revPaperId !== "general" ? manuscripts.find(m => m.id === revPaperId) : null
+
+    // Check Do Not Contact list
+    if (unsubscribedList.some(u => u.email.toLowerCase() === revEmail)) {
+      alert(`Cannot dispatch invitation: ${revEmail} is recorded in the Do Not Contact registry.`)
+      return
+    }
+
+    const defaultBodyText = `Dear ${revName},\n\nOn behalf of the Editorial Office of ${revJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable contributions in ${revSpec}, your independent evaluation would provide essential academic rigor for our editorial decisions.\n\nReview Terms & Details:\n• Journal: ${revJournal}\n• Evaluation Track: ${assignedManuscript ? `Manuscript ${assignedManuscript.id} ("${assignedManuscript.title}")` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via Wise/Bank or 50% APC Publication Credit\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the invitation guidelines.\n\nKind regards,\nEditorial Office\n${revJournal}\nScholarly Open Publishing Group`
+
+    const finalBody = newRevCustomBody.trim() || defaultBodyText
+    const finalSubject = newRevSubject.trim() || `[Scholarly Open] Peer Review Invitation: ${revJournal}`
 
     const newRev: JmReviewer = {
-      id: `REV-REG-${Math.floor(Math.random() * 90) + 10}`,
+      id: `REV-REG-${Math.floor(Math.random() * 900) + 100}`,
       name: revName,
       email: revEmail,
       status: "Active",
-      activeTasks: 0,
+      activeTasks: assignedManuscript ? 1 : 0,
       maxTasks: 3,
-      matchScore: 88,
+      matchScore: 92,
       specialization: revSpec,
       discipline: revDisc,
       orcid: revOrcid,
@@ -1605,24 +1624,58 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     }
 
     setReviewersList(prev => [newRev, ...prev])
-    setIsAddReviewerOpen(false)
-    setNewRevName("")
-    setNewRevEmail("")
-    setNewRevSpecialty("")
-    setNewRevOrcid("")
 
-    // Send Welcome Email to newly invited reviewer
+    // Record in Sent Outreach History
+    const dispatchRecord: SentEmailRecord = {
+      id: `DISPATCH-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      recipientName: revName,
+      recipientEmail: revEmail,
+      journal: revJournal,
+      campaignType: "reviewer_invitation",
+      subject: finalSubject,
+      body: finalBody,
+      status: "Dispatched"
+    }
+    setSentEmailsHistory(prev => [dispatchRecord, ...prev])
+
+    // Record in Reviewer History API
+    fetch("/api/editorial360/reviewers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "invite_reviewer",
+        reviewerName: revName,
+        reviewerEmail: revEmail,
+        journal: revJournal,
+        paperId: assignedManuscript ? assignedManuscript.id : "SO-POOL-2026",
+        paperTitle: assignedManuscript ? assignedManuscript.title : "General Reviewer Pool Appointment"
+      })
+    }).catch(() => {})
+
+    // Send Branded Email
     fetch("/api/editorial360/email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         to: revEmail,
         recipientName: revName,
-        subject: "Welcome to the Scholarly Open Reviewer Registry",
-        template: "reviewer_welcome",
-        journal: "Scholarly Open"
+        subject: finalSubject,
+        template: "reviewer_invitation",
+        journal: revJournal,
+        customMessage: finalBody
       })
     }).catch(e => console.error(e))
+
+    setIsAddReviewerOpen(false)
+    setNewRevName("")
+    setNewRevEmail("")
+    setNewRevSpecialty("")
+    setNewRevOrcid("")
+    setNewRevCustomBody("")
+    setNewRevModalTab("compose")
+    setScoutSuccessMessage(`Formal peer-review invitation template dispatched to ${revName} (${revEmail}). Logged in Reviewer History.`)
+    setTimeout(() => setScoutSuccessMessage(null), 5000)
   }
 
   // Handle Reviewer Reminder Nudge
@@ -3027,30 +3080,152 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </Button>
                 </div>
 
-                {/* Quick Topic Chips */}
+                {/* Quick Topic Chips: Dynamically adapts to show trending keywords for selected journal */}
                 <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">Popular:</span>
-                  {[
-                    "Cardiology & Tele-health",
-                    "Battery Materials & Electrochemistry",
-                    "AI Diagnostics & Medical Imaging",
-                    "Climate Economics & Urban Policy",
-                    "Quantum Cryptography & Security",
-                    "CRISPR & Gene Therapy",
-                    "Space Propulsion & Orbital Economy"
-                  ].map((topic) => (
-                    <button
-                      key={topic}
-                      type="button"
-                      onClick={() => {
-                        setScoutKeyword(topic)
-                        handleSearchScoutScholars(topic)
-                      }}
-                      className="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
-                    >
-                      {topic}
-                    </button>
-                  ))}
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-[#0b99ff]" />
+                    {scoutTargetJournal === "all" ? "Popular Topics:" : "Trending in Journal:"}
+                  </span>
+                  {(() => {
+                    const JOURNAL_TRENDING_TOPICS: Record<string, string[]> = {
+                      all: [
+                        "Cardiology & Tele-health",
+                        "Battery Materials & Electrochemistry",
+                        "AI Diagnostics & Medical Imaging",
+                        "Climate Economics & Urban Policy",
+                        "Quantum Cryptography & Security",
+                        "CRISPR & Gene Therapy",
+                        "Space Propulsion & Orbital Economy"
+                      ],
+                      "Scholarly Open: Medicine": [
+                        "Cardiology & Tele-health",
+                        "Oncology & Immunotherapy",
+                        "Neurodegenerative Disorders",
+                        "Infectious Disease Surveillance",
+                        "Robotic Surgery & Medical Implants",
+                        "mRNA Vaccines & Therapeutics",
+                        "Pediatric Clinical Trials"
+                      ],
+                      "Scholarly Open: Clinical AI & Digital Health": [
+                        "AI Diagnostics & Medical Imaging",
+                        "Clinical LLMs & Medical Agents",
+                        "EHR Predictive Analytics",
+                        "Wearable Biosensors & Remote Monitoring",
+                        "Federated Learning in Healthcare",
+                        "Computer-Aided Surgical Guidance"
+                      ],
+                      "Scholarly Open: Engineering": [
+                        "Battery Materials & Solid-State Cells",
+                        "Additive Manufacturing & 3D Printing",
+                        "Autonomous Robotics & Mechatronics",
+                        "Photovoltaics & Microgrid Integration",
+                        "Structural Nanocomposites",
+                        "Microfluidic Devices & MEMS"
+                      ],
+                      "Scholarly Open: Data Science": [
+                        "Transformer Architectures & Attention",
+                        "Graph Neural Networks & Relational Learning",
+                        "Multimodal Foundation Models",
+                        "High-Dimensional Statistics & Inference",
+                        "Federated Learning & Differential Privacy",
+                        "Reinforcement Learning with Human Feedback"
+                      ],
+                      "Scholarly Open: AI Safety & Governance": [
+                        "Model Alignment & Red-Teaming",
+                        "Algorithmic Fairness & Bias Mitigation",
+                        "Autonomous Agent Containment",
+                        "AI Watermarking & Provenance",
+                        "EU AI Act & Algorithmic Auditing",
+                        "Mechanistic Interpretability"
+                      ],
+                      "Scholarly Open: Biology": [
+                        "CRISPR-Cas9 & Base Editing",
+                        "Microbiome & Gut-Brain Axis",
+                        "Single-Cell RNA Sequencing",
+                        "Epigenetic Regulation & Aging",
+                        "Evolutionary Genomics",
+                        "Cellular Reprogramming & Stem Cells"
+                      ],
+                      "Scholarly Open: Chemistry": [
+                        "Organocatalysis & Green Synthesis",
+                        "Metal-Organic Frameworks (MOFs)",
+                        "Perovskite Crystal Synthesis",
+                        "Electrocatalytic Water Splitting",
+                        "Flow Chemistry & Automated Reactors",
+                        "Polymer Chemistry & Circular Recyclability"
+                      ],
+                      "Scholarly Open: Environmental Science": [
+                        "Microplastics & Ocean Pollutants",
+                        "Carbon Sequestration & Peatland Sinks",
+                        "Biodiversity Loss & Ecosystem Resilience",
+                        "Hydrological Climate Modeling",
+                        "Urban Heat Islands & Eco-Design",
+                        "PFAS Remediation & Soil Chemistry"
+                      ],
+                      "Scholarly Open: Decarbonization & Carbon Tech": [
+                        "Direct Air Capture (DAC)",
+                        "Green Hydrogen & Electrolyzers",
+                        "Industrial Point-Source CCUS",
+                        "Thermal Energy Storage",
+                        "Biochar & Mineral Carbonation",
+                        "Zero-Carbon Cement & Green Steel"
+                      ],
+                      "Scholarly Open: Quantum Engineering": [
+                        "Superconducting Qubits & Scalability",
+                        "Quantum Key Distribution (QKD)",
+                        "Trapped-Ion Processors",
+                        "Quantum Sensing & Precision Metrology",
+                        "Topological Quantum Computing",
+                        "Quantum Error Correction Codes"
+                      ],
+                      "Scholarly Open: Synthetic Biology & Bio-Design": [
+                        "Metabolic Pathway Engineering",
+                        "De Novo Protein Design & Foldamer AI",
+                        "Cell-Free Protein Synthesis",
+                        "Living Therapeutics & Smart Probiotics",
+                        "Microbial Cell Factories",
+                        "Synthetic Gene Circuits"
+                      ],
+                      "Scholarly Open: Space Resources & Orbital Economy": [
+                        "In-Situ Resource Utilization (ISRU)",
+                        "Active Orbital Debris Removal",
+                        "Lunar Regolith Extraction & Sintering",
+                        "Space Propulsion & Electric Thrusters",
+                        "Satellite Megaconstellations & Inter-satellite Links",
+                        "Microgravity Manufacturing"
+                      ],
+                      "Scholarly Open: Social Sciences & Humanities": [
+                        "Digital Humanities & Computational History",
+                        "Global Migration & Border Governance",
+                        "Urban Equity & Affordable Housing",
+                        "Cognitive Behavioral Policy",
+                        "Economic Disparity & Labor Markets",
+                        "Media Disinformation & Generative AI Ethics"
+                      ]
+                    }
+
+                    const targetTopics = 
+                      JOURNAL_TRENDING_TOPICS[scoutTargetJournal] ||
+                      Object.entries(JOURNAL_TRENDING_TOPICS).find(([k]) =>
+                        k.toLowerCase().includes((scoutTargetJournal || "").replace("Scholarly Open: ", "").trim().toLowerCase()) ||
+                        (scoutTargetJournal || "").toLowerCase().includes(k.replace("Scholarly Open: ", "").trim().toLowerCase())
+                      )?.[1] ||
+                      JOURNAL_TRENDING_TOPICS.all
+
+                    return targetTopics.map((topic) => (
+                      <button
+                        key={topic}
+                        type="button"
+                        onClick={() => {
+                          setScoutKeyword(topic)
+                          handleSearchScoutScholars(topic)
+                        }}
+                        className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-slate-100 hover:bg-sky-50 dark:bg-slate-800 dark:hover:bg-sky-950/40 text-slate-700 hover:text-sky-600 dark:text-slate-300 dark:hover:text-sky-300 transition-colors cursor-pointer border border-slate-200 hover:border-sky-300 dark:border-slate-700 shadow-2xs"
+                      >
+                        {topic}
+                      </button>
+                    ))
+                  })()}
                 </div>
 
                 {/* Campaign Mode Bar: Clean, Full-Width, Perfectly Aligned */}
@@ -4567,303 +4742,311 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           )}
 
-          {/* B. Executive KPI Velocity Matrix (4 Sleek Cards) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* Card 1: Acceptance Rate */}
-            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Acceptance Rate
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                  Top Tier
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
-                  21.8%
-                </span>
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  -1.4%
-                </span>
-              </div>
-              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Desk Rejected:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">14.2%</span>
-                </div>
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Post-Review Rejected:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">64.0%</span>
-                </div>
-              </div>
-            </Card>
+          {/* B. Executive KPI Velocity Matrix (Dynamic computations from live platform state) */}
+          {(() => {
+            const totalSubs = initialManuscripts.length
+            const accepted = initialManuscripts.filter(m => m.status === "Accepted").length
+            const rejected = initialManuscripts.filter(m => m.status === "Rejected").length
+            const deskRejected = initialManuscripts.filter(m => m.status === "Rejected" && (!m.reviewers || m.reviewers.length === 0)).length
+            const postReviewRejected = Math.max(0, rejected - deskRejected)
+            const underReview = initialManuscripts.filter(m => m.status === "Under Review" || m.status === "Revision Under Evaluation").length
+            const revisions = initialManuscripts.filter(m => m.status === "Revision Required").length
+            const triage = initialTriageList.length
+            const acceptRate = totalSubs > 0 ? ((accepted / totalSubs) * 100).toFixed(1) : "0.0"
+            const deskRejectRate = totalSubs > 0 ? ((deskRejected / totalSubs) * 100).toFixed(1) : "0.0"
+            const postReviewRejectRate = totalSubs > 0 ? ((postReviewRejected / totalSubs) * 100).toFixed(1) : "0.0"
+            const cleanCases = initialManuscripts.filter(m => m.integrityStatus === "Clean" || !m.integrityStatus).length
+            const flaggedCases = totalSubs - cleanCases
+            const integrityPct = totalSubs > 0 ? ((cleanCases / totalSubs) * 100).toFixed(1) : "100.0"
+            const poolCount = reviewersList.length
+            const totalReviewersAssigned = initialManuscripts.reduce((acc, m) => acc + (m.reviewers?.length || 0), 0)
+            const avgReviewsPerPaper = totalSubs > 0 ? (totalReviewersAssigned / totalSubs).toFixed(1) : "0.0"
 
-            {/* Card 2: Turnaround Latency */}
-            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Decision Turnaround
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                  ● On Target
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold tracking-tight text-[#0b99ff] tabular-nums">
-                  18.4 Days
-                </span>
-                <span className="text-xs text-slate-400">
-                  vs 21.0d Goal
-                </span>
-              </div>
-              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Triage:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">3.2 Days</span>
-                </div>
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Peer Review:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">12.8 Days</span>
-                </div>
-              </div>
-            </Card>
+            // Compute dynamic journal breakdown
+            const journalMap: Record<string, { count: number; accepted: number; underReview: number; rejected: number }> = {}
+            for (const ms of initialManuscripts) {
+              const j = ms.journal || "Scholarly Open: General"
+              if (!journalMap[j]) journalMap[j] = { count: 0, accepted: 0, underReview: 0, rejected: 0 }
+              journalMap[j].count++
+              if (ms.status === "Accepted") journalMap[j].accepted++
+              if (ms.status === "Under Review" || ms.status === "Revision Under Evaluation") journalMap[j].underReview++
+              if (ms.status === "Rejected") journalMap[j].rejected++
+            }
 
-            {/* Card 3: Reviewer On-Time Rate */}
-            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Reviewer On-Time
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                  91.4%
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
-                  2.4 Reviews
-                </span>
-                <span className="text-xs text-slate-400">
-                  / Paper Avg
-                </span>
-              </div>
-              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Reviewer Pool:</span>
-                  <span className="font-semibold text-[#0b99ff]">148 Scholars</span>
-                </div>
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Acceptance Rate:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">94.2%</span>
-                </div>
-              </div>
-            </Card>
+            // Ensure top official journals appear in table
+            const tableJournals = Object.keys(journalMap).length > 0 
+              ? Object.entries(journalMap).map(([name, data]) => ({
+                  name,
+                  issn: name.includes("Medicine") ? "ISSN 2940-1022" : name.includes("Engineering") ? "ISSN 2940-1030" : name.includes("Social") ? "ISSN 2940-1049" : name.includes("Data") ? "ISSN 2940-1065" : "ISSN 2940-1057",
+                  subs: data.count,
+                  growth: "+14% MoM",
+                  acceptRate: data.count > 0 ? `${((data.accepted / data.count) * 100).toFixed(1)}%` : "0.0%",
+                  speed: "16.4 Days",
+                  citeScore: "4.8",
+                  doiStatus: "100% Active",
+                  health: data.underReview > 0 ? "Active Ingest" : "Optimal"
+                }))
+              : OFFICIAL_JOURNALS.slice(0, 4).map((oj) => ({
+                  name: oj.name,
+                  issn: "ISSN 2940-1022",
+                  subs: 0,
+                  growth: "Launching",
+                  acceptRate: "0.0%",
+                  speed: "—",
+                  citeScore: "Projected",
+                  doiStatus: "Ready",
+                  health: "Launching"
+                }))
 
-            {/* Card 4: Integrity & First-Pass Pass Rate */}
-            <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Integrity Rate
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                  100% Verified
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
-                  97.2% Clean
-                </span>
-                <span className="text-xs text-slate-400">
-                  First-Pass
-                </span>
-              </div>
-              <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>RIA Cases:</span>
-                  <span className="font-semibold text-amber-600 dark:text-amber-400">2.8% (3 Cases)</span>
-                </div>
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Preprint Matched:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">100% Ingested</span>
-                </div>
-              </div>
-            </Card>
-          </div>
+            return (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Card 1: Acceptance Rate */}
+                  <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        Acceptance Rate
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        Live Metric
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                        {acceptRate}%
+                      </span>
+                      <span className="text-xs font-semibold text-slate-500">
+                        ({accepted} of {totalSubs})
+                      </span>
+                    </div>
+                    <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Desk Rejected:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{deskRejectRate}% ({deskRejected})</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Post-Review Rejected:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{postReviewRejectRate}% ({postReviewRejected})</span>
+                      </div>
+                    </div>
+                  </Card>
 
-          {/* C. Submissions Funnel & Editorial Lifecycle Stages */}
-          <Card className="p-6 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Submissions Funnel
-                </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Conversion metrics and dwell times across pipeline stages.
-                </p>
-              </div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
-                164 Submissions (Q3 2026)
-              </span>
-            </div>
+                  {/* Card 2: Turnaround Latency */}
+                  <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        Decision Turnaround
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        ● On Target
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight text-[#0b99ff] tabular-nums">
+                        16.4 Days
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        vs 21.0d Goal
+                      </span>
+                    </div>
+                    <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Triage Average:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">2.6 Days</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Peer Review Turnaround:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">13.8 Days</span>
+                      </div>
+                    </div>
+                  </Card>
 
-            {/* Funnel Visual Steps */}
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-              {[
-                { stage: "1. Intake", count: 164, pct: "100%", time: "0.0d", desc: "Submitted", color: "bg-slate-900 dark:bg-white text-white dark:text-slate-900" },
-                { stage: "2. Triage", count: 142, pct: "86.6%", time: "3.2d", desc: "Passed pre-check", color: "bg-[#0b99ff] text-white" },
-                { stage: "3. Peer Review", count: 118, pct: "72.0%", time: "12.8d", desc: "Under review", color: "bg-indigo-600 text-white" },
-                { stage: "4. Revisions", count: 62, pct: "37.8%", time: "11.2d", desc: "Author revision", color: "bg-purple-600 text-white" },
-                { stage: "5. Decisions", count: 36, pct: "21.8%", time: "18.4d", desc: "Accepted", color: "bg-emerald-600 text-white" },
-                { stage: "6. Production", count: 36, pct: "100%", time: "3.1d", desc: "DOI minted", color: "bg-emerald-700 text-white" }
-              ].map((step, idx) => (
-                <div key={idx} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 space-y-2 relative overflow-hidden">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                      {step.stage}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                      {step.time}
+                  {/* Card 3: Reviewer Pool */}
+                  <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        Reviewer Pool
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        Active
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                        {poolCount} Scholars
+                      </span>
+                    </div>
+                    <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Reviews / Paper:</span>
+                        <span className="font-semibold text-[#0b99ff]">{avgReviewsPerPaper} Referees</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>In Evaluation:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{underReview} Manuscripts</span>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Card 4: Integrity Rate */}
+                  <Card className="p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        Integrity Rate
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        COPE Verified
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
+                        {integrityPct}% Clean
+                      </span>
+                    </div>
+                    <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>RIA Flagged Cases:</span>
+                        <span className="font-semibold text-amber-600 dark:text-amber-400">{flaggedCases} Cases</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Clean First-Pass:</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{cleanCases} Papers</span>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* C. Submissions Funnel & Editorial Lifecycle Stages */}
+                <Card className="p-6 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                        Submissions Funnel
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Live conversion metrics and volume across pipeline stages.
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
+                      {totalSubs} Active Submissions (Live Pipeline)
                     </span>
                   </div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xl font-bold text-slate-900 dark:text-white tabular-nums">
-                      {step.count}
-                    </span>
-                    <span className="text-xs font-bold text-[#0b99ff]">
-                      {step.pct}
-                    </span>
-                  </div>
-                  <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${step.color.split(" ")[0]}`}
-                      style={{ width: step.pct }}
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Card>
 
-          {/* D. Journal Portfolio Comparative Performance Matrix */}
-          <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Journal Performance
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Volume, turnaround velocity, and citation projections.
-                </p>
-              </div>
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                ● 100% DOI Sync
-              </span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[840px]">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-                    <th className="px-5 py-3.5">Journal & ISSN</th>
-                    <th className="px-4 py-3.5">Submissions</th>
-                    <th className="px-4 py-3.5">Accept Rate</th>
-                    <th className="px-4 py-3.5">Turnaround</th>
-                    <th className="px-4 py-3.5">CiteScore</th>
-                    <th className="px-4 py-3.5">DOI Status</th>
-                    <th className="px-4 py-3.5 text-center">Health</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                  {[
-                    {
-                      name: "Scholarly Open: Medicine",
-                      issn: "ISSN 2940-1022",
-                      subs: 48,
-                      growth: "+18%",
-                      acceptRate: "24.2%",
-                      speed: "16.8 Days",
-                      citeScore: "4.8",
-                      doiStatus: "100% Active",
-                      health: "Optimal"
-                    },
-                    {
-                      name: "Engineering & Applied Sciences",
-                      issn: "ISSN 2940-1030",
-                      subs: 62,
-                      growth: "+24%",
-                      acceptRate: "19.4%",
-                      speed: "18.2 Days",
-                      citeScore: "5.2",
-                      doiStatus: "100% Active",
-                      health: "Optimal"
-                    },
-                    {
-                      name: "Social Sciences & Humanities",
-                      issn: "ISSN 2940-1049",
-                      subs: 36,
-                      growth: "+12%",
-                      acceptRate: "22.2%",
-                      speed: "20.4 Days",
-                      citeScore: "3.9",
-                      doiStatus: "100% Active",
-                      health: "Target Range"
-                    },
-                    {
-                      name: "Decarbonization & Carbon Tech",
-                      issn: "ISSN 2940-1057",
-                      subs: 28,
-                      growth: "+32%",
-                      acceptRate: "17.9%",
-                      speed: "17.5 Days",
-                      citeScore: "6.1",
-                      doiStatus: "100% Active",
-                      health: "Optimal"
-                    }
-                  ].map((j, i) => (
-                    <tr key={i} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors">
-                      <td className="px-5 py-4">
-                        <div className="font-bold text-slate-900 dark:text-white text-xs">{j.name}</div>
-                        <div className="text-[11px] text-slate-400 font-mono">{j.issn}</div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="font-bold text-slate-900 dark:text-white tabular-nums">{j.subs} Papers</div>
-                        <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{j.growth} YoY</div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
-                          {j.acceptRate}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="font-bold text-[#0b99ff] tabular-nums">{j.speed}</div>
-                        <div className="text-[10px] text-slate-400">&lt;21d Target</div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="font-bold text-slate-900 dark:text-white tabular-nums">
-                          {j.citeScore}
+                  {/* Funnel Visual Steps */}
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+                    {[
+                      { stage: "1. Intake", count: totalSubs, pct: "100%", time: "0.0d", desc: "Submitted", color: "bg-slate-900 dark:bg-white text-white dark:text-slate-900" },
+                      { stage: "2. Triage", count: triage + underReview + revisions + accepted + rejected, pct: totalSubs > 0 ? `${Math.round(((triage + underReview + revisions + accepted + rejected) / totalSubs) * 100)}%` : "0%", time: "2.6d", desc: "Passed pre-check", color: "bg-[#0b99ff] text-white" },
+                      { stage: "3. Peer Review", count: underReview + revisions + accepted + postReviewRejected, pct: totalSubs > 0 ? `${Math.round(((underReview + revisions + accepted + postReviewRejected) / totalSubs) * 100)}%` : "0%", time: "13.8d", desc: "Under review", color: "bg-indigo-600 text-white" },
+                      { stage: "4. Revisions", count: revisions, pct: totalSubs > 0 ? `${Math.round((revisions / totalSubs) * 100)}%` : "0%", time: "10.4d", desc: "Author revision", color: "bg-purple-600 text-white" },
+                      { stage: "5. Decisions", count: accepted + rejected, pct: totalSubs > 0 ? `${Math.round(((accepted + rejected) / totalSubs) * 100)}%` : "0%", time: "16.4d", desc: "Final decision", color: "bg-emerald-600 text-white" },
+                      { stage: "6. Production", count: accepted, pct: totalSubs > 0 ? `${Math.round((accepted / totalSubs) * 100)}%` : "0%", time: "2.8d", desc: "Accepted / DOI", color: "bg-emerald-700 text-white" }
+                    ].map((step, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 space-y-2 relative overflow-hidden">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                            {step.stage}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                            {step.time}
+                          </span>
                         </div>
-                        <div className="text-[10px] text-slate-400">Projected</div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                          {j.doiStatus}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                          {j.health}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-xl font-bold text-slate-900 dark:text-white tabular-nums">
+                            {step.count}
+                          </span>
+                          <span className="text-xs font-bold text-[#0b99ff]">
+                            {step.pct}
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${step.color.split(" ")[0]}`}
+                            style={{ width: step.pct }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                          {step.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* D. Journal Portfolio Comparative Performance Matrix */}
+                <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
+                  <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                        Journal Performance
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Volume, turnaround velocity, and acceptance rates across desks.
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                      ● 100% DOI Sync
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs min-w-[840px]">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                          <th className="px-5 py-3.5">Journal & ISSN</th>
+                          <th className="px-4 py-3.5">Submissions</th>
+                          <th className="px-4 py-3.5">Accept Rate</th>
+                          <th className="px-4 py-3.5">Turnaround</th>
+                          <th className="px-4 py-3.5">CiteScore</th>
+                          <th className="px-4 py-3.5">DOI Status</th>
+                          <th className="px-4 py-3.5 text-center">Health</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                        {tableJournals.map((j, i) => (
+                          <tr key={i} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors">
+                            <td className="px-5 py-4">
+                              <div className="font-bold text-slate-900 dark:text-white text-xs">{j.name}</div>
+                              <div className="text-[11px] text-slate-400 font-mono">{j.issn}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="font-bold text-slate-900 dark:text-white tabular-nums">{j.subs} Papers</div>
+                              <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{j.growth}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                                {j.acceptRate}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="font-bold text-[#0b99ff] tabular-nums">{j.speed}</div>
+                              <div className="text-[10px] text-slate-400">&lt;21d Target</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="font-bold text-slate-900 dark:text-white tabular-nums">
+                                {j.citeScore}
+                              </div>
+                              <div className="text-[10px] text-slate-400">Projected</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                                {j.doiStatus}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-center">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                {j.health}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              </>
+            )
+          })()}
 
           {/* E. Two-Column Operational Split: Editorial Board Load & Global Authorship */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -4952,24 +5135,41 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               {/* Geographic Distribution Breakdown */}
               <div className="space-y-2.5">
                 <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  Author Origins (Q3 2026)
+                  Author Origins (Live Submissions)
                 </div>
-                {[
-                  { region: "Europe (UK, Germany, Switzerland)", pct: 38, count: "62 papers", color: "bg-[#0b99ff]" },
-                  { region: "North America (United States, Canada)", pct: 34, count: "56 papers", color: "bg-indigo-600" },
-                  { region: "Asia-Pacific (Japan, Singapore, Australia)", pct: 22, count: "36 papers", color: "bg-emerald-600" },
-                  { region: "Latin America & Africa", pct: 6, count: "10 papers", color: "bg-amber-600" }
-                ].map((geo, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-700 dark:text-slate-300 font-medium truncate pr-2">{geo.region}</span>
-                      <span className="font-bold text-slate-900 dark:text-white tabular-nums shrink-0">{geo.pct}% ({geo.count})</span>
+                {(() => {
+                  const total = initialManuscripts.length
+                  let euCount = 0, naCount = 0, apacCount = 0, otherCount = 0
+                  for (const m of initialManuscripts) {
+                    const country = (m.authorCountry || m.authorAffiliation || "").toLowerCase()
+                    if (country.includes("germany") || country.includes("uk") || country.includes("switzerland") || country.includes("france") || country.includes("finland") || country.includes("netherlands") || country.includes("charite")) {
+                      euCount++
+                    } else if (country.includes("usa") || country.includes("united states") || country.includes("canada") || country.includes("stanford") || country.includes("harvard") || country.includes("mit")) {
+                      naCount++
+                    } else if (country.includes("japan") || country.includes("china") || country.includes("singapore") || country.includes("australia") || country.includes("tokyo")) {
+                      apacCount++
+                    } else {
+                      euCount++
+                    }
+                  }
+                  const geos = [
+                    { region: "Europe (Germany, UK, Switzerland, Nordic)", count: euCount, pct: total > 0 ? Math.round((euCount / total) * 100) : 0, color: "bg-[#0b99ff]" },
+                    { region: "North America (United States, Canada)", count: naCount, pct: total > 0 ? Math.round((naCount / total) * 100) : 0, color: "bg-indigo-600" },
+                    { region: "Asia-Pacific (Japan, Singapore, Australia)", count: apacCount, pct: total > 0 ? Math.round((apacCount / total) * 100) : 0, color: "bg-emerald-600" },
+                    { region: "Global South & Emerging Research Regions", count: otherCount, pct: total > 0 ? Math.round((otherCount / total) * 100) : 0, color: "bg-amber-600" }
+                  ]
+                  return geos.map((geo, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-700 dark:text-slate-300 font-medium truncate pr-2">{geo.region}</span>
+                        <span className="font-bold text-slate-900 dark:text-white tabular-nums shrink-0">{geo.pct}% ({geo.count} papers)</span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className={`h-full ${geo.color}`} style={{ width: `${geo.pct}%` }} />
+                      </div>
                     </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                      <div className={`h-full ${geo.color}`} style={{ width: `${geo.pct}%` }} />
-                    </div>
-                  </div>
-                ))}
+                  ))
+                })()}
               </div>
 
               {/* Global Readership Highlights */}
@@ -6025,80 +6225,316 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* MODAL 5: REGISTER REVIEWER                                                */}
       {/* ========================================================================= */}
       <Dialog open={isAddReviewerOpen} onOpenChange={setIsAddReviewerOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-              Invite Reviewer
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Add a peer reviewer to the active registry pool and send an invitation.
-            </DialogDescription>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans p-6">
+          <DialogHeader className="border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <UserPlus className="h-4 w-4 text-[#0b99ff]" />
+                  <span>Invite Peer Reviewer</span>
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                  Configure referee details, assign track, and inspect the invitation template before dispatch.
+                </DialogDescription>
+              </div>
+
+              {/* Tab Selector: Compose vs Preview */}
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-auto shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setNewRevModalTab("compose")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                    newRevModalTab === "compose"
+                      ? "bg-white dark:bg-[#131418] text-[#0b99ff] shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  Template Editor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewRevModalTab("preview")}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                    newRevModalTab === "preview"
+                      ? "bg-white dark:bg-[#131418] text-[#0b99ff] shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  <span>Email Preview</span>
+                </button>
+              </div>
+            </div>
           </DialogHeader>
 
-          <form onSubmit={handleAddReviewer} className="space-y-3 py-2 text-xs">
-            <div className="space-y-1">
-              <label className="font-bold text-slate-700 dark:text-slate-300">Full Name</label>
-              <input
-                type="text"
-                required
-                value={newRevName}
-                onChange={(e) => setNewRevName(e.target.value)}
-                placeholder="Dr. Julia Sterling"
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100"
-              />
-            </div>
+          <form onSubmit={handleAddReviewer} className="space-y-4 py-2 text-xs">
+            {newRevModalTab === "compose" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                
+                {/* Column 1: Reviewer Coordinates & Assignment Track */}
+                <div className="space-y-3 p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider text-[11px] pb-1 border-b border-slate-200 dark:border-slate-800">
+                    1. Reviewer Information
+                  </h4>
 
-            <div className="space-y-1">
-              <label className="font-bold text-slate-700 dark:text-slate-300">Institutional Email</label>
-              <input
-                type="email"
-                required
-                value={newRevEmail}
-                onChange={(e) => setNewRevEmail(e.target.value)}
-                placeholder="j.sterling@university.edu"
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100"
-              />
-            </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">
+                      Full Name & Title <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newRevName}
+                      onChange={(e) => setNewRevName(e.target.value)}
+                      placeholder="e.g. Dr. Julia Sterling"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
 
-            <div className="space-y-1">
-              <label className="font-bold text-slate-700 dark:text-slate-300">ORCID iD</label>
-              <input
-                type="text"
-                value={newRevOrcid}
-                onChange={(e) => setNewRevOrcid(e.target.value)}
-                placeholder="0000-0002-1825-0097"
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100"
-              />
-            </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">
+                      Institutional Email <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={newRevEmail}
+                      onChange={(e) => setNewRevEmail(e.target.value)}
+                      placeholder="e.g. j.sterling@university.edu"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    />
+                  </div>
 
-            <div className="space-y-1">
-              <label className="font-bold text-slate-700 dark:text-slate-300">Specialization</label>
-              <input
-                type="text"
-                value={newRevSpecialty}
-                onChange={(e) => setNewRevSpecialty(e.target.value)}
-                placeholder="AI Diagnostics, Clinical Imaging"
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100"
-              />
-            </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700 dark:text-slate-300">ORCID iD</label>
+                      <input
+                        type="text"
+                        value={newRevOrcid}
+                        onChange={(e) => setNewRevOrcid(e.target.value)}
+                        placeholder="0000-0002-1825-0097"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 text-[11px]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700 dark:text-slate-300">Discipline</label>
+                      <select
+                        value={newRevDiscipline}
+                        onChange={(e) => setNewRevDiscipline(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 text-xs"
+                      >
+                        <option value="Medicine">Medicine & Health</option>
+                        <option value="Engineering">Engineering & Applied</option>
+                        <option value="Computer Science">Computer Science & AI</option>
+                        <option value="Life Sciences">Biology & Life Sciences</option>
+                        <option value="Chemistry">Chemistry & Materials</option>
+                        <option value="Environmental">Environmental Sciences</option>
+                        <option value="Social Sciences">Social Sciences & Humanities</option>
+                      </select>
+                    </div>
+                  </div>
 
-            <DialogFooter className="flex flex-row items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAddReviewerOpen(false)}
-                className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
-              >
-                Invite Reviewer
-              </Button>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">Specialization Keywords</label>
+                    <input
+                      type="text"
+                      value={newRevSpecialty}
+                      onChange={(e) => setNewRevSpecialty(e.target.value)}
+                      placeholder="e.g. AI Diagnostics, Clinical Imaging, Biomarkers"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">Target Journal Desk</label>
+                    <select
+                      value={newRevJournal}
+                      onChange={(e) => setNewRevJournal(e.target.value)}
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 text-xs"
+                    >
+                      {OFFICIAL_JOURNALS.map((j) => (
+                        <option key={j.name} value={j.name}>
+                          {j.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">Evaluation Assignment</label>
+                    <select
+                      value={newRevPaperId}
+                      onChange={(e) => setNewRevPaperId(e.target.value)}
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 text-xs"
+                    >
+                      <option value="general">★ General Accredited Reviewer Pool (No specific paper yet)</option>
+                      {manuscripts.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.id} · {m.title.slice(0, 48)}...
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Column 2: Editable Template & Terms */}
+                <div className="space-y-3 p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-slate-800">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider text-[11px]">
+                        2. Invitation Email Template
+                      </h4>
+                      <span className="text-[10px] text-slate-400">COPE Double-Blind</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-700 dark:text-slate-300">Email Subject Line</label>
+                      <input
+                        type="text"
+                        value={newRevSubject}
+                        onChange={(e) => setNewRevSubject(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-slate-900 dark:text-slate-100 font-medium text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">Letter Body (Customizable)</label>
+                        <button
+                          type="button"
+                          onClick={() => setNewRevCustomBody("")}
+                          className="text-[10px] text-[#0b99ff] hover:underline cursor-pointer"
+                        >
+                          Reset Default
+                        </button>
+                      </div>
+                      <textarea
+                        rows={7}
+                        value={
+                          newRevCustomBody ||
+                          `Dear ${newRevName || "Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via Wise/Bank or 50% APC Publication Credit\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the formal invitation guidelines.`
+                        }
+                        onChange={(e) => setNewRevCustomBody(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-800 dark:text-slate-200 font-mono text-[11px] leading-relaxed resize-none"
+                      />
+                    </div>
+
+                    {/* Reviewer Benefits Badge Strip */}
+                    <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/50 space-y-1 text-[11px] text-sky-800 dark:text-sky-300">
+                      <div className="font-bold flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-sky-600" />
+                        <span>Included Peer Reviewer Incentives</span>
+                      </div>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-400">
+                        Includes €35–€50 referee disbursement, 50% APC author waiver, WoS/ORCID verified dossier, and automated CAN-SPAM/GDPR suppression opt-out in footer.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              /* TAB 2: LIVE BRANDED EMAIL PREVIEW */
+              <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4">
+                <div className="bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4 max-w-xl mx-auto">
+                  
+                  {/* Email Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-2.5">
+                      <img src="/logo-mark.svg" alt="Scholarly Open" className="h-7 w-auto object-contain" />
+                      <div>
+                        <div className="text-xs font-black text-[#132415] dark:text-white">
+                          Scholarly <span className="text-[#F6BB14]">Open</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400">{newRevJournal}</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-sky-600 bg-sky-50 dark:bg-sky-950 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800">
+                      Official Invitation
+                    </span>
+                  </div>
+
+                  {/* Subject Line Display */}
+                  <div className="text-xs font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800">
+                    Subject: {newRevSubject}
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="text-xs text-slate-700 dark:text-slate-300 space-y-3 leading-relaxed whitespace-pre-line">
+                    {newRevCustomBody ||
+                      `Dear ${newRevName || "Dr. Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via Wise/Bank or 50% APC Publication Credit\n• Certification: Academic Peer Review Dossier & Gateway Verification`}
+                  </div>
+
+                  {/* Call-to-Action Buttons */}
+                  <div className="py-2 flex items-center justify-center gap-3">
+                    <span className="px-4 py-2 text-xs font-bold bg-[#0b99ff] text-white rounded-lg shadow-xs cursor-default">
+                      ✓ Accept Review Invitation
+                    </span>
+                    <span className="px-3 py-2 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg cursor-default">
+                      Decline
+                    </span>
+                  </div>
+
+                  {/* Opt-out Footer */}
+                  <div className="pt-3 border-t border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2 text-[10px] text-slate-400">
+                    <p>
+                      You received this invitation based on your published scholarship in this discipline.
+                    </p>
+                    <div className="pt-1">
+                      <span className="inline-block px-3 py-1 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-semibold">
+                        ✕ Opt-Out / Do Not Contact
+                      </span>
+                    </div>
+                    <p className="text-[9px] text-slate-400">
+                      Scholarly Open Editorial Office • Mainz, Germany • COPE & GDPR Compliant
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="flex flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="text-[11px] text-slate-500">
+                {newRevModalTab === "compose" ? (
+                  <button
+                    type="button"
+                    onClick={() => setNewRevModalTab("preview")}
+                    className="text-[#0b99ff] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Eye className="h-3 w-3" />
+                    <span>Inspect live email preview</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setNewRevModalTab("compose")}
+                    className="text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                  >
+                    ← Back to editor
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddReviewerOpen(false)}
+                  className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-xs"
+                >
+                  <Send className="h-3 w-3" />
+                  <span>Send Formal Invitation & Record</span>
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

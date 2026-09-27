@@ -2,11 +2,24 @@ import Image from "next/image"
 
 type LogoSOProps = {
   className?: string
-  variant?: "mark" | "lockup"
+  variant?: "mark" | "lockup" | "lockup-color"
   priority?: boolean
 }
 
 export function LogoSO({ className, variant = "mark", priority = false }: LogoSOProps) {
+  if (variant === "lockup-color") {
+    return (
+      <Image
+        src="/logo-full-color.svg"
+        alt="Scholarly Open"
+        width={1370}
+        height={430}
+        className={className}
+        priority={priority}
+      />
+    )
+  }
+
   if (variant === "lockup") {
     return (
       <Image

@@ -18,7 +18,11 @@ import {
   ChevronRight,
   Printer,
   Share2,
-  ExternalLink
+  ExternalLink,
+  ShieldAlert,
+  EyeOff,
+  Lock,
+  Shield
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -44,96 +48,96 @@ const QUESTION_BANK: Question[] = [
   {
     id: 1,
     category: "Academic English & Tone",
-    scenario: "A manuscript has several grammatical awkward phrases in the discussion section, although the experimental data is sound.",
-    question: "Which of the following comments represents professional, constructive peer-review phrasing?",
+    scenario: "A manuscript exhibits several awkward and convoluted sentence constructions in the discussion section, though the underlying laboratory data is reproducible and sound.",
+    question: "Which of the following comments represents professional, constructive peer-review phrasing in academic English?",
     options: [
       {
         id: "a",
-        text: "The English is terrible and almost unreadable. The authors clearly need a native speaker to rewrite the entire text.",
+        text: "The grammatical construction throughout the discussion is excessively convoluted; the authors must engage professional editorial assistance before resubmission.",
         isCorrect: false,
-        explanation: "Unprofessional and demoralizing. COPE guidelines strictly advise against disparaging personal remarks on language."
+        explanation: "Overly harsh and dismissive. Reviewers should highlight specific passages and provide constructive direction."
       },
       {
         id: "b",
-        text: "While the experimental findings are promising, the manuscript would benefit from thorough language editing to enhance clarity, particularly in Section 4 where several complex sentences obscure the interpretation.",
+        text: "While experimental data is solid, the manuscript requires targeted language editing in Section 4 to resolve complex phrasing and clarify key interpretations.",
         isCorrect: true,
-        explanation: "Constructive, objective, and pinpoints the exact section needing refinement without hostile language."
+        explanation: "Exemplary academic tone: recognizes empirical rigor, isolates the section needing improvement, and maintains respectful collegiality."
       },
       {
         id: "c",
-        text: "Rejected immediately due to non-standard phrasing in lines 120–145.",
+        text: "Summary rejection is warranted because syntactic inconsistencies in the discussion prevent reviewers from verifying whether the stated hypotheses are supported.",
         isCorrect: false,
-        explanation: "Flawed language alone in early drafts should never be the sole basis for summary rejection if the scientific methodology is rigorous."
+        explanation: "Language flaws alone in sound experimental manuscripts should prompt constructive revision rather than summary dismissal."
       },
       {
         id: "d",
-        text: "I do not understand why the authors used passive voice. Rewrite it all in active voice or withdraw the paper.",
+        text: "The authors should replace all passive voice constructions across Section 4 with active voice formulations to meet the standard archival conventions of the journal.",
         isCorrect: false,
-        explanation: "Prescriptive stylistic preference rather than academic assessment."
+        explanation: "Enforces subjective stylistic preferences rather than evaluating clarity and scientific precision."
       }
     ]
   },
   {
     id: 2,
     category: "Academic English & Tone",
-    scenario: "An author's conclusion states that their algorithm is '100% infallible and superior to every existing solution on Earth.'",
-    question: "How should a certified referee professionally critique this overstatement in academic English?",
+    scenario: "An author's conclusion asserts that their newly developed neural network architecture is 'entirely flawless, completely superior, and unrivaled by all existing computational models.'",
+    question: "How should an accredited referee objectively critique this overstatement in formal scholarly discourse?",
     options: [
       {
         id: "a",
-        text: "The authors are making ridiculous and completely untrue claims that prove they are novices in this field.",
+        text: "The hyperbolic conclusions presented in the final paragraph demonstrate that the authors lack adequate familiarity with established benchmarks in the domain.",
         isCorrect: false,
-        explanation: "Ad hominem attacks violate COPE reviewer codes."
+        explanation: "Unprofessional ad hominem critique that questions author competence rather than addressing empirical boundaries."
       },
       {
         id: "b",
-        text: "The claims in the abstract regarding universal superiority appear overgeneralized. It is recommended to temper the conclusions and discuss the specific parameter boundaries and limitations observed in Table 2.",
+        text: "The conclusions regarding universal superiority appear overgeneralized; please temper these claims by detailing boundary conditions and parameter trade-offs.",
         isCorrect: true,
-        explanation: "Encourages scientific modesty, precise bounding, and references the empirical data directly."
+        explanation: "Accurate and rigorous: encourages scientific modesty, requires explicit boundaries, and guides authors toward empirical precision."
       },
       {
         id: "c",
-        text: "I disagree with the authors because my own algorithm performs better.",
+        text: "The authors must delete all claims of computational superiority and explicitly state that existing benchmark algorithms perform equally well under noise.",
         isCorrect: false,
-        explanation: "Lacks objective scientific critique and centers the reviewer's ego."
+        explanation: "Prescriptive overreach that dictates author conclusions rather than requesting objective qualification."
       },
       {
         id: "d",
-        text: "Delete lines 45–50 immediately.",
+        text: "I cannot endorse this submission because my own previously published neural architecture achieves comparable classification metrics with lower latency.",
         isCorrect: false,
-        explanation: "Arbitrary command without reasoning or academic justification."
+        explanation: "Egocentric review comment that lacks impartial evaluation and risks compromising double-blind confidentiality."
       }
     ]
   },
   {
     id: 3,
     category: "Academic English & Tone",
-    scenario: "You notice that the manuscript relies heavily on colloquial idioms (e.g., 'a rule of thumb', 'touch and go', 'gut feeling').",
-    question: "What is the appropriate recommendation in formal scholarly discourse?",
+    scenario: "A submitted paper frequently employs informal colloquial phrases such as 'a rule of thumb', 'touch and go', and 'gut feeling' when describing experimental parameter selection.",
+    question: "What is the appropriate academic recommendation to uphold international archival standards?",
     options: [
       {
         id: "a",
-        text: "Suggest replacing informal idioms with standardized technical terminology and empirical thresholds to maintain archival precision.",
+        text: "Recommend replacing informal idioms with standardized technical terminology and quantifiable heuristic thresholds to preserve global archival precision.",
         isCorrect: true,
-        explanation: "Accurate: international scientific discourse requires disambiguated, formal terminology."
+        explanation: "Correct: formal scientific literature requires precise, unambiguous definitions to ensure international reproducibility."
       },
       {
         id: "b",
-        text: "Ignore it completely because readers will understand the colloquialisms anyway.",
+        text: "Permit the colloquial expressions because international readers can generally deduce practical meaning from the surrounding experimental context.",
         isCorrect: false,
-        explanation: "Idioms create severe translation and comprehension barriers for non-native global readers."
+        explanation: "Colloquialisms create ambiguity, translation errors, and comprehension barriers for global scholarship."
       },
       {
         id: "c",
-        text: "Report the paper for research misconduct.",
+        text: "Report the manuscript to the editorial office for immediate ethical investigation regarding unprofessional scientific communication standards.",
         isCorrect: false,
-        explanation: "Informal phrasing is an editorial style issue, not research misconduct."
+        explanation: "Informal phrasing is a stylistic and editorial matter, not research misconduct or an ethical breach."
       },
       {
         id: "d",
-        text: "Demand the authors translate the entire paper into Latin.",
+        text: "Instruct the authors to formalize their text by converting all informal expressions into verbatim Latin nomenclature across the methodology.",
         isCorrect: false,
-        explanation: "Irrelevant and nonsensical."
+        explanation: "Inappropriate stylistic demand that does not enhance methodological clarity."
       }
     ]
   },
@@ -142,128 +146,128 @@ const QUESTION_BANK: Question[] = [
   {
     id: 4,
     category: "COPE Ethics & Integrity",
-    scenario: "While reviewing a blinded manuscript, you recognize that the research directly competes with a grant proposal you are currently writing, and you personally know the lead author.",
-    question: "According to the Committee on Publication Ethics (COPE), what is your mandatory obligation?",
+    scenario: "While evaluating a double-blind manuscript, you realize that the research directly competes with your lab's active grant application, and you identify the lead author as a former collaborator.",
+    question: "Under the Committee on Publication Ethics (COPE) core practices, what is your mandatory obligation?",
     options: [
       {
         id: "a",
-        text: "Proceed with the review quickly and give a harsh evaluation to delay their publication.",
+        text: "Complete the evaluation swiftly with stringent scoring criteria to ensure competitive equilibrium for your research group's pending grant.",
         isCorrect: false,
-        explanation: "Severe ethical violation (sabotage and breach of confidentiality)."
+        explanation: "Gross ethical violation: exploiting reviewer status to delay or prejudice competing scholarship."
       },
       {
         id: "b",
-        text: "Disclose the direct conflict of interest to the Handling Editor immediately and recuse yourself from reviewing.",
+        text: "Disclose the competitive and personal conflict of interest immediately to the Handling Editor and recuse yourself from further evaluation.",
         isCorrect: true,
-        explanation: "COPE mandates immediate disclosure and recusal when a competitive or personal conflict of interest compromises impartiality."
+        explanation: "COPE mandates immediate declaration and recusal whenever financial, personal, or competitive conflicts compromise impartiality."
       },
       {
         id: "c",
-        text: "Download the dataset for your own lab's research before declining the invitation.",
+        text: "Proceed with the review provided that you do not discuss the competing findings with laboratory members until official journal publication.",
         isCorrect: false,
-        explanation: "Blatant breach of reviewer confidentiality and intellectual property theft."
+        explanation: "Concealing a known conflict of interest compromises the integrity and independence of the peer review process."
       },
       {
         id: "d",
-        text: "Continue reviewing as long as you do not tell your department head.",
+        text: "Download the experimental protocol and raw datasets for archival verification before declining the formal invitation to review the paper.",
         isCorrect: false,
-        explanation: "Conflicts must be declared formally to the editorial office, not concealed."
+        explanation: "Blatant breach of reviewer confidentiality and intellectual property misappropriation."
       }
     ]
   },
   {
     id: 5,
     category: "COPE Ethics & Integrity",
-    scenario: "You notice that 4 paragraphs in the literature review match an existing published paper verbatim without quotation marks, though the source is listed in the bibliography.",
-    question: "How should this suspected text overlap be handled by a reviewer?",
+    scenario: "You identify four verbatim paragraphs in the literature review that match a previously published paper without quotation marks, though the source is cited at the end of the section.",
+    question: "How must this potential text overlap be handled in accordance with COPE publishing standards?",
     options: [
       {
         id: "a",
-        text: "Accuse the author publicly on LinkedIn of fraud and intellectual theft.",
+        text: "Notify the corresponding author via direct email to request immediate clarification and replacement of the disputed introductory paragraphs.",
         isCorrect: false,
-        explanation: "Breaches confidentiality and due process."
+        explanation: "Referees must never contact authors directly; all communications must proceed through the editorial desk."
       },
       {
         id: "b",
-        text: "Flag the specific overlapping passages confidentially to the Handling Editor, cite the matching publication, and let the editorial office initiate similarity forensics.",
+        text: "Report the specific overlapping passages confidentially to the Handling Editor with the citation to allow standard similarity forensics.",
         isCorrect: true,
-        explanation: "Reviewers must report potential plagiarism confidentially to the editor with evidence, allowing the journal to follow COPE flowcharts."
+        explanation: "Appropriate protocol: provides confidential evidence to the handling editor to initiate formal similarity investigation."
       },
       {
         id: "c",
-        text: "Ignore it since the source is mentioned in the bibliography anyway.",
+        text: "Overlook the verbatim passages because citing the reference in the bibliography satisfies conventional academic attribution requirements.",
         isCorrect: false,
-        explanation: "Verbatim copying without quotation marks or attribution is plagiarism regardless of bibliography entry."
+        explanation: "Verbatim copying without quotes or quotation formatting constitutes plagiarism regardless of bibliography citation."
       },
       {
         id: "d",
-        text: "Secretly email the corresponding author directly to demand an explanation.",
+        text: "Publish a public inquiry on academic social networks regarding the duplication to protect scientific integrity prior to editorial ruling.",
         isCorrect: false,
-        explanation: "Reviewers must never contact authors directly during double-blind or single-blind review."
+        explanation: "Breaches confidentiality obligations regarding unpublished manuscript materials."
       }
     ]
   },
   {
     id: 6,
     category: "COPE Ethics & Integrity",
-    scenario: "You are reviewing a paper and realize that adding 3 citations to your own previously published papers would increase your personal h-index, even though they are only tangentially related.",
-    question: "Under COPE guidelines regarding coercive citations, what is the ethical rule?",
+    scenario: "You are preparing your peer review report and consider suggesting that the authors cite three of your own recent publications that are only tangentially related to the manuscript's topic.",
+    question: "Under COPE guidelines regarding coercive citation practices, what is the referee's ethical boundary?",
     options: [
       {
         id: "a",
-        text: "It is acceptable as long as you disguise your recommendation by suggesting 1 other paper.",
+        text: "Reviewers may recommend self-citations provided they also suggest an equal number of foundational papers published by other research teams.",
         isCorrect: false,
-        explanation: "Coercive self-citation is an explicit breach of reviewer ethics."
+        explanation: "Coercive self-citation remains unethical regardless of whether other papers are simultaneously mentioned."
       },
       {
         id: "b",
-        text: "Reviewers must never suggest adding citations to their own work primarily to inflate citation metrics; any suggested citation must be demonstrably essential to the paper's scientific validity.",
+        text: "Reviewers must never request citations to their own work to artificially inflate citation metrics; citations must be scientifically indispensable.",
         isCorrect: true,
-        explanation: "COPE strictly prohibits reviewers from exploiting their position for citation gaming or personal metric manipulation."
+        explanation: "COPE strictly forbids referees from using review reports to game citations or enhance personal impact metrics."
       },
       {
         id: "c",
-        text: "Publishers require reviewers to cite themselves at least twice per report.",
+        text: "Self-citations are permitted without editorial justification whenever a paper is submitted under an open-access Creative Commons license.",
         isCorrect: false,
-        explanation: "Completely false."
+        explanation: "Publishing models (Open Access or subscription) have no bearing on peer review citation ethics."
       },
       {
         id: "d",
-        text: "It is allowed if the paper is submitted under an Open Access license.",
+        text: "Reviewers are encouraged by publishing standards to incorporate at least two relevant self-citations per report to establish domain expertise.",
         isCorrect: false,
-        explanation: "Licensing model has zero bearing on citation ethics."
+        explanation: "Completely untrue; peer reviewers are appointed on established merit, not to insert self-citations."
       }
     ]
   },
   {
     id: 7,
     category: "COPE Ethics & Integrity",
-    scenario: "A manuscript contains Western blot images where two different protein bands across separate experimental conditions appear identical under magnification, suggesting figure manipulation.",
-    question: "What is the referee's proper course of action?",
+    scenario: "A biological study features Western blot figure panels where two distinct protein bands across separate control lanes appear duplicate under magnification, suggesting potential manipulation.",
+    question: "What is the proper, COPE-compliant course of action for the evaluating referee?",
     options: [
       {
         id: "a",
-        text: "Note the specific figure panels, explain the image duplication concern in the Confidential Comments to the Editor, and request raw unprocessed blot scans.",
+        text: "Document the duplicated figure regions confidentially in Comments to Editor and recommend requesting high-resolution unprocessed raw blot scans.",
         isCorrect: true,
-        explanation: "Protects integrity while providing actionable evidence confidentially to the handling editor."
+        explanation: "Provides objective, confidential evidence to the editor while upholding the integrity of the peer review workflow."
       },
       {
         id: "b",
-        text: "Assume it was an innocent clerical error and approve the manuscript.",
+        text: "Assume an accidental clerical error during figure assembly and advise the authors in public comments to substitute an alternative blot panel.",
         isCorrect: false,
-        explanation: "Neglects research integrity; image duplication is a primary indicator of data fabrication."
+        explanation: "Neglects research integrity; image duplication is a major red flag that requires editorial verification."
       },
       {
         id: "c",
-        text: "Delete the figure and tell the author to publish without it.",
+        text: "Unilaterally reject the manuscript for fraud without notifying the handling editor or providing verifiable visual evidence of duplication.",
         isCorrect: false,
-        explanation: "Reviewers cannot alter author submissions."
+        explanation: "Editorial offices, not individual reviewers, hold the jurisdiction to investigate and adjudicate fraud allegations."
       },
       {
         id: "d",
-        text: "Post the images on public forums before the editor has evaluated the case.",
+        text: "Post the magnified figure panels anonymously on public post-publication forums to crowd-source independent forensic image verification.",
         isCorrect: false,
-        explanation: "Violates the confidentiality of unpublished peer review."
+        explanation: "Direct violation of manuscript confidentiality and COPE reviewer confidentiality agreements."
       }
     ]
   },
@@ -272,96 +276,96 @@ const QUESTION_BANK: Question[] = [
   {
     id: 8,
     category: "Methodological Rigor",
-    scenario: "A clinical study tests a new treatment on 6 patients without a control group or power calculation, but claims 'statistically proven universal therapeutic efficacy.'",
-    question: "Which methodological critique is most critical for the referee to raise?",
+    scenario: "A clinical pilot investigation evaluates a novel cardiovascular intervention in a cohort of 6 patients without a control arm or power calculation, claiming 'statistically proven universal efficacy.'",
+    question: "Which methodological assessment must the referee prioritize in their evaluation report?",
     options: [
       {
         id: "a",
-        text: "The sample size (n=6) is critically underpowered to establish general efficacy, and the lack of a control or randomized cohort precludes causal inference. The claim must be downgraded to a preliminary pilot observation.",
+        text: "The sample size (n=6) lacks statistical power and the absence of a control cohort precludes causal inference; findings must be framed as a pilot.",
         isCorrect: true,
-        explanation: "Accurately identifies sample power deficiencies, absence of control, and unwarranted causal claims."
+        explanation: "Accurately targets statistical underpowering, lack of control arm, and unsubstantiated causal generalizations."
       },
       {
         id: "b",
-        text: "The paper is too short; make it 20 pages longer.",
+        text: "The experimental cohort is statistically sufficient for definitive therapeutic claims provided that parametric Student's t-tests were executed.",
         isCorrect: false,
-        explanation: "Page length is not a metric of scientific validity."
+        explanation: "Scientifically unsound; n=6 without controls cannot establish causal efficacy regardless of t-test computations."
       },
       {
         id: "c",
-        text: "Six patients is plenty for universal clinical claims in medicine.",
+        text: "The manuscript should be accepted on the condition that the authors expand the discussion section by at least fifteen pages of background context.",
         isCorrect: false,
-        explanation: "Scientifically invalid and dangerous."
+        explanation: "Arbitrary length additions do not remediate fundamental experimental underpowering or absent controls."
       },
       {
         id: "d",
-        text: "Recommend using pie charts instead of bar charts.",
+        text: "The study design is adequate for clinical translation, but all bar chart visualizations must be converted into high-density violin plot graphs.",
         isCorrect: false,
-        explanation: "Superficial formatting remark that ignores severe statistical flaws."
+        explanation: "Focuses on superficial visualization formatting while ignoring fatal clinical methodology flaws."
       }
     ]
   },
   {
     id: 9,
     category: "Methodological Rigor",
-    scenario: "A machine learning manuscript reports a 99.8% classification accuracy, but fails to provide the train/test split methodology, code repository link, or baseline dataset description.",
-    question: "How should a rigorous peer reviewer evaluate this submission?",
+    scenario: "A deep learning paper reports 99.8% diagnostic accuracy on medical images, but omits the training/test split protocol, cross-validation parameters, and open repository code link.",
+    question: "How should an accredited referee evaluate this computational submission?",
     options: [
       {
         id: "a",
-        text: "Accept immediately because 99.8% is an outstanding metric.",
+        text: "Accept the manuscript without delay because achieving 99.8% classification accuracy represents a definitive benchmark breakthrough in the domain.",
         isCorrect: false,
-        explanation: "High metrics without verifiable reproducibility protocols are frequently the result of data leakage or overfitting."
+        explanation: "Uncritical acceptance of high metrics without verification protocols invites data leakage and reproducibility failures."
       },
       {
         id: "b",
-        text: "Request detailed cross-validation methodology, test set isolation protocols, and open code/dataset availability to verify reproducibility according to FAIR data principles.",
+        text: "Request detailed cross-validation methodology, test set isolation protocols, and open code availability to verify reproducibility under FAIR rules.",
         isCorrect: true,
-        explanation: "Essential for modern AI and data science peer review; prevents reproducibility crises."
+        explanation: "Essential for modern AI peer review: requires proof against data leakage, partition isolation, and open reproducibility."
       },
       {
         id: "c",
-        text: "Ask the authors to run their model on a quantum computer.",
+        text: "Reject the submission summarily because any machine learning accuracy metric exceeding 95% indicates unverifiable mathematical impossibility.",
         isCorrect: false,
-        explanation: "Irrelevant and non-actionable."
+        explanation: "Arbitrary summary rejection without requesting methodological details denies authors due process."
       },
       {
         id: "d",
-        text: "Reject because 99.8% is too high to be real, without asking for clarification.",
+        text: "Require the authors to re-run their deep learning models on specialized quantum processing hardware to confirm stability under thermal variance.",
         isCorrect: false,
-        explanation: "Unjustified summary dismissal without giving the opportunity to substantiate experimental rigor."
+        explanation: "Irrelevant and non-actionable technical demand that fails to address standard train/test leakage."
       }
     ]
   },
   {
     id: 10,
     category: "Methodological Rigor",
-    scenario: "An author reports p-values of p=0.049 across 15 separate hypothesis tests without applying any correction for multiple comparisons (e.g., Bonferroni or False Discovery Rate).",
-    question: "What is the key scientific concern?",
+    scenario: "An author performs 15 independent statistical significance tests on a single clinical dataset and reports unadjusted p-values ranging between 0.041 and 0.049 as definitive discoveries.",
+    question: "What critical statistical concern must the reviewer raise regarding these reported findings?",
     options: [
       {
         id: "a",
-        text: "High risk of Type I error (false positives) due to p-hacking or multiplicity; authors must report adjusted p-values and effect sizes with 95% confidence intervals.",
+        text: "Multiplicity generates high risk of Type I false positive discovery; authors must report adjusted p-values and effect sizes with 95% confidence intervals.",
         isCorrect: true,
-        explanation: "Standard statistical best practice to prevent misleading claims resulting from multiple testing."
+        explanation: "Standard statistical rigor: multiple testing inflates false positive error rates, necessitating FDR/Bonferroni corrections and effect sizes."
       },
       {
         id: "b",
-        text: "Any p-value below 0.05 is mathematically guaranteed to be true regardless of how many tests are performed.",
+        text: "All unadjusted p-values below the 0.05 threshold confirm genuine biological significance regardless of how many simultaneous hypothesis tests are performed.",
         isCorrect: false,
-        explanation: "Statistical fallacy."
+        explanation: "Classic statistical fallacy: cumulative Type I error increases significantly with multiple comparisons."
       },
       {
         id: "c",
-        text: "P-values are banned in all scientific journals.",
+        text: "The authors should adjust the significance threshold by arbitrarily dividing all computed p-values by two to substantiate the strength of evidence.",
         isCorrect: false,
-        explanation: "False; they require correct contextual reporting and multiplicity adjustments."
+        explanation: "Mathematically invalid adjustment that distorts statistical inference."
       },
       {
         id: "d",
-        text: "Authors should change p=0.049 to p=0.001 to look more impressive.",
+        text: "Statistical hypothesis testing should be discarded entirely from the manuscript in favor of subjective qualitative observation of cohort trends.",
         isCorrect: false,
-        explanation: "Encouraging data falsification."
+        explanation: "Unscientific recommendation; quantitative empirical studies require rigorous, adjusted inferential statistics."
       }
     ]
   }
@@ -385,6 +389,10 @@ export default function ReviewerGatewayPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const [credentialId, setCredentialId] = useState("")
 
+  // Anti-cheating & proctoring suite states
+  const [tabSwitchCount, setTabSwitchCount] = useState(0)
+  const [proctorAlert, setProctorAlert] = useState<string | null>(null)
+
   // Shuffle & pick 10 questions on start
   const startExam = (e: React.FormEvent) => {
     e.preventDefault()
@@ -397,12 +405,99 @@ export default function ReviewerGatewayPage() {
     setUserAnswers({})
     setTimeLeft(15 * 60)
     setIsTimerRunning(true)
+    setTabSwitchCount(0)
+    setProctorAlert(null)
     setStep("exam")
     
     // Generate simulated permanent credential ID
     const randomHex = Math.random().toString(16).substring(2, 8).toUpperCase()
     setCredentialId(`SO-REV-${new Date().getFullYear()}-${randomHex}`)
   }
+
+  // Active exam security & proctoring event listeners
+  useEffect(() => {
+    if (step !== "exam") return
+
+    // 1. Tab visibility / window focus loss detection
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setTabSwitchCount(prev => {
+          const next = prev + 1
+          setProctorAlert(`Proctor Alert #${next}: Tab switch or background switch detected. Navigating away from the active exam is logged in your qualification dossier.`)
+          return next
+        })
+      }
+    }
+
+    const handleBlur = () => {
+      setTabSwitchCount(prev => {
+        const next = prev + 1
+        setProctorAlert(`Proctor Warning: Window focus lost (${next}/3 recorded). Please remain within the assessment window.`)
+        return next
+      })
+    }
+
+    // 2. Keyboard blocking: PrintScreen, devtools (F12, Ctrl+Shift+I/J/C), source (Ctrl+U), print (Ctrl+P)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // PrintScreen
+      if (e.key === "PrintScreen") {
+        e.preventDefault()
+        setProctorAlert("Proctor Security: Screen capture attempts (PrintScreen) are disabled during the live assessment.")
+        return false
+      }
+
+      // Ctrl+P or Cmd+P (Print)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
+        e.preventDefault()
+        setProctorAlert("Proctor Security: Printing the examination document is prohibited.")
+        return false
+      }
+
+      // DevTools: F12 or Ctrl+Shift+I / J / C
+      if (
+        e.key === "F12" ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ["i", "j", "c"].includes(e.key.toLowerCase())) ||
+        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "u")
+      ) {
+        e.preventDefault()
+        setProctorAlert("Proctor Security: Inspecting page elements and developer tooling is strictly forbidden.")
+        return false
+      }
+
+      // Copy / Cut shortcuts: Ctrl+C / Cmd+C, Ctrl+X
+      if ((e.ctrlKey || e.metaKey) && ["c", "x"].includes(e.key.toLowerCase())) {
+        e.preventDefault()
+        setProctorAlert("Proctor Security: Copying exam scenarios or answer text is disabled.")
+        return false
+      }
+    }
+
+    // 3. Context menu blocking
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault()
+      setProctorAlert("Proctor Security: Right-click context menu is disabled during the assessment.")
+    }
+
+    // 4. Copy/Cut event listeners
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault()
+      setProctorAlert("Proctor Security: Clipboard extraction is blocked.")
+    }
+
+    window.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("blur", handleBlur)
+    window.addEventListener("keydown", handleKeyDown)
+    window.addEventListener("contextmenu", handleContextMenu)
+    window.addEventListener("copy", handleCopy)
+
+    return () => {
+      window.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("blur", handleBlur)
+      window.removeEventListener("keydown", handleKeyDown)
+      window.removeEventListener("contextmenu", handleContextMenu)
+      window.removeEventListener("copy", handleCopy)
+    }
+  }, [step])
 
   // Timer countdown
   useEffect(() => {
@@ -665,34 +760,80 @@ export default function ReviewerGatewayPage() {
 
           {/* STEP 2: ACTIVE TIMED EXAM */}
           {step === "exam" && currentQ && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              
-              {/* Exam Header: Timer + Progress */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-card border border-border shadow-xs">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Question {currentIndex + 1} of {questions.length}
-                  </span>
-                  <span className="hidden sm:inline-block text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    {currentQ.category}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 font-mono text-sm font-bold bg-muted px-3 py-1.5 rounded-lg border border-border">
-                  <Clock className={`h-4 w-4 ${timeLeft < 180 ? "text-destructive animate-pulse" : "text-primary"}`} />
-                  <span className={timeLeft < 180 ? "text-destructive" : "text-foreground"}>
-                    {formatTime(timeLeft)}
-                  </span>
-                </div>
+            <>
+              {/* Security Diagonal Watermark Overlays */}
+              <div className="fixed inset-0 pointer-events-none z-40 flex items-center justify-center opacity-[0.035] rotate-[-25deg] text-xs sm:text-base font-black tracking-widest text-foreground uppercase select-none overflow-hidden">
+                SCHOLARLY OPEN PROCTORING • VERIFIED EXAM SESSION • {candidateName || "CANDIDATE"} • {credentialId} • CONFIDENTIAL TEST BANK
               </div>
 
-              {/* Progress Bar */}
-              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className="bg-primary h-full transition-all duration-300"
-                  style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-                />
-              </div>
+              <div 
+                onContextMenu={(e) => { e.preventDefault(); setProctorAlert("Proctor Security: Right-click context menu is disabled during the exam.") }}
+                onCopy={(e) => { e.preventDefault(); setProctorAlert("Proctor Security: Copying exam scenarios or answers is disabled.") }}
+                onCut={(e) => { e.preventDefault(); setProctorAlert("Proctor Security: Clipboard actions are disabled.") }}
+                className="space-y-6 animate-in fade-in duration-200 select-none relative z-10"
+              >
+                {/* Proctor Security Alert Banner */}
+                {proctorAlert && (
+                  <div className="p-4 rounded-xl bg-destructive/10 border-2 border-destructive/30 text-destructive flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in text-xs font-semibold shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <ShieldAlert className="h-5 w-5 shrink-0 animate-bounce" />
+                      <span>{proctorAlert}</span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => setProctorAlert(null)}
+                      className="border-destructive/30 hover:bg-destructive/20 text-destructive text-xs font-bold h-7 px-3 cursor-pointer shrink-0 self-end sm:self-auto"
+                    >
+                      Acknowledge & Continue
+                    </Button>
+                  </div>
+                )}
+                
+                {/* Exam Header: Timer + Progress + Proctor Badge */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-card border border-border shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Question {currentIndex + 1} of {questions.length}
+                    </span>
+                    <span className="hidden sm:inline-block text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      {currentQ.category}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    {/* Proctor Active Badge */}
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <Shield className="h-3.5 w-3.5" /> Proctor Active
+                    </span>
+
+                    {tabSwitchCount > 0 && (
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                        tabSwitchCount >= 3 
+                          ? "bg-destructive/10 text-destructive border border-destructive/30 animate-pulse" 
+                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                      }`}>
+                        <EyeOff className="h-3 w-3" /> Focus Lost: {tabSwitchCount}/3
+                      </span>
+                    )}
+
+                    {/* Countdown Timer */}
+                    <div className="flex items-center gap-2 font-mono text-sm font-bold bg-muted px-3 py-1.5 rounded-lg border border-border ml-1">
+                      <Clock className={`h-4 w-4 ${timeLeft < 180 ? "text-destructive animate-pulse" : "text-primary"}`} />
+                      <span className={timeLeft < 180 ? "text-destructive" : "text-foreground"}>
+                        {formatTime(timeLeft)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                  <div 
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+                  />
+                </div>
 
               {/* Active Question Card */}
               <Card className="border-border shadow-sm">
@@ -794,6 +935,7 @@ export default function ReviewerGatewayPage() {
                 })}
               </div>
             </div>
+            </>
           )}
 
           {/* STEP 3: RESULTS & CERTIFICATE */}
@@ -888,6 +1030,22 @@ export default function ReviewerGatewayPage() {
                     </div>
 
                     <div className="space-y-6 relative z-10">
+                      <div className="flex items-center justify-center">
+                        <img 
+                          src="/logo-full-color.svg" 
+                          alt="Scholarly Open" 
+                          className="h-12 sm:h-14 w-auto object-contain dark:hidden"
+                          onError={(e) => {
+                            ;(e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
+                          }}
+                        />
+                        <img 
+                          src="/logo-full.svg" 
+                          alt="Scholarly Open" 
+                          className="h-12 sm:h-14 w-auto object-contain hidden dark:block"
+                        />
+                      </div>
+
                       <div className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-3 py-1 rounded-full text-xs font-bold text-primary tracking-widest uppercase">
                         Scholarly Open Standards Board
                       </div>
