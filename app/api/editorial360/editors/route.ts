@@ -29,6 +29,7 @@ export interface OnboardedEditorRecord {
   hasAcceptedTerms: boolean
   consentProfileUpload: boolean
   status: string
+  jmApproved?: boolean
   acceptedAt: string
 }
 
@@ -105,7 +106,8 @@ export async function POST(req: Request) {
       linkedin,
       publications = [],
       hasAcceptedTerms = true,
-      consentProfileUpload = true
+      consentProfileUpload = true,
+      jmApproved = false
     } = body
 
     if (!name || !email) {
@@ -121,7 +123,7 @@ export async function POST(req: Request) {
       email,
       role,
       journal,
-      journalSlug: journal.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+      journalSlug: journal.toLowerCase().replace("scholarly open:", "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
       affiliation: affiliation || "Academic Institution",
       department: department || "",
       country: country || "",
@@ -138,7 +140,8 @@ export async function POST(req: Request) {
       publications: Array.isArray(publications) ? publications : [],
       hasAcceptedTerms: !!hasAcceptedTerms,
       consentProfileUpload: !!consentProfileUpload,
-      status: "Active Handling Editor",
+      status: jmApproved ? "Active Handling Editor" : "Pending JM Approval",
+      jmApproved: Boolean(jmApproved),
       acceptedAt: new Date().toISOString()
     }
 
@@ -153,6 +156,57 @@ export async function POST(req: Request) {
     saveStoredEditors(updatedEditors)
 
     return NextResponse.json({ success: true, record: newRecord })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json()
+    const { id, email, jmApproved, status } = body
+
+    const currentEditors = getStoredEditors()
+    const index = currentEditors.findIndex(e => (id && e.id === id) || (email && e.email.toLowerCase() === email.toLowerCase()))
+
+    if (index < 0) {
+      return NextResponse.json({ success: false, error: "Editor not found" }, { status: 404 })
+    }
+
+    if (typeof jmApproved === "boolean") {
+      currentEditors[index].jmApproved = jmApproved
+      currentEditors[index].status = jmApproved ? "Active Handling Editor" : "Pending JM Approval"
+    }
+    if (status) {
+      currentEditors[index].status = status
+    }
+
+    saveStoredEditors(currentEditors)
+    return NextResponse.json({ success: true, record: currentEditors[index] })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get("id")
+    const email = searchParams.get("email")
+
+    if (!id && !email) {
+      return NextResponse.json({ success: false, error: "ID or email required to delete" }, { status: 400 })
+    }
+
+    let currentEditors = getStoredEditors()
+    currentEditors = currentEditors.filter(e => {
+      if (id && e.id === id) return false
+      if (email && e.email.toLowerCase() === email.toLowerCase()) return false
+      return true
+    })
+
+    saveStoredEditors(currentEditors)
+    return NextResponse.json({ success: true, remaining: currentEditors.length })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }

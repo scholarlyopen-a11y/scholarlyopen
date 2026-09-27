@@ -614,20 +614,41 @@ export function EditorWorkspace({
       .catch(e => console.error("Editor failed to load reviewer history:", e))
   }, [currentTab])
 
-  // Filter counts (Synchronized 1:1 with Journal Manager Workspace)
-  const triageCount = manuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft").length
-  const reviewCount = manuscripts.filter(m => m.status === "Under Review").length
-  const revisionCount = manuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation").length
-  const decisionCount = manuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected").length
+  // Synchronized access control:
+  // Editor-in-Chief / Managing Editors see portfolio submissions.
+  // Appointed Handling Editors and new board members only see submissions specifically assigned to them by the Journal Manager.
+  const isChiefEditor = Boolean(
+    user?.title?.toLowerCase().includes("chief") ||
+    user?.title?.toLowerCase().includes("managing") ||
+    user?.name?.toLowerCase().includes("aris thorne") ||
+    user?.name?.toLowerCase().includes("clara zhang")
+  )
 
-  const readyForVerdictCount = manuscripts.filter(m => m.status === "Under Review" && (m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
-  const inProgressReviewCount = manuscripts.filter(m => m.status === "Under Review" && !(m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
+  const activeManuscripts = isChiefEditor
+    ? manuscripts
+    : manuscripts.filter(m => {
+        if (!user?.name && !user?.email) return false
+        const userNorm = user?.name ? user.name.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
+        const edNorm = m.assignedEditorName ? m.assignedEditorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
+        const matchesName = Boolean(edNorm && userNorm && (edNorm === userNorm || edNorm.includes(userNorm) || userNorm.includes(edNorm)))
+        const matchesEmail = Boolean((m as any).assignedEditorEmail && user?.email && (m as any).assignedEditorEmail.toLowerCase().trim() === user.email.toLowerCase().trim())
+        return matchesName || matchesEmail
+      })
+
+  // Filter counts (Synchronized 1:1 with Journal Manager Workspace)
+  const triageCount = activeManuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft").length
+  const reviewCount = activeManuscripts.filter(m => m.status === "Under Review").length
+  const revisionCount = activeManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation").length
+  const decisionCount = activeManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected").length
+
+  const readyForVerdictCount = activeManuscripts.filter(m => m.status === "Under Review" && (m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
+  const inProgressReviewCount = activeManuscripts.filter(m => m.status === "Under Review" && !(m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
   const escalatedPaperIds = (integrityAlerts || []).filter(a => a.status === "Escalated").map(a => a.paperId)
-  const integrityCount = manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)).length
+  const integrityCount = activeManuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)).length
   const escalatedCount = integrityCount
 
   // Filtered Papers
-  const filteredPapers = manuscripts.filter(m => {
+  const filteredPapers = activeManuscripts.filter(m => {
     const matchesJournal = selectedJournal === "all" || m.journal.toLowerCase().includes(selectedJournal.toLowerCase())
     const matchesSearch = !searchQuery ||
       m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1360,7 +1381,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span>{isDe ? "Zugewiesene Manuskripte" : "Assigned Manuscripts"}</span>
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${currentTab === "desk" || currentTab === "overview" ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}`}>
-              {manuscripts.length}
+              {activeManuscripts.length}
             </span>
           </button>
 
@@ -1376,7 +1397,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             <Clock className="h-3.5 w-3.5" />
             <span>{isDe ? "Gutachten-Tracking" : "Review Tracker"}</span>
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${currentTab === "tracker" ? "bg-white/20 text-white" : "bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200"}`}>
-              {manuscripts.filter(m => m.status === "Under Review").length} Live
+              {activeManuscripts.filter(m => m.status === "Under Review").length} Live
             </span>
           </button>
 
@@ -1468,7 +1489,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {/* Small Clickable Stage Filter Tabs (Synchronized 1:1 with JM Workspace) */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 pt-2 border-t border-slate-100 dark:border-[#272832]">
               {[
-                { id: "all", label: isDe ? "Alle" : "All", count: manuscripts.length },
+                { id: "all", label: isDe ? "Alle" : "All", count: activeManuscripts.length },
                 { id: "triage", label: isDe ? "Triage" : "Triage", count: triageCount },
                 { id: "review", label: isDe ? "In Prüfung" : "In Review", count: reviewCount },
                 { id: "revision", label: isDe ? "Revisionen" : "Revisions", count: revisionCount },

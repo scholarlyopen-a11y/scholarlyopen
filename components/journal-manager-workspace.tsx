@@ -56,9 +56,9 @@ import {
   History,
   Server,
   ChevronLeft,
-  ChevronRight,
   GraduationCap,
-  UserX
+  UserX,
+  Trash2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -267,6 +267,74 @@ export function JournalManagerWorkspace({
   const [isLoadingGateway, setIsLoadingGateway] = useState(false)
   const [gatewaySearch, setGatewaySearch] = useState("")
   const [selectedCandidateDossier, setSelectedCandidateDossier] = useState<any | null>(null)
+
+  const handleToggleCandidateApproval = async (candidate: any) => {
+    const nextApproved = !candidate.jmApproved
+    const targetEmail = candidate.candidateEmail || candidate.email
+    if (!targetEmail) return
+
+    try {
+      const res = await fetch("/api/editorial360/editors", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: targetEmail,
+          jmApproved: nextApproved,
+          status: nextApproved ? "Active Handling Editor" : "Pending JM Approval"
+        })
+      })
+
+      if (res.ok) {
+        setGatewayResponses(prev => prev.map(r => {
+          if ((r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) || r.id === candidate.id) {
+            return { ...r, jmApproved: nextApproved, status: nextApproved ? "Active Handling Editor" : "Pending JM Approval" }
+          }
+          return r
+        }))
+        if (selectedCandidateDossier) {
+          setSelectedCandidateDossier((prev: any) => prev ? {
+            ...prev,
+            jmApproved: nextApproved,
+            status: nextApproved ? "Active Handling Editor" : "Pending JM Approval"
+          } : null)
+        }
+      }
+    } catch (e) {
+      console.error("Failed to toggle candidate approval:", e)
+    }
+  }
+
+  const handleDeleteCandidate = async (candidate: any) => {
+    const targetEmail = candidate.candidateEmail || candidate.email
+    const targetId = candidate.id
+    if (!targetEmail && !targetId) return
+
+    const scholarName = candidate.candidateName || candidate.name || "this candidate"
+    const confirmMsg = `Are you sure you want to permanently delete ${scholarName} from the database? This will completely purge their profile and credentials.`
+    if (typeof window !== "undefined" && !window.confirm(confirmMsg)) {
+      return
+    }
+
+    try {
+      const query = targetEmail ? `email=${encodeURIComponent(targetEmail)}` : `id=${encodeURIComponent(targetId)}`
+      await Promise.all([
+        fetch(`/api/editorial360/editors?${query}`, { method: "DELETE" }),
+        fetch(`/api/editorial360/invitation-response?${query}`, { method: "DELETE" })
+      ])
+
+      setGatewayResponses(prev => prev.filter(r => {
+        if (targetEmail && r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) return false
+        if (targetId && r.id === targetId) return false
+        return true
+      }))
+
+      if (selectedCandidateDossier && ((targetEmail && selectedCandidateDossier.candidateEmail?.toLowerCase() === targetEmail.toLowerCase()) || selectedCandidateDossier.id === targetId)) {
+        setSelectedCandidateDossier(null)
+      }
+    } catch (e) {
+      console.error("Failed to delete candidate:", e)
+    }
+  }
 
   // Reviewer Profile Inspection State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
@@ -4343,22 +4411,37 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             {resp.journal}
                           </td>
                           <td className="py-3.5 px-4 align-middle whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${
-                              resp.decision === "yes" || resp.decision === "claimed"
-                                ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30"
-                                : resp.decision === "conditional"
-                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                                : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30"
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            <div className="space-y-1">
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${
                                 resp.decision === "yes" || resp.decision === "claimed"
-                                  ? "bg-[#0b99ff]"
+                                  ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30"
                                   : resp.decision === "conditional"
-                                  ? "bg-amber-500"
-                                  : "bg-rose-500"
-                              }`} />
-                              {resp.decision.toUpperCase()}
-                            </span>
+                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                  : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                  resp.decision === "yes" || resp.decision === "claimed"
+                                    ? "bg-[#0b99ff]"
+                                    : resp.decision === "conditional"
+                                    ? "bg-amber-500"
+                                    : "bg-rose-500"
+                                }`} />
+                                {resp.decision.toUpperCase()}
+                              </span>
+                              {resp.type !== "reviewer_claim" && (
+                                <div className="text-[10px] font-semibold">
+                                  {resp.jmApproved ? (
+                                    <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3" /> Live on Masthead
+                                    </span>
+                                  ) : (
+                                    <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                      <Clock className="w-3 h-3" /> Pending JM Approval
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </td>
                           <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             {resp.credentialId ? (
@@ -4370,14 +4453,39 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             )}
                           </td>
                           <td className="py-3.5 px-4 align-middle text-center whitespace-nowrap">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedCandidateDossier(resp)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 text-[#0b99ff] border border-[#0b99ff]/30 transition-all cursor-pointer shadow-2xs"
-                            >
-                              <Eye className="h-3.5 w-3.5" />
-                              <span>View Profile</span>
-                            </button>
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedCandidateDossier(resp)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 text-[#0b99ff] border border-[#0b99ff]/30 transition-all cursor-pointer shadow-2xs"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                <span>Profile</span>
+                              </button>
+                              {resp.type !== "reviewer_claim" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleCandidateApproval(resp)}
+                                  title={resp.jmApproved ? "Revoke / Unpublish from Masthead" : "Approve & Publish to Public Masthead"}
+                                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                                    resp.jmApproved
+                                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-100"
+                                      : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 hover:bg-amber-100"
+                                  }`}
+                                >
+                                  {resp.jmApproved ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />}
+                                  <span>{resp.jmApproved ? "Approved" : "Approve"}</span>
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCandidate(resp)}
+                                title="Delete Candidate & Purge Record"
+                                className="inline-flex items-center p-1.5 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40 transition-all cursor-pointer shadow-2xs"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </td>
                           <td className="py-3.5 px-4 align-middle text-right text-slate-400 text-[11px] whitespace-nowrap">
                             {resp.timestamp ? new Date(resp.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
@@ -8276,6 +8384,52 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   )}
                 </div>
 
+                {/* Journal Manager Governance & Masthead Approval Control */}
+                {selectedCandidateDossier.type !== "reviewer_claim" && (
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
+                          <span>Website Masthead Publication & Live Privileges</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Controls whether this editor is published on the public journal page and assigned handling editor rights.
+                        </p>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        selectedCandidateDossier.jmApproved 
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300"
+                          : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300"
+                      }`}>
+                        {selectedCandidateDossier.jmApproved ? "Approved & Live on Website" : "Pending JM Approval (Private)"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleToggleCandidateApproval(selectedCandidateDossier)}
+                        className={`text-xs font-bold h-8 px-3 rounded-lg cursor-pointer ${
+                          selectedCandidateDossier.jmApproved
+                            ? "bg-amber-600 hover:bg-amber-700 text-white"
+                            : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        }`}
+                      >
+                        {selectedCandidateDossier.jmApproved ? (
+                          <>Revoke / Unpublish from Masthead</>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                            Approve & Publish to Public Masthead
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Consent & Compliance Audit */}
                 <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
@@ -8300,13 +8454,25 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <Globe className="h-3.5 w-3.5" />
                   <span>Public Journal Masthead</span>
                 </Link>
-                <Button
-                  size="sm"
-                  onClick={() => setSelectedCandidateDossier(null)}
-                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
-                >
-                  Close Dossier
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDeleteCandidate(selectedCandidateDossier)}
+                    className="border-rose-200 hover:border-rose-300 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold h-8 px-3 rounded-lg cursor-pointer"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1 text-rose-600" />
+                    Delete Profile
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setSelectedCandidateDossier(null)}
+                    className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+                  >
+                    Close Dossier
+                  </Button>
+                </div>
               </div>
             </div>
           )}

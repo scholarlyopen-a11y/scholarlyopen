@@ -4657,14 +4657,15 @@ export default function Editorial360Page() {
               setEditorPhotoUrl(data.photoUrl)
               setEditorOrcid(data.orcid)
 
-              // 2. Set current user session to Handling Editor
+              // 2. Lead to login screen with created ID and password
               setRole("editor")
               setEmail(data.email)
-              setIsLoggedIn(true)
-              setActiveEditorTab("desk")
+              setPassword(data.password || "")
+              setIsLoggedIn(false)
+              setMode("login")
               setOnboardingInvite(null)
 
-              // 3. Clear action from URL so reload preserves active logged-in state
+              // 3. Clear action and query parameters from URL so reload stays on clean login
               if (typeof window !== "undefined") {
                 const params = new URLSearchParams(window.location.search)
                 params.delete("action")
@@ -4675,23 +4676,10 @@ export default function Editorial360Page() {
                 window.history.replaceState({}, "", `${window.location.pathname}${newQuery}`)
               }
 
-              // 4. Persist session
+              // 4. Clear any stale session
               if (typeof window !== "undefined") {
                 try {
-                  sessionStorage.setItem("editorial360_session", JSON.stringify({
-                    isLoggedIn: true,
-                    role: "editor",
-                    email: data.email,
-                    editorName: data.name,
-                    editorRank: data.role || "Editorial Board Member & Handling Editor",
-                    editorJournal: data.journal,
-                    editorInstitution: data.affiliation,
-                    editorCountry: data.country,
-                    editorPhotoUrl: data.photoUrl,
-                    editorOrcid: data.orcid,
-                    activeEditorTab: "desk",
-                    timestamp: Date.now()
-                  }))
+                  sessionStorage.removeItem("editorial360_session")
                 } catch (e) {}
               }
 
@@ -4700,7 +4688,7 @@ export default function Editorial360Page() {
                 id: `NOTIF-EB-${Date.now()}`,
                 type: "editorial_board_joined",
                 title: "Editorial Board Onboarding Completed",
-                message: `${data.name} has formally accepted their appointment for ${data.journal} and onboarded their profile to editorial360.`,
+                message: `${data.name} has formally accepted their appointment for ${data.journal} and created credentials. Pending JM verification.`,
                 senderRole: "editor",
                 senderName: data.name,
                 targetRole: "jm",
@@ -4709,7 +4697,7 @@ export default function Editorial360Page() {
                 urgent: false
               })
 
-              setSuccess(`Welcome to Scholarly Open, ${data.name}! Your Editorial Board appointment and Handling Editor Desk are active.`)
+              setSuccess(`Account registered successfully! Welcome, ${data.name}. Please click "Sign In" below using your created credentials to access your Handling Editor Desk.`)
             }}
           />
         ) : (

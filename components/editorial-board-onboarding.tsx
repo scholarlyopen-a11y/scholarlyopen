@@ -36,6 +36,7 @@ export interface EditorialBoardOnboardingData {
   photoUrl: string
   cvFileName: string
   cvFileSize: string
+  cvBase64?: string
   orcid: string
   googleScholar: string
   researchGate: string
@@ -68,80 +69,35 @@ export function EditorialBoardOnboarding({
   onSignInClick,
   language = "en"
 }: EditorialBoardOnboardingProps) {
-  // Scholar heuristic profiles
-  const isPrashant = initialName.toLowerCase().includes("prashant") || initialName.toLowerCase().includes("kumar")
-  const isSanna = initialName.toLowerCase().includes("sanna") || initialName.toLowerCase().includes("järvelä") || initialName.toLowerCase().includes("jarvela")
-
-  const derivedJournal = initialJournal && !initialJournal.includes("Environmental Science")
-    ? initialJournal
-    : isSanna
-    ? "Scholarly Open: Medicine"
-    : isPrashant
-    ? "Scholarly Open: Environmental Science"
-    : (initialJournal || "Scholarly Open: Medicine")
-
-  const [title, setTitle] = useState(isSanna ? "Prof." : isPrashant ? "Prof. Dr." : "Prof.")
-  const [name, setName] = useState(initialName || (isSanna ? "Prof. Sanna Järvelä" : isPrashant ? "Prof. Prashant Kumar" : ""))
-  const [email, setEmail] = useState(initialEmail || (isSanna ? "sanna.jarvela@oulu.fi" : isPrashant ? "p.kumar@surrey.ac.uk" : ""))
-  const [journal, setJournal] = useState(derivedJournal)
+  const [title, setTitle] = useState("Prof.")
+  const [name, setName] = useState(initialName || "")
+  const [email, setEmail] = useState(initialEmail || "")
+  const [journal, setJournal] = useState(initialJournal || "Scholarly Open: Medicine")
   
-  const [affiliation, setAffiliation] = useState(
-    isSanna 
-      ? "University of Oulu" 
-      : isPrashant 
-      ? "University of Surrey" 
-      : ""
-  )
-  const [department, setDepartment] = useState(
-    isSanna 
-      ? "Department of Educational Sciences, LET Research Unit" 
-      : isPrashant 
-      ? "School of Engineering, GCARE" 
-      : ""
-  )
-  const [country, setCountry] = useState(
-    isSanna ? "Finland" : isPrashant ? "United Kingdom" : ""
-  )
+  const [affiliation, setAffiliation] = useState("")
+  const [department, setDepartment] = useState("")
+  const [country, setCountry] = useState("")
 
   const [photoUrl, setPhotoUrl] = useState<string>("")
   const [photoPreview, setPhotoPreview] = useState<string>("")
   const photoInputRef = useRef<HTMLInputElement>(null)
 
-  const [cvFileName, setCvFileName] = useState(
-    isSanna ? "CV_Prof_Sanna_Jarvela.pdf" : isPrashant ? "CV_Prof_Prashant_Kumar.pdf" : ""
-  )
-  const [cvFileSize, setCvFileSize] = useState(isSanna || isPrashant ? "Verified" : "")
-  const [cvFileStatus, setCvFileStatus] = useState<"none" | "uploaded">(isSanna || isPrashant ? "uploaded" : "none")
+  const [cvFileName, setCvFileName] = useState("")
+  const [cvFileSize, setCvFileSize] = useState("")
+  const [cvBase64, setCvBase64] = useState<string>("")
+  const [cvFileStatus, setCvFileStatus] = useState<"none" | "uploaded">("none")
   const cvInputRef = useRef<HTMLInputElement>(null)
 
-  const [biography, setBiography] = useState(
-    isSanna
-      ? "Sanna Järvelä is a Professor in learning sciences and educational technology and head of the Learning and Educational Technology Research Unit (LET) at the University of Oulu, Finland. Her research focuses on self-regulated learning, computer-supported collaborative learning, and multimodal learning analytics. She is an elected member of the Finnish Academy of Science and Letters."
-      : isPrashant
-      ? "Professor Prashant Kumar is the Professor and Chair in Air Quality and Health at the University of Surrey, UK. Founding Director of GCARE and Founding Co-Director of the Institute for Sustainability. Winner of the 2023 Haagen-Smit Prize."
-      : ""
-  )
-
-  const [interestsText, setInterestsText] = useState(
-    isSanna
-      ? "AI in Education, Self-Regulated Learning, Multimodal Learning Analytics, Collaborative Learning, Educational Psychology"
-      : isPrashant
-      ? "Air Quality & Health, Aerosol Science, Low-Cost Sensing, Nature-Based Solutions, Climate Mitigation"
-      : ""
-  )
-
-  const [orcid, setOrcid] = useState(
-    isSanna ? "0000-0001-6223-366X" : isPrashant ? "0000-0002-8692-7484" : ""
-  )
-  const [googleScholar, setGoogleScholar] = useState(
-    isSanna ? "https://scholar.google.com/citations?user=xGgXk-4AAAAJ" : isPrashant ? "https://scholar.google.com/citations?user=prashant-kumar" : ""
-  )
+  const [biography, setBiography] = useState("")
+  const [interestsText, setInterestsText] = useState("")
+  const [orcid, setOrcid] = useState("")
+  const [googleScholar, setGoogleScholar] = useState("")
 
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(true)
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false)
   const [consentProfileUpload, setConsentProfileUpload] = useState(true)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -226,6 +182,13 @@ export function EditorialBoardOnboarding({
     setCvFileName(file.name)
     setCvFileSize(sizeKb > 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`)
     setCvFileStatus("uploaded")
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      setCvBase64(dataUrl)
+    }
+    reader.readAsDataURL(file)
   }
 
   // Submit onboarding
@@ -245,20 +208,20 @@ export function EditorialBoardOnboarding({
       setErrorMsg("Please provide your primary academic affiliation / university.")
       return
     }
+    if (!password.trim() || password.length < 6) {
+      setErrorMsg("Please create an account password of at least 6 characters.")
+      return
+    }
+    if (password !== confirmPassword) {
+      setErrorMsg("Account passwords do not match.")
+      return
+    }
     if (!hasAcceptedTerms) {
       setErrorMsg("You must accept the terms of the editorial appointment to proceed.")
       return
     }
     if (!consentProfileUpload) {
       setErrorMsg("Consent to display your name and affiliation on the journal masthead is required.")
-      return
-    }
-    if (password && password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters long.")
-      return
-    }
-    if (password && password !== confirmPassword) {
-      setErrorMsg("Passwords do not match.")
       return
     }
 
@@ -286,21 +249,22 @@ export function EditorialBoardOnboarding({
       country: country.trim(),
       biography: biography.trim(),
       photoUrl: photoPreview || photoUrl,
-      cvFileName: cvFileName || "CV_Uploaded.pdf",
-      cvFileSize: cvFileSize || "Verified",
+      cvFileName: cvFileName.trim(),
+      cvFileSize: cvFileSize.trim(),
+      cvBase64: cvBase64 || undefined,
       orcid: orcid.trim(),
       googleScholar: googleScholar.trim(),
       researchGate: "",
       linkedin: "",
       researchInterests: parsedInterests,
       publications: [],
-      password: password || "Editor360@2026",
+      password: password.trim(),
       hasAcceptedTerms,
       consentProfileUpload
     }
 
     try {
-      // 1. Post to invitation-response API (records live response & notifies Journal Manager Desk)
+      // 1. Post to invitation-response API (records live response, attaches CV & notifies Journal Manager Desk)
       await fetch("/api/editorial360/invitation-response", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -317,6 +281,7 @@ export function EditorialBoardOnboarding({
           photoUrl: payload.photoUrl,
           cvFileName: payload.cvFileName,
           cvFileSize: payload.cvFileSize,
+          cvBase64: payload.cvBase64,
           researchInterests: payload.researchInterests,
           orcid: payload.orcid,
           googleScholar: payload.googleScholar,
@@ -325,7 +290,7 @@ export function EditorialBoardOnboarding({
         })
       })
 
-      // 2. Post to editors API (registers editor in official masthead registry)
+      // 2. Post to editors API (registers editor in official registry pending JM approval)
       await fetch("/api/editorial360/editors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -178,7 +178,9 @@ export async function GET() {
           googleScholar: e.googleScholar,
           linkedin: e.linkedin,
           hasAcceptedTerms: e.hasAcceptedTerms,
-          consentProfileUpload: e.consentProfileUpload
+          consentProfileUpload: e.consentProfileUpload,
+          jmApproved: Boolean(e.jmApproved),
+          status: e.status || (e.jmApproved ? "Active Handling Editor" : "Pending JM Approval")
         }))
       }
     }
@@ -201,6 +203,43 @@ export async function GET() {
   })
 }
 
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get("id")
+    const email = searchParams.get("email")
+
+    if (!id && !email) {
+      return NextResponse.json({ success: false, error: "ID or email required" }, { status: 400 })
+    }
+
+    // Clean in-memory
+    responseStore = responseStore.filter(r => {
+      if (id && r.id === id) return false
+      if (email && r.candidateEmail && r.candidateEmail.toLowerCase() === email.toLowerCase()) return false
+      return true
+    })
+
+    // Clean disk
+    if (fs.existsSync(EDITORS_FILE_PATH)) {
+      const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed.onboardedEditors)) {
+        parsed.onboardedEditors = parsed.onboardedEditors.filter((e: any) => {
+          if (id && e.id === id) return false
+          if (email && e.email && e.email.toLowerCase() === email.toLowerCase()) return false
+          return true
+        })
+        fs.writeFileSync(EDITORS_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
+      }
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -219,6 +258,7 @@ export async function POST(req: Request) {
       photoUrl = "",
       cvFileName = "",
       cvFileSize = "",
+      cvBase64 = "",
       researchInterests = [],
       orcid = "",
       googleScholar = "",
@@ -287,7 +327,8 @@ export async function POST(req: Request) {
         publications: Array.isArray(publications) ? publications : [],
         hasAcceptedTerms: !!hasAcceptedTerms,
         consentProfileUpload: !!consentProfileUpload,
-        status: "Active Handling Editor",
+        status: "Pending JM Approval",
+        jmApproved: false,
         acceptedAt: new Date().toISOString()
       })
       updateSentInvitationStatus(candidateEmail, candidateName)
@@ -370,12 +411,26 @@ export async function POST(req: Request) {
           </div>
         `
 
+        const attachments: any[] = []
+        if (cvBase64) {
+          try {
+            const rawBase64 = cvBase64.includes(";base64,") ? cvBase64.split(";base64,")[1] : cvBase64
+            attachments.push({
+              filename: cvFileName || `${candidateName.replace(/[^a-zA-Z0-9]/g, '_')}_CV.pdf`,
+              content: Buffer.from(rawBase64, "base64")
+            })
+          } catch (attErr) {
+            console.warn("Could not encode CV attachment:", attErr)
+          }
+        }
+
         await transporter.sendMail({
           from: `"editorial360 Notifications" <${from}>`,
           to: "info@scholarlyopen.org",
           replyTo: candidateEmail || "info@scholarlyopen.org",
           subject,
-          html: htmlContent
+          html: htmlContent,
+          attachments
         })
       }
     } catch (mailErr) {

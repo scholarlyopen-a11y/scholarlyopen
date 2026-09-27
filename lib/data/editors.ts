@@ -1116,7 +1116,9 @@ Dr. Chamberland earned her Ph.D. in History from the University of California, D
 // Dynamically integrate verified onboarded Editorial Board Members from editorial-board-onboarding.json
 const onboardedList: EditorMember[] = (
   Array.isArray((onboardedData as any)?.onboardedEditors)
-    ? (onboardedData as any).onboardedEditors.map((o: any) => {
+    ? (onboardedData as any).onboardedEditors
+        .filter((o: any) => o.jmApproved === true)
+        .map((o: any) => {
         const cleanSlug = (o.name || "editor")
           .toLowerCase()
           .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
