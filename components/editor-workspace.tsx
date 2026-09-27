@@ -395,9 +395,18 @@ export function EditorWorkspace({
 
   const [manuscripts, setManuscripts] = useState<JmManuscript[]>(initialManuscripts)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedJournal, setSelectedJournal] = useState("all")
+  const [selectedJournal, setSelectedJournal] = useState<string>(() => {
+    if (user?.journal && user.journal !== "Scholarly Open") return user.journal
+    return "all"
+  })
   const [selectedStageFilter, setSelectedStageFilter] = useState<"all" | "triage" | "review" | "revision" | "decision" | "integrity">("all")
   const [reviewSubFilter, setReviewSubFilter] = useState<"all" | "ready" | "in_progress">("all")
+
+  useEffect(() => {
+    if (user?.journal && user.journal !== "Scholarly Open") {
+      setSelectedJournal(user.journal)
+    }
+  }, [user?.journal])
 
   // EiC IM Escalation Review Modal State
   const [selectedEscalationAlert, setSelectedEscalationAlert] = useState<any | null>(null)
@@ -1536,7 +1545,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
           {/* Manuscripts List */}
           <div className="space-y-3">
-            {filteredPapers.map((paper) => {
+            {filteredPapers.length === 0 ? (
+              <Card className="p-8 sm:p-12 text-center bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl space-y-3 shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-[#0b99ff]/10 text-[#0b99ff] mx-auto flex items-center justify-center">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">
+                  {isDe ? "Keine Manuskripte in dieser Ansicht" : "No Submissions Assigned in this View"}
+                </h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                  {isDe 
+                    ? "Sobald neue Einreichungen Ihrem Desk zugewiesen werden oder Filter zurückgesetzt werden, erscheinen Manuskripte hier mit vollen Begutachtungs-Workflows."
+                    : `When the Journal Management Desk assigns incoming submissions in ${user.journal || "your portfolio"} to your desk, they will appear here with complete triage, peer review, and decision tools.`}
+                </p>
+                {selectedJournal !== "all" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedJournal("all")}
+                    className="text-xs font-semibold rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 mt-2"
+                  >
+                    {isDe ? "Alle Zeitschriften anzeigen" : "View All Journals"}
+                  </Button>
+                )}
+              </Card>
+            ) : (
+              filteredPapers.map((paper) => {
               const isTriage = paper.status === "Awaiting Initial Check" || paper.status === "Submitted" || paper.status === "Draft"
               const isRevisedSubmitted = paper.status === "Revision Under Evaluation" || (paper as any).submissionStage === "Revised Submission"
               const isReviewing = paper.status === "Under Review"
@@ -1736,7 +1771,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                 </Card>
               )
-            })}
+            })
+          )}
           </div>
         </div>
       )}

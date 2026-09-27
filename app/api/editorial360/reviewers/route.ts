@@ -77,6 +77,26 @@ const globalReviewerHistory: ReviewerHistoryItem[] = [
   }
 ]
 
+import fs from "fs"
+import path from "path"
+
+const RECORDS_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
+
+function getRegisteredReviewersFromDisk(): any[] {
+  try {
+    if (fs.existsSync(RECORDS_FILE_PATH)) {
+      const raw = fs.readFileSync(RECORDS_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      if (parsed && Array.isArray(parsed.registeredReviewers)) {
+        return parsed.registeredReviewers
+      }
+    }
+  } catch (e) {
+    console.error("Error reading registeredReviewers:", e)
+  }
+  return []
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
@@ -91,7 +111,9 @@ export async function GET(req: Request) {
       results = results.filter(r => r.reviewerEmail.toLowerCase() === email.toLowerCase())
     }
 
-    return NextResponse.json({ ok: true, history: results })
+    const registeredReviewers = getRegisteredReviewersFromDisk()
+
+    return NextResponse.json({ ok: true, history: results, registeredReviewers })
   } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
   }

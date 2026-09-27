@@ -2,6 +2,8 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
+import fs from "fs"
+import path from "path"
 
 export interface ReviewerTestRecord {
   id: string
@@ -9,6 +11,7 @@ export interface ReviewerTestRecord {
   candidateEmail: string
   discipline: string
   institution: string
+  department?: string
   score: number
   totalQuestions: number
   passed: boolean
@@ -16,94 +19,48 @@ export interface ReviewerTestRecord {
   credentialId?: string
   date: string
   timestamp: string
+  orcid?: string
   notes?: string
 }
 
-// In-memory persistent cache for serverless lifetime
-let reviewerTestStore: ReviewerTestRecord[] = [
-  {
-    id: "TEST-2026-9040",
-    candidateName: "Dr. Wenxiong Sun (孙文雄)",
-    candidateEmail: "102500216@hbut.edu.cn",
-    discipline: "engineering-materials",
-    institution: "Hubei University of Technology",
-    score: 92,
-    totalQuestions: 10,
-    passed: true,
-    status: "Passed - Account Active",
-    credentialId: "CERT-SO-2026-9088",
-    date: "Sep 23, 2026",
-    timestamp: "2026-09-23T21:40:00Z",
-    notes: "Completed Reviewer Gateway onboarding and assessment (92%). Verified referee on Editorial360."
-  },
-  {
-    id: "TEST-2026-9041",
-    candidateName: "Dr. Elena Rostova",
-    candidateEmail: "e.rostova@karolinska.se",
-    discipline: "medicine",
-    institution: "Karolinska Institute · Department of Oncology",
-    score: 90,
-    totalQuestions: 10,
-    passed: true,
-    status: "Passed - Account Active",
-    credentialId: "CERT-SO-2026-9812",
-    date: "Sep 22, 2026",
-    timestamp: "2026-09-22T14:32:00Z",
-    notes: "Completed Editorial360 reviewer onboarding. ORCID linked."
-  },
-  {
-    id: "TEST-2026-9042",
-    candidateName: "Dr. Kenji Takahashi",
-    candidateEmail: "k-takahashi@u-tokyo.ac.jp",
-    discipline: "applied-sciences",
-    institution: "University of Tokyo · Department of Precision Engineering",
-    score: 85,
-    totalQuestions: 10,
-    passed: true,
-    status: "Passed - Pending Account",
-    credentialId: "CERT-SO-2026-9813",
-    date: "Sep 22, 2026",
-    timestamp: "2026-09-22T17:15:00Z",
-    notes: "Passed assessment with 85%. Awaiting Editorial360 account creation."
-  },
-  {
-    id: "TEST-2026-9043",
-    candidateName: "Prof. Sarah O'Connor",
-    candidateEmail: "soconnor@tcd.ie",
-    discipline: "humanities",
-    institution: "Trinity College Dublin · Centre for Digital Humanities",
-    score: 70,
-    totalQuestions: 10,
-    passed: false,
-    status: "Failed Threshold",
-    date: "Sep 21, 2026",
-    timestamp: "2026-09-21T11:05:00Z",
-    notes: "Did not meet 80% passing threshold (70%). Eligible for re-test in 7 days."
-  },
-  {
-    id: "TEST-2026-9044",
-    candidateName: "Dr. Tariq Al-Mansoor",
-    candidateEmail: "t.almansoor@kfupm.edu.sa",
-    discipline: "energy-materials",
-    institution: "KFUPM · Center for Clean Energy & Decarbonization",
-    score: 95,
-    totalQuestions: 10,
-    passed: true,
-    status: "Passed - Pending Account",
-    credentialId: "CERT-SO-2026-9814",
-    date: "Sep 22, 2026",
-    timestamp: "2026-09-22T18:40:00Z",
-    notes: "Passed assessment with 95%. Automated invite to Editorial360 sent."
+const DATA_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
+
+function getStoredRecords(): { tests: ReviewerTestRecord[]; registeredReviewers: any[] } {
+  try {
+    if (fs.existsSync(DATA_FILE_PATH)) {
+      const raw = fs.readFileSync(DATA_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      return {
+        tests: Array.isArray(parsed.tests) ? parsed.tests : [],
+        registeredReviewers: Array.isArray(parsed.registeredReviewers) ? parsed.registeredReviewers : []
+      }
+    }
+  } catch (e) {
+    console.error("Error reading reviewer-records.json:", e)
   }
-]
+  return { tests: [], registeredReviewers: [] }
+}
+
+function saveStoredRecords(data: { tests: ReviewerTestRecord[]; registeredReviewers: any[] }) {
+  try {
+    const dir = path.dirname(DATA_FILE_PATH)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(data, null, 2), "utf-8")
+  } catch (e) {
+    console.error("Error saving reviewer-records.json:", e)
+  }
+}
 
 export async function GET() {
+  const { tests } = getStoredRecords()
   return NextResponse.json({
     success: true,
-    tests: reviewerTestStore,
-    total: reviewerTestStore.length,
-    passedCount: reviewerTestStore.filter(t => t.passed).length,
-    pendingAccountCount: reviewerTestStore.filter(t => t.status === "Passed - Pending Account").length
+    tests,
+    total: tests.length,
+    passedCount: tests.filter(t => t.passed).length,
+    pendingAccountCount: tests.filter(t => t.status === "Passed - Pending Account").length
   })
 }
 
@@ -115,11 +72,13 @@ export async function POST(req: Request) {
       candidateEmail, 
       discipline, 
       institution, 
+      department,
       score, 
       totalQuestions = 10, 
       passed, 
       credentialId,
-      status
+      status,
+      orcid
     } = body
 
     if (!candidateName || !candidateEmail) {
@@ -133,17 +92,55 @@ export async function POST(req: Request) {
       candidateEmail,
       discipline: discipline || "general",
       institution: institution || "Academic Institution",
+      department: department || "",
       score: score || 0,
       totalQuestions,
       passed: isPassed,
       status: status || (isPassed ? "Passed - Pending Account" : "Failed Threshold"),
       credentialId: credentialId || (isPassed ? `CERT-SO-2026-${Math.floor(1000 + Math.random() * 9000)}` : undefined),
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      orcid: orcid || "",
+      notes: isPassed ? "Qualified via Reviewer Gateway assessment." : "Assessment threshold not met."
     }
 
-    // Prepend new record
-    reviewerTestStore = [newRecord, ...reviewerTestStore]
+    const store = getStoredRecords()
+    const existingIndex = store.tests.findIndex(t => t.candidateEmail.toLowerCase() === candidateEmail.toLowerCase())
+    if (existingIndex >= 0) {
+      store.tests[existingIndex] = { ...store.tests[existingIndex], ...newRecord }
+    } else {
+      store.tests = [newRecord, ...store.tests]
+    }
+
+    // If passed, also automatically register/update them in registeredReviewers so JM sees them immediately
+    if (isPassed) {
+      const revIndex = store.registeredReviewers.findIndex((r: any) => r.email.toLowerCase() === candidateEmail.toLowerCase())
+      const reviewerEntry = {
+        id: revIndex >= 0 ? store.registeredReviewers[revIndex].id : `REV-REG-${Date.now().toString().slice(-4)}`,
+        name: candidateName,
+        email: candidateEmail,
+        status: "Active",
+        activeTasks: 0,
+        maxTasks: 3,
+        matchScore: Math.min(99, Math.max(80, score || 85)),
+        specialization: `${discipline ? discipline.replace("-", " ") : "Academic"} Peer Review`,
+        discipline: discipline || "General Sciences",
+        institution: institution || "Academic Institution",
+        orcid: orcid || "",
+        completedReviews: 0,
+        onTimeRate: 100,
+        credentialId: newRecord.credentialId,
+        keywords: [discipline || "sciences", "peer review", "academic research"]
+      }
+
+      if (revIndex >= 0) {
+        store.registeredReviewers[revIndex] = { ...store.registeredReviewers[revIndex], ...reviewerEntry }
+      } else {
+        store.registeredReviewers = [reviewerEntry, ...store.registeredReviewers]
+      }
+    }
+
+    saveStoredRecords(store)
 
     return NextResponse.json({ success: true, record: newRecord })
   } catch (err: any) {
@@ -156,14 +153,17 @@ export async function PATCH(req: Request) {
     const body = await req.json()
     const { id, candidateEmail, status } = body
 
-    reviewerTestStore = reviewerTestStore.map(test => {
+    const store = getStoredRecords()
+    store.tests = store.tests.map(test => {
       if ((id && test.id === id) || (candidateEmail && test.candidateEmail.toLowerCase() === candidateEmail.toLowerCase())) {
         return { ...test, status: status || "Passed - Account Active" }
       }
       return test
     })
 
-    return NextResponse.json({ success: true, tests: reviewerTestStore })
+    saveStoredRecords(store)
+
+    return NextResponse.json({ success: true, tests: store.tests })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }

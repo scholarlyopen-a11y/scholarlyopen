@@ -757,12 +757,52 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     journalSlug: "environmental-science",
   },
   {
-    slug: "position-open-environmental-science-ebm-1",
-    name: "Position Open",
+    slug: "prashant-kumar",
+    name: "Prof. Prashant Kumar",
     role: "Editorial Board Member",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
+    affiliation: "Global Centre for Clean Air Research (GCARE), School of Engineering, University of Surrey, UK",
+    specialization: "Air quality, aerosol science, low-cost sensing, nature-based solutions, and climate change mitigation.",
+    email: "editor.environsci@scholarlyopen.org",
+    orcid: "0000-0002-8692-7484",
+    researchGate: "https://www.researchgate.net/profile/Prashant-Kumar-4",
+    googleScholar: "https://scholar.google.com/citations?user=prashant-kumar",
+    assignedSections: [
+      "Water and air quality",
+      "Climate science and adaptation",
+      "Urban ecology"
+    ],
+    expertise: [
+      "Air Quality & Health",
+      "Aerosol Science & Nanoparticles",
+      "Low-Cost Sensing",
+      "Citizen Science",
+      "Nature-Based Solutions",
+      "Climate Change Mitigation",
+      "Environmental Engineering"
+    ],
+    badges: ["Top 1% Highly Cited Researcher", "Haagen-Smit Prize Winner"],
     journalSlug: "environmental-science",
+    welcomeMessage: "As an Editorial Board Member and Handling Editor for Scholarly Open: Environmental Science, I am committed to advancing rigorous, peer-reviewed open science addressing real-world environmental challenges, atmospheric health, and sustainable solutions worldwide.",
+    stats: [
+      { label: "Status", value: "Accepting Submissions", description: "Handling editor ready for peer evaluation" },
+      { label: "Citations", value: "35,000+", description: "Highly cited in Environmental Science & Technology" },
+      { label: "Review Standard", value: "COPE Compliant", description: "Transparent, rigorous peer review" }
+    ],
+    biography: `Professor Prashant Kumar is the Professor and Chair in Air Quality and Health at the University of Surrey, United Kingdom. He is the Founding Director of the Global Centre for Clean Air Research (GCARE) and Founding Co-Director of the university's pan-university Institute for Sustainability. He holds a PhD in Engineering from the University of Cambridge and has been consistently named in the top 1% of Global Highly Cited Researchers. Winner of the 2023 Haagen-Smit Prize and the Clean Air Award for his transformative contributions to environmental science and urban air quality.`,
+    personalPublications: [
+      {
+        title: "Clean air engineering for cities: Connecting science, policy and people",
+        journal: "Atmospheric Environment",
+        year: "2024",
+        doi: "10.1016/j.atmosenv.2024.120000"
+      },
+      {
+        title: "The power of low-cost sensing for urban air quality monitoring and citizen engagement",
+        journal: "Environmental Science & Technology",
+        year: "2023",
+        doi: "10.1021/acs.est.2023.001"
+      }
+    ]
   },
   {
     slug: "position-open-environmental-science-ebm-2",

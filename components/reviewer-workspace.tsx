@@ -246,26 +246,80 @@ export function ReviewerWorkspace({
 
   // Reviewer Profile State & Onboarding
   const [profile, setProfile] = useState<ReviewerProfile>(() => {
+    const rawName = user?.name || initialProfile?.name || ""
+    const rawEmail = user?.email || initialProfile?.email || ""
+    const isBolutife = rawName.toLowerCase().includes("bolutife") || rawEmail.toLowerCase().includes("olofinjana")
+    const isMarcus = rawEmail.includes("m.vance") || rawName.includes("Marcus Vance")
+
+    if (isBolutife) {
+      return {
+        title: "Prof.",
+        name: rawName || "Prof. Bolutife Olofinjana",
+        email: rawEmail || "b.olofinjana@oauife.edu.ng",
+        photoUrl: user?.photoUrl || initialProfile?.photoUrl || "",
+        badges: ["Gateway Certified (95%)", "Verified Referee", "COPE Ethics Verified"],
+        institution: user?.institution || "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
+        department: "Department of Physics and Engineering Physics",
+        country: "Nigeria",
+        orcid: user?.orcid || "0000-0002-3652-3213",
+        scholarUrl: "https://scholar.google.com/citations?user=Gze_tvm8uEVqyX3mmpuh9SI1hZ5ZGCQKj2aVhxwOS9RLFzPbqvEQwltNpodj9vk0lnOTnPo57Zpnh5UkL9Vkr2WQlHnwDaQfUMNtATQerpIrunXu-J4klwKhc5RfJkwnT0VAh8gjEE_Da1Tx0cXsul8g==",
+        primaryDiscipline: "engineering",
+        subDisciplines: ["Materials Science", "Nanostructured Materials", "Thin Films", "Energy Storage"],
+        keywords: ["Materials Science", "Nanostructured Materials", "Thin Films", "Sensors", "Energy Storage", "Physics"],
+        maxReviewsPerMonth: 2,
+        preferredTurnaround: 14,
+        availabilityStatus: "Available",
+        sabbaticalUntil: "",
+        coiAcknowledged: true,
+        isCompleted: true
+      }
+    }
+
+    if (isMarcus) {
+      return {
+        title: initialProfile?.title || "Dr.",
+        name: rawName || "Marcus Vance",
+        email: rawEmail || "m.vance@university-charite.de",
+        photoUrl: user?.photoUrl || initialProfile?.photoUrl || "",
+        badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"],
+        institution: user?.institution || initialProfile?.institution || "Charité – Universitätsmedizin Berlin",
+        department: initialProfile?.department || "Department of Cardiology & Vascular Medicine",
+        country: initialProfile?.country || "Germany",
+        orcid: user?.orcid || initialProfile?.orcid || "0000-0004-7711-2093",
+        scholarUrl: initialProfile?.scholarUrl || "https://scholar.google.com/citations?user=vance-m",
+        primaryDiscipline: initialProfile?.primaryDiscipline || "medicine",
+        subDisciplines: initialProfile?.subDisciplines || ["Cardiology", "Cardiovascular Imaging", "Biomarkers"],
+        keywords: initialProfile?.keywords || ["CRISPR", "Cardiovascular Imaging", "AI Diagnostics", "Randomized Controlled Trials", "Echocardiography"],
+        maxReviewsPerMonth: initialProfile?.maxReviewsPerMonth ?? 2,
+        preferredTurnaround: initialProfile?.preferredTurnaround ?? 14,
+        availabilityStatus: initialProfile?.availabilityStatus || "Available",
+        sabbaticalUntil: initialProfile?.sabbaticalUntil || "",
+        coiAcknowledged: initialProfile?.coiAcknowledged ?? true,
+        isCompleted: initialProfile?.isCompleted ?? true
+      }
+    }
+
+    // Clean initial profile for any newly registered reviewer
     return {
       title: initialProfile?.title || "Dr.",
-      name: user?.name || initialProfile?.name || "Marcus Vance",
-      email: user?.email || initialProfile?.email || "m.vance@university-charite.de",
+      name: rawName || "Academic Referee",
+      email: rawEmail || "reviewer@scholarlyopen.org",
       photoUrl: user?.photoUrl || initialProfile?.photoUrl || "",
-      badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"],
-      institution: user?.institution || initialProfile?.institution || "Charité – Universitätsmedizin Berlin",
-      department: initialProfile?.department || "Department of Cardiology & Vascular Medicine",
-      country: initialProfile?.country || "Germany",
-      orcid: user?.orcid || initialProfile?.orcid || "0000-0004-7711-2093",
-      scholarUrl: initialProfile?.scholarUrl || "https://scholar.google.com/citations?user=vance-m",
-      primaryDiscipline: initialProfile?.primaryDiscipline || "medicine",
-      subDisciplines: initialProfile?.subDisciplines || ["Cardiology", "Cardiovascular Imaging", "Biomarkers"],
-      keywords: initialProfile?.keywords || ["CRISPR", "Cardiovascular Imaging", "AI Diagnostics", "Randomized Controlled Trials", "Echocardiography"],
+      badges: ["Qualified Referee", "COPE Ethics Verified"],
+      institution: user?.institution || initialProfile?.institution || "Academic Institution",
+      department: initialProfile?.department || "",
+      country: initialProfile?.country || "",
+      orcid: user?.orcid || initialProfile?.orcid || "",
+      scholarUrl: initialProfile?.scholarUrl || "",
+      primaryDiscipline: initialProfile?.primaryDiscipline || "general",
+      subDisciplines: initialProfile?.subDisciplines || ["Peer Review", "Methodology"],
+      keywords: initialProfile?.keywords || ["Academic Research", "Peer Review"],
       maxReviewsPerMonth: initialProfile?.maxReviewsPerMonth ?? 2,
       preferredTurnaround: initialProfile?.preferredTurnaround ?? 14,
       availabilityStatus: initialProfile?.availabilityStatus || "Available",
       sabbaticalUntil: initialProfile?.sabbaticalUntil || "",
       coiAcknowledged: initialProfile?.coiAcknowledged ?? true,
-      isCompleted: initialProfile?.isCompleted ?? true
+      isCompleted: initialProfile?.isCompleted ?? false
     }
   })
 
@@ -331,9 +385,10 @@ export function ReviewerWorkspace({
   const [portfolioFilter, setPortfolioFilter] = useState<"all" | "in_progress" | "invitations" | "completed">("all")
 
   // Wallet & Gamification state
-  const [points, setPoints] = useState(35)
-  const [reviewsDone, setReviewsDone] = useState(3)
-  const [walletExpiryDays, setWalletExpiryDays] = useState(312)
+  const isMarcusEmail = (user?.email || "").toLowerCase().includes("m.vance")
+  const [points, setPoints] = useState(isMarcusEmail ? 35 : 0)
+  const [reviewsDone, setReviewsDone] = useState(isMarcusEmail ? 3 : 0)
+  const [walletExpiryDays, setWalletExpiryDays] = useState(365)
   const [certViewMode, setCertViewMode] = useState<"certificate" | "cv">("certificate")
 
   // Awarded Vouchers & Wallet Perks
@@ -353,13 +408,17 @@ export function ReviewerWorkspace({
   useEffect(() => {
     try {
       const email = user?.email || "reviewer@scholarlyopen.org"
+      const isLegacyTest = email.toLowerCase().includes("m.vance")
+
       // Load accumulated points
       const storedPoints = localStorage.getItem(`editorial360_reviewer_points_${email}`)
       if (storedPoints) {
         const parsed = parseInt(storedPoints, 10)
-        if (!isNaN(parsed) && parsed > 0) {
-          setPoints(prev => Math.min(100, Math.max(prev, parsed)))
+        if (!isNaN(parsed) && parsed >= 0) {
+          setPoints(Math.min(100, parsed))
         }
+      } else if (!isLegacyTest) {
+        setPoints(0)
       }
 
       // Load awarded vouchers
@@ -381,8 +440,8 @@ export function ReviewerWorkspace({
         }
       }
 
-      // Default active starter vouchers if none exist yet
-      if (list.length === 0) {
+      // Only give starter voucher to legacy Marcus Vance test account
+      if (list.length === 0 && isLegacyTest) {
         list = [
           {
             id: "VOUCH-INIT-01",
@@ -2821,7 +2880,7 @@ COPE & Plan S Certified Archive
                     </div>
 
                     <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>Verified ORCID: {profile.orcid || "0000-0004-7711-2093"}</span>
+                      <span>Verified ORCID: {profile.orcid || "Verified Academic Record"}</span>
                       <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Gateway Certified Seal</span>
                     </div>
                   </Card>
@@ -2864,7 +2923,7 @@ COPE & Plan S Certified Archive
                   <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
                     <div className="flex justify-between">
                       <span className="text-slate-500">Verified ORCID Record:</span>
-                      <strong className="text-slate-900 dark:text-white font-mono">{profile.orcid || "0000-0004-7711-2093"}</strong>
+                      <strong className="text-slate-900 dark:text-white font-mono">{profile.orcid || "Verified Academic Record"}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Total Completed Reviews:</span>
@@ -2904,8 +2963,8 @@ COPE & Plan S Certified Archive
                   <Button
                     onClick={() => {
                       const orcidData = JSON.stringify({
-                        scholar: "Dr. Marcus Vance",
-                        orcid: "0000-0004-7711-2093",
+                        scholar: getFormattedReviewerName(profile.title, profile.name),
+                        orcid: profile.orcid || "N/A",
                         publisher: "Scholarly Open",
                         verifiedReviews: [
                           { id: "SOENG-26-RS001", journal: "Engineering & Applied Sciences", date: "2026-08-20", type: "review", blind: "double-blind" },
@@ -2917,7 +2976,8 @@ COPE & Plan S Certified Archive
                       const url = URL.createObjectURL(blob)
                       const a = document.createElement("a")
                       a.href = url
-                      a.download = "Dr_Marcus_Vance_PeerReview_ORCID_Record.json"
+                      const cleanPrefix = (profile.name || "Reviewer").replace(/[^a-zA-Z0-9]/g, "_")
+                      a.download = `${cleanPrefix}_PeerReview_ORCID_Record.json`
                       a.click()
                     }}
                     variant="outline"
@@ -2984,7 +3044,7 @@ COPE & Plan S Certified Archive
                         {profile.department ? `${profile.department} · ` : ""}{profile.institution} ({profile.country})
                       </p>
                       <div className="flex items-center gap-2 mt-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
-                        <span>✓ ORCID: {profile.orcid || "0000-0004-7711-2093"}</span>
+                        <span>✓ ORCID: {profile.orcid || "Verified Academic Record"}</span>
                         <span>•</span>
                         <span>WoS: WOS-REV-2026-9812</span>
                       </div>
@@ -3892,8 +3952,8 @@ COPE & Plan S Certified Archive
                     />
                     <span className="text-xs text-slate-700 dark:text-slate-300">
                       {isDe 
-                        ? `Begutachtungsnachweis automatisch mit meinem ORCID-Profil (${profile.orcid || "0000-0004-7711-2093"}) synchronisieren.`
-                        : `Automatically sync review credit to my ORCID profile (${profile.orcid || "0000-0004-7711-2093"}).`}
+                        ? `Begutachtungsnachweis automatisch mit meinem ORCID-Profil (${profile.orcid || "Verifizierter Datensatz"}) synchronisieren.`
+                        : `Automatically sync review credit to my ORCID profile (${profile.orcid || "Verified Record"}).`}
                     </span>
                   </label>
                 </div>
@@ -4001,7 +4061,7 @@ COPE & Plan S Certified Archive
                 <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500 flex-wrap gap-2">
                   <div className="text-left font-mono">
                     <div>Verification ID: CERT-REV-{selectedCertReview.id}-2026</div>
-                    <div>ORCID iD: {profile.orcid || "0000-0004-7711-2093"} (Synced ✓)</div>
+                    <div>ORCID iD: {profile.orcid || "Verified Academic Record"} (Synced ✓)</div>
                   </div>
                   <div className="text-right">
                     <span className="font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">

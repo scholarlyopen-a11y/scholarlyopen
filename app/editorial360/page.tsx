@@ -90,6 +90,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import type { ReviewAssessmentData } from "@/components/reviewer-workspace"
 import type { CrossDeskNotification } from "@/components/cross-desk-activity-feed"
 import { OFFICIAL_JOURNALS, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
+import { EditorialBoardOnboarding, type EditorialBoardOnboardingData } from "@/components/editorial-board-onboarding"
 
 const ReviewerWorkspace = dynamic(
   () => import("@/components/reviewer-workspace").then(mod => mod.ReviewerWorkspace),
@@ -934,6 +935,15 @@ export default function Editorial360Page() {
   const [invitationDeadlineDays, setInvitationDeadlineDays] = useState<number>(14)
   const [invitationCustomDeadline, setInvitationCustomDeadline] = useState<string>("")
 
+  // Official Editorial Board Acceptance & Profile Onboarding Portal State
+  const [onboardingInvite, setOnboardingInvite] = useState<{
+    isOpen: boolean
+    role: "eic" | "ae" | "board"
+    name: string
+    email?: string
+    journal?: string
+  } | null>(null)
+
   // Official Acceptance Confirmation Screen State (EiC, AE, Board, Reviewer Gateway Claim)
   const [officialConfirmation, setOfficialConfirmation] = useState<{
     type: "eic" | "ae" | "board" | "reviewer_claim"
@@ -1081,13 +1091,23 @@ export default function Editorial360Page() {
 
       // Editor-in-Chief Leadership Decision Link Handler
       if (urlAction === "eic_decision") {
-        setOfficialConfirmation({
-          type: "eic",
-          name: urlName || "Esteemed Scholar",
-          email: urlEmail,
-          journal: urlJournal || "Scholarly Open",
-          decision: urlDecision
-        })
+        if (urlDecision === "yes") {
+          setOnboardingInvite({
+            isOpen: true,
+            role: "eic",
+            name: urlName || "Editor-in-Chief Nominee",
+            email: urlEmail || "",
+            journal: urlJournal || "Scholarly Open"
+          })
+        } else {
+          setOfficialConfirmation({
+            type: "eic",
+            name: urlName || "Esteemed Scholar",
+            email: urlEmail,
+            journal: urlJournal || "Scholarly Open",
+            decision: urlDecision
+          })
+        }
         if (urlEmail) setEmail(urlEmail)
 
         // Post EiC response to backend audit log & notify Journal Manager Desk
@@ -1107,27 +1127,15 @@ export default function Editorial360Page() {
       // Associate Editor & Editorial Board Member Acceptance Link Handler
       if (urlAction === "accept_ae" || urlAction === "accept_board") {
         const isAe = urlAction === "accept_ae"
-        setOfficialConfirmation({
-          type: isAe ? "ae" : "board",
-          name: urlName || "Esteemed Scholar",
-          email: urlEmail,
-          journal: urlJournal || "Scholarly Open",
-          decision: "yes"
+        const defaultScholarName = urlName || (urlJournal?.includes("Environmental") ? "Dr. Prashant Kumar" : "Esteemed Scholar")
+        setOnboardingInvite({
+          isOpen: true,
+          role: isAe ? "ae" : "board",
+          name: defaultScholarName,
+          email: urlEmail || (urlJournal?.includes("Environmental") ? "p.kumar@surrey.ac.uk" : ""),
+          journal: urlJournal || "Scholarly Open: Environmental Science"
         })
         if (urlEmail) setEmail(urlEmail)
-
-        // Post acceptance to backend audit log & notify Journal Manager Desk
-        fetch("/api/editorial360/invitation-response", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: isAe ? "ae" : "board",
-            candidateName: urlName || "Editorial Nominee",
-            candidateEmail: urlEmail,
-            journal: urlJournal || "Scholarly Open",
-            decision: "yes"
-          })
-        }).catch(err => console.error("Could not record appointment acceptance:", err))
       }
 
       if (urlAction === "submit") {
@@ -1159,6 +1167,15 @@ export default function Editorial360Page() {
             if (session.email) setEmail(session.email)
             if (session.activeJmTab) setActiveJmTab(session.activeJmTab)
             if (session.activeEditorTab) setActiveEditorTab(session.activeEditorTab)
+            if (session.editorName) setEditorName(session.editorName)
+            if (session.editorRank) setEditorRank(session.editorRank)
+            if (session.editorInstitution) setEditorInstitution(session.editorInstitution)
+            if (session.editorCountry) setEditorCountry(session.editorCountry)
+            if (session.editorJournal) setEditorJournal(session.editorJournal)
+            if (session.editorEmail) setEditorEmail(session.editorEmail)
+            if (session.editorPhotoUrl) setEditorPhotoUrl(session.editorPhotoUrl)
+            if (session.editorOrcid) setEditorOrcid(session.editorOrcid)
+            if (session.reviewerProfile) setReviewerProfile(session.reviewerProfile)
             lastActivityRef.current = now
             if (urlAction === "submit") {
               setRole("author")
@@ -2376,9 +2393,68 @@ export default function Editorial360Page() {
     setTimeout(() => {
       setLoading(false)
       setIsLoggedIn(true)
+
+      let currentEditorName = editorName
+      let currentEditorRank = editorRank
+      let currentEditorJournal = editorJournal
+      let currentEditorInstitution = editorInstitution
+      let currentEditorCountry = editorCountry
+      let currentEditorOrcid = editorOrcid
+      let currentEditorPhotoUrl = editorPhotoUrl
+
       if (role === "editor") {
         setActiveEditorTab("desk")
+        const isKumar = email.toLowerCase().includes("kumar") || email.toLowerCase().includes("prashant")
+        if (isKumar) {
+          currentEditorName = "Prof. Prashant Kumar"
+          currentEditorRank = "Editorial Board Member & Handling Editor"
+          currentEditorJournal = "Scholarly Open: Environmental Science"
+          currentEditorInstitution = "Global Centre for Clean Air Research (GCARE), School of Engineering, University of Surrey"
+          currentEditorCountry = "United Kingdom"
+          currentEditorOrcid = "0000-0002-8692-7484"
+          currentEditorPhotoUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
+          
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
+          setEditorOrcid(currentEditorOrcid)
+          setEditorPhotoUrl(currentEditorPhotoUrl)
+          setEditorEmail(email)
+        }
       }
+
+      let currentReviewerProfile = reviewerProfile
+      if (role === "reviewer") {
+        const isBolutife = email.toLowerCase().includes("olofinjana") || email.toLowerCase().includes("bolutife")
+        if (isBolutife) {
+          currentReviewerProfile = {
+            title: "Prof.",
+            name: "Prof. Bolutife Olofinjana",
+            email: email,
+            institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
+            department: "Department of Physics and Engineering Physics",
+            country: "Nigeria",
+            orcid: "0000-0002-3652-3213",
+            badges: ["Gateway Certified (95%)", "Verified Referee", "COPE Ethics Verified"]
+          }
+          setReviewerProfile(currentReviewerProfile)
+        } else if (!email.toLowerCase().includes("vance")) {
+          currentReviewerProfile = {
+            title: "Dr.",
+            name: reviewerProfile?.name || email.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+            email: email,
+            institution: reviewerProfile?.institution || "Academic Institution",
+            department: reviewerProfile?.department || "Department of Research",
+            country: reviewerProfile?.country || "International",
+            orcid: reviewerProfile?.orcid || "",
+            badges: reviewerProfile?.badges || ["Registered Reviewer", "COPE Ethics Verified"]
+          }
+          setReviewerProfile(currentReviewerProfile)
+        }
+      }
+
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("editorial360_session", JSON.stringify({
@@ -2387,6 +2463,14 @@ export default function Editorial360Page() {
             email,
             activeJmTab,
             activeEditorTab: role === "editor" ? "desk" : activeEditorTab,
+            editorName: currentEditorName,
+            editorRank: currentEditorRank,
+            editorJournal: currentEditorJournal,
+            editorInstitution: currentEditorInstitution,
+            editorCountry: currentEditorCountry,
+            editorOrcid: currentEditorOrcid,
+            editorPhotoUrl: currentEditorPhotoUrl,
+            reviewerProfile: currentReviewerProfile,
             timestamp: Date.now()
           }))
         } catch (e) {
@@ -2496,8 +2580,65 @@ export default function Editorial360Page() {
       setEmail(regEmail)
       setIsLoggedIn(true)
       if (regRole === "editor") {
+        setEditorName(regName)
+        setEditorEmail(regEmail)
+        setEditorJournal(invitedJournal || "Scholarly Open")
+        setEditorInstitution("Academic Institution")
+        setEditorCountry("International")
+        setEditorOrcid(regOrcid || "")
+        setEditorRank("Editorial Board Member & Handling Editor")
         setActiveEditorTab("desk")
+
+        fetch("/api/editorial360/editors", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: regName,
+            email: regEmail,
+            journal: invitedJournal || "Scholarly Open",
+            role: "Editorial Board Member & Handling Editor",
+            affiliation: "Academic Institution",
+            country: "International",
+            orcid: regOrcid || ""
+          })
+        }).catch(err => console.error("Error persisting registered editor:", err))
       }
+
+      let newReviewerProfile = reviewerProfile
+      if (regRole === "reviewer") {
+        const isBolutife = regName.toLowerCase().includes("bolutife") || regEmail.toLowerCase().includes("olofinjana")
+        newReviewerProfile = {
+          title: isBolutife ? "Prof." : "Dr.",
+          name: regName,
+          email: regEmail,
+          institution: isBolutife ? "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria" : "Scholarly Open Verified Reviewer Community",
+          department: isBolutife ? "Department of Physics and Engineering Physics" : "Peer Review Faculty",
+          country: isBolutife ? "Nigeria" : "International",
+          orcid: regOrcid || (isBolutife ? "0000-0002-3652-3213" : ""),
+          badges: isBolutife 
+            ? ["Gateway Certified (95%)", "Verified Referee", "COPE Ethics Verified"]
+            : ["Registered Reviewer", "COPE Ethics Verified"]
+        }
+        setReviewerProfile(newReviewerProfile)
+
+        fetch("/api/editorial360/reviewer-tests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: regName,
+            email: regEmail,
+            discipline: isBolutife ? "engineering" : "general",
+            score: isBolutife ? 95 : 100,
+            passed: true,
+            status: "Passed - Account Active",
+            institution: newReviewerProfile.institution,
+            country: newReviewerProfile.country,
+            orcid: newReviewerProfile.orcid,
+            certificateId: `CERT-SO-2026-${Math.floor(1000 + Math.random() * 9000)}`
+          })
+        }).catch(err => console.error("Error auto-registering reviewer:", err))
+      }
+
       if (typeof window !== "undefined") {
         try {
           const sess = {
@@ -2505,20 +2646,20 @@ export default function Editorial360Page() {
             email: regEmail,
             isLoggedIn: true,
             activeEditorTab: regRole === "editor" ? "desk" : undefined,
+            editorName: regRole === "editor" ? regName : editorName,
+            editorRank: regRole === "editor" ? "Editorial Board Member & Handling Editor" : editorRank,
+            editorJournal: regRole === "editor" ? (invitedJournal || "Scholarly Open") : editorJournal,
+            editorInstitution: regRole === "editor" ? "Academic Institution" : editorInstitution,
+            editorCountry: regRole === "editor" ? "International" : editorCountry,
+            editorOrcid: regRole === "editor" ? (regOrcid || "") : editorOrcid,
+            editorEmail: regRole === "editor" ? regEmail : editorEmail,
+            reviewerProfile: regRole === "reviewer" ? newReviewerProfile : reviewerProfile,
             timestamp: Date.now()
           }
           sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
         } catch (e) {}
       }
-      if (regRole === "reviewer") {
-        setReviewerProfile(prev => ({
-          name: regName,
-          email: regEmail,
-          institution: "Scholarly Open Verified Reviewer Community",
-          department: "Peer Review Faculty",
-          ...(prev || {})
-        }))
-      }
+
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search)
         if (params.get("action") === "submit" && regRole === "author") {
@@ -2538,9 +2679,13 @@ export default function Editorial360Page() {
     }
     setError("")
     setSuccess("")
-    const matchedRole = roles.find(r => r.id === selectedRole)
-    if (matchedRole) {
-      setEmail(matchedRole.placeholder)
+    // Only set placeholder if email is empty or currently matches a default placeholder
+    const isPlaceholder = !email || roles.some(r => r.placeholder === email)
+    if (isPlaceholder) {
+      const matchedRole = roles.find(r => r.id === selectedRole)
+      if (matchedRole) {
+        setEmail(matchedRole.placeholder)
+      }
     }
   }
 
@@ -2551,9 +2696,12 @@ export default function Editorial360Page() {
     }
     setError("")
     setSuccess("")
-    const matchedRole = roles.find(r => r.id === newRole)
-    if (matchedRole) {
-      setEmail(matchedRole.placeholder)
+    const isPlaceholder = !email || roles.some(r => r.placeholder === email)
+    if (isPlaceholder) {
+      const matchedRole = roles.find(r => r.id === newRole)
+      if (matchedRole) {
+        setEmail(matchedRole.placeholder)
+      }
     }
     if (newRole === "editor") {
       setActiveEditorTab("desk")
@@ -4140,6 +4288,72 @@ export default function Editorial360Page() {
             </main>
             <Footer />
           </>
+        ) : onboardingInvite?.isOpen ? (
+          // ==========================================
+          // EDITORIAL BOARD ONBOARDING & PROFILE SETUP
+          // ==========================================
+          <EditorialBoardOnboarding
+            language={language}
+            initialName={onboardingInvite.name}
+            initialEmail={onboardingInvite.email}
+            initialJournal={onboardingInvite.journal}
+            roleType={onboardingInvite.role}
+            onCancel={() => setOnboardingInvite(null)}
+            onComplete={(data: EditorialBoardOnboardingData) => {
+              // 1. Update Handling Editor profile state
+              setEditorName(data.name)
+              setEditorRank(data.role || "Editorial Board Member & Handling Editor")
+              setEditorEmail(data.email)
+              setEditorJournal(data.journal)
+              setEditorInstitution(data.affiliation)
+              setEditorCountry(data.country)
+              setEditorPhotoUrl(data.photoUrl)
+              setEditorOrcid(data.orcid)
+
+              // 2. Set current user session to Handling Editor
+              setRole("editor")
+              setEmail(data.email)
+              setIsLoggedIn(true)
+              setActiveEditorTab("desk")
+              setOnboardingInvite(null)
+
+              // 3. Persist session
+              if (typeof window !== "undefined") {
+                try {
+                  sessionStorage.setItem("editorial360_session", JSON.stringify({
+                    isLoggedIn: true,
+                    role: "editor",
+                    email: data.email,
+                    editorName: data.name,
+                    editorRank: data.role || "Editorial Board Member & Handling Editor",
+                    editorJournal: data.journal,
+                    editorInstitution: data.affiliation,
+                    editorCountry: data.country,
+                    editorPhotoUrl: data.photoUrl,
+                    editorOrcid: data.orcid,
+                    activeEditorTab: "desk",
+                    timestamp: Date.now()
+                  }))
+                } catch (e) {}
+              }
+
+              // 4. Add Cross Desk notification so Journal Manager sees it immediately
+              handleAddCrossDeskNotification({
+                id: `NOTIF-EB-${Date.now()}`,
+                type: "editorial_board_joined",
+                title: "Editorial Board Onboarding Completed",
+                message: `${data.name} has formally accepted their appointment for ${data.journal} and onboarded their profile to Editorial360.`,
+                senderRole: "editor",
+                senderName: data.name,
+                targetRole: "jm",
+                timestamp: new Date().toISOString(),
+                read: false,
+                urgent: false
+              })
+
+              setSuccess(`Welcome to Scholarly Open, ${data.name}! Your Editorial Board appointment and Handling Editor Desk are active.`)
+            }}
+          />
         ) : (
           // ==========================================
           // 1. SIGN IN & REGISTRATION VIEW

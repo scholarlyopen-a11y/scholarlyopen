@@ -2,6 +2,8 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
+import fs from "fs"
+import path from "path"
 
 export interface InvitationResponseRecord {
   id: string
@@ -13,6 +15,21 @@ export interface InvitationResponseRecord {
   credentialId?: string
   timestamp: string
   notes?: string
+  affiliation?: string
+  department?: string
+  country?: string
+  biography?: string
+  photoUrl?: string
+  cvFileName?: string
+  cvFileSize?: string
+  researchInterests?: string[]
+  orcid?: string
+  googleScholar?: string
+  researchGate?: string
+  linkedin?: string
+  publications?: any[]
+  hasAcceptedTerms?: boolean
+  consentProfileUpload?: boolean
 }
 
 let responseStore: InvitationResponseRecord[] = [
@@ -28,6 +45,75 @@ let responseStore: InvitationResponseRecord[] = [
     notes: "Reviewer profile activated via Reviewer Gateway qualification."
   }
 ]
+
+const EDITORS_FILE_PATH = path.join(process.cwd(), "lib", "data", "editorial-board-onboarding.json")
+const REVIEWERS_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
+
+function saveEditorToDisk(editor: any) {
+  try {
+    let list: any[] = []
+    if (fs.existsSync(EDITORS_FILE_PATH)) {
+      const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      list = Array.isArray(parsed.onboardedEditors) ? parsed.onboardedEditors : []
+    }
+    const idx = list.findIndex(e => e.email && editor.email && e.email.toLowerCase() === editor.email.toLowerCase())
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...editor }
+    } else {
+      list.unshift(editor)
+    }
+    fs.writeFileSync(EDITORS_FILE_PATH, JSON.stringify({ onboardedEditors: list }, null, 2), "utf-8")
+  } catch (e) {
+    console.error("Error saving editor to disk:", e)
+  }
+}
+
+function updateReviewerOnDisk(email: string, name: string, credId?: string) {
+  try {
+    if (fs.existsSync(REVIEWERS_FILE_PATH)) {
+      const raw = fs.readFileSync(REVIEWERS_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      let changed = false
+      if (Array.isArray(parsed.tests)) {
+        parsed.tests = parsed.tests.map((t: any) => {
+          if (t.candidateEmail?.toLowerCase() === email.toLowerCase()) {
+            changed = true
+            return { ...t, status: "Passed - Account Active" }
+          }
+          return t
+        })
+      }
+      if (Array.isArray(parsed.registeredReviewers)) {
+        const existing = parsed.registeredReviewers.find((r: any) => r.email?.toLowerCase() === email.toLowerCase())
+        if (!existing && email) {
+          changed = true
+          parsed.registeredReviewers.unshift({
+            id: `REV-REG-${Date.now().toString().slice(-4)}`,
+            name,
+            email,
+            status: "Active",
+            activeTasks: 0,
+            maxTasks: 3,
+            matchScore: 95,
+            specialization: "Academic Peer Review",
+            discipline: "Sciences",
+            institution: "Academic Institution",
+            completedReviews: 0,
+            onTimeRate: 100,
+            credentialId: credId || "CERT-SO-2026-CLAIMED",
+            keywords: ["peer review", "academic research"]
+          })
+        }
+      }
+      if (changed) {
+        fs.writeFileSync(REVIEWERS_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
+      }
+    }
+  } catch (e) {
+    console.error("Error updating reviewer on disk:", e)
+  }
+}
 
 export async function GET() {
   return NextResponse.json({
@@ -47,7 +133,22 @@ export async function POST(req: Request) {
       journal = "Scholarly Open",
       decision = "yes",
       credentialId = "",
-      notes = ""
+      notes = "",
+      affiliation = "",
+      department = "",
+      country = "",
+      biography = "",
+      photoUrl = "",
+      cvFileName = "",
+      cvFileSize = "",
+      researchInterests = [],
+      orcid = "",
+      googleScholar = "",
+      researchGate = "",
+      linkedin = "",
+      publications = [],
+      hasAcceptedTerms = true,
+      consentProfileUpload = true
     } = body
 
     if (!candidateName) {
@@ -63,10 +164,60 @@ export async function POST(req: Request) {
       decision,
       credentialId,
       timestamp: new Date().toISOString(),
-      notes: notes || `Action logged via Editorial360 invitation link (${type}: ${decision})`
+      notes: notes || `Action logged via Editorial360 invitation link (${type}: ${decision})`,
+      affiliation,
+      department,
+      country,
+      biography,
+      photoUrl,
+      cvFileName,
+      cvFileSize,
+      researchInterests: Array.isArray(researchInterests) ? researchInterests : [],
+      orcid,
+      googleScholar,
+      researchGate,
+      linkedin,
+      publications: Array.isArray(publications) ? publications : [],
+      hasAcceptedTerms: !!hasAcceptedTerms,
+      consentProfileUpload: !!consentProfileUpload
     }
 
     responseStore = [newRecord, ...responseStore]
+
+    // Persist editor onboarding data
+    if (type === "board" || type === "ae" || type === "eic") {
+      saveEditorToDisk({
+        id: `EBM-${Date.now().toString().slice(-4)}`,
+        name: candidateName,
+        email: candidateEmail,
+        role: type === "eic" ? "Editor-in-Chief" : type === "ae" ? "Associate Editor" : "Editorial Board Member & Handling Editor",
+        journal,
+        journalSlug: journal.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+        affiliation: affiliation || "Academic Institution",
+        department,
+        country,
+        specialization: Array.isArray(researchInterests) && researchInterests.length > 0 ? researchInterests.join(", ") : "Academic Research",
+        researchInterests: Array.isArray(researchInterests) ? researchInterests : [],
+        biography,
+        photoUrl,
+        cvFileName,
+        cvFileSize,
+        orcid,
+        googleScholar,
+        researchGate,
+        linkedin,
+        publications: Array.isArray(publications) ? publications : [],
+        hasAcceptedTerms: !!hasAcceptedTerms,
+        consentProfileUpload: !!consentProfileUpload,
+        status: "Active Handling Editor",
+        acceptedAt: new Date().toISOString()
+      })
+    }
+
+    // If reviewer claim, update reviewer on disk
+    if (type === "reviewer_claim" && candidateEmail) {
+      updateReviewerOnDisk(candidateEmail, candidateName, credentialId)
+    }
 
     // Send email alert to Journal Manager Desk if SMTP is configured
     try {
@@ -92,28 +243,47 @@ export async function POST(req: Request) {
           ? "Associate Editor" 
           : type === "reviewer_claim" 
           ? "Certified Peer Reviewer" 
-          : "Editorial Board Member"
+          : "Editorial Board Member & Handling Editor"
 
         const subject = type === "reviewer_claim"
           ? `[Reviewer Active] ${candidateName} completed Gateway Onboarding (${credentialId || "Certified"})`
           : `[Invitation Confirmed] ${candidateName} accepted ${roleLabel} for ${journal}`
 
         const htmlContent = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <div style="border-bottom: 2px solid #0b99ff; padding-bottom: 12px; margin-bottom: 16px;">
-              <h2 style="color: #0f172a; margin: 0; font-size: 18px;">Editorial360 Notification: Appointment & Onboarding</h2>
+          <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+            <div style="border-bottom: 3px solid #0b99ff; padding-bottom: 16px; margin-bottom: 20px;">
+              <h2 style="color: #0f172a; margin: 0 0 6px 0; font-size: 20px;">Editorial360 Notification: Appointment & Profile Acceptance</h2>
+              <span style="display: inline-block; background-color: #ecfdf5; color: #047857; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+                Official Consent & Profile Submitted
+              </span>
             </div>
-            <p style="font-size: 14px; color: #334155; line-height: 1.6;">
+            
+            <p style="font-size: 14px; color: #334155; line-height: 1.7;">
               <strong>Scholar / Candidate:</strong> ${candidateName}<br>
               <strong>Email:</strong> ${candidateEmail || "Provided during activation"}<br>
               <strong>Role / Category:</strong> ${roleLabel}<br>
               <strong>Journal Portfolio:</strong> ${journal}<br>
+              <strong>Affiliation:</strong> ${affiliation || "Academic Institution"}${department ? ` (${department})` : ""}${country ? `, ${country}` : ""}<br>
+              ${orcid ? `<strong>ORCID iD:</strong> <a href="https://orcid.org/${orcid}" style="color: #0b99ff;">${orcid}</a><br>` : ""}
+              ${cvFileName ? `<strong>Uploaded CV:</strong> ${cvFileName} (${cvFileSize || "Uploaded"})<br>` : ""}
+              ${photoUrl ? `<strong>Photo:</strong> High-resolution profile photo attached<br>` : ""}
+              ${Array.isArray(researchInterests) && researchInterests.length > 0 ? `<strong>Research Interests:</strong> ${researchInterests.join(", ")}<br>` : ""}
               <strong>Decision / Action:</strong> ${decision.toUpperCase()}<br>
               ${credentialId ? `<strong>Credential ID:</strong> ${credentialId}<br>` : ""}
+              <strong>Website Profile Upload Consent:</strong> ${consentProfileUpload ? "Granted (GDPR Compliant)" : "Pending"}<br>
+              <strong>Terms Accepted:</strong> ${hasAcceptedTerms ? "Yes (COPE & Rigor Standards)" : "No"}<br>
               <strong>Timestamp:</strong> ${new Date().toUTCString()}
             </p>
-            <div style="background-color: #f8fafc; padding: 12px; border-radius: 6px; font-size: 12px; color: #64748b;">
-              This notification was generated automatically by Editorial360 Unified Editorial Management.
+
+            ${biography ? `
+              <div style="background-color: #f8fafc; border-left: 3px solid #0b99ff; padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
+                <strong style="color: #1e293b; font-size: 13px;">Academic Biography:</strong>
+                <p style="color: #475569; font-size: 13px; line-height: 1.6; margin: 6px 0 0 0;">${biography}</p>
+              </div>
+            ` : ""}
+
+            <div style="background-color: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 12px; color: #64748b; margin-top: 20px;">
+              This record has been synchronized into the Editorial360 Handling Editor & Reviewer registry and is ready for assignment in the Journal Manager desk.
             </div>
           </div>
         `

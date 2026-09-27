@@ -328,9 +328,10 @@ export function JournalManagerWorkspace({
   const fetchGatewayData = async () => {
     setIsLoadingGateway(true)
     try {
-      const [testsRes, respRes] = await Promise.all([
+      const [testsRes, respRes, revsRes] = await Promise.all([
         fetch("/api/editorial360/reviewer-tests"),
-        fetch("/api/editorial360/invitation-response")
+        fetch("/api/editorial360/invitation-response"),
+        fetch("/api/editorial360/reviewers")
       ])
       if (testsRes.ok) {
         const d = await testsRes.json()
@@ -339,6 +340,16 @@ export function JournalManagerWorkspace({
       if (respRes.ok) {
         const r = await respRes.json()
         if (r.success && Array.isArray(r.responses)) setGatewayResponses(r.responses)
+      }
+      if (revsRes.ok) {
+        const rv = await revsRes.json()
+        if (rv.ok && Array.isArray(rv.registeredReviewers)) {
+          setReviewersList(prev => {
+            const existingEmails = new Set(prev.map(p => p.email?.toLowerCase()))
+            const toAdd = rv.registeredReviewers.filter((nr: any) => nr.email && !existingEmails.has(nr.email.toLowerCase()))
+            return [...toAdd, ...prev]
+          })
+        }
       }
     } catch (e) {
       console.error("Error loading gateway tests:", e)
@@ -1141,6 +1152,21 @@ export function JournalManagerWorkspace({
 
   // Reviewer Registry List
   const [reviewersList, setReviewersList] = useState<JmReviewer[]>([
+    {
+      id: "REV-REG-05",
+      name: "Prof. Bolutife Olofinjana",
+      email: "b.olofinjana@oauife.edu.ng",
+      status: "Active",
+      activeTasks: 0,
+      maxTasks: 3,
+      matchScore: 95,
+      specialization: "Materials Science, Nanostructured Materials, Thin Films, Energy Storage",
+      discipline: "Engineering",
+      orcid: "0000-0002-3652-3213",
+      completedReviews: 0,
+      onTimeRate: 100,
+      keywords: ["materials science", "nanostructured materials", "thin films", "sensors", "energy storage", "physics"]
+    },
     {
       id: "REV-REG-01",
       name: "Dr. Evelyn Vane",
