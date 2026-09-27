@@ -4808,79 +4808,6 @@ export default function Editorial360Page() {
                     </CardContent>
                     
                     <CardFooter className="flex flex-col gap-3 px-6 pb-6 pt-2">
-                      {/* One-Click Quick Role Switcher for Seamless Testing & Access */}
-                      <div className="w-full pt-1 pb-2 border-b border-slate-100 dark:border-slate-800">
-                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-1.5">
-                          Quick Demo Sign-In (Select Role):
-                        </span>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRole("editor")
-                              setEmail("p.kumar@surrey.ac.uk")
-                              setPassword("Scholarly#2026!Secured")
-                              setError("")
-                            }}
-                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
-                              role === "editor"
-                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
-                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
-                            }`}
-                          >
-                            Editor Desk
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRole("jm")
-                              setEmail("noor.f@scholarlyopen.org")
-                              setPassword("Scholarly#2026!Secured")
-                              setError("")
-                            }}
-                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
-                              role === "jm"
-                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
-                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
-                            }`}
-                          >
-                            Journal Mgr
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRole("reviewer")
-                              setEmail("b.olofinjana@oauife.edu.ng")
-                              setPassword("Scholarly#2026!Secured")
-                              setError("")
-                            }}
-                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
-                              role === "reviewer"
-                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
-                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
-                            }`}
-                          >
-                            Reviewer
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRole("author")
-                              setEmail("author@scholarlyopen.org")
-                              setPassword("Scholarly#2026!Secured")
-                              setError("")
-                            }}
-                            className={`px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer text-center ${
-                              role === "author"
-                                ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
-                                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]/50"
-                            }`}
-                          >
-                            Author
-                          </button>
-                        </div>
-                      </div>
-
                       <Button 
                         type="submit" 
                         disabled={loading}
@@ -4893,10 +4820,10 @@ export default function Editorial360Page() {
 
                       <button
                         type="button"
-                        onClick={() => handleLogin()}
+                        onClick={() => setSuccess(language === "de" ? "Magic-Link wurde per E-Mail gesendet!" : "Magic sign-in link sent to your email!")}
                         className="w-full text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0b99ff] py-1.5 transition-all text-center cursor-pointer"
                       >
-                        {language === "de" ? "Mit Direktlink anmelden (1-Klick Login)" : "Sign in with direct link (Instant 1-Click)"}
+                        {language === "de" ? "Mit Direktlink anmelden" : "Sign in with direct magic link"}
                       </button>
                       
                       {/* PeerJ-Inspired SSO Social Bar */}
