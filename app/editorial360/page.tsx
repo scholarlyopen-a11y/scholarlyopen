@@ -17,6 +17,7 @@ import {
   CheckSquare, 
   Users, 
   Eye, 
+  EyeOff, 
   Plus, 
   Send, 
   AlertTriangle, 
@@ -902,6 +903,9 @@ export default function Editorial360Page() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const [showRegPassword, setShowRegPassword] = useState(false)
+  const [showInvPassword, setShowInvPassword] = useState(false)
 
   // Registration States
   const [regName, setRegName] = useState("")
@@ -1222,6 +1226,13 @@ export default function Editorial360Page() {
             if (session.editorPhotoUrl) setEditorPhotoUrl(session.editorPhotoUrl)
             if (session.editorOrcid) setEditorOrcid(session.editorOrcid)
             if (session.reviewerProfile) setReviewerProfile(session.reviewerProfile)
+            if (session.profPhotoUrl) setProfPhotoUrl(session.profPhotoUrl)
+            if (session.jmFullName) setJmFullName(session.jmFullName)
+            if (session.jmStaffRole) setJmStaffRole(session.jmStaffRole)
+            if (session.jmDepartment) setJmDepartment(session.jmDepartment)
+            if (session.jmOfficeLocation) setJmOfficeLocation(session.jmOfficeLocation)
+            if (session.jmDeskEmail) setJmDeskEmail(session.jmDeskEmail)
+            if (session.profCountry) setProfCountry(session.profCountry)
             lastActivityRef.current = now
             if (urlAction === "submit") {
               setRole("author")
@@ -1230,6 +1241,25 @@ export default function Editorial360Page() {
           } else {
             sessionStorage.removeItem("editorial360_session")
           }
+        }
+
+        // Restore global persistent user photo if set
+        const savedPhoto = localStorage.getItem("editorial360_user_photo")
+        if (savedPhoto) setProfPhotoUrl(savedPhoto)
+
+        // Restore JM profile if saved
+        const savedJm = localStorage.getItem("editorial360_jm_profile")
+        if (savedJm) {
+          try {
+            const pj = JSON.parse(savedJm)
+            if (pj.jmFullName) setJmFullName(pj.jmFullName)
+            if (pj.jmStaffRole) setJmStaffRole(pj.jmStaffRole)
+            if (pj.jmDepartment) setJmDepartment(pj.jmDepartment)
+            if (pj.jmOfficeLocation) setJmOfficeLocation(pj.jmOfficeLocation)
+            if (pj.jmDeskEmail) setJmDeskEmail(pj.jmDeskEmail)
+            if (pj.profCountry) setProfCountry(pj.profCountry)
+            if (pj.photoUrl) setProfPhotoUrl(pj.photoUrl)
+          } catch (e) {}
         }
       } catch (e) {
         console.error("Failed to parse editorial360_session", e)
@@ -2737,6 +2767,13 @@ export default function Editorial360Page() {
             editorOrcid: currentEditorOrcid,
             editorPhotoUrl: currentEditorPhotoUrl,
             reviewerProfile: currentReviewerProfile,
+            profPhotoUrl: profPhotoUrl || "",
+            jmFullName: jmFullName || "Noor F.",
+            jmStaffRole: jmStaffRole || "Editorial Manager",
+            jmDepartment: jmDepartment || "Editorial & Publishing Operations",
+            jmOfficeLocation: jmOfficeLocation || "Scholarly Open Headquarters (Mainz, Germany)",
+            jmDeskEmail: jmDeskEmail || "scholarlyopen@gmail.com",
+            profCountry: profCountry || "Germany",
             timestamp: Date.now()
           }))
         } catch (e) {
@@ -4132,13 +4169,23 @@ export default function Editorial360Page() {
                           <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                             {language === "de" ? "Passwort" : "Password"} <span className="text-rose-500">*</span>
                           </label>
-                          <input
-                            type="password"
-                            value={invitationPassword}
-                            onChange={e => setInvitationPassword(e.target.value)}
-                            placeholder="Min. 6 characters"
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                          />
+                          <div className="relative">
+                            <input
+                              type={showInvPassword ? "text" : "password"}
+                              value={invitationPassword}
+                              onChange={e => setInvitationPassword(e.target.value)}
+                              placeholder="Min. 6 characters"
+                              className="w-full pl-3 pr-10 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowInvPassword(!showInvPassword)}
+                              aria-label={showInvPassword ? "Hide password" : "Show password"}
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                            >
+                              {showInvPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -4801,17 +4848,27 @@ export default function Editorial360Page() {
                             {language === "de" ? "Passwort vergessen?" : "Forgot email or password?"}
                           </Link>
                         </div>
-                        <input
-                          id="password"
-                          name="password"
-                          type="password"
-                          autoComplete="current-password"
-                          required
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-sky-500 transition-all"
-                          placeholder={language === "de" ? "Passwort eingeben" : "Password"}
-                        />
+                        <div className="relative">
+                          <input
+                            id="password"
+                            name="password"
+                            type={showLoginPassword ? "text" : "password"}
+                            autoComplete="current-password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full pl-3.5 pr-10 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-sky-500 transition-all"
+                            placeholder={language === "de" ? "Passwort eingeben" : "Password"}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowLoginPassword(!showLoginPassword)}
+                            aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                          >
+                            {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Remember me */}
@@ -5111,13 +5168,21 @@ export default function Editorial360Page() {
                           </div>
                           <input
                             id="reg-pass"
-                            type="password"
+                            type={showRegPassword ? "text" : "password"}
                             required
                             value={regPassword}
                             onChange={(e) => setRegPassword(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all"
+                            className="w-full pl-9 pr-10 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all"
                             placeholder="••••••••"
                           />
+                          <button
+                            type="button"
+                            onClick={() => setShowRegPassword(!showRegPassword)}
+                            aria-label={showRegPassword ? "Hide password" : "Show password"}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                          >
+                            {showRegPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
                         </div>
                       </div>
                     </CardContent>
@@ -5451,22 +5516,12 @@ export default function Editorial360Page() {
                 >
                   <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
                     <div className="h-full w-full rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
-                      {role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl) ? (
+                      {((role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl)) ||
+                        (role === "editor" && (editorPhotoUrl || profPhotoUrl)) ||
+                        profPhotoUrl) ? (
                         <img 
-                          src={reviewerProfile?.photoUrl || profPhotoUrl} 
-                          alt={reviewerProfile?.name || "Reviewer"} 
-                          className="h-full w-full object-cover"
-                        />
-                      ) : role === "editor" && editorPhotoUrl ? (
-                        <img 
-                          src={editorPhotoUrl} 
-                          alt={editorName} 
-                          className="h-full w-full object-cover"
-                        />
-                      ) : role === "author" && profPhotoUrl ? (
-                        <img 
-                          src={profPhotoUrl} 
-                          alt={profFullName} 
+                          src={(role === "reviewer" ? (reviewerProfile?.photoUrl || profPhotoUrl) : (role === "editor" ? (editorPhotoUrl || profPhotoUrl) : profPhotoUrl))} 
+                          alt="Avatar" 
                           className="h-full w-full object-cover"
                         />
                       ) : (
@@ -5508,22 +5563,12 @@ export default function Editorial360Page() {
                       {/* User Header */}
                       <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                          {role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl) ? (
+                          {((role === "reviewer" && (reviewerProfile?.photoUrl || profPhotoUrl)) ||
+                            (role === "editor" && (editorPhotoUrl || profPhotoUrl)) ||
+                            profPhotoUrl) ? (
                             <img 
-                              src={reviewerProfile?.photoUrl || profPhotoUrl} 
-                              alt={reviewerProfile?.name || "Reviewer"} 
-                              className="h-full w-full object-cover"
-                            />
-                          ) : role === "editor" && editorPhotoUrl ? (
-                            <img 
-                              src={editorPhotoUrl} 
-                              alt={editorName} 
-                              className="h-full w-full object-cover"
-                            />
-                          ) : role === "author" && profPhotoUrl ? (
-                            <img 
-                              src={profPhotoUrl} 
-                              alt={profFullName} 
+                              src={(role === "reviewer" ? (reviewerProfile?.photoUrl || profPhotoUrl) : (role === "editor" ? (editorPhotoUrl || profPhotoUrl) : profPhotoUrl))} 
+                              alt="Avatar" 
                               className="h-full w-full object-cover"
                             />
                           ) : (
@@ -5891,7 +5936,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <Users className="h-4 w-4" />
-                        {language === "de" ? "Gutachter-Pool" : "Reviewer Pool"}
+                        {language === "de" ? "Gutachter-Register & Gateway" : "Reviewer Registry & Gateway"}
                       </button>
 
                       <button 
@@ -12355,6 +12400,49 @@ export default function Editorial360Page() {
                   e.preventDefault()
                   setIsAuthorProfileCompleted(true)
                   setIsAuthorProfileSetupOpen(false)
+
+                  // Save user photo globally
+                  if (profPhotoUrl) {
+                    try {
+                      localStorage.setItem("editorial360_user_photo", profPhotoUrl)
+                    } catch (e) {}
+                  }
+
+                  // If JM, persist in-house desk profile
+                  if (role === "jm") {
+                    try {
+                      const jmData = {
+                        jmFullName,
+                        jmStaffRole,
+                        jmDepartment,
+                        jmOfficeLocation,
+                        jmDeskEmail,
+                        profCountry,
+                        photoUrl: profPhotoUrl
+                      }
+                      localStorage.setItem("editorial360_jm_profile", JSON.stringify(jmData))
+                    } catch (e) {}
+                  }
+
+                  // Update active session
+                  try {
+                    const sessionStr = sessionStorage.getItem("editorial360_session")
+                    if (sessionStr) {
+                      const sess = JSON.parse(sessionStr)
+                      sess.profPhotoUrl = profPhotoUrl
+                      if (role === "editor") sess.editorPhotoUrl = editorPhotoUrl
+                      if (role === "jm") {
+                        sess.jmFullName = jmFullName
+                        sess.jmStaffRole = jmStaffRole
+                        sess.jmDepartment = jmDepartment
+                        sess.jmOfficeLocation = jmOfficeLocation
+                        sess.jmDeskEmail = jmDeskEmail
+                        sess.profCountry = profCountry
+                      }
+                      sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
+                    }
+                  } catch (e) {}
+
                   if (role === "reviewer") {
                     setReviewerProfile(prev => {
                       const next = {
@@ -12416,27 +12504,43 @@ export default function Editorial360Page() {
                             const reader = new FileReader()
                             reader.onloadend = () => {
                               const photoStr = reader.result as string
+                              setProfPhotoUrl(photoStr)
+                              try {
+                                localStorage.setItem("editorial360_user_photo", photoStr)
+                                const sessionStr = sessionStorage.getItem("editorial360_session")
+                                if (sessionStr) {
+                                  const sess = JSON.parse(sessionStr)
+                                  sess.profPhotoUrl = photoStr
+                                  if (role === "editor") sess.editorPhotoUrl = photoStr
+                                  sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
+                                }
+                              } catch (e) {}
+
                               if (role === "editor") {
                                 setEditorPhotoUrl(photoStr)
-                              } else {
-                                setProfPhotoUrl(photoStr)
-                                if (role === "reviewer") {
-                                  setReviewerProfile(prev => {
-                                    const next = {
-                                      name: prev?.name || profFullName || "Dr. Marcus Vance",
-                                      email: prev?.email || email || "reviewer@scholarlyopen.org",
-                                      institution: prev?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
-                                      orcid: prev?.orcid || profOrcid || "0000-0004-7711-2093",
-                                      ...prev,
-                                      photoUrl: photoStr
-                                    }
-                                    try {
-                                      localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
-                                      if (next.email) localStorage.setItem(`so_reviewer_profile_${next.email}`, JSON.stringify(next))
-                                    } catch (err) {}
-                                    return next
-                                  })
-                                }
+                              } else if (role === "jm") {
+                                try {
+                                  const savedJm = localStorage.getItem("editorial360_jm_profile")
+                                  const jmObj = savedJm ? JSON.parse(savedJm) : {}
+                                  jmObj.photoUrl = photoStr
+                                  localStorage.setItem("editorial360_jm_profile", JSON.stringify(jmObj))
+                                } catch (e) {}
+                              } else if (role === "reviewer") {
+                                setReviewerProfile(prev => {
+                                  const next = {
+                                    name: prev?.name || profFullName || "Dr. Marcus Vance",
+                                    email: prev?.email || email || "reviewer@scholarlyopen.org",
+                                    institution: prev?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
+                                    orcid: prev?.orcid || profOrcid || "0000-0004-7711-2093",
+                                    ...prev,
+                                    photoUrl: photoStr
+                                  }
+                                  try {
+                                    localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
+                                    if (next.email) localStorage.setItem(`so_reviewer_profile_${next.email}`, JSON.stringify(next))
+                                  } catch (err) {}
+                                  return next
+                                })
                               }
                             }
                             reader.readAsDataURL(file)
@@ -12448,21 +12552,29 @@ export default function Editorial360Page() {
                       <button
                         type="button"
                         onClick={() => {
+                          setProfPhotoUrl("")
+                          try {
+                            localStorage.removeItem("editorial360_user_photo")
+                            const sessionStr = sessionStorage.getItem("editorial360_session")
+                            if (sessionStr) {
+                              const sess = JSON.parse(sessionStr)
+                              sess.profPhotoUrl = ""
+                              if (role === "editor") sess.editorPhotoUrl = ""
+                              sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
+                            }
+                          } catch (e) {}
                           if (role === "editor") {
                             setEditorPhotoUrl("")
-                          } else {
-                            setProfPhotoUrl("")
-                            if (role === "reviewer") {
-                              setReviewerProfile(prev => {
-                                if (!prev) return null
-                                const next = { ...prev, photoUrl: "" }
-                                try {
-                                  localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
-                                  if (prev?.email) localStorage.setItem(`so_reviewer_profile_${prev.email}`, JSON.stringify(next))
-                                } catch (err) {}
-                                return next
-                              })
-                            }
+                          } else if (role === "reviewer") {
+                            setReviewerProfile(prev => {
+                              if (!prev) return null
+                              const next = { ...prev, photoUrl: "" }
+                              try {
+                                localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
+                                if (prev?.email) localStorage.setItem(`so_reviewer_profile_${prev.email}`, JSON.stringify(next))
+                              } catch (err) {}
+                              return next
+                            })
                           }
                         }}
                         className="px-2.5 py-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"

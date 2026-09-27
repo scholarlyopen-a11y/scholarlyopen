@@ -28,6 +28,34 @@
       "cvFileSize": "240 KB",
       "status": "Active Handling Editor",
       "acceptedAt": "2026-09-27T10:00:00Z"
+    },
+    {
+      "id": "EBM-2026-002",
+      "name": "Prof. Sanna Järvelä",
+      "email": "sanna.jarvela@oulu.fi",
+      "role": "Editorial Board Member & Handling Editor",
+      "journal": "Scholarly Open: Medicine",
+      "journalSlug": "medicine",
+      "affiliation": "University of Oulu – Department of Educational Sciences & Faculty of Medicine",
+      "department": "Learning and Educational Technology (LET) Research Unit",
+      "country": "Finland",
+      "specialization": "AI in Education, Self-Regulated Learning, Multimodal Learning Analytics, Digital Health & Behavioral Medicine",
+      "researchInterests": [
+        "Digital Health & Behavioral Analytics",
+        "Multimodal Learning Analytics",
+        "AI in Clinical Education & Decision Support",
+        "Self-Regulated Learning & Physiological Signals",
+        "Collaborative Learning in Medicine"
+      ],
+      "biography": "Professor Sanna Järvelä is Professor in the Department of Educational Sciences and the Learning and Educational Technology (LET) research unit at the University of Oulu, Finland. Her research centers on self-regulated learning, socially shared regulation in learning, and multimodal learning analytics. She is an elected member of the Finnish Academy of Science and Letters.",
+      "orcid": "0000-0001-6223-3668",
+      "googleScholar": "https://scholar.google.fi/citations?user=sanna-jarvela",
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "cvFileName": "CV_Prof_Sanna_Jarvela.pdf",
+      "cvFileSize": "310 KB",
+      "status": "Active Handling Editor",
+      "acceptedAt": "2026-09-27T18:00:00Z"
     }
   ]
 }

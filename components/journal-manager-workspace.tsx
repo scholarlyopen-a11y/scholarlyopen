@@ -129,6 +129,7 @@ export interface JmManuscript {
   coverLetter?: string
   ethicsIrb?: string
   fundingGrant?: string
+  authorCountry?: string
 }
 
 export interface JmReviewFeedback {
@@ -158,6 +159,7 @@ export interface JmReviewer {
   specialization: string
   discipline: string
   orcid: string
+  institution?: string
   completedReviews: number
   onTimeRate: number
   keywords?: string[]
@@ -264,6 +266,7 @@ export function JournalManagerWorkspace({
   const [gatewayResponses, setGatewayResponses] = useState<any[]>([])
   const [isLoadingGateway, setIsLoadingGateway] = useState(false)
   const [gatewaySearch, setGatewaySearch] = useState("")
+  const [selectedCandidateDossier, setSelectedCandidateDossier] = useState<any | null>(null)
 
   // Reviewer Profile Inspection State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
@@ -2396,7 +2399,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs">
         <div className="flex items-center gap-3.5">
           <div className="relative h-11 w-11 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-[#272832]">
-            <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF"}</span>
+            {user?.photoUrl ? (
+              <img src={user.photoUrl} alt={user.name || "JM"} className="h-full w-full object-cover" />
+            ) : (
+              <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF"}</span>
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -4308,6 +4315,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         <th className="py-3 px-4 whitespace-nowrap">Journal Portfolio</th>
                         <th className="py-3 px-4 whitespace-nowrap">Decision / Status</th>
                         <th className="py-3 px-4 whitespace-nowrap">Credential</th>
+                        <th className="py-3 px-4 text-center whitespace-nowrap">Candidate Profile</th>
                         <th className="py-3 px-4 text-right whitespace-nowrap">Timestamp</th>
                       </tr>
                     </thead>
@@ -4360,6 +4368,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             ) : (
                               <span className="text-slate-400 italic text-[11px]">—</span>
                             )}
+                          </td>
+                          <td className="py-3.5 px-4 align-middle text-center whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedCandidateDossier(resp)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 text-[#0b99ff] border border-[#0b99ff]/30 transition-all cursor-pointer shadow-2xs"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              <span>View Profile</span>
+                            </button>
                           </td>
                           <td className="py-3.5 px-4 align-middle text-right text-slate-400 text-[11px] whitespace-nowrap">
                             {resp.timestamp ? new Date(resp.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
@@ -8083,6 +8101,215 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               Save to Blocklist
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Candidate Profile Dossier Dialog for Journal Manager */}
+      <Dialog open={!!selectedCandidateDossier} onOpenChange={(open) => !open && setSelectedCandidateDossier(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 bg-white dark:bg-[#18191e] border-slate-200 dark:border-[#272832] rounded-2xl shadow-2xl">
+          {selectedCandidateDossier && (
+            <div>
+              {/* Dossier Header */}
+              <div className="p-6 bg-slate-50/70 dark:bg-slate-900/50 border-b border-slate-100 dark:border-[#272832]">
+                <div className="flex items-start gap-4">
+                  <div className="relative h-16 w-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-md ring-2 ring-white dark:ring-[#272832]">
+                    {selectedCandidateDossier.photoUrl ? (
+                      <img 
+                        src={selectedCandidateDossier.photoUrl} 
+                        alt={selectedCandidateDossier.candidateName} 
+                        className="h-full w-full object-cover" 
+                      />
+                    ) : (
+                      <span>
+                        {selectedCandidateDossier.candidateName
+                          ? selectedCandidateDossier.candidateName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                          : "AC"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">
+                        {selectedCandidateDossier.candidateName}
+                      </h3>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        Appointment Confirmed
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 truncate">
+                      {selectedCandidateDossier.candidateEmail || "Verified Scholar Email"}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                        {selectedCandidateDossier.type === "eic" 
+                          ? "Editor-in-Chief" 
+                          : selectedCandidateDossier.type === "ae" 
+                          ? "Associate Editor" 
+                          : selectedCandidateDossier.type === "reviewer_claim" 
+                          ? "Certified Referee" 
+                          : "Editorial Board Member & Handling Editor"}
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        {selectedCandidateDossier.journal}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dossier Body */}
+              <div className="p-6 space-y-5 text-xs text-slate-700 dark:text-slate-300">
+                {/* Academic Affiliation Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Primary Affiliation</span>
+                    <span className="text-xs font-medium text-slate-900 dark:text-white mt-0.5 block">
+                      {selectedCandidateDossier.affiliation || "University / Research Institute"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Department / Faculty</span>
+                    <span className="text-xs font-medium text-slate-900 dark:text-white mt-0.5 block">
+                      {selectedCandidateDossier.department || "Faculty of Sciences"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Country / Jurisdiction</span>
+                    <span className="text-xs font-medium text-slate-900 dark:text-white mt-0.5 block">
+                      {selectedCandidateDossier.country || "International"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Credential / Board ID</span>
+                    <span className="text-xs font-mono font-bold text-[#0b99ff] mt-0.5 block">
+                      {selectedCandidateDossier.credentialId || "EBM-2026-CONFIRMED"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Academic Biography */}
+                {selectedCandidateDossier.biography && (
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                      Academic Biography & Statement
+                    </span>
+                    <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 whitespace-pre-line">
+                      {selectedCandidateDossier.biography}
+                    </p>
+                  </div>
+                )}
+
+                {/* Research Interests */}
+                {Array.isArray(selectedCandidateDossier.researchInterests) && selectedCandidateDossier.researchInterests.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                      Research Specializations & Subject Areas
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {selectedCandidateDossier.researchInterests.map((interest: string, i: number) => (
+                        <span key={i} className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Identifiers & External Profiles */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {selectedCandidateDossier.orcid && (
+                    <a 
+                      href={`https://orcid.org/${selectedCandidateDossier.orcid}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20 hover:border-emerald-400 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="h-5 w-5 rounded-full bg-[#a6ce39] text-white flex items-center justify-center text-[10px] font-bold">iD</div>
+                        <span className="text-xs font-mono font-semibold text-emerald-800 dark:text-emerald-300">
+                          {selectedCandidateDossier.orcid}
+                        </span>
+                      </div>
+                      <ExternalLink className="h-3.5 w-3.5 text-emerald-600" />
+                    </a>
+                  )}
+
+                  {selectedCandidateDossier.cvFileName && (
+                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+                      <div className="flex items-center gap-2 truncate">
+                        <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">
+                          {selectedCandidateDossier.cvFileName}
+                        </span>
+                        {selectedCandidateDossier.cvFileSize && (
+                          <span className="text-[10px] text-slate-400 font-mono">({selectedCandidateDossier.cvFileSize})</span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                        Uploaded
+                      </span>
+                    </div>
+                  )}
+
+                  {selectedCandidateDossier.googleScholar && (
+                    <a 
+                      href={selectedCandidateDossier.googleScholar}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 hover:border-[#0b99ff] transition-colors"
+                    >
+                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Google Scholar Profile</span>
+                      <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
+                    </a>
+                  )}
+
+                  {selectedCandidateDossier.linkedin && (
+                    <a 
+                      href={selectedCandidateDossier.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 hover:border-[#0b99ff] transition-colors"
+                    >
+                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">LinkedIn Profile</span>
+                      <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
+                    </a>
+                  )}
+                </div>
+
+                {/* Consent & Compliance Audit */}
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400">
+                      COPE Rigor & Ethics Standards Verified • GDPR Profile Upload Consent: <strong>{selectedCandidateDossier.consentProfileUpload !== false ? "Granted" : "Pending"}</strong>
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    {selectedCandidateDossier.timestamp ? new Date(selectedCandidateDossier.timestamp).toUTCString() : "Live Record"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dossier Footer */}
+              <div className="p-4 bg-slate-50/70 dark:bg-slate-900/50 border-t border-slate-100 dark:border-[#272832] flex items-center justify-between">
+                <Link
+                  href="/journals"
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0b99ff] hover:underline"
+                >
+                  <Globe className="h-3.5 w-3.5" />
+                  <span>Public Journal Masthead</span>
+                </Link>
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedCandidateDossier(null)}
+                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+                >
+                  Close Dossier
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

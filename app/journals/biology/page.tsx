@@ -6,7 +6,7 @@ import { editors } from "@/lib/data/editors"
 export default function BiologyPage() {
   const journalEditors = editors.filter(e => e.journalSlug === "biology")
   const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
-  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+  const editorialBoard = journalEditors.filter(e => e.role.includes("Editorial Board"))
 
   return (
     <JournalPage

@@ -6,7 +6,7 @@ import { editors } from "@/lib/data/editors"
 export default function ClinicalAIPage() {
   const journalEditors = editors.filter(e => e.journalSlug === "clinical-ai-digital-health")
   const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
-  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+  const editorialBoard = journalEditors.filter(e => e.role.includes("Editorial Board"))
 
   return (
     <JournalPage

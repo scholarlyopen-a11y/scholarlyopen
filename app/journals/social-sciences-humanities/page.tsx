@@ -7,7 +7,7 @@ import { editors } from "@/lib/data/editors"
 export default function SocialSciencesPage() {
   const journalEditors = editors.filter(e => e.journalSlug === "social-sciences-humanities")
   const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
-  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+  const editorialBoard = journalEditors.filter(e => e.role.includes("Editorial Board"))
 
   return (
     <JournalPage

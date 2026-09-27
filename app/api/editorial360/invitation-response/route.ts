@@ -150,10 +150,54 @@ function updateReviewerOnDisk(email: string, name: string, credId?: string) {
 }
 
 export async function GET() {
+  let diskResponses: InvitationResponseRecord[] = []
+  try {
+    if (fs.existsSync(EDITORS_FILE_PATH)) {
+      const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed.onboardedEditors)) {
+        diskResponses = parsed.onboardedEditors.map((e: any) => ({
+          id: e.id || `RESP-${Date.now()}`,
+          type: (e.role && e.role.toLowerCase().includes("chief")) ? "eic" : (e.role && e.role.toLowerCase().includes("associate")) ? "ae" : "board",
+          candidateName: e.name,
+          candidateEmail: e.email,
+          journal: e.journal,
+          decision: "yes" as const,
+          credentialId: e.id,
+          timestamp: e.acceptedAt || new Date().toISOString(),
+          notes: "Editorial Board Member onboarded via verified portal",
+          affiliation: e.affiliation,
+          department: e.department,
+          country: e.country,
+          biography: e.biography,
+          photoUrl: e.photoUrl,
+          cvFileName: e.cvFileName,
+          cvFileSize: e.cvFileSize,
+          researchInterests: e.researchInterests,
+          orcid: e.orcid,
+          googleScholar: e.googleScholar,
+          linkedin: e.linkedin,
+          hasAcceptedTerms: e.hasAcceptedTerms,
+          consentProfileUpload: e.consentProfileUpload
+        }))
+      }
+    }
+  } catch (err) {
+    console.error("Error reading disk onboarded editors in GET:", err)
+  }
+
+  // Merge in-memory and disk records avoiding duplicates
+  const combined = [...diskResponses]
+  for (const resp of responseStore) {
+    if (!combined.some(c => (c.candidateEmail && resp.candidateEmail && c.candidateEmail.toLowerCase() === resp.candidateEmail.toLowerCase()) || c.id === resp.id)) {
+      combined.push(resp)
+    }
+  }
+
   return NextResponse.json({
     success: true,
-    responses: responseStore,
-    total: responseStore.length
+    responses: combined,
+    total: combined.length
   })
 }
 
@@ -281,12 +325,15 @@ export async function POST(req: Request) {
           : "Editorial Board Member & Handling Editor"
 
         const subject = type === "reviewer_claim"
-          ? `[Reviewer Active] ${candidateName} completed Gateway Onboarding (${credentialId || "Certified"})`
-          : `[Invitation Confirmed] ${candidateName} accepted ${roleLabel} for ${journal}`
+          ? `[${journal}] [Reviewer Gateway Active] ${candidateName} (${credentialId || "Certified"})`
+          : `[${journal}] Editorial Board Acceptance: ${candidateName} (${roleLabel})`
 
         const htmlContent = `
           <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
             <div style="border-bottom: 3px solid #0b99ff; padding-bottom: 16px; margin-bottom: 20px;">
+              <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #0b99ff; margin-bottom: 4px;">
+                ${journal}
+              </div>
               <h2 style="color: #0f172a; margin: 0 0 6px 0; font-size: 20px;">editorial360 Notification: Appointment & Profile Acceptance</h2>
               <span style="display: inline-block; background-color: #ecfdf5; color: #047857; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
                 Official Consent & Profile Submitted

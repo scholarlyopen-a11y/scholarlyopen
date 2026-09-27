@@ -6,7 +6,7 @@ import { editors } from "@/lib/data/editors"
 export default function QuantumEngineeringPage() {
   const journalEditors = editors.filter(e => e.journalSlug === "quantum-engineering")
   const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
-  const editorialBoard = journalEditors.filter(e => e.role === "Editorial Board Member")
+  const editorialBoard = journalEditors.filter(e => e.role.includes("Editorial Board"))
 
   return (
     <JournalPage

@@ -1,3 +1,5 @@
+import onboardedData from "./editorial-board-onboarding.json"
+
 export interface EditorMember {
   slug: string
   name: string
@@ -37,7 +39,7 @@ export interface EditorMember {
   publicationsNote?: string
 }
 
-export const editors: EditorMember[] = [
+const baseEditors: EditorMember[] = [
   {
     slug: "mohamed-eletmany",
     name: "Mohamed R. Eletmany, Ph.D.",
@@ -1109,4 +1111,45 @@ Dr. Chamberland earned her Ph.D. in History from the University of California, D
     specialization: "Editorial Board",
     journalSlug: "synthetic-biology-bio-design",
   },
+]
+
+// Dynamically integrate verified onboarded Editorial Board Members from editorial-board-onboarding.json
+const onboardedList: EditorMember[] = (
+  Array.isArray((onboardedData as any)?.onboardedEditors)
+    ? (onboardedData as any).onboardedEditors.map((o: any) => {
+        const cleanSlug = (o.name || "editor")
+          .toLowerCase()
+          .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+
+        let jSlug = o.journalSlug
+        if (!jSlug && o.journal) {
+          jSlug = o.journal.toLowerCase().replace("scholarly open:", "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+        }
+
+        return {
+          slug: cleanSlug,
+          name: o.name,
+          role: o.role || "Editorial Board Member",
+          affiliation: o.affiliation || "University / Academic Institution",
+          specialization: o.specialization || (Array.isArray(o.researchInterests) ? o.researchInterests.join(", ") : "Academic Peer Review & Research"),
+          imageUrl: o.photoUrl || undefined,
+          email: o.email || undefined,
+          orcid: o.orcid || undefined,
+          googleScholar: o.googleScholar || undefined,
+          linkedin: o.linkedin || undefined,
+          biography: o.biography || undefined,
+          expertise: Array.isArray(o.researchInterests) ? o.researchInterests : undefined,
+          journalSlug: jSlug,
+          badges: ["Verified Board Member", "COPE Ethics Verified"]
+        }
+      })
+    : []
+)
+
+export const editors: EditorMember[] = [
+  ...onboardedList,
+  ...baseEditors.filter(be => !onboardedList.some(ol => ol.name.toLowerCase() === be.name.toLowerCase() || (ol.journalSlug === be.journalSlug && be.name === "Position Open")))
 ]
