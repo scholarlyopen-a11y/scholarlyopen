@@ -21,6 +21,7 @@ interface EmailPayload {
   actionLabel?: string
   actionUrl?: string
   fromEmail?: string
+  cc?: string
   senderName?: string
   role?: string
   includeEditorial360Logo?: boolean
@@ -165,7 +166,8 @@ export async function POST(req: Request) {
     const replyToEmail = body.fromEmail || designatedEmail || DEFAULT_EDITORIAL_EMAIL
 
     const normalizedTo = body.to.trim().toLowerCase()
-    const ccRecipient = normalizedTo !== "scholarlyopen@gmail.com" ? "scholarlyopen@gmail.com" : undefined
+    const defaultCc = "scholarlyopen@gmail.com"
+    const ccRecipient = body.cc ? body.cc.trim() : (normalizedTo !== defaultCc ? defaultCc : undefined)
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
       const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"

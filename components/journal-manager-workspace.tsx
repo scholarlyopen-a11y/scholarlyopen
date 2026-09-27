@@ -60,13 +60,15 @@ import {
   GraduationCap,
   UserX,
   Trash2,
-  Plus
+  Plus,
+  Loader2,
+  Copy
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
-import { generateBrandedEmailHtml } from "@/lib/email-templates"
+import { generateBrandedEmailHtml, getJournalBranding } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 import { OFFICIAL_JOURNALS, getJournalReplyTo } from "@/lib/data/journal-contacts"
 import { REGIONAL_COUNTRY_GROUPS, GLOBAL_COUNTRIES } from "@/lib/data/countries"
@@ -288,6 +290,96 @@ export function JournalManagerWorkspace({
   const [manualSuccessBanner, setManualSuccessBanner] = useState<{ id: string; claimUrl: string; email: string } | null>(null)
   const [manualCopiedClaim, setManualCopiedClaim] = useState(false)
 
+  // Author Portal Claim Invitation Preview & Dispatch State
+  const [claimPreviewModal, setClaimPreviewModal] = useState<{
+    isOpen: boolean
+    msId: string
+    title: string
+    journal: string
+    authorName: string
+    authorEmail: string
+    authorAffiliation?: string
+    status?: string
+    claimUrl: string
+    subject: string
+    customBody: string
+    ccEmail: string
+    isSending: boolean
+    isSent: boolean
+    activeTab: "edit" | "preview"
+  } | null>(null)
+
+  const handleOpenClaimPreview = (data: {
+    msId: string
+    title: string
+    journal: string
+    authorName: string
+    authorEmail: string
+    authorAffiliation?: string
+    status?: string
+  }) => {
+    const claimUrl = `https://www.scholarlyopen.org/editorial360?action=claim_submission&id=${encodeURIComponent(data.msId)}&email=${encodeURIComponent(data.authorEmail)}&name=${encodeURIComponent(data.authorName)}`
+    const defaultSubject = `[${data.journal}] Author Desk Access & Manuscript Activation: ${data.msId}`
+    const defaultBody = `Dear ${data.authorName},\n\nYour manuscript has been officially imported and activated within the live editorial360 platform for ${data.journal}.\n\nManuscript Details:\n• Reference ID: ${data.msId}\n• Title: "${data.title}"\n• Current Status: ${data.status || "Under Review"}\n• Submitting Institute: ${data.authorAffiliation || "Academic Institution"}\n\nYou can access your dedicated Author Desk to monitor the evaluation stage, view referee reports once released, and manage publication milestones using the link below:\n\n${claimUrl}\n\nKind regards,\nEditorial Office\n${data.journal}\nScholarly Open Publishing Group`
+
+    setClaimPreviewModal({
+      isOpen: true,
+      msId: data.msId,
+      title: data.title,
+      journal: data.journal,
+      authorName: data.authorName,
+      authorEmail: data.authorEmail,
+      authorAffiliation: data.authorAffiliation,
+      status: data.status || "Under Review",
+      claimUrl,
+      subject: defaultSubject,
+      customBody: defaultBody,
+      ccEmail: "scholarlyopen@gmail.com",
+      isSending: false,
+      isSent: false,
+      activeTab: "preview"
+    })
+  }
+
+  const handleSendClaimInvite = async () => {
+    if (!claimPreviewModal) return
+    setClaimPreviewModal(prev => prev ? { ...prev, isSending: true } : null)
+
+    try {
+      const res = await fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: claimPreviewModal.authorEmail,
+          recipientName: claimPreviewModal.authorName,
+          subject: claimPreviewModal.subject,
+          customSubject: claimPreviewModal.subject,
+          journal: claimPreviewModal.journal,
+          paperId: claimPreviewModal.msId,
+          paperTitle: claimPreviewModal.title,
+          actionLabel: "Access Author Desk & Track Manuscript",
+          actionUrl: claimPreviewModal.claimUrl,
+          customBody: claimPreviewModal.customBody,
+          cc: claimPreviewModal.ccEmail,
+          fromEmail: "editorial@scholarlyopen.org",
+          role: "author"
+        })
+      })
+
+      const data = await res.json()
+      if (data.success) {
+        setClaimPreviewModal(prev => prev ? { ...prev, isSending: false, isSent: true } : null)
+      } else {
+        alert("Could not send email: " + (data.error || "Unknown error"))
+        setClaimPreviewModal(prev => prev ? { ...prev, isSending: false } : null)
+      }
+    } catch (err) {
+      console.error("Claim invite dispatch failed:", err)
+      alert("Failed to send claim invite. Please check connection.")
+      setClaimPreviewModal(prev => prev ? { ...prev, isSending: false } : null)
+    }
+  }
+
   const handleQuickFillDrLee = () => {
     setManualMsId("SOMED-26-MS201")
     setManualJournal("Scholarly Open: Medicine")
@@ -370,6 +462,7 @@ export function JournalManagerWorkspace({
           paperTitle: newMs.title,
           actionLabel: "Access Author Desk & Track Manuscript",
           actionUrl: claimUrl,
+          cc: "scholarlyopen@gmail.com",
           customBody: `Dear ${newMs.authorName},\n\nYour manuscript has been officially imported and activated within the live editorial360 platform for ${manualJournal}.\n\nManuscript Details:\n• Reference ID: ${msId}\n• Title: "${newMs.title}"\n• Current Status: ${manualStatus}\n\nYou can access your dedicated Author Desk to monitor the evaluation stage, view referee reports once released, and manage publication milestones using the link below:\n\n${claimUrl}\n\nKind regards,\nEditorial Office\n${manualJournal}\nScholarly Open Publishing Group`
         })
       }).catch(e => console.error("Email send failed:", e))
@@ -3002,6 +3095,28 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
                                   Archived
                                 </span>
+                              )}
+
+                              {/* 1-Click Send Portal Claim Invitation to Author (Preview & CC: scholarlyopen@gmail.com) */}
+                              {Boolean(ms.authorEmail || ms.id.includes("MS201") || ms.id.includes("SOMED")) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleOpenClaimPreview({
+                                    msId: ms.id,
+                                    title: ms.title,
+                                    journal: ms.journal,
+                                    authorName: ms.authorName || "Dr. Sam Lee",
+                                    authorEmail: ms.authorEmail || (ms.id.includes("MS201") ? "dr.sam.lee@acei-health.org" : "author@university.edu"),
+                                    authorAffiliation: ms.authorAffiliation || "",
+                                    status: ms.status
+                                  })}
+                                  className="h-8 text-xs font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 border-sky-200 dark:border-sky-800 px-2.5 rounded-lg cursor-pointer"
+                                  title="Preview & Send Portal Claim Invitation to Author (CC: scholarlyopen@gmail.com)"
+                                >
+                                  <Mail className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  <span>Claim Invite</span>
+                                </Button>
                               )}
                             </div>
                           </td>
@@ -6690,21 +6805,39 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div className="bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4 max-w-xl mx-auto">
                   
-                  {/* Email Header: Real Logo on the Left, Journal Name on the Right */}
-                  <div className="flex items-center justify-between pb-3 border-b-2 border-[#0b99ff] gap-4">
-                    <div className="flex items-center">
-                      <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 w-auto object-contain dark:hidden" />
-                      <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 w-auto object-contain hidden dark:block brightness-125" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                        {newRevJournal}
+                  {/* Email Header: Main Logo on Left, Journal Name and Icon on Right (CFPs & EBMs standard) */}
+                  {(() => {
+                    const branding = getJournalBranding(newRevJournal)
+                    const fullJournalName = newRevJournal.includes("Scholarly Open") ? newRevJournal : `Scholarly Open: ${branding.cleanName}`
+                    return (
+                      <div className="flex items-center justify-between pb-3.5 border-b-2 border-[#0b99ff] gap-4">
+                        <div className="flex items-center">
+                          <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain dark:hidden" />
+                          <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain hidden dark:block brightness-125" />
+                        </div>
+                        <div className="flex items-center gap-2.5 text-right">
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                              {fullJournalName}
+                            </div>
+                            <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
+                              Peer-Reviewed Journal
+                            </div>
+                          </div>
+                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shrink-0">
+                            <img
+                              src={`/journal-icons/${branding.slug}.svg`}
+                              alt={branding.cleanName}
+                              className="w-6 h-6 object-contain"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
-                        Peer-Reviewed Journal
-                      </div>
-                    </div>
-                  </div>
+                    )
+                  })()}
 
                   {/* Subject Line Display */}
                   <div className="text-xs font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -8247,7 +8380,39 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 max-h-[350px] overflow-y-auto space-y-2">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 max-h-[350px] overflow-y-auto space-y-3">
+                {(() => {
+                  const branding = getJournalBranding(viewingHistoryEmail.journal)
+                  const fullJournalName = viewingHistoryEmail.journal?.includes("Scholarly Open") ? viewingHistoryEmail.journal : `Scholarly Open: ${branding.cleanName}`
+                  return (
+                    <div className="flex items-center justify-between pb-3 border-b-2 border-[#0b99ff] gap-4 bg-white dark:bg-[#131418] p-3 rounded-lg border border-slate-200/70 dark:border-slate-800">
+                      <div className="flex items-center">
+                        <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-7 w-auto object-contain dark:hidden" />
+                        <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-7 w-auto object-contain hidden dark:block brightness-125" />
+                      </div>
+                      <div className="flex items-center gap-2.5 text-right">
+                        <div>
+                          <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                            {fullJournalName}
+                          </div>
+                          <div className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">
+                            Official Archive
+                          </div>
+                        </div>
+                        <div className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                          <img
+                            src={`/journal-icons/${branding.slug}.svg`}
+                            alt={branding.cleanName}
+                            className="w-5 h-5 object-contain"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = 'none'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                   Dispatched Email Content:
                 </span>
@@ -8652,7 +8817,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                 </div>
 
-                <div className="p-3 bg-white dark:bg-[#131418] border border-emerald-200 dark:border-emerald-900 rounded-lg space-y-2">
+                <div className="p-3.5 bg-white dark:bg-[#131418] border border-emerald-200 dark:border-emerald-900 rounded-lg space-y-3">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Author Portal Claim Link:</span>
                     <button
@@ -8671,6 +8836,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </>
                       ) : (
                         <>
+                          <Copy className="w-3 h-3" />
                           <span>Copy Claim Link</span>
                         </>
                       )}
@@ -8682,12 +8848,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     value={manualSuccessBanner.claimUrl}
                     className="w-full text-[11px] font-mono p-2 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 select-all"
                   />
-                  {manualSendClaimInvite && manualSuccessBanner.email && (
-                    <p className="text-[10px] text-slate-500 flex items-center gap-1.5 pt-1">
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                    <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
                       <Mail className="w-3.5 h-3.5 text-[#0b99ff]" />
-                      <span>Claim invitation dispatched to <strong>{manualSuccessBanner.email}</strong>. The author can click to immediately access their active desk.</span>
+                      <span>Delivery archive enabled to <strong>scholarlyopen@gmail.com</strong></span>
                     </p>
-                  )}
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        handleOpenClaimPreview({
+                          msId: manualSuccessBanner.id,
+                          title: manualTitle || "Submitted Manuscript",
+                          journal: manualJournal,
+                          authorName: manualAuthorName || "Dr. Sam Lee",
+                          authorEmail: manualSuccessBanner.email,
+                          authorAffiliation: manualAuthorAffiliation,
+                          status: manualStatus
+                        })
+                      }}
+                      className="text-xs font-bold h-7 bg-[#0b99ff] hover:bg-[#0088e0] text-white flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span>Preview / Send Portal Claim Invite</span>
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2">
@@ -8864,20 +9051,54 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                 </div>
 
-                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex items-start gap-2.5">
-                  <input
-                    type="checkbox"
-                    id="manualSendClaimInvite"
-                    checked={manualSendClaimInvite}
-                    onChange={(e) => setManualSendClaimInvite(e.target.checked)}
-                    className="mt-0.5 rounded text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4 cursor-pointer"
-                  />
-                  <label htmlFor="manualSendClaimInvite" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
-                    <span className="font-bold">Send Author Portal Claim Invitation immediately</span>
-                    <span className="block text-[11px] text-slate-500">
-                      Author receives an email with a 1-click link to access their live Author Desk on editorial360 and track this manuscript.
-                    </span>
-                  </label>
+                <div className="p-3.5 rounded-xl border border-sky-200 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/20 space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="flex items-start gap-2.5">
+                      <input
+                        type="checkbox"
+                        id="manualSendClaimInvite"
+                        checked={manualSendClaimInvite}
+                        onChange={(e) => setManualSendClaimInvite(e.target.checked)}
+                        className="mt-0.5 rounded text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4 cursor-pointer"
+                      />
+                      <label htmlFor="manualSendClaimInvite" className="text-xs text-slate-800 dark:text-slate-200 cursor-pointer">
+                        <span className="font-bold flex items-center gap-1.5 flex-wrap">
+                          <span>Send Author Portal Claim Invitation immediately</span>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-300">
+                            CC: scholarlyopen@gmail.com
+                          </span>
+                        </span>
+                        <span className="block text-[11px] text-slate-500 mt-0.5">
+                          Author receives branded email with 1-click access to their live Author Desk on editorial360.
+                        </span>
+                      </label>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (!manualAuthorEmail.trim()) {
+                          alert("Please specify the author email first to preview the template.")
+                          return
+                        }
+                        handleOpenClaimPreview({
+                          msId: manualMsId || "SOMED-26-MS201",
+                          title: manualTitle || "Submitted Manuscript",
+                          journal: manualJournal,
+                          authorName: manualAuthorName || "Author",
+                          authorEmail: manualAuthorEmail,
+                          authorAffiliation: manualAuthorAffiliation,
+                          status: manualStatus
+                        })
+                      }}
+                      className="text-xs font-semibold h-8 shrink-0 text-[#0b99ff] border-sky-300 dark:border-sky-800 hover:bg-sky-100/50 dark:hover:bg-sky-900/30 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Preview Template</span>
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -8900,6 +9121,272 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </form>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ======================================================== */}
+      {/* AUTHOR PORTAL CLAIM INVITATION PREVIEW & SEND DIALOG     */}
+      {/* ======================================================== */}
+      <Dialog
+        open={Boolean(claimPreviewModal?.isOpen)}
+        onOpenChange={(open) => {
+          if (!open) setClaimPreviewModal(null)
+        }}
+      >
+        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-[#131418] border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-[#0b99ff]">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Send Portal Claim Invitation to Author</span>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                      Live Preview &amp; Dispatch
+                    </span>
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500">
+                    Official manuscript onboarding invitation with direct 1-click access to Author Desk.
+                  </DialogDescription>
+                </div>
+              </div>
+
+              {/* Tab Selector: Live Preview vs Edit */}
+              <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setClaimPreviewModal(prev => prev ? { ...prev, activeTab: "preview" } : null)}
+                  className={`px-3 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+                    claimPreviewModal?.activeTab === "preview"
+                      ? "bg-white dark:bg-[#131418] text-[#0b99ff] shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  Template Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setClaimPreviewModal(prev => prev ? { ...prev, activeTab: "edit" } : null)}
+                  className={`px-3 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+                    claimPreviewModal?.activeTab === "edit"
+                      ? "bg-white dark:bg-[#131418] text-[#0b99ff] shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  Edit Message
+                </button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="p-6 overflow-y-auto space-y-4 flex-1">
+            {/* Meta Strip: To, CC, From, Paper */}
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-500 w-12 shrink-0">To:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white truncate">
+                    {claimPreviewModal?.authorName} &lt;{claimPreviewModal?.authorEmail}&gt;
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-500 w-12 shrink-0">CC:</span>
+                  <span className="inline-flex items-center gap-1 font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                    scholarlyopen@gmail.com
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-500 w-12 shrink-0">From:</span>
+                  <span className="text-slate-700 dark:text-slate-300 truncate">
+                    {claimPreviewModal?.journal} Editorial Office &lt;editorial@scholarlyopen.org&gt;
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-500 w-12 shrink-0">Paper:</span>
+                  <span className="font-mono text-slate-800 dark:text-slate-200">
+                    {claimPreviewModal?.msId} ({claimPreviewModal?.status})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {claimPreviewModal?.activeTab === "edit" ? (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Subject Line
+                  </label>
+                  <input
+                    type="text"
+                    value={claimPreviewModal.subject}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setClaimPreviewModal(prev => prev ? { ...prev, subject: val } : null)
+                    }}
+                    className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-[#0b99ff] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Message Body (Plain Text &amp; Token Preview)
+                  </label>
+                  <textarea
+                    rows={10}
+                    value={claimPreviewModal.customBody}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setClaimPreviewModal(prev => prev ? { ...prev, customBody: val } : null)
+                    }}
+                    className="w-full text-xs font-mono p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white leading-relaxed focus:ring-1 focus:ring-[#0b99ff] focus:outline-none resize-none"
+                  />
+                </div>
+              </div>
+            ) : (
+              /* LIVE BRANDED TEMPLATE PREVIEW WITH DUAL HEADER */
+              <div className="p-4 sm:p-6 bg-slate-100/70 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div className="bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-5 max-w-xl mx-auto">
+                  {/* Header: Main Logo on Left, Journal Name and Icon on Right (CFPs & EBMs standard) */}
+                  {(() => {
+                    const branding = getJournalBranding(claimPreviewModal?.journal)
+                    const fullJournalName = claimPreviewModal?.journal?.includes("Scholarly Open")
+                      ? claimPreviewModal.journal
+                      : `Scholarly Open: ${branding.cleanName}`
+                    return (
+                      <div className="flex items-center justify-between pb-3.5 border-b-2 border-[#0b99ff] gap-4">
+                        <div className="flex items-center">
+                          <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain dark:hidden" />
+                          <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain hidden dark:block brightness-125" />
+                        </div>
+                        <div className="flex items-center gap-2.5 text-right">
+                          <div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                              {fullJournalName}
+                            </div>
+                            <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
+                              Author Desk · Manuscript Notification
+                            </div>
+                          </div>
+                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shrink-0">
+                            <img
+                              src={`/journal-icons/${branding.slug}.svg`}
+                              alt={branding.cleanName}
+                              className="w-6 h-6 object-contain"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* Subject line */}
+                  <div className="text-xs font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800">
+                    Subject: {claimPreviewModal?.subject}
+                  </div>
+
+                  {/* Formatted Letter Body */}
+                  <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line space-y-2">
+                    {claimPreviewModal?.customBody}
+                  </div>
+
+                  {/* Call-to-Action Button */}
+                  <div className="py-2 text-center">
+                    <a
+                      href={claimPreviewModal?.claimUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-5 py-2.5 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-lg shadow-xs transition-all cursor-pointer gap-1.5"
+                    >
+                      <span>Access Author Desk &amp; Track Manuscript</span>
+                      <span>→</span>
+                    </a>
+                    <span className="block text-[10px] text-slate-400 mt-2 font-mono break-all">
+                      {claimPreviewModal?.claimUrl}
+                    </span>
+                  </div>
+
+                  {/* Footer Audit Notice */}
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-500 leading-normal flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span>Official dispatch through Scholarly Open editorial delivery servers.</span>
+                      <span className="block text-emerald-700 dark:text-emerald-400 font-semibold">
+                        Automatic carbon-copy (CC) delivered to: scholarlyopen@gmail.com
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {claimPreviewModal?.isSent && (
+              <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 font-bold animate-in fade-in">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>Portal Claim Invitation successfully sent to {claimPreviewModal.authorEmail} and CC'd to scholarlyopen@gmail.com!</span>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (claimPreviewModal?.claimUrl) {
+                    navigator.clipboard.writeText(claimPreviewModal.claimUrl)
+                    alert("Author Portal Claim URL copied to clipboard!")
+                  }
+                }}
+                className="text-xs font-semibold h-8"
+              >
+                <Copy className="w-3.5 h-3.5 mr-1 text-[#0b99ff]" />
+                <span>Copy Direct Link</span>
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setClaimPreviewModal(null)}
+                className="text-xs font-semibold h-8"
+              >
+                Close
+              </Button>
+
+              <Button
+                type="button"
+                size="sm"
+                disabled={claimPreviewModal?.isSending}
+                onClick={handleSendClaimInvite}
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                {claimPreviewModal?.isSending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Dispatching Email...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Send Invitation (CC: scholarlyopen@gmail.com)</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

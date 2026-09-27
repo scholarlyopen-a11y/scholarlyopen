@@ -973,7 +973,7 @@ export function generateBrandedEmailHtml(options: {
               <tr>
                 <td valign="middle" align="right" style="text-align: right; padding-right: 12px; vertical-align: middle;">
                   <div style="font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                    ${branding.cleanName}
+                    ${journal && journal !== "all" && journal.includes("Scholarly Open") ? journal : `Scholarly Open: ${branding.cleanName}`}
                   </div>
                   <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                     Peer-Reviewed Journal
