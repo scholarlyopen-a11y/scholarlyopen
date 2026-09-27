@@ -325,7 +325,24 @@ export function ReviewerWorkspace({
 
   // Sync profile when user or initialProfile changes
   useEffect(() => {
-    if (user?.name || user?.photoUrl !== undefined || initialProfile?.name || initialProfile?.photoUrl !== undefined) {
+    const rawName = user?.name || initialProfile?.name || ""
+    const rawEmail = user?.email || initialProfile?.email || ""
+    const isBolutife = rawName.toLowerCase().includes("bolutife") || rawEmail.toLowerCase().includes("olofinjana")
+
+    if (isBolutife) {
+      setProfile(prev => ({
+        ...prev,
+        title: "Prof.",
+        name: "Prof. Bolutife Olofinjana",
+        email: rawEmail || "b.olofinjana@oauife.edu.ng",
+        primaryDiscipline: "engineering",
+        department: "Department of Physics and Engineering Physics",
+        institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
+        country: "Nigeria",
+        orcid: user?.orcid || prev.orcid || "0000-0002-3652-3213",
+        photoUrl: user?.photoUrl || initialProfile?.photoUrl || prev.photoUrl || ""
+      }))
+    } else if (user?.name || user?.photoUrl !== undefined || initialProfile?.name || initialProfile?.photoUrl !== undefined) {
       setProfile(prev => ({
         ...prev,
         name: user?.name || initialProfile?.name || prev.name,
@@ -456,12 +473,28 @@ export function ReviewerWorkspace({
         ]
       }
 
-      // Sync candidate from passed gateway if available
-      const gatewayPassStr = localStorage.getItem("scholarlyopen_passed_reviewer_gateway")
-      if (gatewayPassStr) {
+      // Sync candidate from passed gateway only if email strictly matches currently logged in reviewer
+      const currentEmail = (email || user?.email || "").toLowerCase().trim()
+      const isBol = currentEmail.includes("olofinjana") || (user?.name || "").toLowerCase().includes("bolutife")
+      
+      const gatewayPassStr = typeof window !== "undefined" ? localStorage.getItem("scholarlyopen_passed_reviewer_gateway") : null
+      if (isBol) {
+        setProfile(prev => ({
+          ...prev,
+          title: "Prof.",
+          name: "Prof. Bolutife Olofinjana",
+          email: user?.email || prev.email || "b.olofinjana@oauife.edu.ng",
+          primaryDiscipline: "engineering",
+          department: "Department of Physics and Engineering Physics",
+          institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
+          country: "Nigeria",
+          orcid: user?.orcid || prev.orcid || "0000-0002-3652-3213"
+        }))
+      } else if (gatewayPassStr) {
         try {
           const gw = JSON.parse(gatewayPassStr)
-          if (gw?.name) {
+          const gwEmail = (gw?.email || "").toLowerCase().trim()
+          if (gw?.name && gwEmail && currentEmail && gwEmail === currentEmail) {
             setProfile(prev => ({
               ...prev,
               name: gw.name.replace(/^Dr\.\s*|^Prof\.\s*/i, ""),
@@ -1467,14 +1500,16 @@ COPE & Plan S Certified Archive
             </div>
           )}
 
-          {/* Top AI Pre-review Watch Banner (from screenshot) */}
-          <div className="p-3.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900/50 text-sky-800 dark:text-sky-300 text-xs flex items-center gap-2.5 shadow-2xs">
-            <Lightbulb className="h-4 w-4 text-[#0b99ff] shrink-0" />
-            <span className="font-medium">
-              {isDe 
-                ? "Achten Sie auf KI-Artefakte in Text und Grafiken: vage Formulierungen, inkonsistente Formatierung, fehlende Maßstabsleisten..." 
-                : "Watch for AI artifacts in both text and visuals: vague language, inconsistent formatting, missing scale bars..."}
-            </span>
+          {/* Peer Review Evaluation Standard Guidance Banner */}
+          <div className="p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900/50 text-sky-800 dark:text-sky-300 text-xs flex items-center justify-between gap-2.5 shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <Lightbulb className="h-4 w-4 text-[#0b99ff] shrink-0" />
+              <span className="font-medium leading-relaxed">
+                {isDe 
+                  ? "Gutachter-Leitfaden: Bewerten Sie Manuskripte objektiv auf wissenschaftliche Originalität, empirische Methodik, Datenintegrität und die Einhaltung ethischer COPE-Standards." 
+                  : "Reviewer Guidance: Please evaluate manuscripts objectively for research methodology, empirical validity, data integrity, and international COPE reporting ethics."}
+              </span>
+            </div>
           </div>
 
           {/* Profile Card (from screenshot) */}
@@ -1487,10 +1522,6 @@ COPE & Plan S Certified Archive
                   ) : (
                     <span>{getReviewerInitials(profile.name)}</span>
                   )}
-                  <span 
-                    className="absolute bottom-0 right-0 h-4 w-4 rounded-full ring-2 ring-white dark:ring-slate-950 bg-emerald-500 z-10" 
-                    title="Verified Active Reviewer"
-                  />
                 </div>
 
                 <div className="space-y-1">
@@ -1498,13 +1529,13 @@ COPE & Plan S Certified Archive
                     {getFormattedReviewerName(profile.title, profile.name)}
                   </h2>
                   <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-                    {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Senior Researcher, AI Ethics"}
+                    {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria"}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     <strong className="text-slate-700 dark:text-slate-300 font-semibold">{isDe ? "Forschungsinteressen: " : "Research Interests: "}</strong>
                     {profile.keywords.length > 0 
                       ? profile.keywords.slice(0, 4).join(", ") 
-                      : "AI Bias, Data Privacy, Algorithmic Fairness"}
+                      : "Materials Science, Nanostructured Materials, Thin Films, Sensors"}
                   </p>
                   <div className="pt-1.5 flex items-center gap-2">
                     <button
@@ -1543,102 +1574,101 @@ COPE & Plan S Certified Archive
             </div>
           </div>
 
-          {/* Reviewer Metrics Card (Exact 5-Column Stats & Big Badges from Screenshot) */}
-          <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                {isDe ? "Gutachter-Kennzahlen" : "Reviewer Metrics"}
+          {/* Concise Reviewer Metrics Card */}
+          <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <Award className="h-4 w-4 text-[#0b99ff]" />
+                {isDe ? "Gutachter-Kennzahlen & Rigor-Status" : "Reviewer Metrics & Rigor Performance"}
               </h3>
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
-                {isDe ? "Verifizierte COPE-Aktivität" : "COPE Verified Performance"}
+              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
+                {isDe ? "COPE-Audit: Konform" : "COPE Ethics Verified"}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-2 text-center items-start pt-2">
-              {/* 1. Time to complete */}
-              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                <Clock className="h-6 w-6 text-sky-400" />
-                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-                  {isDe ? "3 Tage" : "3 days"}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center items-center py-1">
+              {/* 1. Completed Evaluations */}
+              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                  {reviewsDone}
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-                  {isDe ? "DURCHSCHN. DAUER (AVG)" : "TIME TO COMPLETE (AVG)"}
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "ABGESCHL. GUTACHTEN" : "REVIEWS COMPLETED"}
                 </div>
               </div>
 
-              {/* 2. Reviews rated high quality */}
-              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                <Star className="h-6 w-6 text-sky-400" />
-                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
+              {/* 2. Review Turnaround Target */}
+              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                  {profile.preferredTurnaround || 14} {isDe ? "Tage" : "Days"}
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "ZIEL-BEGUTACHTUNGSZEIT" : "TARGET TURNAROUND"}
+                </div>
+              </div>
+
+              {/* 3. Gateway Rigor Score */}
+              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-[#0b99ff] leading-tight">
                   95%
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-                  {isDe ? "QUALITATIV HOCHWERTIG" : "REVIEWS RATED HIGH QUALITY"}
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "GATEWAY-QUALIFIKATION" : "GATEWAY RIGOR SCORE"}
                 </div>
               </div>
 
-              {/* 3. Integrity flags raised */}
-              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                <Flag className="h-6 w-6 text-sky-400" />
-                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-                  7
+              {/* 4. Honoraria Tier */}
+              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 leading-tight">
+                  €35 – €50
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-                  {isDe ? "INTEGRITÄTSMELDUNGEN" : "INTEGRITY FLAGS RAISED"}
-                </div>
-              </div>
-
-              {/* 4. Badges earned */}
-              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors cursor-pointer group" onClick={() => onTabChange && onTabChange("certificate")}>
-                <Award className="h-6 w-6 text-sky-400 group-hover:scale-110 transition-transform" />
-                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1 text-sky-600 dark:text-sky-400">
-                  4
-                </div>
-                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-                  {isDe ? "ABZEICHEN ERHALTEN" : "BADGES EARNED"}
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "HONORAR PRO BERICHT" : "HONORARIUM / REPORT"}
                 </div>
               </div>
 
-              {/* 5. Percentile score */}
-              <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                <TrendingUp className="h-6 w-6 text-sky-400" />
-                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-                  Top 12%
+              {/* 5. Max Review Load */}
+              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 col-span-2 sm:col-span-1">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                  {profile.maxReviewsPerMonth || 2} / mo
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-                  {isDe ? "PERZENTIL-RANG" : "PERCENTILE SCORE"}
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "MAX. KAPAZITÄT" : "MAX LOAD CAPACITY"}
                 </div>
               </div>
             </div>
 
             {/* Share ORCID & LinkedIn */}
-            <div className="flex items-center justify-center sm:justify-end gap-5 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    const orcidUrl = profile.orcid ? `https://orcid.org/${profile.orcid}` : "https://orcid.org"
-                    window.open(orcidUrl, "_blank")
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 text-sky-500 hover:text-sky-600 font-semibold cursor-pointer transition-colors"
-              >
-                <Link2 className="h-3.5 w-3.5" />
-                <span>Share ORCID</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    const text = encodeURIComponent("I am a verified Peer Reviewer with Scholarly Open! Track my verified peer evaluations and academic badges.")
-                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 text-sky-500 hover:text-sky-600 font-semibold cursor-pointer transition-colors"
-              >
-                <Linkedin className="h-3.5 w-3.5" />
-                <span>Share LinkedIn</span>
-              </button>
+            <div className="flex flex-col sm:flex-row items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 gap-2">
+              <span>{isDe ? "Offiziell akkreditiert im Scholarly Open Gutachter-Register" : "Officially accredited in the Scholarly Open Verified Reviewer Registry"}</span>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      const orcidUrl = profile.orcid ? `https://orcid.org/${profile.orcid}` : "https://orcid.org"
+                      window.open(orcidUrl, "_blank")
+                    }
+                  }}
+                  className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                >
+                  <Link2 className="h-3 w-3" />
+                  <span>ORCID</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      const text = encodeURIComponent("I am a verified Peer Reviewer with Scholarly Open! Track my verified peer evaluations and academic badges.")
+                      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
+                    }
+                  }}
+                  className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                >
+                  <Linkedin className="h-3 w-3" />
+                  <span>LinkedIn</span>
+                </button>
+              </div>
             </div>
           </div>
 

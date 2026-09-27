@@ -221,17 +221,18 @@ export function JournalPage({
     },
   }
 
-  const defaultTheme = {
-    bgColor: "#F8FAFC",
-    border: "border-slate-200",
-    text: "text-slate-900",
-    subtext: "text-slate-600",
-    buttonOutline: "border-slate-300 bg-slate-100/50 text-slate-700 hover:bg-slate-100 hover:text-slate-900",
-    iconBg: "bg-slate-900/10 text-slate-800",
-    badge: "bg-slate-950/10 text-slate-950 border-slate-900/15 shadow-none hover:bg-slate-950/20"
+  // Universal authentic pista green theme for all Scholarly Open journals
+  const pistaTheme = {
+    bgColor: "#D0DEC0", // authentic pista green shade
+    border: "border-[#BDCEAA]",
+    text: "text-emerald-950",
+    subtext: "text-emerald-900/80",
+    buttonOutline: "border-emerald-300 bg-emerald-100/30 text-emerald-900 hover:bg-emerald-100/60",
+    iconBg: "bg-green-500/10 text-green-600",
+    badge: "bg-emerald-900/10 text-emerald-900 border-emerald-900/25 shadow-none hover:bg-emerald-900/20"
   }
 
-  const currentBrandTheme = (journalSlug && brandThemes[journalSlug]) || defaultTheme
+  const currentBrandTheme = pistaTheme
 
   const stats = [
     { label: "Average Review Time", value: "4-8 weeks" },
