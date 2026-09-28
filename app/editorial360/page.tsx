@@ -6431,6 +6431,20 @@ export default function Editorial360Page() {
                     onAddManuscript={(newMs) => {
                       setManuscripts(prev => [newMs as any, ...prev.filter(m => m.id !== newMs.id)])
                     }}
+                    onDeleteManuscript={(id) => {
+                      setManuscripts(prev => {
+                        const updated = prev.filter(m => m.id !== id)
+                        try {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+                          }
+                        } catch (e) {}
+                        return updated
+                      })
+                      fetch(`/api/editorial360/manuscripts?id=${encodeURIComponent(id)}`, {
+                        method: "DELETE"
+                      }).catch(e => console.error("Cloud delete failed:", e))
+                    }}
                     onUpdateManuscriptStatus={(id, st) => {
                       const nowIso = new Date().toISOString()
                       setManuscripts(prev => {

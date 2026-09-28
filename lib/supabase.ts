@@ -129,3 +129,23 @@ export async function updateDbManuscriptStatus(id: string, updates: Partial<DbMa
     return false
   }
 }
+
+// Server-side helper to delete a manuscript
+export async function deleteDbManuscript(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/manuscripts?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      },
+      cache: "no-store",
+    })
+
+    return res.ok
+  } catch (error) {
+    console.error("Error deleting manuscript from Supabase:", error)
+    return false
+  }
+}
+

@@ -1,7 +1,7 @@
 export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
-import { getDbManuscripts, upsertDbManuscript, updateDbManuscriptStatus } from "@/lib/supabase"
+import { getDbManuscripts, upsertDbManuscript, updateDbManuscriptStatus, deleteDbManuscript } from "@/lib/supabase"
 
 export async function GET() {
   try {
@@ -37,3 +37,18 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get("id")
+    if (!id) {
+      return NextResponse.json({ ok: false, error: "Missing manuscript id" }, { status: 400 })
+    }
+    const success = await deleteDbManuscript(id)
+    return NextResponse.json({ ok: success })
+  } catch (error: any) {
+    return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
+  }
+}
+
