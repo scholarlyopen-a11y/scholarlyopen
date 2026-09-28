@@ -138,7 +138,7 @@ Dr. Mohamed has participated in several national and international research proj
     role: "Associate Editor",
     affiliation: "Shanghai Jiao Tong\nUniversity School of Medicine, China",
     specialization: "Gastrointestinal tumors, organ transplantation",
-    email: "editor.med@scholarlyopen.org",
+    email: "126010@sh9hospital.org.cn",
     orcid: "0000-0002-0213-7313",
     imageUrl: "/images/editors/weihua-gong.jpg",
     assignedSections: [

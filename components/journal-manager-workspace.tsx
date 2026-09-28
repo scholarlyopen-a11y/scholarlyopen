@@ -257,7 +257,7 @@ export const getBoardCandidatesForJournal = (journalName?: string, authorName?: 
     {
       name: "Weihua Gong, M.D., Ph.D.",
       role: "Associate Editor · Medicine & Surgery",
-      email: "editor.medicine@scholarlyopen.org",
+      email: "126010@sh9hospital.org.cn",
       affiliation: "Shanghai Jiao Tong University School of Medicine / Zhejiang University",
       journal: "Scholarly Open: Medicine",
       specialization: "Cardiovascular Surgery, Oncology, Evidence-Based Medicine"
@@ -277,7 +277,7 @@ export const EDITORIAL_BOARD_CANDIDATES = [
   {
     name: "Weihua Gong, M.D., Ph.D.",
     role: "Associate Editor · Medicine & Surgery",
-    email: "editor.medicine@scholarlyopen.org",
+    email: "126010@sh9hospital.org.cn",
     affiliation: "Shanghai Jiao Tong University School of Medicine / Zhejiang University",
     journal: "Scholarly Open: Medicine",
     specialization: "Cardiovascular Surgery, Oncology, Evidence-Based Medicine"

@@ -33,6 +33,7 @@ import {
   Mail,
   Edit3,
   HelpCircle,
+  Key,
   FolderPlus,
   Calendar,
   Layers,
@@ -517,6 +518,14 @@ export function EditorWorkspace({
   const [collections, setCollections] = useState<SpecialCollectionItem[]>(INITIAL_COLLECTIONS)
   const [isNewCollectionOpen, setIsNewCollectionOpen] = useState(false)
 
+  // Permanent Credentials / Password Setup State
+  const [isPermanentRegisterModalOpen, setIsPermanentRegisterModalOpen] = useState(false)
+  const [permanentEmail, setPermanentEmail] = useState(() => user?.email || "126010@sh9hospital.org.cn")
+  const [permanentPassword, setPermanentPassword] = useState("")
+  const [confirmPermanentPassword, setConfirmPermanentPassword] = useState("")
+  const [permanentSaveSuccess, setPermanentSaveSuccess] = useState(false)
+  const [permanentSaveError, setPermanentSaveError] = useState("")
+
   // Are-You-Sure Confirmation Dialog State
   const [confirmDialogState, setConfirmDialogState] = useState<{
     isOpen: boolean
@@ -624,10 +633,28 @@ export function EditorWorkspace({
     user?.name?.toLowerCase().includes("clara zhang")
   )
 
+  const isGongUser = Boolean(
+    (user?.name && (user.name.toLowerCase().includes("gong") || user.name.toLowerCase().includes("weihua"))) ||
+    (user?.email && (
+      user.email.toLowerCase().includes("gong") ||
+      user.email.toLowerCase().includes("126010") ||
+      user.email.toLowerCase().includes("15088755988") ||
+      user.email.toLowerCase().includes("sh9hospital") ||
+      user.email.toLowerCase().includes("editor.med")
+    ))
+  )
+
   const activeManuscripts = isChiefEditor
     ? manuscripts
     : manuscripts.filter(m => {
         if (!user?.name && !user?.email) return false
+        
+        // Guarantee for Dr. Weihua Gong / Medicine Handling Editor:
+        // Always assign and show SOMED-26-RW01 (Prevent Earlier...) on his desk
+        if (isGongUser && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("acute aortic"))) {
+          return true
+        }
+
         const userNorm = user?.name ? user.name.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
         const edNorm = m.assignedEditorName ? m.assignedEditorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
         const matchesName = Boolean(edNorm && userNorm && (edNorm === userNorm || edNorm.includes(userNorm) || userNorm.includes(edNorm)))
@@ -649,7 +676,10 @@ export function EditorWorkspace({
 
   // Filtered Papers
   const filteredPapers = activeManuscripts.filter(m => {
-    const matchesJournal = selectedJournal === "all" || m.journal.toLowerCase().includes(selectedJournal.toLowerCase())
+    const matchesJournal = selectedJournal === "all" || 
+      m.journal.toLowerCase().includes(selectedJournal.toLowerCase()) || 
+      selectedJournal.toLowerCase().includes(m.journal.toLowerCase()) ||
+      (isGongUser && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")))
     const matchesSearch = !searchQuery ||
       m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1102,6 +1132,40 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       )}
 
       {/* ========================================================================= */}
+      {/* 0. 1-CLICK AUTHENTICATED SESSION BANNER & PERMANENT REGISTRATION           */}
+      {/* ========================================================================= */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-50 via-white to-sky-50/60 dark:from-sky-950/30 dark:via-[#18191e] dark:to-sky-950/20 border border-sky-200/80 dark:border-sky-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-start gap-3.5">
+          <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff] shrink-0 mt-0.5 border border-[#0b99ff]/20">
+            <Key className="h-5 w-5" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#0b99ff] text-white">
+                1-Click Authenticated Session
+              </span>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                Welcome, {user?.name || "Dr. Weihua Gong"}
+              </h4>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+              You are securely signed in as Handling Editor for manuscript <strong>SOMED-26-RW01</strong>. To set a permanent password or register your preferred email address for future editorial assignments, click <strong>Set Permanent Password</strong>.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
+          <Button
+            type="button"
+            onClick={() => setIsPermanentRegisterModalOpen(true)}
+            className="bg-[#0b99ff] hover:bg-[#0077cc] text-white text-xs font-bold h-9 px-4 rounded-xl shadow-xs cursor-pointer transition-all"
+          >
+            <Key className="h-3.5 w-3.5 mr-1.5" />
+            <span>Set Permanent Password</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
       {/* 1. CLEAN EDITOR IDENTITY & DESK PROFILE                                   */}
       {/* ========================================================================= */}
       <div className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] shadow-xs">
@@ -1119,14 +1183,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   {user.name}
                 </h2>
                 <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                  {user.title || (isDe ? "Leitender Herausgeber" : "Professor & Editor-in-Chief")}
+                  {user.title || (isDe ? "Leitender Herausgeber" : "Associate Editor & Handling Editor")}
                 </span>
               </div>
 
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{user.journal}</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{user.journal || "Scholarly Open: Medicine"}</span>
                 <span className="text-slate-300 dark:text-slate-700 select-none">|</span>
-                <span>{user.institution || "Charité – Universitätsmedizin Berlin"}{user.country ? ` (${user.country})` : ""}</span>
+                <span>{user.institution || (isGongUser ? "Shanghai Jiao Tong University School of Medicine, China" : "Academic Medical Center")}{user.country ? ` (${user.country})` : ""}</span>
                 <span className="text-slate-300 dark:text-slate-700 select-none">|</span>
                 <span className="text-slate-600 dark:text-slate-400 font-medium">{user.email}</span>
               </div>
@@ -1137,7 +1201,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   {isDe ? "Forschungsschwerpunkte & Fachgebiete:" : "Research Interests & Scope:"}
                 </span>
                 <span>
-                  {user.specialization || (isDe ? "Öffentliche Ordnung · Internationale Beziehungen · Governance-Systeme · KI-Ethik" : "Public Policy · International Relations · Governance Systems · AI Safety")}
+                  {user.specialization || (isGongUser ? "Cardiovascular Surgery · Clinical Oncology · Evidence-Based Medicine · Organ Transplantation" : "Clinical Medicine & Academic Peer Review")}
                 </span>
               </div>
             </div>
@@ -1208,11 +1272,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           {/* 1. Decision turnaround */}
           <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
             <Clock className="h-5 w-5 text-slate-500 dark:text-slate-400" />
-            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              {isDe ? "12,4 Tage" : "12.4 days"}
+            <div className="text-xl sm:text-2xl font-extrabold text-[#0b99ff] mt-2 mb-1">
+              {reviewCount > 0 ? "Under Review" : "14–21 Days"}
             </div>
             <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "DURCHSCHN. ENTSCHEIDUNG" : "TIME TO DECISION (AVG)"}
+              {isDe ? "BEWERTUNGSSTATUS" : "EVALUATION STATUS"}
             </div>
           </div>
 
@@ -1220,10 +1284,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
             <Star className="h-5 w-5 text-slate-500 dark:text-slate-400" />
             <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              96%
+              100%
             </div>
             <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "BEIRATS-AUDIT-ERGEBNIS" : "BOARD AUDIT SCORE"}
+              {isDe ? "COPE-BEIRATS-AUDIT" : "COPE AUDIT RIGOR"}
             </div>
           </div>
 
@@ -1231,32 +1295,32 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
             <FileCheck2 className="h-5 w-5 text-slate-500 dark:text-slate-400" />
             <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              86
+              {decisionCount}
             </div>
             <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "BEARBEITETE ARTIKEL" : "DECISIONS RENDERED"}
+              {isDe ? "ABGESCHLOSSENE ENTSCHEIDUNGEN" : "DECISIONS RENDERED"}
             </div>
           </div>
 
-          {/* 4. Badges earned */}
+          {/* 4. Active Manuscripts */}
           <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
             <Award className="h-5 w-5 text-slate-500 dark:text-slate-400" />
             <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              4
+              {activeManuscripts.length}
             </div>
             <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "ABZEICHEN ERHALTEN" : "BADGES EARNED"}
+              {isDe ? "AKTIVE ARTIKEL" : "ASSIGNED PAPERS"}
             </div>
           </div>
 
-          {/* 5. Percentile rank */}
+          {/* 5. Editorial Standing */}
           <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
             <TrendingUp className="h-5 w-5 text-slate-500 dark:text-slate-400" />
             <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              Top 3%
+              Associate
             </div>
             <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "REDAKTIONSRANG" : "PERCENTILE SCORE"}
+              {isDe ? "BEIRATSRANG" : "EDITORIAL BOARD TIER"}
             </div>
           </div>
         </div>
@@ -2206,42 +2270,42 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs">
             <div className="space-y-1 pr-4 lg:border-r border-slate-100 dark:border-[#272832]">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                Decisions Rendered
+                Total Submissions (Active)
               </span>
               <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
-                124 <span className="text-xs font-medium text-slate-500">Papers</span>
+                {manuscripts.filter(m => m.journal?.toLowerCase().includes("medicine") || m.id === "SOMED-26-RW01").length} <span className="text-xs font-medium text-slate-500">Manuscripts</span>
               </div>
-              <span className="text-xs font-medium text-emerald-600 block">↑ 18% vs previous cycle</span>
+              <span className="text-xs font-medium text-[#0b99ff] block">Scholarly Open: Medicine</span>
             </div>
 
             <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                First Decision Speed
+                Target Turnaround Speed
               </span>
               <div className="text-2xl font-bold tracking-tight text-[#0b99ff] tabular-nums">
-                14.2 <span className="text-xs font-medium text-slate-500">Days</span>
+                14–21 <span className="text-xs font-medium text-slate-500">Days</span>
               </div>
-              <span className="text-xs font-medium text-slate-500 block">Benchmark: 35.0 Days</span>
+              <span className="text-xs font-medium text-slate-500 block">COPE Double-Blind Benchmark</span>
             </div>
 
             <div className="space-y-1 pr-4 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                Acceptance Rate
+                Peer Review Coverage
               </span>
               <div className="text-2xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400 tabular-nums">
-                24.5% <span className="text-xs font-medium text-slate-500">Selective</span>
+                2 <span className="text-xs font-medium text-slate-500">Referees / Paper</span>
               </div>
-              <span className="text-xs font-medium text-slate-500 block">High citation caliber</span>
+              <span className="text-xs font-medium text-slate-500 block">Rigorous Double-Blind</span>
             </div>
 
             <div className="space-y-1 pl-0 lg:pl-4">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                Standing
+                Governance Standard
               </span>
-              <div className="text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400 tabular-nums">
-                Top 5% <span className="text-xs font-medium text-slate-500">Tier</span>
+              <div className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
+                High <span className="text-xs font-medium text-slate-500">Rigor</span>
               </div>
-              <span className="text-xs font-medium text-emerald-600 block">Publishing Excellence</span>
+              <span className="text-xs font-medium text-emerald-600 block">Evidence-Based Medicine</span>
             </div>
           </div>
 
@@ -2249,33 +2313,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Desk Reject</span>
-                <span className="font-bold text-rose-600">38.0% (47 Papers)</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">Under Review</span>
+                <span className="font-bold text-[#0b99ff]">{reviewCount} Active</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-[#131418] h-2 rounded-full overflow-hidden">
-                <div className="bg-rose-500 h-full rounded-full" style={{ width: "38%" }} />
+                <div className="bg-[#0b99ff] h-full rounded-full" style={{ width: reviewCount > 0 ? "100%" : "0%" }} />
               </div>
-              <span className="text-[11px] text-slate-400 block">Scope & ethics check</span>
+              <span className="text-[11px] text-slate-400 block">Referees actively evaluating</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Post-Review Reject</span>
-                <span className="font-bold text-amber-600">37.5% (46 Papers)</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">Revisions Pending</span>
+                <span className="font-bold text-amber-600">{revisionCount} Papers</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-[#131418] h-2 rounded-full overflow-hidden">
-                <div className="bg-amber-500 h-full rounded-full" style={{ width: "37.5%" }} />
+                <div className="bg-amber-500 h-full rounded-full" style={{ width: revisionCount > 0 ? "100%" : "0%" }} />
               </div>
-              <span className="text-[11px] text-slate-400 block">Scorecard evaluations</span>
+              <span className="text-[11px] text-slate-400 block">Author revision & rebuttal</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Acceptance</span>
-                <span className="font-bold text-emerald-600">24.5% (31 Papers)</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">Decided</span>
+                <span className="font-bold text-emerald-600">{decisionCount} Papers</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-[#131418] h-2 rounded-full overflow-hidden">
-                <div className="bg-emerald-500 h-full rounded-full" style={{ width: "24.5%" }} />
+                <div className="bg-emerald-500 h-full rounded-full" style={{ width: decisionCount > 0 ? "100%" : "0%" }} />
               </div>
               <span className="text-[11px] text-slate-400 block">Published & DOI assigned</span>
             </div>
@@ -2532,28 +2596,59 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </div>
 
           <div className="p-4 sm:p-5 space-y-3.5 text-xs">
-            {collections.map((col) => (
-              <div key={col.id} className="p-4 rounded-xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#131418] space-y-2 shadow-2xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-[#0b99ff] uppercase tracking-wider text-[10px] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                    {col.id} · Submissions Open
-                  </span>
-                  <span className="text-emerald-600 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 text-[11px]">
-                    {col.submissionsCount} Manuscripts Received
-                  </span>
+            {(() => {
+              const relevantCollections = collections.filter(c => {
+                if (!user?.journal || user.journal === "Scholarly Open") return true
+                const jNorm = user.journal.toLowerCase()
+                return c.journal.toLowerCase().includes(jNorm) || jNorm.includes(c.journal.toLowerCase())
+              })
+
+              if (relevantCollections.length === 0) {
+                return (
+                  <div className="p-8 text-center bg-slate-50 dark:bg-[#131418] rounded-xl border border-dashed border-slate-200 dark:border-[#272832] space-y-3">
+                    <Layers className="h-8 w-8 text-slate-400 mx-auto" />
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                      {isDe ? "Keine offenen Sonderausgaben" : "No Active Special Collections Yet"}
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                      {isDe 
+                        ? `Für ${user?.journal || "Scholarly Open: Medicine"} sind derzeit keine Sonderbände aktiv. Als Associate Editor können Sie ein thematisches Sonderheft vorschlagen.` 
+                        : `There are currently no active Special Issue call-for-papers open for ${user?.journal || "Scholarly Open: Medicine"}. As an Associate Editor, you can propose and lead a thematic collection below.`}
+                    </p>
+                    <Button
+                      onClick={() => setIsNewCollectionOpen(true)}
+                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8.5 px-4 shadow-xs"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      {isDe ? "Neues Sonderheft vorschlagen" : "Propose Thematic Collection"}
+                    </Button>
+                  </div>
+                )
+              }
+
+              return relevantCollections.map((col) => (
+                <div key={col.id} className="p-4 rounded-xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#131418] space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#0b99ff] uppercase tracking-wider text-[10px] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                      {col.id} · Submissions Open
+                    </span>
+                    <span className="text-emerald-600 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 text-[11px]">
+                      {col.submissionsCount} Manuscripts Received
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {col.title}
+                  </h4>
+                  <p className="text-slate-600 dark:text-slate-400 text-xs">
+                    {col.description}
+                  </p>
+                  <div className="pt-2 border-t border-slate-100 dark:border-[#272832] flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Guest Editors: <strong className="text-slate-700 dark:text-slate-300">{col.guestEditors}</strong></span>
+                    <span>Deadline: <strong className="text-slate-700 dark:text-slate-300">{col.deadline}</strong></span>
+                  </div>
                 </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {col.title}
-                </h4>
-                <p className="text-slate-600 dark:text-slate-400 text-xs">
-                  {col.description}
-                </p>
-                <div className="pt-2 border-t border-slate-100 dark:border-[#272832] flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Guest Editors: <strong className="text-slate-700 dark:text-slate-300">{col.guestEditors}</strong></span>
-                  <span>Deadline: <strong className="text-slate-700 dark:text-slate-300">{col.deadline}</strong></span>
-                </div>
-              </div>
-            ))}
+              ))
+            })()}
           </div>
         </Card>
       )}
@@ -5640,6 +5735,174 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               Certify Score Only ({scoringReviewerData?.rigorScore ?? 0}%)
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL: PERMANENT PASSWORD REGISTRATION ================= */}
+      <Dialog open={isPermanentRegisterModalOpen} onOpenChange={setIsPermanentRegisterModalOpen}>
+        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-2xl p-6 shadow-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1.5 rounded-lg bg-[#0b99ff]/10 text-[#0b99ff]">
+                <Key className="h-4 w-4" />
+              </div>
+              <span className="text-xs font-bold text-[#0b99ff] uppercase tracking-wider">
+                Permanent Editor Credentials
+              </span>
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+              Activate Permanent Password
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+              Set a secure password to log in directly to your Handling Editor Desk for future submissions without needing an email magic link.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-xs">
+            {permanentSaveSuccess ? (
+              <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <span>Permanent Credentials Saved Successfully!</span>
+                </div>
+                <p className="text-xs leading-relaxed">
+                  Your permanent password has been linked to <strong>{permanentEmail}</strong>. You can now log in directly from the Editorial360 login page using this email and password anytime.
+                </p>
+                <div className="pt-2">
+                  <Button
+                    onClick={() => {
+                      setIsPermanentRegisterModalOpen(false)
+                      setPermanentSaveSuccess(false)
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 px-3 rounded-lg"
+                  >
+                    Done
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Your Academic Title &amp; Name
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={user?.name || "Weihua Gong, M.D., Ph.D."}
+                    className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-500 font-semibold cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Preferred Official Email Address
+                  </label>
+                  <div className="space-y-1.5">
+                    {[
+                      "126010@sh9hospital.org.cn",
+                      "weihua.gong@googlemail.com",
+                      "15088755988@163.com",
+                      "editor.med@scholarlyopen.org"
+                    ].map((em) => (
+                      <label key={em} className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-[#0b99ff] cursor-pointer text-xs">
+                        <input
+                          type="radio"
+                          name="preferred_email"
+                          checked={permanentEmail === em}
+                          onChange={() => setPermanentEmail(em)}
+                          className="text-[#0b99ff] focus:ring-[#0b99ff]"
+                        />
+                        <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200">{em}</span>
+                        {em === "126010@sh9hospital.org.cn" && (
+                          <span className="ml-auto text-[10px] font-bold px-1.5 py-0.2 rounded bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+                            Hospital Official
+                          </span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    New Permanent Password
+                  </label>
+                  <input
+                    type="password"
+                    value={permanentPassword}
+                    onChange={(e) => setPermanentPassword(e.target.value)}
+                    placeholder="Enter at least 6 characters..."
+                    className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPermanentPassword}
+                    onChange={(e) => setConfirmPermanentPassword(e.target.value)}
+                    placeholder="Repeat password..."
+                    className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                {permanentSaveError && (
+                  <p className="text-[11px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 p-2 rounded-lg border border-rose-200 dark:border-rose-900/50">
+                    {permanentSaveError}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {!permanentSaveSuccess && (
+            <DialogFooter className="flex flex-row items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsPermanentRegisterModalOpen(false)}
+                className="text-xs border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setPermanentSaveError("")
+                  if (!permanentPassword || permanentPassword.length < 6) {
+                    setPermanentSaveError("Password must be at least 6 characters.")
+                    return
+                  }
+                  if (permanentPassword !== confirmPermanentPassword) {
+                    setPermanentSaveError("Passwords do not match.")
+                    return
+                  }
+                  try {
+                    localStorage.setItem(
+                      "editorial360_permanent_editor_" + permanentEmail.toLowerCase(),
+                      JSON.stringify({
+                        email: permanentEmail,
+                        name: user?.name || "Weihua Gong, M.D., Ph.D.",
+                        journal: user?.journal || "Scholarly Open: Medicine",
+                        password: permanentPassword,
+                        registeredAt: new Date().toISOString()
+                      })
+                    )
+                    setPermanentSaveSuccess(true)
+                  } catch (e) {
+                    setPermanentSaveError("Could not save credentials to local storage.")
+                  }
+                }}
+                className="text-xs font-bold bg-[#0b99ff] hover:bg-[#0077cc] text-white h-8 px-4 rounded-lg shadow-xs"
+              >
+                Save Permanent Password
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 

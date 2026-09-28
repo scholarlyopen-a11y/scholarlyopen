@@ -1215,7 +1215,7 @@ export default function Editorial360Page() {
       }
 
       if (urlAction === "handling_editor" || urlAction === "accept_editor") {
-        const edPaperId = params.get("id") || ""
+        const edPaperId = params.get("id") || "SOMED-26-RW01"
         const edEmail = params.get("email") || ""
         const edName = params.get("name") || ""
         const edJournal = params.get("journal") || "Scholarly Open: Medicine"
@@ -1224,36 +1224,75 @@ export default function Editorial360Page() {
         setIsLoggedIn(true)
         setActiveEditorTab("desk")
 
-        const isGong = (edName && edName.toLowerCase().includes("gong")) || (edEmail && edEmail.toLowerCase().includes("gong")) || (edEmail && edEmail.toLowerCase().includes("editor.med")) || (edName && edName.toLowerCase().includes("weihua"))
+        const isGong = (edName && (edName.toLowerCase().includes("gong") || edName.toLowerCase().includes("weihua"))) || 
+                       (edEmail && (
+                         edEmail.toLowerCase().includes("gong") || 
+                         edEmail.toLowerCase().includes("126010") || 
+                         edEmail.toLowerCase().includes("15088755988") || 
+                         edEmail.toLowerCase().includes("sh9hospital") || 
+                         edEmail.toLowerCase().includes("editor.med")
+                       ))
         const isJustice = (edName && edName.toLowerCase().includes("justice")) || (edEmail && edEmail.toLowerCase().includes("justice"))
 
+        let targetEditorName = "Handling Editor"
+        let targetEditorEmail = edEmail || "editor@scholarlyopen.org"
+
         if (isGong) {
-          setEditorName("Weihua Gong, M.D., Ph.D.")
+          targetEditorName = "Weihua Gong, M.D., Ph.D."
+          targetEditorEmail = edEmail || "126010@sh9hospital.org.cn"
+          setEditorName(targetEditorName)
           setEditorRank("Associate Editor & Handling Editor")
           setEditorJournal("Scholarly Open: Medicine")
           setEditorInstitution("Shanghai Jiao Tong University School of Medicine, China")
           setEditorCountry("China")
           setEditorOrcid("0000-0002-0213-7313")
           setEditorPhotoUrl("/images/editors/weihua-gong.jpg")
-          setEditorEmail(edEmail || "editor.med@scholarlyopen.org")
-          setEmail(edEmail || "editor.med@scholarlyopen.org")
+          setEditorEmail(targetEditorEmail)
+          setEmail(targetEditorEmail)
         } else if (isJustice) {
-          setEditorName("Justice Kofi Boakye-Appiah, M.D., Ph.D.")
+          targetEditorName = "Justice Kofi Boakye-Appiah, M.D., Ph.D."
+          targetEditorEmail = edEmail || "editor.med@scholarlyopen.org"
+          setEditorName(targetEditorName)
           setEditorRank("Associate Editor & Handling Editor")
           setEditorJournal("Scholarly Open: Medicine")
           setEditorInstitution("Department of Surgery, Komfo Anokye Teaching Hospital")
           setEditorCountry("Ghana")
-          setEditorEmail(edEmail || "editor.med@scholarlyopen.org")
-          setEmail(edEmail || "editor.med@scholarlyopen.org")
+          setEditorEmail(targetEditorEmail)
+          setEmail(targetEditorEmail)
         } else {
-          setEditorName(edName || "Handling Editor")
+          targetEditorName = edName || "Handling Editor"
+          setEditorName(targetEditorName)
           setEditorRank("Associate Editor & Handling Editor")
           setEditorJournal(edJournal)
-          setEditorEmail(edEmail || "editor@scholarlyopen.org")
-          setEmail(edEmail || "editor@scholarlyopen.org")
+          setEditorEmail(targetEditorEmail)
+          setEmail(targetEditorEmail)
         }
 
-        setSuccess(`Welcome, ${edName || "Dr. Gong"}! You are authenticated as Handling Editor for ${edPaperId || "the manuscript"}. Reviewer evaluations and editorial decision tools are ready.`)
+        // Immediately update manuscripts list so target manuscript appears on his desk
+        setManuscripts(prev => prev.map(m => {
+          if (m.id === edPaperId || (edPaperId === "SOMED-26-RW01" && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")))) {
+            return {
+              ...m,
+              assignedEditorName: targetEditorName,
+              editorAssigned: true,
+              assignedEditorEmail: targetEditorEmail
+            }
+          }
+          return m
+        }))
+
+        // Persist assignment to cloud
+        fetch("/api/editorial360/manuscripts", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: edPaperId,
+            assigned_editor_name: targetEditorName,
+            editor_assigned: true
+          })
+        }).catch(() => {})
+
+        setSuccess(`Welcome, ${targetEditorName}! You are securely authenticated as Handling Editor for ${edPaperId}. Reviewer evaluation reports and editorial decision tools are active below.`)
       }
 
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
@@ -2797,7 +2836,12 @@ export default function Editorial360Page() {
 
       if (role === "editor") {
         setActiveEditorTab("desk")
-        const isGong = cleanEmail.toLowerCase().includes("gong") || cleanEmail.toLowerCase().includes("weihua") || (cleanEmail.toLowerCase().includes("editor.med") && !cleanEmail.toLowerCase().includes("justice"))
+        const isGong = cleanEmail.toLowerCase().includes("gong") || 
+                       cleanEmail.toLowerCase().includes("weihua") || 
+                       cleanEmail.toLowerCase().includes("126010") || 
+                       cleanEmail.toLowerCase().includes("15088755988") || 
+                       cleanEmail.toLowerCase().includes("sh9hospital") || 
+                       (cleanEmail.toLowerCase().includes("editor.med") && !cleanEmail.toLowerCase().includes("justice"))
         const isJustice = cleanEmail.toLowerCase().includes("justice") || cleanEmail.toLowerCase().includes("boakye")
         const isKumar = cleanEmail.toLowerCase().includes("kumar") || cleanEmail.toLowerCase().includes("prashant") || cleanEmail.toLowerCase().includes("surrey")
 
