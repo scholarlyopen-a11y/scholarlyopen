@@ -1353,7 +1353,7 @@ export default function Editorial360Page() {
               authorFirstName: m.author_first_name,
               authorLastName: m.author_last_name,
               authorName: m.author_name || (m.author_first_name && m.author_last_name ? `${m.author_first_name} ${m.author_last_name}` : "Author"),
-              authorEmail: m.author_email,
+              authorEmail: m.id === "SOMED-26-RW01" ? (m.author_email || "Applied.EBM.Institute@proton.me") : m.author_email,
               authorAffiliation: m.author_affiliation,
               authorCountry: m.author_country,
               authorOrcid: m.author_orcid,
@@ -1361,9 +1361,9 @@ export default function Editorial360Page() {
               articleType: m.article_type || "Original Research",
               submissionStage: m.submission_stage || "Initial Submission",
               abstract: m.abstract,
-              keywords: m.keywords,
-              fileName: m.file_name,
-              fileSize: m.file_size,
+              fileName: m.file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
+              fileSize: m.file_size || (m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
+              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : undefined),
               coverLetter: m.cover_letter,
               ethicsIrb: m.ethics_irb,
               fundingGrant: m.funding_grant,
@@ -1484,7 +1484,7 @@ export default function Editorial360Page() {
               authorFirstName: m.author_first_name,
               authorLastName: m.author_last_name,
               authorName: m.author_name || (m.author_first_name && m.author_last_name ? `${m.author_first_name} ${m.author_last_name}` : "Author"),
-              authorEmail: m.author_email,
+              authorEmail: m.id === "SOMED-26-RW01" ? (m.author_email || "Applied.EBM.Institute@proton.me") : m.author_email,
               authorAffiliation: m.author_affiliation,
               authorCountry: m.author_country,
               authorOrcid: m.author_orcid,
@@ -1492,9 +1492,9 @@ export default function Editorial360Page() {
               articleType: m.article_type || "Original Research",
               submissionStage: m.submission_stage || "Initial Submission",
               abstract: m.abstract,
-              keywords: m.keywords,
-              fileName: m.file_name,
-              fileSize: m.file_size,
+              fileName: m.file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
+              fileSize: m.file_size || (m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
+              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : undefined),
               coverLetter: m.cover_letter,
               ethicsIrb: m.ethics_irb,
               fundingGrant: m.funding_grant,
@@ -6627,7 +6627,7 @@ export default function Editorial360Page() {
                 {/* ================= 4. AUTHOR WORKSPACE ================= */}
                 {role === "author" && (() => {
                   const isDe = language === "de"
-                  const isDemoAuthor = email === "author@scholarlyopen.org" || email === "author@example.com" || email === "e.vane@university.edu" || email.toLowerCase().includes("sam.lee")
+                  const isDemoAuthor = email === "author@scholarlyopen.org" || email === "author@example.com" || email === "e.vane@university.edu" || email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me")
                   const authorFiltered = isDemoAuthor 
                     ? manuscripts 
                     : manuscripts.filter(m => 
@@ -6644,9 +6644,9 @@ export default function Editorial360Page() {
                   })
 
                   const isSamLee = Boolean(
-                    (email && (email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("sam"))) ||
+                    (email && (email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("sam") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me"))) ||
                     (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
-                    uniqueManuscripts.some(m => m.id === "SOMED-26-RW01" && (m.author?.toLowerCase().includes("sam") || m.authorName?.toLowerCase().includes("sam")))
+                    uniqueManuscripts.some(m => m.id === "SOMED-26-RW01" && (m.author?.toLowerCase().includes("sam") || m.authorName?.toLowerCase().includes("sam") || m.authorEmail?.toLowerCase().includes("applied.ebm.institute") || m.authorEmail?.toLowerCase().includes("proton.me")))
                   )
                   const displayAuthorName = isSamLee ? "Sam Lee" : (profFullName || "Dr. Evelyn Vane")
 
@@ -13412,7 +13412,17 @@ export default function Editorial360Page() {
                             </div>
                             <button
                               type="button"
-                              onClick={() => alert(`Downloading ${selectedManuscriptDetails.fileName || "Main_Manuscript.pdf"}`)}
+                              onClick={() => {
+                                const isAortic = selectedManuscriptDetails.id === "SOMED-26-RW01" || selectedManuscriptDetails.title?.toLowerCase().includes("prevent earlier")
+                                const dlUrl = selectedManuscriptDetails.fileUrl || (isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
+                                const dlName = selectedManuscriptDetails.fileName || (isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscriptDetails.id}_Manuscript.docx`)
+                                const link = document.createElement("a")
+                                link.href = dlUrl
+                                link.download = dlName
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                              }}
                               className="inline-flex items-center gap-1 text-xs font-bold text-[#0b99ff] hover:text-[#0077cc] dark:hover:text-sky-300 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 dark:hover:bg-sky-900/60 border border-sky-200/70 dark:border-sky-800/50 px-2.5 py-1 rounded-md transition-all cursor-pointer shrink-0"
                             >
                               <Download className="h-3 w-3" />
@@ -13454,11 +13464,21 @@ export default function Editorial360Page() {
               <div className="p-4 px-6 border-t border-slate-100 dark:border-[#272832] flex items-center justify-between gap-3 shrink-0">
                 <button
                   type="button"
-                  onClick={() => alert(`Downloading submission dossier for ${selectedManuscriptDetails?.id}...`)}
+                  onClick={() => {
+                    const isAortic = selectedManuscriptDetails?.id === "SOMED-26-RW01" || selectedManuscriptDetails?.title?.toLowerCase().includes("prevent earlier")
+                    const dlUrl = selectedManuscriptDetails?.fileUrl || (isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
+                    const dlName = selectedManuscriptDetails?.fileName || (isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscriptDetails?.id || "Manuscript"}_Dossier.zip`)
+                    const link = document.createElement("a")
+                    link.href = dlUrl
+                    link.download = dlName
+                    document.body.appendChild(link)
+                    link.click()
+                    document.body.removeChild(link)
+                  }}
                   className="inline-flex items-center gap-1.5 border border-[#0b99ff]/30 dark:border-sky-800/60 bg-sky-50/70 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0b99ff] dark:text-sky-300 font-semibold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer transition-colors shadow-2xs"
                 >
                   <Download className="h-3.5 w-3.5" />
-                  <span>Download Package (.zip)</span>
+                  <span>Download Package (.docx)</span>
                 </button>
                 <button
                   type="button"

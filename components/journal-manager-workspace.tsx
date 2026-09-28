@@ -1870,9 +1870,12 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         integrityStatus: "Clean",
         date: "2026-08-10",
         authorName: "Dr. Sam Lee",
-        authorEmail: "sam.lee@scholarlyopen.org",
+        authorEmail: "Applied.EBM.Institute@proton.me",
         articleType: "Review Article",
         submissionStage: "Under Review",
+        fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
+        fileSize: "38.6 KB",
+        fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
         editorAssigned: false,
         assignedEditorName: undefined,
         reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza"],
@@ -1892,7 +1895,10 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
           journal: "Scholarly Open: Medicine",
           status: m.status || "Under Review",
           authorName: "Dr. Sam Lee",
-          authorEmail: (m.authorEmail && !m.authorEmail.includes("vane")) ? m.authorEmail : "sam.lee@scholarlyopen.org",
+          authorEmail: (m.authorEmail && !m.authorEmail.includes("vane")) ? m.authorEmail : "Applied.EBM.Institute@proton.me",
+          fileName: m.fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
+          fileSize: m.fileSize || "38.6 KB",
+          fileUrl: m.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
           assignedEditorName: m.assignedEditorName || undefined,
           editorAssigned: Boolean(m.assignedEditorName),
           reviewers: cleanRev
@@ -3454,7 +3460,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     authorName: ms.authorName || (ms.id === "SOMED-26-RW01" ? "Dr. Sam Lee" : "Author"),
                                     authorEmail: (ms.authorEmail && !ms.authorEmail.includes("vane")) 
                                       ? ms.authorEmail 
-                                      : (ms.id === "SOMED-26-RW01" ? "sam.lee@scholarlyopen.org" : (ms.id.includes("MS201") ? "dr.sam.lee@acei-health.org" : "author@scholarlyopen.org")),
+                                      : (ms.id === "SOMED-26-RW01" ? "Applied.EBM.Institute@proton.me" : (ms.id.includes("MS201") ? "dr.sam.lee@acei-health.org" : "author@scholarlyopen.org")),
                                     authorAffiliation: ms.authorAffiliation || "",
                                     status: ms.status
                                   })}
@@ -6634,21 +6640,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <a
-                  href={selectedManuscript?.fileUrl || selectedManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"}
-                  download={selectedManuscript?.fileName || `${selectedManuscript?.id || "Manuscript"}_Main_Document.pdf`}
+                  href={selectedManuscript?.fileUrl || (selectedManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : selectedManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                  download={selectedManuscript?.fileName || (selectedManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscript?.id || "Manuscript"}_Main_Document.docx`)}
                   className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <FileText className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
                     <div className="truncate">
                       <span className="truncate block">
-                        {selectedManuscript?.fileName || "Main Manuscript (PDF)"}
+                        {selectedManuscript?.fileName || (selectedManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Main Manuscript (.docx)")}
                       </span>
-                      {selectedManuscript?.fileSize && (
-                        <span className="text-[10px] text-slate-400 block font-mono">
-                          {selectedManuscript.fileSize}
-                        </span>
-                      )}
+                      <span className="text-[10px] text-slate-400 block font-mono">
+                        {selectedManuscript?.fileSize || (selectedManuscript?.id === "SOMED-26-RW01" ? "38.6 KB" : "2.4 MB")}
+                      </span>
                     </div>
                   </div>
                   <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
@@ -6689,6 +6693,41 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                   <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
                 </a>
+              </div>
+
+              {/* Upload or replace manuscript Word document option */}
+              <div className="pt-1.5">
+                <label className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-dashed border-sky-300 dark:border-sky-800 bg-sky-50/50 dark:bg-sky-950/20 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-[#0b99ff] text-xs font-semibold cursor-pointer transition-colors">
+                  <Upload className="w-3.5 h-3.5 text-[#0b99ff]" />
+                  <span>Upload / Replace Manuscript File (.docx, .doc, .pdf)</span>
+                  <input
+                    type="file"
+                    accept=".docx,.doc,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (!file || !selectedManuscript) return
+                      const objectUrl = URL.createObjectURL(file)
+                      const sizeStr = `${(file.size / 1024).toFixed(1)} KB`
+                      setSelectedManuscript(prev => prev ? {
+                        ...prev,
+                        fileName: file.name,
+                        fileSize: sizeStr,
+                        fileUrl: objectUrl
+                      } : null)
+                      fetch("/api/editorial360/manuscripts", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          id: selectedManuscript.id,
+                          file_name: file.name,
+                          file_size: sizeStr
+                        })
+                      }).catch(() => {})
+                      alert(`Successfully uploaded "${file.name}" for ${selectedManuscript.id}! This file is now active and downloadable across JM, Reviewer, and Author desks.`)
+                    }}
+                  />
+                </label>
               </div>
             </div>
 

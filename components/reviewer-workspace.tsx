@@ -1016,7 +1016,19 @@ export function ReviewerWorkspace({
 
   const handleDownloadSpecificFile = (type: "fulltext" | "supp" | "irb", rev: ActiveReviewItem) => {
     const id = rev.manuscriptId || rev.id || "SOMED-26-RS001"
+    const isAortic = id === "SOMED-26-RW01" || rev.title?.toLowerCase().includes("prevent earlier") || rev.title?.toLowerCase().includes("acute aortic dissection") || Boolean((rev as any).fileUrl)
+
     if (type === "fulltext") {
+      if (isAortic) {
+        const link = document.createElement("a")
+        link.href = (rev as any).fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+        link.download = (rev as any).fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx"
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return
+      }
+
       const content = `================================================================================
 SCHOLARLY OPEN • BLINDED MANUSCRIPT FULL TEXT
 Double-Blind Evaluation Copy (Author details and institutional PII redacted)
@@ -1087,6 +1099,17 @@ All clinical research procedures adhere strictly to COPE guidelines and local st
     setTimeout(() => {
       setIsDownloadingZip(false)
       const id = rev.manuscriptId || rev.id || "SOMED-26-RS001"
+      const isAortic = id === "SOMED-26-RW01" || rev.title?.toLowerCase().includes("prevent earlier") || rev.title?.toLowerCase().includes("acute aortic dissection") || Boolean((rev as any).fileUrl)
+
+      if (isAortic) {
+        const link = document.createElement("a")
+        link.href = (rev as any).fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+        link.download = (rev as any).fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx"
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return
+      }
       const content = `================================================================================
 SCHOLARLY OPEN • EDITORIAL360 COMPLETE BLINDED PEER REVIEW PACKAGE
 ================================================================================
@@ -4190,28 +4213,37 @@ COPE & Plan S Certified Archive
                 </span>
 
                 <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-lg border border-slate-200 dark:border-slate-800">
-                  <div className="p-2.5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-red-500 shrink-0" />
-                      <div>
-                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Blinded_Manuscript_FullText.txt</div>
-                        <div className="text-[10px] text-slate-400">Main text · 14 Pages · Anonymized (Authors/PII Redacted)</div>
+                  {(() => {
+                    const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
+                    return (
+                      <div className="p-2.5 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                          <div>
+                            <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                              {isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Blinded_Manuscript_FullText.docx"}
+                            </div>
+                            <div className="text-[10px] text-slate-400">
+                              {isAortic ? "Original Manuscript Word Document (.docx) · Evidence-Based Medicine Review" : "Main text · 14 Pages · Anonymized (Authors/PII Redacted)"}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-mono text-slate-400">{isAortic ? "38.6 KB" : "2.4 MB"}</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
+                            className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
+                          >
+                            <Download className="h-3 w-3 mr-1" />
+                            {isDe ? "Laden" : "Download"}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-mono text-slate-400">2.4 MB</span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
-                        className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        {isDe ? "Laden" : "Download"}
-                      </Button>
-                    </div>
-                  </div>
+                    )
+                  })()}
 
                   <div className="p-2.5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
