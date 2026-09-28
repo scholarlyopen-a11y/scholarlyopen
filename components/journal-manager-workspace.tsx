@@ -140,6 +140,7 @@ export interface JmManuscript {
   ethicsIrb?: string
   fundingGrant?: string
   authorCountry?: string
+  wordCount?: number
 }
 
 export interface JmReviewFeedback {
