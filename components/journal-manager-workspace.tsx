@@ -74,6 +74,7 @@ import { generateBrandedEmailHtml, getJournalBranding } from "@/lib/email-templa
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 import { OFFICIAL_JOURNALS, getJournalReplyTo } from "@/lib/data/journal-contacts"
 import { REGIONAL_COUNTRY_GROUPS, GLOBAL_COUNTRIES } from "@/lib/data/countries"
+import { editors } from "@/lib/data/editors"
 
 export interface SentEmailRecord {
   id: string
@@ -113,12 +114,14 @@ export interface JmManuscript {
   plagiarismScore?: number
   aiScore?: number
   authorName?: string
+  author?: string
   authorEmail?: string
   authorAffiliation?: string
   authorOrcid?: string
   abstract?: string
   keywords?: string
   assignedEditorName?: string
+  editor?: string
   editorAssigned?: boolean
   articleType?: string
   proofStatus?: "Pending Upload" | "Pending Author Sign-off" | "Approved by Author ✓"
@@ -223,54 +226,69 @@ export const PRAVEEN_NAGULA_RAF = {
   conflictOfInterest: "None"
 }
 
+export const getBoardCandidatesForJournal = (journalName?: string, authorName?: string) => {
+  const targetJournal = journalName || "Scholarly Open: Medicine"
+  const branding = getJournalBranding(targetJournal)
+  const targetSlug = branding.slug
+  const cleanAuthor = (authorName || "").toLowerCase().replace(/^(dr\.|prof\.|dr|prof)\s+/i, "").trim()
+
+  const matched = editors.filter(e => {
+    if (e.journalSlug !== targetSlug) return false
+    if (!e.name || e.name.toLowerCase().includes("position open")) return false
+    // Filter out author of the paper to eliminate COI
+    if (cleanAuthor && e.name.toLowerCase().includes(cleanAuthor)) return false
+    return true
+  })
+
+  // Format real board members
+  const candidates = matched.map(e => ({
+    name: e.name,
+    role: e.role,
+    email: e.email || `editor.${targetSlug}@scholarlyopen.org`,
+    affiliation: e.affiliation?.replace(/\n/g, ", "),
+    journal: targetJournal.includes("Scholarly Open") ? targetJournal : `Scholarly Open: ${branding.cleanName}`,
+    specialization: e.specialization || (e.expertise ? e.expertise.join(", ") : "Peer Review Oversight")
+  }))
+
+  if (candidates.length > 0) return candidates
+
+  // Standard verified real board members for Medicine
+  return [
+    {
+      name: "Weihua Gong, M.D., Ph.D.",
+      role: "Associate Editor · Medicine & Surgery",
+      email: "editor.medicine@scholarlyopen.org",
+      affiliation: "Shanghai Jiao Tong University School of Medicine / Zhejiang University",
+      journal: "Scholarly Open: Medicine",
+      specialization: "Cardiovascular Surgery, Oncology, Evidence-Based Medicine"
+    },
+    {
+      name: "Justice Kofi Boakye-Appiah, M.D., Ph.D.",
+      role: "Editorial Board Member · Exploratory Medicine",
+      email: "editor.med@scholarlyopen.org",
+      affiliation: "Eli Lilly and Company, USA",
+      journal: "Scholarly Open: Medicine",
+      specialization: "Obesity, Cardiometabolic Health, Clinical Pharmacology"
+    }
+  ]
+}
+
 export const EDITORIAL_BOARD_CANDIDATES = [
   {
-    name: "Weihua Gong, MD, PhD",
+    name: "Weihua Gong, M.D., Ph.D.",
     role: "Associate Editor · Medicine & Surgery",
     email: "editor.medicine@scholarlyopen.org",
-    affiliation: "Zhejiang University, China",
+    affiliation: "Shanghai Jiao Tong University School of Medicine / Zhejiang University",
     journal: "Scholarly Open: Medicine",
     specialization: "Cardiovascular Surgery, Oncology, Evidence-Based Medicine"
   },
   {
-    name: "Prof. Clara Zhang",
-    role: "Lead Editor",
-    email: "c.zhang@scholarlyopen.org",
-    affiliation: "University of Cambridge",
-    journal: "Scholarly Open: Engineering & Applied Sciences",
-    specialization: "Biomedical Systems, Advanced Materials, Operations"
-  },
-  {
-    name: "Prof. Aris Thorne",
-    role: "Executive Editorial Board",
-    email: "a.thorne@scholarlyopen.org",
-    affiliation: "Imperial College London",
-    journal: "Scholarly Open: Social Sciences & Medicine",
-    specialization: "Healthcare Systems, Public Health Operations"
-  },
-  {
-    name: "Mohamed R. Eletmany, Ph.D.",
-    role: "Associate Editor",
-    email: "editor.dcct@scholarlyopen.org",
-    affiliation: "South Valley University, Egypt",
-    journal: "Scholarly Open: Chemistry & Applied Sciences",
-    specialization: "Molecular Modeling, Applied Sciences"
-  },
-  {
-    name: "Prof. Sanna Järvelä",
-    role: "Editorial Board Member",
-    email: "s.jarvela@scholarlyopen.org",
-    affiliation: "University of Oulu, Finland",
-    journal: "Scholarly Open",
-    specialization: "Healthcare Technology, Collaborative Systems"
-  },
-  {
-    name: "Dr. Sarah Jenkins",
-    role: "Research Integrity Advisor & Section Editor",
-    email: "s.jenkins@scholarlyopen.org",
-    affiliation: "University of Oxford",
+    name: "Justice Kofi Boakye-Appiah, M.D., Ph.D.",
+    role: "Editorial Board Member · Exploratory Medicine",
+    email: "editor.med@scholarlyopen.org",
+    affiliation: "Eli Lilly and Company, USA",
     journal: "Scholarly Open: Medicine",
-    specialization: "Clinical Evidence, Research Integrity"
+    specialization: "Obesity, Cardiometabolic Health, Clinical Pharmacology"
   }
 ]
 
@@ -754,12 +772,17 @@ export function JournalManagerWorkspace({
   const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>(() => {
     if (typeof window !== "undefined") {
       try {
+        const v2 = localStorage.getItem("editorial360_scout_sent_v2_reset")
+        if (!v2) {
+          localStorage.removeItem("editorial360_scout_sent_history")
+          localStorage.setItem("editorial360_scout_sent_v2_reset", "true")
+          return []
+        }
         const saved = localStorage.getItem("editorial360_scout_sent_history")
         if (saved) {
           const parsed = JSON.parse(saved)
           if (Array.isArray(parsed)) {
-            // Purge any mock/test email records
-            return parsed.filter((r: any) => !["SENT-1090", "SENT-1091", "SENT-1092"].includes(r.id))
+            return parsed.filter((r: any) => !["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"].includes(r.id))
           }
         }
       } catch (e) {
@@ -774,18 +797,13 @@ export function JournalManagerWorkspace({
     fetch("/api/editorial360/sent-invitations")
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) {
-          setSentEmailsHistory(prev => {
-            const existingIds = new Set(prev.map(p => p.id))
-            const newItems = data.filter((d: SentEmailRecord) => !existingIds.has(d.id) && !["SENT-1090", "SENT-1091", "SENT-1092"].includes(d.id))
-            const combined = [...prev, ...newItems].filter(d => !["SENT-1090", "SENT-1091", "SENT-1092"].includes(d.id))
-            if (typeof window !== "undefined") {
-              try {
-                localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(combined))
-              } catch (e) {}
-            }
-            return combined
-          })
+        const items = Array.isArray(data) ? data : (data?.sentInvitations || [])
+        const clean = items.filter((d: SentEmailRecord) => !["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"].includes(d.id))
+        setSentEmailsHistory(clean)
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(clean))
+          } catch (e) {}
         }
       })
       .catch(err => console.error("Failed to fetch persistent sent invitations:", err))
@@ -1508,7 +1526,7 @@ export function JournalManagerWorkspace({
   // Handling Editor Invitation Modal from Track Review
   const [isInviteEditorModalOpen, setIsInviteEditorModalOpen] = useState(false)
   const [editorInviteMode, setEditorInviteMode] = useState<"board" | "custom">("board")
-  const [selectedBoardEditor, setSelectedBoardEditor] = useState("Weihua Gong, MD, PhD")
+  const [selectedBoardEditor, setSelectedBoardEditor] = useState("Weihua Gong, M.D., Ph.D.")
   const [customEditorName, setCustomEditorName] = useState("")
   const [customEditorEmail, setCustomEditorEmail] = useState("")
   const [customEditorSubject, setCustomEditorSubject] = useState("")
@@ -1543,7 +1561,7 @@ Current Stage: Under Peer Review (Double-Blind)
 
 Peer Review Status:
 • Reviewer #1: Dr. Praveen Nagula has completed evaluation and submitted an Electronic Reviewer's Assessment Form (Recommendation: Re-write and Re-submit, Priority Rating: 6/10).
-• Reviewer #2: ragab aziza is currently conducting their review (target completion on or before 29th August, 2026).
+• Reviewer #2: Dr. Ragab Aziza is currently conducting their review (target completion on or before 29th August, 2026).
 
 As Handling Editor, you will oversee this peer review round, synthesize reviewer remarks, and issue the official editorial decision (Accept, Minor Revision, Major Revision, Re-write & Re-submit, or Reject) with guidance for the authors.
 
@@ -1570,7 +1588,8 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         edName = customEditorName.trim() || "Guest Handling Editor"
         edEmail = customEditorEmail.trim() || "editor@scholarlyopen.org"
       } else {
-        const found = EDITORIAL_BOARD_CANDIDATES.find(c => c.name === selectedBoardEditor)
+        const currentCandidates = getBoardCandidatesForJournal(trackingManuscript.journal, trackingManuscript.authorName || trackingManuscript.author)
+        const found = currentCandidates.find(c => c.name === selectedBoardEditor) || EDITORIAL_BOARD_CANDIDATES.find(c => c.name === selectedBoardEditor)
         if (found) {
           edName = found.name
           edEmail = found.email
@@ -1653,6 +1672,25 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         .catch(e => console.error("Failed to load global reviewer history:", e))
     }
   }, [activeTab, reviewerRegistryTab])
+
+  // Deduplicated and sanitized reviewer history
+  const cleanReviewerHistory = useMemo(() => {
+    const seen = new Set<string>()
+    return (globalReviewerHistory || [])
+      .filter(item => item && item.paperId !== "SOMED-26-RW820" && !item.id?.includes("820"))
+      .map(item => ({
+        ...item,
+        reviewerName: item.reviewerName?.toLowerCase().includes("ragab aziza") || item.reviewerName?.toLowerCase().includes("aziza")
+          ? "Dr. Ragab Aziza"
+          : item.reviewerName
+      }))
+      .filter(item => {
+        const key = `${item.paperId}-${item.reviewerEmail}`.toLowerCase()
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+  }, [globalReviewerHistory])
 
   // Dedicated Forensics Investigation Modal
   const [isForensicsModalOpen, setIsForensicsModalOpen] = useState(false)
@@ -1773,8 +1811,9 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
 
   // Filtered manuscripts
   const filteredManuscripts = useMemo(() => {
-    const list = [...initialManuscripts]
-    const hasMedPaper = list.some(m => m.id === "SOMED-26-RW01" || m.id === "SOMED-26-RW820" || m.title?.includes("Prevent Earlier"))
+    // Purge duplicate SOMED-26-RW820 completely
+    const list = initialManuscripts.filter(m => m.id !== "SOMED-26-RW820")
+    const hasMedPaper = list.some(m => m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier"))
     if (!hasMedPaper) {
       list.unshift({
         id: "SOMED-26-RW01",
@@ -1789,21 +1828,25 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         submissionStage: "Under Review",
         editorAssigned: false,
         assignedEditorName: undefined,
-        reviewers: ["Dr. Praveen Nagula", "ragab aziza"],
+        reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza"],
         keywords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking"
       })
     }
 
     return list.map(m => {
-      // Ensure SOMED-26-RW01 / SOMED-26-RW820 has 2 active reviewers and keeps assignedEditorName if appointed
-      if (m.id === "SOMED-26-RW01" || m.id === "SOMED-26-RW820" || m.title?.includes("Prevent Earlier")) {
+      // Ensure SOMED-26-RW01 has 2 active reviewers and keeps assignedEditorName if appointed
+      if (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier")) {
+        const cleanRev = (m.reviewers && m.reviewers.length > 0)
+          ? m.reviewers.map(r => r.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : r)
+          : ["Dr. Praveen Nagula", "Dr. Ragab Aziza"]
         return {
           ...m,
+          id: "SOMED-26-RW01",
           journal: "Scholarly Open: Medicine",
           status: m.status || "Under Review",
           assignedEditorName: m.assignedEditorName || undefined,
           editorAssigned: Boolean(m.assignedEditorName),
-          reviewers: m.reviewers && m.reviewers.length > 0 ? m.reviewers : ["Dr. Praveen Nagula", "ragab aziza"]
+          reviewers: cleanRev
         }
       }
       // Ensure SOEAS-26-RS102 has 2 reviewers under Prof. Clara Zhang
@@ -3201,7 +3244,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 <div>
                                   <span className="text-slate-400 font-medium">Reviewers:</span>{" "}
                                   <span className="font-semibold text-[#0b99ff]">
-                                    {ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers.join(", ") : "None assigned"}
+                                    {ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers.map(r => r.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : r).join(", ") : "None assigned"}
                                   </span>
                                 </div>
                               </div>
@@ -4653,7 +4696,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  Reviewer History ({globalReviewerHistory.length})
+                  Reviewer History ({cleanReviewerHistory.length})
                 </button>
               </div>
 
@@ -5000,24 +5043,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60">
                   <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Total Dispatched</span>
-                  <span className="text-xl font-bold text-slate-900 dark:text-white mt-0.5 block">{globalReviewerHistory.length}</span>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white mt-0.5 block">{cleanReviewerHistory.length}</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20">
                   <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Accepted / Active</span>
                   <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-                    {globalReviewerHistory.filter(h => h.status === "Accepted" || h.status === "Completed").length}
+                    {cleanReviewerHistory.filter(h => h.status === "Accepted" || h.status === "Completed").length}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20">
                   <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wider block">Declined</span>
                   <span className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-0.5 block">
-                    {globalReviewerHistory.filter(h => h.status === "Declined").length}
+                    {cleanReviewerHistory.filter(h => h.status === "Declined").length}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/20">
                   <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">Pending Response</span>
                   <span className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5 block">
-                    {globalReviewerHistory.filter(h => h.status === "Invited").length}
+                    {cleanReviewerHistory.filter(h => h.status === "Invited").length}
                   </span>
                 </div>
               </div>
@@ -5036,14 +5079,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                    {globalReviewerHistory.length === 0 ? (
+                    {cleanReviewerHistory.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-8 text-center text-slate-400 italic">
                           No reviewer invitations logged yet. Dispatched review requests will appear here.
                         </td>
                       </tr>
                     ) : (
-                      globalReviewerHistory.map((item) => {
+                      cleanReviewerHistory.map((item) => {
                         const targetMs = initialManuscripts.find(m => m.id && m.id.toLowerCase() === item.paperId.toLowerCase())
 
                         return (
@@ -5683,61 +5726,62 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               <div className="space-y-3">
-                {[
-                  {
-                    name: "Prof. Clara Zhang",
-                    title: "Editor-in-Chief • Engineering",
-                    active: 4,
-                    max: 6,
-                    speed: "16.2d",
-                    onTime: "100%",
-                    avatar: "CZ"
-                  },
-                  {
-                    name: "Prof. Aris Thorne",
-                    title: "Senior Handling Editor • Medicine",
-                    active: 3,
-                    max: 5,
-                    speed: "18.1d",
-                    onTime: "98%",
-                    avatar: "AT"
-                  },
-                  {
-                    name: "Prof. Hiroshi Tanaka",
-                    title: "Associate Editor • Social Sciences",
-                    active: 2,
-                    max: 5,
-                    speed: "19.4d",
-                    onTime: "96%",
-                    avatar: "HT"
-                  }
-                ].map((ed, idx) => (
-                  <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                          {ed.avatar}
+                {(() => {
+                  const realEditors = [
+                    {
+                      name: "Weihua Gong, M.D., Ph.D.",
+                      title: "Editorial Board Member • Medicine",
+                      avatar: "WG",
+                      max: 5
+                    },
+                    {
+                      name: "Justice Kofi Boakye-Appiah, M.D., Ph.D.",
+                      title: "Editorial Board Member • Medicine",
+                      avatar: "JK",
+                      max: 5
+                    }
+                  ].map(ed => {
+                    const firstName = ed.name.split(" ")[0].toLowerCase()
+                    const activeCount = initialManuscripts.filter(m => 
+                      (m.assignedEditorName && m.assignedEditorName.toLowerCase().includes(firstName)) ||
+                      (m.editor && m.editor.toLowerCase().includes(firstName))
+                    ).length
+                    return {
+                      ...ed,
+                      active: activeCount,
+                      speed: activeCount > 0 ? "14.2d" : "—",
+                      onTime: activeCount > 0 ? "100%" : "N/A"
+                    }
+                  })
+
+                  return realEditors.map((ed, idx) => (
+                    <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                            {ed.avatar}
+                          </div>
+                          <div>
+                            <h5 className="text-xs font-bold text-slate-900 dark:text-white">{ed.name}</h5>
+                            <p className="text-[10px] text-slate-400">{ed.title}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h5 className="text-xs font-bold text-slate-900 dark:text-white">{ed.name}</h5>
-                          <p className="text-[10px] text-slate-400">{ed.title}</p>
+                        <div className="text-right">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">
+                            {ed.active} / {ed.max} Active
+                          </span>
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{ed.onTime} on-time</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">
-                          {ed.active} / {ed.max} Active
-                        </span>
-                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{ed.onTime} on-time</p>
+                      <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#0b99ff]"
+                          style={{ width: `${Math.min(100, (ed.active / ed.max) * 100)}%` }}
+                        />
                       </div>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#0b99ff]"
-                        style={{ width: `${(ed.active / ed.max) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ))
+                })()}
               </div>
             </Card>
 
@@ -7261,7 +7305,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             )}
 
             {/* 1/2 Reviews Active Banner for SOMED-26-RW01 */}
-            {(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.id === "SOMED-26-RW820" || trackingManuscript?.title?.includes("Prevent Earlier")) && (
+            {(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.title?.includes("Prevent Earlier")) && (
               <div className="p-3.5 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
                 <div className="flex items-center gap-2.5">
                   <div className="h-8 w-8 rounded-lg bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0 border border-sky-200 dark:border-sky-800">
@@ -7273,7 +7317,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20">50% Logged</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (ragab aziza) is currently reviewing.
+                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is currently reviewing.
                     </div>
                   </div>
                 </div>
@@ -7294,7 +7338,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             )}
 
             {/* 2/2 Complete Banner with Prompt Editor Action */}
-            {((trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && trackingManuscript?.id !== "SOMED-26-RW01" && trackingManuscript?.id !== "SOMED-26-RW820") && (
+            {((trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && trackingManuscript?.id !== "SOMED-26-RW01") && (
               <div className="p-3.5 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 shrink-0" />
@@ -7376,19 +7420,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-slate-500 font-medium">
                     {(() => {
-                      const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.id === "SOMED-26-RW820" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
+                      const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
                       const list = paperReviewerHistory.length > 0 
                         ? paperReviewerHistory 
                         : (isMedAortic
                             ? [
                                 { id: "pn-01", paperId: trackingManuscript?.id || "SOMED-26-RW01", reviewerName: "Dr. Praveen Nagula", reviewerEmail: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as any },
-                                { id: "ra-02", paperId: trackingManuscript?.id || "SOMED-26-RW01", reviewerName: "ragab aziza", reviewerEmail: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as any }
+                                { id: "ra-02", paperId: trackingManuscript?.id || "SOMED-26-RW01", reviewerName: "Dr. Ragab Aziza", reviewerEmail: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as any }
                               ]
                             : (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0
                                 ? trackingManuscript.reviewers.map((r, i) => ({
                                     id: `mock-${i}`,
                                     paperId: trackingManuscript?.id || "",
-                                    reviewerName: r,
+                                    reviewerName: r.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : r,
                                     reviewerEmail: r.toLowerCase().includes("nagula") ? "drpraveennagula@gmail.com" : (r.toLowerCase().includes("aziza") ? "ragabaziza61@gmail.com" : "reviewer@scholarlyopen.org"),
                                     invitedDate: "2026-08-15",
                                     status: (r.toLowerCase().includes("nagula") ? "Completed" : "Accepted") as any
@@ -7417,9 +7461,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               {(() => {
-                const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.id === "SOMED-26-RW820" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
+                const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
 
-                const displayList: {
+                const rawList: {
                   id: string
                   name: string
                   email: string
@@ -7431,7 +7475,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 }[] = paperReviewerHistory.length > 0
                   ? paperReviewerHistory.map(h => ({
                       id: h.id,
-                      name: h.reviewerName,
+                      name: h.reviewerName?.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : h.reviewerName,
                       email: h.reviewerEmail,
                       invitedDate: h.invitedDate,
                       status: h.status,
@@ -7442,12 +7486,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   : (isMedAortic
                       ? [
                           { id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as const, deadline: "2026-08-29" },
-                          { id: "REV-HIST-RA-02", name: "ragab aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" }
+                          { id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" }
                         ]
                       : (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0
                           ? trackingManuscript.reviewers.map((revName, idx) => ({
                               id: `REV-FALLBACK-${idx}`,
-                              name: revName,
+                              name: revName.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : revName,
                               email: revName.toLowerCase().includes("nagula") ? "drpraveennagula@gmail.com" : (revName.toLowerCase().includes("aziza") ? "ragabaziza61@gmail.com" : "reviewer@scholarlyopen.org"),
                               invitedDate: "2026-08-15",
                               status: revName.toLowerCase().includes("nagula") ? ("Completed" as const) : ("Accepted" as const),
@@ -7456,6 +7500,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           : []
                         )
                     )
+
+                // Deduplicate displayList by email/name so identical items never repeat
+                const seenKeys = new Set<string>()
+                const displayList = rawList.filter(item => {
+                  const key = (item.email || item.name).toLowerCase()
+                  if (seenKeys.has(key)) return false
+                  seenKeys.add(key)
+                  return true
+                })
 
                 if (displayList.length === 0) {
                   return (
@@ -7886,7 +7939,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <span className="text-[11px] font-semibold text-[#0b99ff]">{trackingManuscript?.journal}</span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                2 reviewers are conducting the peer review. <strong>Dr. Praveen Nagula</strong> has submitted comments (Re-write and Re-submit), and <strong>ragab aziza</strong> is actively reviewing. Appointing a Handling Editor will allow them to synthesize evaluations and render the editorial verdict.
+                2 reviewers are conducting the peer review. <strong>Dr. Praveen Nagula</strong> has submitted comments (Re-write and Re-submit), and <strong>Dr. Ragab Aziza</strong> is actively reviewing. Appointing a Handling Editor will allow them to synthesize evaluations and render the editorial verdict.
               </p>
             </div>
 
@@ -7919,32 +7972,38 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {editorInviteMode === "board" ? (
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block uppercase tracking-wider">
-                  Select Board Member
+                  Select Board Member ({trackingManuscript?.journal || "Scholarly Open: Medicine"})
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {EDITORIAL_BOARD_CANDIDATES.map((cand) => {
-                    const isSelected = selectedBoardEditor === cand.name
-                    return (
-                      <div
-                        key={cand.email}
-                        onClick={() => setSelectedBoardEditor(cand.name)}
-                        className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
-                          isSelected
-                            ? "border-[#0b99ff] bg-[#0b99ff]/5 ring-1 ring-[#0b99ff]"
-                            : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-[#121316]"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">{cand.name}</h5>
-                          {isSelected && <Check className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />}
-                        </div>
-                        <p className="text-[11px] text-[#0b99ff] font-medium">{cand.role}</p>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{cand.affiliation}</p>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 italic truncate">{cand.specialization}</p>
-                      </div>
-                    )
-                  })}
-                </div>
+                {(() => {
+                  const currentCandidates = getBoardCandidatesForJournal(trackingManuscript?.journal || "Scholarly Open: Medicine", trackingManuscript?.authorName || trackingManuscript?.author)
+                  const boardList = currentCandidates.length > 0 ? currentCandidates : EDITORIAL_BOARD_CANDIDATES
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {boardList.map((cand) => {
+                        const isSelected = selectedBoardEditor === cand.name
+                        return (
+                          <div
+                            key={cand.email}
+                            onClick={() => setSelectedBoardEditor(cand.name)}
+                            className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
+                              isSelected
+                                ? "border-[#0b99ff] bg-[#0b99ff]/5 ring-1 ring-[#0b99ff]"
+                                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-[#121316]"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">{cand.name}</h5>
+                              {isSelected && <Check className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />}
+                            </div>
+                            <p className="text-[11px] text-[#0b99ff] font-medium">{cand.role}</p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{cand.affiliation}</p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 italic truncate">{cand.specialization}</p>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
               </div>
             ) : (
               <div className="space-y-3 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
@@ -7991,30 +8050,37 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
               {/* Branded Email Container */}
               <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316] shadow-xs">
-                {/* Standard Brand Header */}
+                {/* Standard Brand Header (CFPs & EBMs standard) */}
                 {(() => {
                   const branding = getJournalBranding(trackingManuscript?.journal || "Scholarly Open: Medicine")
-                  const brandColor = branding.iconStroke || "#0b99ff"
+                  const fullJournalName = (trackingManuscript?.journal || "Scholarly Open: Medicine").includes("Scholarly Open")
+                    ? (trackingManuscript?.journal || "Scholarly Open: Medicine")
+                    : `Scholarly Open: ${branding.cleanName}`
                   return (
-                    <div 
-                      className="px-4 py-3 flex items-center justify-between gap-3 text-white"
-                      style={{ background: `linear-gradient(135deg, ${brandColor} 0%, #001f3f 100%)` }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <img 
-                          src="/images/logo/scholarly-open-logo.png" 
-                          alt="Scholarly Open" 
-                          className="h-7 w-auto object-contain filter brightness-0 invert" 
-                        />
-                        <span className="font-bold text-xs tracking-tight">Scholarly Open</span>
+                    <div className="flex items-center justify-between p-4 pb-3.5 border-b-2 border-[#0b99ff] gap-4 bg-white dark:bg-[#121316]">
+                      <div className="flex items-center">
+                        <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain dark:hidden" />
+                        <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain hidden dark:block brightness-125" />
                       </div>
-                      <div className="flex items-center gap-1.5 text-right">
-                        <div className="h-6 w-6 rounded-md bg-white/10 flex items-center justify-center p-1 shrink-0">
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: branding.svgPath }} />
+                      <div className="flex items-center gap-2.5 text-right">
+                        <div>
+                          <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                            {fullJournalName}
+                          </div>
+                          <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
+                            Peer-Reviewed Journal
+                          </div>
                         </div>
-                        <span className="text-[11px] font-semibold text-white/95 max-w-[180px] sm:max-w-[260px] truncate">
-                          {trackingManuscript?.journal || "Scholarly Open: Medicine"}
-                        </span>
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shrink-0">
+                          <img
+                            src={`/journal-icons/${branding.slug}.svg`}
+                            alt={branding.cleanName}
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = 'none'
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   )
@@ -8039,6 +8105,22 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       onChange={(e) => setCustomEditorBody(e.target.value)}
                       className="w-full text-xs font-mono p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 leading-relaxed resize-y"
                     />
+                  </div>
+
+                  {/* Corporate & Compliance Footer (CFPs & EBMs standard) */}
+                  <div className="pt-3 border-t border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2 text-[10px] text-slate-400">
+                    <p className="font-semibold text-slate-600 dark:text-slate-300">
+                      Scholarly Open Editorial Office • International Open Access Publishing
+                    </p>
+                    <p className="text-[9px]">
+                      Rigorous Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards<br />
+                      &copy; 2026 Scholarly Open • Open Access CC BY 4.0 • editorial360 Platform
+                    </p>
+                    <div className="pt-1">
+                      <span className="inline-block px-3 py-1 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-semibold">
+                        ✕ Opt-Out / Do Not Contact
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

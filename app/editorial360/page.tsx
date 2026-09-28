@@ -1395,7 +1395,8 @@ export default function Editorial360Page() {
           "SOEAS-26-TR105",
           "SOMED-26-RW101",
           "SOENG-26-RJ110",
-          "SOSOC-26-RV002"
+          "SOSOC-26-RV002",
+          "SOMED-26-RW820"
         ])
         const stored = localStorage.getItem("editorial360_manuscripts")
         if (stored) {
@@ -2818,6 +2819,15 @@ export default function Editorial360Page() {
             badges: reviewerProfile?.badges || ["Registered Reviewer", "COPE Ethics Verified"]
           }
           setReviewerProfile(currentReviewerProfile)
+        }
+      }
+
+      if (role === "author") {
+        if (cleanEmail.toLowerCase().includes("sam")) {
+          setProfFullName("Sam Lee")
+          setProfRank("Corresponding Author")
+          setProfInstitution("Stanford University School of Medicine")
+          setProfCountry("United States")
         }
       }
 
@@ -6619,6 +6629,13 @@ export default function Editorial360Page() {
                     return timeB - timeA
                   })
 
+                  const isSamLee = Boolean(
+                    (email && (email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("sam"))) ||
+                    (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
+                    uniqueManuscripts.some(m => m.id === "SOMED-26-RW01" && (m.author?.toLowerCase().includes("sam") || m.authorName?.toLowerCase().includes("sam")))
+                  )
+                  const displayAuthorName = isSamLee ? "Sam Lee" : (profFullName || "Dr. Evelyn Vane")
+
                   const translateStatus = (st: string) => {
                     if (!isDe) return st
                     switch (st) {
@@ -6687,7 +6704,7 @@ export default function Editorial360Page() {
                               </span>
                             </div>
                             <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                              {isDe ? `Willkommen, ${profFullName}` : `Welcome, ${profFullName}`}
+                              {isDe ? `Willkommen, ${displayAuthorName}` : `Welcome, ${displayAuthorName}`}
                             </h2>
                             <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
                               {isDe 
@@ -7856,10 +7873,10 @@ export default function Editorial360Page() {
                                   {isDe ? "Erlass-Stufe" : "Waiver Standing"}
                                 </span>
                                 <div className="text-sm font-bold text-slate-900 dark:text-white">
-                                  {isDe ? "Stufe 2 · 25% APC-Erlass" : "Tier 2 · 25% APC Waiver"}
+                                  {isSamLee ? (isDe ? "Stufe 0 · 0% APC-Erlass" : "Tier 0 · 0% APC Waiver") : (isDe ? "Stufe 2 · 25% APC-Erlass" : "Tier 2 · 25% APC Waiver")}
                                 </div>
-                                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block">
-                                  {isDe ? "12 Gutachten verifiziert" : "12 peer reviews verified"}
+                                <span className={`text-[11px] font-medium block ${isSamLee ? "text-slate-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                                  {isSamLee ? (isDe ? "0 Gutachten verifiziert" : "0 peer reviews verified") : (isDe ? "12 Gutachten verifiziert" : "12 peer reviews verified")}
                                 </span>
                               </div>
 
@@ -7868,7 +7885,7 @@ export default function Editorial360Page() {
                                   {isDe ? "Verfügbarer Erlassbetrag" : "Available Discount"}
                                 </span>
                                 <div className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
-                                  €650.00 EUR
+                                  {isSamLee ? "€0.00 EUR" : "€650.00 EUR"}
                                 </div>
                                 <span className="text-[11px] text-slate-500 font-medium block">
                                   {isDe ? "Wird von Haupt-APC abgezogen" : "Subtracted from principle APC"}
@@ -7881,21 +7898,23 @@ export default function Editorial360Page() {
                                 </span>
                                 <div className="flex items-center justify-between gap-1 pt-0.5">
                                   <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    SO-WAIVER-2026-98X
+                                    {isSamLee ? "None Available" : "SO-WAIVER-2026-98X"}
                                   </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (typeof navigator !== "undefined") {
-                                        navigator.clipboard.writeText("SO-WAIVER-2026-98X")
-                                        setCopiedVoucher(true)
-                                        setTimeout(() => setCopiedVoucher(false), 1500)
-                                      }
-                                    }}
-                                    className="text-[10px] font-bold text-[#0b99ff] hover:text-[#0077cc] bg-sky-50 dark:bg-sky-950/60 px-2 py-1 rounded border border-sky-200/80 dark:border-sky-800/60 transition-colors cursor-pointer"
-                                  >
-                                    {copiedVoucher ? (isDe ? "Kopiert!" : "Copied!") : (isDe ? "Kopieren" : "Copy")}
-                                  </button>
+                                  {!isSamLee && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (typeof navigator !== "undefined") {
+                                          navigator.clipboard.writeText("SO-WAIVER-2026-98X")
+                                          setCopiedVoucher(true)
+                                          setTimeout(() => setCopiedVoucher(false), 1500)
+                                        }
+                                      }}
+                                      className="text-[10px] font-bold text-[#0b99ff] hover:text-[#0077cc] bg-sky-50 dark:bg-sky-950/60 px-2 py-1 rounded border border-sky-200/80 dark:border-sky-800/60 transition-colors cursor-pointer"
+                                    >
+                                      {copiedVoucher ? (isDe ? "Kopiert!" : "Copied!") : (isDe ? "Kopieren" : "Copy")}
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -7907,9 +7926,11 @@ export default function Editorial360Page() {
                                   {isDe ? "Gutschein auf Manuskript anwenden" : "Apply Voucher to Manuscript Invoice"}
                                 </h4>
                                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                  {isDe 
-                                    ? "Wählen Sie Ihr Manuskript aus. Der Erlass von 650 € (oder 25%) wird während der Zahlungsabwicklung direkt von der Haupt-APC abgezogen." 
-                                    : "Select your manuscript. The €650 discount (or 25% waiver) will be subtracted directly from the principle APC during checkout."}
+                                  {isSamLee
+                                    ? (isDe ? "Keine aktiven Gutscheine verfügbar. Führen Sie Begutachtungen durch, um APC-Guthaben zu erwerben." : "No active vouchers available. Complete verified peer reviews to earn institutional APC waivers.")
+                                    : (isDe 
+                                        ? "Wählen Sie Ihr Manuskript aus. Der Erlass von 650 € (oder 25%) wird während der Zahlungsabwicklung direkt von der Haupt-APC abgezogen." 
+                                        : "Select your manuscript. The €650 discount (or 25% waiver) will be subtracted directly from the principle APC during checkout.")}
                                 </p>
                               </div>
 
@@ -7941,25 +7962,34 @@ export default function Editorial360Page() {
 
                                 <Button
                                   onClick={() => {
+                                    if (isSamLee) return
                                     setIsClaimingWaiver(true)
                                     setTimeout(() => {
                                       setIsClaimingWaiver(false)
                                       setWaiverClaimSuccess(true)
                                     }, 600)
                                   }}
-                                  disabled={isClaimingWaiver}
-                                  className="bg-[#0b99ff] hover:bg-[#0077cc] text-white text-xs font-bold px-4 py-2 h-auto rounded-lg cursor-pointer whitespace-nowrap shrink-0 shadow-2xs transition-all"
+                                  disabled={isSamLee || isClaimingWaiver}
+                                  className={`${isSamLee ? "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed" : "bg-[#0b99ff] hover:bg-[#0077cc] text-white cursor-pointer"} text-xs font-bold px-4 py-2 h-auto rounded-lg whitespace-nowrap shrink-0 shadow-2xs transition-all`}
                                 >
-                                  {isClaimingWaiver 
-                                    ? (isDe ? "Buche Erlass..." : "Applying Voucher...") 
-                                    : (isDe ? "650 € Erlass anwenden" : "Apply €650 Voucher")}
+                                  {isSamLee 
+                                    ? (isDe ? "Kein Gutschein verfügbar" : "No Voucher Available")
+                                    : (isClaimingWaiver 
+                                        ? (isDe ? "Buche Erlass..." : "Applying Voucher...") 
+                                        : (isDe ? "650 € Erlass anwenden" : "Apply €650 Voucher"))}
                                 </Button>
                               </div>
 
                               <div className="pt-2 border-t border-slate-100 dark:border-[#272832] flex flex-wrap items-center justify-between gap-2 text-[11px]">
                                 <button
                                   type="button"
-                                  onClick={() => alert(isDe ? `Lade APC-Erlasszertifikat PDF für Code SO-WAIVER-2026-98X herunter...` : `Downloading APC Waiver Certificate PDF for SO-WAIVER-2026-98X...`)}
+                                  onClick={() => {
+                                    if (isSamLee) {
+                                      alert(isDe ? "Noch keine Erlass-Zertifikate für dieses Konto ausgestellt." : "No waiver certificates issued yet for this account.")
+                                      return
+                                    }
+                                    alert(isDe ? `Lade APC-Erlasszertifikat PDF für Code SO-WAIVER-2026-98X herunter...` : `Downloading APC Waiver Certificate PDF for SO-WAIVER-2026-98X...`)
+                                  }}
                                   className="text-[#0b99ff] hover:underline font-semibold cursor-pointer inline-flex items-center gap-1"
                                 >
                                   <Download className="h-3 w-3" />
@@ -7986,14 +8016,16 @@ export default function Editorial360Page() {
                                   {isDe ? "Verifizierte wissenschaftliche Abzeichen" : "Verified Contributor Badges"}
                                 </h4>
                                 <p className="text-[11px] text-slate-400 mt-0.5">
-                                  {isDe ? "4 aktive Abzeichen für Gutachten und Open-Science-Standards." : "4 active badges for peer review rigor and open science compliance."}
+                                  {isSamLee 
+                                    ? (isDe ? "0 aktive Abzeichen für Gutachten und Open-Science-Standards." : "0 active badges for peer review rigor and open science compliance.")
+                                    : (isDe ? "4 aktive Abzeichen für Gutachten und Open-Science-Standards." : "4 active badges for peer review rigor and open science compliance.")}
                                 </p>
                               </div>
 
                               {/* Single Clean Social Share Group */}
                               <div className="flex items-center gap-1.5 self-start sm:self-auto">
                                 <a
-                                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://scholarlyopen.org/author/evelyn-vane")}`}
+                                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(isSamLee ? "https://scholarlyopen.org/author/sam-lee" : "https://scholarlyopen.org/author/evelyn-vane")}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#131418] dark:hover:bg-[#20222a] text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-[#272832] text-[11px] font-medium transition-colors cursor-pointer"
@@ -8004,7 +8036,7 @@ export default function Editorial360Page() {
                                 </a>
 
                                 <a
-                                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out my verified researcher badges on Scholarly Open! https://scholarlyopen.org/author/evelyn-vane")}`}
+                                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(isSamLee ? "Check out my researcher profile on Scholarly Open! https://scholarlyopen.org/author/sam-lee" : "Check out my verified researcher badges on Scholarly Open! https://scholarlyopen.org/author/evelyn-vane")}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#131418] dark:hover:bg-[#20222a] text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-[#272832] text-[11px] font-medium transition-colors cursor-pointer"
@@ -8018,7 +8050,7 @@ export default function Editorial360Page() {
                                   type="button"
                                   onClick={() => {
                                     if (typeof navigator !== "undefined") {
-                                      navigator.clipboard.writeText("https://scholarlyopen.org/author/evelyn-vane")
+                                      navigator.clipboard.writeText(isSamLee ? "https://scholarlyopen.org/author/sam-lee" : "https://scholarlyopen.org/author/evelyn-vane")
                                       alert(isDe ? "Profil-Link kopiert!" : "Badge profile link copied!")
                                     }
                                   }}
@@ -8031,95 +8063,114 @@ export default function Editorial360Page() {
                               </div>
                             </div>
 
-                            {/* Clean 2x2 Badge Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                              
-                              {/* 1. Top Reviewer */}
-                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                  <Star className="h-4 w-4 text-amber-500 fill-amber-500/20" />
-                                </div>
-                                <div className="min-w-0 flex-1 space-y-0.5">
-                                  <div className="flex items-center justify-between gap-1">
-                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Top Reviewer 2026</h5>
-                                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                      ✓ Verified
-                                    </span>
+                            {/* Clean 2x2 Badge Grid or Empty State */}
+                            {isSamLee ? (
+                              <div className="p-8 text-center rounded-xl bg-white dark:bg-[#18191e] border border-dashed border-slate-200 dark:border-[#272832] space-y-2">
+                                <Award className="h-8 w-8 mx-auto text-slate-300 dark:text-slate-600" />
+                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                  {isDe ? "Noch keine Abzeichen erworben" : "No Badges Earned Yet"}
+                                </p>
+                                <p className="text-[11px] text-slate-500 max-w-md mx-auto">
+                                  {isDe 
+                                    ? "Verifizierte Beitragsabzeichen werden nach Durchführung gründlicher Gutachten oder Bereitstellung offener Datensätze freigeschaltet." 
+                                    : "Verified contributor badges are unlocked after conducting rigorous peer review evaluations or depositing open datasets."}
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                {/* 1. Top Reviewer */}
+                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                  <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Star className="h-4 w-4 text-amber-500 fill-amber-500/20" />
                                   </div>
-                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                    {isDe ? "12 Begutachtungen in den besten 10% Antwortzeit." : "12 peer reviews completed in top 10% turnaround bracket."}
-                                  </p>
+                                  <div className="min-w-0 flex-1 space-y-0.5">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Top Reviewer 2026</h5>
+                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
+                                        ✓ Verified
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                      {isDe ? "12 Begutachtungen in den besten 10% Antwortzeit." : "12 peer reviews completed in top 10% turnaround bracket."}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* 2. Ethics & Rigor */}
+                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                  <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                    <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
+                                  </div>
+                                  <div className="min-w-0 flex-1 space-y-0.5">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Ethics & Rigor Verified</h5>
+                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
+                                        ✓ Verified
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                      {isDe ? "Volle COPE-Konformität und null Beanstandungen." : "Full COPE compliance and zero retraction or integrity flags."}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* 3. Open Data Champion */}
+                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                  <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                    <BookOpen className="h-4 w-4 text-indigo-500" />
+                                  </div>
+                                  <div className="min-w-0 flex-1 space-y-0.5">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Open Data Champion</h5>
+                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
+                                        ✓ Verified
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                      {isDe ? "Hinterlegte offene Datensätze mit öffentlichen DOIs." : "Deposited open research datasets with verified public DOIs."}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* 4. Rapid Revision Responder */}
+                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Clock className="h-4 w-4 text-emerald-600" />
+                                  </div>
+                                  <div className="min-w-0 flex-1 space-y-0.5">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Rapid Revision Responder</h5>
+                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
+                                        ✓ Verified
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                      {isDe ? "Einreichung überarbeiteter Manuskripte in <5 Tagen." : "Submitting author revisions within an average of 4.5 days."}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-
-                              {/* 2. Ethics & Rigor */}
-                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                  <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
-                                </div>
-                                <div className="min-w-0 flex-1 space-y-0.5">
-                                  <div className="flex items-center justify-between gap-1">
-                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Ethics & Rigor Verified</h5>
-                                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                      ✓ Verified
-                                    </span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                    {isDe ? "Volle COPE-Konformität und null Beanstandungen." : "Full COPE compliance and zero retraction or integrity flags."}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* 3. Open Data Champion */}
-                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                  <BookOpen className="h-4 w-4 text-indigo-500" />
-                                </div>
-                                <div className="min-w-0 flex-1 space-y-0.5">
-                                  <div className="flex items-center justify-between gap-1">
-                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Open Data Champion</h5>
-                                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                      ✓ Verified
-                                    </span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                    {isDe ? "Hinterlegte offene Datensätze mit öffentlichen DOIs." : "Deposited open research datasets with verified public DOIs."}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* 4. Rapid Revision Responder */}
-                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                  <Clock className="h-4 w-4 text-emerald-600" />
-                                </div>
-                                <div className="min-w-0 flex-1 space-y-0.5">
-                                  <div className="flex items-center justify-between gap-1">
-                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Rapid Revision Responder</h5>
-                                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                      ✓ Verified
-                                    </span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                    {isDe ? "Einreichung überarbeiteter Manuskripte in <5 Tagen." : "Submitting author revisions within an average of 4.5 days."}
-                                  </p>
-                                </div>
-                              </div>
-
-                            </div>
+                            )}
 
                             {/* Clean Milestone Progress Strip */}
                             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/70 dark:border-[#272832] space-y-1.5">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                  {isDe ? "Nächste Stufe: 50% APC-Erlass (Stufe 3)" : "Next Milestone: 50% APC Waiver (Tier 3)"}
+                                  {isSamLee 
+                                    ? (isDe ? "Nächste Stufe: 10% APC-Erlass (Stufe 1)" : "Next Milestone: 10% APC Waiver (Tier 1)")
+                                    : (isDe ? "Nächste Stufe: 50% APC-Erlass (Stufe 3)" : "Next Milestone: 50% APC Waiver (Tier 3)")}
                                 </span>
                                 <span className="text-slate-500 dark:text-slate-400 font-medium tabular-nums">
-                                  {isDe ? "Noch 1 Gutachten erforderlich (75%)" : "1 more review needed (75% completed)"}
+                                  {isSamLee
+                                    ? (isDe ? "Noch 4 Gutachten erforderlich (0% abgeschlossen)" : "4 more reviews needed (0% completed)")
+                                    : (isDe ? "Noch 1 Gutachten erforderlich (75%)" : "1 more review needed (75% completed)")}
                                 </span>
                               </div>
                               <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                <div className="bg-[#0b99ff] h-full rounded-full w-3/4" />
+                                <div
+                                  className="bg-[#0b99ff] h-full rounded-full transition-all duration-300"
+                                  style={{ width: isSamLee ? "0%" : "75%" }}
+                                />
                               </div>
                             </div>
                           </div>
@@ -8141,36 +8192,46 @@ export default function Editorial360Page() {
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-[#272832] text-slate-700 dark:text-slate-300">
-                                  <tr>
-                                    <td className="px-4 py-3 text-slate-500">2026-08-15</td>
-                                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Peer Review Completed (SOMED-26-094)</td>
-                                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€150 EUR (+10% Waiver)</td>
-                                    <td className="px-4 py-3 text-right">
-                                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                        Applied
-                                      </span>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td className="px-4 py-3 text-slate-500">2026-06-20</td>
-                                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Early-Bird Revision Submission (&lt;5 Days)</td>
-                                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€200 EUR</td>
-                                    <td className="px-4 py-3 text-right">
-                                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                        Applied
-                                      </span>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td className="px-4 py-3 text-slate-500">2026-04-10</td>
-                                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Guest Editor for Special Issue (SI-2026-AI)</td>
-                                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€300 EUR</td>
-                                    <td className="px-4 py-3 text-right">
-                                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                        Applied
-                                      </span>
-                                    </td>
-                                  </tr>
+                                  {isSamLee ? (
+                                    <tr>
+                                      <td colSpan={4} className="px-4 py-8 text-center text-slate-400 italic text-xs">
+                                        {isDe ? "Noch keine Beitrags- oder Erlassguthaben verzeichnet." : "No contribution or waiver credits recorded yet."}
+                                      </td>
+                                    </tr>
+                                  ) : (
+                                    <>
+                                      <tr>
+                                        <td className="px-4 py-3 text-slate-500">2026-08-15</td>
+                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Peer Review Completed (SOMED-26-094)</td>
+                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€150 EUR (+10% Waiver)</td>
+                                        <td className="px-4 py-3 text-right">
+                                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
+                                            Applied
+                                          </span>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-4 py-3 text-slate-500">2026-06-20</td>
+                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Early-Bird Revision Submission (&lt;5 Days)</td>
+                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€200 EUR</td>
+                                        <td className="px-4 py-3 text-right">
+                                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
+                                            Applied
+                                          </span>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-4 py-3 text-slate-500">2026-04-10</td>
+                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Guest Editor for Special Issue (SI-2026-AI)</td>
+                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€300 EUR</td>
+                                        <td className="px-4 py-3 text-right">
+                                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
+                                            Applied
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    </>
+                                  )}
                                 </tbody>
                               </table>
                             </div>
@@ -8193,13 +8254,13 @@ export default function Editorial360Page() {
                                   {profPhotoUrl ? (
                                     <img src={profPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                                   ) : (
-                                    <span>{profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() : "EV"}</span>
+                                    <span>{isSamLee ? "SL" : (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() : "EV")}</span>
                                   )}
                                 </div>
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                                      {profFullName ? (profFullName.startsWith("Dr.") ? profFullName : `Dr. ${profFullName}`) : "Dr. Evelyn Vane"}
+                                      {isSamLee ? "Sam Lee" : (profFullName ? (profFullName.startsWith("Dr.") ? profFullName : `Dr. ${profFullName}`) : "Dr. Evelyn Vane")}
                                     </h3>
                                     {isOrcidVerified && (
                                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#A6CE39]/10 text-[#6a9a1f] dark:text-[#A6CE39] border border-[#A6CE39]/30">
@@ -8209,9 +8270,11 @@ export default function Editorial360Page() {
                                     )}
                                   </div>
                                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                    {profRank || (isDe ? "Senior-Forscher & Fakultätsleiter" : "Senior Researcher & Faculty Lead")}
-                                    {profInstitution ? ` · ${profInstitution}` : ""}
-                                    {profCountry ? `, ${profCountry}` : ""}
+                                    {isSamLee 
+                                      ? "Corresponding Author · Stanford University School of Medicine, United States"
+                                      : (profRank || (isDe ? "Senior-Forscher & Fakultätsleiter" : "Senior Researcher & Faculty Lead")) +
+                                        (profInstitution ? ` · ${profInstitution}` : "") +
+                                        (profCountry ? `, ${profCountry}` : "")}
                                   </p>
                                 </div>
                               </div>
@@ -8231,7 +8294,7 @@ export default function Editorial360Page() {
                                   type="button"
                                   onClick={() => {
                                     if (typeof navigator !== "undefined") {
-                                      navigator.clipboard.writeText("https://scholarlyopen.org/author/evelyn-vane")
+                                      navigator.clipboard.writeText(isSamLee ? "https://scholarlyopen.org/author/sam-lee" : "https://scholarlyopen.org/author/evelyn-vane")
                                       alert(isDe ? "Profil-Link kopiert!" : "Researcher profile link copied!")
                                     }
                                   }}
@@ -8248,26 +8311,26 @@ export default function Editorial360Page() {
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-5 mt-5 border-t border-slate-100 dark:border-[#272832]">
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{isDe ? "Artikel" : "Articles Published"}</span>
-                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">5</div>
-                                <span className="text-[10px] text-emerald-600 font-medium">100% Open Access</span>
+                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{isSamLee ? 0 : 5}</div>
+                                <span className="text-[10px] text-emerald-600 font-medium">{isSamLee ? "Pending Publications" : "100% Open Access"}</span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{isDe ? "Gesamtzitate" : "Total Citations"}</span>
-                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">120</div>
+                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{isSamLee ? 0 : 120}</div>
                                 <span className="text-[10px] text-slate-500 font-medium">Crossref Indexed</span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">h-index / i10-index</span>
-                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">4 · 3</div>
+                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{isSamLee ? "0 · 0" : "4 · 3"}</div>
                                 <span className="text-[10px] text-slate-500 font-medium">Verified Metric</span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{isDe ? "Gutachter-Stufe" : "Reviewer Tier"}</span>
-                                <div className="text-base font-bold text-[#0b99ff] mt-0.5">{isDe ? "Stufe 2 · 25% Erlass" : "Tier 2 (25% Waiver)"}</div>
-                                <span className="text-[10px] text-emerald-600 font-medium">12 Reviews Completed</span>
+                                <div className="text-base font-bold text-[#0b99ff] mt-0.5">{isSamLee ? (isDe ? "Stufe 0 · 0% Erlass" : "Tier 0 (0% Waiver)") : (isDe ? "Stufe 2 · 25% Erlass" : "Tier 2 (25% Waiver)")}</div>
+                                <span className={`text-[10px] font-medium ${isSamLee ? "text-slate-400" : "text-emerald-600"}`}>{isSamLee ? "0 Reviews Completed" : "12 Reviews Completed"}</span>
                               </div>
                             </div>
                           </Card>
@@ -8290,18 +8353,18 @@ export default function Editorial360Page() {
                                 {/* Compact Bar Chart */}
                                 <div className="h-36 flex items-end justify-between gap-2.5 pt-4 pb-1 border-b border-slate-100 dark:border-[#272832]">
                                   {[
-                                    { year: "2019", count: 12, pct: 28 },
-                                    { year: "2020", count: 22, pct: 48 },
-                                    { year: "2021", count: 35, pct: 75 },
-                                    { year: "2022", count: 30, pct: 65 },
-                                    { year: "2023", count: 45, pct: 96 },
+                                    { year: "2019", count: isSamLee ? 0 : 12, pct: isSamLee ? 2 : 28 },
+                                    { year: "2020", count: isSamLee ? 0 : 22, pct: isSamLee ? 2 : 48 },
+                                    { year: "2021", count: isSamLee ? 0 : 35, pct: isSamLee ? 2 : 75 },
+                                    { year: "2022", count: isSamLee ? 0 : 30, pct: isSamLee ? 2 : 65 },
+                                    { year: "2023", count: isSamLee ? 0 : 45, pct: isSamLee ? 2 : 96 },
                                   ].map((bar) => (
                                     <div key={bar.year} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
                                       <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
                                         {bar.count}
                                       </span>
                                       <div
-                                        className="w-full max-w-[32px] bg-[#0b99ff] hover:bg-[#0077cc] rounded-t-md transition-all duration-200 cursor-pointer"
+                                        className={`w-full max-w-[32px] ${isSamLee ? "bg-slate-200 dark:bg-slate-800" : "bg-[#0b99ff] hover:bg-[#0077cc]"} rounded-t-md transition-all duration-200 cursor-pointer`}
                                         style={{ height: `${bar.pct}%` }}
                                         title={`${bar.year}: ${bar.count} Citations`}
                                       />
@@ -8314,7 +8377,9 @@ export default function Editorial360Page() {
 
                                 <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
                                   <span>{isDe ? "Wachstumstrend:" : "Growth Trajectory:"}</span>
-                                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">+275% (2019–2023)</span>
+                                  <span className={`font-semibold ${isSamLee ? "text-slate-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                                    {isSamLee ? "0% Baseline" : "+275% (2019–2023)"}
+                                  </span>
                                 </div>
                               </Card>
 
@@ -8326,15 +8391,21 @@ export default function Editorial360Page() {
                                 <div className="space-y-2 text-xs">
                                   <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-[#272832]">
                                     <span className="text-slate-500">{isDe ? "Feld-Perzentil" : "Discipline Field Rank"}</span>
-                                    <span className="font-semibold text-slate-900 dark:text-white">Top 8% in Medical AI</span>
+                                    <span className="font-semibold text-slate-900 dark:text-white">
+                                      {isSamLee ? "New Author · Baseline" : "Top 8% in Medical AI"}
+                                    </span>
                                   </div>
                                   <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-[#272832]">
                                     <span className="text-slate-500">{isDe ? "Ø Zitate pro Artikel" : "Avg. Citations / Article"}</span>
-                                    <span className="font-semibold text-slate-900 dark:text-white">24.0 Citations</span>
+                                    <span className="font-semibold text-slate-900 dark:text-white">
+                                      {isSamLee ? "0.0 Citations" : "24.0 Citations"}
+                                    </span>
                                   </div>
                                   <div className="flex items-center justify-between py-1">
                                     <span className="text-slate-500">{isDe ? "Daten-Hinterlegungsrate" : "Data Sharing Compliance"}</span>
-                                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">100% FAIR Compliant</span>
+                                    <span className={`font-semibold ${isSamLee ? "text-slate-500" : "text-emerald-600 dark:text-emerald-400"}`}>
+                                      {isSamLee ? "Pending Submissions" : "100% FAIR Compliant"}
+                                    </span>
                                   </div>
                                 </div>
                               </Card>
@@ -8354,39 +8425,45 @@ export default function Editorial360Page() {
                                     </p>
                                   </div>
                                   <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 dark:bg-[#131418] px-2 py-0.5 rounded border border-slate-200 dark:border-[#272832]">
-                                    4 {isDe ? "Artikel" : "Articles"}
+                                    {isSamLee ? 0 : 4} {isDe ? "Artikel" : "Articles"}
                                   </span>
                                 </div>
 
-                                <div className="divide-y divide-slate-100 dark:divide-[#272832]">
-                                  {[
-                                    { title: "A Security Framework for Decentralized Ledgers in Public Records", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2026.102", citations: 42, year: "2026" },
-                                    { title: "Machine Learning Approaches in Renewable Energy Forecasting", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2026.081", citations: 38, year: "2026" },
-                                    { title: "Ethical Dimensions of AI-Assisted Clinical Decision Support", journal: "Medicine & Health Sciences", doi: "10.5555/so.2025.047", citations: 27, year: "2025" },
-                                    { title: "Federated Learning Privacy Guarantees Under Byzantine Faults", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2025.039", citations: 13, year: "2025" },
-                                  ].map((pub, i) => (
-                                    <div key={i} className="py-3.5 space-y-1.5 first:pt-0 last:pb-0 group">
-                                      <div className="flex items-start justify-between gap-3">
-                                        <h5 className="text-xs font-bold text-slate-900 dark:text-white leading-snug group-hover:text-[#0b99ff] transition-colors">
-                                          {pub.title}
-                                        </h5>
-                                        <span className="text-[11px] font-semibold text-[#0b99ff] bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-200/70 dark:border-sky-800/60 shrink-0 whitespace-nowrap">
-                                          {pub.citations} {isDe ? "Zitate" : "Citations"}
-                                        </span>
-                                      </div>
+                                {isSamLee ? (
+                                  <div className="p-8 text-center text-slate-400 italic text-xs">
+                                    {isDe ? "Noch keine veröffentlichten Artikel verzeichnet." : "No published articles on record yet. Accepted submissions will be cataloged here automatically."}
+                                  </div>
+                                ) : (
+                                  <div className="divide-y divide-slate-100 dark:divide-[#272832]">
+                                    {[
+                                      { title: "A Security Framework for Decentralized Ledgers in Public Records", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2026.102", citations: 42, year: "2026" },
+                                      { title: "Machine Learning Approaches in Renewable Energy Forecasting", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2026.081", citations: 38, year: "2026" },
+                                      { title: "Ethical Dimensions of AI-Assisted Clinical Decision Support", journal: "Medicine & Health Sciences", doi: "10.5555/so.2025.047", citations: 27, year: "2025" },
+                                      { title: "Federated Learning Privacy Guarantees Under Byzantine Faults", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2025.039", citations: 13, year: "2025" },
+                                    ].map((pub, i) => (
+                                      <div key={i} className="py-3.5 space-y-1.5 first:pt-0 last:pb-0 group">
+                                        <div className="flex items-start justify-between gap-3">
+                                          <h5 className="text-xs font-bold text-slate-900 dark:text-white leading-snug group-hover:text-[#0b99ff] transition-colors">
+                                            {pub.title}
+                                          </h5>
+                                          <span className="text-[11px] font-semibold text-[#0b99ff] bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-200/70 dark:border-sky-800/60 shrink-0 whitespace-nowrap">
+                                            {pub.citations} {isDe ? "Zitate" : "Citations"}
+                                          </span>
+                                        </div>
 
-                                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                                        <span className="font-medium text-slate-700 dark:text-slate-300">Scholarly Open: {pub.journal}</span>
-                                        <span>·</span>
-                                        <span>{pub.year}</span>
-                                        <span>·</span>
-                                        <span className="text-[#0b99ff]">DOI: {pub.doi}</span>
-                                        <span>·</span>
-                                        <span className="text-emerald-600 font-medium">Open Access</span>
+                                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                                          <span className="font-medium text-slate-700 dark:text-slate-300">Scholarly Open: {pub.journal}</span>
+                                          <span>·</span>
+                                          <span>{pub.year}</span>
+                                          <span>·</span>
+                                          <span className="text-[#0b99ff]">DOI: {pub.doi}</span>
+                                          <span>·</span>
+                                          <span className="text-emerald-600 font-medium">Open Access</span>
+                                        </div>
                                       </div>
-                                    </div>
-                                  ))}
-                                </div>
+                                    ))}
+                                  </div>
+                                )}
                               </Card>
                             </div>
 
@@ -13054,43 +13131,58 @@ export default function Editorial360Page() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-[#272832] font-normal">
-                      <tr className="hover:bg-slate-50/50 dark:hover:bg-[#1e2027]">
-                        <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white">Tier 1</td>
-                        <td className="px-3.5 py-2.5 text-emerald-600 dark:text-emerald-400 font-semibold">10%</td>
-                        <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300">3+</td>
-                        <td className="px-3.5 py-2.5 text-slate-500">&lt; 7 {language === "de" ? "Tage" : "Days"}</td>
-                        <td className="px-3.5 py-2.5 text-slate-500">{language === "de" ? "Einwandfrei" : "Clean"}</td>
-                        <td className="px-3.5 py-2.5 text-right text-emerald-600 font-semibold">{language === "de" ? "Qualifiziert" : "Qualified"}</td>
-                      </tr>
-                      <tr className="bg-sky-50/60 dark:bg-sky-950/30 border-l-2 border-l-[#0b99ff]">
-                        <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                          Tier 2
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#0b99ff]" />
-                        </td>
-                        <td className="px-3.5 py-2.5 text-[#0b99ff] font-semibold">25%</td>
-                        <td className="px-3.5 py-2.5 text-slate-900 dark:text-white font-semibold">10+</td>
-                        <td className="px-3.5 py-2.5 text-slate-700 dark:text-slate-300">&lt; 5 {language === "de" ? "Tage" : "Days"}</td>
-                        <td className="px-3.5 py-2.5 text-slate-700 dark:text-slate-300">{language === "de" ? "Einwandfrei" : "Clean"}</td>
-                        <td className="px-3.5 py-2.5 text-right">
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#0b99ff] text-white">{language === "de" ? "Aktiv" : "Active"}</span>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-slate-50/50 dark:hover:bg-[#1e2027]">
-                        <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white">Tier 3</td>
-                        <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300 font-semibold">50%</td>
-                        <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300">20+</td>
-                        <td className="px-3.5 py-2.5 text-slate-500">&lt; 4 {language === "de" ? "Tage" : "Days"}</td>
-                        <td className="px-3.5 py-2.5 text-slate-500">{language === "de" ? "Einwandfrei" : "Clean"}</td>
-                        <td className="px-3.5 py-2.5 text-right text-[#0b99ff] font-semibold">{language === "de" ? "Noch 2 Gutachten" : "2 Away"}</td>
-                      </tr>
-                      <tr className="hover:bg-slate-50/50 dark:hover:bg-[#1e2027]">
-                        <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white">Tier 4</td>
-                        <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300 font-semibold">100%</td>
-                        <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300">40+ / Board</td>
-                        <td className="px-3.5 py-2.5 text-slate-500">&lt; 3 {language === "de" ? "Tage" : "Days"}</td>
-                        <td className="px-3.5 py-2.5 text-slate-500">{language === "de" ? "Einwandfrei" : "Clean"}</td>
-                        <td className="px-3.5 py-2.5 text-right text-slate-400">Senior</td>
-                      </tr>
+                      {(() => {
+                        const isCurSam = (email && email.toLowerCase().includes("sam")) || (profFullName && profFullName.toLowerCase().includes("sam"))
+                        return (
+                          <>
+                            <tr className="hover:bg-slate-50/50 dark:hover:bg-[#1e2027]">
+                              <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white">Tier 1</td>
+                              <td className="px-3.5 py-2.5 text-emerald-600 dark:text-emerald-400 font-semibold">10%</td>
+                              <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300">3+</td>
+                              <td className="px-3.5 py-2.5 text-slate-500">&lt; 7 {language === "de" ? "Tage" : "Days"}</td>
+                              <td className="px-3.5 py-2.5 text-slate-500">{language === "de" ? "Einwandfrei" : "Clean"}</td>
+                              <td className="px-3.5 py-2.5 text-right text-emerald-600 font-semibold">
+                                {isCurSam ? (language === "de" ? "Noch 3 Gutachten" : "3 Away") : (language === "de" ? "Qualifiziert" : "Qualified")}
+                              </td>
+                            </tr>
+                            <tr className={isCurSam ? "hover:bg-slate-50/50 dark:hover:bg-[#1e2027]" : "bg-sky-50/60 dark:bg-sky-950/30 border-l-2 border-l-[#0b99ff]"}>
+                              <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                Tier 2
+                                {!isCurSam && <span className="h-1.5 w-1.5 rounded-full bg-[#0b99ff]" />}
+                              </td>
+                              <td className="px-3.5 py-2.5 text-[#0b99ff] font-semibold">25%</td>
+                              <td className="px-3.5 py-2.5 text-slate-900 dark:text-white font-semibold">10+</td>
+                              <td className="px-3.5 py-2.5 text-slate-700 dark:text-slate-300">&lt; 5 {language === "de" ? "Tage" : "Days"}</td>
+                              <td className="px-3.5 py-2.5 text-slate-700 dark:text-slate-300">{language === "de" ? "Einwandfrei" : "Clean"}</td>
+                              <td className="px-3.5 py-2.5 text-right">
+                                {isCurSam ? (
+                                  <span className="text-slate-400 text-[11px] font-semibold">{language === "de" ? "Noch 10 Gutachten" : "10 Away"}</span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#0b99ff] text-white">{language === "de" ? "Aktiv" : "Active"}</span>
+                                )}
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-50/50 dark:hover:bg-[#1e2027]">
+                              <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white">Tier 3</td>
+                              <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300 font-semibold">50%</td>
+                              <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300">20+</td>
+                              <td className="px-3.5 py-2.5 text-slate-500">&lt; 4 {language === "de" ? "Tage" : "Days"}</td>
+                              <td className="px-3.5 py-2.5 text-slate-500">{language === "de" ? "Einwandfrei" : "Clean"}</td>
+                              <td className="px-3.5 py-2.5 text-right text-[#0b99ff] font-semibold">
+                                {isCurSam ? (language === "de" ? "Noch 20 Gutachten" : "20 Away") : (language === "de" ? "Noch 2 Gutachten" : "2 Away")}
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-50/50 dark:hover:bg-[#1e2027]">
+                              <td className="px-3.5 py-2.5 font-semibold text-slate-900 dark:text-white">Tier 4</td>
+                              <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300 font-semibold">100%</td>
+                              <td className="px-3.5 py-2.5 text-slate-600 dark:text-slate-300">40+ / Board</td>
+                              <td className="px-3.5 py-2.5 text-slate-500">&lt; 3 {language === "de" ? "Tage" : "Days"}</td>
+                              <td className="px-3.5 py-2.5 text-slate-500">{language === "de" ? "Einwandfrei" : "Clean"}</td>
+                              <td className="px-3.5 py-2.5 text-right text-slate-400">Senior</td>
+                            </tr>
+                          </>
+                        )
+                      })()}
                     </tbody>
                   </table>
                 </div>
