@@ -1596,6 +1596,7 @@ export function JournalManagerWorkspace({
       if (edEmail && (!customEditorEmail || editorInviteMode === "board")) {
         setCustomEditorEmail(edEmail)
       }
+      const directAccessUrl = `https://scholarlyopen.org/editorial360?action=handling_editor&id=${encodeURIComponent(msId)}&email=${encodeURIComponent(edEmail || "editor.med@scholarlyopen.org")}&name=${encodeURIComponent(edName)}&journal=${encodeURIComponent(journalName)}`
       setCustomEditorSubject(`[${journalName}] Handling Editor Appointment & Review Oversight: ${msId}`)
       setCustomEditorBody(
 `Dear ${edName},
@@ -1613,7 +1614,18 @@ Peer Review Status:
 
 As Handling Editor, you will oversee this peer review round, synthesize reviewer remarks, and issue the official editorial decision (Accept, Minor Revision, Major Revision, Re-write & Re-submit, or Reject) with guidance for the authors.
 
-You can access the manuscript dossier, reviewer assessment forms, and editorial decision tools directly via the Editorial360 Desk.
+----------------------------------------------------------------------
+DIRECT 1-CLICK ACCESS TO YOUR HANDLING EDITOR DASHBOARD:
+----------------------------------------------------------------------
+Click the secure link below to open your workspace. No separate registration or password creation is required — your session is automatically pre-authenticated with your academic credentials:
+
+👉 Access Handling Editor Desk:
+${directAccessUrl}
+
+Within your workspace, you will have immediate access to:
+1. Complete manuscript documents (.docx / Word & PDF).
+2. Submitted peer evaluation forms from Dr. Praveen Nagula and Dr. Ragab Aziza.
+3. Editorial decision synthesis tools (Accept, Revise, Reject) and confidential communication channels.
 
 Thank you for your academic leadership and dedicated service to our scientific community.
 
@@ -1624,7 +1636,7 @@ ${journalName} · Scholarly Open
 scholarlyopen@gmail.com | https://scholarlyopen.org`
       )
     }
-  }, [isInviteEditorModalOpen, trackingManuscript, selectedBoardEditor, editorInviteMode, customEditorName])
+  }, [isInviteEditorModalOpen, trackingManuscript, selectedBoardEditor, editorInviteMode, customEditorName, customEditorEmail])
 
   const handleConfirmInviteEditor = async () => {
     if (!trackingManuscript) return
@@ -8236,6 +8248,28 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       onChange={(e) => setCustomEditorBody(e.target.value)}
                       className="w-full text-xs font-mono p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 leading-relaxed resize-y"
                     />
+                  </div>
+
+                  {/* 1-Click SSO Access Callout for Invitee */}
+                  <div className="p-3 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5 font-bold text-sky-950 dark:text-sky-200">
+                        <CheckCircle2 className="h-4 w-4 text-[#0b99ff]" />
+                        <span>Pre-Authenticated 1-Click SSO Access Link Active</span>
+                      </div>
+                      <p className="text-[11px] text-sky-700 dark:text-sky-300">
+                        The invitee will not be asked to register or create a password. Clicking the link in the email automatically authenticates them into their Handling Editor Desk.
+                      </p>
+                    </div>
+                    <a
+                      href={`/editorial360?action=handling_editor&id=${encodeURIComponent(trackingManuscript?.id || "SOMED-26-RW01")}&email=${encodeURIComponent(customEditorEmail || "editor.med@scholarlyopen.org")}&name=${encodeURIComponent(editorInviteMode === "custom" ? (customEditorName || "Guest Editor") : selectedBoardEditor)}&journal=${encodeURIComponent(trackingManuscript?.journal || "Scholarly Open: Medicine")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#0b99ff] hover:bg-[#0077cc] text-white text-xs font-bold rounded-lg shadow-2xs shrink-0 cursor-pointer transition-all"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>Preview Editor View</span>
+                    </a>
                   </div>
 
                   {/* Corporate & Compliance Footer (CFPs & EBMs standard) */}

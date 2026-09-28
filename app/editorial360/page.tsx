@@ -1214,6 +1214,48 @@ export default function Editorial360Page() {
         setSuccess(`Welcome ${claimName ? claimName : "Author"}! Manuscript ${claimId} has been linked to your active Author Desk.`)
       }
 
+      if (urlAction === "handling_editor" || urlAction === "accept_editor") {
+        const edPaperId = params.get("id") || ""
+        const edEmail = params.get("email") || ""
+        const edName = params.get("name") || ""
+        const edJournal = params.get("journal") || "Scholarly Open: Medicine"
+
+        setRole("editor")
+        setIsLoggedIn(true)
+        setActiveEditorTab("desk")
+
+        const isGong = (edName && edName.toLowerCase().includes("gong")) || (edEmail && edEmail.toLowerCase().includes("gong")) || (edEmail && edEmail.toLowerCase().includes("editor.med")) || (edName && edName.toLowerCase().includes("weihua"))
+        const isJustice = (edName && edName.toLowerCase().includes("justice")) || (edEmail && edEmail.toLowerCase().includes("justice"))
+
+        if (isGong) {
+          setEditorName("Weihua Gong, M.D., Ph.D.")
+          setEditorRank("Associate Editor & Handling Editor")
+          setEditorJournal("Scholarly Open: Medicine")
+          setEditorInstitution("Shanghai Jiao Tong University School of Medicine, China")
+          setEditorCountry("China")
+          setEditorOrcid("0000-0002-0213-7313")
+          setEditorPhotoUrl("/images/editors/weihua-gong.jpg")
+          setEditorEmail(edEmail || "editor.med@scholarlyopen.org")
+          setEmail(edEmail || "editor.med@scholarlyopen.org")
+        } else if (isJustice) {
+          setEditorName("Justice Kofi Boakye-Appiah, M.D., Ph.D.")
+          setEditorRank("Associate Editor & Handling Editor")
+          setEditorJournal("Scholarly Open: Medicine")
+          setEditorInstitution("Department of Surgery, Komfo Anokye Teaching Hospital")
+          setEditorCountry("Ghana")
+          setEditorEmail(edEmail || "editor.med@scholarlyopen.org")
+          setEmail(edEmail || "editor.med@scholarlyopen.org")
+        } else {
+          setEditorName(edName || "Handling Editor")
+          setEditorRank("Associate Editor & Handling Editor")
+          setEditorJournal(edJournal)
+          setEditorEmail(edEmail || "editor@scholarlyopen.org")
+          setEmail(edEmail || "editor@scholarlyopen.org")
+        }
+
+        setSuccess(`Welcome, ${edName || "Dr. Gong"}! You are authenticated as Handling Editor for ${edPaperId || "the manuscript"}. Reviewer evaluations and editorial decision tools are ready.`)
+      }
+
       if (urlRole && ["admin", "author", "reviewer", "editor", "im", "ria", "jm"].includes(urlRole)) {
         const normalizedRole = (urlRole === "im" ? "ria" : urlRole) as UserRole
         setRole(normalizedRole)
@@ -2755,8 +2797,41 @@ export default function Editorial360Page() {
 
       if (role === "editor") {
         setActiveEditorTab("desk")
+        const isGong = cleanEmail.toLowerCase().includes("gong") || cleanEmail.toLowerCase().includes("weihua") || (cleanEmail.toLowerCase().includes("editor.med") && !cleanEmail.toLowerCase().includes("justice"))
+        const isJustice = cleanEmail.toLowerCase().includes("justice") || cleanEmail.toLowerCase().includes("boakye")
         const isKumar = cleanEmail.toLowerCase().includes("kumar") || cleanEmail.toLowerCase().includes("prashant") || cleanEmail.toLowerCase().includes("surrey")
-        if (isKumar) {
+
+        if (isGong) {
+          currentEditorName = "Weihua Gong, M.D., Ph.D."
+          currentEditorRank = "Associate Editor & Handling Editor"
+          currentEditorJournal = "Scholarly Open: Medicine"
+          currentEditorInstitution = "Shanghai Jiao Tong University School of Medicine, China"
+          currentEditorCountry = "China"
+          currentEditorOrcid = "0000-0002-0213-7313"
+          currentEditorPhotoUrl = "/images/editors/weihua-gong.jpg"
+          
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
+          setEditorOrcid(currentEditorOrcid)
+          setEditorPhotoUrl(currentEditorPhotoUrl)
+          setEditorEmail(cleanEmail)
+        } else if (isJustice) {
+          currentEditorName = "Justice Kofi Boakye-Appiah, M.D., Ph.D."
+          currentEditorRank = "Associate Editor & Handling Editor"
+          currentEditorJournal = "Scholarly Open: Medicine"
+          currentEditorInstitution = "Department of Surgery, Komfo Anokye Teaching Hospital"
+          currentEditorCountry = "Ghana"
+          
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
+          setEditorEmail(cleanEmail)
+        } else if (isKumar) {
           currentEditorName = "Prof. Prashant Kumar"
           currentEditorRank = "Editorial Board Member & Handling Editor"
           currentEditorJournal = "Scholarly Open: Environmental Science"
