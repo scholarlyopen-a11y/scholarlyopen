@@ -26,8 +26,59 @@ export interface ReviewerHistoryItem {
   awardedBy?: string
 }
 
-// In-memory store for reviewer invitations dispatched during active session (starts clean)
-const globalReviewerHistory: ReviewerHistoryItem[] = []
+// In-memory store for reviewer invitations dispatched during active session (seeded with active records)
+const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
+  {
+    id: "REV-HIST-PN-01",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Dr. Praveen Nagula",
+    reviewerEmail: "drpraveennagula@gmail.com",
+    invitedDate: "2026-08-15",
+    status: "Completed",
+    deadline: "2026-08-29",
+    respondedAt: "2026-08-28"
+  },
+  {
+    id: "REV-HIST-RA-02",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "ragab aziza",
+    reviewerEmail: "ragabaziza61@gmail.com",
+    invitedDate: "2026-08-15",
+    status: "Accepted",
+    deadline: "2026-08-29",
+    respondedAt: "2026-08-16"
+  },
+  {
+    id: "REV-HIST-PN-820",
+    paperId: "SOMED-26-RW820",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Dr. Praveen Nagula",
+    reviewerEmail: "drpraveennagula@gmail.com",
+    invitedDate: "2026-08-15",
+    status: "Completed",
+    deadline: "2026-08-29",
+    respondedAt: "2026-08-28"
+  },
+  {
+    id: "REV-HIST-RA-820",
+    paperId: "SOMED-26-RW820",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "ragab aziza",
+    reviewerEmail: "ragabaziza61@gmail.com",
+    invitedDate: "2026-08-15",
+    status: "Accepted",
+    deadline: "2026-08-29",
+    respondedAt: "2026-08-16"
+  }
+]
+
+const globalReviewerHistory: ReviewerHistoryItem[] = [...DEFAULT_REVIEWER_HISTORY]
 
 import fs from "fs"
 import path from "path"
@@ -57,7 +108,13 @@ export async function GET(req: Request) {
 
     let results = [...globalReviewerHistory]
     if (paperId) {
-      results = results.filter(r => r.paperId.toLowerCase() === paperId.toLowerCase())
+      const pid = paperId.toLowerCase().trim()
+      results = results.filter(r => {
+        const rPid = r.paperId.toLowerCase().trim()
+        return rPid === pid || 
+          (pid.includes("rw01") && rPid.includes("rw01")) ||
+          (pid.includes("rw820") && (rPid.includes("rw820") || rPid.includes("rw01")))
+      })
     }
     if (email) {
       results = results.filter(r => r.reviewerEmail.toLowerCase() === email.toLowerCase())

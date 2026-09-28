@@ -82,6 +82,48 @@
         "composite materials",
         "fluid dynamics"
       ]
+    },
+    {
+      "id": "REV-REG-03",
+      "name": "Dr. Praveen Nagula",
+      "email": "drpraveennagula@gmail.com",
+      "status": "Active",
+      "activeTasks": 0,
+      "maxTasks": 3,
+      "matchScore": 98,
+      "specialization": "Cardiology, Acute Aortic Dissection, Cardiovascular Surgery, Healthcare Operations",
+      "discipline": "Medicine",
+      "institution": "Department of Cardiology & Vascular Medicine",
+      "completedReviews": 1,
+      "onTimeRate": 100,
+      "keywords": [
+        "acute aortic dissection",
+        "cardiology",
+        "cardiovascular surgery",
+        "healthcare operations",
+        "evidence-based medicine"
+      ]
+    },
+    {
+      "id": "REV-REG-04",
+      "name": "ragab aziza",
+      "email": "ragabaziza61@gmail.com",
+      "status": "Active",
+      "activeTasks": 1,
+      "maxTasks": 3,
+      "matchScore": 94,
+      "specialization": "Clinical Medicine, Emergency Care, Healthcare Management, Internal Medicine",
+      "discipline": "Medicine",
+      "institution": "Faculty of Medicine, Department of Clinical Care",
+      "completedReviews": 0,
+      "onTimeRate": 100,
+      "keywords": [
+        "acute aortic dissection",
+        "emergency medicine",
+        "healthcare management",
+        "patient safety",
+        "clinical operations"
+      ]
     }
   ]
 }

@@ -62,7 +62,9 @@ import {
   Trash2,
   Plus,
   Loader2,
-  Copy
+  Copy,
+  UserCheck,
+  Printer
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -117,6 +119,7 @@ export interface JmManuscript {
   abstract?: string
   keywords?: string
   assignedEditorName?: string
+  editorAssigned?: boolean
   articleType?: string
   proofStatus?: "Pending Upload" | "Pending Author Sign-off" | "Approved by Author ✓"
   submissionStage?: string
@@ -177,6 +180,99 @@ export interface JmArchiveLog {
   timestamp: string
   details: string
 }
+
+export const PRAVEEN_NAGULA_RAF = {
+  reviewerName: "Dr. Praveen Nagula",
+  reviewerEmail: "drpraveennagula@gmail.com",
+  manuscriptId: "SOMED-26-RW01",
+  manuscriptTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+  manuscriptType: "REVIEW ARTICLE",
+  typeOfReview: "DOUBLE-BLINDED",
+  journal: "Scholarly Open: Medicine",
+  dueDate: "On or before, 29th August, 2026",
+  submittedDate: "2026-08-28",
+  keyWords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking",
+  structure: {
+    lengthOfArticle: "too long",
+    numberOfTables: "none",
+    numberOfFigures: "none"
+  },
+  questionnaire: [
+    { question: "Does the manuscript fit into the mission of the journal?", answer: "No" as const },
+    { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" as const },
+    { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" as const },
+    { question: "Is the information on the Institutional Review Board approval stated?", answer: "No" as const },
+    { question: "Is the problem significant and concisely stated?", answer: "Yes" as const },
+    { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" as const },
+    { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "N/A" as const },
+    { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "N/A" as const },
+    { question: "Is adequate reference made to other work in the field?", answer: "Yes" as const },
+    { question: "Are the language, grammar and syntax acceptable?", answer: "No" as const }
+  ],
+  priorityRating: 6, // 1 is highest priority, 10 is lowest priority
+  generalComments: "The review article to be concised. Tables to be provided.",
+  specificComments: [
+    "too low references for a review article",
+    "what has been changed over the years in the management to be mentioned",
+    "the manuscript to be neatly structured to have a good orientation for the reader regarding the topic",
+    "no figures were provided",
+    "atleast tables to be there"
+  ],
+  recommendation: "Re-write and Re-submit",
+  willingToReviewRevision: "Yes",
+  conflictOfInterest: "None"
+}
+
+export const EDITORIAL_BOARD_CANDIDATES = [
+  {
+    name: "Weihua Gong, MD, PhD",
+    role: "Associate Editor · Medicine & Surgery",
+    email: "editor.medicine@scholarlyopen.org",
+    affiliation: "Zhejiang University, China",
+    journal: "Scholarly Open: Medicine",
+    specialization: "Cardiovascular Surgery, Oncology, Evidence-Based Medicine"
+  },
+  {
+    name: "Prof. Clara Zhang",
+    role: "Lead Editor",
+    email: "c.zhang@scholarlyopen.org",
+    affiliation: "University of Cambridge",
+    journal: "Scholarly Open: Engineering & Applied Sciences",
+    specialization: "Biomedical Systems, Advanced Materials, Operations"
+  },
+  {
+    name: "Prof. Aris Thorne",
+    role: "Executive Editorial Board",
+    email: "a.thorne@scholarlyopen.org",
+    affiliation: "Imperial College London",
+    journal: "Scholarly Open: Social Sciences & Medicine",
+    specialization: "Healthcare Systems, Public Health Operations"
+  },
+  {
+    name: "Mohamed R. Eletmany, Ph.D.",
+    role: "Associate Editor",
+    email: "editor.dcct@scholarlyopen.org",
+    affiliation: "South Valley University, Egypt",
+    journal: "Scholarly Open: Chemistry & Applied Sciences",
+    specialization: "Molecular Modeling, Applied Sciences"
+  },
+  {
+    name: "Prof. Sanna Järvelä",
+    role: "Editorial Board Member",
+    email: "s.jarvela@scholarlyopen.org",
+    affiliation: "University of Oulu, Finland",
+    journal: "Scholarly Open",
+    specialization: "Healthcare Technology, Collaborative Systems"
+  },
+  {
+    name: "Dr. Sarah Jenkins",
+    role: "Research Integrity Advisor & Section Editor",
+    email: "s.jenkins@scholarlyopen.org",
+    affiliation: "University of Oxford",
+    journal: "Scholarly Open: Medicine",
+    specialization: "Clinical Evidence, Research Integrity"
+  }
+]
 
 interface JournalManagerWorkspaceProps {
   language?: "en" | "de"
@@ -1409,6 +1505,125 @@ export function JournalManagerWorkspace({
   const [nudgedReviewers, setNudgedReviewers] = useState<Record<string, boolean>>({})
   const [extendedDays, setExtendedDays] = useState<Record<string, number>>({})
 
+  // Handling Editor Invitation Modal from Track Review
+  const [isInviteEditorModalOpen, setIsInviteEditorModalOpen] = useState(false)
+  const [editorInviteMode, setEditorInviteMode] = useState<"board" | "custom">("board")
+  const [selectedBoardEditor, setSelectedBoardEditor] = useState("Weihua Gong, MD, PhD")
+  const [customEditorName, setCustomEditorName] = useState("")
+  const [customEditorEmail, setCustomEditorEmail] = useState("")
+  const [customEditorSubject, setCustomEditorSubject] = useState("")
+  const [customEditorBody, setCustomEditorBody] = useState("")
+  const [isDispatchingEditorInvite, setIsDispatchingEditorInvite] = useState(false)
+  const [editorInviteSuccessMsg, setEditorInviteSuccessMsg] = useState<string | null>(null)
+
+  // Full Electronic Reviewer Assessment Form (RAF) Modal
+  const [isViewingRafModalOpen, setIsViewingRafModalOpen] = useState(false)
+  const [viewingRafData, setViewingRafData] = useState<any>(null)
+
+  // Pre-fill Handling Editor invitation letter when modal opens
+  useEffect(() => {
+    if (isInviteEditorModalOpen && trackingManuscript) {
+      const journalName = trackingManuscript.journal || "Scholarly Open: Medicine"
+      const msId = trackingManuscript.id
+      const msTitle = trackingManuscript.title
+      let edName = selectedBoardEditor
+      if (editorInviteMode === "custom") {
+        edName = customEditorName || "Colleague"
+      }
+      setCustomEditorSubject(`[${journalName}] Handling Editor Appointment & Review Oversight: ${msId}`)
+      setCustomEditorBody(
+`Dear ${edName},
+
+On behalf of the Editorial Office of ${journalName}, I am pleased to cordially invite you to serve as Handling Editor for the following manuscript currently undergoing double-blind peer review:
+
+Manuscript ID: ${msId}
+Title: ${msTitle}
+Article Type: Review Article
+Current Stage: Under Peer Review (Double-Blind)
+
+Peer Review Status:
+• Reviewer #1: Dr. Praveen Nagula has completed evaluation and submitted an Electronic Reviewer's Assessment Form (Recommendation: Re-write and Re-submit, Priority Rating: 6/10).
+• Reviewer #2: ragab aziza is currently conducting their review (target completion on or before 29th August, 2026).
+
+As Handling Editor, you will oversee this peer review round, synthesize reviewer remarks, and issue the official editorial decision (Accept, Minor Revision, Major Revision, Re-write & Re-submit, or Reject) with guidance for the authors.
+
+You can access the manuscript dossier, reviewer assessment forms, and editorial decision tools directly via the Editorial360 Desk.
+
+Thank you for your academic leadership and dedicated service to our scientific community.
+
+Warm regards,
+
+Journal Management Desk
+${journalName} · Scholarly Open
+scholarlyopen@gmail.com | https://scholarlyopen.org`
+      )
+    }
+  }, [isInviteEditorModalOpen, trackingManuscript, selectedBoardEditor, editorInviteMode, customEditorName])
+
+  const handleConfirmInviteEditor = async () => {
+    if (!trackingManuscript) return
+    setIsDispatchingEditorInvite(true)
+    try {
+      let edName = selectedBoardEditor
+      let edEmail = "editor.medicine@scholarlyopen.org"
+      if (editorInviteMode === "custom") {
+        edName = customEditorName.trim() || "Guest Handling Editor"
+        edEmail = customEditorEmail.trim() || "editor@scholarlyopen.org"
+      } else {
+        const found = EDITORIAL_BOARD_CANDIDATES.find(c => c.name === selectedBoardEditor)
+        if (found) {
+          edName = found.name
+          edEmail = found.email
+        }
+      }
+
+      // Update local tracking manuscript immediately
+      const updatedMs: JmManuscript = {
+        ...trackingManuscript,
+        assignedEditorName: edName,
+        editorAssigned: true
+      }
+      setTrackingManuscript(updatedMs)
+
+      // Notify parent onAssignEditor if available
+      if (onAssignEditor) {
+        onAssignEditor(trackingManuscript.id, edName)
+      }
+
+      // PATCH to cloud database
+      await fetch("/api/editorial360/manuscripts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: trackingManuscript.id,
+          assigned_editor_name: edName,
+          editor_assigned: true
+        })
+      }).catch(e => console.error("Cloud editor assignment patch failed:", e))
+
+      if (onAddNotification) {
+        onAddNotification({
+          paperId: trackingManuscript.id,
+          paperTitle: trackingManuscript.title,
+          journal: trackingManuscript.journal,
+          type: "jm_assignment",
+          actorName: "Journal Manager",
+          actorRole: "JM Desk",
+          headline: `Handling Editor Appointed: ${edName}`,
+          summary: `Appointed as Handling Editor for ${trackingManuscript.id}. Official appointment invitation dispatched (CC: scholarlyopen@gmail.com).`,
+          recipient: edEmail
+        })
+      }
+
+      setEditorInviteSuccessMsg(`✓ Handling Editor (${edName}) successfully appointed and notified via official letter (CC: scholarlyopen@gmail.com).`)
+      setIsInviteEditorModalOpen(false)
+    } catch (err) {
+      console.error("Error appointing handling editor:", err)
+    } finally {
+      setIsDispatchingEditorInvite(false)
+    }
+  }
+
   // Fetch paper-specific reviewer history when Track Modal opens
   useEffect(() => {
     if (isTrackModalOpen && trackingManuscript?.id) {
@@ -1558,7 +1773,39 @@ export function JournalManagerWorkspace({
 
   // Filtered manuscripts
   const filteredManuscripts = useMemo(() => {
-    return initialManuscripts.map(m => {
+    const list = [...initialManuscripts]
+    const hasMedPaper = list.some(m => m.id === "SOMED-26-RW01" || m.id === "SOMED-26-RW820" || m.title?.includes("Prevent Earlier"))
+    if (!hasMedPaper) {
+      list.unshift({
+        id: "SOMED-26-RW01",
+        title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+        journal: "Scholarly Open: Medicine",
+        status: "Under Review",
+        integrityStatus: "Clean",
+        date: "2026-08-10",
+        authorName: "Dr. Sam Lee",
+        authorEmail: "e.vane@scholarlyopen.org",
+        articleType: "Review Article",
+        submissionStage: "Under Review",
+        editorAssigned: false,
+        assignedEditorName: undefined,
+        reviewers: ["Dr. Praveen Nagula", "ragab aziza"],
+        keywords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking"
+      })
+    }
+
+    return list.map(m => {
+      // Ensure SOMED-26-RW01 / SOMED-26-RW820 has 2 active reviewers and keeps assignedEditorName if appointed
+      if (m.id === "SOMED-26-RW01" || m.id === "SOMED-26-RW820" || m.title?.includes("Prevent Earlier")) {
+        return {
+          ...m,
+          journal: "Scholarly Open: Medicine",
+          status: m.status || "Under Review",
+          assignedEditorName: m.assignedEditorName || undefined,
+          editorAssigned: Boolean(m.assignedEditorName),
+          reviewers: m.reviewers && m.reviewers.length > 0 ? m.reviewers : ["Dr. Praveen Nagula", "ragab aziza"]
+        }
+      }
       // Ensure SOEAS-26-RS102 has 2 reviewers under Prof. Clara Zhang
       if (m.id === "SOEAS-26-RS102") {
         return {
@@ -2941,14 +3188,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               <div className="space-y-1">
                                 <div>
                                   <span className="text-slate-400 font-medium">Editor:</span>{" "}
-                                  <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                    {ms.assignedEditorName || "Prof. Clara Zhang"}
-                                  </span>
+                                  {ms.assignedEditorName ? (
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                      {ms.assignedEditorName}
+                                    </span>
+                                  ) : (
+                                    <span className="text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 text-[10px]">
+                                      Unassigned (Action Req.)
+                                    </span>
+                                  )}
                                 </div>
                                 <div>
                                   <span className="text-slate-400 font-medium">Reviewers:</span>{" "}
                                   <span className="font-semibold text-[#0b99ff]">
-                                    {ms.reviewers?.join(", ") || "Dr. Evelyn Vane, Dr. Marcus Vance"}
+                                    {ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers.join(", ") : "None assigned"}
                                   </span>
                                 </div>
                               </div>
@@ -6943,19 +7196,105 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </DialogHeader>
 
           <div className="space-y-4 py-2 text-xs">
-            {/* Handling Editor Info */}
-            <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between">
-              <div>
-                <span className="text-slate-400 font-medium block text-[11px] uppercase tracking-wider">Handling Editor</span>
-                <span className="text-sm font-bold text-slate-900 dark:text-white">{trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}</span>
+            {/* Handling Editor Info & Invitation */}
+            {trackingManuscript?.assignedEditorName ? (
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
+                    <UserCheck className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-medium block text-[11px] uppercase tracking-wider">Handling Editor</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">{trackingManuscript.assignedEditorName}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded border border-emerald-200 dark:border-emerald-900/30">
+                    Managing Active Round
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditorInviteSuccessMsg(null)
+                      setIsInviteEditorModalOpen(true)
+                    }}
+                    className="h-7 text-[11px] font-semibold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    Change / Reassign
+                  </Button>
+                </div>
               </div>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded border border-emerald-200 dark:border-emerald-900/30">
-                Managing Active Round
-              </span>
-            </div>
+            ) : (
+              <div className="p-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-300 dark:border-amber-700/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                <div className="flex items-start sm:items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700/60 mt-0.5 sm:mt-0">
+                    <AlertTriangle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                        No Handling Editor Assigned Yet
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                        Action Required
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                      Double-blind peer review is underway with 2 reviewers, but no Handling Editor has been appointed yet. As Journal Manager, you can invite an editor from the board or invite a guest handling editor.
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setEditorInviteSuccessMsg(null)
+                    setIsInviteEditorModalOpen(true)
+                  }}
+                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-3.5 rounded-lg shadow-sm cursor-pointer shrink-0 transition-all"
+                >
+                  <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                  Invite / Assign Handling Editor
+                </Button>
+              </div>
+            )}
+
+            {/* 1/2 Reviews Active Banner for SOMED-26-RW01 */}
+            {(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.id === "SOMED-26-RW820" || trackingManuscript?.title?.includes("Prevent Earlier")) && (
+              <div className="p-3.5 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0 border border-sky-200 dark:border-sky-800">
+                    <Clock className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-2">
+                      <span>Peer Review Round in Progress (1 of 2 Reports Completed)</span>
+                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20">50% Logged</span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (ragab aziza) is currently reviewing.
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setViewingRafData(PRAVEEN_NAGULA_RAF)
+                    setIsViewingRafModalOpen(true)
+                  }}
+                  className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs"
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400" />
+                  View Dr. Nagula&apos;s RAF
+                </Button>
+              </div>
+            )}
 
             {/* 2/2 Complete Banner with Prompt Editor Action */}
-            {(trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && (
+            {((trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && trackingManuscript?.id !== "SOMED-26-RW01" && trackingManuscript?.id !== "SOMED-26-RW820") && (
               <div className="p-3.5 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 shrink-0" />
@@ -6964,7 +7303,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       All Assigned Reviews Completed (2/2)
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Peer review reports logged and ready for {trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}&apos;s official verdict.
+                      Peer review reports logged and ready for {trackingManuscript?.assignedEditorName || "Handling Editor"}&apos;s official verdict.
                     </div>
                   </div>
                 </div>
@@ -6972,16 +7311,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <Button
                   size="sm"
                   onClick={() => {
+                    if (!trackingManuscript?.assignedEditorName) {
+                      setIsInviteEditorModalOpen(true)
+                      return
+                    }
                     triggerConfirm({
                       title: "Prompt Handling Editor for Decision?",
-                      message: `Are you sure you want to notify Handling Editor (${trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}) that all 2/2 reviewer evaluations are in and prompt for the official verdict?`,
+                      message: `Are you sure you want to notify Handling Editor (${trackingManuscript.assignedEditorName}) that all reviewer evaluations are in and prompt for the official verdict?`,
                       confirmButtonLabel: "Yes, Prompt Editor",
                       confirmColorClass: "bg-purple-600 hover:bg-purple-700",
                       onConfirm: () => {
                         if (trackingManuscript) {
                           setPromptedEditors(prev => ({ ...prev, [trackingManuscript.id]: true }))
                         }
-                        setEditorPromptSuccess(`✓ Automated alert dispatched to Handling Editor (${trackingManuscript?.assignedEditorName || "Prof. Clara Zhang"}). Pipeline status updated to 'Editor Prompted'.`)
+                        setEditorPromptSuccess(`✓ Automated alert dispatched to Handling Editor (${trackingManuscript.assignedEditorName}). Pipeline status updated to 'Editor Prompted'.`)
                         setTimeout(() => setEditorPromptSuccess(null), 6000)
                       }
                     })
@@ -7014,6 +7357,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             )}
 
+            {editorInviteSuccessMsg && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-2xs animate-in fade-in">
+                <span>{editorInviteSuccessMsg}</span>
+                <button onClick={() => setEditorInviteSuccessMsg(null)} className="text-xs font-bold cursor-pointer">✕</button>
+              </div>
+            )}
+
             {/* Reviewer History */}
             <div className="space-y-3 pt-1">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -7026,16 +7376,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-slate-500 font-medium">
                     {(() => {
+                      const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.id === "SOMED-26-RW820" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
                       const list = paperReviewerHistory.length > 0 
                         ? paperReviewerHistory 
-                        : (trackingManuscript?.reviewers || ["Dr. Evelyn Vane", "Dr. Marcus Vance"]).map((r, i) => ({
-                            id: `mock-${i}`,
-                            paperId: trackingManuscript?.id || "",
-                            reviewerName: r,
-                            reviewerEmail: r === "Dr. Evelyn Vane" ? "e.vane@university-medical.edu" : (r === "Dr. Marcus Vance" ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
-                            invitedDate: "2026-08-20",
-                            status: (r === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && r === "Dr. Marcus Vance") ? "Completed" : "Accepted") as any
-                          }))
+                        : (isMedAortic
+                            ? [
+                                { id: "pn-01", paperId: trackingManuscript?.id || "SOMED-26-RW01", reviewerName: "Dr. Praveen Nagula", reviewerEmail: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as any },
+                                { id: "ra-02", paperId: trackingManuscript?.id || "SOMED-26-RW01", reviewerName: "ragab aziza", reviewerEmail: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as any }
+                              ]
+                            : (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0
+                                ? trackingManuscript.reviewers.map((r, i) => ({
+                                    id: `mock-${i}`,
+                                    paperId: trackingManuscript?.id || "",
+                                    reviewerName: r,
+                                    reviewerEmail: r.toLowerCase().includes("nagula") ? "drpraveennagula@gmail.com" : (r.toLowerCase().includes("aziza") ? "ragabaziza61@gmail.com" : "reviewer@scholarlyopen.org"),
+                                    invitedDate: "2026-08-15",
+                                    status: (r.toLowerCase().includes("nagula") ? "Completed" : "Accepted") as any
+                                  }))
+                                : []
+                              )
+                          )
                       return `${list.length} logged`
                     })()}
                   </span>
@@ -7057,6 +7417,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               {(() => {
+                const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.id === "SOMED-26-RW820" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
+
                 const displayList: {
                   id: string
                   name: string
@@ -7073,23 +7435,43 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       email: h.reviewerEmail,
                       invitedDate: h.invitedDate,
                       status: h.status,
-                      deadline: h.deadline,
+                      deadline: h.deadline || "2026-08-29",
                       declineReason: h.declineReason,
                       declineReferral: h.declineReferral
                     }))
-                  : (trackingManuscript?.reviewers || ["Dr. Evelyn Vane", "Dr. Marcus Vance"]).map((revName, idx) => ({
-                      id: `REV-FALLBACK-${idx}`,
-                      name: revName,
-                      email: revName === "Dr. Evelyn Vane" ? "e.vane@university-medical.edu" : (revName === "Dr. Marcus Vance" ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
-                      invitedDate: "2026-08-20",
-                      status: (revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && revName === "Dr. Marcus Vance") ? "Completed" : "Accepted") as any,
-                      deadline: "2026-09-04"
-                    }))
+                  : (isMedAortic
+                      ? [
+                          { id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as const, deadline: "2026-08-29" },
+                          { id: "REV-HIST-RA-02", name: "ragab aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" }
+                        ]
+                      : (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0
+                          ? trackingManuscript.reviewers.map((revName, idx) => ({
+                              id: `REV-FALLBACK-${idx}`,
+                              name: revName,
+                              email: revName.toLowerCase().includes("nagula") ? "drpraveennagula@gmail.com" : (revName.toLowerCase().includes("aziza") ? "ragabaziza61@gmail.com" : "reviewer@scholarlyopen.org"),
+                              invitedDate: "2026-08-15",
+                              status: revName.toLowerCase().includes("nagula") ? ("Completed" as const) : ("Accepted" as const),
+                              deadline: "2026-08-29"
+                            }))
+                          : []
+                        )
+                    )
+
+                if (displayList.length === 0) {
+                  return (
+                    <div className="p-8 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
+                      <Users className="h-8 w-8 mx-auto text-slate-400 opacity-60" />
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No Reviewers Assigned Yet</p>
+                      <p className="text-[11px] text-slate-500">Click &ldquo;Invite Reviewer&rdquo; above to invite experts from the Reviewer Registry.</p>
+                    </div>
+                  )
+                }
 
                 return displayList.map((rev) => {
                   const revName = rev.name
                   const isDeclined = rev.status === "Declined"
                   const isInvitedOnly = rev.status === "Invited"
+                  const isNagula = revName.toLowerCase().includes("nagula") || rev.email.toLowerCase().includes("nagula")
 
                   // Match any real submitted review from initialReviews
                   const matchedReview = initialReviews.find(r => 
@@ -7097,7 +7479,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     (r.reviewerName?.toLowerCase().includes(revName.toLowerCase()) || revName.toLowerCase().includes(r.reviewerName?.toLowerCase()) || !r.reviewerName)
                   ) || (initialReviews.length === 1 && (initialReviews[0].paperId?.toLowerCase() === trackingManuscript?.id?.toLowerCase() || (initialReviews[0] as any).manuscriptId?.toLowerCase() === trackingManuscript?.id?.toLowerCase()) ? initialReviews[0] : undefined)
 
-                  const isSubmitted = !!matchedReview || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
+                  const isSubmitted = isNagula || !!matchedReview || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
                   const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
                   const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === ("Approved" as any) || matchedReview.status === "Released" || approvedReviewRemarks[matchedReview.id]))
                   const isNudged = !!nudgedReviewers[revName]
@@ -7105,18 +7487,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   const extraDays = extendedDays[revName] || 0
                   const remainingDays = baseDays + extraDays
 
-                  const baseDate = trackingManuscript?.id === "SOEAS-26-RS106" ? new Date("2026-08-30") : new Date("2026-09-04")
+                  const baseDate = trackingManuscript?.id === "SOEAS-26-RS106" ? new Date("2026-08-30") : new Date("2026-08-29")
                   const targetDate = new Date(baseDate)
                   targetDate.setDate(targetDate.getDate() + extraDays)
                   const targetDeadlineDate = rev.deadline || targetDate.toISOString().split("T")[0]
 
-                  // Compute display score & recommendation from matched review if available
+                  // Compute display score & recommendation
                   const mrAny = matchedReview as any
-                  const displayScore = mrAny?.scores 
+                  const displayScore = isNagula ? "6 / 10" : (mrAny?.scores 
                     ? ((mrAny.scores.novelty + mrAny.scores.methodology + mrAny.scores.clarity + mrAny.scores.significance) / 4).toFixed(1)
-                    : (matchedReview?.originality ? `${matchedReview.originality}.0` : "4.8")
-                  const displayRecommendation = matchedReview?.recommendation || "Minor Revision"
-                  const displayQuote = matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || "The methodology is rigorous and well-supported. Minor clarifications required in Section 4."
+                    : (matchedReview?.originality ? `${matchedReview.originality}.0` : "4.8"))
+                  const displayRecommendation = isNagula ? "Re-write and Re-submit" : (matchedReview?.recommendation || "Minor Revision")
+                  const displayQuote = isNagula 
+                    ? "The review article to be concised. Tables to be provided. Specific: too low references for a review article; what has been changed over the years in the management to be mentioned; the manuscript to be neatly structured to have a good orientation for the reader regarding the topic; no figures were provided; atleast tables to be there."
+                    : (matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.")
 
                   if (isDeclined) {
                     return (
@@ -7234,8 +7618,18 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex flex-wrap items-center gap-2.5">
                           <div>
-                            <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                              {revName}
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap flex items-center gap-1.5">
+                              <span>{revName}</span>
+                              {isNagula && (
+                                <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                                  Reviewer #1
+                                </span>
+                              )}
+                              {(revName.toLowerCase().includes("aziza") || rev.email.includes("aziza")) && (
+                                <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-1.5 py-0.5 rounded border border-[#0b99ff]/20">
+                                  Reviewer #2
+                                </span>
+                              )}
                             </h4>
                             <div className="text-[11px] text-slate-500 dark:text-slate-400">
                               {rev.email}
@@ -7260,7 +7654,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </span>
                           ) : (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 border border-[#0b99ff]/20 whitespace-nowrap">
-                              Accepted (Due in {remainingDays}d)
+                              Accepted · Reviewing (In Progress)
                             </span>
                           )}
                         </div>
@@ -7320,60 +7714,92 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             )}
                           </div>
                         ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              const revObj: JmReviewFeedback = matchedReview ? {
-                                id: matchedReview.id,
-                                paperId: trackingManuscript?.id || matchedReview.paperId,
-                                reviewerName: matchedReview.reviewerName || revName,
-                                originalComments: matchedReview.originalComments || matchedReview.commentsAuthor || "",
-                                sanitizedCommentsAuthor: matchedReview.sanitizedCommentsAuthor || matchedReview.commentsAuthor || "",
-                                commentsAuthor: matchedReview.commentsAuthor || "",
-                                commentsEditor: matchedReview.commentsEditor || "",
-                                recommendation: matchedReview.recommendation || "Minor Revision",
-                                originality: (matchedReview as any).originality || ((matchedReview as any).scores ? Math.round(((matchedReview as any).scores.novelty + (matchedReview as any).scores.methodology + (matchedReview as any).scores.clarity + (matchedReview as any).scores.significance) / 4) : 5),
-                                status: (matchedReview.status as any) || "Pending Moderation"
-                              } : {
-                                id: `REV-FB-${revName.replace(/\s+/g, '')}`,
-                                paperId: trackingManuscript?.id || "SOEAS-26-RS102",
-                                reviewerName: revName,
-                                originalComments: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
-                                sanitizedCommentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
-                                commentsAuthor: "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.",
-                                commentsEditor: "Solid paper. Recommend minor revision.",
-                                recommendation: "Minor Revision",
-                                originality: 5,
-                                status: "Pending Moderation"
-                              }
-                              handleOpenModeration(revObj)
-                            }}
-                            className={`h-7.5 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all ${
-                              isRemarksApproved
-                                ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
-                                : "text-[#0b99ff] border-[#0b99ff]/30 hover:bg-sky-50 dark:hover:bg-sky-950/30"
-                            }`}
-                          >
-                            {isRemarksApproved ? (
-                              <>
-                                <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                                Edit Sanitized Remarks
-                              </>
-                            ) : (
-                              <>
-                                <ShieldCheck className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                Sanitize & Dispatch
-                              </>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* View Full RAF button for Dr. Praveen Nagula or any review with RAF */}
+                            {(isNagula || isMedAortic) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setViewingRafData(PRAVEEN_NAGULA_RAF)
+                                  setIsViewingRafModalOpen(true)
+                                }}
+                                className="h-7.5 text-xs font-bold px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer transition-all shadow-xs"
+                              >
+                                <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400" />
+                                View Full Assessment Form (RAF)
+                              </Button>
                             )}
-                          </Button>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const revObj: JmReviewFeedback = isNagula ? {
+                                  id: "REV-FB-PN01",
+                                  paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                  reviewerName: "Dr. Praveen Nagula",
+                                  originality: 3,
+                                  commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+                                  sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+                                  commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+                                  recommendation: "Re-write and Re-submit",
+                                  status: "Pending Moderation"
+                                } : (matchedReview ? {
+                                  id: matchedReview.id,
+                                  paperId: trackingManuscript?.id || matchedReview.paperId,
+                                  reviewerName: matchedReview.reviewerName || revName,
+                                  originalComments: matchedReview.originalComments || matchedReview.commentsAuthor || "",
+                                  sanitizedCommentsAuthor: matchedReview.sanitizedCommentsAuthor || matchedReview.commentsAuthor || "",
+                                  commentsAuthor: matchedReview.commentsAuthor || "",
+                                  commentsEditor: matchedReview.commentsEditor || "",
+                                  recommendation: matchedReview.recommendation || "Minor Revision",
+                                  originality: (matchedReview as any).originality || 5,
+                                  status: (matchedReview.status as any) || "Pending Moderation"
+                                } : {
+                                  id: `REV-FB-${revName.replace(/\s+/g, '')}`,
+                                  paperId: trackingManuscript?.id || "SOEAS-26-RS102",
+                                  reviewerName: revName,
+                                  originalComments: "Review evaluation logged.",
+                                  sanitizedCommentsAuthor: "Review evaluation logged.",
+                                  commentsAuthor: "Review evaluation logged.",
+                                  commentsEditor: "Solid paper. Recommendation recorded.",
+                                  recommendation: "Minor Revision",
+                                  originality: 5,
+                                  status: "Pending Moderation"
+                                })
+                                handleOpenModeration(revObj)
+                              }}
+                              className={`h-7.5 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all ${
+                                isRemarksApproved
+                                  ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
+                                  : "text-[#0b99ff] border-[#0b99ff]/30 hover:bg-sky-50 dark:hover:bg-sky-950/30"
+                              }`}
+                            >
+                              {isRemarksApproved ? (
+                                <>
+                                  <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" />
+                                  Edit Sanitized Remarks
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheck className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Sanitize & Dispatch
+                                </>
+                              )}
+                            </Button>
+                          </div>
                         )}
                       </div>
 
                       <div className="text-xs text-slate-500 dark:text-slate-400">
                         {isSubmitted ? (
                           <div className="flex items-center gap-2 flex-wrap pt-0.5">
-                            <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{displayScore} / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">{displayRecommendation}</strong></span>
+                            {isNagula ? (
+                              <span>Priority Rating: <strong className="text-slate-700 dark:text-slate-300 font-bold">6 / 10</strong> • Recommendation: <span className="text-amber-700 dark:text-amber-300 font-bold bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 text-[11px]">Re-write and Re-submit</span></span>
+                            ) : (
+                              <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{displayScore} / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">{displayRecommendation}</strong></span>
+                            )}
                             {isRemarksApproved ? (
                               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
                                 ✓ Sanitized & Dispatched to Editor
@@ -7423,6 +7849,547 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
             >
               Close Tracker
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 6B: INVITE / APPOINT HANDLING EDITOR                                */}
+      {/* ========================================================================= */}
+      <Dialog open={isInviteEditorModalOpen} onOpenChange={setIsInviteEditorModalOpen}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[92vh] overflow-y-auto">
+          <DialogHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs">
+                  {trackingManuscript?.id}
+                </span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/80">
+                  Handling Editor Appointment
+                </span>
+              </div>
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white mt-2">
+              Invite / Appoint Handling Editor
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+              {trackingManuscript?.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-xs">
+            {/* Status Context Banner */}
+            <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1.5">
+              <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+                <span>Active Review Status</span>
+                <span className="text-[11px] font-semibold text-[#0b99ff]">{trackingManuscript?.journal}</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                2 reviewers are conducting the peer review. <strong>Dr. Praveen Nagula</strong> has submitted comments (Re-write and Re-submit), and <strong>ragab aziza</strong> is actively reviewing. Appointing a Handling Editor will allow them to synthesize evaluations and render the editorial verdict.
+              </p>
+            </div>
+
+            {/* Selection Mode */}
+            <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setEditorInviteMode("board")}
+                className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  editorInviteMode === "board"
+                    ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                Appoint Editorial Board Member
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditorInviteMode("custom")}
+                className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  editorInviteMode === "custom"
+                    ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                Invite External / Guest Editor
+              </button>
+            </div>
+
+            {editorInviteMode === "board" ? (
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block uppercase tracking-wider">
+                  Select Board Member
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {EDITORIAL_BOARD_CANDIDATES.map((cand) => {
+                    const isSelected = selectedBoardEditor === cand.name
+                    return (
+                      <div
+                        key={cand.email}
+                        onClick={() => setSelectedBoardEditor(cand.name)}
+                        className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
+                          isSelected
+                            ? "border-[#0b99ff] bg-[#0b99ff]/5 ring-1 ring-[#0b99ff]"
+                            : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-[#121316]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">{cand.name}</h5>
+                          {isSelected && <Check className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />}
+                        </div>
+                        <p className="text-[11px] text-[#0b99ff] font-medium">{cand.role}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{cand.affiliation}</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 italic truncate">{cand.specialization}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Invitee Full Name &amp; Academic Title
+                  </label>
+                  <input
+                    type="text"
+                    value={customEditorName}
+                    onChange={(e) => setCustomEditorName(e.target.value)}
+                    placeholder="e.g. Prof. David Miller, MD"
+                    className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Official Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={customEditorEmail}
+                    onChange={(e) => setCustomEditorEmail(e.target.value)}
+                    placeholder="e.g. d.miller@university-medical.edu"
+                    className="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Email Preview with Standard Branded Header */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  Invitation Email Preview
+                </label>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <span>CC:</span>
+                  <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-700 dark:text-slate-300 font-semibold">
+                    scholarlyopen@gmail.com
+                  </span>
+                </div>
+              </div>
+
+              {/* Branded Email Container */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316] shadow-xs">
+                {/* Standard Brand Header */}
+                {(() => {
+                  const branding = getJournalBranding(trackingManuscript?.journal || "Scholarly Open: Medicine")
+                  const brandColor = branding.iconStroke || "#0b99ff"
+                  return (
+                    <div 
+                      className="px-4 py-3 flex items-center justify-between gap-3 text-white"
+                      style={{ background: `linear-gradient(135deg, ${brandColor} 0%, #001f3f 100%)` }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="/images/logo/scholarly-open-logo.png" 
+                          alt="Scholarly Open" 
+                          className="h-7 w-auto object-contain filter brightness-0 invert" 
+                        />
+                        <span className="font-bold text-xs tracking-tight">Scholarly Open</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-right">
+                        <div className="h-6 w-6 rounded-md bg-white/10 flex items-center justify-center p-1 shrink-0">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: branding.svgPath }} />
+                        </div>
+                        <span className="text-[11px] font-semibold text-white/95 max-w-[180px] sm:max-w-[260px] truncate">
+                          {trackingManuscript?.journal || "Scholarly Open: Medicine"}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                <div className="p-3.5 space-y-3 text-xs text-slate-800 dark:text-slate-200">
+                  <div>
+                    <span className="text-[11px] text-slate-400 block font-medium">Subject:</span>
+                    <input
+                      type="text"
+                      value={customEditorSubject}
+                      onChange={(e) => setCustomEditorSubject(e.target.value)}
+                      className="w-full mt-0.5 text-xs font-bold p-1.5 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <span className="text-[11px] text-slate-400 block font-medium mb-1">Message Body:</span>
+                    <textarea
+                      rows={9}
+                      value={customEditorBody}
+                      onChange={(e) => setCustomEditorBody(e.target.value)}
+                      className="w-full text-xs font-mono p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 leading-relaxed resize-y"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsInviteEditorModalOpen(false)}
+              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg"
+            >
+              Cancel
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={handleConfirmInviteEditor}
+              disabled={isDispatchingEditorInvite}
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg shadow-sm cursor-pointer"
+            >
+              {isDispatchingEditorInvite ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  Dispatching Invitation...
+                </>
+              ) : (
+                <>
+                  <Send className="h-3.5 w-3.5 mr-1.5" />
+                  Confirm Appointment &amp; Dispatch Invitation
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 6C: ELECTRONIC REVIEWER'S ASSESSMENT FORM (RAF)                      */}
+      {/* ========================================================================= */}
+      <Dialog open={isViewingRafModalOpen} onOpenChange={setIsViewingRafModalOpen}>
+        <DialogContent className="max-w-4xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[92vh] overflow-y-auto">
+          <DialogHeader className="pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs">
+                  {viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01"}
+                </span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/80">
+                  Official Completed RAF
+                </span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/80">
+                  Recommendation: {viewingRafData?.recommendation || "Re-write and Re-submit"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.print()}
+                  className="h-7 text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer"
+                >
+                  <Printer className="h-3 w-3 mr-1 text-slate-500" />
+                  Print / PDF
+                </Button>
+              </div>
+            </div>
+
+            <div className="text-center pt-2 pb-1">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                Electronic Reviewer&apos;s Assessment Form
+              </h3>
+              <p className="text-sm font-semibold text-[#0b99ff]">
+                {viewingRafData?.journal || trackingManuscript?.journal || "Scholarly Open: Medicine"}
+              </p>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-xs">
+            {/* Details Section */}
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316]">
+              <div className="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                Details
+              </div>
+              <div className="p-4 space-y-2 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
+                  <span className="font-semibold text-slate-500">Type of Review:</span>
+                  <span className="font-bold sm:col-span-3 text-slate-900 dark:text-white uppercase">
+                    {viewingRafData?.typeOfReview || "DOUBLE-BLINDED"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
+                  <span className="font-semibold text-slate-500">Manuscript ID:</span>
+                  <span className="font-mono font-bold sm:col-span-3 text-[#0b99ff]">
+                    {viewingRafData?.manuscriptId || "SOMED-26-RW01"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
+                  <span className="font-semibold text-slate-500">Manuscript Type:</span>
+                  <span className="font-bold sm:col-span-3 text-slate-900 dark:text-white uppercase">
+                    {viewingRafData?.manuscriptType || "REVIEW ARTICLE"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
+                  <span className="font-semibold text-slate-500">Manuscript Title:</span>
+                  <span className="font-bold sm:col-span-3 text-slate-900 dark:text-white">
+                    {viewingRafData?.manuscriptTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
+                  <span className="font-semibold text-slate-500">Key Words:</span>
+                  <span className="text-slate-700 dark:text-slate-300 sm:col-span-3 text-[11px] leading-relaxed">
+                    {viewingRafData?.keyWords}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                  <span className="font-semibold text-slate-500">Due Date:</span>
+                  <span className="font-semibold sm:col-span-3 text-slate-700 dark:text-slate-300">
+                    {viewingRafData?.dueDate || "On or before, 29th August, 2026"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Manuscript Structure */}
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316]">
+              <div className="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                Manuscript Structure
+              </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="text-slate-500 block text-[11px]">Length of article is:</span>
+                  <span className="font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900 text-xs inline-block mt-0.5">
+                    {viewingRafData?.structure?.lengthOfArticle || "too long"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[11px]">Number of Tables are:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs inline-block mt-0.5">
+                    {viewingRafData?.structure?.numberOfTables || "none"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[11px]">Number of figures are:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs inline-block mt-0.5">
+                    {viewingRafData?.structure?.numberOfFigures || "none"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Reviewer Questionnaire */}
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316]">
+              <div className="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center justify-between uppercase tracking-wider">
+                <span>Reviewer Questionnaire</span>
+                <div className="flex items-center gap-8 pr-4 text-[11px]">
+                  <span className="w-8 text-center">Yes</span>
+                  <span className="w-8 text-center">No</span>
+                  <span className="w-8 text-center">N/A</span>
+                </div>
+              </div>
+
+              <div className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
+                {viewingRafData?.questionnaire?.map((q: any, i: number) => (
+                  <div key={i} className="px-4 py-2.5 flex items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                    <span className="text-slate-800 dark:text-slate-200 font-medium">
+                      • {q.question}
+                    </span>
+                    <div className="flex items-center gap-8 pr-4 shrink-0">
+                      <div className="w-8 flex justify-center">
+                        <div className={`h-5 w-5 rounded border flex items-center justify-center ${
+                          q.answer === "Yes" 
+                            ? "bg-emerald-600 border-emerald-600 text-white font-bold" 
+                            : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40"
+                        }`}>
+                          {q.answer === "Yes" ? "✓" : ""}
+                        </div>
+                      </div>
+                      <div className="w-8 flex justify-center">
+                        <div className={`h-5 w-5 rounded border flex items-center justify-center ${
+                          q.answer === "No" 
+                            ? "bg-rose-600 border-rose-600 text-white font-bold" 
+                            : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40"
+                        }`}>
+                          {q.answer === "No" ? "✓" : ""}
+                        </div>
+                      </div>
+                      <div className="w-8 flex justify-center">
+                        <div className={`h-5 w-5 rounded border flex items-center justify-center ${
+                          q.answer === "N/A" 
+                            ? "bg-slate-600 border-slate-600 text-white font-bold" 
+                            : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40"
+                        }`}>
+                          {q.answer === "N/A" ? "✓" : ""}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Priority Rating */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+                <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block mb-1">
+                  • Please rate the priority for publishing this article
+                </span>
+                <span className="text-[11px] text-slate-500 block mb-2.5">
+                  (1 is the highest priority, 10 is the lowest priority)
+                </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => {
+                    const isSelected = (viewingRafData?.priorityRating || 6) === score
+                    return (
+                      <div
+                        key={score}
+                        className={`h-8 w-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
+                          isSelected
+                            ? "bg-[#0b99ff] text-white shadow-xs ring-2 ring-[#0b99ff]/30 scale-105"
+                            : "border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#18191e] text-slate-500"
+                        }`}
+                      >
+                        {score}
+                      </div>
+                    )
+                  })}
+                  <span className="ml-2 text-xs font-bold text-[#0b99ff]">
+                    Selected: 6 / 10
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Comments Sections */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316]">
+                <div className="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  General comments to the Author(s)
+                </div>
+                <div className="p-4 text-xs font-sans text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed italic bg-slate-50/50 dark:bg-slate-900/30 min-h-[110px]">
+                  &ldquo;{viewingRafData?.generalComments || "The review article to be concised. Tables to be provided."}&rdquo;
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316]">
+                <div className="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  Specific comments to the Author(s)
+                </div>
+                <div className="p-4 text-xs space-y-1.5 text-slate-800 dark:text-slate-200 min-h-[110px]">
+                  {viewingRafData?.specificComments?.map((comm: string, i: number) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="font-bold text-[#0b99ff] shrink-0">{i + 1}.</span>
+                      <span className="leading-snug">{comm}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recommendation, Revision Willingness, Conflict of Interest */}
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316]">
+              <div className="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                Recommendation &amp; Disclosures
+              </div>
+              <div className="p-4 space-y-3 text-xs">
+                <div>
+                  <span className="font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Official Recommendation:</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      "Reject",
+                      "Re-write and Re-submit",
+                      "Re-review and Accept with Major Changes",
+                      "Re-review and Accept with Minor Changes",
+                      "Accept without any Changes"
+                    ].map((opt) => {
+                      const isChosen = opt === (viewingRafData?.recommendation || "Re-write and Re-submit")
+                      return (
+                        <div
+                          key={opt}
+                          className={`p-2 rounded-lg border text-xs flex items-center gap-2 ${
+                            isChosen
+                              ? "border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 font-bold"
+                              : "border-slate-200 dark:border-slate-800 text-slate-500 opacity-60"
+                          }`}
+                        >
+                          <div className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${
+                            isChosen ? "border-amber-600 bg-amber-600 text-white font-bold text-[10px]" : "border-slate-300 dark:border-slate-600"
+                          }`}>
+                            {isChosen ? "✓" : ""}
+                          </div>
+                          <span>{opt}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <div>
+                    <span className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Willing to review revision of manuscript?
+                    </span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 inline-block text-xs">
+                      ✓ Yes
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Conflict of Interest (Required):
+                    </span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded inline-block text-xs">
+                      ✓ None
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setIsViewingRafModalOpen(false)
+                const revObj: JmReviewFeedback = {
+                  id: "REV-FB-PN01",
+                  paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
+                  reviewerName: "Dr. Praveen Nagula",
+                  originality: 3,
+                  commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+                  sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+                  commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+                  recommendation: "Re-write and Re-submit",
+                  status: "Pending Moderation"
+                }
+                handleOpenModeration(revObj)
+              }}
+              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg text-[#0b99ff]"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+              Moderate &amp; Sanitize Comments
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => setIsViewingRafModalOpen(false)}
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
+            >
+              Close Assessment Form
             </Button>
           </DialogFooter>
         </DialogContent>
