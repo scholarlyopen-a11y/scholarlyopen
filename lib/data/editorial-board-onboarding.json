@@ -1,34 +1,3 @@
 {
-  "onboardedEditors": [
-    {
-      "id": "EBM-2026-001",
-      "name": "Prof. Prashant Kumar",
-      "email": "p.kumar@surrey.ac.uk",
-      "role": "Editorial Board Member & Handling Editor",
-      "journal": "Scholarly Open: Environmental Science",
-      "journalSlug": "environmental-science",
-      "affiliation": "Global Centre for Clean Air Research (GCARE), School of Engineering, University of Surrey",
-      "department": "School of Engineering",
-      "country": "United Kingdom",
-      "specialization": "Air pollution monitoring, low-cost sensing, aerosol science, nature-based solutions, climate change mitigation",
-      "researchInterests": [
-        "Air Quality & Health",
-        "Aerosol Science & Nanoparticles",
-        "Low-Cost Sensing & Citizen Science",
-        "Nature-Based Solutions",
-        "Climate Change Mitigation",
-        "Environmental Engineering"
-      ],
-      "biography": "Professor Prashant Kumar is the Professor and Chair in Air Quality and Health at the University of Surrey, where he is the Founding Director of the Global Centre for Clean Air Research (GCARE) and Founding Co-Director of the Institute for Sustainability. He holds a PhD from the University of Cambridge and has been consistently named in the top 1% of Global Highly Cited Researchers. Winner of the 2023 Haagen-Smit Prize and Clean Air Award.",
-      "orcid": "0000-0002-8692-7484",
-      "googleScholar": "https://scholar.google.com/citations?user=prashant-kumar",
-      "hasAcceptedTerms": true,
-      "consentProfileUpload": true,
-      "cvFileName": "CV_Prof_Prashant_Kumar.pdf",
-      "cvFileSize": "240 KB",
-      "status": "Pending JM Approval",
-      "jmApproved": false,
-      "acceptedAt": "2026-09-27T10:00:00Z"
-    }
-  ]
+  "onboardedEditors": []
 }

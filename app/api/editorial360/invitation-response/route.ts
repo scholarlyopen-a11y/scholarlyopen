@@ -234,6 +234,19 @@ export async function DELETE(req: Request) {
       }
     }
 
+    if (fs.existsSync(REVIEWERS_FILE_PATH)) {
+      const raw = fs.readFileSync(REVIEWERS_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed.registeredReviewers)) {
+        parsed.registeredReviewers = parsed.registeredReviewers.filter((r: any) => {
+          if (id && r.id === id) return false
+          if (email && r.email && r.email.toLowerCase() === email.toLowerCase()) return false
+          return true
+        })
+        fs.writeFileSync(REVIEWERS_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
+      }
+    }
+
     return NextResponse.json({ success: true })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
@@ -442,3 +455,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }
 }
+

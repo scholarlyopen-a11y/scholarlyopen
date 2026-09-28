@@ -1,6 +1,8 @@
 export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
+import fs from "fs"
+import path from "path"
 import nodemailer from "nodemailer"
 import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES } from "@/lib/email-templates"
 import { getJournalReplyTo, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
@@ -206,6 +208,41 @@ export async function POST(req: Request) {
 
       sentViaSmtp = true
       messageId = info.messageId
+    }
+
+    // Auto-record to sent-invitations.json so every outreach email is 100% permanently logged
+    try {
+      const sentFilePath = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
+      let sentList: any[] = []
+      if (fs.existsSync(sentFilePath)) {
+        const raw = fs.readFileSync(sentFilePath, "utf-8")
+        const parsed = JSON.parse(raw)
+        sentList = Array.isArray(parsed.sentInvitations) ? parsed.sentInvitations : []
+      }
+      const newSentItem = {
+        id: `SENT-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 1000)}`,
+        timestamp: new Date().toISOString(),
+        recipientName,
+        recipientEmail: body.to.trim(),
+        journal,
+        campaignType: (body as any).campaignType || body.template || "editorial_outreach",
+        subject: finalSubject,
+        body: finalHtml,
+        status: sentViaSmtp ? "Delivered" : "Simulated",
+        messageId: messageId || undefined
+      }
+      // Check if already logged within last 60 seconds for same recipient + subject to prevent duplicate entries
+      const isDupe = sentList.some(s => 
+        s.recipientEmail?.toLowerCase() === body.to.trim().toLowerCase() && 
+        s.subject === finalSubject &&
+        Math.abs(new Date(s.timestamp).getTime() - Date.now()) < 60000
+      )
+      if (!isDupe) {
+        sentList.unshift(newSentItem)
+        fs.writeFileSync(sentFilePath, JSON.stringify({ sentInvitations: sentList }, null, 2), "utf-8")
+      }
+    } catch (saveErr) {
+      console.warn("Could not auto-log to sent-invitations.json:", saveErr)
     }
 
     return NextResponse.json({

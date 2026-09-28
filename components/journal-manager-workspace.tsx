@@ -389,7 +389,7 @@ export function JournalManagerWorkspace({
   // Assign Modal
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
   const [selectedManuscript, setSelectedManuscript] = useState<JmManuscript | null>(null)
-  const [selectedEditor, setSelectedEditor] = useState("Prof. Aris Thorne")
+  const [selectedEditor, setSelectedEditor] = useState("Weihua Gong, M.D., Ph.D.")
   const [selectedReviewers, setSelectedReviewers] = useState<string[]>([])
   const [jmReviewerSourceTab, setJmReviewerSourceTab] = useState<"matched" | "suggested" | "external">("matched")
   const [customRevName, setCustomRevName] = useState("")
@@ -688,6 +688,16 @@ export function JournalManagerWorkspace({
         return true
       }))
 
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("editorial360_deleted_candidates")
+          const list: string[] = raw ? JSON.parse(raw) : []
+          if (targetEmail) list.push(targetEmail.toLowerCase())
+          if (targetId) list.push(targetId)
+          localStorage.setItem("editorial360_deleted_candidates", JSON.stringify(Array.from(new Set(list))))
+        } catch (e) {}
+      }
+
       if (selectedCandidateDossier && ((targetEmail && selectedCandidateDossier.candidateEmail?.toLowerCase() === targetEmail.toLowerCase()) || selectedCandidateDossier.id === targetId)) {
         setSelectedCandidateDossier(null)
       }
@@ -771,7 +781,22 @@ export function JournalManagerWorkspace({
       }
       if (respRes.ok) {
         const r = await respRes.json()
-        if (r.success && Array.isArray(r.responses)) setGatewayResponses(r.responses)
+        if (r.success && Array.isArray(r.responses)) {
+          let deletedSet = new Set<string>()
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("editorial360_deleted_candidates")
+              if (raw) deletedSet = new Set(JSON.parse(raw).map((s: string) => (s || "").toLowerCase()))
+            } catch (e) {}
+          }
+          const filtered = r.responses.filter((resp: any) => {
+            const email = (resp.candidateEmail || resp.email || "").toLowerCase()
+            const id = (resp.id || "").toLowerCase()
+            if ((email && deletedSet.has(email)) || (id && deletedSet.has(id))) return false
+            return true
+          })
+          setGatewayResponses(filtered)
+        }
       }
       if (revsRes.ok) {
         const rv = await revsRes.json()
@@ -811,12 +836,6 @@ export function JournalManagerWorkspace({
   const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const v2 = localStorage.getItem("editorial360_scout_sent_v2_reset")
-        if (!v2) {
-          localStorage.removeItem("editorial360_scout_sent_history")
-          localStorage.setItem("editorial360_scout_sent_v2_reset", "true")
-          return []
-        }
         const saved = localStorage.getItem("editorial360_scout_sent_history")
         if (saved) {
           const parsed = JSON.parse(saved)
@@ -838,12 +857,21 @@ export function JournalManagerWorkspace({
       .then(data => {
         const items = Array.isArray(data) ? data : (data?.sentInvitations || [])
         const clean = items.filter((d: SentEmailRecord) => !["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"].includes(d.id))
-        setSentEmailsHistory(clean)
-        if (typeof window !== "undefined") {
-          try {
-            localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(clean))
-          } catch (e) {}
-        }
+        setSentEmailsHistory(prev => {
+          const existingIds = new Set(prev.map(p => p.id))
+          const existingEmailsAndSubjects = new Set(prev.map(p => `${(p.recipientEmail || '').toLowerCase()}::${p.subject}`))
+          const toAdd = clean.filter((c: SentEmailRecord) => 
+            !existingIds.has(c.id) && 
+            !existingEmailsAndSubjects.has(`${(c.recipientEmail || '').toLowerCase()}::${c.subject}`)
+          )
+          const merged = [...prev, ...toAdd].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(merged))
+            } catch (e) {}
+          }
+          return merged
+        })
       })
       .catch(err => console.error("Failed to fetch persistent sent invitations:", err))
   }, [])
@@ -1993,6 +2021,9 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   const handleOpenAssign = (ms: JmManuscript) => {
     setSelectedManuscript(ms)
     setSelectedReviewers(ms.reviewers || [])
+    const boardCandidates = getBoardCandidatesForJournal(ms.journal, ms.author || ms.authorName)
+    const defaultEd = ms.assignedEditorName || (boardCandidates.length > 0 ? boardCandidates[0].name : "Weihua Gong, M.D., Ph.D.")
+    setSelectedEditor(defaultEd)
     const initialSubject = `Review Invitation: ${ms.id} - ${ms.title}`
     const initialBody = `Dear {{recipientName}},
 
@@ -4190,14 +4221,40 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     >
                                       <UserX className="h-3.5 w-3.5" />
                                     </Button>
-                                    <Button
-                                      size="sm"
-                                      onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
-                                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3 rounded-lg cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
-                                    >
-                                      <Send className="h-3 w-3" />
-                                      <span>{campaignLabel}</span>
-                                    </Button>
+                                    {(() => {
+                                      const alreadySent = sentEmailsHistory.find(s => 
+                                        s.recipientEmail && scholar.email && s.recipientEmail.toLowerCase() === scholar.email.toLowerCase()
+                                      )
+                                      if (alreadySent) {
+                                        return (
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
+                                              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                                              Invited ✓
+                                            </span>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                                              className="text-[10px] font-semibold h-8 px-2 rounded-lg cursor-pointer text-slate-600 hover:text-[#0b99ff]"
+                                              title="Send Follow-up or Resend"
+                                            >
+                                              Resend
+                                            </Button>
+                                          </div>
+                                        )
+                                      }
+                                      return (
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                                          className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3 rounded-lg cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                                        >
+                                          <Send className="h-3 w-3" />
+                                          <span>{campaignLabel}</span>
+                                        </Button>
+                                      )
+                                    })()}
                                   </div>
                                 </td>
                               </tr>
@@ -4317,14 +4374,40 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 {scholar.country ? `${scholar.country} · ` : ""}COPE Vetted
                               </span>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
-                              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                            >
-                              <Send className="h-3 w-3" />
-                              <span>{campaignLabel}</span>
-                            </Button>
+                            {(() => {
+                              const alreadySent = sentEmailsHistory.find(s => 
+                                s.recipientEmail && scholar.email && s.recipientEmail.toLowerCase() === scholar.email.toLowerCase()
+                              )
+                              if (alreadySent) {
+                                return (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
+                                      <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                                      Invited ✓
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                                      className="text-[10px] font-semibold h-8 px-2 rounded-lg cursor-pointer text-slate-600 hover:text-[#0b99ff]"
+                                      title="Send Follow-up or Resend"
+                                    >
+                                      Resend
+                                    </Button>
+                                  </div>
+                                )
+                              }
+                              return (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleDispatchScoutOutreach(scholar, scoutCampaignType)}
+                                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                >
+                                  <Send className="h-3 w-3" />
+                                  <span>{campaignLabel}</span>
+                                </Button>
+                              )
+                            })()}
                           </div>
                         </Card>
                       )
@@ -6006,9 +6089,28 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 onChange={(e) => setSelectedEditor(e.target.value)}
                 className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-[#0b99ff]"
               >
-                <option value="Prof. Aris Thorne">Prof. Aris Thorne (3 active papers · Managing Editor)</option>
-                <option value="Prof. Clara Zhang">Prof. Clara Zhang (1 active paper · Section Editor)</option>
-                <option value="Dr. Sarah Jenkins">Dr. Sarah Jenkins (0 active papers · Available)</option>
+                {(() => {
+                  const journalCandidates = getBoardCandidatesForJournal(selectedManuscript?.journal, selectedManuscript?.author || selectedManuscript?.authorName)
+                  const list = [...journalCandidates]
+                  if (selectedManuscript?.assignedEditorName && !list.some(c => c.name === selectedManuscript.assignedEditorName)) {
+                    list.unshift({
+                      name: selectedManuscript.assignedEditorName,
+                      role: "Assigned Handling Editor",
+                      email: "",
+                      affiliation: "",
+                      journal: selectedManuscript.journal,
+                      specialization: "Editorial Oversight"
+                    })
+                  }
+                  if (list.length === 0) {
+                    return <option value="Unassigned">No Board Members Available</option>
+                  }
+                  return list.map(ed => (
+                    <option key={ed.name} value={ed.name}>
+                      {ed.name} ({ed.role || "Editorial Board Member"})
+                    </option>
+                  ))
+                })()}
               </select>
             </div>
 
