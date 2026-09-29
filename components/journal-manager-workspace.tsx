@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
@@ -413,6 +413,13 @@ export function JournalManagerWorkspace({
   const [scoutTotalResults, setScoutTotalResults] = useState<number>(142)
   const [editingScholarEmailIndex, setEditingScholarEmailIndex] = useState<number | null>(null)
   const [viewingHistoryEmail, setViewingHistoryEmail] = useState<SentEmailRecord | null>(null)
+
+  // Quick Invite (Manual EIC/Editorial Outreach) state
+  const [isQuickInviteOpen, setIsQuickInviteOpen] = useState(false)
+  const [quickInviteName, setQuickInviteName] = useState("")
+  const [quickInviteEmail, setQuickInviteEmail] = useState("")
+  const [quickInviteJournal, setQuickInviteJournal] = useState("Scholarly Open: Chemistry")
+  const [quickInviteCampaign, setQuickInviteCampaign] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up">("eic")
 
   // Reviewer Registry & History Tracking States
   const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
@@ -832,48 +839,65 @@ export function JournalManagerWorkspace({
   const [ecrSelectedNames, setEcrSelectedNames] = useState<string[]>([])
   const [ecrCampaignType, setEcrCampaignType] = useState<"ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver">("ecr_reviewer")
 
-  // Sent Emails History (Audit Log) with LocalStorage persistence & API sync
-  const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("editorial360_scout_sent_history")
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed)) {
-            return parsed.filter((r: any) => !["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"].includes(r.id))
-          }
-        }
-      } catch (e) {
-        console.error("Failed to load sent emails history:", e)
-      }
-    }
-    return []
-  })
+  // Sent Emails History (Audit Log) — Server is source of truth for cross-user visibility
+  // localStorage is only a fallback cache; server API always takes priority.
+  const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>([])
+  const [isSentHistoryLoaded, setIsSentHistoryLoaded] = useState(false)
 
-  // Synchronize live sent invitations from the persistent API
+  // Load sent invitations: server first (shared), then merge local-only session records
   useEffect(() => {
+    const BLOCKED_IDS = new Set(["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"])
+
     fetch("/api/editorial360/sent-invitations")
       .then(res => res.json())
       .then(data => {
-        const items = Array.isArray(data) ? data : (data?.sentInvitations || [])
-        const clean = items.filter((d: SentEmailRecord) => !["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"].includes(d.id))
-        setSentEmailsHistory(prev => {
-          const existingIds = new Set(prev.map(p => p.id))
-          const existingEmailsAndSubjects = new Set(prev.map(p => `${(p.recipientEmail || '').toLowerCase()}::${p.subject}`))
-          const toAdd = clean.filter((c: SentEmailRecord) => 
-            !existingIds.has(c.id) && 
-            !existingEmailsAndSubjects.has(`${(c.recipientEmail || '').toLowerCase()}::${c.subject}`)
-          )
-          const merged = [...prev, ...toAdd].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          if (typeof window !== "undefined") {
-            try {
-              localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(merged))
-            } catch (e) {}
-          }
-          return merged
-        })
+        const serverItems: SentEmailRecord[] = (Array.isArray(data) ? data : (data?.sentInvitations || []))
+          .filter((d: SentEmailRecord) => !BLOCKED_IDS.has(d.id))
+
+        // Merge any local-only records that the server doesn't have yet
+        let localItems: SentEmailRecord[] = []
+        if (typeof window !== "undefined") {
+          try {
+            const saved = localStorage.getItem("editorial360_scout_sent_history")
+            if (saved) {
+              const parsed = JSON.parse(saved)
+              if (Array.isArray(parsed)) localItems = parsed.filter((r: any) => !BLOCKED_IDS.has(r.id))
+            }
+          } catch (e) {}
+        }
+
+        const serverIds = new Set(serverItems.map(s => s.id))
+        const serverKeys = new Set(serverItems.map(s => `${(s.recipientEmail || '').toLowerCase()}::${s.subject}`))
+        const localOnly = localItems.filter(l =>
+          !serverIds.has(l.id) &&
+          !serverKeys.has(`${(l.recipientEmail || '').toLowerCase()}::${l.subject}`)
+        )
+
+        const merged = [...serverItems, ...localOnly].sort((a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        )
+        if (typeof window !== "undefined") {
+          try { localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(merged)) } catch (e) {}
+        }
+        setSentEmailsHistory(merged)
+        setIsSentHistoryLoaded(true)
       })
-      .catch(err => console.error("Failed to fetch persistent sent invitations:", err))
+      .catch(err => {
+        console.error("Failed to fetch persistent sent invitations:", err)
+        // Fall back to localStorage cache if API is unreachable
+        if (typeof window !== "undefined") {
+          try {
+            const saved = localStorage.getItem("editorial360_scout_sent_history")
+            if (saved) {
+              const parsed = JSON.parse(saved)
+              if (Array.isArray(parsed)) {
+                setSentEmailsHistory(parsed.filter((r: any) => !["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"].includes(r.id)))
+              }
+            }
+          } catch (e) {}
+        }
+        setIsSentHistoryLoaded(true)
+      })
   }, [])
 
   // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 3,250/day across all 13 journals)
@@ -1173,6 +1197,11 @@ export function JournalManagerWorkspace({
     const term = (queryToSearch !== undefined ? queryToSearch : scoutKeyword).trim()
     if (!term) return
     setIsScouting(true)
+    // Reset to page 1 when starting a fresh search (not paginating)
+    if (pageToSearch === 1) {
+      setScoutPage(1)
+      setScoutResults([])
+    }
     try {
       const res = await fetch("/api/editorial360/match-reviewers", {
         method: "POST",
@@ -1189,8 +1218,19 @@ export function JournalManagerWorkspace({
         const data = await res.json()
         if (data.reviewers && data.reviewers.length > 0) {
           setScoutResults(data.reviewers)
-          if (data.totalResults) setScoutTotalResults(data.totalResults)
+          // Store actual candidates count separately from raw DB hit count
+          const actualCandidates = data.reviewers.length
+          // Use actual candidates count for pagination (prevents showing phantom pages)
+          // scoutTotalResults tracks actual candidates found on this + subsequent pages
+          setScoutTotalResults(prev => {
+            // On first page, use actual count. On subsequent pages, keep cumulative
+            if (pageToSearch === 1) return Math.max(actualCandidates, data.totalResults ? Math.min(data.totalResults, actualCandidates * 6) : actualCandidates)
+            return Math.max(prev, actualCandidates * pageToSearch)
+          })
           setScoutPage(pageToSearch)
+        } else if (pageToSearch > 1) {
+          // No results on this page — stay on previous page
+          setScoutPage(pageToSearch - 1)
         }
       }
     } catch (err) {
@@ -3803,6 +3843,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </>
                     )}
                   </Button>
+                  {/* Quick Invite button for manual outreach (LinkedIn / email contacts) */}
+                  <Button
+                    type="button"
+                    onClick={() => setIsQuickInviteOpen(true)}
+                    className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-10 px-4 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
+                    title="Invite someone you found on LinkedIn or via email directly"
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    <span>Quick Invite</span>
+                  </Button>
                 </div>
 
                 {/* Quick Topic Chips: Dynamically adapts to show trending keywords for selected journal */}
@@ -3993,6 +4043,132 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                 </div>
               </Card>
+
+              {/* Quick Invite Modal — Send outreach directly by name & email (e.g. LinkedIn/email contacts) */}
+              {isQuickInviteOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setIsQuickInviteOpen(false)}>
+                  <div
+                    className="bg-white dark:bg-[#18191e] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg p-6 space-y-5"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          <Send className="h-4 w-4 text-[#0b99ff]" />
+                          Quick Direct Invite
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Send a personal invitation via Scout to someone you found on LinkedIn or email</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsQuickInviteOpen(false)}
+                        className="text-slate-400 hover:text-slate-700 dark:hover:text-white text-lg leading-none cursor-pointer"
+                      >✕</button>
+                    </div>
+
+                    {/* Recipient Details */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1.5">
+                          Recipient Full Name <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={quickInviteName}
+                          onChange={e => setQuickInviteName(e.target.value)}
+                          placeholder="e.g. Prof. Francis Collins"
+                          className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/40 focus:border-[#0b99ff]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1.5">
+                          Email Address <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          value={quickInviteEmail}
+                          onChange={e => setQuickInviteEmail(e.target.value)}
+                          placeholder="e.g. francis.collins@nih.gov"
+                          className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/40 focus:border-[#0b99ff]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1.5">Target Journal</label>
+                        <select
+                          value={quickInviteJournal}
+                          onChange={e => setQuickInviteJournal(e.target.value)}
+                          className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/40 focus:border-[#0b99ff]"
+                        >
+                          {OFFICIAL_JOURNALS.map(j => (
+                            <option key={j.name} value={j.name}>{j.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1.5">Invitation Template</label>
+                        <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
+                          {[
+                            { id: "eic", label: "🏆 Editor-in-Chief" },
+                            { id: "ebm", label: "📋 Editorial Board" },
+                            { id: "associate_editor", label: "✏️ Associate Editor" },
+                            { id: "call_for_papers", label: "📄 Call for Papers" },
+                            { id: "follow_up", label: "🔁 Follow-Up" },
+                          ].map(c => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => setQuickInviteCampaign(c.id as any)}
+                              className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                quickInviteCampaign === c.id
+                                  ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs border border-slate-200 dark:border-slate-700 font-bold"
+                                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/40"
+                              }`}
+                            >
+                              {c.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setIsQuickInviteOpen(false)}
+                        className="flex-1 h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!quickInviteName.trim() || !quickInviteEmail.trim()}
+                        onClick={() => {
+                          if (!quickInviteName.trim() || !quickInviteEmail.trim()) return
+                          const syntheticScholar = {
+                            name: quickInviteName.trim(),
+                            email: quickInviteEmail.trim(),
+                            institution: "Independent Scholar",
+                            specialty: quickInviteJournal.replace("Scholarly Open: ", ""),
+                            country: undefined,
+                            metrics: "Direct Invitation via Scout",
+                          }
+                          // Temporarily switch journal context and trigger outreach
+                          const prevJournal = scoutTargetJournal
+                          setScoutTargetJournal(quickInviteJournal)
+                          handleDispatchScoutOutreach(syntheticScholar, quickInviteCampaign)
+                          setIsQuickInviteOpen(false)
+                          setQuickInviteName("")
+                          setQuickInviteEmail("")
+                        }}
+                        className="flex-1 h-10 rounded-xl bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                        Compose & Send Invitation
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Results Section with View Mode Switcher (List vs Cards) */}
               <div className="space-y-3">
@@ -4417,22 +4593,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                 {/* Pagination Controls Bar */}
                 {scoutResults.length > 0 && (() => {
+                  // Use actual displayed candidates count for pagination (not raw DB hit count)
+                  const actualCount = activeScoutResults.length
+                  // Total pages based on actual candidates per page
                   const totalPages = Math.max(1, Math.ceil(scoutTotalResults / scoutLimit))
-                  const startRecord = (scoutPage - 1) * scoutLimit + 1
-                  const endRecord = Math.min(scoutPage * scoutLimit, scoutTotalResults)
+                  const cappedTotalPages = Math.min(totalPages, 20) // Cap at 20 pages to prevent phantom pages
 
                   // Generate smart page numbers array (up to 7 items)
                   const getPageNumbers = () => {
-                    if (totalPages <= 7) {
-                      return Array.from({ length: totalPages }, (_, i) => i + 1)
+                    if (cappedTotalPages <= 7) {
+                      return Array.from({ length: cappedTotalPages }, (_, i) => i + 1)
                     }
                     if (scoutPage <= 4) {
-                      return [1, 2, 3, 4, 5, "...", totalPages]
+                      return [1, 2, 3, 4, 5, "...", cappedTotalPages]
                     }
-                    if (scoutPage >= totalPages - 3) {
-                      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
+                    if (scoutPage >= cappedTotalPages - 3) {
+                      return [1, "...", cappedTotalPages - 4, cappedTotalPages - 3, cappedTotalPages - 2, cappedTotalPages - 1, cappedTotalPages]
                     }
-                    return [1, "...", scoutPage - 1, scoutPage, scoutPage + 1, "...", totalPages]
+                    return [1, "...", scoutPage - 1, scoutPage, scoutPage + 1, "...", cappedTotalPages]
                   }
 
                   const pages = getPageNumbers()
@@ -4442,12 +4620,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       {/* Left: Summary text */}
                       <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
                         <span>
-                          Showing <strong className="text-slate-900 dark:text-white font-mono">{startRecord}</strong> to{" "}
-                          <strong className="text-slate-900 dark:text-white font-mono">{endRecord}</strong> of{" "}
-                          <strong className="text-slate-900 dark:text-white font-mono">{scoutTotalResults.toLocaleString()}</strong> candidates
+                          <strong className="text-slate-900 dark:text-white font-mono">{actualCount}</strong> verified candidates on this page
                         </span>
                         <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
-                        <span className="hidden sm:inline font-medium">Page {scoutPage} of {totalPages}</span>
+                        <span className="hidden sm:inline font-medium">Page {scoutPage} of {cappedTotalPages}</span>
                       </div>
 
                       {/* Right: Pagination buttons */}
@@ -4496,7 +4672,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={scoutPage >= totalPages || isScouting}
+                          disabled={scoutPage >= cappedTotalPages || isScouting}
                           onClick={() => handleSearchScoutScholars(undefined, scoutPage + 1, scoutLimit)}
                           className="h-8 px-2.5 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer"
                         >

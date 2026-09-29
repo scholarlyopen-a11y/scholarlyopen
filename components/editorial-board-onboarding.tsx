@@ -208,6 +208,14 @@ export function EditorialBoardOnboarding({
       setErrorMsg("Please provide your primary academic affiliation / university.")
       return
     }
+    if (!country.trim()) {
+      setErrorMsg("Please select your country of affiliation. This is required for the editorial registry.")
+      return
+    }
+    if (!biography.trim() || biography.trim().length < 50) {
+      setErrorMsg("Please provide a short academic biography (at least 50 characters). This appears on the journal masthead.")
+      return
+    }
     if (!password.trim() || password.length < 6) {
       setErrorMsg("Please create an account password of at least 6 characters.")
       return
@@ -473,7 +481,9 @@ export function EditorialBoardOnboarding({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Country</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  Country <span className="text-rose-500">*</span>
+                </label>
                 <input
                   type="text"
                   required
@@ -568,16 +578,21 @@ export function EditorialBoardOnboarding({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                Brief Academic Biography (for Journal Masthead)
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                Brief Academic Biography (for Journal Masthead) <span className="text-rose-500">*</span>
+                <span className="text-[10px] text-slate-400 ml-1">min. 50 characters</span>
               </label>
               <textarea
                 rows={3}
+                required
                 value={biography}
                 onChange={(e) => setBiography(e.target.value)}
                 placeholder="Brief summary of academic appointments, chairships, research focus, and notable honors..."
                 className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white leading-relaxed focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
               />
+              <p className="text-[11px] text-slate-400">
+                {biography.trim().length}/50 minimum characters · This text appears publicly on the journal editorial board page.
+              </p>
             </div>
           </div>
 

@@ -3539,26 +3539,50 @@ export default function Editorial360Page() {
     })
   }
 
-  const handleUploadRevision = () => {
+  const handleUploadRevision = async () => {
     const finalFileName = revisionFileName || "Revised_Manuscript_V2.pdf"
     const finalFileSize = revisionFileSize || "2.8 MB"
-    let generatedBlobUrl: string | undefined = undefined
+    const nowIso = new Date().toISOString()
+    let finalFileUrl: string | undefined = undefined
+
+    // Upload file to Supabase Storage for cross-user visibility (fixes blob: URL issue)
     if (revisionFile) {
       try {
-        generatedBlobUrl = URL.createObjectURL(revisionFile)
-      } catch (e) {}
+        const formData = new FormData()
+        formData.append("file", revisionFile)
+        formData.append("manuscriptId", revisionPaperId || `rev-${Date.now()}`)
+        formData.append("fileType", "revision")
+
+        const uploadRes = await fetch("/api/editorial360/upload", {
+          method: "POST",
+          body: formData,
+        })
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          if (uploadData.ok && uploadData.fileUrl) {
+            finalFileUrl = uploadData.fileUrl
+          }
+        }
+      } catch (uploadErr) {
+        console.warn("Supabase upload failed, falling back to blob URL:", uploadErr)
+        try { finalFileUrl = URL.createObjectURL(revisionFile) } catch (e) {}
+      }
+      // Fallback: if upload failed, use local blob (visible in current session only)
+      if (!finalFileUrl) {
+        try { finalFileUrl = URL.createObjectURL(revisionFile) } catch (e) {}
+      }
     }
-    const nowIso = new Date().toISOString()
+
     setManuscripts(prev => {
       const updated: Manuscript[] = prev.map(m => m.id === revisionPaperId ? { 
         ...m, 
         status: "Revision Under Evaluation" as const,
         fileName: finalFileName,
         fileSize: finalFileSize,
-        fileUrl: generatedBlobUrl || m.fileUrl,
+        fileUrl: finalFileUrl || m.fileUrl,
         revisedFileName: finalFileName,
         revisedFileSize: finalFileSize,
-        revisedFileUrl: generatedBlobUrl || m.fileUrl,
+        revisedFileUrl: finalFileUrl || m.fileUrl,
         revisionDate: nowIso,
         lastActivity: nowIso,
         updatedAt: nowIso,
@@ -3574,17 +3598,19 @@ export default function Editorial360Page() {
       return updated
     })
 
-    // Cloud sync
+    // Cloud sync — include file_url so other users see it via the 12s polling
     fetch("/api/editorial360/manuscripts", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id: revisionPaperId,
         status: "Revision Under Evaluation",
-        fileName: finalFileName,
-        fileSize: finalFileSize,
-        revisedFileName: finalFileName,
-        revisedFileSize: finalFileSize,
+        file_name: finalFileName,
+        file_size: finalFileSize,
+        file_url: finalFileUrl || null,
+        revised_file_name: finalFileName,
+        revised_file_size: finalFileSize,
+        revised_file_url: finalFileUrl || null,
         updatedAt: nowIso,
         date: nowIso
       })

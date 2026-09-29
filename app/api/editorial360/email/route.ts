@@ -147,15 +147,17 @@ export async function POST(req: Request) {
     const smtpUser = process.env.SMTP_USER
     const smtpPass = process.env.SMTP_PASS
 
-    // Designated sender email. Prioritizes explicit fromEmail (e.g. editorial@scholarlyopen.org)
-    // or falls back to journal-specific address or DEFAULT_EDITORIAL_EMAIL
-    const designatedEmail = body.fromEmail || (body.template === "workspace_invite" ? DEFAULT_EDITORIAL_EMAIL : getJournalReplyTo(journal))
+    // Journal-specific display email for From: header and Reply-To:
+    // This is what recipients SEE and where replies go (e.g. editor.chem@scholarlyopen.org)
+    const journalDisplayEmail = body.fromEmail 
+      || (body.template === "workspace_invite" ? DEFAULT_EDITORIAL_EMAIL : getJournalReplyTo(journal))
 
-    const activeSenderEmail = process.env.FORCE_SINGLE_SENDER === "true"
-      ? (process.env.EDITORIAL_SENDER_EMAIL || DEFAULT_EDITORIAL_EMAIL)
-      : designatedEmail
+    // SMTP envelope sender must match the authenticated SMTP_USER account (training@scholarlyopen.org)
+    // Namecheap cPanel only allows delivery from the authenticated account
+    // We use SMTP_USER as the envelope sender but show journalDisplayEmail in From: header
+    const smtpEnvelopeSender = smtpUser || journalDisplayEmail
 
-    // Ensure display name adheres to RFC 5322 without redundant double-quotes
+    // From: header display — shows journal email so recipient sees the correct address
     const rawSenderDisplayName = body.senderName || (
       body.template === "workspace_invite" 
         ? "Scholarly Open Editorial Office" 
@@ -164,8 +166,11 @@ export async function POST(req: Request) {
           : `${journal} Editorial Office`
     )
     const cleanSenderName = rawSenderDisplayName.replace(/["\r\n]/g, "").trim()
-    const formattedFrom = `"${cleanSenderName}" <${activeSenderEmail}>`
-    const replyToEmail = body.fromEmail || designatedEmail || DEFAULT_EDITORIAL_EMAIL
+    // From header shows the journal address; SMTP envelope uses training@ for delivery
+    const formattedFrom = `"${cleanSenderName}" <${journalDisplayEmail}>`
+    const replyToEmail = journalDisplayEmail
+    // For response tracking, also note the actual SMTP sender
+    const activeSenderEmail = journalDisplayEmail
 
     const normalizedTo = body.to.trim().toLowerCase()
     const defaultCc = "scholarlyopen@gmail.com"
@@ -187,12 +192,11 @@ export async function POST(req: Request) {
       })
 
       const mailOptions: nodemailer.SendMailOptions = {
-        from: formattedFrom,
+        from: formattedFrom,          // Journal display email shown to recipient
         to: body.to.trim(),
-        replyTo: replyToEmail,
-        sender: activeSenderEmail,
+        replyTo: replyToEmail,         // Replies go to journal inbox
         envelope: {
-          from: activeSenderEmail,
+          from: smtpEnvelopeSender,    // Must match SMTP_USER for Namecheap auth
           to: [body.to.trim(), ...(ccRecipient ? [ccRecipient] : [])]
         },
         subject: finalSubject,
