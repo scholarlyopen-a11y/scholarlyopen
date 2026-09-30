@@ -903,8 +903,8 @@ export default function Editorial360Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")
   const [role, setRole] = useState<UserRole>("editor")
-  const [email, setEmail] = useState("editor@scholarlyopen.org")
-  const [password, setPassword] = useState("Scholarly#2026!Secured")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
@@ -2851,12 +2851,14 @@ export default function Editorial360Page() {
     if (e && typeof e.preventDefault === "function") {
       e.preventDefault()
     }
-    const cleanEmail = email?.trim() || "editor@scholarlyopen.org"
-    if (!email?.trim()) {
-      setEmail("editor@scholarlyopen.org")
+    const cleanEmail = email?.trim()
+    if (!cleanEmail) {
+      setError(language === "de" ? "Bitte geben Sie Ihre E-Mail-Adresse ein." : "Please enter your email address.")
+      return
     }
     if (!password) {
-      setPassword("Scholarly#2026!Secured")
+      setError(language === "de" ? "Bitte geben Sie Ihr Passwort ein." : "Please enter your password.")
+      return
     }
     setLoading(true)
     setError("")
@@ -3368,14 +3370,6 @@ export default function Editorial360Page() {
     }
     setError("")
     setSuccess("")
-    // Only set placeholder if email is empty or currently matches a default placeholder
-    const isPlaceholder = !email || roles.some(r => r.placeholder === email)
-    if (isPlaceholder) {
-      const matchedRole = roles.find(r => r.id === selectedRole)
-      if (matchedRole) {
-        setEmail(matchedRole.placeholder)
-      }
-    }
   }
 
   const handleQuickSwitch = (newRole: UserRole) => {
@@ -3385,13 +3379,6 @@ export default function Editorial360Page() {
     }
     setError("")
     setSuccess("")
-    const isPlaceholder = !email || roles.some(r => r.placeholder === email)
-    if (isPlaceholder) {
-      const matchedRole = roles.find(r => r.id === newRole)
-      if (matchedRole) {
-        setEmail(matchedRole.placeholder)
-      }
-    }
     if (newRole === "editor") {
       setActiveEditorTab("desk")
     }
@@ -5061,10 +5048,10 @@ export default function Editorial360Page() {
               setEditorPhotoUrl(data.photoUrl)
               setEditorOrcid(data.orcid)
 
-              // 2. Lead to login screen with created ID and password
+              // 2. Lead to login screen with created ID
               setRole("editor")
               setEmail(data.email)
-              setPassword(data.password || "")
+              setPassword("")
               setIsLoggedIn(false)
               setMode("login")
               setOnboardingInvite(null)
