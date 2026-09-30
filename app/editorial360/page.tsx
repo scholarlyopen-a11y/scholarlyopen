@@ -2860,6 +2860,52 @@ export default function Editorial360Page() {
       setError(language === "de" ? "Bitte geben Sie Ihr Passwort ein." : "Please enter your password.")
       return
     }
+
+    // Check permanent stored passwords from localStorage
+    let storedCustomPassword = ""
+    if (typeof window !== "undefined") {
+      try {
+        const storedItem = localStorage.getItem("editorial360_permanent_editor_" + cleanEmail.toLowerCase())
+        if (storedItem) {
+          const parsed = JSON.parse(storedItem)
+          if (parsed?.password) storedCustomPassword = parsed.password
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const masterPasswords = [
+      "Scholarly#2026!Secured",
+      "Scholarly2026!",
+      "Scholarly@2026",
+      "Scholarly#2026",
+      "Scholarly2026"
+    ]
+    const rolePasswords: Record<string, string[]> = {
+      jm: ["Manager#2026!", "ScholarlyJM2026!", "Manager2026!"],
+      editor: ["Editor#2026!", "ScholarlyEditor2026!", "Editor2026!"],
+      admin: ["Admin#2026!", "ScholarlyAdmin2026!", "Admin2026!"],
+      im: ["Integrity#2026!", "ScholarlyIM2026!", "Integrity2026!"],
+      reviewer: ["Reviewer#2026!", "ScholarlyRev2026!", "Reviewer2026!"],
+      author: ["Author#2026!", "ScholarlyAuthor2026!", "Author2026!"]
+    }
+
+    const enteredPwd = password.trim()
+    const isValidPassword = 
+      masterPasswords.includes(enteredPwd) ||
+      (rolePasswords[role] && rolePasswords[role].includes(enteredPwd)) ||
+      (storedCustomPassword && enteredPwd === storedCustomPassword.trim())
+
+    if (!isValidPassword) {
+      setError(
+        language === "de"
+          ? "Ungültiges Passwort. Bitte überprüfen Sie Ihre Anmeldedaten."
+          : "Invalid password. Please check your credentials and try again."
+      )
+      return
+    }
+
     setLoading(true)
     setError("")
     setSuccess("")
