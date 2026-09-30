@@ -2861,11 +2861,48 @@ export default function Editorial360Page() {
       return
     }
 
+    const lowerEmail = cleanEmail.toLowerCase()
+
+    // 1. Precise Role Resolution from Email: A Journal Manager email NEVER logs into Handling Editor
+    let effectiveRole: UserRole = role
+    if (
+      lowerEmail === "manager@scholarlyopen.org" ||
+      lowerEmail.startsWith("manager@") ||
+      lowerEmail.includes("journal.manager") ||
+      lowerEmail.includes("jm@") ||
+      lowerEmail.includes("noor") ||
+      lowerEmail.includes("abbas")
+    ) {
+      effectiveRole = "jm"
+    } else if (lowerEmail === "admin@scholarlyopen.org" || lowerEmail.startsWith("admin@")) {
+      effectiveRole = "admin"
+    } else if (lowerEmail === "im@scholarlyopen.org" || lowerEmail.startsWith("im@") || lowerEmail.includes("integrity")) {
+      effectiveRole = "im"
+    } else if (
+      lowerEmail === "editor@scholarlyopen.org" ||
+      lowerEmail.startsWith("editor.") ||
+      lowerEmail.includes("gong") ||
+      lowerEmail.includes("boakye") ||
+      lowerEmail.includes("kumar") ||
+      lowerEmail.includes("thorne")
+    ) {
+      effectiveRole = "editor"
+    } else if (lowerEmail === "reviewer@scholarlyopen.org" || lowerEmail.includes("olofinjana") || lowerEmail.includes("sun") || lowerEmail.includes("vance")) {
+      effectiveRole = "reviewer"
+    } else if (lowerEmail === "author@scholarlyopen.org" || lowerEmail.includes("sam.lee") || lowerEmail.includes("proton.me")) {
+      effectiveRole = "author"
+    }
+
+    // Automatically correct role state if it doesn't match the account type
+    if (effectiveRole !== role) {
+      setRole(effectiveRole)
+    }
+
     // Check permanent stored passwords from localStorage
     let storedCustomPassword = ""
     if (typeof window !== "undefined") {
       try {
-        const storedItem = localStorage.getItem("editorial360_permanent_editor_" + cleanEmail.toLowerCase())
+        const storedItem = localStorage.getItem("editorial360_permanent_editor_" + lowerEmail)
         if (storedItem) {
           const parsed = JSON.parse(storedItem)
           if (parsed?.password) storedCustomPassword = parsed.password
@@ -2894,14 +2931,15 @@ export default function Editorial360Page() {
     const enteredPwd = password.trim()
     const isValidPassword = 
       masterPasswords.includes(enteredPwd) ||
-      (rolePasswords[role] && rolePasswords[role].includes(enteredPwd)) ||
+      (rolePasswords[effectiveRole] && rolePasswords[effectiveRole].includes(enteredPwd)) ||
       (storedCustomPassword && enteredPwd === storedCustomPassword.trim())
 
     if (!isValidPassword) {
+      const roleName = effectiveRole === "jm" ? "Journal Manager" : effectiveRole === "editor" ? "Handling Editor" : effectiveRole
       setError(
         language === "de"
-          ? "Ungültiges Passwort. Bitte überprüfen Sie Ihre Anmeldedaten."
-          : "Invalid password. Please check your credentials and try again."
+          ? `Ungültiges Passwort für ${roleName}. Bitte überprüfen Sie Ihre Anmeldedaten.`
+          : `Invalid password for ${roleName}. Please check your credentials and try again.`
       )
       return
     }
@@ -2923,7 +2961,7 @@ export default function Editorial360Page() {
       let currentEditorOrcid = editorOrcid
       let currentEditorPhotoUrl = editorPhotoUrl
 
-      if (role === "editor") {
+      if (effectiveRole === "editor") {
         setActiveEditorTab("desk")
         const isGong = cleanEmail.toLowerCase().includes("gong") || 
                        cleanEmail.toLowerCase().includes("weihua") || 
@@ -3001,7 +3039,7 @@ export default function Editorial360Page() {
       }
 
       let currentReviewerProfile = reviewerProfile
-      if (role === "reviewer") {
+      if (effectiveRole === "reviewer") {
         const isBolutife = cleanEmail.toLowerCase().includes("olofinjana") || cleanEmail.toLowerCase().includes("bolutife")
         if (isBolutife) {
           currentReviewerProfile = {
@@ -3030,7 +3068,7 @@ export default function Editorial360Page() {
         }
       }
 
-      if (role === "author") {
+      if (effectiveRole === "author") {
         if (cleanEmail.toLowerCase().includes("sam")) {
           setProfFullName("Sam Lee")
           setProfRank("Corresponding Author")
@@ -3039,14 +3077,28 @@ export default function Editorial360Page() {
         }
       }
 
+      let currentJmFullName = jmFullName || "Editorial Staff"
+      let currentJmDeskEmail = jmDeskEmail || "scholarlyopen@gmail.com"
+      if (lowerEmail.includes("abbas")) {
+        currentJmFullName = "Dr. Abbas"
+        currentJmDeskEmail = "abbas@scholarlyopen.org"
+        setJmFullName(currentJmFullName)
+        setJmDeskEmail(currentJmDeskEmail)
+      } else if (lowerEmail.includes("noor")) {
+        currentJmFullName = "Noor F."
+        currentJmDeskEmail = "manager@scholarlyopen.org"
+        setJmFullName(currentJmFullName)
+        setJmDeskEmail(currentJmDeskEmail)
+      }
+
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("editorial360_session", JSON.stringify({
             isLoggedIn: true,
-            role,
+            role: effectiveRole,
             email: cleanEmail,
             activeJmTab,
-            activeEditorTab: role === "editor" ? "desk" : activeEditorTab,
+            activeEditorTab: effectiveRole === "editor" ? "desk" : activeEditorTab,
             editorName: currentEditorName,
             editorRank: currentEditorRank,
             editorJournal: currentEditorJournal,
@@ -3056,11 +3108,11 @@ export default function Editorial360Page() {
             editorPhotoUrl: currentEditorPhotoUrl,
             reviewerProfile: currentReviewerProfile,
             profPhotoUrl: profPhotoUrl || "",
-            jmFullName: jmFullName || "Noor F.",
+            jmFullName: currentJmFullName,
             jmStaffRole: jmStaffRole || "Editorial Manager",
             jmDepartment: jmDepartment || "Editorial & Publishing Operations",
             jmOfficeLocation: jmOfficeLocation || "Scholarly Open Headquarters (Mainz, Germany)",
-            jmDeskEmail: jmDeskEmail || "scholarlyopen@gmail.com",
+            jmDeskEmail: currentJmDeskEmail,
             profCountry: profCountry || "Germany",
             timestamp: Date.now()
           }))
@@ -5254,7 +5306,24 @@ export default function Editorial360Page() {
                           autoComplete="email"
                           required
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setEmail(val)
+                            const lower = val.trim().toLowerCase()
+                            if (lower.startsWith("manager@") || lower.includes("manager") || lower.includes("noor") || lower.includes("abbas") || lower.includes("jm@")) {
+                              if (role !== "jm") setRole("jm")
+                            } else if (lower.startsWith("admin@")) {
+                              if (role !== "admin") setRole("admin")
+                            } else if (lower.startsWith("im@") || lower.includes("integrity")) {
+                              if (role !== "im") setRole("im")
+                            } else if (lower.startsWith("editor@") || lower.includes("gong") || lower.includes("boakye") || lower.includes("kumar") || lower.includes("thorne")) {
+                              if (role !== "editor") setRole("editor")
+                            } else if (lower.startsWith("reviewer@") || lower.includes("olofinjana") || lower.includes("sun")) {
+                              if (role !== "reviewer") setRole("reviewer")
+                            } else if (lower.startsWith("author@") || lower.includes("sam.lee")) {
+                              if (role !== "author") setRole("author")
+                            }
+                          }}
                           className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-sky-500 transition-all"
                           placeholder={language === "de" ? "E-Mail-Adresse eingeben" : "Email address"}
                         />

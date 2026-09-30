@@ -1,6 +1,6 @@
-﻿"use client"
+"use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { 
   LayoutDashboard, 
@@ -844,8 +844,8 @@ export function JournalManagerWorkspace({
   const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>([])
   const [isSentHistoryLoaded, setIsSentHistoryLoaded] = useState(false)
 
-  // Load sent invitations: server first (shared), then merge local-only session records
-  useEffect(() => {
+  // Load sent invitations: server first (shared), then merge local-only session records and auto-sync
+  const fetchSentInvitations = useCallback(() => {
     const BLOCKED_IDS = new Set(["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"])
 
     fetch("/api/editorial360/sent-invitations")
@@ -873,6 +873,15 @@ export function JournalManagerWorkspace({
           !serverKeys.has(`${(l.recipientEmail || '').toLowerCase()}::${l.subject}`)
         )
 
+        // If this client has local items not yet in the cloud, push them to Supabase now
+        if (localOnly.length > 0) {
+          fetch("/api/editorial360/sent-invitations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(localOnly)
+          }).catch(() => {})
+        }
+
         const merged = [...serverItems, ...localOnly].sort((a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         )
@@ -899,6 +908,12 @@ export function JournalManagerWorkspace({
         setIsSentHistoryLoaded(true)
       })
   }, [])
+
+  useEffect(() => {
+    fetchSentInvitations()
+    const interval = setInterval(fetchSentInvitations, 12000)
+    return () => clearInterval(interval)
+  }, [fetchSentInvitations])
 
   // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 3,250/day across all 13 journals)
   const quotaInfo = useMemo(() => {
@@ -1066,12 +1081,13 @@ export function JournalManagerWorkspace({
       .catch(() => {})
   }, [])
 
-  // Automatically switch scoutSubTab to history when activeTab is "sent"
+  // Automatically switch scoutSubTab to history when activeTab is "sent" and refresh data
   useEffect(() => {
     if (activeTab === "sent") {
       setScoutSubTab("history")
+      fetchSentInvitations()
     }
-  }, [activeTab])
+  }, [activeTab, fetchSentInvitations])
 
   // Active Scout Candidates dynamically filtered against Sent History, Unsubscribed List, and Dismissed Candidates
   const activeScoutResults = useMemo(() => {

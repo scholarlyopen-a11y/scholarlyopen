@@ -33,9 +33,30 @@ export interface OnboardedEditorRecord {
   acceptedAt: string
 }
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const BUCKET = "editorial360_data"
+const FILE_PATH = "editorial-board-onboarding.json"
+
 const DATA_FILE_PATH = path.join(process.cwd(), "lib", "data", "editorial-board-onboarding.json")
 
-function getStoredEditors(): OnboardedEditorRecord[] {
+async function getStoredEditors(): Promise<OnboardedEditorRecord[]> {
+  // 1. Try Supabase Cloud Storage
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
+      cache: "no-store"
+    })
+    if (res.ok) {
+      const parsed = await res.json()
+      if (parsed && Array.isArray(parsed.onboardedEditors)) {
+        return parsed.onboardedEditors
+      }
+    }
+  } catch (e) {
+    console.warn("Supabase fetch editors warning:", e)
+  }
+
+  // 2. Fallback to local file
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const raw = fs.readFileSync(DATA_FILE_PATH, "utf-8")
@@ -50,7 +71,24 @@ function getStoredEditors(): OnboardedEditorRecord[] {
   return []
 }
 
-function saveStoredEditors(editors: OnboardedEditorRecord[]) {
+async function saveStoredEditors(editors: OnboardedEditorRecord[]) {
+  // 1. Save to Supabase Cloud Storage
+  try {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ onboardedEditors: editors, lastUpdated: new Date().toISOString() })
+    })
+  } catch (e) {
+    console.error("Supabase save editors error:", e)
+  }
+
+  // 2. Local fallback
   try {
     const dir = path.dirname(DATA_FILE_PATH)
     if (!fs.existsSync(dir)) {
@@ -58,7 +96,7 @@ function saveStoredEditors(editors: OnboardedEditorRecord[]) {
     }
     fs.writeFileSync(DATA_FILE_PATH, JSON.stringify({ onboardedEditors: editors }, null, 2), "utf-8")
   } catch (e) {
-    console.error("Error saving editorial-board-onboarding.json:", e)
+    // Non-fatal on Vercel
   }
 }
 
@@ -68,7 +106,7 @@ export async function GET(req: Request) {
     const email = searchParams.get("email")
     const journal = searchParams.get("journal")
 
-    let editors = getStoredEditors()
+    let editors = await getStoredEditors()
 
     if (email) {
       editors = editors.filter(e => e.email.toLowerCase() === email.toLowerCase())
@@ -114,7 +152,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Name and email are required" }, { status: 400 })
     }
 
-    const currentEditors = getStoredEditors()
+    const currentEditors = await getStoredEditors()
     const existingIndex = currentEditors.findIndex(e => e.email.toLowerCase() === email.toLowerCase())
 
     const newRecord: OnboardedEditorRecord = {
@@ -153,7 +191,7 @@ export async function POST(req: Request) {
       updatedEditors = [newRecord, ...currentEditors]
     }
 
-    saveStoredEditors(updatedEditors)
+    await saveStoredEditors(updatedEditors)
 
     return NextResponse.json({ success: true, record: newRecord })
   } catch (err: any) {
@@ -166,7 +204,7 @@ export async function PATCH(req: Request) {
     const body = await req.json()
     const { id, email, jmApproved, status } = body
 
-    const currentEditors = getStoredEditors()
+    const currentEditors = await getStoredEditors()
     const index = currentEditors.findIndex(e => (id && e.id === id) || (email && e.email.toLowerCase() === email.toLowerCase()))
 
     if (index < 0) {
@@ -181,7 +219,7 @@ export async function PATCH(req: Request) {
       currentEditors[index].status = status
     }
 
-    saveStoredEditors(currentEditors)
+    await saveStoredEditors(currentEditors)
     return NextResponse.json({ success: true, record: currentEditors[index] })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
@@ -198,14 +236,14 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ success: false, error: "ID or email required to delete" }, { status: 400 })
     }
 
-    let currentEditors = getStoredEditors()
+    let currentEditors = await getStoredEditors()
     currentEditors = currentEditors.filter(e => {
       if (id && e.id === id) return false
       if (email && e.email.toLowerCase() === email.toLowerCase()) return false
       return true
     })
 
-    saveStoredEditors(currentEditors)
+    await saveStoredEditors(currentEditors)
     return NextResponse.json({ success: true, remaining: currentEditors.length })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
