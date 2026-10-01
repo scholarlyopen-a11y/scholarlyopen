@@ -147,13 +147,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Name and email are required" }, { status: 400 })
     }
 
+    const cleanEmail = email.trim().toLowerCase()
+
+    // Integrity check: if candidate identity was disapproved by JM, deny registration
+    try {
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/disapproved-candidates.json?t=${Date.now()}`, { cache: "no-store" })
+      if (res.ok) {
+        const data = await res.json()
+        if (data && Array.isArray(data.disapproved)) {
+          const match = data.disapproved.find((d: any) => d.email && d.email.toLowerCase() === cleanEmail)
+          if (match) {
+            return NextResponse.json({
+              success: false,
+              error: "This applicant identity is currently flagged by the Journal Manager and cannot register an active account."
+            }, { status: 403 })
+          }
+        }
+      }
+    } catch (e) {}
+
     const currentUsers = await getStoredUsers()
-    const existingIndex = currentUsers.findIndex(u => u.email.toLowerCase() === email.toLowerCase())
+    const existingIndex = currentUsers.findIndex(u => u.email.toLowerCase() === cleanEmail)
 
     const newRecord: StoredUserRecord = {
       id: existingIndex >= 0 ? currentUsers[existingIndex].id : `USR-${Date.now().toString().slice(-4)}`,
       name: name.trim(),
-      email: email.trim().toLowerCase(),
+      email: cleanEmail,
       role,
       affiliation: affiliation.trim(),
       country: country.trim(),
@@ -174,6 +193,30 @@ export async function POST(req: Request) {
     await saveStoredUsers(updatedUsers)
 
     return NextResponse.json({ success: true, user: newRecord })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const email = searchParams.get("email")?.trim().toLowerCase()
+    const id = searchParams.get("id")
+
+    if (!email && !id) {
+      return NextResponse.json({ success: false, error: "Email or ID is required" }, { status: 400 })
+    }
+
+    let users = await getStoredUsers()
+    users = users.filter(u => {
+      if (email && u.email.toLowerCase() === email) return false
+      if (id && u.id === id) return false
+      return true
+    })
+
+    await saveStoredUsers(users)
+    return NextResponse.json({ success: true, total: users.length })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }

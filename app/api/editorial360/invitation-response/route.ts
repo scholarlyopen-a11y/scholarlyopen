@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic"
 import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
+import { getStoredDisapproved, saveStoredDisapproved, DisapprovedCandidateRecord } from "../disapproved-candidates/route"
 
 export interface InvitationResponseRecord {
   id: string
@@ -32,6 +33,8 @@ export interface InvitationResponseRecord {
   consentProfileUpload?: boolean
   status?: string
   jmApproved?: boolean
+  watchlistFlagged?: boolean
+  flagReason?: string
 }
 
 let responseStore: InvitationResponseRecord[] = [
@@ -338,23 +341,35 @@ export async function GET() {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json()
-    const { id, candidateEmail, email, jmApproved, status } = body
+    const { id, candidateEmail, email, jmApproved, status, action, reason, notes } = body
     const targetEmail = (candidateEmail || email || "").toLowerCase().trim()
 
     let responses = await getStoredResponses()
     let updated = false
+    let targetRecord: any = null
+
+    const isDisapproving = status === "Disapproved - Access Blocked" || status === "Rejected" || action === "disapprove" || (jmApproved === false && status === "Disapproved")
 
     responses = responses.map(r => {
       const matchEmail = targetEmail && r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail
       const matchId = id && r.id === id
       if (matchEmail || matchId) {
         updated = true
-        const nextApproved = jmApproved !== undefined ? jmApproved : !r.jmApproved
-        const nextStatus = status || (nextApproved ? (r.type === "reviewer_claim" ? "Active Referee" : "Active Handling Editor") : "Pending JM Approval")
+        targetRecord = r
+        let nextApproved = jmApproved !== undefined ? jmApproved : !r.jmApproved
+        let nextStatus = status || (nextApproved ? (r.type === "reviewer_claim" ? "Active Referee" : "Active Handling Editor") : "Pending JM Approval")
+
+        if (isDisapproving) {
+          nextApproved = false
+          nextStatus = "Disapproved - Access Blocked"
+        }
+
         return {
           ...r,
           jmApproved: nextApproved,
-          status: nextStatus
+          status: nextStatus,
+          watchlistFlagged: isDisapproving ? true : r.watchlistFlagged,
+          flagReason: isDisapproving ? (reason || "Disapproved by Journal Manager") : r.flagReason
         }
       }
       return r
@@ -363,7 +378,28 @@ export async function PATCH(req: Request) {
     if (updated) {
       await saveStoredResponses(responses)
       if (targetEmail) {
-        await updateReviewerInCloud(targetEmail, "", undefined, Boolean(jmApproved))
+        await updateReviewerInCloud(targetEmail, "", undefined, isDisapproving ? false : Boolean(jmApproved))
+      }
+
+      if (targetRecord && isDisapproving) {
+        const currentWatchlist = await getStoredDisapproved()
+        const filtered = currentWatchlist.filter(d => d.email.toLowerCase() !== targetRecord.candidateEmail.toLowerCase())
+        await saveStoredDisapproved([
+          {
+            id: `WATCH-${Date.now().toString().slice(-6)}`,
+            name: targetRecord.candidateName,
+            email: targetRecord.candidateEmail.toLowerCase(),
+            orcid: targetRecord.orcid,
+            institution: targetRecord.affiliation,
+            credentialId: targetRecord.credentialId,
+            disapprovedAt: new Date().toISOString(),
+            disapprovedBy: "Journal Manager",
+            status: "Disapproved",
+            reason: reason || "Disapproved by Journal Manager",
+            notes: notes || undefined
+          },
+          ...filtered
+        ])
       }
     }
 
@@ -377,17 +413,23 @@ export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get("id")
-    const email = searchParams.get("email")
+    const email = searchParams.get("email")?.toLowerCase().trim()
 
     if (!id && !email) {
       return NextResponse.json({ success: false, error: "ID or email required" }, { status: 400 })
     }
 
-    // Clean cloud responses
+    // Clean cloud responses & save to watchlist
     let responses = await getStoredResponses()
+    let removedRecord: any = null
+
     responses = responses.filter(r => {
-      if (id && r.id === id) return false
-      if (email && r.candidateEmail && r.candidateEmail.toLowerCase() === email.toLowerCase()) return false
+      const matchId = id && r.id === id
+      const matchEmail = email && r.candidateEmail && r.candidateEmail.toLowerCase() === email
+      if (matchId || matchEmail) {
+        removedRecord = r
+        return false
+      }
       return true
     })
     await saveStoredResponses(responses)
@@ -395,7 +437,7 @@ export async function DELETE(req: Request) {
     // Clean editors
     const editors = (await getStoredEditors()).filter(e => {
       if (id && e.id === id) return false
-      if (email && e.email && e.email.toLowerCase() === email.toLowerCase()) return false
+      if (email && e.email && e.email.toLowerCase() === email) return false
       return true
     })
     await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${EDITORS_FILE}`, {
@@ -408,6 +450,30 @@ export async function DELETE(req: Request) {
       },
       body: JSON.stringify({ onboardedEditors: editors, lastUpdated: new Date().toISOString() })
     })
+
+    // Retain purged candidate on integrity watchlist so future attempts are caught
+    if (removedRecord && removedRecord.candidateEmail) {
+      const currentWatchlist = await getStoredDisapproved()
+      const exists = currentWatchlist.some(w => w.email.toLowerCase() === removedRecord.candidateEmail.toLowerCase())
+      if (!exists) {
+        await saveStoredDisapproved([
+          {
+            id: `WATCH-${Date.now().toString().slice(-6)}`,
+            name: removedRecord.candidateName,
+            email: removedRecord.candidateEmail.toLowerCase(),
+            orcid: removedRecord.orcid,
+            institution: removedRecord.affiliation,
+            credentialId: removedRecord.credentialId,
+            disapprovedAt: new Date().toISOString(),
+            disapprovedBy: "Journal Manager",
+            status: "Purged / Watchlisted",
+            reason: "Purged from active onboarding desk by Journal Manager",
+            notes: "Automatic retention on integrity watchlist following record purge"
+          },
+          ...currentWatchlist
+        ])
+      }
+    }
 
     return NextResponse.json({ success: true })
   } catch (err: any) {
@@ -448,16 +514,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Name is required" }, { status: 400 })
     }
 
+    const cleanEmail = (candidateEmail || "").trim().toLowerCase()
+    const cleanOrcid = (orcid || "").trim()
+
+    const disapprovedList = await getStoredDisapproved()
+    const matchDisapproved = disapprovedList.find(d => 
+      (d.email && d.email.toLowerCase() === cleanEmail) || 
+      (cleanOrcid && d.orcid && d.orcid === cleanOrcid)
+    )
+
+    const initialStatus = matchDisapproved
+      ? "Disapproved - Access Blocked"
+      : (type === "reviewer_claim" ? "Pending JM Vetting" : "Pending JM Approval")
+
     const newRecord: InvitationResponseRecord = {
       id: `RESP-${Date.now().toString().slice(-4)}`,
       type,
       candidateName,
-      candidateEmail,
+      candidateEmail: cleanEmail,
       journal,
-      decision,
+      decision: matchDisapproved ? "no" : decision,
       credentialId,
       timestamp: new Date().toISOString(),
-      notes: notes || `Action logged via editorial360 invitation link (${type}: ${decision})`,
+      notes: matchDisapproved
+        ? "⚠️ INTEGRITY ALERT: Candidate on watchlist (Previously Disapproved by Journal Manager)."
+        : (notes || `Action logged via editorial360 invitation link (${type}: ${decision})`),
       affiliation,
       department,
       country,
@@ -466,13 +547,17 @@ export async function POST(req: Request) {
       cvFileName,
       cvFileSize,
       researchInterests: Array.isArray(researchInterests) ? researchInterests : [],
-      orcid,
+      orcid: cleanOrcid,
       googleScholar,
       researchGate,
       linkedin,
       publications: Array.isArray(publications) ? publications : [],
       hasAcceptedTerms: !!hasAcceptedTerms,
-      consentProfileUpload: !!consentProfileUpload
+      consentProfileUpload: !!consentProfileUpload,
+      status: initialStatus,
+      jmApproved: false,
+      watchlistFlagged: Boolean(matchDisapproved),
+      flagReason: matchDisapproved ? `Flagged on Integrity Watchlist: Previously Disapproved on ${new Date(matchDisapproved.disapprovedAt).toLocaleDateString()}` : undefined
     }
 
     responseStore = [newRecord, ...responseStore]

@@ -424,13 +424,15 @@ export function JournalManagerWorkspace({
   // Reviewer Registry & History Tracking States
   const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
   const [globalReviewerHistory, setGlobalReviewerHistory] = useState<ReviewerHistoryItem[]>([])
-  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr" | "gateway">("directory")
+  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr" | "gateway" | "watchlist">("directory")
   const [isLoadingPaperHistory, setIsLoadingPaperHistory] = useState(false)
 
   // Reviewer Gateway Tests & Onboarding State
   const [gatewayTests, setGatewayTests] = useState<any[]>([])
   const [gatewayResponses, setGatewayResponses] = useState<any[]>([])
+  const [disapprovedWatchlist, setDisapprovedWatchlist] = useState<any[]>([])
   const [isLoadingGateway, setIsLoadingGateway] = useState(false)
+  const [isLoadingWatchlist, setIsLoadingWatchlist] = useState(false)
   const [gatewaySearch, setGatewaySearch] = useState("")
   const [selectedCandidateDossier, setSelectedCandidateDossier] = useState<any | null>(null)
 
@@ -751,13 +753,91 @@ export function JournalManagerWorkspace({
     }
   }
 
+  const handleDisapproveCandidate = async (candidate: any) => {
+    const targetEmail = candidate.candidateEmail || candidate.email
+    const targetId = candidate.id
+    if (!targetEmail && !targetId) return
+
+    const scholarName = candidate.candidateName || candidate.name || "this candidate"
+    const confirmMsg = `Disapprove & Block ${scholarName}?\n\nThis will revoke all permissions, block access to editorial360, and record their identity in the persistent Journal Integrity Watchlist so any future attempts are automatically flagged.`
+    if (typeof window !== "undefined" && !window.confirm(confirmMsg)) {
+      return
+    }
+
+    try {
+      await Promise.all([
+        fetch("/api/editorial360/reviewer-tests", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            candidateEmail: targetEmail,
+            id: targetId,
+            action: "disapprove",
+            status: "Disapproved - Access Blocked",
+            jmApproved: false,
+            reason: "Identity unverified / Disapproved by Journal Manager"
+          })
+        }),
+        fetch("/api/editorial360/invitation-response", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: targetEmail,
+            candidateEmail: targetEmail,
+            id: targetId,
+            action: "disapprove",
+            status: "Disapproved - Access Blocked",
+            jmApproved: false,
+            reason: "Identity unverified / Disapproved by Journal Manager"
+          })
+        }),
+        fetch("/api/editorial360/disapproved-candidates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: scholarName,
+            email: targetEmail,
+            institution: candidate.institution || candidate.affiliation,
+            orcid: candidate.orcid,
+            credentialId: candidate.credentialId,
+            status: "Disapproved",
+            reason: "Disapproved by Journal Manager during onboarding review"
+          })
+        })
+      ])
+
+      setGatewayTests(prev => prev.map(t => {
+        if (targetEmail && t.candidateEmail && t.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) {
+          return { ...t, status: "Disapproved - Access Blocked", jmApproved: false, isFlagged: true }
+        }
+        return t
+      }))
+      setGatewayResponses(prev => prev.map(r => {
+        if (targetEmail && r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) {
+          return { ...r, status: "Disapproved - Access Blocked", jmApproved: false, watchlistFlagged: true }
+        }
+        return r
+      }))
+      if (selectedCandidateDossier && ((targetEmail && selectedCandidateDossier.candidateEmail?.toLowerCase() === targetEmail.toLowerCase()) || selectedCandidateDossier.id === targetId)) {
+        setSelectedCandidateDossier((prev: any) => prev ? {
+          ...prev,
+          status: "Disapproved - Access Blocked",
+          jmApproved: false,
+          watchlistFlagged: true
+        } : null)
+      }
+    } catch (e) {
+      console.error("Failed to disapprove candidate:", e)
+    }
+  }
+
   const handleDeleteCandidate = async (candidate: any) => {
     const targetEmail = candidate.candidateEmail || candidate.email
     const targetId = candidate.id
     if (!targetEmail && !targetId) return
 
     const scholarName = candidate.candidateName || candidate.name || "this candidate"
-    const confirmMsg = `Are you sure you want to permanently delete ${scholarName} from the database? This will completely purge their profile and credentials.`
+    const confirmMsg = `Are you sure you want to permanently delete ${scholarName} from the database? This will completely purge their profile and credentials while remembering their identity on the Integrity Watchlist.`
     if (typeof window !== "undefined" && !window.confirm(confirmMsg)) {
       return
     }
@@ -766,12 +846,19 @@ export function JournalManagerWorkspace({
       const query = targetEmail ? `email=${encodeURIComponent(targetEmail)}` : `id=${encodeURIComponent(targetId)}`
       await Promise.all([
         fetch(`/api/editorial360/editors?${query}`, { method: "DELETE" }),
-        fetch(`/api/editorial360/invitation-response?${query}`, { method: "DELETE" })
+        fetch(`/api/editorial360/invitation-response?${query}`, { method: "DELETE" }),
+        fetch(`/api/editorial360/reviewer-tests?${query}`, { method: "DELETE" }),
+        fetch(`/api/editorial360/users?${query}`, { method: "DELETE" })
       ])
 
       setGatewayResponses(prev => prev.filter(r => {
         if (targetEmail && r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) return false
         if (targetId && r.id === targetId) return false
+        return true
+      }))
+      setGatewayTests(prev => prev.filter(t => {
+        if (targetEmail && t.candidateEmail && t.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) return false
+        if (targetId && t.id === targetId) return false
         return true
       }))
 
@@ -790,6 +877,30 @@ export function JournalManagerWorkspace({
       }
     } catch (e) {
       console.error("Failed to delete candidate:", e)
+    }
+  }
+
+  const handleRemoveFromWatchlist = async (candidate: any) => {
+    const targetEmail = candidate.email || candidate.candidateEmail
+    const targetId = candidate.id
+    if (!targetEmail && !targetId) return
+
+    const scholarName = candidate.name || candidate.candidateName || targetEmail || "this candidate"
+    const confirmMsg = `Remove ${scholarName} from the Integrity Watchlist?\n\nThis will reinstate their eligibility for future applications or registrations.`
+    if (typeof window !== "undefined" && !window.confirm(confirmMsg)) {
+      return
+    }
+
+    try {
+      const query = targetEmail ? `email=${encodeURIComponent(targetEmail)}` : `id=${encodeURIComponent(targetId)}`
+      await fetch(`/api/editorial360/disapproved-candidates?${query}`, { method: "DELETE" })
+      setDisapprovedWatchlist(prev => prev.filter(w => {
+        if (targetEmail && w.email.toLowerCase() === targetEmail.toLowerCase()) return false
+        if (targetId && w.id === targetId) return false
+        return true
+      }))
+    } catch (e) {
+      console.error("Failed to remove from watchlist:", e)
     }
   }
 
@@ -857,14 +968,19 @@ export function JournalManagerWorkspace({
   const fetchGatewayData = async () => {
     setIsLoadingGateway(true)
     try {
-      const [testsRes, respRes, revsRes] = await Promise.all([
+      const [testsRes, respRes, revsRes, watchRes] = await Promise.all([
         fetch("/api/editorial360/reviewer-tests"),
         fetch("/api/editorial360/invitation-response"),
-        fetch("/api/editorial360/reviewers")
+        fetch("/api/editorial360/reviewers"),
+        fetch("/api/editorial360/disapproved-candidates")
       ])
       if (testsRes.ok) {
         const d = await testsRes.json()
         if (d.success && Array.isArray(d.tests)) setGatewayTests(d.tests)
+      }
+      if (watchRes.ok) {
+        const w = await watchRes.json()
+        if (w.success && Array.isArray(w.disapproved)) setDisapprovedWatchlist(w.disapproved)
       }
       if (respRes.ok) {
         const r = await respRes.json()
@@ -5063,6 +5179,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   ? "Early Career Researcher (ECR) Invitations" 
                   : reviewerRegistryTab === "gateway"
                   ? "Reviewer Gateway Onboarding & Assessments"
+                  : reviewerRegistryTab === "watchlist"
+                  ? "Journal Integrity Watchlist & Disapproved Directory"
                   : "Reviewer History"}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -5072,6 +5190,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   ? "Source and invite emerging scholars and preprint lead authors from bioRxiv, medRxiv, and arXiv."
                   : reviewerRegistryTab === "gateway"
                   ? "Scholars who completed the Reviewer Gateway qualification test (≥80%) and registered referee accounts."
+                  : reviewerRegistryTab === "watchlist"
+                  ? "Disapproved candidates and unverified entries remembered across the journal network for audit and prevention."
                   : "Complete dispatch, acceptance, and declination log across all journal desks."}
               </p>
             </div>
@@ -5123,6 +5243,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 >
                   <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
                   <span>ECR Invitations</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReviewerRegistryTab("watchlist")
+                    fetchGatewayData()
+                  }}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                    reviewerRegistryTab === "watchlist"
+                      ? "bg-white dark:bg-[#18191e] text-rose-600 dark:text-rose-400 shadow-xs font-bold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <ShieldAlert className="h-3.5 w-3.5 text-rose-500" />
+                  <span>Integrity Watchlist</span>
+                  {disapprovedWatchlist.length > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 font-bold">
+                      {disapprovedWatchlist.length}
+                    </span>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -5292,21 +5432,31 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </td>
                               <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${
-                                  test.status === "Passed - Account Active"
+                                  test.status === "Disapproved - Access Blocked" || test.status === "Rejected"
+                                    ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                                    : test.status === "Passed - Account Active"
                                     ? "bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30"
-                                    : test.status === "Passed - Pending Account"
+                                    : test.status === "Passed - Pending Account" || test.status === "Pending JM Approval"
                                     ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                                     : "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700"
                                 }`}>
                                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                    test.status === "Passed - Account Active"
+                                    test.status === "Disapproved - Access Blocked" || test.status === "Rejected"
+                                      ? "bg-rose-500"
+                                      : test.status === "Passed - Account Active"
                                       ? "bg-[#0b99ff]"
-                                      : test.status === "Passed - Pending Account"
+                                      : test.status === "Passed - Pending Account" || test.status === "Pending JM Approval"
                                       ? "bg-amber-500"
                                       : "bg-slate-400"
                                   }`} />
                                   {test.status}
                                 </span>
+                                {test.isFlagged && (
+                                  <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                                    <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" />
+                                    <span>Watchlist Match</span>
+                                  </div>
+                                )}
                               </td>
                               <td className="py-3.5 px-4 align-middle text-right text-slate-500 text-[11px] whitespace-nowrap">
                                 {test.date}
@@ -5334,6 +5484,25 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   >
                                     {test.status === "Passed - Account Active" || test.jmApproved ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />}
                                     <span>{test.status === "Passed - Account Active" || test.jmApproved ? "Approved" : "Approve"}</span>
+                                  </button>
+                                  {test.status !== "Disapproved - Access Blocked" && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDisapproveCandidate(test)}
+                                      title="Disapprove & Add to Integrity Watchlist"
+                                      className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-300 transition-all cursor-pointer shadow-2xs"
+                                    >
+                                      <XCircle className="h-3.5 w-3.5 text-rose-600" />
+                                      <span>Disapprove</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteCandidate(test)}
+                                    title="Delete Candidate & Purge from Desk"
+                                    className="inline-flex items-center p-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 border border-slate-200 dark:border-slate-700 hover:border-rose-300 transition-all cursor-pointer shadow-2xs"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
                                   </button>
                                 </div>
                               </td>
@@ -5418,7 +5587,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </span>
                               {resp.type !== "reviewer_claim" ? (
                                 <div className="text-[10px] font-semibold">
-                                  {resp.jmApproved ? (
+                                  {resp.status === "Disapproved - Access Blocked" ? (
+                                    <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                                      <XCircle className="w-3 h-3" /> Disapproved - Blocked
+                                    </span>
+                                  ) : resp.jmApproved ? (
                                     <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                       <CheckCircle2 className="w-3 h-3" /> Live on Masthead
                                     </span>
@@ -5427,10 +5600,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                       <Clock className="w-3 h-3" /> Pending JM Approval
                                     </span>
                                   )}
+                                  {resp.watchlistFlagged && (
+                                    <div className="text-[10px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1 mt-0.5">
+                                      <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" /> Watchlist Match
+                                    </div>
+                                  )}
                                 </div>
                               ) : (
                                 <div className="text-[10px] font-semibold">
-                                  {resp.jmApproved ? (
+                                  {resp.status === "Disapproved - Access Blocked" ? (
+                                    <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                                      <XCircle className="w-3 h-3" /> Disapproved - Blocked
+                                    </span>
+                                  ) : resp.jmApproved ? (
                                     <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                       <CheckCircle2 className="w-3 h-3" /> Approved Referee
                                     </span>
@@ -5438,6 +5620,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
                                       <Clock className="w-3 h-3" /> Pending JM Vetting
                                     </span>
+                                  )}
+                                  {resp.watchlistFlagged && (
+                                    <div className="text-[10px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1 mt-0.5">
+                                      <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" /> Watchlist Match
+                                    </div>
                                   )}
                                 </div>
                               )}
@@ -5475,6 +5662,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 {resp.jmApproved ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />}
                                 <span>{resp.jmApproved ? "Approved" : "Approve"}</span>
                               </button>
+                              {resp.status !== "Disapproved - Access Blocked" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDisapproveCandidate(resp)}
+                                  title="Disapprove & Add to Integrity Watchlist"
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-300 transition-all cursor-pointer shadow-2xs"
+                                >
+                                  <XCircle className="h-3.5 w-3.5 text-rose-600" />
+                                  <span>Disapprove</span>
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => handleDeleteCandidate(resp)}
@@ -5490,6 +5688,111 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : reviewerRegistryTab === "watchlist" ? (
+            <div className="p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/20">
+                    <ShieldAlert className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                      Journal Integrity & Identity Watchlist ({disapprovedWatchlist.length})
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Candidates, applicant identities, and unverified credentials recorded for prevention. Future registrations or applications matching these identities are automatically blocked and flagged for Journal Manager review.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={fetchGatewayData}
+                  className="text-xs font-semibold h-8 rounded-lg shrink-0 border-rose-300 text-rose-700 dark:text-rose-300 hover:bg-rose-100/50 cursor-pointer"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                  <span>Refresh Cloud Sync</span>
+                </Button>
+              </div>
+
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418] shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs font-sans">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 text-slate-500 font-semibold">
+                        <th className="py-3 px-4">Watchlisted Individual</th>
+                        <th className="py-3 px-4">Affiliation / ORCID</th>
+                        <th className="py-3 px-4">Disapproval Reason</th>
+                        <th className="py-3 px-4">Status & Flag</th>
+                        <th className="py-3 px-4 text-right">Disapproved Date</th>
+                        <th className="py-3 px-4 text-center">Governance Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {disapprovedWatchlist.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center text-slate-400">
+                            <ShieldCheck className="h-8 w-8 text-emerald-500 mx-auto mb-2 opacity-50" />
+                            <p className="font-semibold text-slate-600 dark:text-slate-300">No Disapproved Entries on Watchlist</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">Any candidate disapproved or purged by the Journal Manager will appear here permanently.</p>
+                          </td>
+                        </tr>
+                      ) : (
+                        disapprovedWatchlist.map((item: any) => (
+                          <tr key={item.id || item.email} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                            <td className="py-3.5 px-4 align-middle">
+                              <div className="font-bold text-slate-900 dark:text-white">{item.name}</div>
+                              <div className="text-[11px] text-slate-500 font-mono mt-0.5">{item.email}</div>
+                              {item.credentialId && (
+                                <span className="inline-block mt-1 font-mono text-[10px] text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                                  {item.credentialId}
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 align-middle text-slate-600 dark:text-slate-400">
+                              <div>{item.institution || "Academic Institution (Unverified)"}</div>
+                              {item.orcid && (
+                                <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+                                  ORCID: {item.orcid}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 align-middle">
+                              <div className="text-slate-700 dark:text-slate-300 font-medium">
+                                {item.reason || "Disapproved by Journal Manager"}
+                              </div>
+                              {item.notes && (
+                                <div className="text-[10px] text-slate-400 mt-0.5 italic">{item.notes}</div>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                {item.status || "Disapproved - Access Blocked"}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 align-middle text-right text-slate-400 text-[11px] whitespace-nowrap">
+                              {item.disapprovedAt ? new Date(item.disapprovedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recorded"}
+                            </td>
+                            <td className="py-3.5 px-4 align-middle text-center whitespace-nowrap">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRemoveFromWatchlist(item)}
+                                className="h-7 text-xs font-semibold border-slate-300 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 text-slate-600 dark:text-slate-300 rounded-lg cursor-pointer"
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                <span>Reinstate / Clear Flag</span>
+                              </Button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -10328,7 +10631,28 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 flex-wrap">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDeleteCandidate(selectedCandidateDossier)}
+                      className="text-xs font-bold h-8 px-3 rounded-lg border-rose-300 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      <span>Delete & Purge</span>
+                    </Button>
+                    {selectedCandidateDossier.status !== "Disapproved - Access Blocked" && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleDisapproveCandidate(selectedCandidateDossier)}
+                        className="text-xs font-bold h-8 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
+                      >
+                        <XCircle className="h-3.5 w-3.5 mr-1" />
+                        <span>Disapprove & Watchlist</span>
+                      </Button>
+                    )}
                     <Button
                       type="button"
                       size="sm"
