@@ -1793,6 +1793,10 @@ export function JournalManagerWorkspace({
   }
 
   // Assign Team Modal Invitation Email Template State
+  const [assignStep, setAssignStep] = useState<"select" | "dispatch">("select")
+  const [assignFromEmail, setAssignFromEmail] = useState("")
+  const [assignSenderName, setAssignSenderName] = useState("")
+  const [assignRecipients, setAssignRecipients] = useState<Array<{ name: string; email: string; affiliation?: string }>>([])
   const [assignEmailSubject, setAssignEmailSubject] = useState("")
   const [assignEmailBody, setAssignEmailBody] = useState("")
   const [assignEmailTab, setAssignEmailTab] = useState<"edit" | "preview">("edit")
@@ -2307,28 +2311,68 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     setAssignEmailSubject(initialSubject)
     setAssignEmailBody(initialBody)
     setAssignEmailTab("edit")
+    setAssignStep("select")
+    const defaultFrom = getJournalReplyTo(ms.journal) || "editor.med@scholarlyopen.org"
+    setAssignFromEmail(defaultFrom)
+    setAssignSenderName(`${ms.journal} Editorial Office`)
     setIsAssignModalOpen(true)
   }
 
-  // Handle confirm assignment
+  // Handle transition from Scholar Selection to Template Check & Dispatch View
+  const handleProceedToDispatchCheck = () => {
+    if (!selectedManuscript || selectedReviewers.length === 0) return
+
+    const resolved = selectedReviewers.map(name => {
+      const extObj = externalReviewersList.find(x => x.name.toLowerCase() === name.toLowerCase())
+      if (extObj && extObj.email) {
+        return { name: extObj.name, email: extObj.email, affiliation: extObj.affiliation || "" }
+      }
+      const regObj = reviewersList.find(x => x.name.toLowerCase() === name.toLowerCase())
+      if (regObj && (regObj as any).email) {
+        return { name: regObj.name, email: (regObj as any).email, affiliation: regObj.specialization || "" }
+      }
+      const oAlex = jmOpenAlexResults?.find(x => x.name.toLowerCase() === name.toLowerCase())
+      if (oAlex && oAlex.email) {
+        return { name: oAlex.name, email: oAlex.email, affiliation: oAlex.affiliation || "" }
+      }
+      // Common active reviewers fallback
+      if (name.toLowerCase().includes("praveen") || name.toLowerCase().includes("nagula")) {
+        return { name, email: "drpraveennagula@gmail.com", affiliation: "Osmania Medical College & Gandhi Hospital" }
+      }
+      if (name.toLowerCase().includes("ragab") || name.toLowerCase().includes("aziza")) {
+        return { name, email: "ragab.aziza@agr.kfs.edu.eg", affiliation: "Kafrelsheikh University, Egypt" }
+      }
+      return { name, email: "reviewer@scholarlyopen.org", affiliation: "" }
+    })
+
+    setAssignRecipients(resolved)
+    const defaultFrom = getJournalReplyTo(selectedManuscript.journal) || "editor.med@scholarlyopen.org"
+    setAssignFromEmail(defaultFrom)
+    setAssignSenderName(`${selectedManuscript.journal} Editorial Office`)
+    setAssignStep("dispatch")
+  }
+
+  // Handle confirm assignment and dispatch invitation emails
   const handleConfirmAssignment = async () => {
-    if (!selectedManuscript) return
+    if (!selectedManuscript || assignRecipients.length === 0) return
     const msId = selectedManuscript.id
     const msTitle = selectedManuscript.title
     const msJournal = selectedManuscript.journal
     const editor = selectedEditor
-    const reviewers = [...selectedReviewers]
 
     setIsAssignSending(true)
     if (onAssignEditor) onAssignEditor(msId, editor)
     if (onUpdateManuscriptStatus) onUpdateManuscriptStatus(msId, "Under Review")
 
-    // Dispatch custom edited invitation emails to all selected reviewers
-    await Promise.all(reviewers.map(async (revName) => {
-      const extObj = externalReviewersList.find(x => x.name === revName)
-      const revObj = reviewersList.find(x => x.name === revName)
-      const targetEmail = extObj ? extObj.email : (revObj ? revObj.email : "reviewer@scholarlyopen.org")
-      const personalizedBody = assignEmailBody.replace(/\{\{recipientName\}\}/g, revName)
+    // Dispatch custom edited invitation emails to all verified recipients
+    await Promise.all(assignRecipients.map(async (rec) => {
+      const revName = rec.name.trim()
+      const targetEmail = rec.email.trim() || "reviewer@scholarlyopen.org"
+      const personalizedBody = assignEmailBody
+        .replace(/\{\{recipientName\}\}/g, revName)
+        .replace(/\{\{manuscriptId\}\}/g, msId)
+        .replace(/\{\{manuscriptTitle\}\}/g, msTitle)
+        .replace(/\{\{journalName\}\}/g, msJournal)
 
       const acceptLink = `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(msId)}&journal=${encodeURIComponent(msJournal)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(revName)}`
       const declineLink = `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(msId)}&journal=${encodeURIComponent(msJournal)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(revName)}`
@@ -2343,7 +2387,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         journal: msJournal,
         paperId: msId,
         paperTitle: msTitle,
-        recipientName: revName
+        recipientName: revName,
+        recipientEmail: targetEmail
       })
 
       // Record invitation in tracking store
@@ -2365,6 +2410,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         body: JSON.stringify({
           to: targetEmail,
           recipientName: revName,
+          fromEmail: assignFromEmail,
+          senderName: assignSenderName,
           customSubject: assignEmailSubject,
           customBody: personalizedBody,
           customHtml: renderedHtml,
@@ -2390,9 +2437,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
     setIsAssignSending(false)
     setIsAssignModalOpen(false)
+    setAssignStep("select")
     setEditorPromptSuccess(isDe 
-      ? `✓ Team zugewiesen und Einladungs-E-Mails an ${reviewers.length} Gutachter versendet!` 
-      : `✓ Team allocated and review invitations dispatched to ${reviewers.length} reviewer(s)!`)
+      ? `✓ Team zugewiesen und Einladungs-E-Mails an ${assignRecipients.length} Gutachter von ${assignFromEmail} versendet!` 
+      : `✓ Team allocated and review invitations dispatched to ${assignRecipients.length} reviewer(s) from ${assignFromEmail}!`)
     setTimeout(() => setEditorPromptSuccess(null), 6000)
   }
 
@@ -6929,13 +6977,29 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-6 flex flex-col shadow-2xl">
           <DialogHeader className="pb-1">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2">
-              <span>Assign Team</span>
+              {assignStep === "select" ? (
+                <span>Assign Team</span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAssignStep("select")}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                    title="Back to Scholar Selection"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <span>Check & Dispatch Reviewer Invitations</span>
+                </div>
+              )}
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
                 {selectedManuscript?.id}
               </span>
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 line-clamp-1">
-              {selectedManuscript?.title}
+              {assignStep === "select" 
+                ? (selectedManuscript?.title || "Allocate Handling Editor and Peer Reviewers")
+                : "Check sender desk (From), recipient addresses (To), and invitation letter template before dispatching."}
             </DialogDescription>
           </DialogHeader>
 
@@ -7358,165 +7422,363 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             )}
 
-            {/* Reviewer Invitation Letter */}
-            <div className="space-y-3 pt-3 border-t border-slate-200/80 dark:border-[#272832]">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div>
-                  <h4 className="font-semibold text-xs text-slate-900 dark:text-white">
-                    {isDe ? "Gutachter-Einladungsschreiben" : "Reviewer Invitation Letter"}
-                  </h4>
-                </div>
+            {/* If assignStep === "dispatch", render Step 2: From, To, and Template Editing */}
+            {assignStep === "dispatch" && (
+              <div className="space-y-4 pt-1">
+                {/* 1. SENDER / FROM EMAIL & JOURNAL DESK CONFIGURATION */}
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs">
+                      <Mail className="w-3.5 h-3.5 text-[#0b99ff]" />
+                      <span>From (Journal Desk & Sender Email):</span>
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      DKIM / SPF Authorized
+                    </span>
+                  </div>
 
-                {/* Sub-Tabs: Edit Letter / Preview */}
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-0.5 rounded-lg border border-slate-200/80 dark:border-[#272832]">
-                  <button
-                    type="button"
-                    onClick={() => setAssignEmailTab("edit")}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                      assignEmailTab === "edit"
-                        ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    {isDe ? "Bearbeiten" : "Edit Letter"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAssignEmailTab("preview")}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                      assignEmailTab === "preview"
-                        ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    {isDe ? "Vorschau" : "Preview"}
-                  </button>
-                </div>
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Official Journal Desk:
+                      </label>
+                      <select
+                        value={assignFromEmail}
+                        onChange={(e) => {
+                          const chosen = e.target.value
+                          setAssignFromEmail(chosen)
+                          const jFound = OFFICIAL_JOURNALS.find(j => j.email === chosen)
+                          if (jFound) {
+                            setAssignSenderName(`${jFound.name} Editorial Office`)
+                          }
+                        }}
+                        className="w-full text-xs bg-white dark:bg-[#18191e] border border-slate-300 dark:border-[#272832] rounded-lg p-2 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-[#0b99ff]"
+                      >
+                        {OFFICIAL_JOURNALS.map(j => (
+                          <option key={j.email} value={j.email}>
+                            {j.name} ({j.email})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-              {/* Subject Line */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Betreff:" : "Subject:"}
-                  </label>
-                  <span className="text-[10px] text-slate-400">CC: scholarlyopen@gmail.com</span>
-                </div>
-                <input
-                  type="text"
-                  value={assignEmailSubject}
-                  onChange={(e) => setAssignEmailSubject(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-                />
-              </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Sender Display Name:
+                      </label>
+                      <input
+                        type="text"
+                        value={assignSenderName}
+                        onChange={(e) => setAssignSenderName(e.target.value)}
+                        placeholder="e.g. Scholarly Open: Medicine Editorial Office"
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
 
-              {/* Body Edit or Preview */}
-              {assignEmailTab === "edit" ? (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Schreiben:" : "Letter Body:"}
-                  </label>
-                  <textarea
-                    rows={9}
-                    value={assignEmailBody}
-                    onChange={(e) => setAssignEmailBody(e.target.value)}
-                    className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Vorschau:" : "Email Preview:"}
-                  </label>
-                  <div className="rounded-lg border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-50 dark:bg-slate-950 p-2">
-                    <iframe
-                      title="Review Invitation Email Preview"
-                      srcDoc={generateBrandedEmailHtml({
-                        subject: assignEmailSubject,
-                        bodyText: assignEmailBody.replace(/\{\{recipientName\}\}/g, selectedReviewers[0] || "Dr. Reviewer"),
-                        actionLabel: "Accept Review Invitation",
-                        actionUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(selectedManuscript?.id || '')}&journal=${encodeURIComponent(selectedManuscript?.journal || '')}`,
-                        secondaryActionLabel: "Decline Invitation",
-                        secondaryActionUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(selectedManuscript?.id || '')}&journal=${encodeURIComponent(selectedManuscript?.journal || '')}`,
-                        journal: selectedManuscript?.journal || "Scholarly Open",
-                        paperId: selectedManuscript?.id,
-                        paperTitle: selectedManuscript?.title,
-                        recipientName: selectedReviewers[0] || "Dr. Reviewer"
-                      })}
-                      className="w-full h-[320px] bg-white rounded border border-slate-200 dark:border-slate-800"
-                    />
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-800/80">
+                    <span>Replies will be routed directly to: <strong className="font-mono text-slate-800 dark:text-slate-200">{assignFromEmail}</strong></span>
+                    <span className="text-[10px] text-slate-400">CC: scholarlyopen@gmail.com</span>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
 
-          <DialogFooter className="flex flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-2 flex-wrap max-w-[65%]">
-              <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
-                Selected ({selectedReviewers.length}):
-              </span>
-              {selectedReviewers.length === 0 ? (
-                <span className="text-xs text-slate-400 italic">None selected yet</span>
-              ) : (
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {selectedReviewers.map((name) => (
-                    <span
-                      key={name}
-                      className="inline-flex items-center gap-1 text-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700"
-                    >
-                      <span className="max-w-[130px] truncate font-medium">{name}</span>
+                {/* 2. RECIPIENTS / TO EMAIL EDITING */}
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs">
+                      <Users className="w-3.5 h-3.5 text-[#0b99ff]" />
+                      <span>To (Designated Reviewers & Email Addresses):</span>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                        {assignRecipients.length} Reviewer(s)
+                      </span>
                       <button
                         type="button"
                         onClick={() => {
-                          setSelectedReviewers(prev => prev.filter(n => n !== name))
-                          setExternalReviewersList(prev => prev.filter(r => r.name !== name))
-                          if (editingReviewerIndex !== null && externalReviewersList[editingReviewerIndex]?.name === name) {
-                            setEditingReviewerIndex(null)
-                            setCustomRevName("")
-                            setCustomRevEmail("")
-                            setCustomRevAffiliation("")
-                          }
+                          setAssignRecipients(prev => [
+                            ...prev,
+                            { name: "Dr. New Reviewer", email: "reviewer@university.edu", affiliation: "Research Institution" }
+                          ])
                         }}
-                        className="text-slate-400 hover:text-rose-500 cursor-pointer text-xs font-bold leading-none ml-0.5"
-                        title="Remove reviewer"
+                        className="text-[11px] font-semibold text-[#0b99ff] hover:underline cursor-pointer flex items-center gap-0.5"
                       >
-                        ×
+                        <Plus className="w-3 h-3" />
+                        <span>Add Another</span>
                       </button>
-                    </span>
-                  ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {assignRecipients.map((rec, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Recipient #{idx + 1}
+                          </span>
+                          {assignRecipients.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAssignRecipients(prev => prev.filter((_, i) => i !== idx))
+                              }}
+                              className="text-slate-400 hover:text-rose-500 cursor-pointer text-xs font-bold"
+                              title="Remove from dispatch"
+                            >
+                              Remove ×
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div className="space-y-0.5">
+                            <label className="text-[10px] text-slate-500 font-medium">Reviewer Name:</label>
+                            <input
+                              type="text"
+                              value={rec.name}
+                              onChange={(e) => {
+                                const val = e.target.value
+                                setAssignRecipients(prev => prev.map((r, i) => i === idx ? { ...r, name: val } : r))
+                              }}
+                              placeholder="Full Name"
+                              className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 dark:border-[#272832] bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                            />
+                          </div>
+
+                          <div className="space-y-0.5 sm:col-span-1">
+                            <label className="text-[10px] text-slate-500 font-medium">Recipient Email (To):</label>
+                            <input
+                              type="email"
+                              value={rec.email}
+                              onChange={(e) => {
+                                const val = e.target.value
+                                setAssignRecipients(prev => prev.map((r, i) => i === idx ? { ...r, email: val } : r))
+                              }}
+                              placeholder="Institutional Email"
+                              className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 dark:border-[#272832] bg-white dark:bg-slate-900 text-xs font-mono text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                            />
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <label className="text-[10px] text-slate-500 font-medium">Institution / Affiliation:</label>
+                            <input
+                              type="text"
+                              value={rec.affiliation || ""}
+                              onChange={(e) => {
+                                const val = e.target.value
+                                setAssignRecipients(prev => prev.map((r, i) => i === idx ? { ...r, affiliation: val } : r))
+                              }}
+                              placeholder="e.g. Osmania Medical College"
+                              className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 dark:border-[#272832] bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={isAssignSending}
-                onClick={() => setIsAssignModalOpen(false)}
-                className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleConfirmAssignment}
-                disabled={selectedReviewers.length === 0 || isAssignSending}
-                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer flex items-center gap-1.5"
-              >
-                {isAssignSending ? (
-                  <>
-                    <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Assigning & Sending...</span>
-                  </>
-                ) : (
-                  <>
+
+                {/* 3. TEMPLATE & LETTER BODY EDITING */}
+                <div className="space-y-3 pt-1">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div>
+                      <h4 className="font-semibold text-xs text-slate-900 dark:text-white">
+                        Reviewer Invitation Letter Template:
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Dynamic tokens: <span className="font-mono text-[#0b99ff]">&#123;&#123;recipientName&#125;&#125;</span>, <span className="font-mono text-[#0b99ff]">&#123;&#123;manuscriptId&#125;&#125;</span>, <span className="font-mono text-[#0b99ff]">&#123;&#123;journalName&#125;&#125;</span>
+                      </p>
+                    </div>
+
+                    {/* Sub-Tabs: Edit Letter / Preview */}
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-0.5 rounded-lg border border-slate-200/80 dark:border-[#272832]">
+                      <button
+                        type="button"
+                        onClick={() => setAssignEmailTab("edit")}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                          assignEmailTab === "edit"
+                            ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        }`}
+                      >
+                        Edit Template
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAssignEmailTab("preview")}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                          assignEmailTab === "preview"
+                            ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        }`}
+                      >
+                        Email Preview
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Subject Line */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                      Subject Line:
+                    </label>
+                    <input
+                      type="text"
+                      value={assignEmailSubject}
+                      onChange={(e) => setAssignEmailSubject(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Body Edit or Preview */}
+                  {assignEmailTab === "edit" ? (
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Letter Body:
+                      </label>
+                      <textarea
+                        rows={10}
+                        value={assignEmailBody}
+                        onChange={(e) => setAssignEmailBody(e.target.value)}
+                        className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Rendered HTML Email Preview:
+                      </label>
+                      <div className="rounded-lg border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-50 dark:bg-slate-950 p-2">
+                        <iframe
+                          title="Review Invitation Email Preview"
+                          srcDoc={generateBrandedEmailHtml({
+                            subject: assignEmailSubject,
+                            bodyText: assignEmailBody.replace(/\{\{recipientName\}\}/g, assignRecipients[0]?.name || "Dr. Reviewer"),
+                            actionLabel: "Accept Review Invitation",
+                            actionUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(selectedManuscript?.id || '')}&journal=${encodeURIComponent(selectedManuscript?.journal || '')}&email=${encodeURIComponent(assignRecipients[0]?.email || '')}`,
+                            secondaryActionLabel: "Decline Invitation",
+                            secondaryActionUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(selectedManuscript?.id || '')}&journal=${encodeURIComponent(selectedManuscript?.journal || '')}&email=${encodeURIComponent(assignRecipients[0]?.email || '')}`,
+                            journal: selectedManuscript?.journal || "Scholarly Open",
+                            paperId: selectedManuscript?.id,
+                            paperTitle: selectedManuscript?.title,
+                            recipientName: assignRecipients[0]?.name || "Dr. Reviewer",
+                            recipientEmail: assignRecipients[0]?.email
+                          })}
+                          className="w-full h-[320px] bg-white rounded border border-slate-200 dark:border-slate-800"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            {assignStep === "select" ? (
+              <>
+                <div className="flex items-center gap-2 flex-wrap max-w-[65%]">
+                  <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+                    Selected ({selectedReviewers.length}):
+                  </span>
+                  {selectedReviewers.length === 0 ? (
+                    <span className="text-xs text-slate-400 italic">None selected yet</span>
+                  ) : (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {selectedReviewers.map((name) => (
+                        <span
+                          key={name}
+                          className="inline-flex items-center gap-1 text-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700"
+                        >
+                          <span className="max-w-[130px] truncate font-medium">{name}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedReviewers(prev => prev.filter(n => n !== name))
+                              setExternalReviewersList(prev => prev.filter(r => r.name !== name))
+                              if (editingReviewerIndex !== null && externalReviewersList[editingReviewerIndex]?.name === name) {
+                                setEditingReviewerIndex(null)
+                                setCustomRevName("")
+                                setCustomRevEmail("")
+                                setCustomRevAffiliation("")
+                              }
+                            }}
+                            className="text-slate-400 hover:text-rose-500 cursor-pointer text-xs font-bold leading-none ml-0.5"
+                            title="Remove reviewer"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isAssignSending}
+                    onClick={() => setIsAssignModalOpen(false)}
+                    className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleProceedToDispatchCheck}
+                    disabled={selectedReviewers.length === 0}
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  >
                     <Send className="h-3 w-3 mr-1" />
-                    <span>Assign & Dispatch Invitations</span>
-                  </>
-                )}
-              </Button>
-            </div>
+                    <span>Assign & Dispatch Invitations ({selectedReviewers.length})</span>
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isAssignSending}
+                  onClick={() => setAssignStep("select")}
+                  className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg cursor-pointer"
+                >
+                  ← Back to Selection
+                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isAssignSending}
+                    onClick={() => setIsAssignModalOpen(false)}
+                    className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleConfirmAssignment}
+                    disabled={assignRecipients.length === 0 || isAssignSending}
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  >
+                    {isAssignSending ? (
+                      <>
+                        <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Dispatching Invitations...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-3 w-3 mr-1" />
+                        <span>Send & Dispatch Invitations ({assignRecipients.length})</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

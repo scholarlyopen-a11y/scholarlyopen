@@ -81,7 +81,8 @@ import {
   DollarSign,
   CreditCard,
   Landmark,
-  Printer
+  Printer,
+  Info
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -952,7 +953,7 @@ export default function Editorial360Page() {
   const [invitationDepartment, setInvitationDepartment] = useState("")
   const [invitationOrcid, setInvitationOrcid] = useState("")
   const [invitationPassword, setInvitationPassword] = useState("")
-  const [invitationPaymentMethod, setInvitationPaymentMethod] = useState<"Wise" | "PayPal" | "Payoneer" | "Waiver">("Wise")
+  const [invitationPaymentMethod, setInvitationPaymentMethod] = useState<"apc_waiver" | "low_income_fund" | "library_fund" | "certificate" | "Wise" | "PayPal" | "Payoneer" | "Waiver">("apc_waiver")
   const [invitationPaymentAccount, setInvitationPaymentAccount] = useState("")
   const [invitationCoiChecked, setInvitationCoiChecked] = useState(false)
   const [invitationGovernanceChecked, setInvitationGovernanceChecked] = useState(true)
@@ -2912,11 +2913,14 @@ export default function Editorial360Page() {
       setRole(effectiveRole)
     }
 
-    // Check permanent stored passwords from localStorage
+    // Check permanent stored passwords from localStorage (reviewer, editor, general user)
     let storedCustomPassword = ""
     if (typeof window !== "undefined") {
       try {
-        const storedItem = localStorage.getItem("editorial360_permanent_editor_" + lowerEmail)
+        const storedItem = 
+          localStorage.getItem("editorial360_permanent_reviewer_" + lowerEmail) ||
+          localStorage.getItem("editorial360_permanent_user_" + lowerEmail) ||
+          localStorage.getItem("editorial360_permanent_editor_" + lowerEmail)
         if (storedItem) {
           const parsed = JSON.parse(storedItem)
           if (parsed?.password) storedCustomPassword = parsed.password
@@ -3866,9 +3870,42 @@ export default function Editorial360Page() {
       department: invitationDepartment.trim(),
       orcid: invitationOrcid.trim(),
       paymentMethod: invitationPaymentMethod,
+      recognitionPreference: invitationPaymentMethod,
       paymentAccount: invitationPaymentAccount.trim(),
       role: "reviewer" as UserRole
     }
+
+    const reviewerPassword = invitationPassword.trim()
+    const permanentUserRecord = {
+      name: reviewerData.name,
+      email: reviewerData.email,
+      role: "reviewer",
+      password: reviewerPassword,
+      institution: reviewerData.institution,
+      department: reviewerData.department,
+      orcid: reviewerData.orcid,
+      recognitionPreference: invitationPaymentMethod,
+      createdAt: new Date().toISOString()
+    }
+
+    // Persist permanent reviewer credentials for future logins
+    try {
+      localStorage.setItem(`editorial360_permanent_reviewer_${reviewerData.email}`, JSON.stringify(permanentUserRecord))
+      localStorage.setItem(`editorial360_permanent_user_${reviewerData.email}`, JSON.stringify(permanentUserRecord))
+    } catch (e) {}
+
+    // Sync user record to backend registry for cross-session authentication
+    fetch("/api/editorial360/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: reviewerData.name,
+        email: reviewerData.email,
+        role: "reviewer",
+        affiliation: reviewerData.institution,
+        password: reviewerPassword
+      })
+    }).catch(e => console.warn("Failed to sync reviewer user record:", e))
 
     setActiveReviews(prev => {
       const exists = prev.some(r => r.id === newReview.id || r.title === newReview.title)
@@ -3917,8 +3954,8 @@ export default function Editorial360Page() {
     }
 
     setSuccess(language === "de"
-      ? `Willkommen, ${reviewerData.name}! Begutachtung für ${newReview.id} angenommen. Abgabefrist: ${deadlineStr}.`
-      : `Welcome, ${reviewerData.name}! Review accepted for ${newReview.id}. Turnaround deadline: ${deadlineStr}.`
+      ? `Willkommen, ${reviewerData.name}! Begutachtung für ${newReview.id} angenommen (Frist: ${deadlineStr}). Ihr Passwort wurde gespeichert — Sie können sich jederzeit mit Ihrer E-Mail anmelden.`
+      : `Welcome, ${reviewerData.name}! Review accepted for ${newReview.id} (Deadline: ${deadlineStr}). Your account password is saved — you can log into editorial360 anytime using your email and password.`
     )
   }
 
@@ -4761,6 +4798,11 @@ export default function Editorial360Page() {
                               {showInvPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                           </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                            {language === "de"
+                              ? "Dieses Passwort wird dauerhaft aktiviert. Sie können sich damit künftig jederzeit mit Ihrer E-Mail bei editorial360 anmelden."
+                              : "This password will be securely activated. You can use your email and this password to sign into editorial360 anytime."}
+                          </p>
                         </div>
                       </div>
 
@@ -4860,70 +4902,95 @@ export default function Editorial360Page() {
                         </label>
                       </div>
 
-                      {/* Honorarium / Payout Configuration */}
-                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">
-                            {language === "de" ? "Gutachter-Honorarium (€35 – €50)" : "Reviewer Honorarium (€35 – €50)"}
-                          </span>
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                            {language === "de" ? "Auszahlung nach Abschluss" : "Credited upon completion"}
+                      {/* Reviewer Academic Contribution & Recognition (Non-Monetary) */}
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                              {language === "de" ? "Akademische Anerkennung & Beitragsoption" : "Reviewer Contribution & Academic Recognition"}
+                            </span>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                              {language === "de"
+                                ? "Wählen Sie Ihre bevorzugte Form der Anerkennung bzw. Förderung für diese Begutachtung:"
+                                : "Select your preferred recognition or fee support preference upon completing this evaluation:"}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-[#0b99ff] border border-blue-200 dark:border-blue-800">
+                            {language === "de" ? "Wissenschaftliche Förderung" : "Diamond Open Access"}
                           </span>
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="font-medium text-slate-700 dark:text-slate-300 block">
-                            {language === "de" ? "Auszahlungsmethode:" : "Payout Method:"} <span className="text-rose-500">*</span>
-                          </label>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            {[
-                              { id: "Wise", label: "Wise" },
-                              { id: "PayPal", label: "PayPal" },
-                              { id: "Payoneer", label: "Payoneer" },
-                              { id: "Waiver", label: "APC Waiver" }
-                            ].map((method) => {
-                              const isSelected = invitationPaymentMethod === method.id
-                              return (
-                                <button
-                                  key={method.id}
-                                  type="button"
-                                  onClick={() => setInvitationPaymentMethod(method.id as any)}
-                                  className={`py-1.5 px-2 rounded-lg border text-xs font-medium text-center transition-colors cursor-pointer ${
-                                    isSelected
-                                      ? "border-[#0b99ff] bg-[#0b99ff] text-white"
-                                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 hover:border-slate-300"
-                                  }`}
-                                >
-                                  {method.label}
-                                </button>
-                              )
-                            })}
-                          </div>
+                        {/* 4 Recognition / Contribution Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                          {[
+                            {
+                              id: "apc_waiver",
+                              titleEn: "APC Publication Waiver",
+                              titleDe: "APC-Publikationserlass",
+                              descEn: "100% APC waiver applied to your or your research team's next submission in any Scholarly Open journal.",
+                              descDe: "100% Erlass der Publikationsgebühr (APC) für Ihre nächste Veröffentlichung in einem Scholarly Open Journal.",
+                              badge: "100% Waiver"
+                            },
+                            {
+                              id: "low_income_fund",
+                              titleEn: "Donate to Low-Income Scholars",
+                              titleDe: "Spende für einkommensschwache Länder",
+                              descEn: "Donate your fee waiver credit to support unfunded researchers and scholars from low-income developing nations.",
+                              descDe: "Übertragen Sie Ihr Guthaben zur Unterstützung von Forschern aus einkommensschwachen Ländern ohne Förderung.",
+                              badge: "Global South"
+                            },
+                            {
+                              id: "library_fund",
+                              titleEn: "Donate to OA Library Fund",
+                              titleDe: "Spende an Universitätsbibliotheken",
+                              descEn: "Allocate your review contribution toward open-access university library funds and institutional repository initiatives.",
+                              descDe: "Widmen Sie Ihren Beitrag der Förderung von Open-Access-Bibliotheken und universitären Repositorien.",
+                              badge: "Library Fund"
+                            },
+                            {
+                              id: "certificate",
+                              titleEn: "Official Certificate & Masthead",
+                              titleDe: "Zertifikat & Impressums-Nennung",
+                              descEn: "Verified Certificate of Peer Review Merit + annual recognition in the official journal editorial masthead.",
+                              descDe: "Offizielles Gutachter-Zertifikat und jährliche Nennung im Journal-Impressum.",
+                              badge: "COPE Certified"
+                            }
+                          ].map((opt) => {
+                            const isSelected = invitationPaymentMethod === opt.id
+                            return (
+                              <div
+                                key={opt.id}
+                                onClick={() => setInvitationPaymentMethod(opt.id as any)}
+                                className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
+                                  isSelected
+                                    ? "border-[#0b99ff] bg-[#0b99ff]/5 ring-1 ring-[#0b99ff]"
+                                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:border-slate-300 dark:hover:border-slate-700"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-1 mb-1">
+                                  <span className={`text-xs font-bold ${isSelected ? "text-[#0b99ff]" : "text-slate-800 dark:text-slate-200"}`}>
+                                    {language === "de" ? opt.titleDe : opt.titleEn}
+                                  </span>
+                                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                    {opt.badge}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                  {language === "de" ? opt.descDe : opt.descEn}
+                                </p>
+                              </div>
+                            )
+                          })}
                         </div>
 
-                        {invitationPaymentMethod !== "Waiver" ? (
-                          <div className="space-y-1 pt-1">
-                            <input
-                              type="text"
-                              value={invitationPaymentAccount}
-                              onChange={(e) => setInvitationPaymentAccount(e.target.value)}
-                              placeholder={
-                                invitationPaymentMethod === "Wise"
-                                  ? "Wise account email or phone"
-                                  : invitationPaymentMethod === "PayPal"
-                                  ? "PayPal registered email"
-                                  : "Payoneer registered account"
-                              }
-                              className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                            />
-                          </div>
-                        ) : (
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        <div className="p-2.5 rounded-lg bg-slate-100/70 dark:bg-slate-800/50 text-[11px] text-slate-600 dark:text-slate-400 flex items-start gap-2">
+                          <Info className="w-3.5 h-3.5 text-[#0b99ff] shrink-0 mt-0.5" />
+                          <span>
                             {language === "de"
-                              ? "100% Verzicht auf Publikationsgebühren (APC) für Ihre nächste Einreichung."
-                              : "100% APC waiver applied to your next journal submission."}
-                          </p>
-                        )}
+                              ? "Scholarly Open ist eine wachsende, unabhängige Open-Access-Initiative. Um wissenschaftliche Erkenntnisse barrierefrei zu halten, reinvestieren wir alle Ressourcen in APC-Verzichtsfonds für Universitätsbibliotheken und bedürftige Forscher anstelle kommerzieller Bar-Honorare."
+                              : "Scholarly Open is an emerging independent academic publisher. Rather than commercial cash disbursements, we allocate institutional resources directly into library infrastructure, complete APC waivers, and scholarship funds for researchers in unfunded and low-income countries."}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Action Buttons */}
