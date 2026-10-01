@@ -1124,9 +1124,9 @@ export default function Editorial360Page() {
         if (urlName) {
           setRegName(urlName)
         }
-        setMode("register")
+        // Vetting Gate: Reviewer Gateway candidates are routed to login view with approval pending notice
+        setMode("login")
         setRole("reviewer")
-        setRegRole("reviewer")
 
         // Post claim to backend audit log & notify Journal Manager Desk
         fetch("/api/editorial360/invitation-response", {
@@ -1477,6 +1477,20 @@ export default function Editorial360Page() {
           }
         })
         .catch(err => console.warn("Could not fetch cloud manuscripts:", err))
+
+      // Load shared live peer reviews from Supabase (for remote multi-user sync)
+      fetch("/api/editorial360/reviews")
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.ok && Array.isArray(data.reviews) && data.reviews.length > 0) {
+            setReviews(prev => {
+              const cloudIds = new Set(data.reviews.map((r: any) => r.id))
+              const localOnly = prev.filter(r => !cloudIds.has(r.id))
+              return [...data.reviews, ...localOnly]
+            })
+          }
+        })
+        .catch(err => console.warn("Could not fetch cloud reviews:", err))
 
       // Load any author submissions persisted in browser storage (purging legacy fake mocks)
       try {
@@ -4071,13 +4085,22 @@ export default function Editorial360Page() {
         return updated
       })
 
+      // Sync review scorecard to Supabase database
+      fetch("/api/editorial360/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newReview)
+      }).catch(e => console.error("Cloud review scorecard sync failed:", e))
+
       // Update manuscript in manuscripts state to register the reviewer & review completion
+      let targetNextReviewers: string[] = []
       setManuscripts(prev => {
         const updated = prev.map(m => {
           if (m.id.toLowerCase() === paperId.toLowerCase()) {
             const currentReviewers = m.reviewers || []
             const hasRev = currentReviewers.some(r => r.toLowerCase().includes(activeReviewerName.toLowerCase()) || activeReviewerName.toLowerCase().includes(r.toLowerCase()))
             const nextReviewers = hasRev ? currentReviewers : [...currentReviewers, activeReviewerName]
+            targetNextReviewers = nextReviewers
             return {
               ...m,
               reviewers: nextReviewers,
@@ -4093,6 +4116,17 @@ export default function Editorial360Page() {
         } catch (e) {}
         return updated
       })
+
+      // Sync manuscript reviewers and stage to Supabase database
+      fetch("/api/editorial360/manuscripts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: paperId,
+          submission_stage: "Reviews In (Decision Pending)",
+          reviewers: targetNextReviewers
+        })
+      }).catch(e => console.error("Cloud manuscript reviewers sync failed:", e))
 
       // Send CrossDeskNotification so JM and Handling Editor immediately see the submitted review
       handleAddCrossDeskNotification({
@@ -4160,12 +4194,21 @@ export default function Editorial360Page() {
         return updated
       })
 
+      // Sync review comments to Supabase
+      fetch("/api/editorial360/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newReview)
+      }).catch(e => console.error("Cloud review feedback sync failed:", e))
+
+      let targetModalReviewers: string[] = []
       setManuscripts(prev => {
         const updated = prev.map(m => {
           if (m.id.toLowerCase() === paperId.toLowerCase()) {
             const currentReviewers = m.reviewers || []
             const hasRev = currentReviewers.some(r => r.toLowerCase().includes(activeReviewerName.toLowerCase()) || activeReviewerName.toLowerCase().includes(r.toLowerCase()))
             const nextReviewers = hasRev ? currentReviewers : [...currentReviewers, activeReviewerName]
+            targetModalReviewers = nextReviewers
             return {
               ...m,
               reviewers: nextReviewers,
@@ -4181,6 +4224,17 @@ export default function Editorial360Page() {
         } catch (e) {}
         return updated
       })
+
+      // Sync manuscript reviewers and stage to Supabase
+      fetch("/api/editorial360/manuscripts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: paperId,
+          submission_stage: "Reviews In (Decision Pending)",
+          reviewers: targetModalReviewers
+        })
+      }).catch(e => console.error("Cloud manuscript reviewers sync failed:", e))
       
       const newLog: ArchiveLog = {
         id: `LOG-${Math.floor(Math.random() * 100) + 200}`,
@@ -4220,6 +4274,17 @@ export default function Editorial360Page() {
       } catch (e) {}
       return updated
     })
+
+    // Sync released comments to Supabase
+    fetch("/api/editorial360/reviews", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: moderatingReviewId,
+        status: "Released",
+        sanitizedCommentsAuthor: modRedactdComments
+      })
+    }).catch(e => console.error("Cloud review release sync failed:", e))
 
     const revObj = reviews.find(r => r.id === moderatingReviewId)
     if (revObj) {
@@ -4273,6 +4338,17 @@ export default function Editorial360Page() {
           return m
         })
       )
+
+      // Sync integrity status to Supabase
+      fetch("/api/editorial360/manuscripts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: alert.paperId,
+          integrity_status: action === "escalate" ? "Flagged" : "Clean",
+          status: action === "clear" ? "Awaiting Initial Check" : undefined
+        })
+      }).catch(e => console.error("Cloud IM resolve sync failed:", e))
     }
     setIsForensicsOpen(false)
   }
@@ -4340,6 +4416,16 @@ export default function Editorial360Page() {
           return m
         })
       )
+
+      // Sync escalation flag to Supabase
+      fetch("/api/editorial360/manuscripts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: alert.paperId,
+          integrity_status: "Flagged"
+        })
+      }).catch(e => console.error("Cloud IM escalation sync failed:", e))
 
       handleAddCrossDeskNotification({
         paperId: alert.paperId,
@@ -5056,33 +5142,51 @@ export default function Editorial360Page() {
                     </div>
                   </div>
 
-                  {/* Real-time Notification Dispatch Confirmation */}
-                  <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 flex items-start gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-[#0b99ff] mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed">
-                      <strong>Automatic Desk Dispatch:</strong> The Journal Management Office (Noor F. · <span className="font-mono">info@scholarlyopen.org</span>) has received your confirmation. Your profile is recognized across the editorial network.
-                    </p>
-                  </div>
+                  {/* Real-time Notification Dispatch Confirmation / Vetting Alert */}
+                  {officialConfirmation.type === "reviewer_claim" ? (
+                    <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 flex items-start gap-2.5 text-left">
+                      <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                      <div className="text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed space-y-1">
+                        <p>
+                          <strong>Journal Manager Vetting Required:</strong> In accordance with COPE publishing standards and research integrity protocols, all reviewer dossiers undergo CV and institutional verification prior to editorial360 desk activation.
+                        </p>
+                        <p>
+                          Your assessment record and credentials are under review by the Journal Management Office (Noor F. · <span className="font-mono">info@scholarlyopen.org</span>). Once approved, you will receive an official activation invitation.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 flex items-start gap-2.5 text-left">
+                      <ShieldCheck className="w-4 h-4 text-[#0b99ff] mt-0.5 shrink-0" />
+                      <p className="text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed">
+                        <strong>Automatic Desk Dispatch:</strong> The Journal Management Office (Noor F. · <span className="font-mono">info@scholarlyopen.org</span>) has received your confirmation. Your profile is recognized across the editorial network.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Next Step Action Buttons */}
                   <div className="space-y-2.5 pt-2">
-                    <Button
-                      onClick={() => {
-                        const targetType = officialConfirmation.type
-                        setOfficialConfirmation(null)
-                        if (targetType === "reviewer_claim") {
-                          setMode("register")
-                          setRole("reviewer")
-                        } else {
+                    {officialConfirmation.type === "reviewer_claim" ? (
+                      <Button
+                        onClick={() => {
+                          setOfficialConfirmation(null)
                           setMode("login")
-                        }
-                      }}
-                      className="w-full bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold h-11 rounded-xl text-sm shadow-sm cursor-pointer"
-                    >
-                      {officialConfirmation.type === "reviewer_claim" 
-                        ? "Activate Account & Set Password" 
-                        : "Proceed to editorial360 Login"}
-                    </Button>
+                        }}
+                        className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-bold h-11 rounded-xl text-sm shadow-sm cursor-pointer"
+                      >
+                        Awaiting JM Clearance · Return to Sign In
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          setOfficialConfirmation(null)
+                          setMode("login")
+                        }}
+                        className="w-full bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold h-11 rounded-xl text-sm shadow-sm cursor-pointer"
+                      >
+                        Proceed to editorial360 Login
+                      </Button>
+                    )}
 
                     <Button
                       variant="outline"
@@ -5634,9 +5738,18 @@ export default function Editorial360Page() {
                               Reviewer Panel
                             </button>
                           </div>
-                          <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                            Handling Editors, Integrity Managers, and Journal Managers are onboarded via official invitation from the Editorial Office.
-                          </p>
+                          {regRole === "reviewer" ? (
+                            <div className="p-3 rounded-lg bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 flex items-start gap-2 text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed">
+                              <ShieldCheck className="w-4 h-4 text-[#0b99ff] mt-0.5 shrink-0" />
+                              <p>
+                                <strong>Vetting Protocol:</strong> Peer referees must complete the <Link href="/reviewer-gateway" className="underline font-bold text-[#0b99ff] hover:text-[#0088e0]">Reviewer Assessment Gateway</Link> with institutional affiliation, ORCID, and CV submission. Desks are activated following Journal Manager review.
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                              Handling Editors, Integrity Managers, and Journal Managers are onboarded via official invitation from the Editorial Office.
+                            </p>
+                          )}
                         </div>
                       )}
 
@@ -6998,6 +7111,18 @@ export default function Editorial360Page() {
                             localStorage.setItem("editorial360_reviews", JSON.stringify(finalReviews))
                           }
                         } catch (e) {}
+
+                        // Sync released review to Supabase
+                        fetch("/api/editorial360/reviews", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            id: revId,
+                            status: "Released",
+                            sanitizedCommentsAuthor: sanitizedText
+                          })
+                        }).catch(e => console.error("Cloud review release sync failed:", e))
+
                         return finalReviews
                       })
                     }}
@@ -7031,6 +7156,18 @@ export default function Editorial360Page() {
                             localStorage.setItem("editorial360_reviews", JSON.stringify(updated))
                           }
                         } catch (e) {}
+
+                        // Sync released review to Supabase
+                        fetch("/api/editorial360/reviews", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            id: revId,
+                            status: "Released",
+                            sanitizedCommentsAuthor: sanitizedText
+                          })
+                        }).catch(e => console.error("Cloud review release sync failed:", e))
+
                         return updated
                       })
                     }}
@@ -9782,10 +9919,20 @@ export default function Editorial360Page() {
                         if (actionType === "clear") {
                           setIntegrityAlerts(prev => prev.map(a => a.paperId === selectedCopePaperId ? { ...a, status: "Cleared" as any } : a))
                           setManuscripts(prev => prev.map(m => m.id === selectedCopePaperId ? { ...m, integrityStatus: "Clean" } : m))
+                          fetch("/api/editorial360/manuscripts", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: selectedCopePaperId, integrity_status: "Clean" })
+                          }).catch(e => console.error("Cloud COPE clear sync failed:", e))
                           setSuccess(`✓ Case resolved: Manuscript ${selectedCopePaperId} cleared of ethics flags and certified compliant.`)
                         } else if (actionType === "reject" || actionType === "escalate") {
                           setIntegrityAlerts(prev => prev.map(a => a.paperId === selectedCopePaperId ? { ...a, status: "Escalated" as any } : a))
                           setManuscripts(prev => prev.map(m => m.id === selectedCopePaperId ? { ...m, status: "Rejected", integrityStatus: "Flagged" } : m))
+                          fetch("/api/editorial360/manuscripts", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: selectedCopePaperId, status: "Rejected", integrity_status: "Flagged" })
+                          }).catch(e => console.error("Cloud COPE reject sync failed:", e))
                           setSuccess(`✓ Ethical Rejection executed: Manuscript ${selectedCopePaperId} rejected with institutional escalation.`)
                         } else {
                           setSuccess(`✓ Editorial notice dispatched for manuscript ${selectedCopePaperId}. Author given standard 14-day response window.`)

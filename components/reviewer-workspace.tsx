@@ -1177,6 +1177,13 @@ COPE & Plan S Certified Archive
         localStorage.setItem("editorial360_payout_requests", JSON.stringify(list))
       } catch (e) {}
 
+      // Sync payout request to Supabase
+      fetch("/api/editorial360/payouts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRequest)
+      }).catch(err => console.error("Cloud payout request sync failed:", err))
+
       setPayoutSuccessMsg(isDe 
         ? `Auszahlungsantrag (${ticketId}) eingereicht! Die Buchhaltung/Admin prüft und gibt die €50 frei.` 
         : `Disbursement request (${ticketId}) submitted! Managing Editor will review and release the €50 honorarium within 24–48 hours.`)

@@ -59,9 +59,28 @@ const globalReviewerHistory: ReviewerHistoryItem[] = [...DEFAULT_REVIEWER_HISTOR
 import fs from "fs"
 import path from "path"
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const BUCKET = "editorial360_data"
+const FILE_PATH = "reviewer-records.json"
 const RECORDS_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
 
-function getRegisteredReviewersFromDisk(): any[] {
+async function getRegisteredReviewers(): Promise<any[]> {
+  // 1. Try Supabase Cloud Storage
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
+      cache: "no-store"
+    })
+    if (res.ok) {
+      const parsed = await res.json()
+      if (parsed && Array.isArray(parsed.registeredReviewers)) {
+        return parsed.registeredReviewers
+      }
+    }
+  } catch (e) {
+    console.warn("Supabase fetch registeredReviewers warning:", e)
+  }
+
+  // 2. Fallback to local file
   try {
     if (fs.existsSync(RECORDS_FILE_PATH)) {
       const raw = fs.readFileSync(RECORDS_FILE_PATH, "utf-8")
@@ -96,7 +115,7 @@ export async function GET(req: Request) {
       results = results.filter(r => r.reviewerEmail.toLowerCase() === email.toLowerCase())
     }
 
-    const registeredReviewers = getRegisteredReviewersFromDisk()
+    const registeredReviewers = await getRegisteredReviewers()
 
     return NextResponse.json({ ok: true, history: results, registeredReviewers })
   } catch (error: any) {

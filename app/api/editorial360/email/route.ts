@@ -7,6 +7,11 @@ import nodemailer from "nodemailer"
 import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES } from "@/lib/email-templates"
 import { getJournalReplyTo, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const BUCKET = "editorial360_data"
+const SENT_FILE = "sent-invitations.json"
+
 interface EmailPayload {
   to: string
   subject?: string
@@ -214,15 +219,35 @@ export async function POST(req: Request) {
       messageId = info.messageId
     }
 
-    // Auto-record to sent-invitations.json so every outreach email is 100% permanently logged
+    // Auto-record to sent-invitations.json in Supabase Cloud Storage so every outreach email is 100% permanently logged
     try {
-      const sentFilePath = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
       let sentList: any[] = []
-      if (fs.existsSync(sentFilePath)) {
-        const raw = fs.readFileSync(sentFilePath, "utf-8")
-        const parsed = JSON.parse(raw)
-        sentList = Array.isArray(parsed.sentInvitations) ? parsed.sentInvitations : []
+
+      // 1. Fetch from Supabase Cloud Storage
+      try {
+        const cloudRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${SENT_FILE}?t=${Date.now()}`, {
+          cache: "no-store"
+        })
+        if (cloudRes.ok) {
+          const cloudData = await cloudRes.json()
+          if (cloudData && Array.isArray(cloudData.sentInvitations)) {
+            sentList = cloudData.sentInvitations
+          }
+        }
+      } catch (e) {
+        console.warn("Supabase fetch sent-invitations warning in email route:", e)
       }
+
+      // 2. Fallback to local file if empty
+      const sentFilePath = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
+      if (sentList.length === 0 && fs.existsSync(sentFilePath)) {
+        try {
+          const raw = fs.readFileSync(sentFilePath, "utf-8")
+          const parsed = JSON.parse(raw)
+          sentList = Array.isArray(parsed.sentInvitations) ? parsed.sentInvitations : []
+        } catch (e) {}
+      }
+
       const newSentItem = {
         id: `SENT-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 1000)}`,
         timestamp: new Date().toISOString(),
@@ -235,15 +260,39 @@ export async function POST(req: Request) {
         status: sentViaSmtp ? "Delivered" : "Simulated",
         messageId: messageId || undefined
       }
-      // Check if already logged within last 60 seconds for same recipient + subject to prevent duplicate entries
+
+      // Deduplicate within last 60 seconds
       const isDupe = sentList.some(s => 
         s.recipientEmail?.toLowerCase() === body.to.trim().toLowerCase() && 
         s.subject === finalSubject &&
         Math.abs(new Date(s.timestamp).getTime() - Date.now()) < 60000
       )
+
       if (!isDupe) {
         sentList.unshift(newSentItem)
-        fs.writeFileSync(sentFilePath, JSON.stringify({ sentInvitations: sentList }, null, 2), "utf-8")
+
+        // Save to Supabase Cloud Storage
+        try {
+          await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${SENT_FILE}`, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_SERVICE_KEY,
+              Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+              "Content-Type": "application/json",
+              "x-upsert": "true"
+            },
+            body: JSON.stringify({ sentInvitations: sentList, lastUpdated: new Date().toISOString() })
+          })
+        } catch (cloudSaveErr) {
+          console.error("Supabase save sent-invitations error in email route:", cloudSaveErr)
+        }
+
+        // Save locally
+        try {
+          const dir = path.dirname(sentFilePath)
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+          fs.writeFileSync(sentFilePath, JSON.stringify({ sentInvitations: sentList }, null, 2), "utf-8")
+        } catch (e) {}
       }
     } catch (saveErr) {
       console.warn("Could not auto-log to sent-invitations.json:", saveErr)

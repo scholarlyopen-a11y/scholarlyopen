@@ -30,6 +30,8 @@ export interface InvitationResponseRecord {
   publications?: any[]
   hasAcceptedTerms?: boolean
   consentProfileUpload?: boolean
+  status?: string
+  jmApproved?: boolean
 }
 
 let responseStore: InvitationResponseRecord[] = [
@@ -46,153 +48,283 @@ let responseStore: InvitationResponseRecord[] = [
   }
 ]
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const BUCKET = "editorial360_data"
+const RESPONSES_FILE = "invitation-responses.json"
+const EDITORS_FILE = "editorial-board-onboarding.json"
+const REVIEWERS_FILE = "reviewer-records.json"
+const SENT_FILE = "sent-invitations.json"
+
 const EDITORS_FILE_PATH = path.join(process.cwd(), "lib", "data", "editorial-board-onboarding.json")
 const REVIEWERS_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
 const SENT_FILE_PATH = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
+const LOCAL_RESPONSES_PATH = path.join(process.cwd(), "lib", "data", "invitation-responses.json")
 
-function updateSentInvitationStatus(candidateEmail: string, candidateName: string) {
+async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
+  // 1. Try Supabase Cloud Storage (primary)
   try {
-    if (fs.existsSync(SENT_FILE_PATH)) {
-      const raw = fs.readFileSync(SENT_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed.sentInvitations)) {
-        let matched = false
-        parsed.sentInvitations = parsed.sentInvitations.map((item: any) => {
-          const matchEmail = candidateEmail && item.recipientEmail && item.recipientEmail.toLowerCase() === candidateEmail.toLowerCase()
-          const cleanCandName = (candidateName || "").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().toLowerCase()
-          const cleanRecipName = (item.recipientName || "").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().toLowerCase()
-          const matchName = cleanCandName.length > 2 && (cleanCandName.includes(cleanRecipName) || cleanRecipName.includes(cleanCandName))
-
-          if (matchEmail || matchName) {
-            matched = true
-            return {
-              ...item,
-              status: "Accepted",
-              acceptedAt: new Date().toISOString()
-            }
-          }
-          return item
-        })
-        if (matched) {
-          fs.writeFileSync(SENT_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
-        }
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${RESPONSES_FILE}?t=${Date.now()}`, {
+      cache: "no-store"
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data && Array.isArray(data.responses)) {
+        return data.responses
       }
     }
   } catch (e) {
-    console.error("Error updating sent invitation status:", e)
+    console.warn("Supabase fetch invitation-responses warning:", e)
   }
+
+  // 2. Fallback to local file
+  try {
+    if (fs.existsSync(LOCAL_RESPONSES_PATH)) {
+      const raw = fs.readFileSync(LOCAL_RESPONSES_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      if (parsed && Array.isArray(parsed.responses)) {
+        return parsed.responses
+      }
+    }
+  } catch (e) {}
+
+  return responseStore
 }
 
-function saveEditorToDisk(editor: any) {
+async function saveStoredResponses(responses: InvitationResponseRecord[]): Promise<boolean> {
+  let ok = false
+  // 1. Save to Supabase Cloud Storage
   try {
-    let list: any[] = []
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${RESPONSES_FILE}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ responses, lastUpdated: new Date().toISOString() })
+    })
+    ok = res.ok
+  } catch (e) {
+    console.error("Supabase save invitation-responses error:", e)
+  }
+
+  // 2. Save locally for dev fallback
+  try {
+    const dir = path.dirname(LOCAL_RESPONSES_PATH)
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+    fs.writeFileSync(LOCAL_RESPONSES_PATH, JSON.stringify({ responses }, null, 2), "utf-8")
+  } catch (e) {}
+
+  return ok
+}
+
+async function getStoredEditors(): Promise<any[]> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${EDITORS_FILE}?t=${Date.now()}`, { cache: "no-store" })
+    if (res.ok) {
+      const parsed = await res.json()
+      if (parsed && Array.isArray(parsed.onboardedEditors)) return parsed.onboardedEditors
+    }
+  } catch (e) {}
+  try {
     if (fs.existsSync(EDITORS_FILE_PATH)) {
       const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
       const parsed = JSON.parse(raw)
-      list = Array.isArray(parsed.onboardedEditors) ? parsed.onboardedEditors : []
+      if (parsed && Array.isArray(parsed.onboardedEditors)) return parsed.onboardedEditors
     }
+  } catch (e) {}
+  return []
+}
+
+async function saveEditorToCloud(editor: any) {
+  try {
+    const list = await getStoredEditors()
     const idx = list.findIndex(e => e.email && editor.email && e.email.toLowerCase() === editor.email.toLowerCase())
     if (idx >= 0) {
       list[idx] = { ...list[idx], ...editor }
     } else {
       list.unshift(editor)
     }
-    fs.writeFileSync(EDITORS_FILE_PATH, JSON.stringify({ onboardedEditors: list }, null, 2), "utf-8")
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${EDITORS_FILE}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ onboardedEditors: list, lastUpdated: new Date().toISOString() })
+    })
+    try {
+      fs.writeFileSync(EDITORS_FILE_PATH, JSON.stringify({ onboardedEditors: list }, null, 2), "utf-8")
+    } catch {}
   } catch (e) {
-    console.error("Error saving editor to disk:", e)
+    console.error("Error saving editor to cloud:", e)
   }
 }
 
-function updateReviewerOnDisk(email: string, name: string, credId?: string) {
+async function updateSentInvitationStatus(candidateEmail: string, candidateName: string) {
   try {
-    if (fs.existsSync(REVIEWERS_FILE_PATH)) {
-      const raw = fs.readFileSync(REVIEWERS_FILE_PATH, "utf-8")
+    let sentList: any[] = []
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${SENT_FILE}?t=${Date.now()}`, { cache: "no-store" })
+    if (res.ok) {
+      const parsed = await res.json()
+      if (parsed && Array.isArray(parsed.sentInvitations)) sentList = parsed.sentInvitations
+    }
+    if (sentList.length === 0 && fs.existsSync(SENT_FILE_PATH)) {
+      const raw = fs.readFileSync(SENT_FILE_PATH, "utf-8")
       const parsed = JSON.parse(raw)
-      let changed = false
-      if (Array.isArray(parsed.tests)) {
-        parsed.tests = parsed.tests.map((t: any) => {
-          if (t.candidateEmail?.toLowerCase() === email.toLowerCase()) {
-            changed = true
-            return { ...t, status: "Passed - Account Active" }
-          }
-          return t
-        })
-      }
-      if (Array.isArray(parsed.registeredReviewers)) {
-        const existing = parsed.registeredReviewers.find((r: any) => r.email?.toLowerCase() === email.toLowerCase())
-        if (!existing && email) {
-          changed = true
-          parsed.registeredReviewers.unshift({
-            id: `REV-REG-${Date.now().toString().slice(-4)}`,
-            name,
-            email,
-            status: "Active",
-            activeTasks: 0,
-            maxTasks: 3,
-            matchScore: 95,
-            specialization: "Academic Peer Review",
-            discipline: "Sciences",
-            institution: "Academic Institution",
-            completedReviews: 0,
-            onTimeRate: 100,
-            credentialId: credId || "CERT-SO-2026-CLAIMED",
-            keywords: ["peer review", "academic research"]
-          })
+      if (parsed && Array.isArray(parsed.sentInvitations)) sentList = parsed.sentInvitations
+    }
+
+    let matched = false
+    sentList = sentList.map((item: any) => {
+      const matchEmail = candidateEmail && item.recipientEmail && item.recipientEmail.toLowerCase() === candidateEmail.toLowerCase()
+      const cleanCandName = (candidateName || "").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().toLowerCase()
+      const cleanRecipName = (item.recipientName || "").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().toLowerCase()
+      const matchName = cleanCandName.length > 2 && (cleanCandName.includes(cleanRecipName) || cleanRecipName.includes(cleanCandName))
+
+      if (matchEmail || matchName) {
+        matched = true
+        return {
+          ...item,
+          status: "Accepted",
+          acceptedAt: new Date().toISOString()
         }
       }
-      if (changed) {
-        fs.writeFileSync(REVIEWERS_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
-      }
+      return item
+    })
+
+    if (matched) {
+      await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${SENT_FILE}`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_SERVICE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        body: JSON.stringify({ sentInvitations: sentList, lastUpdated: new Date().toISOString() })
+      })
+      try {
+        fs.writeFileSync(SENT_FILE_PATH, JSON.stringify({ sentInvitations: sentList }, null, 2), "utf-8")
+      } catch {}
     }
   } catch (e) {
-    console.error("Error updating reviewer on disk:", e)
+    console.error("Error updating sent invitation status in cloud:", e)
+  }
+}
+
+async function updateReviewerInCloud(email: string, name: string, credId?: string, isApproved = false) {
+  try {
+    let recs: { tests: any[]; registeredReviewers: any[] } = { tests: [], registeredReviewers: [] }
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${REVIEWERS_FILE}?t=${Date.now()}`, { cache: "no-store" })
+    if (res.ok) {
+      const parsed = await res.json()
+      if (parsed) {
+        recs.tests = Array.isArray(parsed.tests) ? parsed.tests : []
+        recs.registeredReviewers = Array.isArray(parsed.registeredReviewers) ? parsed.registeredReviewers : []
+      }
+    }
+    if (recs.tests.length === 0 && fs.existsSync(REVIEWERS_FILE_PATH)) {
+      const raw = fs.readFileSync(REVIEWERS_FILE_PATH, "utf-8")
+      const parsed = JSON.parse(raw)
+      recs.tests = Array.isArray(parsed.tests) ? parsed.tests : []
+      recs.registeredReviewers = Array.isArray(parsed.registeredReviewers) ? parsed.registeredReviewers : []
+    }
+
+    let changed = false
+    recs.tests = recs.tests.map((t: any) => {
+      if (t.candidateEmail?.toLowerCase() === email.toLowerCase()) {
+        changed = true
+        return { ...t, status: isApproved ? "Passed - Account Active" : "Pending JM Approval", jmApproved: isApproved }
+      }
+      return t
+    })
+
+    if (isApproved) {
+      const existing = recs.registeredReviewers.find((r: any) => r.email?.toLowerCase() === email.toLowerCase())
+      if (!existing && email) {
+        changed = true
+        recs.registeredReviewers.unshift({
+          id: `REV-REG-${Date.now().toString().slice(-4)}`,
+          name,
+          email,
+          status: "Active",
+          activeTasks: 0,
+          maxTasks: 3,
+          matchScore: 95,
+          specialization: "Academic Peer Review",
+          discipline: "Sciences",
+          institution: "Academic Institution",
+          completedReviews: 0,
+          onTimeRate: 100,
+          credentialId: credId || "CERT-SO-2026-CLAIMED",
+          keywords: ["peer review", "academic research"]
+        })
+      }
+    }
+
+    if (changed) {
+      await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${REVIEWERS_FILE}`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_SERVICE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        body: JSON.stringify({ ...recs, lastUpdated: new Date().toISOString() })
+      })
+      try {
+        fs.writeFileSync(REVIEWERS_FILE_PATH, JSON.stringify(recs, null, 2), "utf-8")
+      } catch {}
+    }
+  } catch (e) {
+    console.error("Error updating reviewer in cloud:", e)
   }
 }
 
 export async function GET() {
-  let diskResponses: InvitationResponseRecord[] = []
-  try {
-    if (fs.existsSync(EDITORS_FILE_PATH)) {
-      const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed.onboardedEditors)) {
-        diskResponses = parsed.onboardedEditors.map((e: any) => ({
-          id: e.id || `RESP-${Date.now()}`,
-          type: (e.role && e.role.toLowerCase().includes("chief")) ? "eic" : (e.role && e.role.toLowerCase().includes("associate")) ? "ae" : "board",
-          candidateName: e.name,
-          candidateEmail: e.email,
-          journal: e.journal,
-          decision: "yes" as const,
-          credentialId: e.id,
-          timestamp: e.acceptedAt || new Date().toISOString(),
-          notes: "Editorial Board Member onboarded via verified portal",
-          affiliation: e.affiliation,
-          department: e.department,
-          country: e.country,
-          biography: e.biography,
-          photoUrl: e.photoUrl,
-          cvFileName: e.cvFileName,
-          cvFileSize: e.cvFileSize,
-          researchInterests: e.researchInterests,
-          orcid: e.orcid,
-          googleScholar: e.googleScholar,
-          linkedin: e.linkedin,
-          hasAcceptedTerms: e.hasAcceptedTerms,
-          consentProfileUpload: e.consentProfileUpload,
-          jmApproved: Boolean(e.jmApproved),
-          status: e.status || (e.jmApproved ? "Active Handling Editor" : "Pending JM Approval")
-        }))
-      }
-    }
-  } catch (err) {
-    console.error("Error reading disk onboarded editors in GET:", err)
-  }
+  const [cloudResponses, editors] = await Promise.all([
+    getStoredResponses(),
+    getStoredEditors()
+  ])
 
-  // Merge in-memory and disk records avoiding duplicates
-  const combined = [...diskResponses]
-  for (const resp of responseStore) {
-    if (!combined.some(c => (c.candidateEmail && resp.candidateEmail && c.candidateEmail.toLowerCase() === resp.candidateEmail.toLowerCase()) || c.id === resp.id)) {
-      combined.push(resp)
+  const editorResponses: InvitationResponseRecord[] = editors.map((e: any) => ({
+    id: e.id || `RESP-${Date.now()}`,
+    type: (e.role && e.role.toLowerCase().includes("chief")) ? "eic" : (e.role && e.role.toLowerCase().includes("associate")) ? "ae" : "board",
+    candidateName: e.name,
+    candidateEmail: e.email,
+    journal: e.journal,
+    decision: "yes" as const,
+    credentialId: e.id,
+    timestamp: e.acceptedAt || new Date().toISOString(),
+    notes: "Editorial Board Member onboarded via verified portal",
+    affiliation: e.affiliation,
+    department: e.department,
+    country: e.country,
+    biography: e.biography,
+    photoUrl: e.photoUrl,
+    cvFileName: e.cvFileName,
+    cvFileSize: e.cvFileSize,
+    researchInterests: e.researchInterests,
+    orcid: e.orcid,
+    googleScholar: e.googleScholar,
+    linkedin: e.linkedin,
+    hasAcceptedTerms: e.hasAcceptedTerms,
+    consentProfileUpload: e.consentProfileUpload,
+    jmApproved: Boolean(e.jmApproved),
+    status: e.status || (e.jmApproved ? "Active Handling Editor" : "Pending JM Approval")
+  }))
+
+  // Merge responses without duplicates
+  const combined = [...cloudResponses]
+  for (const er of editorResponses) {
+    if (!combined.some(c => (c.candidateEmail && er.candidateEmail && c.candidateEmail.toLowerCase() === er.candidateEmail.toLowerCase()) || c.id === er.id)) {
+      combined.push(er)
     }
   }
 
@@ -201,6 +333,44 @@ export async function GET() {
     responses: combined,
     total: combined.length
   })
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json()
+    const { id, candidateEmail, email, jmApproved, status } = body
+    const targetEmail = (candidateEmail || email || "").toLowerCase().trim()
+
+    let responses = await getStoredResponses()
+    let updated = false
+
+    responses = responses.map(r => {
+      const matchEmail = targetEmail && r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail
+      const matchId = id && r.id === id
+      if (matchEmail || matchId) {
+        updated = true
+        const nextApproved = jmApproved !== undefined ? jmApproved : !r.jmApproved
+        const nextStatus = status || (nextApproved ? (r.type === "reviewer_claim" ? "Active Referee" : "Active Handling Editor") : "Pending JM Approval")
+        return {
+          ...r,
+          jmApproved: nextApproved,
+          status: nextStatus
+        }
+      }
+      return r
+    })
+
+    if (updated) {
+      await saveStoredResponses(responses)
+      if (targetEmail) {
+        await updateReviewerInCloud(targetEmail, "", undefined, Boolean(jmApproved))
+      }
+    }
+
+    return NextResponse.json({ success: true, responses })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  }
 }
 
 export async function DELETE(req: Request) {
@@ -213,39 +383,31 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ success: false, error: "ID or email required" }, { status: 400 })
     }
 
-    // Clean in-memory
-    responseStore = responseStore.filter(r => {
+    // Clean cloud responses
+    let responses = await getStoredResponses()
+    responses = responses.filter(r => {
       if (id && r.id === id) return false
       if (email && r.candidateEmail && r.candidateEmail.toLowerCase() === email.toLowerCase()) return false
       return true
     })
+    await saveStoredResponses(responses)
 
-    // Clean disk
-    if (fs.existsSync(EDITORS_FILE_PATH)) {
-      const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed.onboardedEditors)) {
-        parsed.onboardedEditors = parsed.onboardedEditors.filter((e: any) => {
-          if (id && e.id === id) return false
-          if (email && e.email && e.email.toLowerCase() === email.toLowerCase()) return false
-          return true
-        })
-        fs.writeFileSync(EDITORS_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
-      }
-    }
-
-    if (fs.existsSync(REVIEWERS_FILE_PATH)) {
-      const raw = fs.readFileSync(REVIEWERS_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed.registeredReviewers)) {
-        parsed.registeredReviewers = parsed.registeredReviewers.filter((r: any) => {
-          if (id && r.id === id) return false
-          if (email && r.email && r.email.toLowerCase() === email.toLowerCase()) return false
-          return true
-        })
-        fs.writeFileSync(REVIEWERS_FILE_PATH, JSON.stringify(parsed, null, 2), "utf-8")
-      }
-    }
+    // Clean editors
+    const editors = (await getStoredEditors()).filter(e => {
+      if (id && e.id === id) return false
+      if (email && e.email && e.email.toLowerCase() === email.toLowerCase()) return false
+      return true
+    })
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${EDITORS_FILE}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ onboardedEditors: editors, lastUpdated: new Date().toISOString() })
+    })
 
     return NextResponse.json({ success: true })
   } catch (err: any) {
@@ -315,9 +477,21 @@ export async function POST(req: Request) {
 
     responseStore = [newRecord, ...responseStore]
 
-    // Persist editor onboarding data
+    // 1. Persist response in Supabase Cloud Storage
+    try {
+      const currentResponses = await getStoredResponses()
+      const filtered = currentResponses.filter(r => {
+        if (candidateEmail && r.candidateEmail && r.candidateEmail.toLowerCase() === candidateEmail.toLowerCase()) return false
+        return true
+      })
+      await saveStoredResponses([newRecord, ...filtered])
+    } catch (saveErr) {
+      console.error("Failed to save response to Supabase:", saveErr)
+    }
+
+    // 2. Persist editor onboarding data
     if (type === "board" || type === "ae" || type === "eic") {
-      saveEditorToDisk({
+      await saveEditorToCloud({
         id: `EBM-${Date.now().toString().slice(-4)}`,
         name: candidateName,
         email: candidateEmail,
@@ -344,12 +518,12 @@ export async function POST(req: Request) {
         jmApproved: false,
         acceptedAt: new Date().toISOString()
       })
-      updateSentInvitationStatus(candidateEmail, candidateName)
+      await updateSentInvitationStatus(candidateEmail, candidateName)
     }
 
-    // If reviewer claim, update reviewer on disk
+    // 3. If reviewer claim, update reviewer in Supabase
     if (type === "reviewer_claim" && candidateEmail) {
-      updateReviewerOnDisk(candidateEmail, candidateName, credentialId)
+      await updateReviewerInCloud(candidateEmail, candidateName, credentialId, false)
     }
 
     // Send email alert to Journal Manager Desk if SMTP is configured

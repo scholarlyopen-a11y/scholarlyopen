@@ -3,6 +3,11 @@ export const runtime = "nodejs"
 import nodemailer from "nodemailer"
 import { getJournalReplyTo, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const BUCKET = "editorial360_data"
+const SENT_FILE = "sent-invitations.json"
+
 function requiredEnv(name: string) {
   const value = process.env[name]
   if (!value) {
@@ -127,6 +132,49 @@ export async function POST(request: Request) {
       subject,
       text,
     })
+
+    // Also persist dispatched invitation to Supabase Cloud Storage
+    try {
+      let sentList: any[] = []
+      const cloudRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${SENT_FILE}?t=${Date.now()}`, {
+        cache: "no-store"
+      })
+      if (cloudRes.ok) {
+        const cloudData = await cloudRes.json()
+        if (cloudData && Array.isArray(cloudData.sentInvitations)) {
+          sentList = cloudData.sentInvitations
+        }
+      }
+
+      const newSent = {
+        id: `INV-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 1000)}`,
+        timestamp: new Date().toISOString(),
+        recipientName,
+        recipientEmail,
+        journal: journalName || "Scholarly Open",
+        campaignType: isReviewer ? "reviewer_invitation" : "editor_invitation",
+        subject,
+        body: text,
+        status: "Delivered",
+        manuscriptId,
+        manuscriptTitle
+      }
+
+      sentList.unshift(newSent)
+
+      await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${SENT_FILE}`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_SERVICE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        body: JSON.stringify({ sentInvitations: sentList, lastUpdated: new Date().toISOString() })
+      })
+    } catch (saveErr) {
+      console.warn("Could not save to sent-invitations in Supabase:", saveErr)
+    }
 
     return Response.json({ ok: true })
   } catch (err) {

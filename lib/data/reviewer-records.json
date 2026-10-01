@@ -1,6 +1,26 @@
 {
   "tests": [
     {
+      "id": "TEST-2026-2DFD",
+      "candidateName": "Palak Chitkara, Research Scholar",
+      "candidateEmail": "palak28chitkara@gmail.com",
+      "discipline": "general",
+      "institution": "Academic Institution (Unverified)",
+      "department": "Research Scholar",
+      "score": 85,
+      "totalQuestions": 10,
+      "passed": true,
+      "status": "Pending JM Approval",
+      "credentialId": "SO-REV-2026-2DFD47",
+      "date": "Sep 30, 2026",
+      "timestamp": "2026-09-30T20:29:39.000Z",
+      "orcid": "",
+      "notes": "Self-registered via Reviewer Gateway assessment. Flagged for JM institutional verification, CV, and ORCID check.",
+      "email": "palak28chitkara@gmail.com",
+      "name": "Palak Chitkara, Research Scholar",
+      "jmApproved": false
+    },
+    {
       "id": "TEST-2026-9142",
       "candidateName": "Prof. Bolutife Olofinjana",
       "candidateEmail": "b.olofinjana@oauife.edu.ng",
@@ -124,6 +144,20 @@
         "patient safety",
         "clinical operations"
       ]
+    },
+    {
+      "id": "REV-REG-PALAK",
+      "name": "Palak Chitkara, Research Scholar",
+      "email": "palak28chitkara@gmail.com",
+      "status": "Pending JM Approval",
+      "jmApproved": false,
+      "discipline": "general",
+      "score": 85,
+      "credentialId": "SO-REV-2026-2DFD47",
+      "institution": "Academic Institution (Unverified)",
+      "department": "Research Scholar",
+      "country": "International",
+      "registeredAt": "2026-09-30T20:29:39.000Z"
     }
   ]
 }

@@ -379,7 +379,14 @@ export default function ReviewerGatewayPage() {
   const [candidateName, setCandidateName] = useState("")
   const [candidateEmail, setCandidateEmail] = useState("")
   const [candidateAffiliation, setCandidateAffiliation] = useState("")
+  const [candidateDepartment, setCandidateDepartment] = useState("")
+  const [candidateOrcid, setCandidateOrcid] = useState("")
+  const [candidateKeywords, setCandidateKeywords] = useState("")
+  const [cvFileName, setCvFileName] = useState("")
+  const [cvFileSize, setCvFileSize] = useState("")
+  const [cvBase64, setCvBase64] = useState("")
   const [selectedDiscipline, setSelectedDiscipline] = useState("medicine")
+  const [formError, setFormError] = useState<string | null>(null)
   
   // Exam progress
   const [questions, setQuestions] = useState<Question[]>([])
@@ -393,10 +400,62 @@ export default function ReviewerGatewayPage() {
   const [tabSwitchCount, setTabSwitchCount] = useState(0)
   const [proctorAlert, setProctorAlert] = useState<string | null>(null)
 
+  // Handle CV file selection & base64 conversion
+  const handleCvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 12 * 1024 * 1024) {
+      setFormError("CV file size exceeds 12 MB limit. Please select a smaller document.")
+      return
+    }
+
+    const sizeFormatted = file.size > 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.round(file.size / 1024)} KB`
+
+    setCvFileName(file.name)
+    setCvFileSize(sizeFormatted)
+    setFormError(null)
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setCvBase64(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
   // Shuffle & pick 10 questions on start
   const startExam = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!candidateName.trim() || !candidateEmail.trim()) return
+    setFormError(null)
+
+    if (!candidateName.trim() || !candidateEmail.trim() || !candidateAffiliation.trim()) {
+      setFormError("Please provide your full legal academic name, institutional email, and university affiliation.")
+      return
+    }
+
+    if (!candidateDepartment.trim()) {
+      setFormError("Please enter your academic department, faculty, and current position.")
+      return
+    }
+
+    // Validate 16-digit ORCID format
+    const orcidClean = candidateOrcid.trim()
+    const orcidRegex = /^\d{4}-\d{4}-\d{4}-[\dX]{4}$/
+    if (!orcidClean) {
+      setFormError("ORCID iD is required for COPE publication integrity and reviewer attribution.")
+      return
+    }
+    if (!orcidRegex.test(orcidClean)) {
+      setFormError("Please enter a valid 16-digit ORCID iD in the format: 0000-0002-1825-0097")
+      return
+    }
+
+    if (!cvBase64) {
+      setFormError("Please upload your Curriculum Vitae (PDF or Word document). Institutional CV verification is mandatory before reviewer credentials are issued.")
+      return
+    }
 
     // Deterministic shuffle of the bank
     const shuffled = [...QUESTION_BANK].sort(() => 0.5 - Math.random())
@@ -544,23 +603,7 @@ export default function ReviewerGatewayPage() {
     const percentage = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0
     const isPassed = percentage >= 80
 
-    // Persist passed credential to localStorage for editorial360 sync
-    if (typeof window !== "undefined") {
-      if (isPassed) {
-        const record = {
-          name: candidateName || "Dr. Marcus Vance",
-          email: candidateEmail || "reviewer@scholarlyopen.org",
-          discipline: selectedDiscipline,
-          credentialId,
-          percentage,
-          passedAt: new Date().toISOString(),
-          reviewsDone: 0
-        }
-        localStorage.setItem("scholarlyopen_passed_reviewer_gateway", JSON.stringify(record))
-      }
-    }
-
-    // Server-side audit log for Admin tracking
+    // Server-side audit log for Admin tracking (persisted to Supabase)
     fetch("/api/editorial360/reviewer-tests", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -569,13 +612,44 @@ export default function ReviewerGatewayPage() {
         candidateEmail: candidateEmail || "candidate@university.edu",
         discipline: selectedDiscipline,
         institution: candidateAffiliation || "Academic Institution",
+        department: candidateDepartment || "",
+        orcid: candidateOrcid || "",
+        cvFileName,
+        cvFileSize,
+        cvBase64,
         score: percentage,
         totalQuestions: questions.length,
         passed: isPassed,
         credentialId: isPassed ? credentialId : undefined,
-        status: isPassed ? "Passed - Pending Account" : "Failed Threshold"
+        status: isPassed ? "Pending JM Approval" : "Failed Threshold"
       })
     }).catch(err => console.error("Failed to log reviewer test:", err))
+
+    // Submit formal application / claim to the Journal Manager Desk
+    if (isPassed) {
+      fetch("/api/editorial360/invitation-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "reviewer_claim",
+          candidateName,
+          candidateEmail,
+          journal: "Scholarly Open",
+          decision: "claimed",
+          credentialId,
+          affiliation: candidateAffiliation,
+          department: candidateDepartment,
+          orcid: candidateOrcid,
+          cvFileName,
+          cvFileSize,
+          cvBase64,
+          researchInterests: candidateKeywords ? candidateKeywords.split(",").map(k => k.trim()).filter(Boolean) : [selectedDiscipline],
+          status: "Pending JM Approval",
+          jmApproved: false,
+          notes: `Reviewer Gateway assessment completed (${percentage}%). Candidate submitted dossier for JM vetting.`
+        })
+      }).catch(err => console.error("Failed to record reviewer application:", err))
+    }
   }
 
   // Scoring
@@ -677,16 +751,31 @@ export default function ReviewerGatewayPage() {
               {/* Candidate Info Form */}
               <Card className="border-border shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">Candidate Details</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-[#0b99ff]" />
+                    <CardTitle className="text-xl">Candidate Vetting & Accreditation Dossier</CardTitle>
+                  </div>
                   <CardDescription className="text-xs">
-                    Please provide the exact name and credentials you wish to appear on your verified digital Certificate of Qualification.
+                    In compliance with COPE research integrity guidelines and Plan S standards, referee candidates must provide verified institutional affiliations, an ORCID iD, and an academic CV prior to assessment qualification.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  {formError && (
+                    <div className="mb-5 p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs flex items-start gap-2 animate-in fade-in">
+                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Verification Error: </strong>
+                        {formError}
+                      </div>
+                    </div>
+                  )}
+
                   <form onSubmit={startExam} className="space-y-5">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground">Full Academic Name & Title</label>
+                        <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                          <span>Full Academic Name & Title *</span>
+                        </label>
                         <input
                           type="text"
                           required
@@ -698,7 +787,9 @@ export default function ReviewerGatewayPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground">Academic Institutional Email</label>
+                        <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                          <span>Academic Institutional Email *</span>
+                        </label>
                         <input
                           type="email"
                           required
@@ -707,12 +798,13 @@ export default function ReviewerGatewayPage() {
                           placeholder="m.vance@university.edu"
                           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                         />
+                        <span className="text-[10px] text-muted-foreground">Free webmails (@gmail, @yahoo) require secondary institutional proof.</span>
                       </div>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground">Institution / Affiliation</label>
+                        <label className="text-xs font-semibold text-foreground">University / Institution *</label>
                         <input
                           type="text"
                           required
@@ -724,7 +816,43 @@ export default function ReviewerGatewayPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground">Primary Field of Expertise</label>
+                        <label className="text-xs font-semibold text-foreground">Department & Position *</label>
+                        <input
+                          type="text"
+                          required
+                          value={candidateDepartment}
+                          onChange={(e) => setCandidateDepartment(e.target.value)}
+                          placeholder="e.g., Dept. of Materials Science, Associate Professor"
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                          <span>Verified ORCID iD *</span>
+                          {candidateOrcid && /^\d{4}-\d{4}-\d{4}-[\dX]{4}$/.test(candidateOrcid.trim()) && (
+                            <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                              <CheckCircle2 className="h-3 w-3" /> Valid Format
+                            </span>
+                          )}
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            required
+                            value={candidateOrcid}
+                            onChange={(e) => setCandidateOrcid(e.target.value)}
+                            placeholder="0000-0002-1825-0097"
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">16-digit persistent digital identifier (https://orcid.org/...)</span>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-foreground">Primary Field of Expertise *</label>
                         <select
                           value={selectedDiscipline}
                           onChange={(e) => setSelectedDiscipline(e.target.value)}
@@ -743,13 +871,50 @@ export default function ReviewerGatewayPage() {
                       </div>
                     </div>
 
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-foreground">Research Keywords / Subspecialties *</label>
+                      <input
+                        type="text"
+                        required
+                        value={candidateKeywords}
+                        onChange={(e) => setCandidateKeywords(e.target.value)}
+                        placeholder="e.g., Nanostructured materials, thin films, electrochemistry, machine learning"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                      <span className="text-[10px] text-muted-foreground">Comma-separated terms used for automated COPE referee matching algorithms.</span>
+                    </div>
+
+                    {/* Mandatory Curriculum Vitae (CV) Upload */}
+                    <div className="space-y-2 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40">
+                      <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <FileText className="h-4 w-4 text-[#0b99ff]" />
+                          <span>Curriculum Vitae (CV) Upload * (Required for Institutional Vetting)</span>
+                        </span>
+                        {cvFileName && (
+                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
+                            Attached: {cvFileName} ({cvFileSize})
+                          </span>
+                        )}
+                      </label>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        To eliminate predatory referee entries and verify academic tenure, candidates must attach a recent CV detailing peer-reviewed publications and institutional appointments.
+                      </p>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleCvChange}
+                        className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#0b99ff] file:text-white hover:file:bg-[#0088e0] cursor-pointer"
+                      />
+                    </div>
+
                     <div className="p-4 rounded-lg bg-muted/40 border border-border text-xs text-muted-foreground leading-relaxed">
-                      By proceeding, you attest that you will complete this assessment independently without unauthorized proxy participation, adhering to COPE ethical tenets.
+                      <strong>Governance Notice:</strong> By proceeding, you attest that you will complete this assessment independently. Passing this assessment qualifies your application for <strong>Journal Manager review & approval</strong>. Accounts and referee privileges are not activated until credential verification is complete.
                     </div>
 
                     <div className="flex justify-end pt-2">
-                      <Button type="submit" size="lg" className="font-semibold text-sm gap-2 cursor-pointer">
-                        Begin 15-Minute Assessment <ArrowRight className="h-4 w-4" />
+                      <Button type="submit" size="lg" className="font-semibold text-sm gap-2 cursor-pointer bg-[#0b99ff] hover:bg-[#0088e0] text-white">
+                        Submit Dossier & Begin Assessment <ArrowRight className="h-4 w-4" />
                       </Button>
                     </div>
                   </form>
@@ -984,25 +1149,31 @@ export default function ReviewerGatewayPage() {
               {scoreStats.passed && (
                 <div className="space-y-5">
                   
-                  {/* Account Creation Security Gate Callout */}
-                  <div className="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in">
-                    <div className="space-y-1">
+                  {/* Journal Manager Vetting Gate Callout */}
+                  <div className="p-6 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-5 animate-in fade-in">
+                    <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <ShieldCheck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
                         <h4 className="font-bold text-sm text-amber-900 dark:text-amber-200">
-                          Step 2 Required: Activate Account on editorial360 to Unlock Official Certificate
+                          Assessment Passed ({scoreStats.percentage}%) — Application Under Journal Manager Vetting
                         </h4>
                       </div>
                       <p className="text-xs text-amber-800/80 dark:text-amber-300/80 max-w-2xl leading-relaxed">
-                        To protect credential authenticity and prevent fraudulent use, official downloadable certificates and peer-review matching status are issued directly within your verified editorial360 Reviewer Account.
+                        In strict accordance with COPE research integrity guidelines and Plan S governance, referee accounts are <strong>never activated automatically</strong>. Your complete accreditation dossier (Institution: <strong>{candidateAffiliation}</strong>, Department: <strong>{candidateDepartment}</strong>, ORCID: <strong>{candidateOrcid || "Pending"}</strong>, and Uploaded CV: <strong>{cvFileName || "Attached"}</strong>) has been securely synchronized with the Journal Management Office.
+                      </p>
+                      <p className="text-xs text-amber-900 dark:text-amber-200 font-semibold pt-1">
+                        The Journal Manager (Noor F. · info@scholarlyopen.org) will independently verify your institutional tenure before granting editorial360 manuscript assignment access. You will receive an official notification once approved.
                       </p>
                     </div>
 
-                    <Button asChild className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shrink-0 cursor-pointer">
-                      <Link href={`/editorial360?action=claim_reviewer&name=${encodeURIComponent(candidateName || 'Reviewer')}&email=${encodeURIComponent(candidateEmail || '')}&cred=${credentialId}`}>
-                        Create Account & Unlock Certificate &rarr;
-                      </Link>
-                    </Button>
+                    <div className="shrink-0 flex flex-col sm:items-end gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40">
+                        <Clock className="h-3.5 w-3.5" /> Pending JM Approval
+                      </span>
+                      <span className="text-[11px] text-muted-foreground font-mono">
+                        Dossier ID: {credentialId}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -1079,7 +1250,7 @@ export default function ReviewerGatewayPage() {
 
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full text-xs">
-                            <Clock className="h-3.5 w-3.5" /> Pending Account Activation
+                            <Clock className="h-3.5 w-3.5" /> Pending Institutional Vetting & JM Approval
                           </span>
                         </div>
                       </div>
@@ -1089,14 +1260,14 @@ export default function ReviewerGatewayPage() {
                   {/* Next Step CTA Card */}
                   <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-[#0b99ff]/10 to-primary/5 border border-[#0b99ff]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-0.5">
-                      <h4 className="font-bold text-sm text-[#0b99ff] dark:text-sky-400">Ready to Review & Earn Merit Honoraria?</h4>
+                      <h4 className="font-bold text-sm text-[#0b99ff] dark:text-sky-400">Application Registered in editorial360 Registry</h4>
                       <p className="text-xs text-muted-foreground max-w-xl">
-                        Register or sign in to your editorial360 account to link your verified credential, unlock official high-res PDF certificate export, and access the €35–€50 honoraria wallet.
+                        Your qualification dossier (CV, ORCID iD, and Institutional Affiliation) has been logged in the Journal Manager desk. Once our editorial office completes institutional vetting, you will receive an official notification to activate your referee desk.
                       </p>
                     </div>
-                    <Button asChild size="sm" className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold gap-1.5 shrink-0 px-4 py-2 rounded-xl shadow-sm">
-                      <Link href={`/editorial360?action=claim_reviewer&name=${encodeURIComponent(candidateName || 'Reviewer')}&email=${encodeURIComponent(candidateEmail || '')}&cred=${credentialId}`}>
-                        Proceed to editorial360 <ArrowRight className="h-4 w-4" />
+                    <Button asChild size="sm" variant="outline" className="border-[#0b99ff]/40 text-[#0b99ff] hover:bg-[#0b99ff]/10 font-bold gap-1.5 shrink-0 px-4 py-2 rounded-xl cursor-pointer">
+                      <Link href="/">
+                        Return to Homepage <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
                   </div>

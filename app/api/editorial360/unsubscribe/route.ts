@@ -1,14 +1,57 @@
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 import { NextResponse } from "next/server"
 
-interface UnsubscribeRecord {
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const BUCKET = "editorial360_data"
+const FILE_PATH = "unsubscribed.json"
+
+export interface UnsubscribeRecord {
   email: string
   journal?: string
   timestamp: string
   reason?: string
 }
 
-// In-memory fallback cache for development/serverless session
-let unsubscribedMemoryStore: UnsubscribeRecord[] = []
+let memoryCache: UnsubscribeRecord[] = []
+
+async function getStoredUnsubscribed(): Promise<UnsubscribeRecord[]> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
+      cache: "no-store"
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data && Array.isArray(data.unsubscribed)) {
+        memoryCache = data.unsubscribed
+        return data.unsubscribed
+      }
+    }
+  } catch (e) {
+    console.warn("Supabase fetch unsubscribed warning:", e)
+  }
+  return memoryCache
+}
+
+async function saveStoredUnsubscribed(list: UnsubscribeRecord[]): Promise<void> {
+  memoryCache = list
+  try {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ unsubscribed: list, updatedAt: new Date().toISOString() })
+    })
+  } catch (err) {
+    console.error("Supabase save unsubscribed error:", err)
+  }
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -16,21 +59,24 @@ export async function GET(req: Request) {
   const journal = searchParams.get("journal") || "All Journals"
   const format = searchParams.get("format")
 
+  let list = await getStoredUnsubscribed()
+
   if (format === "json") {
     return NextResponse.json({
       success: true,
-      unsubscribed: unsubscribedMemoryStore
+      unsubscribed: list
     })
   }
 
   if (email) {
-    if (!unsubscribedMemoryStore.some(u => u.email === email)) {
-      unsubscribedMemoryStore.push({
+    if (!list.some(u => u.email === email)) {
+      list.push({
         email,
         journal,
         timestamp: new Date().toISOString(),
         reason: "User unsubscribed via email link"
       })
+      await saveStoredUnsubscribed(list)
     }
 
     // Return HTML confirmation page
@@ -75,7 +121,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     success: true,
-    unsubscribed: unsubscribedMemoryStore
+    unsubscribed: list
   })
 }
 
@@ -90,18 +136,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 })
     }
 
+    let list = await getStoredUnsubscribed()
+
     if (body.action === "remove") {
-      unsubscribedMemoryStore = unsubscribedMemoryStore.filter(u => u.email !== email)
+      list = list.filter(u => u.email !== email)
+      await saveStoredUnsubscribed(list)
       return NextResponse.json({ success: true, action: "removed", email })
     }
 
-    if (!unsubscribedMemoryStore.some(u => u.email === email)) {
-      unsubscribedMemoryStore.push({
+    if (!list.some(u => u.email === email)) {
+      list.push({
         email,
         journal,
         timestamp: new Date().toISOString(),
         reason
       })
+      await saveStoredUnsubscribed(list)
     }
 
     return NextResponse.json({

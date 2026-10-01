@@ -39,8 +39,12 @@ export interface ProfileAuditSummary {
   missingFields: { key: string; label: string; tip: string }[]
 }
 
-// Global serverless in-memory registry of reviewer profiles
-let reviewerProfileStore: Record<string, StoredReviewerProfile> = {
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const BUCKET = "editorial360_data"
+const FILE_PATH = "reviewer-profiles.json"
+
+const DEFAULT_PROFILES: Record<string, StoredReviewerProfile> = {
   "102500216@hbut.edu.cn": {
     title: "Dr.",
     name: "Dr. Wenxiong Sun (孙文雄)",
@@ -126,6 +130,44 @@ let reviewerProfileStore: Record<string, StoredReviewerProfile> = {
   }
 }
 
+let inMemoryProfileCache: Record<string, StoredReviewerProfile> | null = null
+
+async function getStoredProfiles(): Promise<Record<string, StoredReviewerProfile>> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
+      cache: "no-store"
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data && typeof data.profiles === "object") {
+        inMemoryProfileCache = data.profiles
+        return data.profiles
+      }
+    }
+  } catch (e) {
+    console.warn("Supabase fetch reviewer-profiles warning:", e)
+  }
+  return inMemoryProfileCache || DEFAULT_PROFILES
+}
+
+async function saveStoredProfiles(profiles: Record<string, StoredReviewerProfile>): Promise<void> {
+  inMemoryProfileCache = profiles
+  try {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ profiles, updatedAt: new Date().toISOString() })
+    })
+  } catch (err) {
+    console.error("Supabase save reviewer-profiles error:", err)
+  }
+}
+
 export function analyzeProfileCompletion(profile: StoredReviewerProfile): ProfileAuditSummary {
   const fieldsToCheck = [
     { key: "name", label: "Full Name", tip: "Add official title and full name" },
@@ -182,13 +224,15 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const email = searchParams.get("email")
 
+    const profilesStore = await getStoredProfiles()
+
     if (email) {
       const normalizedEmail = email.toLowerCase().trim()
-      let profile = reviewerProfileStore[normalizedEmail]
+      let profile = profilesStore[normalizedEmail]
 
       // Fallback matching by partial email
       if (!profile) {
-        const found = Object.values(reviewerProfileStore).find(
+        const found = Object.values(profilesStore).find(
           p => p.email.toLowerCase() === normalizedEmail
         )
         if (found) profile = found
@@ -215,7 +259,7 @@ export async function GET(req: Request) {
     }
 
     // Return list of all profiles with audit summaries
-    const profilesWithAudit = Object.values(reviewerProfileStore).map(p => ({
+    const profilesWithAudit = Object.values(profilesStore).map(p => ({
       profile: p,
       audit: analyzeProfileCompletion(p)
     }))
@@ -245,7 +289,8 @@ export async function POST(req: Request) {
       )
     }
 
-    const existing = reviewerProfileStore[email] || {
+    const profilesStore = await getStoredProfiles()
+    const existing = profilesStore[email] || {
       title: body.title || "Dr.",
       name: body.name || "Reviewer Candidate",
       email,
@@ -268,7 +313,8 @@ export async function POST(req: Request) {
       updatedAt: new Date().toISOString()
     }
 
-    reviewerProfileStore[email] = updatedProfile
+    profilesStore[email] = updatedProfile
+    await saveStoredProfiles(profilesStore)
 
     const audit = analyzeProfileCompletion(updatedProfile)
 

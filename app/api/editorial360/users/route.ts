@@ -18,9 +18,53 @@ export interface StoredUserRecord {
   passwordHash?: string
 }
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const BUCKET = "editorial360_data"
+const FILE_PATH = "users.json"
+
 const DATA_FILE_PATH = path.join(process.cwd(), "lib", "data", "users.json")
 
-function getStoredUsers(): StoredUserRecord[] {
+const DEFAULT_USERS: StoredUserRecord[] = [
+  {
+    id: "USR-01",
+    name: "Dr. Marcus Vance",
+    email: "m.vance@scholarlyopen.org",
+    role: "reviewer",
+    affiliation: "Scholarly Open Verified Reviewer Community",
+    country: "United Kingdom",
+    status: "Active",
+    createdAt: "2026-01-15T10:00:00.000Z"
+  },
+  {
+    id: "USR-02",
+    name: "Prof. Aris Thorne",
+    email: "a.thorne@scholarlyopen.org",
+    role: "editor",
+    affiliation: "Charité – Universitätsmedizin Berlin",
+    country: "Germany",
+    status: "Active",
+    createdAt: "2026-01-15T10:00:00.000Z"
+  }
+]
+
+async function getStoredUsers(): Promise<StoredUserRecord[]> {
+  // 1. Try Supabase Cloud Storage
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
+      cache: "no-store"
+    })
+    if (res.ok) {
+      const parsed = await res.json()
+      if (parsed && Array.isArray(parsed.users)) {
+        return parsed.users
+      }
+    }
+  } catch (e) {
+    console.warn("Supabase fetch users warning:", e)
+  }
+
+  // 2. Fallback to local file
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const raw = fs.readFileSync(DATA_FILE_PATH, "utf-8")
@@ -32,31 +76,27 @@ function getStoredUsers(): StoredUserRecord[] {
   } catch (e) {
     console.error("Error reading users.json:", e)
   }
-  return [
-    {
-      id: "USR-01",
-      name: "Dr. Marcus Vance",
-      email: "m.vance@scholarlyopen.org",
-      role: "reviewer",
-      affiliation: "Scholarly Open Verified Reviewer Community",
-      country: "United Kingdom",
-      status: "Active",
-      createdAt: "2026-01-15T10:00:00.000Z"
-    },
-    {
-      id: "USR-02",
-      name: "Prof. Aris Thorne",
-      email: "a.thorne@scholarlyopen.org",
-      role: "editor",
-      affiliation: "Charité – Universitätsmedizin Berlin",
-      country: "Germany",
-      status: "Active",
-      createdAt: "2026-01-15T10:00:00.000Z"
-    }
-  ]
+  return DEFAULT_USERS
 }
 
-function saveStoredUsers(users: StoredUserRecord[]) {
+async function saveStoredUsers(users: StoredUserRecord[]) {
+  // 1. Save to Supabase Cloud Storage
+  try {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ users, updatedAt: new Date().toISOString() })
+    })
+  } catch (err) {
+    console.error("Supabase save users error:", err)
+  }
+
+  // 2. Save locally
   try {
     const dir = path.dirname(DATA_FILE_PATH)
     if (!fs.existsSync(dir)) {
@@ -74,7 +114,7 @@ export async function GET(req: Request) {
     const email = searchParams.get("email")
     const role = searchParams.get("role")
 
-    let users = getStoredUsers()
+    let users = await getStoredUsers()
 
     if (email) {
       users = users.filter(u => u.email.toLowerCase() === email.toLowerCase())
@@ -107,7 +147,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Name and email are required" }, { status: 400 })
     }
 
-    const currentUsers = getStoredUsers()
+    const currentUsers = await getStoredUsers()
     const existingIndex = currentUsers.findIndex(u => u.email.toLowerCase() === email.toLowerCase())
 
     const newRecord: StoredUserRecord = {
@@ -131,7 +171,7 @@ export async function POST(req: Request) {
       updatedUsers = [newRecord, ...currentUsers]
     }
 
-    saveStoredUsers(updatedUsers)
+    await saveStoredUsers(updatedUsers)
 
     return NextResponse.json({ success: true, user: newRecord })
   } catch (err: any) {
