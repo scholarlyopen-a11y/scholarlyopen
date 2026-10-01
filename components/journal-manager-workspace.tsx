@@ -413,6 +413,7 @@ export function JournalManagerWorkspace({
   const [scoutTotalResults, setScoutTotalResults] = useState<number>(142)
   const [editingScholarEmailIndex, setEditingScholarEmailIndex] = useState<number | null>(null)
   const [viewingHistoryEmail, setViewingHistoryEmail] = useState<SentEmailRecord | null>(null)
+  const [sentEmailViewMode, setSentEmailViewMode] = useState<"rendered" | "source">("rendered")
 
   // Quick Invite (Manual EIC/Editorial Outreach) state
   const [isQuickInviteOpen, setIsQuickInviteOpen] = useState(false)
@@ -1250,6 +1251,13 @@ export function JournalManagerWorkspace({
   const [newUnsubReason, setNewUnsubReason] = useState("")
   const [isAddUnsubModalOpen, setIsAddUnsubModalOpen] = useState(false)
 
+  // Sent Items Pagination, Filter & Jump state (supports 1-60+ pages)
+  const [sentPage, setSentPage] = useState<number>(1)
+  const [sentPageSize, setSentPageSize] = useState<number>(15)
+  const [sentSearchQuery, setSentSearchQuery] = useState<string>("")
+  const [sentJournalFilter, setSentJournalFilter] = useState<string>("ALL")
+  const [sentJumpPage, setSentJumpPage] = useState<string>("")
+
   // Sync unsubscribed list with backend API on mount
   useEffect(() => {
     fetch("/api/editorial360/unsubscribe?format=json")
@@ -1499,8 +1507,13 @@ export function JournalManagerWorkspace({
     }
   }, [reviewerRegistryTab])
 
-  const handleDispatchScoutOutreach = (scholar: any, campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver") => {
-    const journalName = scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal
+  const handleDispatchScoutOutreach = (
+    scholar: any,
+    campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver",
+    overrideJournal?: string
+  ) => {
+    const rawJournal = overrideJournal || scholar?.journal || (scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal)
+    const journalName = rawJournal === "all" ? "Scholarly Open" : rawJournal
     const scholarName = scholar.name || "Distinguished Colleague"
     const scholarEmail = scholar.email || "colleague@university.edu"
     const specialty = scholar.specialty || "your research discipline"
@@ -1564,6 +1577,7 @@ export function JournalManagerWorkspace({
       defaultSubject,
       defaultBody,
       onConfirmSend: async (data: any) => {
+        const effectiveJournal = data.journal || journalName
         const res = await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1573,9 +1587,9 @@ export function JournalManagerWorkspace({
             customSubject: data.subject,
             customBody: data.bodyText,
             customHtml: data.renderedHtml,
-            journal: journalName,
-            fromEmail: getJournalReplyTo(journalName),
-            senderName: `${journalName} Editorial Office`
+            journal: effectiveJournal,
+            fromEmail: getJournalReplyTo(effectiveJournal),
+            senderName: `${effectiveJournal} Editorial Office`
           })
         })
 
@@ -1590,7 +1604,7 @@ export function JournalManagerWorkspace({
           timestamp: new Date().toISOString(),
           recipientName: scholarName,
           recipientEmail: data.recipientEmail,
-          journal: journalName,
+          journal: effectiveJournal,
           campaignType: campaign,
           subject: data.subject,
           body: data.renderedHtml || data.bodyText || "",
@@ -1621,7 +1635,7 @@ export function JournalManagerWorkspace({
         setEcrSelectedNames(prev => prev.filter(name => name !== scholarName))
 
         const smtpNotice = resData.sentViaSmtp ? " via SMTP" : " (Simulated)"
-        setScoutSuccessMessage(`✓ Official invitation for ${scholarName} (${campaign.replace(/_/g, ' ').toUpperCase()}) dispatched to ${data.recipientEmail}${smtpNotice}. Candidate moved to Sent tab.`)
+        setScoutSuccessMessage(`✓ Official invitation for ${scholarName} (${campaign.replace(/_/g, ' ').toUpperCase()}) dispatched to ${data.recipientEmail}${smtpNotice} for ${effectiveJournal}. Candidate moved to Sent tab.`)
         setTimeout(() => setScoutSuccessMessage(null), 7000)
         setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
       }
@@ -4058,7 +4072,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   {/* Quick Invite button for manual outreach (LinkedIn / email contacts) */}
                   <Button
                     type="button"
-                    onClick={() => setIsQuickInviteOpen(true)}
+                    onClick={() => {
+                      if (scoutTargetJournal && scoutTargetJournal !== "all") {
+                        setQuickInviteJournal(scoutTargetJournal)
+                      }
+                      setIsQuickInviteOpen(true)
+                    }}
                     className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-10 px-4 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
                     title="Invite someone you found on LinkedIn or via email directly"
                   >
@@ -4308,7 +4327,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1.5">Target Journal</label>
                         <select
                           value={quickInviteJournal}
-                          onChange={e => setQuickInviteJournal(e.target.value)}
+                          onChange={e => {
+                            setQuickInviteJournal(e.target.value)
+                            setScoutTargetJournal(e.target.value)
+                          }}
                           className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/40 focus:border-[#0b99ff]"
                         >
                           {OFFICIAL_JOURNALS.map(j => (
@@ -4361,13 +4383,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             email: quickInviteEmail.trim(),
                             institution: "Independent Scholar",
                             specialty: quickInviteJournal.replace("Scholarly Open: ", ""),
+                            journal: quickInviteJournal,
                             country: undefined,
                             metrics: "Direct Invitation via Scout",
                           }
-                          // Temporarily switch journal context and trigger outreach
-                          const prevJournal = scoutTargetJournal
                           setScoutTargetJournal(quickInviteJournal)
-                          handleDispatchScoutOutreach(syntheticScholar, quickInviteCampaign)
+                          handleDispatchScoutOutreach(syntheticScholar, quickInviteCampaign, quickInviteJournal)
                           setIsQuickInviteOpen(false)
                           setQuickInviteName("")
                           setQuickInviteEmail("")
@@ -4970,119 +4991,359 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               {/* View 1: Sent Emails History Table */}
-              {sentAuditSubTab === "sent_emails" && (
-                <>
-                  {sentEmailsHistory.length === 0 ? (
+              {sentAuditSubTab === "sent_emails" && (() => {
+                if (sentEmailsHistory.length === 0) {
+                  return (
                     <div className="p-12 text-center text-slate-400 text-xs">
                       No outreach emails dispatched yet. Search candidates and send invitations to populate this audit log.
                     </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            <th className="py-3 px-4 min-w-[140px]">Date / Time</th>
-                            <th className="py-3 px-4 min-w-[180px]">Recipient Scholar</th>
-                            <th className="py-3 px-4 min-w-[200px]">Journal Desk</th>
-                            <th className="py-3 px-3 min-w-[130px]">Campaign Type</th>
-                            <th className="py-3 px-4 min-w-[220px]">Subject</th>
-                            <th className="py-3 px-3 min-w-[90px]">Status</th>
-                            <th className="py-3 px-4 text-right min-w-[160px]">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                          {sentEmailsHistory.map((record) => {
-                            const dateFormatted = record.timestamp 
-                              ? new Date(record.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
-                              : "Recent"
+                  )
+                }
 
-                            return (
-                              <tr key={record.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors">
-                                <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
-                                  {dateFormatted}
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="space-y-0.5">
-                                    <span className="font-bold text-slate-900 dark:text-white block">
-                                      {record.recipientName}
-                                    </span>
-                                    <span className="text-[11px] font-mono text-slate-500 truncate block">
-                                      {record.recipientEmail}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
-                                  <div className="space-y-0.5">
-                                    <span className="font-semibold text-slate-900 dark:text-white block">
-                                      {record.journal}
-                                    </span>
-                                    <span className="text-[11px] font-mono text-[#0b99ff] block">
-                                      {getJournalReplyTo(record.journal)}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-3">
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                                    record.campaignType === "call_for_papers" ? "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200 dark:border-sky-800" :
-                                    record.campaignType === "eic" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800" :
-                                    record.campaignType === "ebm" ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800" :
-                                    record.campaignType === "follow_up" ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800" :
-                                    "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                                  }`}>
-                                    {record.campaignType.replace(/_/g, " ")}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-4 text-slate-600 dark:text-slate-300 truncate max-w-[240px]" title={record.subject}>
-                                  {record.subject}
-                                </td>
-                                <td className="py-3 px-3">
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                                    <Check className="h-3 w-3 text-emerald-600" />
-                                    {record.status}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-4 text-right">
-                                  <div className="flex items-center justify-end gap-1.5">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        handleDispatchScoutOutreach(
-                                          {
-                                            name: record.recipientName,
-                                            email: record.recipientEmail,
-                                            institution: record.journal,
-                                            specialty: "your research field"
-                                          },
-                                          "follow_up"
-                                        )
-                                      }}
-                                      className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-sky-200 dark:border-sky-800 text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 cursor-pointer flex items-center gap-1"
-                                      title="Send a polite follow-up reminder"
-                                    >
-                                      <RotateCcw className="h-3 w-3" />
-                                      Follow-up
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => setViewingHistoryEmail(record)}
-                                      className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
-                                    >
-                                      <Eye className="h-3 w-3 mr-1" />
-                                      View
-                                    </Button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
+                const filteredSentEmails = sentEmailsHistory.filter((record) => {
+                  if (sentJournalFilter !== "ALL" && record.journal !== sentJournalFilter) {
+                    return false
+                  }
+                  if (sentSearchQuery.trim()) {
+                    const q = sentSearchQuery.trim().toLowerCase()
+                    const matchName = (record.recipientName || "").toLowerCase().includes(q)
+                    const matchEmail = (record.recipientEmail || "").toLowerCase().includes(q)
+                    const matchSubject = (record.subject || "").toLowerCase().includes(q)
+                    const matchType = (record.campaignType || "").toLowerCase().includes(q)
+                    if (!matchName && !matchEmail && !matchSubject && !matchType) {
+                      return false
+                    }
+                  }
+                  return true
+                })
+
+                const totalSentPages = Math.max(1, Math.ceil(filteredSentEmails.length / sentPageSize))
+                const safeSentPage = Math.min(Math.max(1, sentPage), totalSentPages)
+                const startIndex = (safeSentPage - 1) * sentPageSize
+                const paginatedSentRecords = filteredSentEmails.slice(startIndex, startIndex + sentPageSize)
+
+                const getSentPages = () => {
+                  if (totalSentPages <= 7) {
+                    return Array.from({ length: totalSentPages }, (_, i) => i + 1)
+                  }
+                  if (safeSentPage <= 4) {
+                    return [1, 2, 3, 4, 5, "...", totalSentPages]
+                  }
+                  if (safeSentPage >= totalSentPages - 3) {
+                    return [1, "...", totalSentPages - 4, totalSentPages - 3, totalSentPages - 2, totalSentPages - 1, totalSentPages]
+                  }
+                  return [1, "...", safeSentPage - 1, safeSentPage, safeSentPage + 1, "...", totalSentPages]
+                }
+
+                const pages = getSentPages()
+
+                return (
+                  <div className="space-y-4">
+                    {/* Filter & Toolbar */}
+                    <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 bg-slate-50/70 dark:bg-slate-900/40 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                      {/* Search Input */}
+                      <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search recipient name, email, subject, campaign..."
+                          value={sentSearchQuery}
+                          onChange={(e) => {
+                            setSentSearchQuery(e.target.value)
+                            setSentPage(1)
+                          }}
+                          className="w-full pl-9 pr-8 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b99ff] text-slate-900 dark:text-white"
+                        />
+                        {sentSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSentSearchQuery("")
+                              setSentPage(1)
+                            }}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Controls: Journal Filter, Rows Per Page, Counter */}
+                      <div className="flex items-center gap-2.5 flex-wrap justify-between md:justify-end text-xs">
+                        <select
+                          value={sentJournalFilter}
+                          onChange={(e) => {
+                            setSentJournalFilter(e.target.value)
+                            setSentPage(1)
+                          }}
+                          className="text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                        >
+                          <option value="ALL">All Journals ({sentEmailsHistory.length})</option>
+                          {OFFICIAL_JOURNALS.map((j) => (
+                            <option key={j.name} value={j.name}>
+                              {j.shortName || j.name}
+                            </option>
+                          ))}
+                        </select>
+
+                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                          <span className="hidden sm:inline">Show:</span>
+                          <select
+                            value={sentPageSize}
+                            onChange={(e) => {
+                              setSentPageSize(Number(e.target.value))
+                              setSentPage(1)
+                            }}
+                            className="text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                          >
+                            <option value={10}>10 / page</option>
+                            <option value={15}>15 / page</option>
+                            <option value={25}>25 / page</option>
+                            <option value={50}>50 / page</option>
+                            <option value={100}>100 / page</option>
+                          </select>
+                        </div>
+
+                        {(sentSearchQuery || sentJournalFilter !== "ALL") && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSentSearchQuery("")
+                              setSentJournalFilter("ALL")
+                              setSentPage(1)
+                            }}
+                            className="h-7 text-[11px] px-2 text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer"
+                          >
+                            Clear filters
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </>
-              )}
+
+                    {/* Table View or Filter Empty State */}
+                    {filteredSentEmails.length === 0 ? (
+                      <div className="p-12 text-center text-slate-400 text-xs bg-slate-50/50 dark:bg-slate-900/20 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                        No sent emails match your search or filter criteria.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                              <th className="py-3 px-4 min-w-[140px]">Date / Time</th>
+                              <th className="py-3 px-4 min-w-[180px]">Recipient Scholar</th>
+                              <th className="py-3 px-4 min-w-[200px]">Journal Desk</th>
+                              <th className="py-3 px-3 min-w-[130px]">Campaign Type</th>
+                              <th className="py-3 px-4 min-w-[220px]">Subject</th>
+                              <th className="py-3 px-3 min-w-[90px]">Status</th>
+                              <th className="py-3 px-4 text-right min-w-[160px]">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                            {paginatedSentRecords.map((record) => {
+                              const dateFormatted = record.timestamp 
+                                ? new Date(record.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                                : "Recent"
+
+                              return (
+                                <tr key={record.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors">
+                                  <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
+                                    {dateFormatted}
+                                  </td>
+                                  <td className="py-3 px-4">
+                                    <div className="space-y-0.5">
+                                      <span className="font-bold text-slate-900 dark:text-white block">
+                                        {record.recipientName}
+                                      </span>
+                                      <span className="text-[11px] font-mono text-slate-500 truncate block">
+                                        {record.recipientEmail}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
+                                    <div className="space-y-0.5">
+                                      <span className="font-semibold text-slate-900 dark:text-white block">
+                                        {record.journal}
+                                      </span>
+                                      <span className="text-[11px] font-mono text-[#0b99ff] block">
+                                        {getJournalReplyTo(record.journal)}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-3">
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                                      record.campaignType === "call_for_papers" ? "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-200 dark:border-sky-800" :
+                                      record.campaignType === "eic" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800" :
+                                      record.campaignType === "ebm" ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800" :
+                                      record.campaignType === "follow_up" ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800" :
+                                      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                    }`}>
+                                      {record.campaignType.replace(/_/g, " ")}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-4 text-slate-600 dark:text-slate-300 truncate max-w-[240px]" title={record.subject}>
+                                    {record.subject}
+                                  </td>
+                                  <td className="py-3 px-3">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                                      <Check className="h-3 w-3 text-emerald-600" />
+                                      {record.status}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-4 text-right">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => {
+                                          handleDispatchScoutOutreach(
+                                            {
+                                              name: record.recipientName,
+                                              email: record.recipientEmail,
+                                              institution: record.journal,
+                                              specialty: "your research field",
+                                              journal: record.journal
+                                            },
+                                            "follow_up",
+                                            record.journal
+                                          )
+                                        }}
+                                        className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-sky-200 dark:border-sky-800 text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 cursor-pointer flex items-center gap-1"
+                                        title="Send a polite follow-up reminder"
+                                      >
+                                        <RotateCcw className="h-3 w-3" />
+                                        Follow-up
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setViewingHistoryEmail(record)}
+                                        className="h-7 text-[11px] font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                                      >
+                                        <Eye className="h-3 w-3 mr-1" />
+                                        View
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* Pagination Bar (supports 1-60+ pages with Next >, Prev <, Page Buttons & Direct Jump) */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 rounded-xl">
+                      {/* Left: Summary text */}
+                      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap">
+                        <span>
+                          Showing <strong className="text-slate-900 dark:text-white font-mono">{filteredSentEmails.length === 0 ? 0 : startIndex + 1}</strong> to <strong className="text-slate-900 dark:text-white font-mono">{Math.min(startIndex + sentPageSize, filteredSentEmails.length)}</strong> of <strong className="text-slate-900 dark:text-white font-mono">{filteredSentEmails.length}</strong> dispatched {filteredSentEmails.length === 1 ? "email" : "emails"}
+                        </span>
+                        <span className="text-slate-300 dark:text-slate-700">|</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                          Page {safeSentPage} of {totalSentPages}
+                        </span>
+                      </div>
+
+                      {/* Right: Pagination controls */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {/* Previous Button */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={safeSentPage <= 1}
+                          onClick={() => setSentPage(p => Math.max(1, p - 1))}
+                          className="h-8 px-2.5 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                          title="Previous page"
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                          <span>Previous</span>
+                        </Button>
+
+                        {/* Numbered Page Buttons with Ellipses */}
+                        {pages.map((p, idx) => {
+                          if (p === "...") {
+                            return (
+                              <span key={`sent-ellipsis-${idx}`} className="px-1.5 py-1 text-xs text-slate-400 font-bold select-none">
+                                ...
+                              </span>
+                            )
+                          }
+                          const pageNum = Number(p)
+                          const isCurrent = pageNum === safeSentPage
+                          return (
+                            <button
+                              key={`sent-page-${pageNum}`}
+                              type="button"
+                              onClick={() => setSentPage(pageNum)}
+                              className={`h-8 min-w-[32px] px-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                isCurrent
+                                  ? "bg-[#0b99ff] text-white shadow-2xs"
+                                  : "bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          )
+                        })}
+
+                        {/* Next Button */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={safeSentPage >= totalSentPages}
+                          onClick={() => setSentPage(p => Math.min(totalSentPages, p + 1))}
+                          className="h-8 px-2.5 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                          title="Next page"
+                        >
+                          <span>Next</span>
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </Button>
+
+                        {/* Direct Jump to Page Input (supports 1 to 60+ pages) */}
+                        <div className="flex items-center gap-1 pl-2 border-l border-slate-200 dark:border-slate-700 text-xs text-slate-500">
+                          <span className="hidden sm:inline">Go to:</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={totalSentPages}
+                            value={sentJumpPage}
+                            placeholder={String(safeSentPage)}
+                            onChange={(e) => setSentJumpPage(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                const p = parseInt(sentJumpPage, 10)
+                                if (!isNaN(p) && p >= 1 && p <= totalSentPages) {
+                                  setSentPage(p)
+                                  setSentJumpPage("")
+                                }
+                              }
+                            }}
+                            className="w-12 h-8 px-1.5 text-center text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                            title={`Jump directly to page (1-${totalSentPages})`}
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const p = parseInt(sentJumpPage, 10)
+                              if (!isNaN(p) && p >= 1 && p <= totalSentPages) {
+                                setSentPage(p)
+                                setSentJumpPage("")
+                              }
+                            }}
+                            className="h-8 px-2 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 cursor-pointer"
+                          >
+                            Go
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* View 2: Unsubscribed / Do-Not-Contact Registry */}
               {sentAuditSubTab === "unsubscribed" && (
@@ -10261,11 +10522,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
       {/* Sent Email History Record Viewer Modal */}
       <Dialog open={!!viewingHistoryEmail} onOpenChange={(open) => !open && setViewingHistoryEmail(null)}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl">
+        <DialogContent className="max-w-3xl bg-white dark:bg-[#18191e] border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl">
           {viewingHistoryEmail && (
             <div className="space-y-4">
               <DialogHeader>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-50 text-[#0b99ff] dark:bg-sky-950/50 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
                     {viewingHistoryEmail.campaignType.replace(/_/g, " ")}
                   </span>
@@ -10286,22 +10547,94 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Target Journal:</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{viewingHistoryEmail.journal}</span>
+                  <span className="font-mono text-[10px] text-[#0b99ff] block mt-0.5">{getJournalReplyTo(viewingHistoryEmail.journal)}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Recipient Email:</span>
-                  <span className="font-mono text-slate-700 dark:text-slate-300">{viewingHistoryEmail.recipientEmail}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Recipient:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{viewingHistoryEmail.recipientName}</span>
+                  <span className="font-mono text-[10px] text-slate-500 block mt-0.5">{viewingHistoryEmail.recipientEmail}</span>
+                </div>
+                <div className="flex sm:justify-end items-center">
+                  <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 p-0.5 bg-white dark:bg-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setSentEmailViewMode("rendered")}
+                      className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
+                        sentEmailViewMode === "rendered"
+                          ? "bg-[#0b99ff] text-white shadow-2xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      Formatted View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSentEmailViewMode("source")}
+                      className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
+                        sentEmailViewMode === "source"
+                          ? "bg-[#0b99ff] text-white shadow-2xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      Source Code
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 max-h-[350px] overflow-y-auto space-y-3">
-                {(() => {
-                  const branding = getJournalBranding(viewingHistoryEmail.journal)
-                  const fullJournalName = viewingHistoryEmail.journal?.includes("Scholarly Open") ? viewingHistoryEmail.journal : `Scholarly Open: ${branding.cleanName}`
+              {(() => {
+                const rawBody = viewingHistoryEmail.body || ""
+                const isHtml = rawBody.trim().startsWith("<!DOCTYPE") ||
+                  rawBody.trim().startsWith("<html") ||
+                  rawBody.includes("<table") ||
+                  rawBody.includes("<div style=") ||
+                  rawBody.includes("<body")
+
+                if (sentEmailViewMode === "source") {
                   return (
+                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                      <div className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 text-[10px] font-mono text-slate-500 flex justify-between items-center border-b border-slate-200 dark:border-slate-800">
+                        <span>Raw Dispatched Payload</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (typeof navigator !== "undefined" && navigator.clipboard) {
+                              navigator.clipboard.writeText(rawBody)
+                            }
+                          }}
+                          className="hover:text-[#0b99ff] cursor-pointer"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                      <pre className="p-3 text-[11px] font-mono text-slate-700 dark:text-slate-300 max-h-[420px] overflow-auto whitespace-pre-wrap bg-slate-50 dark:bg-[#121316]">
+                        {rawBody}
+                      </pre>
+                    </div>
+                  )
+                }
+
+                if (isHtml) {
+                  return (
+                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-100 dark:bg-black/30 p-1 flex justify-center">
+                      <iframe
+                        srcDoc={rawBody}
+                        title="Dispatched Email Preview"
+                        className="w-full h-[450px] bg-white rounded-lg border-0 shadow-xs"
+                      />
+                    </div>
+                  )
+                }
+
+                const branding = getJournalBranding(viewingHistoryEmail.journal)
+                const fullJournalName = viewingHistoryEmail.journal?.includes("Scholarly Open") ? viewingHistoryEmail.journal : `Scholarly Open: ${branding.cleanName}`
+
+                return (
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 max-h-[420px] overflow-y-auto space-y-3">
                     <div className="flex items-center justify-between pb-3 border-b-2 border-[#0b99ff] gap-4 bg-white dark:bg-[#131418] p-3 rounded-lg border border-slate-200/70 dark:border-slate-800">
                       <div className="flex items-center">
                         <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-7 w-auto object-contain dark:hidden" />
@@ -10328,15 +10661,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </div>
                       </div>
                     </div>
-                  )
-                })()}
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                  Dispatched Email Content:
-                </span>
-                <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
-                  {viewingHistoryEmail.body}
-                </div>
-              </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                      Dispatched Email Content:
+                    </span>
+                    <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
+                      {rawBody}
+                    </div>
+                  </div>
+                )
+              })()}
 
               <DialogFooter className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <Button

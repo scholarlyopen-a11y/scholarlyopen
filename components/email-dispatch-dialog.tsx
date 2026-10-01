@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES, getBilingualGermanIntro } from "@/lib/email-templates"
-import { getJournalReplyTo } from "@/lib/data/journal-contacts"
+import { getJournalReplyTo, OFFICIAL_JOURNALS } from "@/lib/data/journal-contacts"
 
 export interface EmailDispatchConfig {
   isOpen: boolean
@@ -37,6 +37,7 @@ export interface EmailDispatchConfig {
     bodyText: string
     renderedHtml: string
     recipientEmail: string
+    journal?: string
   }) => Promise<void> | void
   onCancel: () => void
 }
@@ -53,9 +54,23 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
   const [subject, setSubject] = useState("")
   const [bodyText, setBodyText] = useState("")
   const [recipientEmail, setRecipientEmail] = useState("")
+  const [selectedJournal, setSelectedJournal] = useState(config.journal || "Scholarly Open")
   const [isSending, setIsSending] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [languagePreset, setLanguagePreset] = useState<"en" | "de">("en")
+
+  const handleJournalChange = (newJournal: string) => {
+    const oldJournal = selectedJournal
+    setSelectedJournal(newJournal)
+    if (oldJournal && oldJournal !== newJournal) {
+      if (subject.includes(oldJournal)) {
+        setSubject(prev => prev.replaceAll(oldJournal, newJournal))
+      }
+      if (bodyText.includes(oldJournal)) {
+        setBodyText(prev => prev.replaceAll(oldJournal, newJournal))
+      }
+    }
+  }
 
   const getTemplateCategory = (templateId?: string): "ebm" | "eic" | "author" | "reviewer" | "general" => {
     if (!templateId) return "general"
@@ -77,7 +92,7 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
         const intro = getBilingualGermanIntro(
           category,
           config.recipientName,
-          config.journal || "Scholarly Open",
+          selectedJournal || config.journal || "Scholarly Open",
           { paperId: config.paperId }
         )
         setBodyText(`${intro}\n\n${bodyText}`)
@@ -101,15 +116,17 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
   useEffect(() => {
     if (config.isOpen) {
       const templateDef = DEFAULT_EMAIL_TEMPLATES.find(t => t.id === config.templateId)
+      const currentJournal = config.journal || "Scholarly Open"
+      setSelectedJournal(currentJournal)
 
       const tokens: Record<string, string> = {
         recipientName: config.recipientName || "Colleague",
         paperId: config.paperId || "N/A",
         paperTitle: config.paperTitle || "Submitted Manuscript",
-        journal: config.journal || "Scholarly Open",
+        journal: currentJournal,
         portalUrl: "https://www.scholarlyopen.org/editorial360",
-        acceptUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(config.paperId || '')}&journal=${encodeURIComponent(config.journal || '')}&email=${encodeURIComponent(config.recipientEmail || '')}&name=${encodeURIComponent(config.recipientName || '')}`,
-        declineUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(config.paperId || '')}&journal=${encodeURIComponent(config.journal || '')}&email=${encodeURIComponent(config.recipientEmail || '')}&name=${encodeURIComponent(config.recipientName || '')}`,
+        acceptUrl: `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(config.paperId || '')}&journal=${encodeURIComponent(currentJournal)}&email=${encodeURIComponent(config.recipientEmail || '')}&name=${encodeURIComponent(config.recipientName || '')}`,
+        declineUrl: `https://www.scholarlyopen.org/editorial360?action=decline&id=${encodeURIComponent(config.paperId || '')}&journal=${encodeURIComponent(currentJournal)}&email=${encodeURIComponent(config.recipientEmail || '')}&name=${encodeURIComponent(config.recipientName || '')}`,
         editorName: "Editorial Office",
         customMessage: "",
         dueDate: "within 14 calendar days"
@@ -122,7 +139,7 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
       } else if (templateDef) {
         initialSubject = interpolateTokens(templateDef.defaultSubject, tokens)
       } else {
-        initialSubject = `Editorial Update: ${config.paperId || ''} - ${config.journal || 'Scholarly Open'}`
+        initialSubject = `Editorial Update: ${config.paperId || ''} - ${currentJournal}`
       }
 
       // Body
@@ -152,7 +169,7 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
         const intro = getBilingualGermanIntro(
           category,
           config.recipientName || "Kollege",
-          config.journal || "Scholarly Open",
+          currentJournal,
           { paperId: config.paperId }
         )
         setBodyText(`${intro}\n\n${initialBody}`)
@@ -182,13 +199,13 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
       bodyText,
       actionLabel: config.actionLabel,
       actionUrl: config.actionUrl || "https://www.scholarlyopen.org/editorial360",
-      journal: config.journal || "Scholarly Open",
+      journal: selectedJournal || config.journal || "Scholarly Open",
       paperId: config.paperId,
       paperTitle: config.paperTitle,
       recipientName: config.recipientName,
       includeEditorial360Logo: config.includeEditorial360Logo ?? false
     })
-  }, [subject, bodyText, config])
+  }, [subject, bodyText, selectedJournal, config])
 
   const handleSend = async () => {
     if (!recipientEmail || !subject.trim()) {
@@ -204,7 +221,8 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
         subject,
         bodyText,
         renderedHtml,
-        recipientEmail
+        recipientEmail: recipientEmail.trim(),
+        journal: selectedJournal || config.journal
       })
     } catch (e: any) {
       setErrorMsg(e.message || "Failed to dispatch email")
@@ -271,14 +289,22 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
           {/* Metadata Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-[#20222a] p-3 rounded-xl border border-slate-200/80 dark:border-[#272832]">
             <div>
-              <span className="font-semibold text-slate-500 dark:text-slate-400 block text-[11px]">
-                {isDe ? "Absender (Offizielle Journal-Mail):" : "Sending From (Official Journal Desk):"}
-              </span>
-              <div className="font-bold text-slate-900 dark:text-white truncate">
-                {config.journal || "Scholarly Open"}
-              </div>
-              <span className="font-mono text-[11px] text-[#0b99ff] font-semibold">
-                {getJournalReplyTo(config.journal)}
+              <label className="font-semibold text-slate-500 dark:text-slate-400 block text-[11px] mb-1">
+                {isDe ? "Absender-Journal Desk:" : "Target Journal Desk (Sending From):"}
+              </label>
+              <select
+                value={selectedJournal}
+                onChange={(e) => handleJournalChange(e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-bold bg-white dark:bg-[#18191e] border border-slate-300 dark:border-[#272832] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff] cursor-pointer shadow-2xs"
+              >
+                {OFFICIAL_JOURNALS.map((j) => (
+                  <option key={j.name} value={j.name}>
+                    {j.name}
+                  </option>
+                ))}
+              </select>
+              <span className="font-mono text-[11px] text-[#0b99ff] font-semibold block mt-1">
+                From/Reply-To: {getJournalReplyTo(selectedJournal)}
               </span>
             </div>
 
@@ -286,7 +312,7 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
               <span className="font-semibold text-slate-500 dark:text-slate-400 block text-[11px]">
                 {isDe ? "Empfänger:" : "Recipient:"}
               </span>
-              <div className="font-bold text-slate-900 dark:text-white truncate">
+              <div className="font-bold text-slate-900 dark:text-white truncate mt-1">
                 {config.recipientName}
               </div>
               <span className="text-[11px] text-slate-400">
@@ -313,7 +339,7 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
               </div>
               <div>
                 <span className="font-semibold">Reply-To: </span>
-                <span className="font-mono text-emerald-600 dark:text-emerald-400">{getJournalReplyTo(config.journal)}</span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400">{getJournalReplyTo(selectedJournal)}</span>
               </div>
             </div>
           </div>
