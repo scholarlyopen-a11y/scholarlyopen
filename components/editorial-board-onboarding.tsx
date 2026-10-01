@@ -216,6 +216,10 @@ export function EditorialBoardOnboarding({
       setErrorMsg("Please provide a short academic biography (at least 50 characters). This appears on the journal masthead.")
       return
     }
+    if (!cvFileName.trim() && !cvBase64) {
+      setErrorMsg("Please upload your Curriculum Vitae (CV). A CV document (PDF or DOCX) is mandatory for editorial appointments.")
+      return
+    }
     if (!password.trim() || password.length < 6) {
       setErrorMsg("Please create an account password of at least 6 characters.")
       return
@@ -606,10 +610,18 @@ export function EditorialBoardOnboarding({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* CV File Upload */}
-              <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
+              <div className={`p-3.5 rounded-lg border transition-all space-y-2 ${
+                !cvFileName && errorMsg.includes("CV")
+                  ? "border-rose-400 bg-rose-50/50 dark:bg-rose-950/20"
+                  : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30"
+              }`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-800 dark:text-slate-200">Curriculum Vitae (CV)</span>
-                  <span className="text-[10px] text-slate-400">PDF or DOCX</span>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                    Curriculum Vitae (CV) <span className="text-rose-500">*</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-rose-500 bg-rose-50 dark:bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-800">
+                    Mandatory (PDF or DOCX)
+                  </span>
                 </div>
 
                 <input 
@@ -621,10 +633,10 @@ export function EditorialBoardOnboarding({
                 />
 
                 {cvFileStatus === "uploaded" ? (
-                  <div className="p-2.5 rounded-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div className="p-2.5 rounded-md bg-white dark:bg-[#18191e] border border-emerald-300 dark:border-emerald-800 flex items-center justify-between shadow-2xs">
                     <div className="flex items-center gap-2 overflow-hidden">
-                      <FileText className="w-4 h-4 text-[#0b99ff] shrink-0" />
-                      <div className="truncate text-xs font-medium text-slate-900 dark:text-white">{cvFileName}</div>
+                      <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <div className="truncate text-xs font-semibold text-slate-900 dark:text-white">{cvFileName}</div>
                     </div>
                     <button
                       type="button"
@@ -638,11 +650,15 @@ export function EditorialBoardOnboarding({
                   <button
                     type="button"
                     onClick={() => cvInputRef.current?.click()}
-                    className="w-full py-2.5 px-3 border border-dashed border-slate-300 dark:border-slate-700 rounded-md text-center hover:border-[#0b99ff] transition-colors cursor-pointer text-xs text-slate-600 dark:text-slate-400"
+                    className="w-full py-2.5 px-3 border border-dashed border-rose-300 dark:border-rose-800/80 rounded-md text-center hover:border-[#0b99ff] hover:bg-sky-50/30 transition-colors cursor-pointer text-xs text-rose-700 dark:text-rose-400 font-medium flex items-center justify-center gap-1.5"
                   >
-                    Attach CV document
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload Curriculum Vitae (Required)</span>
                   </button>
                 )}
+                <p className="text-[10px] text-slate-400">
+                  Required for appointment verification, editorial credentials, and COPE vetting.
+                </p>
               </div>
 
               {/* Profile Photo */}

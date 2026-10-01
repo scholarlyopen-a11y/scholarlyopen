@@ -32,33 +32,17 @@ const DEFAULT_REVIEWS: StoredReview[] = [
     id: "REV-FB-SAM-01",
     paperId: "SOMED-26-RW01",
     reviewerName: "Dr. Praveen Nagula",
-    reviewerEmail: "praveen.nagula@hospital.org",
+    reviewerEmail: "drpraveennagula@gmail.com",
     status: "Released",
-    originality: 5,
-    methodology: 4,
-    clarity: 5,
-    significance: 5,
-    commentsAuthor: "Comprehensive healthcare operations framework for acute aortic dissection. Section 3 on ED triage protocols is outstanding. Recommend minor expansion on pediatric dissection differentials in Section 4.2.",
-    commentsEditor: "Strong clinical operations manuscript. Recommended for Acceptance with minor technical clarifications.",
-    recommendation: "Accept with Minor Revisions",
-    sanitizedCommentsAuthor: "Comprehensive healthcare operations framework for acute aortic dissection. Section 3 on ED triage protocols is outstanding. Recommend minor expansion on pediatric dissection differentials in Section 4.2.",
-    createdAt: "2026-09-28T14:20:00Z"
-  },
-  {
-    id: "REV-FB-SAM-02",
-    paperId: "SOMED-26-RW01",
-    reviewerName: "Dr. Ragab Aziza",
-    reviewerEmail: "ragab.aziza@medcenter.edu",
-    status: "Released",
-    originality: 4,
-    methodology: 4,
-    clarity: 4,
-    significance: 5,
-    commentsAuthor: "The multidisciplinary workflow proposed addresses critical diagnostic latency in emergency settings. Suggest adding a high-resolution flowchart for rapid surgical consultation pathway.",
-    commentsEditor: "Methodologically sound and operationally impactful. Strongly support publication.",
-    recommendation: "Accept with Minor Revisions",
-    sanitizedCommentsAuthor: "The multidisciplinary workflow proposed addresses critical diagnostic latency in emergency settings. Suggest adding a high-resolution flowchart for rapid surgical consultation pathway.",
-    createdAt: "2026-09-29T09:15:00Z"
+    originality: 3,
+    methodology: 3,
+    clarity: 3,
+    significance: 3,
+    commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+    commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+    recommendation: "Re-write and Re-submit",
+    sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+    createdAt: "2026-08-28T14:20:00Z"
   }
 ]
 
