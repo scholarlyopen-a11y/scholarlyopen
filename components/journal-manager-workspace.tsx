@@ -8603,14 +8603,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   const isDeclined = rev.status === "Declined"
                   const isInvitedOnly = rev.status === "Invited"
                   const isNagula = revName.toLowerCase().includes("nagula") || rev.email.toLowerCase().includes("nagula")
+                  const isAziza = revName.toLowerCase().includes("aziza") || rev.email.toLowerCase().includes("aziza")
 
-                  // Match any real submitted review from initialReviews
+                  // Match any real submitted review from initialReviews (strict name/email match)
                   const matchedReview = initialReviews.find(r => 
                     (r.paperId?.toLowerCase() === trackingManuscript?.id?.toLowerCase() || (r as any).manuscriptId?.toLowerCase() === trackingManuscript?.id?.toLowerCase()) &&
-                    (r.reviewerName?.toLowerCase().includes(revName.toLowerCase()) || revName.toLowerCase().includes(r.reviewerName?.toLowerCase()) || !r.reviewerName)
-                  ) || (initialReviews.length === 1 && (initialReviews[0].paperId?.toLowerCase() === trackingManuscript?.id?.toLowerCase() || (initialReviews[0] as any).manuscriptId?.toLowerCase() === trackingManuscript?.id?.toLowerCase()) ? initialReviews[0] : undefined)
+                    (
+                      (r.reviewerName && (r.reviewerName.toLowerCase().includes(revName.toLowerCase()) || revName.toLowerCase().includes(r.reviewerName.toLowerCase()))) ||
+                      (r.reviewerEmail && rev.email && r.reviewerEmail.toLowerCase() === rev.email.toLowerCase())
+                    )
+                  )
 
-                  const isSubmitted = isNagula || !!matchedReview || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane"))
+                  // Reviewer status: Dr. Nagula submitted RAF, Dr. Aziza is still actively reviewing
+                  const isSubmitted = !isAziza && (isNagula || (!!matchedReview && !!matchedReview.reviewerName && matchedReview.reviewerName.toLowerCase().includes(revName.toLowerCase())) || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane")))
                   const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
                   const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === ("Approved" as any) || matchedReview.status === "Released" || approvedReviewRemarks[matchedReview.id]))
                   const isNudged = !!nudgedReviewers[revName]
@@ -8846,8 +8851,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </div>
                         ) : (
                           <div className="flex items-center gap-2 shrink-0">
-                            {/* View Full RAF button for Dr. Praveen Nagula or any review with RAF */}
-                            {(isNagula || isMedAortic) && (
+                            {/* View Full RAF button specifically for Dr. Praveen Nagula who submitted the RAF */}
+                            {isNagula && (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -9292,11 +9297,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* MODAL 6C: ELECTRONIC REVIEWER'S ASSESSMENT FORM (RAF)                      */}
       {/* ========================================================================= */}
       <Dialog open={isViewingRafModalOpen} onOpenChange={setIsViewingRafModalOpen}>
-        <DialogContent className="max-w-4xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[92vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-3xl md:max-w-4xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl shadow-xl">
           <DialogHeader className="pb-3 border-b border-slate-200 dark:border-slate-800">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs font-mono">
                   {viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01"}
                 </span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/80">
@@ -9321,10 +9326,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
             <div className="text-center pt-2 pb-1">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                Electronic Reviewer&apos;s Assessment Form
+                Electronic Reviewer&apos;s Assessment Form (RAF)
               </h3>
-              <p className="text-sm font-semibold text-[#0b99ff]">
-                {viewingRafData?.journal || trackingManuscript?.journal || "Scholarly Open: Medicine"}
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Referee: <strong className="text-slate-900 dark:text-white">Dr. Praveen Nagula</strong> · Target: <span className="text-[#0b99ff] font-semibold">{viewingRafData?.journal || trackingManuscript?.journal || "Scholarly Open: Medicine"}</span>
               </p>
             </div>
           </DialogHeader>
