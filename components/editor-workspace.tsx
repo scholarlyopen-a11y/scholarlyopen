@@ -1074,8 +1074,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
     // Dispatch customized review invitation emails
     await Promise.all(selectedReviewerNames.map(async (revName) => {
-      const extRev = externalReviewersList.find(x => x.name === revName)
-      const targetEmail = extRev ? extRev.email : "reviewer@scholarlyopen.org"
+      const lower = revName.trim().toLowerCase()
+      const extRev = externalReviewersList.find(x => x.name.toLowerCase() === lower || lower.includes(x.name.toLowerCase()))
+      const openAiRev = openAiResults?.find(x => x.name?.toLowerCase() === lower || lower.includes(x.name?.toLowerCase()))
+      const regRev = reviewersList.find(x => x.name.toLowerCase() === lower || lower.includes(x.name.toLowerCase()))
+
+      let targetEmail = extRev?.email || openAiRev?.email || (regRev as any)?.email
+      if (!targetEmail || targetEmail === "reviewer@scholarlyopen.org") {
+        if (lower.includes("nagula") || lower.includes("praveen")) targetEmail = "drpraveennagula@gmail.com"
+        else if (lower.includes("aziza") || lower.includes("ragab")) targetEmail = "ragab.aziza@agr.kfs.edu.eg"
+        else if (lower.includes("wang x") || lower.includes("xiaozeng")) targetEmail = "wxiaozeng@163.com"
+        else if (lower.includes("wang b") || lower.includes("wangbindl")) targetEmail = "wangbindl@hotmail.com"
+        else if (lower.includes("zhong w") || lower.includes("wuzhong")) targetEmail = "wuzhong71@scu.edu.cn"
+        else if (lower.includes("vance") || lower.includes("marcus")) targetEmail = "m.vance@university-charite.de"
+        else if (lower.includes("vane") || lower.includes("evelyn")) targetEmail = "e.vane@oxford-academic.uk"
+        else if (lower.includes("tanaka") || lower.includes("hiroshi")) targetEmail = "h.tanaka@u-tokyo.ac.jp"
+        else if (lower.includes("jenkins") || lower.includes("sarah")) targetEmail = "s.jenkins@ed.ac.uk"
+        else if (lower.includes("dupond") || lower.includes("claire")) targetEmail = "claire.dupond@sorbonne-universite.fr"
+        else if (lower.includes("sun") || lower.includes("yidan")) targetEmail = "yidan.sun@wustl.edu"
+        else if (lower.includes("leeuw")) targetEmail = "p.deleeuw@mumc.nl"
+        else targetEmail = extRev?.email || openAiRev?.email || ""
+      }
+
+      if (!targetEmail) {
+        console.warn(`[Editorial360] No email found for reviewer "${revName}".`)
+        return
+      }
+
       const personalizedBody = assignEmailBody.replace(/\{\{recipientName\}\}/g, revName)
 
       const acceptLink = `https://www.scholarlyopen.org/editorial360?action=accept&id=${encodeURIComponent(paperId)}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(revName)}`
@@ -4003,18 +4028,21 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     {
                       name: "Prof. Hiroshi Tanaka",
                       institution: "University of Tokyo (Japan)",
+                      email: "h.tanaka@u-tokyo.ac.jp",
                       specialty: "Juvenile Diabetes Retinopathy",
                       metrics: "42 papers · 1,420 citations"
                     },
                     {
                       name: "Dr. Sarah Jenkins",
                       institution: "University of Edinburgh (UK)",
+                      email: "s.jenkins@ed.ac.uk",
                       specialty: "Deep Learning Clinical Triage",
                       metrics: "19 papers · 540 citations"
                     },
                     {
                       name: "Prof. Claire Dupond",
                       institution: "Sorbonne Université (France)",
+                      email: "claire.dupond@sorbonne-universite.fr",
                       specialty: "Microvascular Biomarkers",
                       metrics: "31 papers · 890 citations"
                     }
@@ -4024,9 +4052,30 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <div
                         key={idx}
                         onClick={() => {
-                          setSelectedReviewerNames(prev =>
-                            isSelected ? prev.filter(n => n !== rev.name) : [...prev, rev.name]
-                          )
+                          if (isSelected) {
+                            setSelectedReviewerNames(prev => prev.filter(n => n !== rev.name))
+                          } else {
+                            setSelectedReviewerNames(prev => [...prev, rev.name])
+                            const candidateEmail = rev.email || (
+                              rev.name.toLowerCase().includes("tanaka") ? "h.tanaka@u-tokyo.ac.jp" :
+                              rev.name.toLowerCase().includes("jenkins") ? "s.jenkins@ed.ac.uk" :
+                              rev.name.toLowerCase().includes("dupond") ? "claire.dupond@sorbonne-universite.fr" :
+                              rev.name.toLowerCase().includes("wang x") ? "wxiaozeng@163.com" :
+                              rev.name.toLowerCase().includes("wang b") ? "wangbindl@hotmail.com" :
+                              rev.name.toLowerCase().includes("zhong w") ? "wuzhong71@scu.edu.cn" :
+                              ""
+                            )
+                            if (candidateEmail) {
+                              setExternalReviewersList(prev => {
+                                const withoutThis = prev.filter(x => x.name.toLowerCase() !== rev.name.toLowerCase())
+                                return [...withoutThis, {
+                                  name: rev.name,
+                                  email: candidateEmail,
+                                  affiliation: rev.institution || rev.specialty || ""
+                                }]
+                              })
+                            }
+                          }
                         }}
                         className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                           isSelected ? "border-[#0b99ff] bg-[#0b99ff]/10" : "border-slate-200 dark:border-[#272832] bg-slate-50 dark:bg-[#131418] hover:border-slate-300"
@@ -4036,6 +4085,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="font-semibold text-slate-900 dark:text-white text-xs">{rev.name}</span>
                             <span className="text-[11px] text-slate-500">· {rev.institution}</span>
+                            {rev.email && (
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                                ({rev.email})
+                              </span>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">

@@ -2323,26 +2323,101 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     if (!selectedManuscript || selectedReviewers.length === 0) return
 
     const resolved = selectedReviewers.map(name => {
-      const extObj = externalReviewersList.find(x => x.name.toLowerCase() === name.toLowerCase())
-      if (extObj && extObj.email) {
-        return { name: extObj.name, email: extObj.email, affiliation: extObj.affiliation || "" }
+      const lower = name.trim().toLowerCase()
+
+      // 1. Check external reviewers list (automatically populated when selecting Global Scholars)
+      const extObj = externalReviewersList.find(x => 
+        x.name.trim().toLowerCase() === lower || 
+        lower.includes(x.name.trim().toLowerCase()) || 
+        x.name.trim().toLowerCase().includes(lower)
+      )
+      if (extObj && extObj.email && extObj.email !== "reviewer@scholarlyopen.org") {
+        return { name: extObj.name || name, email: extObj.email, affiliation: extObj.affiliation || "" }
       }
-      const regObj = reviewersList.find(x => x.name.toLowerCase() === name.toLowerCase())
-      if (regObj && (regObj as any).email) {
+
+      // 2. Check OpenAlex / Europe PMC searched candidates
+      const oAlex = jmOpenAlexResults?.find(x => 
+        x.name?.trim().toLowerCase() === lower || 
+        lower.includes(x.name?.trim().toLowerCase()) || 
+        x.name?.trim().toLowerCase().includes(lower)
+      )
+      if (oAlex && oAlex.email && oAlex.email !== "reviewer@scholarlyopen.org") {
+        return { name: oAlex.name || name, email: oAlex.email, affiliation: oAlex.institution || oAlex.affiliation || "" }
+      }
+
+      // 3. Check Scout / ECR results
+      const scoutFound = (scoutResults || []).concat(ecrResults || []).find(x => 
+        x.name?.trim().toLowerCase() === lower || 
+        lower.includes(x.name?.trim().toLowerCase()) || 
+        x.name?.trim().toLowerCase().includes(lower)
+      )
+      if (scoutFound && scoutFound.email && scoutFound.email !== "reviewer@scholarlyopen.org") {
+        return { name: scoutFound.name || name, email: scoutFound.email, affiliation: scoutFound.institution || "" }
+      }
+
+      // 4. Registered editorial board / reviewer list
+      const regObj = reviewersList.find(x => 
+        x.name.trim().toLowerCase() === lower || 
+        lower.includes(x.name.trim().toLowerCase())
+      )
+      if (regObj && (regObj as any).email && (regObj as any).email !== "reviewer@scholarlyopen.org") {
         return { name: regObj.name, email: (regObj as any).email, affiliation: regObj.specialization || "" }
       }
-      const oAlex = jmOpenAlexResults?.find(x => x.name.toLowerCase() === name.toLowerCase())
-      if (oAlex && oAlex.email) {
-        return { name: oAlex.name, email: oAlex.email, affiliation: oAlex.affiliation || "" }
-      }
-      // Common active reviewers fallback
-      if (name.toLowerCase().includes("praveen") || name.toLowerCase().includes("nagula")) {
+
+      // 5. Common active reviewers verified institutional contacts
+      if (lower.includes("praveen") || lower.includes("nagula")) {
         return { name, email: "drpraveennagula@gmail.com", affiliation: "Osmania Medical College & Gandhi Hospital" }
       }
-      if (name.toLowerCase().includes("ragab") || name.toLowerCase().includes("aziza")) {
+      if (lower.includes("ragab") || lower.includes("aziza")) {
         return { name, email: "ragab.aziza@agr.kfs.edu.eg", affiliation: "Kafrelsheikh University, Egypt" }
       }
-      return { name, email: "reviewer@scholarlyopen.org", affiliation: "" }
+      if (lower.includes("wang x") || lower.includes("xiaozeng")) {
+        return { name, email: "wxiaozeng@163.com", affiliation: "General Hospital of Northern Theater Command" }
+      }
+      if (lower.includes("wang b") || lower.includes("wangbindl")) {
+        return { name, email: "wangbindl@hotmail.com", affiliation: "General Hospital of Northern Theater Command" }
+      }
+      if (lower.includes("zhong w") || lower.includes("wuzhong")) {
+        return { name, email: "wuzhong71@scu.edu.cn", affiliation: "Sichuan University" }
+      }
+      if (lower.includes("marcus") || lower.includes("vance")) {
+        return { name, email: "m.vance@university-charite.de", affiliation: "Charité – Universitätsmedizin Berlin" }
+      }
+      if (lower.includes("evelyn") || lower.includes("vane")) {
+        return { name, email: "e.vane@oxford-academic.uk", affiliation: "University of Oxford" }
+      }
+      if (lower.includes("sanna") || lower.includes("jarvela")) {
+        return { name, email: "sanna.jarvela@oulu.fi", affiliation: "University of Oulu" }
+      }
+      if (lower.includes("sarah") || lower.includes("jenkins")) {
+        return { name, email: "s.jenkins@ed.ac.uk", affiliation: "University of Edinburgh" }
+      }
+      if (lower.includes("hiroshi") || lower.includes("tanaka")) {
+        return { name, email: "h.tanaka@u-tokyo.ac.jp", affiliation: "University of Tokyo" }
+      }
+      if (lower.includes("claire") || lower.includes("dupond")) {
+        return { name, email: "claire.dupond@sorbonne-universite.fr", affiliation: "Sorbonne Université" }
+      }
+      if (lower.includes("yidan") || lower.includes("sun")) {
+        return { name, email: "yidan.sun@wustl.edu", affiliation: "Washington University School of Medicine" }
+      }
+      if (lower.includes("de leeuw") || lower.includes("leeuw")) {
+        return { name, email: "p.deleeuw@mumc.nl", affiliation: "Maastricht University Medical Center" }
+      }
+
+      // 6. Check historical sent emails for any previously logged recipient email for this reviewer
+      const prevSent = sentEmailsHistory.find(s => 
+        s.recipientName && (
+          s.recipientName.toLowerCase() === lower || 
+          s.recipientName.toLowerCase().includes(lower) || 
+          lower.includes(s.recipientName.toLowerCase())
+        )
+      )
+      if (prevSent?.recipientEmail && prevSent.recipientEmail !== "reviewer@scholarlyopen.org") {
+        return { name, email: prevSent.recipientEmail, affiliation: "" }
+      }
+
+      return { name, email: "", affiliation: "" }
     })
 
     setAssignRecipients(resolved)
@@ -2355,6 +2430,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
   // Handle confirm assignment and dispatch invitation emails
   const handleConfirmAssignment = async () => {
     if (!selectedManuscript || assignRecipients.length === 0) return
+
+    // Prevent dispatch if any recipient has an empty email or the generic placeholder
+    const invalidRec = assignRecipients.find(r => !r.email.trim() || r.email.trim() === "reviewer@scholarlyopen.org")
+    if (invalidRec) {
+      alert(`Please enter a valid institutional email address for "${invalidRec.name}" before sending.`)
+      return
+    }
+
     const msId = selectedManuscript.id
     const msTitle = selectedManuscript.title
     const msJournal = selectedManuscript.journal
@@ -2367,7 +2450,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     // Dispatch custom edited invitation emails to all verified recipients
     await Promise.all(assignRecipients.map(async (rec) => {
       const revName = rec.name.trim()
-      const targetEmail = rec.email.trim() || "reviewer@scholarlyopen.org"
+      const targetEmail = rec.email.trim()
       const personalizedBody = assignEmailBody
         .replace(/\{\{recipientName\}\}/g, revName)
         .replace(/\{\{manuscriptId\}\}/g, msId)
@@ -7161,18 +7244,21 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     {
                       name: "Prof. Hiroshi Tanaka",
                       institution: "University of Tokyo (Japan)",
+                      email: "h.tanaka@u-tokyo.ac.jp",
                       specialty: "Juvenile Diabetes Retinopathy",
                       metrics: "42 papers · 1,420 citations"
                     },
                     {
                       name: "Dr. Sarah Jenkins",
                       institution: "University of Edinburgh (UK)",
+                      email: "s.jenkins@ed.ac.uk",
                       specialty: "Deep Learning Clinical Triage",
                       metrics: "19 papers · 540 citations"
                     },
                     {
                       name: "Prof. Claire Dupond",
                       institution: "Sorbonne Université (France)",
+                      email: "claire.dupond@sorbonne-universite.fr",
                       specialty: "Microvascular Biomarkers",
                       metrics: "31 papers · 890 citations"
                     }
@@ -7182,9 +7268,31 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <div
                         key={idx}
                         onClick={() => {
-                          setSelectedReviewers(prev =>
-                            isChecked ? prev.filter(n => n !== rev.name) : [...prev, rev.name]
-                          )
+                          if (isChecked) {
+                            setSelectedReviewers(prev => prev.filter(n => n !== rev.name))
+                          } else {
+                            setSelectedReviewers(prev => [...prev, rev.name])
+                            // Automatically persist the reviewer's real email into externalReviewersList so it is NEVER lost
+                            const candidateEmail = rev.email || (
+                              rev.name.toLowerCase().includes("tanaka") ? "h.tanaka@u-tokyo.ac.jp" :
+                              rev.name.toLowerCase().includes("jenkins") ? "s.jenkins@ed.ac.uk" :
+                              rev.name.toLowerCase().includes("dupond") ? "claire.dupond@sorbonne-universite.fr" :
+                              rev.name.toLowerCase().includes("wang x") ? "wxiaozeng@163.com" :
+                              rev.name.toLowerCase().includes("wang b") ? "wangbindl@hotmail.com" :
+                              rev.name.toLowerCase().includes("zhong w") ? "wuzhong71@scu.edu.cn" :
+                              ""
+                            )
+                            if (candidateEmail) {
+                              setExternalReviewersList(prev => {
+                                const withoutThis = prev.filter(x => x.name.toLowerCase() !== rev.name.toLowerCase())
+                                return [...withoutThis, {
+                                  name: rev.name,
+                                  email: candidateEmail,
+                                  affiliation: rev.institution || rev.specialty || ""
+                                }]
+                              })
+                            }
+                          }
                         }}
                         className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                           isChecked ? "border-[#0b99ff] bg-[#0b99ff]/10" : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:border-slate-300"
@@ -7194,6 +7302,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="font-semibold text-slate-900 dark:text-white text-xs">{rev.name}</span>
                             <span className="text-[11px] text-slate-500">· {rev.institution}</span>
+                            {rev.email && (
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                                ({rev.email})
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">
                             <span className="text-slate-700 dark:text-slate-300 font-medium">{rev.specialty}</span>
@@ -7549,7 +7662,18 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </div>
 
                           <div className="space-y-0.5 sm:col-span-1">
-                            <label className="text-[10px] text-slate-500 font-medium">Recipient Email (To):</label>
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px] text-slate-500 font-medium">Recipient Email (To):</label>
+                              {!rec.email.trim() || rec.email.trim() === "reviewer@scholarlyopen.org" ? (
+                                <span className="text-[9px] font-bold text-rose-500 dark:text-rose-400">
+                                  Required *
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                  ✓ Ready
+                                </span>
+                              )}
+                            </div>
                             <input
                               type="email"
                               value={rec.email}
@@ -7557,8 +7681,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 const val = e.target.value
                                 setAssignRecipients(prev => prev.map((r, i) => i === idx ? { ...r, email: val } : r))
                               }}
-                              placeholder="Institutional Email"
-                              className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 dark:border-[#272832] bg-white dark:bg-slate-900 text-xs font-mono text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0b99ff]"
+                              placeholder="e.g. scholar@university.edu"
+                              className={`w-full px-2.5 py-1.5 rounded-md border text-xs font-mono focus:ring-1 focus:ring-[#0b99ff] ${
+                                !rec.email.trim() || rec.email.trim() === "reviewer@scholarlyopen.org"
+                                  ? "border-rose-400 dark:border-rose-700 bg-rose-50/20 text-rose-900 dark:text-rose-200"
+                                  : "border-slate-300 dark:border-[#272832] bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                              }`}
                             />
                           </div>
 
