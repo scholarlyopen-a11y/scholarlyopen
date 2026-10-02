@@ -2583,21 +2583,32 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
       if (matchPid && s.recipientName && s.recipientEmail) {
         const sRecipientEmail = String(s.recipientEmail).toLowerCase().trim()
         const sRecipientName = String(s.recipientName).toLowerCase().trim()
-        const alreadyPresent = rawList.some(r => {
+        const sStatus: "Invited" | "Accepted" | "Declined" | "Completed" = 
+          ((s as any).status === "Accepted" || (s as any).status === "Declined" || (s as any).status === "Completed") ? (s as any).status : "Invited"
+        const existingEntry = rawList.find(r => {
           const rEmail = String(r.email || "").toLowerCase().trim()
           const rName = String(r.name || "").toLowerCase().trim()
           return (rEmail && rEmail === sRecipientEmail) ||
             (rName && rName === sRecipientName) ||
             (rName && sRecipientName && (rName.includes(sRecipientName) || sRecipientName.includes(rName)))
         })
-        if (!alreadyPresent) {
+        if (existingEntry) {
+          if (sStatus !== "Invited" && existingEntry.status === "Invited") {
+            existingEntry.status = sStatus
+          }
+          if ((s as any).deadline) existingEntry.deadline = (s as any).deadline
+          if ((s as any).declineReason) existingEntry.declineReason = (s as any).declineReason
+          if ((s as any).declineReferral) existingEntry.declineReferral = (s as any).declineReferral
+        } else {
           rawList.push({
             id: s.id || `sent-${s.recipientEmail}`,
             name: s.recipientName,
             email: s.recipientEmail,
             invitedDate: s.timestamp ? s.timestamp.split("T")[0] : "2026-10-01",
-            status: "Invited",
-            deadline: "2026-10-15"
+            status: sStatus,
+            deadline: (s as any).deadline || "2026-10-15",
+            declineReason: (s as any).declineReason,
+            declineReferral: (s as any).declineReferral
           })
         }
       }

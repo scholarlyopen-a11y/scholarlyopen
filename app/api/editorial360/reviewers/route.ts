@@ -264,11 +264,20 @@ export async function GET(req: Request) {
           (s.subject ? s.subject.match(/([A-Z]{3,5}-\d{2}-[A-Z0-9]+)/)?.[1] : null)
 
         if (isReviewInv && matchPid && s.recipientName && s.recipientEmail) {
-          const exists = results.some(r => 
+          const sStatus: "Invited" | "Accepted" | "Declined" | "Completed" = 
+            (s.status === "Accepted" || s.status === "Declined" || s.status === "Completed") ? s.status : "Invited"
+          const existingItem = results.find(r => 
             r.reviewerEmail.toLowerCase() === s.recipientEmail.toLowerCase() &&
             r.paperId.toLowerCase() === matchPid.toLowerCase()
           )
-          if (!exists) {
+          if (existingItem) {
+            if (sStatus !== "Invited" && existingItem.status === "Invited") {
+              existingItem.status = sStatus
+            }
+            if (s.deadline) existingItem.deadline = s.deadline
+            if (s.declineReason) existingItem.declineReason = s.declineReason
+            if (s.declineReferral) existingItem.declineReferral = s.declineReferral
+          } else {
             results.push({
               id: s.id || `SENT-REV-${Date.now()}-${s.recipientEmail}`,
               paperId: matchPid,
@@ -277,8 +286,10 @@ export async function GET(req: Request) {
               reviewerName: s.recipientName,
               reviewerEmail: s.recipientEmail,
               invitedDate: s.timestamp ? s.timestamp.split("T")[0] : "2026-10-01",
-              status: "Invited",
-              deadline: "2026-10-15"
+              status: sStatus,
+              deadline: s.deadline || "2026-10-15",
+              declineReason: s.declineReason,
+              declineReferral: s.declineReferral
             })
           }
         }
@@ -452,6 +463,7 @@ export async function PATCH(req: Request) {
     }
 
     const newStatus = action === "accept" ? "Accepted" : action === "decline" ? "Declined" : "Invited"
+    let finalRecord: ReviewerHistoryItem
 
     if (itemIndex >= 0) {
       const existing = globalReviewerHistory[itemIndex]
@@ -464,7 +476,7 @@ export async function PATCH(req: Request) {
         respondedAt: action === "update_deadline" ? (existing.respondedAt || todayStr) : todayStr,
         deadline: deadline || existing.deadline
       }
-      return NextResponse.json({ ok: true, record: globalReviewerHistory[itemIndex] })
+      finalRecord = globalReviewerHistory[itemIndex]
     } else {
       // Create new record with this response
       const deadlineDate = new Date()
@@ -485,8 +497,52 @@ export async function PATCH(req: Request) {
         deadline: deadline || deadlineDate.toISOString().split("T")[0]
       }
       globalReviewerHistory.unshift(created)
-      return NextResponse.json({ ok: true, record: created })
+      finalRecord = created
     }
+
+    // Persist status update to Supabase Cloud Storage sent-invitations.json
+    try {
+      const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+      const getRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/sent-invitations.json?t=${Date.now()}`, { cache: "no-store" })
+      if (getRes.ok) {
+        const d = await getRes.json()
+        if (Array.isArray(d?.sentInvitations)) {
+          let hasChange = false
+          d.sentInvitations = d.sentInvitations.map((s: any) => {
+            const matches = s.recipientEmail?.toLowerCase() === reviewerEmail.toLowerCase() && 
+              (s.paperId?.toLowerCase() === paperId.toLowerCase() || s.subject?.toLowerCase().includes(paperId.toLowerCase()))
+            if (matches) {
+              hasChange = true
+              return {
+                ...s,
+                status: finalRecord.status,
+                deadline: finalRecord.deadline || s.deadline,
+                declineReason: finalRecord.declineReason || s.declineReason,
+                declineReferral: finalRecord.declineReferral || s.declineReferral,
+                respondedAt: finalRecord.respondedAt || todayStr
+              }
+            }
+            return s
+          })
+          if (hasChange) {
+            await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/sent-invitations.json`, {
+              method: "POST",
+              headers: {
+                apikey: SUPABASE_SERVICE_KEY,
+                Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+                "Content-Type": "application/json",
+                "x-upsert": "true"
+              },
+              body: JSON.stringify({ sentInvitations: d.sentInvitations })
+            })
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not sync reviewer response to Supabase sent-invitations:", e)
+    }
+
+    return NextResponse.json({ ok: true, record: finalRecord })
   } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
   }
