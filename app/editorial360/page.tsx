@@ -134,19 +134,6 @@ const EditorWorkspace = dynamic(
   }
 )
 
-const CrossDeskActivityFeed = dynamic(
-  () => import("@/components/cross-desk-activity-feed").then(mod => mod.CrossDeskActivityFeed),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center p-6 text-slate-500 gap-2">
-        <RefreshCw className="w-4 h-4 animate-spin text-teal-600" />
-        <span className="text-xs">Loading Activity Feed...</span>
-      </div>
-    )
-  }
-)
-
 type UserRole = "admin" | "author" | "reviewer" | "editor" | "im" | "ria" | "jm"
 
 // Manuscript mock data structure
@@ -1358,8 +1345,9 @@ export default function Editorial360Page() {
             setIsLoggedIn(true)
             if (!isScoutDirect && !isClaimDirect && session.role) setRole(session.role)
             if (!isClaimDirect && session.email) setEmail(session.email)
-            if (!isScoutDirect && session.activeJmTab) setActiveJmTab(session.activeJmTab)
-            if (session.activeEditorTab) setActiveEditorTab(session.activeEditorTab)
+            if (!isScoutDirect && session.activeJmTab) setActiveJmTab(session.activeJmTab === "activity" ? "board" : session.activeJmTab)
+            if (session.activeEditorTab) setActiveEditorTab(session.activeEditorTab === "activity" ? "desk" : session.activeEditorTab)
+            if (session.activeRiaTab) setActiveRiaTab(session.activeRiaTab === "activity" ? "alerts" : session.activeRiaTab)
             if (session.editorName) setEditorName(session.editorName)
             if (session.editorRank) setEditorRank(session.editorRank)
             if (session.editorInstitution) setEditorInstitution(session.editorInstitution)
@@ -1555,13 +1543,21 @@ export default function Editorial360Page() {
         console.error("Failed to load saved reviewer profile from localStorage", err)
       }
 
-      // Load saved notifications from localStorage
+      // Load saved notifications from localStorage (filtering only important status changes)
       try {
         const storedNotifs = localStorage.getItem("editorial360_notifications")
         if (storedNotifs) {
           const parsed = JSON.parse(storedNotifs)
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setCrossDeskNotifications(parsed)
+            const importantOnly = parsed.filter((n: any) => 
+              n && 
+              !n.id?.startsWith("NOTIF-OUTREACH-") && 
+              !n.id?.startsWith("NOTIF-INV-") &&
+              n.type !== "raw_outreach"
+            )
+            const finalNotifs = importantOnly.length > 0 ? importantOnly : DEFAULT_CROSS_DESK_NOTIFICATIONS
+            setCrossDeskNotifications(finalNotifs)
+            localStorage.setItem("editorial360_notifications", JSON.stringify(finalNotifs))
           }
         }
       } catch (err) {
@@ -1818,14 +1814,15 @@ export default function Editorial360Page() {
 
   const syncServerLiveNotifications = async () => {
     try {
-      const [resRev, resSent, resFeedbacks] = await Promise.all([
+      const [resRev, resFeedbacks, resManuscripts] = await Promise.all([
         fetch("/api/editorial360/reviewers").catch(() => null),
-        fetch("/api/editorial360/sent-invitations").catch(() => null),
-        fetch("/api/editorial360/reviews").catch(() => null)
+        fetch("/api/editorial360/reviews").catch(() => null),
+        fetch("/api/editorial360/manuscripts").catch(() => null)
       ])
 
       const synthesized: CrossDeskNotification[] = []
 
+      // 1. Important peer review status changes (Completed reviews, Accepted evaluations, Declines)
       if (resRev && resRev.ok) {
         const dataRev = await resRev.json().catch(() => null)
         if (dataRev?.ok && Array.isArray(dataRev.history)) {
@@ -1878,51 +1875,12 @@ export default function Editorial360Page() {
                 recipient: "Journal Manager Desk",
                 isRead: false
               })
-            } else {
-              synthesized.push({
-                id: `NOTIF-INV-${item.id}`,
-                timestamp: item.invitedDate || "Recent",
-                paperId: item.paperId || "SOMED-26-RW01",
-                paperTitle: item.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
-                journal: item.journal || "Scholarly Open: Medicine",
-                type: "jm_assignment",
-                severity: "normal",
-                actorName: "Editorial Office",
-                actorRole: "Journal Manager Desk",
-                headline: `Review Invitation Dispatched: ${item.reviewerName}`,
-                summary: `Official double-blind review invitation sent to ${item.reviewerEmail}.`,
-                recipient: item.reviewerEmail,
-                isRead: false
-              })
             }
           })
         }
       }
 
-      if (resSent && resSent.ok) {
-        const dataSent = await resSent.json().catch(() => null)
-        if (dataSent?.ok && Array.isArray(dataSent.sentInvitations)) {
-          dataSent.sentInvitations.forEach((inv: any, idx: number) => {
-            const scholarName = inv.scholarName || inv.name || inv.email
-            synthesized.push({
-              id: `NOTIF-OUTREACH-${inv.id || inv.email || idx}`,
-              timestamp: inv.sentAt ? new Date(inv.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " · Today" : "Today",
-              paperId: inv.paperId || "SOMED-26-RW01",
-              paperTitle: inv.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
-              journal: inv.journal || "Scholarly Open: Medicine",
-              type: "jm_assignment",
-              severity: "normal",
-              actorName: "Scholar Outreach Desk",
-              actorRole: "Journal Manager Desk",
-              headline: `Reviewer Outreach Sent: ${scholarName}`,
-              summary: `Customized invitation dispatched to ${scholarName} (${inv.email}). Tracking token generated.`,
-              recipient: inv.email,
-              isRead: false
-            })
-          })
-        }
-      }
-
+      // 2. Peer review evaluation reports and editorial recommendations
       if (resFeedbacks && resFeedbacks.ok) {
         const dataFb = await resFeedbacks.json().catch(() => null)
         if (dataFb?.ok && Array.isArray(dataFb.reviews)) {
@@ -1946,25 +1904,54 @@ export default function Editorial360Page() {
         }
       }
 
-      if (synthesized.length > 0) {
-        setCrossDeskNotifications(prev => {
-          const existingMap = new Map(prev.map(p => [p.id, p]))
-          const newlyDiscovered: CrossDeskNotification[] = []
-          synthesized.forEach(item => {
-            if (!existingMap.has(item.id)) {
-              newlyDiscovered.push(item)
+      // 3. New manuscript submissions or major article status changes
+      if (resManuscripts && resManuscripts.ok) {
+        const dataMs = await resManuscripts.json().catch(() => null)
+        if (dataMs?.ok && Array.isArray(dataMs.manuscripts)) {
+          dataMs.manuscripts.forEach((m: any) => {
+            if (m.id && m.id !== "SOMED-26-RW01") {
+              synthesized.push({
+                id: `NOTIF-MS-${m.id}-${m.status || "new"}`,
+                timestamp: m.date || "Recent",
+                paperId: m.id,
+                paperTitle: m.title || "Submitted Manuscript",
+                journal: m.journal || "Scholarly Open",
+                type: m.status === "Published" || m.status === "Accepted" ? "editor_decision" : "author_submission",
+                severity: "info",
+                actorName: m.author_name || (m.author_first_name ? `${m.author_first_name} ${m.author_last_name || ""}` : "Author"),
+                actorRole: "Author Desk",
+                headline: m.status ? `Status Update: ${m.id} (${m.status})` : `New Manuscript Submitted: ${m.id}`,
+                summary: `Article "${m.title || m.id}" is now ${m.status || "Submitted"}.`,
+                recipient: "Editorial Desk",
+                isRead: false
+              })
             }
           })
-          if (newlyDiscovered.length === 0) return prev
-          const updated = [...newlyDiscovered, ...prev]
-          try {
-            if (typeof window !== "undefined") {
-              localStorage.setItem("editorial360_notifications", JSON.stringify(updated))
-            }
-          } catch (e) {}
-          return updated
-        })
+        }
       }
+
+      // Clean existing notifications of any mass outreach items and merge
+      setCrossDeskNotifications(prev => {
+        const cleanedPrev = prev.filter(p => 
+          !p.id.startsWith("NOTIF-OUTREACH-") && 
+          !p.id.startsWith("NOTIF-INV-") &&
+          p.type !== "raw_outreach"
+        )
+        const existingMap = new Map(cleanedPrev.map(p => [p.id, p]))
+        const newlyDiscovered: CrossDeskNotification[] = []
+        synthesized.forEach(item => {
+          if (!existingMap.has(item.id)) {
+            newlyDiscovered.push(item)
+          }
+        })
+        const updated = newlyDiscovered.length > 0 ? [...newlyDiscovered, ...cleanedPrev] : cleanedPrev
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("editorial360_notifications", JSON.stringify(updated))
+          }
+        } catch (e) {}
+        return updated
+      })
     } catch (err) {
       console.warn("Failed to sync server live notifications", err)
     }
@@ -1974,7 +1961,7 @@ export default function Editorial360Page() {
     setIsRefreshingFeed(true)
     try {
       await syncServerLiveNotifications()
-      triggerToast(language === "de" ? "Live-Aktivitäts-Feed aktualisiert." : "Live activity feed refreshed.")
+      triggerToast(language === "de" ? "Mitteilungen aktualisiert." : "Notifications updated.")
     } catch (e) {
       console.error("Refresh error:", e)
     } finally {
@@ -2220,6 +2207,45 @@ export default function Editorial360Page() {
   const [isTranslationMenuOpen, setIsTranslationMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
   const workspaceMainRef = useRef<HTMLElement>(null)
+  const notificationMenuRef = useRef<HTMLDivElement>(null)
+  const translationMenuRef = useRef<HTMLDivElement>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
+
+  // Dismiss dropdown menus when clicking anywhere outside or pressing Escape
+  useEffect(() => {
+    if (!isNotificationMenuOpen && !isTranslationMenuOpen && !isUserMenuOpen) return
+
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node
+      if (isNotificationMenuOpen && notificationMenuRef.current && !notificationMenuRef.current.contains(target)) {
+        setIsNotificationMenuOpen(false)
+      }
+      if (isTranslationMenuOpen && translationMenuRef.current && !translationMenuRef.current.contains(target)) {
+        setIsTranslationMenuOpen(false)
+      }
+      if (isUserMenuOpen && userMenuRef.current && !userMenuRef.current.contains(target)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsNotificationMenuOpen(false)
+        setIsTranslationMenuOpen(false)
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("touchstart", handleClickOutside)
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("touchstart", handleClickOutside)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isNotificationMenuOpen, isTranslationMenuOpen, isUserMenuOpen])
 
   // Admin Reviewer Payouts & Honoraria Ledger State
   const [adminPayouts, setAdminPayouts] = useState<Array<{
@@ -6449,7 +6475,7 @@ export default function Editorial360Page() {
               </button>
 
               {/* 2. Translation Icon & Menu */}
-              <div className="relative">
+              <div ref={translationMenuRef} className="relative">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -6496,7 +6522,7 @@ export default function Editorial360Page() {
               </div>
 
               {/* 3. Notification Icon Bell */}
-              <div className="relative">
+              <div ref={notificationMenuRef} className="relative">
                 <button
                   type="button"
                   onClick={() => {
@@ -6547,23 +6573,20 @@ export default function Editorial360Page() {
                       </div>
                     </div>
                     <div 
-                      className="py-2 space-y-2 max-h-72 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                      className="py-2 space-y-2 max-h-80 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                     >
                       {crossDeskNotifications.length === 0 ? (
                         <div className="p-4 text-center text-xs text-slate-400">
-                          {language === "de" ? "Keine Mitteilungen vorhanden." : "No live notifications yet."}
+                          {language === "de" ? "Keine wichtigen Mitteilungen vorhanden." : "No live notifications yet."}
                         </div>
                       ) : (
-                        crossDeskNotifications.slice(0, 6).map((item) => (
+                        crossDeskNotifications.map((item) => (
                           <div
                             key={item.id}
                             onClick={() => {
                               handleMarkNotificationRead(item.id)
                               setIsNotificationMenuOpen(false)
-                              if (role === "jm") setActiveJmTab("activity")
-                              else if (role === "editor") setActiveEditorTab("activity")
-                              else if (role === "ria" || role === "im") setActiveRiaTab("activity")
                             }}
                             className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-[#131418] ${
                               !item.isRead
@@ -6583,26 +6606,24 @@ export default function Editorial360Page() {
                               {item.summary}
                             </p>
                             <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
-                              <span>{item.paperId}</span>
+                              <span className="font-semibold text-slate-600 dark:text-slate-300">{item.paperId}</span>
                               <span>{item.timestamp}</span>
                             </div>
                           </div>
                         ))
                       )}
                     </div>
-                    <div className="pt-2 border-t border-slate-100 dark:border-[#272832] text-center">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsNotificationMenuOpen(false)
-                          if (role === "jm") setActiveJmTab("activity")
-                          else if (role === "editor") setActiveEditorTab("activity")
-                          else if (role === "ria" || role === "im") setActiveRiaTab("activity")
-                        }}
-                        className="text-xs font-bold text-[#0b99ff] hover:underline cursor-pointer inline-flex items-center gap-1"
-                      >
-                        {language === "de" ? "Im Aktivitäts-Feed öffnen →" : "Open in Activity Feed →"}
-                      </button>
+                    <div className="pt-2 border-t border-slate-100 dark:border-[#272832] flex items-center justify-between text-[11px] text-slate-400">
+                      <span>{language === "de" ? "Wichtige Statusänderungen & Entscheide" : "Important status changes & decisions"}</span>
+                      {crossDeskNotifications.some(n => !n.isRead) && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllNotificationsRead}
+                          className="font-semibold text-[#0b99ff] hover:underline cursor-pointer"
+                        >
+                          {language === "de" ? "Alle gelesen" : "Mark all read"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -6611,7 +6632,7 @@ export default function Editorial360Page() {
               <div className="h-6 w-[1px] bg-slate-200 dark:bg-[#272832] mx-0.5" />
 
               {/* 4. Modern User Round Avatar with Green & Grey Online/Offline Dot */}
-              <div className="relative">
+              <div ref={userMenuRef} className="relative">
                 <button
                   type="button"
                   onClick={() => {
@@ -6989,25 +7010,6 @@ export default function Editorial360Page() {
 
                   {role === "jm" && (
                     <>
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "activity"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4" />
-                          <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
-                        </div>
-                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
-                            {crossDeskNotifications.filter(n => !n.isRead).length}
-                          </span>
-                        )}
-                      </button>
 
                       <button 
                         type="button"
@@ -7091,25 +7093,6 @@ export default function Editorial360Page() {
 
                   {role === "editor" && (
                     <>
-                      <button 
-                        type="button"
-                        onClick={() => setActiveEditorTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeEditorTab === "activity"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4" />
-                          <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
-                        </div>
-                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
-                            {crossDeskNotifications.filter(n => !n.isRead).length}
-                          </span>
-                        )}
-                      </button>
 
                       <button 
                         type="button"
@@ -7200,25 +7183,6 @@ export default function Editorial360Page() {
 
                   {(role === "ria" || role === "im") && (
                     <>
-                      <button 
-                        type="button"
-                        onClick={() => setActiveRiaTab("activity")}
-                        className={`flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeRiaTab === "activity"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Bell className="h-4 w-4" />
-                          <span>{language === "de" ? "Aktivitäts-Feed" : "Activity Feed"}</span>
-                        </div>
-                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
-                            {crossDeskNotifications.filter(n => !n.isRead).length}
-                          </span>
-                        )}
-                      </button>
 
                       <button 
                         type="button"
@@ -9603,26 +9567,6 @@ export default function Editorial360Page() {
                     </div>
 
                     {/* ========================================================= */}
-                    {/* TAB 0: NOTIFICATIONS & ACTIVITY (CROSS-DESK SYNC)         */}
-                    {/* ========================================================= */}
-                    {activeRiaTab === "activity" && (
-                      <CrossDeskActivityFeed
-                        language={language}
-                        currentRole="im"
-                        notifications={crossDeskNotifications}
-                        onMarkAsRead={handleMarkNotificationRead}
-                        onMarkAllAsRead={handleMarkAllNotificationsRead}
-                        onRefresh={handleRefreshFeed}
-                        isRefreshing={isRefreshingFeed}
-                        onViewPaperDossier={(paperId) => {
-                          const alert = integrityAlerts.find(a => a.paperId === paperId)
-                          if (alert) {
-                            setActiveAlertId(alert.id)
-                            setIsForensicsOpen(true)
-                          }
-                        }}
-                      />
-                    )}
 
                     {/* TAB 1: ALERTS (FORENSIC QUEUE) */}
                     {activeRiaTab === "alerts" && (

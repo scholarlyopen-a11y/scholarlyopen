@@ -58,7 +58,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { JmManuscript, JmReviewer } from "./journal-manager-workspace"
-import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
+import { CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
 
 export interface EditorReviewFeedback {
@@ -1545,23 +1545,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {!onTabChange && (
         <div className="flex items-center gap-2 border-b border-slate-200/90 dark:border-[#272832] pb-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <button
-            type="button"
-            onClick={() => handleTabSwitch("activity")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
-              currentTab === "activity"
-                ? "bg-[#0b99ff] text-white shadow-xs"
-                : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
-            }`}
-          >
-            <Bell className="h-3.5 w-3.5" />
-            <span>{isDe ? "Aktivitäts-Feed" : "Activity Feed"}</span>
-            {notifications.filter(n => !n.isRead).length > 0 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-red-600 text-white">
-                {notifications.filter(n => !n.isRead).length}
-              </span>
-            )}
-          </button>
 
           <button
             type="button"
@@ -1641,26 +1624,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* TAB 0: NOTIFICATIONS & ACTIVITY FEED                                      */}
-      {/* ========================================================================= */}
-      {currentTab === "activity" && (
-        <CrossDeskActivityFeed
-          language={language}
-          currentRole="editor"
-          notifications={notifications}
-          onMarkAsRead={onMarkAsRead}
-          onMarkAllAsRead={onMarkAllAsRead}
-          onRefresh={onRefreshNotifications}
-          isRefreshing={isRefreshingNotifications}
-          onViewPaperDossier={(paperId) => {
-            const match = manuscripts.find(m => m.id === paperId)
-            if (match) {
-              setSelectedPaperForReviewTracking(match)
-            }
-          }}
-        />
-      )}
 
       {/* ========================================================================= */}
       {/* TAB 1: EDITORIAL DESK & PIPELINE                                          */}
@@ -2498,38 +2461,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* TAB 0: NOTIFICATIONS & ACTIVITY (COMMON ACROSS JM, EDITOR, IM)             */}
-      {/* ========================================================================= */}
-      {currentTab === "activity" && (
-        <CrossDeskActivityFeed
-          language={language}
-          currentRole="editor"
-          notifications={notifications || []}
-          onViewPaperDossier={(paperId) => {
-            let match = manuscripts.find(m => m.id === paperId)
-            if (!match) {
-              const notif = (notifications || []).find(n => n.paperId === paperId)
-              match = {
-                id: paperId,
-                title: notif?.paperTitle || "Submitted Manuscript",
-                journal: notif?.journal || "Social Sciences & Humanities",
-                status: "Under Review",
-                date: "2026-06-03",
-                reviewers: ["Prof. Aris Thorne", "Prof. Hiroshi Tanaka"],
-                integrityStatus: "Clean",
-                authorName: "Dr. Elena Rostova",
-                authorEmail: "e.rostova@urbanresearch.org",
-                authorAffiliation: "Department of Urban Planning & Social Geography",
-                assignedEditorName: "Prof. Aris Thorne",
-                abstract: "Spatial analysis and econometric evaluation of park accessibility across 14 European metropolitan regions assessing socio-economic disparity indexes.",
-                keywords: "Urban Planning, Green Spaces, Socio-Spatial Equity"
-              } as JmManuscript
-            }
-            if (match) setSelectedPaperForDetail(match)
-          }}
-        />
-      )}
 
       {/* ========================================================================= */}
       {/* TAB 5: INTEGRITY & FORENSIC SUITE                                         */}

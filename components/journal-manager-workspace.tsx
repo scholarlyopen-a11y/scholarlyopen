@@ -69,7 +69,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CrossDeskActivityFeed, CrossDeskNotification } from "./cross-desk-activity-feed"
+import { CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml, getJournalBranding } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
 import { OFFICIAL_JOURNALS, getJournalReplyTo } from "@/lib/data/journal-contacts"
@@ -3860,43 +3860,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* TAB 0: NOTIFICATIONS & ACTIVITY (COMMON ACROSS JM, EDITOR, IM)             */}
-      {/* ========================================================================= */}
-      {activeTab === "activity" && (
-        <CrossDeskActivityFeed
-          language={language}
-          currentRole="jm"
-          notifications={notifications}
-          onMarkAsRead={onMarkAsRead}
-          onMarkAllAsRead={onMarkAllAsRead}
-          onRefresh={onRefreshNotifications}
-          isRefreshing={isRefreshingNotifications}
-          onViewPaperDossier={(paperId) => {
-            let match = initialManuscripts.find(m => m.id === paperId)
-            if (!match) {
-              const notif = notifications.find(n => n.paperId === paperId)
-              match = {
-                id: paperId,
-                title: notif?.paperTitle || "Submitted Manuscript",
-                journal: notif?.journal || "Scholarly Open: Medicine",
-                status: "Under Review",
-                date: "2026-09-14",
-                reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza"],
-                integrityStatus: "Clean",
-                authorName: "Sam Lee",
-                authorEmail: "Applied.EBM.Institute@proton.me",
-                authorAffiliation: "Department of Cardiology & Healthcare Operations",
-                assignedEditorName: "Weihua Gong, M.D., Ph.D.",
-                abstract: "Evidence-based clinical operations and acute aortic dissection management.",
-                keywords: "Aortic Dissection, Healthcare Operations, Clinical Emergency"
-              } as JmManuscript
-            }
-            setSelectedManuscript(match)
-            setIsAssignModalOpen(true)
-          }}
-        />
-      )}
 
       {/* ========================================================================= */}
       {/* 2. SUBMISSIONS PIPELINE (UNIFIED LIST VIEW)                               */}
