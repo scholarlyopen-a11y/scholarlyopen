@@ -86,8 +86,12 @@ interface EditorWorkspaceProps {
   onUpdateManuscriptStatus?: (paperId: string, newStatus: JmManuscript["status"]) => void
   integrityAlerts?: any[]
   onResolveIntegrity?: (alertId: string, action: "clear" | "escalate") => void
-  notifications?: any[]
+  notifications?: CrossDeskNotification[]
   onAddNotification?: (notif: any) => void
+  onMarkAsRead?: (id: string) => void
+  onMarkAllAsRead?: () => void
+  onRefreshNotifications?: () => void
+  isRefreshingNotifications?: boolean
   reviews?: EditorReviewFeedback[]
   onReleaseComments?: (revId: string, sanitizedText: string) => void
   user?: {
@@ -387,6 +391,10 @@ export function EditorWorkspace({
   onResolveIntegrity,
   notifications = [],
   onAddNotification,
+  onMarkAsRead,
+  onMarkAllAsRead,
+  onRefreshNotifications,
+  isRefreshingNotifications = false,
   reviews = [],
   onReleaseComments,
   user = {
@@ -1161,7 +1169,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           setEditorReviewerHistory(grouped)
         }
       })
-      .catch(e => console.error("Editor refresh error:", e))
+    // Dispatch live cross-desk activity feed notifications
+    if (onAddNotification) {
+      selectedReviewerNames.forEach(revName => {
+        onAddNotification({
+          type: "jm_assignment",
+          paperId: paperId,
+          paperTitle: paper.title,
+          journal: journalName,
+          actorName: user?.name || "Handling Editor",
+          actorRole: "Editor-in-Chief",
+          headline: `Reviewer Invitation Dispatched: ${revName}`,
+          summary: `Official review invitation dispatched to ${revName} for "${paper.title}".`,
+          recipient: revName,
+          dispatchedLetter: assignEmailBody.replace(/\{\{recipientName\}\}/g, revName),
+          severity: "normal"
+        })
+      })
+    }
 
     setIsAssignSending(false)
     triggerToast(isDe ? "Gutachter-Einladungen erfolgreich versendet!" : "Peer reviewer invitations dispatched!")
@@ -1522,6 +1547,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         <div className="flex items-center gap-2 border-b border-slate-200/90 dark:border-[#272832] pb-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
+            onClick={() => handleTabSwitch("activity")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+              currentTab === "activity"
+                ? "bg-[#0b99ff] text-white shadow-xs"
+                : "bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#20222a]"
+            }`}
+          >
+            <Bell className="h-3.5 w-3.5" />
+            <span>{isDe ? "Aktivitäts-Feed" : "Activity Feed"}</span>
+            {notifications.filter(n => !n.isRead).length > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-red-600 text-white">
+                {notifications.filter(n => !n.isRead).length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleTabSwitch("desk")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
               currentTab === "desk" || currentTab === "overview"
@@ -1596,6 +1639,27 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             <span>{isDe ? "Journal-Kennzahlen" : "Journal Metrics"}</span>
           </button>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 0: NOTIFICATIONS & ACTIVITY FEED                                      */}
+      {/* ========================================================================= */}
+      {currentTab === "activity" && (
+        <CrossDeskActivityFeed
+          language={language}
+          currentRole="editor"
+          notifications={notifications}
+          onMarkAsRead={onMarkAsRead}
+          onMarkAllAsRead={onMarkAllAsRead}
+          onRefresh={onRefreshNotifications}
+          isRefreshing={isRefreshingNotifications}
+          onViewPaperDossier={(paperId) => {
+            const match = manuscripts.find(m => m.id === paperId)
+            if (match) {
+              setSelectedPaperForReviewTracking(match)
+            }
+          }}
+        />
       )}
 
       {/* ========================================================================= */}

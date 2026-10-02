@@ -1554,6 +1554,22 @@ export default function Editorial360Page() {
       } catch (err) {
         console.error("Failed to load saved reviewer profile from localStorage", err)
       }
+
+      // Load saved notifications from localStorage
+      try {
+        const storedNotifs = localStorage.getItem("editorial360_notifications")
+        if (storedNotifs) {
+          const parsed = JSON.parse(storedNotifs)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCrossDeskNotifications(parsed)
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load notifications from localStorage", err)
+      }
+
+      // Initial server sync for live notifications
+      syncServerLiveNotifications()
     }
   }, [])
 
@@ -1624,6 +1640,9 @@ export default function Editorial360Page() {
           }
         })
         .catch(() => {})
+
+      // Also sync live cross-desk notifications in real-time
+      syncServerLiveNotifications()
     }, 12000)
     return () => clearInterval(timer)
   }, [isLoggedIn])
@@ -1662,15 +1681,118 @@ export default function Editorial360Page() {
 
   const [integrityAlerts, setIntegrityAlerts] = useState<IntegrityAlert[]>([])
 
-  const [crossDeskNotifications, setCrossDeskNotifications] = useState<CrossDeskNotification[]>([])
+  const DEFAULT_CROSS_DESK_NOTIFICATIONS: CrossDeskNotification[] = [
+    {
+      id: "NOTIF-INIT-REV-01",
+      timestamp: "14:20 · Today",
+      paperId: "SOMED-26-RW01",
+      paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+      journal: "Scholarly Open: Medicine",
+      type: "review_complete",
+      severity: "normal",
+      actorName: "Dr. Praveen Nagula",
+      actorRole: "Peer Review Desk",
+      headline: "Peer Review Completed by Dr. Praveen Nagula",
+      summary: "Evaluation report submitted for SOMED-26-RW01. Recommendation: Re-write and Re-submit. Priority score: 6/10.",
+      recipient: "Weihua Gong, M.D., Ph.D.",
+      isRead: false
+    },
+    {
+      id: "NOTIF-INIT-INV-02",
+      timestamp: "10:15 · Today",
+      paperId: "SOMED-26-RW01",
+      paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+      journal: "Scholarly Open: Medicine",
+      type: "jm_assignment",
+      severity: "info",
+      actorName: "Dr. Ragab Aziza",
+      actorRole: "Peer Review Desk",
+      headline: "Review Invitation Accepted: Dr. Ragab Aziza",
+      summary: "Dr. Ragab Aziza confirmed acceptance to evaluate SOMED-26-RW01. Electronic review form active.",
+      recipient: "Journal Manager Desk",
+      isRead: false
+    },
+    {
+      id: "NOTIF-INIT-IM-03",
+      timestamp: "09:00 · Today",
+      paperId: "SOMED-26-RW01",
+      paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+      journal: "Scholarly Open: Medicine",
+      type: "eic_cleared",
+      severity: "info",
+      actorName: "Research Integrity Office",
+      actorRole: "Research Integrity Office",
+      headline: "COPE Integrity Screening Verified Clean",
+      summary: "Automated figure similarity and cross-reference check cleared. Plagiarism index: 4%, AI score: 2%.",
+      recipient: "Editorial Board",
+      isRead: true
+    },
+    {
+      id: "NOTIF-INIT-ED-04",
+      timestamp: "Yesterday",
+      paperId: "SOMED-26-RW01",
+      paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+      journal: "Scholarly Open: Medicine",
+      type: "jm_assignment",
+      severity: "normal",
+      actorName: "Journal Manager Desk",
+      actorRole: "Journal Manager Desk",
+      headline: "Handling Editor Assigned: Weihua Gong, M.D., Ph.D.",
+      summary: "Assigned as Handling Editor for SOMED-26-RW01 in Scholarly Open: Medicine.",
+      recipient: "Weihua Gong, M.D., Ph.D.",
+      isRead: true
+    },
+    {
+      id: "NOTIF-INIT-SUB-05",
+      timestamp: "2 days ago",
+      paperId: "SOMED-26-RW01",
+      paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+      journal: "Scholarly Open: Medicine",
+      type: "jm_assignment",
+      severity: "info",
+      actorName: "Dr. Sam Lee",
+      actorRole: "Editorial Office",
+      headline: "New Submission Received: SOMED-26-RW01",
+      summary: "Author Sam Lee submitted review article on clinical operations in Acute Aortic Dissection.",
+      recipient: "Editorial Desk",
+      isRead: true
+    }
+  ]
+
+  const [crossDeskNotifications, setCrossDeskNotifications] = useState<CrossDeskNotification[]>(DEFAULT_CROSS_DESK_NOTIFICATIONS)
+  const [isRefreshingFeed, setIsRefreshingFeed] = useState(false)
+
+  const handleMarkNotificationRead = (id: string) => {
+    setCrossDeskNotifications(prev => {
+      const updated = prev.map(n => n.id === id ? { ...n, isRead: true } : n)
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("editorial360_notifications", JSON.stringify(updated))
+        }
+      } catch (e) {}
+      return updated
+    })
+  }
+
+  const handleMarkAllNotificationsRead = () => {
+    setCrossDeskNotifications(prev => {
+      const updated = prev.map(n => ({ ...n, isRead: true }))
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("editorial360_notifications", JSON.stringify(updated))
+        }
+      } catch (e) {}
+      return updated
+    })
+  }
 
   const handleAddCrossDeskNotification = (notif: Partial<CrossDeskNotification>) => {
     const newEntry: CrossDeskNotification = {
-      id: `NOTIF-00${crossDeskNotifications.length + 1}`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " · Today",
-      paperId: notif.paperId || "MANUSCRIPT",
-      paperTitle: notif.paperTitle || "Submitted Manuscript",
-      journal: notif.journal || "Scholarly Open",
+      id: notif.id || `NOTIF-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      timestamp: notif.timestamp || (new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " · Today"),
+      paperId: notif.paperId || "SOMED-26-RW01",
+      paperTitle: notif.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+      journal: notif.journal || "Scholarly Open: Medicine",
       type: notif.type || "jm_assignment",
       severity: notif.severity || "normal",
       actorName: notif.actorName || "Editorial Desk",
@@ -1681,7 +1803,183 @@ export default function Editorial360Page() {
       recipient: notif.recipient || "Editorial Staff",
       isRead: false
     }
-    setCrossDeskNotifications(prev => [newEntry, ...prev])
+    setCrossDeskNotifications(prev => {
+      const exists = prev.some(n => n.id === newEntry.id)
+      if (exists) return prev
+      const updated = [newEntry, ...prev]
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("editorial360_notifications", JSON.stringify(updated))
+        }
+      } catch (e) {}
+      return updated
+    })
+  }
+
+  const syncServerLiveNotifications = async () => {
+    try {
+      const [resRev, resSent, resFeedbacks] = await Promise.all([
+        fetch("/api/editorial360/reviewers").catch(() => null),
+        fetch("/api/editorial360/sent-invitations").catch(() => null),
+        fetch("/api/editorial360/reviews").catch(() => null)
+      ])
+
+      const synthesized: CrossDeskNotification[] = []
+
+      if (resRev && resRev.ok) {
+        const dataRev = await resRev.json().catch(() => null)
+        if (dataRev?.ok && Array.isArray(dataRev.history)) {
+          dataRev.history.forEach((item: any) => {
+            if (item.status === "Completed") {
+              synthesized.push({
+                id: `NOTIF-REV-${item.id}`,
+                timestamp: item.respondedAt ? new Date(item.respondedAt).toLocaleDateString() : "Recent",
+                paperId: item.paperId || "SOMED-26-RW01",
+                paperTitle: item.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+                journal: item.journal || "Scholarly Open: Medicine",
+                type: "review_complete",
+                severity: "normal",
+                actorName: item.reviewerName,
+                actorRole: "Peer Review Desk",
+                headline: `Peer Review Completed by ${item.reviewerName}`,
+                summary: `Review completed for ${item.paperId}. Recommendation received. Ready for editorial triage.`,
+                recipient: "Weihua Gong, M.D., Ph.D.",
+                isRead: false
+              })
+            } else if (item.status === "Accepted") {
+              synthesized.push({
+                id: `NOTIF-ACC-${item.id}`,
+                timestamp: item.respondedAt ? new Date(item.respondedAt).toLocaleDateString() : "Recent",
+                paperId: item.paperId || "SOMED-26-RW01",
+                paperTitle: item.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+                journal: item.journal || "Scholarly Open: Medicine",
+                type: "jm_assignment",
+                severity: "info",
+                actorName: item.reviewerName,
+                actorRole: "Peer Review Desk",
+                headline: `Review Invitation Accepted: ${item.reviewerName}`,
+                summary: `${item.reviewerName} accepted the invitation to evaluate ${item.paperId}. Due in 14 days.`,
+                recipient: "Journal Manager Desk",
+                isRead: false
+              })
+            } else if (item.status === "Declined") {
+              synthesized.push({
+                id: `NOTIF-DEC-${item.id}`,
+                timestamp: item.respondedAt ? new Date(item.respondedAt).toLocaleDateString() : "Recent",
+                paperId: item.paperId || "SOMED-26-RW01",
+                paperTitle: item.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+                journal: item.journal || "Scholarly Open: Medicine",
+                type: "im_flag",
+                severity: "urgent",
+                actorName: item.reviewerName,
+                actorRole: "Peer Review Desk",
+                headline: `Review Invitation Declined: ${item.reviewerName}`,
+                summary: `${item.reviewerName} declined review invitation for ${item.paperId}.${item.declineReason ? " Reason: " + item.declineReason : ""}`,
+                recipient: "Journal Manager Desk",
+                isRead: false
+              })
+            } else {
+              synthesized.push({
+                id: `NOTIF-INV-${item.id}`,
+                timestamp: item.invitedDate || "Recent",
+                paperId: item.paperId || "SOMED-26-RW01",
+                paperTitle: item.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+                journal: item.journal || "Scholarly Open: Medicine",
+                type: "jm_assignment",
+                severity: "normal",
+                actorName: "Editorial Office",
+                actorRole: "Journal Manager Desk",
+                headline: `Review Invitation Dispatched: ${item.reviewerName}`,
+                summary: `Official double-blind review invitation sent to ${item.reviewerEmail}.`,
+                recipient: item.reviewerEmail,
+                isRead: false
+              })
+            }
+          })
+        }
+      }
+
+      if (resSent && resSent.ok) {
+        const dataSent = await resSent.json().catch(() => null)
+        if (dataSent?.ok && Array.isArray(dataSent.sentInvitations)) {
+          dataSent.sentInvitations.forEach((inv: any, idx: number) => {
+            const scholarName = inv.scholarName || inv.name || inv.email
+            synthesized.push({
+              id: `NOTIF-OUTREACH-${inv.id || inv.email || idx}`,
+              timestamp: inv.sentAt ? new Date(inv.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " · Today" : "Today",
+              paperId: inv.paperId || "SOMED-26-RW01",
+              paperTitle: inv.paperTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+              journal: inv.journal || "Scholarly Open: Medicine",
+              type: "jm_assignment",
+              severity: "normal",
+              actorName: "Scholar Outreach Desk",
+              actorRole: "Journal Manager Desk",
+              headline: `Reviewer Outreach Sent: ${scholarName}`,
+              summary: `Customized invitation dispatched to ${scholarName} (${inv.email}). Tracking token generated.`,
+              recipient: inv.email,
+              isRead: false
+            })
+          })
+        }
+      }
+
+      if (resFeedbacks && resFeedbacks.ok) {
+        const dataFb = await resFeedbacks.json().catch(() => null)
+        if (dataFb?.ok && Array.isArray(dataFb.reviews)) {
+          dataFb.reviews.forEach((rev: any) => {
+            synthesized.push({
+              id: `NOTIF-FEEDBACK-${rev.id}`,
+              timestamp: rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : "Recent",
+              paperId: rev.paperId || "SOMED-26-RW01",
+              paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+              journal: "Scholarly Open: Medicine",
+              type: "review_complete",
+              severity: "normal",
+              actorName: rev.reviewerName,
+              actorRole: "Peer Review Desk",
+              headline: `Peer Evaluation Filed: ${rev.reviewerName}`,
+              summary: `Recommendation: ${rev.recommendation}. Status: ${rev.status}. Author comments sanitized.`,
+              recipient: "Weihua Gong, M.D., Ph.D.",
+              isRead: false
+            })
+          })
+        }
+      }
+
+      if (synthesized.length > 0) {
+        setCrossDeskNotifications(prev => {
+          const existingMap = new Map(prev.map(p => [p.id, p]))
+          const newlyDiscovered: CrossDeskNotification[] = []
+          synthesized.forEach(item => {
+            if (!existingMap.has(item.id)) {
+              newlyDiscovered.push(item)
+            }
+          })
+          if (newlyDiscovered.length === 0) return prev
+          const updated = [...newlyDiscovered, ...prev]
+          try {
+            if (typeof window !== "undefined") {
+              localStorage.setItem("editorial360_notifications", JSON.stringify(updated))
+            }
+          } catch (e) {}
+          return updated
+        })
+      }
+    } catch (err) {
+      console.warn("Failed to sync server live notifications", err)
+    }
+  }
+
+  const handleRefreshFeed = async () => {
+    setIsRefreshingFeed(true)
+    try {
+      await syncServerLiveNotifications()
+      triggerToast(language === "de" ? "Live-Aktivitäts-Feed aktualisiert." : "Live activity feed refreshed.")
+    } catch (e) {
+      console.error("Refresh error:", e)
+    } finally {
+      setTimeout(() => setIsRefreshingFeed(false), 500)
+    }
   }
 
   const [users, setUsers] = useState<WorkspaceUser[]>([
@@ -6210,56 +6508,101 @@ export default function Editorial360Page() {
                   title={language === "de" ? "Benachrichtigungen" : "Notifications"}
                 >
                   <Bell className="h-4 w-4" />
-                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#18191e] animate-pulse" />
+                  {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
+                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#18191e] animate-pulse" />
+                  )}
                 </button>
 
                 {isNotificationMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] shadow-2xl p-4 z-50 animate-in fade-in duration-150 text-left">
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] shadow-2xl p-4 z-50 animate-in fade-in duration-150 text-left">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-[#272832]">
-                      <h4 className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
-                        {language === "de" ? "Arbeitsbereich-Mitteilungen" : "Workspace Notifications"}
-                      </h4>
-                      <span className="text-[11px] font-semibold bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full">
-                        {language === "de" ? "3 Neu" : "3 New"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">
+                          {language === "de" ? "Arbeitsbereich-Mitteilungen" : "Workspace Notifications"}
+                        </h4>
+                        <span className="relative flex h-2 w-2" title="Live sync connected">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 ? (
+                          <>
+                            <span className="text-[10px] font-bold bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full">
+                              {crossDeskNotifications.filter(n => !n.isRead).length} {language === "de" ? "Neu" : "New"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleMarkAllNotificationsRead}
+                              className="text-[10px] text-slate-500 hover:text-[#0b99ff] font-semibold cursor-pointer"
+                            >
+                              {language === "de" ? "Alle gelesen" : "Mark all read"}
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-[10px] font-medium text-slate-400">
+                            {language === "de" ? "Alle gelesen" : "Up to date"}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div 
-                      className="py-2 space-y-2 max-h-64 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                      className="py-2 space-y-2 max-h-72 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                     >
-                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] text-xs">
-                        <p className="font-semibold text-slate-900 dark:text-slate-100">
-                          {language === "de" ? "Neues Manuskript eingereicht" : "New Manuscript Submitted"}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
-                          {language === "de" ? "SOMED-26-RW101 wartet auf Erstprüfung." : "SOMED-26-RW101 awaiting initial evaluation."}
-                        </p>
-                        <span className="text-[11px] text-slate-400 mt-1 block">
-                          {language === "de" ? "vor 10 Min." : "10 mins ago"}
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] text-xs">
-                        <p className="font-semibold text-slate-900 dark:text-slate-100">
-                          {language === "de" ? "Integritäts-Audit-Hinweis" : "Integrity Audit Alert"}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
-                          {language === "de" ? "Integritätsmanager hat Plagiatsprüfungsergebnisse verifiziert." : "Integrity Manager verified plagiarism check results."}
-                        </p>
-                        <span className="text-[11px] text-slate-400 mt-1 block">
-                          {language === "de" ? "vor 1 Std." : "1 hour ago"}
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] text-xs">
-                        <p className="font-semibold text-slate-900 dark:text-slate-100">
-                          {language === "de" ? "Gutachter-Einladung angenommen" : "Review Invitation Accepted"}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
-                          {language === "de" ? "Dr. Marcus Vance hat das Gutachten für MS-2026-118 angenommen." : "Dr. Marcus Vance accepted review task for MS-2026-118."}
-                        </p>
-                        <span className="text-[11px] text-slate-400 mt-1 block">
-                          {language === "de" ? "vor 3 Std." : "3 hours ago"}
-                        </span>
-                      </div>
+                      {crossDeskNotifications.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-slate-400">
+                          {language === "de" ? "Keine Mitteilungen vorhanden." : "No live notifications yet."}
+                        </div>
+                      ) : (
+                        crossDeskNotifications.slice(0, 6).map((item) => (
+                          <div
+                            key={item.id}
+                            onClick={() => {
+                              handleMarkNotificationRead(item.id)
+                              setIsNotificationMenuOpen(false)
+                              if (role === "jm") setActiveJmTab("activity")
+                              else if (role === "editor") setActiveEditorTab("activity")
+                              else if (role === "ria" || role === "im") setActiveRiaTab("activity")
+                            }}
+                            className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-[#131418] ${
+                              !item.isRead
+                                ? "bg-[#0b99ff]/5 border-[#0b99ff]/20 dark:border-sky-900/40"
+                                : "bg-slate-50/50 dark:bg-[#131418]/50 border-slate-100 dark:border-[#272832]"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className={`font-semibold text-slate-900 dark:text-slate-100 line-clamp-1 ${!item.isRead ? "text-[#0b99ff]" : ""}`}>
+                                {item.headline}
+                              </p>
+                              {!item.isRead && (
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#0b99ff] shrink-0 mt-1" />
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                              {item.summary}
+                            </p>
+                            <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
+                              <span>{item.paperId}</span>
+                              <span>{item.timestamp}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <div className="pt-2 border-t border-slate-100 dark:border-[#272832] text-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsNotificationMenuOpen(false)
+                          if (role === "jm") setActiveJmTab("activity")
+                          else if (role === "editor") setActiveEditorTab("activity")
+                          else if (role === "ria" || role === "im") setActiveRiaTab("activity")
+                        }}
+                        className="text-xs font-bold text-[#0b99ff] hover:underline cursor-pointer inline-flex items-center gap-1"
+                      >
+                        {language === "de" ? "Im Aktivitäts-Feed öffnen →" : "Open in Activity Feed →"}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -7196,6 +7539,10 @@ export default function Editorial360Page() {
                     archiveLogs={archiveLogs as any}
                     notifications={crossDeskNotifications}
                     onAddNotification={handleAddCrossDeskNotification}
+                    onMarkAsRead={handleMarkNotificationRead}
+                    onMarkAllAsRead={handleMarkAllNotificationsRead}
+                    onRefreshNotifications={handleRefreshFeed}
+                    isRefreshingNotifications={isRefreshingFeed}
                     user={{
                       name: jmFullName,
                       role: jmStaffRole,
@@ -7242,6 +7589,10 @@ export default function Editorial360Page() {
                     onResolveIntegrity={handleResolveIntegrity}
                     notifications={crossDeskNotifications}
                     onAddNotification={handleAddCrossDeskNotification}
+                    onMarkAsRead={handleMarkNotificationRead}
+                    onMarkAllAsRead={handleMarkAllNotificationsRead}
+                    onRefreshNotifications={handleRefreshFeed}
+                    isRefreshingNotifications={isRefreshingFeed}
                     onUpdateManuscriptStatus={(id, st) => {
                       const nowIso = new Date().toISOString()
                       setManuscripts(prev => {
@@ -9259,12 +9610,10 @@ export default function Editorial360Page() {
                         language={language}
                         currentRole="im"
                         notifications={crossDeskNotifications}
-                        onMarkAsRead={(id) => {
-                          setCrossDeskNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
-                        }}
-                        onMarkAllAsRead={() => {
-                          setCrossDeskNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
-                        }}
+                        onMarkAsRead={handleMarkNotificationRead}
+                        onMarkAllAsRead={handleMarkAllNotificationsRead}
+                        onRefresh={handleRefreshFeed}
+                        isRefreshing={isRefreshingFeed}
                         onViewPaperDossier={(paperId) => {
                           const alert = integrityAlerts.find(a => a.paperId === paperId)
                           if (alert) {

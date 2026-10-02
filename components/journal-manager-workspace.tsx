@@ -307,6 +307,10 @@ interface JournalManagerWorkspaceProps {
   archiveLogs?: JmArchiveLog[]
   notifications?: CrossDeskNotification[]
   onAddNotification?: (notif: any) => void
+  onMarkAsRead?: (id: string) => void
+  onMarkAllAsRead?: () => void
+  onRefreshNotifications?: () => void
+  isRefreshingNotifications?: boolean
   user?: {
     name?: string
     role?: string
@@ -331,6 +335,10 @@ export function JournalManagerWorkspace({
   archiveLogs: initialLogs = [],
   notifications = [],
   onAddNotification,
+  onMarkAsRead,
+  onMarkAllAsRead,
+  onRefreshNotifications,
+  isRefreshingNotifications = false,
   user
 }: JournalManagerWorkspaceProps) {
   const isDe = language === "de"
@@ -2689,6 +2697,39 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     }))
     setSentEmailsHistory(prev => [...newlyDispatchedRecords, ...prev])
 
+    // Dispatch live cross-desk activity feed notifications
+    if (onAddNotification) {
+      if (editor) {
+        onAddNotification({
+          type: "jm_assignment",
+          paperId: msId,
+          paperTitle: msTitle,
+          journal: msJournal,
+          actorName: user?.name || "Journal Manager Desk",
+          actorRole: "Journal Manager Desk",
+          headline: `Handling Editor Assigned: ${editor}`,
+          summary: `Manuscript assigned to ${editor} for peer-review management.`,
+          recipient: editor,
+          severity: "normal"
+        })
+      }
+      assignRecipients.forEach(rec => {
+        onAddNotification({
+          type: "jm_assignment",
+          paperId: msId,
+          paperTitle: msTitle,
+          journal: msJournal,
+          actorName: user?.name || "Journal Manager Desk",
+          actorRole: "Journal Manager Desk",
+          headline: `Reviewer Invitation Dispatched: ${rec.name}`,
+          summary: `Official invitation sent to ${rec.name} (${rec.email}).`,
+          recipient: rec.email,
+          dispatchedLetter: assignEmailBody.replace(/\{\{recipientName\}\}/g, rec.name),
+          severity: "normal"
+        })
+      })
+    }
+
     // Refresh reviewer history cache immediately
     fetch("/api/editorial360/reviewers")
       .then(res => res.json())
@@ -3722,6 +3763,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           language={language}
           currentRole="jm"
           notifications={notifications}
+          onMarkAsRead={onMarkAsRead}
+          onMarkAllAsRead={onMarkAllAsRead}
+          onRefresh={onRefreshNotifications}
+          isRefreshing={isRefreshingNotifications}
           onViewPaperDossier={(paperId) => {
             let match = initialManuscripts.find(m => m.id === paperId)
             if (!match) {
@@ -3729,17 +3774,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               match = {
                 id: paperId,
                 title: notif?.paperTitle || "Submitted Manuscript",
-                journal: notif?.journal || "Social Sciences & Humanities",
+                journal: notif?.journal || "Scholarly Open: Medicine",
                 status: "Under Review",
-                date: "2026-06-03",
-                reviewers: ["Prof. Aris Thorne", "Prof. Hiroshi Tanaka"],
+                date: "2026-09-14",
+                reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza"],
                 integrityStatus: "Clean",
-                authorName: "Dr. Elena Rostova",
-                authorEmail: "e.rostova@urbanresearch.org",
-                authorAffiliation: "Department of Urban Planning & Social Geography",
-                assignedEditorName: "Prof. Aris Thorne",
-                abstract: "Spatial analysis and econometric evaluation of park accessibility across 14 European metropolitan regions assessing socio-economic disparity indexes.",
-                keywords: "Urban Planning, Green Spaces, Socio-Spatial Equity"
+                authorName: "Sam Lee",
+                authorEmail: "Applied.EBM.Institute@proton.me",
+                authorAffiliation: "Department of Cardiology & Healthcare Operations",
+                assignedEditorName: "Weihua Gong, M.D., Ph.D.",
+                abstract: "Evidence-based clinical operations and acute aortic dissection management.",
+                keywords: "Aortic Dissection, Healthcare Operations, Clinical Emergency"
               } as JmManuscript
             }
             setSelectedManuscript(match)

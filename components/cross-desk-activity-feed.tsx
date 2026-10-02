@@ -15,7 +15,10 @@ import {
   Inbox,
   Copy,
   CheckCheck,
-  Eye
+  Eye,
+  RefreshCw,
+  UserCheck,
+  Sparkles
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -52,17 +55,21 @@ interface CrossDeskActivityFeedProps {
   onMarkAsRead?: (id: string) => void
   onMarkAllAsRead?: () => void
   onViewPaperDossier?: (paperId: string) => void
+  onRefresh?: () => void
+  isRefreshing?: boolean
 }
 
 export function CrossDeskActivityFeed({
   language,
-  notifications,
+  notifications = [],
   onMarkAsRead,
   onMarkAllAsRead,
-  onViewPaperDossier
+  onViewPaperDossier,
+  onRefresh,
+  isRefreshing = false
 }: CrossDeskActivityFeedProps) {
   const isDe = language === "de"
-  const [filterType, setFilterType] = useState<"all" | "escalations" | "rulings" | "letters">("all")
+  const [filterType, setFilterType] = useState<"all" | "invitations" | "reviews" | "escalations" | "rulings" | "letters">("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedJournal, setSelectedJournal] = useState("all")
   const [selectedLetterModal, setSelectedLetterModal] = useState<CrossDeskNotification | null>(null)
@@ -82,23 +89,32 @@ export function CrossDeskActivityFeed({
         notif.paperId.toLowerCase().includes(q) ||
         notif.paperTitle.toLowerCase().includes(q) ||
         notif.headline.toLowerCase().includes(q) ||
-        notif.actorName.toLowerCase().includes(q)
+        notif.actorName.toLowerCase().includes(q) ||
+        (notif.recipient && notif.recipient.toLowerCase().includes(q))
       if (!matchesSearch) return false
     }
 
+    if (filterType === "invitations") {
+      return notif.type === "jm_assignment" || notif.headline.toLowerCase().includes("invit") || notif.summary.toLowerCase().includes("invit")
+    }
+    if (filterType === "reviews") {
+      return notif.type === "review_complete" || notif.headline.toLowerCase().includes("review") || notif.summary.toLowerCase().includes("evaluat")
+    }
     if (filterType === "escalations") {
-      return notif.type === "im_escalation" || notif.type === "im_flag"
+      return notif.type === "im_escalation" || notif.type === "im_flag" || notif.severity === "urgent"
     }
     if (filterType === "rulings") {
       return notif.type === "eic_desk_reject" || notif.type === "eic_cleared" || notif.type === "decision_completed"
     }
     if (filterType === "letters") {
-      return notif.type === "eic_inquiry" || notif.type === "eic_raw_data" || notif.type === "eic_desk_reject"
+      return notif.type === "eic_inquiry" || notif.type === "eic_raw_data" || notif.type === "eic_desk_reject" || !!notif.dispatchedLetter
     }
     return true
   })
 
-  const urgentCount = notifications.filter(n => n.severity === "urgent").length
+  const invitationsCount = notifications.filter(n => n.type === "jm_assignment" || n.headline.toLowerCase().includes("invit") || n.summary.toLowerCase().includes("invit")).length
+  const reviewsCount = notifications.filter(n => n.type === "review_complete" || n.headline.toLowerCase().includes("review") || n.summary.toLowerCase().includes("evaluat")).length
+  const urgentCount = notifications.filter(n => n.severity === "urgent" || n.type === "im_escalation").length
   const rulingsCount = notifications.filter(n => n.type === "eic_desk_reject" || n.type === "eic_cleared" || n.type === "decision_completed").length
   const unreadCount = notifications.filter(n => !n.isRead).length
   const lettersCount = notifications.filter(n => !!n.dispatchedLetter).length
@@ -118,6 +134,14 @@ export function CrossDeskActivityFeed({
         </span>
       )
     }
+    if (item.type === "review_complete") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800/60">
+          <FileText className="h-3 w-3" />
+          {isDe ? "Gutachten" : "Peer Review"}
+        </span>
+      )
+    }
     if (item.type === "eic_desk_reject" || item.type === "eic_cleared" || item.type === "decision_completed") {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
@@ -128,9 +152,17 @@ export function CrossDeskActivityFeed({
     }
     if (item.type === "eic_inquiry" || item.type === "eic_raw_data" || item.dispatchedLetter) {
       return (
-        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60">
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
           <Mail className="h-3 w-3" />
           {isDe ? "Korrespondenz" : "Correspondence"}
+        </span>
+      )
+    }
+    if (item.type === "jm_assignment") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60">
+          <UserCheck className="h-3 w-3" />
+          {isDe ? "Einladung / Zuweisung" : "Invitation / Assign"}
         </span>
       )
     }
@@ -144,7 +176,7 @@ export function CrossDeskActivityFeed({
 
   return (
     <div className="space-y-4">
-      {/* 1. Top Control Bar: Search & Journal Filter (Matches Submission Pipeline) */}
+      {/* 1. Top Control Bar: Live Status, Search & Action Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-[#18191e] p-3.5 rounded-2xl border border-slate-200/90 dark:border-[#272832] shadow-xs">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -152,16 +184,25 @@ export function CrossDeskActivityFeed({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={isDe ? "Nach ID, Titel oder Person filtern..." : "Search activity by MS-ID, title, or author..."}
+            placeholder={isDe ? "Nach ID, Titel oder Person filtern..." : "Search activity by MS-ID, title, or scholar..."}
             className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
           />
         </div>
         
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+          {/* Realtime Live Sync Pill */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold select-none">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span>{isDe ? "Live-Synchronisation" : "Realtime Live Feed"}</span>
+          </div>
+
           <select
             value={selectedJournal}
             onChange={(e) => setSelectedJournal(e.target.value)}
-            className="w-full sm:w-auto text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] cursor-pointer"
+            className="text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] cursor-pointer"
           >
             <option value="all">All Journals</option>
             <option value="Medicine">Scholarly Open: Medicine</option>
@@ -169,6 +210,20 @@ export function CrossDeskActivityFeed({
             <option value="Social">Social Sciences & Humanities</option>
             <option value="Decarbonization">Decarbonization & Carbon Tech</option>
           </select>
+
+          {onRefresh && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="h-8 text-xs font-semibold whitespace-nowrap border-slate-200 dark:border-slate-800 px-3 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900"
+              title={isDe ? "Live-Aktivitäten aktualisieren" : "Refresh live events from server"}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isRefreshing ? "animate-spin text-[#0b99ff]" : "text-slate-500"}`} />
+              {isDe ? "Aktualisieren" : "Refresh"}
+            </Button>
+          )}
 
           {unreadCount > 0 && onMarkAllAsRead && (
             <Button
@@ -188,6 +243,8 @@ export function CrossDeskActivityFeed({
       <div className="flex flex-wrap items-center gap-2">
         {[
           { key: "all", label: isDe ? "Alle" : "All", count: notifications.length },
+          { key: "invitations", label: isDe ? "Gutachter-Einladungen" : "Invitations", count: invitationsCount },
+          { key: "reviews", label: isDe ? "Gutachten" : "Peer Reviews", count: reviewsCount },
           { key: "escalations", label: isDe ? "Handlungsbedarf" : "Action Required", count: urgentCount, isAlert: urgentCount > 0 },
           { key: "rulings", label: isDe ? "Entscheidungen" : "Decisions", count: rulingsCount },
           { key: "letters", label: isDe ? "Korrespondenz" : "Correspondence", count: lettersCount }
