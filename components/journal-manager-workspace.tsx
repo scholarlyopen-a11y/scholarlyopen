@@ -1817,18 +1817,28 @@ export function JournalManagerWorkspace({
   const handleFetchJmOpenAlexReviewers = async (paper?: JmManuscript | null, query?: string, page: number = 1, append: boolean = false) => {
     setIsJmSearchingOpenAlex(true)
     try {
-      const pid = (paper?.id || selectedManuscript?.id || "").toLowerCase()
+      const pid = String(paper?.id || selectedManuscript?.id || "").toLowerCase().trim()
       const excludeEmailsList: string[] = []
       if (pid) {
-        sentEmailsHistory.forEach(s => {
-          const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
-          if (matchPid && s.recipientEmail) {
-            excludeEmailsList.push(s.recipientEmail.toLowerCase().trim())
-          }
-        })
-        paperReviewerHistory.forEach(r => {
-          if (r.reviewerEmail) excludeEmailsList.push(r.reviewerEmail.toLowerCase().trim())
-        })
+        if (Array.isArray(sentEmailsHistory)) {
+          sentEmailsHistory.forEach(s => {
+            if (!s) return
+            const sSubject = typeof s.subject === "string" ? s.subject : ""
+            const sPaperId = typeof s.paperId === "string" ? s.paperId : ""
+            const sRecipientEmail = typeof s.recipientEmail === "string" ? s.recipientEmail : ""
+            const matchPid = (sPaperId && sPaperId.toLowerCase() === pid) || (sSubject && sSubject.toLowerCase().includes(pid))
+            if (matchPid && sRecipientEmail) {
+              excludeEmailsList.push(sRecipientEmail.toLowerCase().trim())
+            }
+          })
+        }
+        if (Array.isArray(paperReviewerHistory)) {
+          paperReviewerHistory.forEach(r => {
+            if (r && typeof r.reviewerEmail === "string" && r.reviewerEmail) {
+              excludeEmailsList.push(r.reviewerEmail.toLowerCase().trim())
+            }
+          })
+        }
       }
 
       const res = await fetch("/api/editorial360/match-reviewers", {
@@ -2325,106 +2335,136 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   // Track already invited reviewer emails and names for active manuscript to prevent duplicate invites
   const alreadyInvitedEmailsSet = useMemo(() => {
     const set = new Set<string>()
-    const pid = (selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
+    const pid = String(selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
     if (pid) {
-      sentEmailsHistory.forEach(s => {
-        // Strictly exclude non-review outreach (EiC, Editorial Board, Associate Editor, Authors, etc.)
-        const isNonReview = 
-          s.campaignType === "eic" ||
-          s.campaignType === "ebm" ||
-          s.campaignType === "board" ||
-          s.campaignType === "associate_editor" ||
-          s.campaignType === "call_for_papers" ||
-          s.campaignType === "author" ||
-          s.campaignType === "ecr_masterclass" ||
-          s.campaignType === "ecr_author_waiver" ||
-          (s.subject && (
-            s.subject.toLowerCase().includes("editor-in-chief") ||
-            s.subject.toLowerCase().includes("leadership appointment") ||
-            s.subject.toLowerCase().includes("editorial board") ||
-            s.subject.toLowerCase().includes("associate editor")
-          ))
-        if (isNonReview) return
+      if (Array.isArray(sentEmailsHistory)) {
+        sentEmailsHistory.forEach(s => {
+          if (!s) return
+          const sSubject = typeof s.subject === "string" ? s.subject : ""
+          const sPaperId = typeof s.paperId === "string" ? s.paperId : ""
+          const sRecipientEmail = typeof s.recipientEmail === "string" ? s.recipientEmail : ""
+          const sCampaignType = typeof s.campaignType === "string" ? s.campaignType : ""
 
-        const isReviewInv = 
-          s.campaignType === "reviewer_invitation" || 
-          s.campaignType === "reviewer" ||
-          s.campaignType === "ecr_reviewer" ||
-          (s.subject && s.subject.toLowerCase().includes("review invitation"))
-        if (!isReviewInv) return
+          // Strictly exclude non-review outreach (EiC, Editorial Board, Associate Editor, Authors, etc.)
+          const isNonReview = 
+            sCampaignType === "eic" ||
+            sCampaignType === "ebm" ||
+            sCampaignType === "board" ||
+            sCampaignType === "associate_editor" ||
+            sCampaignType === "call_for_papers" ||
+            sCampaignType === "author" ||
+            sCampaignType === "ecr_masterclass" ||
+            sCampaignType === "ecr_author_waiver" ||
+            (sSubject && (
+              sSubject.toLowerCase().includes("editor-in-chief") ||
+              sSubject.toLowerCase().includes("leadership appointment") ||
+              sSubject.toLowerCase().includes("editorial board") ||
+              sSubject.toLowerCase().includes("associate editor")
+            ))
+          if (isNonReview) return
 
-        const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
-        if (matchPid && s.recipientEmail) {
-          set.add(s.recipientEmail.toLowerCase().trim())
-        }
-      })
-      paperReviewerHistory.forEach(r => {
-        // Exclude any non-reviewer outreach from paper history
-        const isNonRev = (r as any).campaignType === "eic" ||
-          (r as any).campaignType === "ebm" ||
-          r.reviewerName?.toLowerCase().includes("verpoort") ||
-          r.reviewerEmail?.toLowerCase().includes("verpoort") ||
-          r.reviewerName?.toLowerCase().includes("cacciola") ||
-          r.reviewerName?.toLowerCase().includes("karampitianis")
-        if (!isNonRev && r.reviewerEmail) {
-          set.add(r.reviewerEmail.toLowerCase().trim())
-        }
-      })
+          const isReviewInv = 
+            sCampaignType === "reviewer_invitation" || 
+            sCampaignType === "reviewer" ||
+            sCampaignType === "ecr_reviewer" ||
+            (sSubject && sSubject.toLowerCase().includes("review invitation"))
+          if (!isReviewInv) return
+
+          const matchPid = (sPaperId && sPaperId.toLowerCase() === pid) || (sSubject && sSubject.toLowerCase().includes(pid))
+          if (matchPid && sRecipientEmail) {
+            set.add(sRecipientEmail.toLowerCase().trim())
+          }
+        })
+      }
+      if (Array.isArray(paperReviewerHistory)) {
+        paperReviewerHistory.forEach(r => {
+          if (!r) return
+          const rName = typeof r.reviewerName === "string" ? r.reviewerName : ""
+          const rEmail = typeof r.reviewerEmail === "string" ? r.reviewerEmail : ""
+          const isNonRev = (r as any).campaignType === "eic" ||
+            (r as any).campaignType === "ebm" ||
+            rName.toLowerCase().includes("verpoort") ||
+            rEmail.toLowerCase().includes("verpoort") ||
+            rName.toLowerCase().includes("cacciola") ||
+            rName.toLowerCase().includes("karampitianis")
+          if (!isNonRev && rEmail) {
+            set.add(rEmail.toLowerCase().trim())
+          }
+        })
+      }
     }
     return set
   }, [selectedManuscript?.id, trackingManuscript?.id, sentEmailsHistory, paperReviewerHistory])
 
   const alreadyInvitedNamesSet = useMemo(() => {
     const set = new Set<string>()
-    const pid = (selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
+    const pid = String(selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
     if (pid) {
-      sentEmailsHistory.forEach(s => {
-        // Strictly exclude non-review outreach (EiC, Editorial Board, Associate Editor, Authors, etc.)
-        const isNonReview = 
-          s.campaignType === "eic" ||
-          s.campaignType === "ebm" ||
-          s.campaignType === "board" ||
-          s.campaignType === "associate_editor" ||
-          s.campaignType === "call_for_papers" ||
-          s.campaignType === "author" ||
-          s.campaignType === "ecr_masterclass" ||
-          s.campaignType === "ecr_author_waiver" ||
-          (s.subject && (
-            s.subject.toLowerCase().includes("editor-in-chief") ||
-            s.subject.toLowerCase().includes("leadership appointment") ||
-            s.subject.toLowerCase().includes("editorial board") ||
-            s.subject.toLowerCase().includes("associate editor")
-          ))
-        if (isNonReview) return
+      if (Array.isArray(sentEmailsHistory)) {
+        sentEmailsHistory.forEach(s => {
+          if (!s) return
+          const sSubject = typeof s.subject === "string" ? s.subject : ""
+          const sPaperId = typeof s.paperId === "string" ? s.paperId : ""
+          const sRecipientName = typeof s.recipientName === "string" ? s.recipientName : ""
+          const sCampaignType = typeof s.campaignType === "string" ? s.campaignType : ""
 
-        const isReviewInv = 
-          s.campaignType === "reviewer_invitation" || 
-          s.campaignType === "reviewer" ||
-          s.campaignType === "ecr_reviewer" ||
-          (s.subject && s.subject.toLowerCase().includes("review invitation"))
-        if (!isReviewInv) return
+          const isNonReview = 
+            sCampaignType === "eic" ||
+            sCampaignType === "ebm" ||
+            sCampaignType === "board" ||
+            sCampaignType === "associate_editor" ||
+            sCampaignType === "call_for_papers" ||
+            sCampaignType === "author" ||
+            sCampaignType === "ecr_masterclass" ||
+            sCampaignType === "ecr_author_waiver" ||
+            (sSubject && (
+              sSubject.toLowerCase().includes("editor-in-chief") ||
+              sSubject.toLowerCase().includes("leadership appointment") ||
+              sSubject.toLowerCase().includes("editorial board") ||
+              sSubject.toLowerCase().includes("associate editor")
+            ))
+          if (isNonReview) return
 
-        const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
-        if (matchPid && s.recipientName) {
-          set.add(s.recipientName.toLowerCase().trim())
-        }
-      })
-      paperReviewerHistory.forEach(r => {
-        const isNonRev = (r as any).campaignType === "eic" ||
-          (r as any).campaignType === "ebm" ||
-          r.reviewerName?.toLowerCase().includes("verpoort") ||
-          r.reviewerEmail?.toLowerCase().includes("verpoort") ||
-          r.reviewerName?.toLowerCase().includes("cacciola") ||
-          r.reviewerName?.toLowerCase().includes("karampitianis")
-        if (!isNonRev && r.reviewerName) {
-          set.add(r.reviewerName.toLowerCase().trim())
-        }
-      })
-      if (selectedManuscript?.reviewers) {
-        selectedManuscript.reviewers.forEach(r => set.add(r.toLowerCase().trim()))
+          const isReviewInv = 
+            sCampaignType === "reviewer_invitation" || 
+            sCampaignType === "reviewer" ||
+            sCampaignType === "ecr_reviewer" ||
+            (sSubject && sSubject.toLowerCase().includes("review invitation"))
+          if (!isReviewInv) return
+
+          const matchPid = (sPaperId && sPaperId.toLowerCase() === pid) || (sSubject && sSubject.toLowerCase().includes(pid))
+          if (matchPid && sRecipientName) {
+            set.add(sRecipientName.toLowerCase().trim())
+          }
+        })
       }
-      if (trackingManuscript?.reviewers) {
-        trackingManuscript.reviewers.forEach(r => set.add(r.toLowerCase().trim()))
+      if (Array.isArray(paperReviewerHistory)) {
+        paperReviewerHistory.forEach(r => {
+          if (!r) return
+          const rName = typeof r.reviewerName === "string" ? r.reviewerName : ""
+          const rEmail = typeof r.reviewerEmail === "string" ? r.reviewerEmail : ""
+          const isNonRev = (r as any).campaignType === "eic" ||
+            (r as any).campaignType === "ebm" ||
+            rName.toLowerCase().includes("verpoort") ||
+            rEmail.toLowerCase().includes("verpoort") ||
+            rName.toLowerCase().includes("cacciola") ||
+            rName.toLowerCase().includes("karampitianis")
+          if (!isNonRev && rName) {
+            set.add(rName.toLowerCase().trim())
+          }
+        })
+      }
+      if (Array.isArray(selectedManuscript?.reviewers)) {
+        selectedManuscript.reviewers.forEach(r => {
+          if (typeof r === "string") set.add(r.toLowerCase().trim())
+          else if (r && typeof (r as any).name === "string") set.add((r as any).name.toLowerCase().trim())
+        })
+      }
+      if (Array.isArray(trackingManuscript?.reviewers)) {
+        trackingManuscript.reviewers.forEach(r => {
+          if (typeof r === "string") set.add(r.toLowerCase().trim())
+          else if (r && typeof (r as any).name === "string") set.add((r as any).name.toLowerCase().trim())
+        })
       }
     }
     return set
@@ -2571,20 +2611,25 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   // Handle open Assign Modal
   const handleOpenAssign = (ms: JmManuscript, isAlternate = false) => {
     try {
+      if (!ms) return
       setSelectedManuscript(ms)
       // NEVER pre-select existing reviewers. When inviting alternate/fresh reviewers,
       // starting with an empty selection prevents accidentally re-inviting already assigned reviewers.
       setSelectedReviewers([])
-      const boardCandidates = getBoardCandidatesForJournal(ms.journal, ms.author || ms.authorName)
+      const msJournal = ms.journal || "Scholarly Open: Medicine"
+      const msAuthor = ms.author || ms.authorName || ""
+      const msId = ms.id || "Manuscript"
+      const msTitle = ms.title || "Paper"
+      const boardCandidates = getBoardCandidatesForJournal(msJournal, msAuthor)
       const defaultEd = ms.assignedEditorName || (boardCandidates.length > 0 ? boardCandidates[0].name : "Justice Kofi Boakye-Appiah, M.D., Ph.D.")
       setSelectedEditor(defaultEd)
-      const initialSubject = `Review Invitation: ${ms.id} - ${ms.title}`
+      const initialSubject = `Review Invitation: ${msId} - ${msTitle}`
       const initialBody = `Dear {{recipientName}},
 
-You have been invited to serve as an expert peer reviewer for the following manuscript submitted to ${ms.journal}:
+You have been invited to serve as an expert peer reviewer for the following manuscript submitted to ${msJournal}:
 
-Manuscript ID: ${ms.id}
-Title: ${ms.title}
+Manuscript ID: ${msId}
+Title: ${msTitle}
 
 We would be grateful if you could provide your expert assessment on the originality, methodology, and data integrity of this work. This evaluation is conducted under double-blind peer review standards in full compliance with COPE guidelines.
 
@@ -2596,9 +2641,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       setAssignEmailBody(initialBody)
       setAssignEmailTab("edit")
       setAssignStep("select")
-      const defaultFrom = getJournalReplyTo(ms.journal) || "editor.med@scholarlyopen.org"
+      const defaultFrom = getJournalReplyTo(msJournal) || "editor.med@scholarlyopen.org"
       setAssignFromEmail(defaultFrom)
-      setAssignSenderName(`${ms.journal} Editorial Office`)
+      setAssignSenderName(`${msJournal} Editorial Office`)
 
       if (isAlternate) {
         setJmReviewerSourceTab("suggested")
@@ -2607,7 +2652,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           : typeof ms.keywords === "string"
           ? ms.keywords.replace(/[;,]/g, " ")
           : ""
-        const seedQuery = seedKeywords.trim() || (ms.title ? ms.title.slice(0, 60) : "")
+        const seedQuery = seedKeywords.trim() || (msTitle ? msTitle.slice(0, 60) : "")
         if (seedQuery) {
           setJmOpenAlexQuery(seedQuery)
         }
@@ -7537,7 +7582,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
             {/* TAB 2: GLOBAL SCHOLARS (CLEAN MINIMAL METADATA) */}
             {jmReviewerSourceTab === "suggested" && (() => {
-              const allCandidates = (jmOpenAlexResults || [
+              const allCandidates = (Array.isArray(jmOpenAlexResults) && jmOpenAlexResults.length > 0 ? jmOpenAlexResults : [
                 {
                   name: "Prof. Hiroshi Tanaka",
                   institution: "University of Tokyo (Japan)",
@@ -7562,15 +7607,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               ])
 
               const totalAlreadyInvited = allCandidates.filter(rev => {
-                const isEmailInvited = rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
-                const isNameInvited = rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
+                if (!rev) return false
+                const isEmailInvited = typeof rev.email === "string" && rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
+                const isNameInvited = typeof rev.name === "string" && rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
                 return Boolean(isEmailInvited || isNameInvited)
               }).length
 
               const visibleCandidates = hideAlreadyInvited
                 ? allCandidates.filter(rev => {
-                    const isEmailInvited = rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
-                    const isNameInvited = rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
+                    if (!rev) return false
+                    const isEmailInvited = typeof rev.email === "string" && rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
+                    const isNameInvited = typeof rev.name === "string" && rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
                     return !isEmailInvited && !isNameInvited
                   })
                 : allCandidates
@@ -7678,10 +7725,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </div>
                     ) : (
                       visibleCandidates.map((rev, idx) => {
-                        const isEmailInvited = rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
-                        const isNameInvited = rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
+                        if (!rev) return null
+                        const revName = typeof rev.name === "string" ? rev.name : "Reviewer"
+                        const revEmail = typeof rev.email === "string" ? rev.email : ""
+                        const revInst = typeof rev.institution === "string" ? rev.institution : ""
+                        const revSpec = typeof rev.specialty === "string" ? rev.specialty : ""
+                        const revMetrics = typeof rev.metrics === "string" ? rev.metrics : ""
+                        const isEmailInvited = Boolean(revEmail && alreadyInvitedEmailsSet.has(revEmail.toLowerCase().trim()))
+                        const isNameInvited = Boolean(revName && alreadyInvitedNamesSet.has(revName.toLowerCase().trim()))
                         const isAlreadyInvited = Boolean(isEmailInvited || isNameInvited)
-                        const isChecked = selectedReviewers.includes(rev.name)
+                        const isChecked = selectedReviewers.includes(revName)
 
                         if (isAlreadyInvited) {
                           return (
@@ -7692,16 +7745,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             >
                               <div className="space-y-0.5 pr-2">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{rev.name}</span>
-                                  <span className="text-[11px] text-slate-500">· {rev.institution}</span>
+                                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{revName}</span>
+                                  {revInst && <span className="text-[11px] text-slate-500">· {revInst}</span>}
                                   <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800 flex items-center gap-1">
                                     <Check className="h-3 w-3" /> Already Invited
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">
-                                  <span className="text-slate-600 dark:text-slate-400 font-medium">{rev.specialty}</span>
-                                  <span>•</span>
-                                  <span className="text-slate-500 font-mono text-[10px]">{rev.email}</span>
+                                  <span className="text-slate-600 dark:text-slate-400 font-medium">{revSpec}</span>
+                                  {revEmail && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-slate-500 font-mono text-[10px]">{revEmail}</span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                               <input type="checkbox" disabled checked={false} className="rounded text-slate-300 h-4 w-4 shrink-0 cursor-not-allowed opacity-40" />
@@ -7714,25 +7771,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             key={idx}
                             onClick={() => {
                               if (isChecked) {
-                                setSelectedReviewers(prev => prev.filter(n => n !== rev.name))
+                                setSelectedReviewers(prev => prev.filter(n => n !== revName))
                               } else {
-                                setSelectedReviewers(prev => [...prev, rev.name])
-                                const candidateEmail = rev.email || (
-                                  rev.name.toLowerCase().includes("tanaka") ? "h.tanaka@u-tokyo.ac.jp" :
-                                  rev.name.toLowerCase().includes("jenkins") ? "s.jenkins@ed.ac.uk" :
-                                  rev.name.toLowerCase().includes("dupond") ? "claire.dupond@sorbonne-universite.fr" :
-                                  rev.name.toLowerCase().includes("wang x") ? "wxiaozeng@163.com" :
-                                  rev.name.toLowerCase().includes("wang b") ? "wangbindl@hotmail.com" :
-                                  rev.name.toLowerCase().includes("zhong w") ? "wuzhong71@scu.edu.cn" :
+                                setSelectedReviewers(prev => [...prev, revName])
+                                const lowerName = revName.toLowerCase()
+                                const candidateEmail = revEmail || (
+                                  lowerName.includes("tanaka") ? "h.tanaka@u-tokyo.ac.jp" :
+                                  lowerName.includes("jenkins") ? "s.jenkins@ed.ac.uk" :
+                                  lowerName.includes("dupond") ? "claire.dupond@sorbonne-universite.fr" :
+                                  lowerName.includes("wang x") ? "wxiaozeng@163.com" :
+                                  lowerName.includes("wang b") ? "wangbindl@hotmail.com" :
+                                  lowerName.includes("zhong w") ? "wuzhong71@scu.edu.cn" :
                                   ""
                                 )
                                 if (candidateEmail) {
                                   setExternalReviewersList(prev => {
-                                    const withoutThis = prev.filter(x => x.name.toLowerCase() !== rev.name.toLowerCase())
+                                    const withoutThis = prev.filter(x => (x.name || "").toLowerCase() !== lowerName)
                                     return [...withoutThis, {
-                                      name: rev.name,
+                                      name: revName,
                                       email: candidateEmail,
-                                      affiliation: rev.institution || rev.specialty || ""
+                                      affiliation: revInst || revSpec || ""
                                     }]
                                   })
                                 }
@@ -7744,18 +7802,22 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           >
                             <div className="space-y-0.5 pr-2">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-semibold text-slate-900 dark:text-white text-xs">{rev.name}</span>
-                                <span className="text-[11px] text-slate-500">· {rev.institution}</span>
-                                {rev.email && (
+                                <span className="font-semibold text-slate-900 dark:text-white text-xs">{revName}</span>
+                                {revInst && <span className="text-[11px] text-slate-500">· {revInst}</span>}
+                                {revEmail && (
                                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
-                                    ({rev.email})
+                                    ({revEmail})
                                   </span>
                                 )}
                               </div>
                               <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">
-                                <span className="text-slate-700 dark:text-slate-300 font-medium">{rev.specialty}</span>
-                                <span>•</span>
-                                <span className="text-[#0b99ff] font-medium">{rev.metrics}</span>
+                                <span className="text-slate-700 dark:text-slate-300 font-medium">{revSpec}</span>
+                                {revMetrics && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="text-[#0b99ff] font-medium">{revMetrics}</span>
+                                  </>
+                                )}
                               </div>
                             </div>
                             <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded text-[#0b99ff] h-4 w-4 shrink-0" />
@@ -9499,8 +9561,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     variant="outline"
                     onClick={() => {
                       if (trackingManuscript) {
+                        const targetMs = trackingManuscript
                         setIsTrackModalOpen(false)
-                        handleOpenAssign(trackingManuscript, true)
+                        setTimeout(() => {
+                          handleOpenAssign(targetMs, true)
+                        }, 50)
                       }
                     }}
                     className="h-7 text-[11px] font-semibold border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -9584,8 +9649,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             size="sm"
                             onClick={() => {
                               if (trackingManuscript) {
+                                const targetMs = trackingManuscript
                                 setIsTrackModalOpen(false)
-                                handleOpenAssign(trackingManuscript, true)
+                                setTimeout(() => {
+                                  handleOpenAssign(targetMs, true)
+                                }, 50)
                               }
                             }}
                             className="h-8 text-xs font-semibold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer whitespace-nowrap shrink-0 mt-1 md:mt-0"
@@ -9944,8 +10012,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               variant="outline"
               size="sm"
               onClick={() => {
+                const targetMs = trackingManuscript
                 setIsTrackModalOpen(false)
-                if (trackingManuscript) handleOpenAssign(trackingManuscript, true)
+                setTimeout(() => {
+                  if (targetMs) handleOpenAssign(targetMs, true)
+                }, 50)
               }}
               className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/30 cursor-pointer whitespace-nowrap"
             >
