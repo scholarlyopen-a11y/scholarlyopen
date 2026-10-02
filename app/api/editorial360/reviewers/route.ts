@@ -121,17 +121,47 @@ export async function GET(req: Request) {
       }
 
       for (const s of sentList) {
-        const isReviewInv = s.campaignType === "editorial_outreach" || (s.subject && s.subject.toLowerCase().includes("review invitation"))
-        if (isReviewInv && s.recipientName && s.recipientEmail) {
-          const matchPid = s.paperId || (s.subject ? s.subject.match(/([A-Z]{3,5}-\d{2}-[A-Z0-9]+)/)?.[1] : null) || ""
+        // Exclude all non-review outreach campaigns (EiC, Editorial Board, Associate Editor, Authors, ECR Masterclass, etc.)
+        const isNonReview = 
+          s.campaignType === "eic" ||
+          s.campaignType === "ebm" ||
+          s.campaignType === "board" ||
+          s.campaignType === "associate_editor" ||
+          s.campaignType === "call_for_papers" ||
+          s.campaignType === "author" ||
+          s.campaignType === "ecr_masterclass" ||
+          s.campaignType === "ecr_author_waiver" ||
+          (s.subject && (
+            s.subject.toLowerCase().includes("editor-in-chief") ||
+            s.subject.toLowerCase().includes("leadership appointment") ||
+            s.subject.toLowerCase().includes("editorial board") ||
+            s.subject.toLowerCase().includes("associate editor") ||
+            s.subject.toLowerCase().includes("call for papers") ||
+            s.subject.toLowerCase().includes("waiver")
+          ))
+
+        if (isNonReview) continue
+
+        // Must be an explicit reviewer invitation
+        const isReviewInv = 
+          s.campaignType === "reviewer_invitation" || 
+          s.campaignType === "reviewer" ||
+          s.campaignType === "ecr_reviewer" ||
+          (s.subject && s.subject.toLowerCase().includes("review invitation"))
+
+        // Must have an explicit manuscript ID associated with it (NEVER fallback to SOMED-26-RW01)
+        const matchPid = (s.paperId && s.paperId !== "SO-POOL-2026" ? s.paperId : null) || 
+          (s.subject ? s.subject.match(/([A-Z]{3,5}-\d{2}-[A-Z0-9]+)/)?.[1] : null)
+
+        if (isReviewInv && matchPid && s.recipientName && s.recipientEmail) {
           const exists = results.some(r => 
             r.reviewerEmail.toLowerCase() === s.recipientEmail.toLowerCase() &&
-            (r.paperId.toLowerCase() === matchPid.toLowerCase() || (s.subject && s.subject.toLowerCase().includes(r.paperId.toLowerCase())))
+            r.paperId.toLowerCase() === matchPid.toLowerCase()
           )
           if (!exists) {
             results.push({
               id: s.id || `SENT-REV-${Date.now()}-${s.recipientEmail}`,
-              paperId: matchPid || "SOMED-26-RW01",
+              paperId: matchPid,
               paperTitle: s.paperTitle || s.subject?.split(" - ")?.[1] || "Manuscript",
               journal: s.journal || "Scholarly Open",
               reviewerName: s.recipientName,

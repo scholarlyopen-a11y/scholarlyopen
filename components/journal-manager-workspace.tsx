@@ -2328,13 +2328,47 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     const pid = (selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
     if (pid) {
       sentEmailsHistory.forEach(s => {
+        // Strictly exclude non-review outreach (EiC, Editorial Board, Associate Editor, Authors, etc.)
+        const isNonReview = 
+          s.campaignType === "eic" ||
+          s.campaignType === "ebm" ||
+          s.campaignType === "board" ||
+          s.campaignType === "associate_editor" ||
+          s.campaignType === "call_for_papers" ||
+          s.campaignType === "author" ||
+          s.campaignType === "ecr_masterclass" ||
+          s.campaignType === "ecr_author_waiver" ||
+          (s.subject && (
+            s.subject.toLowerCase().includes("editor-in-chief") ||
+            s.subject.toLowerCase().includes("leadership appointment") ||
+            s.subject.toLowerCase().includes("editorial board") ||
+            s.subject.toLowerCase().includes("associate editor")
+          ))
+        if (isNonReview) return
+
+        const isReviewInv = 
+          s.campaignType === "reviewer_invitation" || 
+          s.campaignType === "reviewer" ||
+          s.campaignType === "ecr_reviewer" ||
+          (s.subject && s.subject.toLowerCase().includes("review invitation"))
+        if (!isReviewInv) return
+
         const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
         if (matchPid && s.recipientEmail) {
           set.add(s.recipientEmail.toLowerCase().trim())
         }
       })
       paperReviewerHistory.forEach(r => {
-        if (r.reviewerEmail) set.add(r.reviewerEmail.toLowerCase().trim())
+        // Exclude any non-reviewer outreach from paper history
+        const isNonRev = (r as any).campaignType === "eic" ||
+          (r as any).campaignType === "ebm" ||
+          r.reviewerName?.toLowerCase().includes("verpoort") ||
+          r.reviewerEmail?.toLowerCase().includes("verpoort") ||
+          r.reviewerName?.toLowerCase().includes("cacciola") ||
+          r.reviewerName?.toLowerCase().includes("karampitianis")
+        if (!isNonRev && r.reviewerEmail) {
+          set.add(r.reviewerEmail.toLowerCase().trim())
+        }
       })
     }
     return set
@@ -2345,13 +2379,46 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     const pid = (selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
     if (pid) {
       sentEmailsHistory.forEach(s => {
+        // Strictly exclude non-review outreach (EiC, Editorial Board, Associate Editor, Authors, etc.)
+        const isNonReview = 
+          s.campaignType === "eic" ||
+          s.campaignType === "ebm" ||
+          s.campaignType === "board" ||
+          s.campaignType === "associate_editor" ||
+          s.campaignType === "call_for_papers" ||
+          s.campaignType === "author" ||
+          s.campaignType === "ecr_masterclass" ||
+          s.campaignType === "ecr_author_waiver" ||
+          (s.subject && (
+            s.subject.toLowerCase().includes("editor-in-chief") ||
+            s.subject.toLowerCase().includes("leadership appointment") ||
+            s.subject.toLowerCase().includes("editorial board") ||
+            s.subject.toLowerCase().includes("associate editor")
+          ))
+        if (isNonReview) return
+
+        const isReviewInv = 
+          s.campaignType === "reviewer_invitation" || 
+          s.campaignType === "reviewer" ||
+          s.campaignType === "ecr_reviewer" ||
+          (s.subject && s.subject.toLowerCase().includes("review invitation"))
+        if (!isReviewInv) return
+
         const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
         if (matchPid && s.recipientName) {
           set.add(s.recipientName.toLowerCase().trim())
         }
       })
       paperReviewerHistory.forEach(r => {
-        if (r.reviewerName) set.add(r.reviewerName.toLowerCase().trim())
+        const isNonRev = (r as any).campaignType === "eic" ||
+          (r as any).campaignType === "ebm" ||
+          r.reviewerName?.toLowerCase().includes("verpoort") ||
+          r.reviewerEmail?.toLowerCase().includes("verpoort") ||
+          r.reviewerName?.toLowerCase().includes("cacciola") ||
+          r.reviewerName?.toLowerCase().includes("karampitianis")
+        if (!isNonRev && r.reviewerName) {
+          set.add(r.reviewerName.toLowerCase().trim())
+        }
       })
       if (selectedManuscript?.reviewers) {
         selectedManuscript.reviewers.forEach(r => set.add(r.toLowerCase().trim()))
@@ -2382,6 +2449,17 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
 
     if (paperReviewerHistory.length > 0) {
       paperReviewerHistory.forEach(h => {
+        // Exclude any non-reviewer outreach entries (such as EiC, Editorial Board, etc.)
+        const isNonReview = (h as any).campaignType === "eic" || 
+          (h as any).campaignType === "ebm" || 
+          (h as any).campaignType === "board" || 
+          (h as any).campaignType === "associate_editor" ||
+          h.reviewerName?.toLowerCase().includes("verpoort") || 
+          h.reviewerEmail?.toLowerCase().includes("verpoort") ||
+          h.reviewerName?.toLowerCase().includes("cacciola") ||
+          h.reviewerName?.toLowerCase().includes("karampitianis")
+        if (isNonReview) return
+
         rawList.push({
           id: h.id,
           name: h.reviewerName?.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : h.reviewerName,
@@ -2415,11 +2493,38 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
       })
     }
 
-    // Merge persistent sent invitations for this manuscript (such as the members invited via outreach)
+    // Merge persistent sent reviewer invitations strictly matching this manuscript
     sentEmailsHistory.forEach(s => {
+      // Exclude all non-review outreach campaigns (EiC, Editorial Board, Associate Editor, Authors, ECR Masterclass, etc.)
+      const isNonReview = 
+        s.campaignType === "eic" ||
+        s.campaignType === "ebm" ||
+        s.campaignType === "board" ||
+        s.campaignType === "associate_editor" ||
+        s.campaignType === "call_for_papers" ||
+        s.campaignType === "author" ||
+        s.campaignType === "ecr_masterclass" ||
+        s.campaignType === "ecr_author_waiver" ||
+        (s.subject && (
+          s.subject.toLowerCase().includes("editor-in-chief") ||
+          s.subject.toLowerCase().includes("leadership appointment") ||
+          s.subject.toLowerCase().includes("editorial board") ||
+          s.subject.toLowerCase().includes("associate editor") ||
+          s.subject.toLowerCase().includes("call for papers")
+        ))
+      if (isNonReview) return
+
+      // Must be an explicit reviewer invitation
+      const isReviewInv = 
+        s.campaignType === "reviewer_invitation" || 
+        s.campaignType === "reviewer" ||
+        s.campaignType === "ecr_reviewer" ||
+        (s.subject && s.subject.toLowerCase().includes("review invitation"))
+      if (!isReviewInv) return
+
+      // Must explicitly match this manuscript's ID
       const matchPid = (s.paperId && s.paperId.toLowerCase() === msId) ||
-        (s.subject && s.subject.toLowerCase().includes(msId)) ||
-        (isMedAortic && (s.subject?.toLowerCase().includes("prevent earlier") || s.subject?.toLowerCase().includes("aortic dissection")))
+        (s.subject && s.subject.toLowerCase().includes(msId))
       
       if (matchPid && s.recipientName && s.recipientEmail) {
         const alreadyPresent = rawList.some(r => 
@@ -2691,7 +2796,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       paperId: msId,
       paperTitle: msTitle,
       journal: msJournal,
-      campaignType: "editorial_outreach" as const,
+      campaignType: "reviewer_invitation" as const,
       timestamp: nowIso,
       status: "Delivered" as const
     }))
