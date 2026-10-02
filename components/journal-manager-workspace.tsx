@@ -64,7 +64,8 @@ import {
   Loader2,
   Copy,
   UserCheck,
-  Printer
+  Printer,
+  RefreshCw
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -2580,12 +2581,15 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         (s.subject && s.subject.toLowerCase().includes(msId))
       
       if (matchPid && s.recipientName && s.recipientEmail) {
-        const alreadyPresent = rawList.some(r => 
-          r.email.toLowerCase() === s.recipientEmail.toLowerCase() ||
-          r.name.toLowerCase() === s.recipientName.toLowerCase() ||
-          r.name.toLowerCase().includes(s.recipientName.toLowerCase()) ||
-          s.recipientName.toLowerCase().includes(r.name.toLowerCase())
-        )
+        const sRecipientEmail = String(s.recipientEmail).toLowerCase().trim()
+        const sRecipientName = String(s.recipientName).toLowerCase().trim()
+        const alreadyPresent = rawList.some(r => {
+          const rEmail = String(r.email || "").toLowerCase().trim()
+          const rName = String(r.name || "").toLowerCase().trim()
+          return (rEmail && rEmail === sRecipientEmail) ||
+            (rName && rName === sRecipientName) ||
+            (rName && sRecipientName && (rName.includes(sRecipientName) || sRecipientName.includes(rName)))
+        })
         if (!alreadyPresent) {
           rawList.push({
             id: s.id || `sent-${s.recipientEmail}`,
@@ -2601,8 +2605,8 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
 
     const seenKeys = new Set<string>()
     return rawList.filter(item => {
-      const key = (item.email || item.name).toLowerCase()
-      if (seenKeys.has(key)) return false
+      const key = String(item.email || item.name || "").toLowerCase().trim()
+      if (!key || seenKeys.has(key)) return false
       seenKeys.add(key)
       return true
     })
@@ -2923,7 +2927,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         if (data?.ok && Array.isArray(data.history)) {
           setGlobalReviewerHistory(data.history)
           if (trackingManuscript?.id) {
-            setPaperReviewerHistory(data.history.filter((h: any) => h.paperId.toLowerCase() === trackingManuscript.id.toLowerCase()))
+            const trackId = String(trackingManuscript.id).toLowerCase().trim()
+            setPaperReviewerHistory(data.history.filter((h: any) => h?.paperId && String(h.paperId).toLowerCase().trim() === trackId))
           }
         }
       })
@@ -9584,20 +9589,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               ) : (
                 modalReviewerDisplayList.map((rev) => {
-                  const revName = rev.name
-                  const isDeclined = rev.status === "Declined"
-                  const isInvitedOnly = rev.status === "Invited"
-                  const isNagula = revName.toLowerCase().includes("nagula") || rev.email.toLowerCase().includes("nagula")
-                  const isAziza = revName.toLowerCase().includes("aziza") || rev.email.toLowerCase().includes("aziza")
+                  const revName = rev?.name || "Reviewer"
+                  const revEmail = rev?.email || ""
+                  const isDeclined = rev?.status === "Declined"
+                  const isInvitedOnly = rev?.status === "Invited"
+                  const isNagula = revName.toLowerCase().includes("nagula") || revEmail.toLowerCase().includes("nagula")
+                  const isAziza = revName.toLowerCase().includes("aziza") || revEmail.toLowerCase().includes("aziza")
 
                   // Match any real submitted review from initialReviews (strict name/email match)
-                  const matchedReview = initialReviews.find(r => 
-                    (r.paperId?.toLowerCase() === trackingManuscript?.id?.toLowerCase() || (r as any).manuscriptId?.toLowerCase() === trackingManuscript?.id?.toLowerCase()) &&
-                    (
-                      (r.reviewerName && (r.reviewerName.toLowerCase().includes(revName.toLowerCase()) || revName.toLowerCase().includes(r.reviewerName.toLowerCase()))) ||
-                      (r.reviewerEmail && rev.email && r.reviewerEmail.toLowerCase() === rev.email.toLowerCase())
-                    )
-                  )
+                  const trackMsId = String(trackingManuscript?.id || "").toLowerCase().trim()
+                  const matchedReview = initialReviews.find(r => {
+                    const rPaperId = String(r.paperId || (r as any).manuscriptId || "").toLowerCase().trim()
+                    const rRevName = String(r.reviewerName || "").toLowerCase().trim()
+                    const rRevEmail = String(r.reviewerEmail || "").toLowerCase().trim()
+                    const lRevName = revName.toLowerCase().trim()
+                    const lRevEmail = revEmail.toLowerCase().trim()
+                    const matchesPaper = rPaperId && trackMsId && rPaperId === trackMsId
+                    const matchesName = rRevName && lRevName && (rRevName.includes(lRevName) || lRevName.includes(rRevName))
+                    const matchesEmail = rRevEmail && lRevEmail && rRevEmail === lRevEmail
+                    return Boolean(matchesPaper && (matchesName || matchesEmail))
+                  })
 
                   // Reviewer status: Dr. Nagula submitted RAF, Dr. Aziza is still actively reviewing
                   const isSubmitted = !isAziza && (isNagula || (!!matchedReview && !!matchedReview.reviewerName && matchedReview.reviewerName.toLowerCase().includes(revName.toLowerCase())) || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane")))
@@ -9750,7 +9761,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   Reviewer #1
                                 </span>
                               )}
-                              {(revName.toLowerCase().includes("aziza") || rev.email.includes("aziza")) && (
+                              {isAziza && (
                                 <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-1.5 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">
                                   Reviewer #2
                                 </span>
