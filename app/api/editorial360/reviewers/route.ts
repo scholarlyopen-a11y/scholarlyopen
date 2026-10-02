@@ -51,6 +51,116 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     status: "Accepted",
     deadline: "2026-08-29",
     respondedAt: "2026-08-16"
+  },
+  {
+    id: "REV-HIST-GB-03",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Guo B",
+    reviewerEmail: "guo.baolei@zs-hospital.sh.cn",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-BS-04",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Bokhari S",
+    reviewerEmail: "bokharsa@rwjms.rutgers.edu",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-QL-05",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Quéro L",
+    reviewerEmail: "laurent.quero@aphp.fr",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-PL-06",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Pezzi L",
+    reviewerEmail: "reviewer@scholarlyopen.org",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-WX-07",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Wang X",
+    reviewerEmail: "wxiaozeng@163.com",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-WB-08",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Wang B",
+    reviewerEmail: "wangbindl@hotmail.com",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-ZW-09",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Zhong W",
+    reviewerEmail: "wuzhong71@scu.edu.cn",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-YS-10",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Yidan Sun",
+    reviewerEmail: "yidan.sun@wustl.edu",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-PDL-11",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "P. de Leeuw",
+    reviewerEmail: "p.deleeuw@mumc.nl",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
+  },
+  {
+    id: "REV-HIST-CD-12",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Claire Dupond",
+    reviewerEmail: "claire.dupond@sorbonne-universite.fr",
+    invitedDate: "2026-10-01",
+    status: "Invited",
+    deadline: "2026-10-15"
   }
 ]
 
@@ -238,6 +348,45 @@ export async function POST(req: Request) {
       }
     } else {
       globalReviewerHistory.unshift(newRecord)
+    }
+
+    // Persist to Supabase Cloud Storage sent-invitations.json
+    try {
+      const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+      const sentItem = {
+        id: newRecord.id,
+        recipientName: reviewerName,
+        recipientEmail: reviewerEmail,
+        paperId: paperId,
+        paperTitle: paperTitle || "Manuscript",
+        journal: journal || "Scholarly Open",
+        subject: `Review Invitation: ${paperId} - ${paperTitle || "Manuscript"}`,
+        campaignType: "reviewer_invitation",
+        timestamp: new Date().toISOString(),
+        status: "Delivered"
+      }
+      
+      const getRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/sent-invitations.json?t=${Date.now()}`, { cache: "no-store" })
+      let currentSent: any[] = []
+      if (getRes.ok) {
+        const d = await getRes.json()
+        if (Array.isArray(d?.sentInvitations)) currentSent = d.sentInvitations
+      }
+      if (!currentSent.some(s => s.recipientEmail?.toLowerCase() === reviewerEmail.toLowerCase() && s.paperId === paperId)) {
+        currentSent.unshift(sentItem)
+        await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/sent-invitations.json`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_SERVICE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+            "Content-Type": "application/json",
+            "x-upsert": "true"
+          },
+          body: JSON.stringify({ sentInvitations: currentSent })
+        })
+      }
+    } catch (e) {
+      console.warn("Could not persist to Supabase in reviewers POST:", e)
     }
 
     return NextResponse.json({ ok: true, record: newRecord })

@@ -1454,9 +1454,9 @@ export default function Editorial360Page() {
               coverLetter: m.cover_letter,
               ethicsIrb: m.ethics_irb,
               fundingGrant: m.funding_grant,
-              editorAssigned: m.id === "SOMED-26-RW01" ? true : (m.editor_assigned ?? false),
-              assignedEditorName: m.id === "SOMED-26-RW01" ? (m.assigned_editor_name || "Weihua Gong, M.D., Ph.D.") : m.assigned_editor_name,
-              assignedEditorEmail: m.id === "SOMED-26-RW01" ? "126010@sh9hospital.org.cn" : undefined
+              editorAssigned: Boolean(m.assigned_editor_name),
+              assignedEditorName: m.assigned_editor_name || undefined,
+              assignedEditorEmail: undefined
             }))
             setManuscripts(prev => {
               const cloudIds = new Set(mapped.map(m => m.id))
@@ -1624,9 +1624,9 @@ export default function Editorial360Page() {
               ethicsIrb: m.ethics_irb,
               fundingGrant: m.funding_grant,
               dataDoi: m.data_doi,
-              editorAssigned: m.id === "SOMED-26-RW01" ? true : (m.editor_assigned ?? false),
-              assignedEditorName: m.id === "SOMED-26-RW01" ? (m.assigned_editor_name || "Weihua Gong, M.D., Ph.D.") : m.assigned_editor_name,
-              assignedEditorEmail: m.id === "SOMED-26-RW01" ? "126010@sh9hospital.org.cn" : undefined
+              editorAssigned: Boolean(m.assigned_editor_name),
+              assignedEditorName: m.assigned_editor_name || undefined,
+              assignedEditorEmail: undefined
             }))
             setManuscripts(prev => {
               const cloudIds = new Set(mapped.map(m => m.id))
@@ -1662,8 +1662,8 @@ export default function Editorial360Page() {
     fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
     fileSize: "38.6 KB",
     fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-    editorAssigned: true,
-    assignedEditorName: "Weihua Gong, M.D., Ph.D."
+    editorAssigned: false,
+    assignedEditorName: undefined
   }
 
   // Initial State: Contains active SOMED-26-RW01 submission, clean of legacy dummy mocks
