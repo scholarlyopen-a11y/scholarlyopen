@@ -9185,28 +9185,28 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* MODAL 6: PEER REVIEW PROGRESS & REVIEWER TRACKING                         */}
       {/* ========================================================================= */}
       <Dialog open={isTrackModalOpen} onOpenChange={setIsTrackModalOpen}>
-        <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[88vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl rounded-2xl">
-          <DialogHeader className="p-5 pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0 pr-12">
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2">
+        <DialogContent className="w-[96vw] sm:max-w-4xl lg:max-w-5xl max-h-[90vh] !flex !flex-col p-0 sm:p-0 gap-0 overflow-hidden bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl rounded-2xl">
+          <DialogHeader className="p-5 pb-3.5 border-b border-slate-100 dark:border-slate-800 shrink-0 pr-14">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-3">
               <span>Review Tracker</span>
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 shrink-0">
                 {trackingManuscript?.id}
               </span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 line-clamp-2 mt-1">
+            <DialogDescription className="text-xs text-slate-500 line-clamp-2 mt-1 break-words">
               {trackingManuscript?.title}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-4 text-xs min-w-0">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 space-y-4 text-xs min-w-0 w-full box-border">
             {/* Handling Editor Info & Invitation */}
             {trackingManuscript?.assignedEditorName ? (
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
-                <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
                     <UserCheck className="h-4 w-4" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <span className="text-slate-400 font-medium block text-[11px] uppercase tracking-wider">Handling Editor</span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white truncate block">{trackingManuscript.assignedEditorName}</span>
                   </div>
@@ -9229,13 +9229,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               </div>
             ) : (
-              <div className="p-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-300 dark:border-amber-700/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in min-w-0">
-                <div className="flex items-start sm:items-center gap-3 min-w-0">
+              <div className="p-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-300 dark:border-amber-700/60 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 animate-in fade-in min-w-0 w-full box-border">
+                <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                   <div className="h-9 w-9 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700/60 mt-0.5 sm:mt-0">
                     <AlertTriangle className="h-5 w-5" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
                         No Handling Editor Assigned Yet
                       </span>
@@ -9243,7 +9243,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         Action Required
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 break-words">
                       Double-blind peer review is underway, but no Handling Editor has been appointed yet. As Journal Manager, you can invite an editor from the board or invite a guest handling editor.
                     </p>
                   </div>
@@ -9255,7 +9255,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setEditorInviteSuccessMsg(null)
                     setIsInviteEditorModalOpen(true)
                   }}
-                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-3.5 rounded-lg shadow-sm cursor-pointer shrink-0 transition-all whitespace-nowrap"
+                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-3.5 rounded-lg shadow-sm cursor-pointer shrink-0 transition-all whitespace-nowrap mt-1 md:mt-0"
                 >
                   <UserPlus className="h-3.5 w-3.5 mr-1" />
                   Invite / Assign Handling Editor
@@ -9265,17 +9265,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
             {/* 1/2 Reviews Active Banner for SOMED-26-RW01 */}
             {(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.title?.includes("Prevent Earlier")) && (
-              <div className="p-3.5 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0 animate-in fade-in">
-                <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+              <div className="p-3.5 sm:p-4 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border animate-in fade-in">
+                <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
                   <div className="h-8 w-8 rounded-lg bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0 border border-sky-200 dark:border-sky-800 mt-0.5 sm:mt-0">
                     <Clock className="h-4 w-4" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="font-bold text-slate-900 dark:text-white text-xs flex flex-wrap items-center gap-2">
                       <span>Peer Review Round in Progress (1 of 2 Reports Completed)</span>
                       <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">50% Logged</span>
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 break-words">
                       Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is currently reviewing.
                     </div>
                   </div>
@@ -9288,7 +9288,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setViewingRafData(PRAVEEN_NAGULA_RAF)
                     setIsViewingRafModalOpen(true)
                   }}
-                  className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap mt-1 sm:mt-0"
+                  className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap mt-1 md:mt-0"
                 >
                   <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400 shrink-0" />
                   View Dr. Nagula&apos;s RAF
@@ -9298,10 +9298,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
             {/* 2/2 Complete Banner with Prompt Editor Action */}
             {((trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && trackingManuscript?.id !== "SOMED-26-RW01") && (
-              <div className="p-3.5 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0 animate-in fade-in">
-                <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-3.5 sm:p-4 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border animate-in fade-in">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 shrink-0" />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="font-bold text-slate-900 dark:text-white text-xs">
                       All Assigned Reviews Completed (2/2)
                     </div>
@@ -9332,7 +9332,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       }
                     })
                   }}
-                  className={`text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap ${
+                  className={`text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap mt-1 md:mt-0 ${
                     promptedEditors[trackingManuscript?.id || ""]
                       ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700 hover:bg-indigo-100"
                       : "bg-purple-600 hover:bg-purple-700 text-white shadow-xs"
@@ -9448,10 +9448,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     return (
                       <div 
                         key={rev.id || revName}
-                        className="p-3.5 sm:p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20 space-y-2.5 transition-all animate-in fade-in min-w-0"
+                        className="p-3.5 sm:p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20 space-y-2.5 transition-all animate-in fade-in min-w-0 w-full box-border"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full">
+                          <div className="flex flex-wrap items-center gap-2.5 min-w-0 flex-1">
                             <div className="min-w-0">
                               <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
                                 {revName}
@@ -9473,7 +9473,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 handleOpenAssign(trackingManuscript, true)
                               }
                             }}
-                            className="h-8 text-xs font-semibold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer whitespace-nowrap shrink-0"
+                            className="h-8 text-xs font-semibold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer whitespace-nowrap shrink-0 mt-1 md:mt-0"
                           >
                             <UserPlus className="h-3.5 w-3.5 mr-1" />
                             Invite Replacement
@@ -9498,10 +9498,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     return (
                       <div 
                         key={rev.id || revName}
-                        className="p-3.5 sm:p-4 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/10 space-y-2.5 transition-all animate-in fade-in min-w-0"
+                        className="p-3.5 sm:p-4 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/10 space-y-2.5 transition-all animate-in fade-in min-w-0 w-full box-border"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full">
+                          <div className="flex flex-wrap items-center gap-2.5 min-w-0 flex-1">
                             <div className="min-w-0">
                               <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
                                 {revName}
@@ -9515,7 +9515,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </span>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 sm:mt-0">
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
                             <Button
                               size="sm"
                               variant="outline"
@@ -9551,13 +9551,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   return (
                     <div 
                       key={rev.id || revName}
-                      className={`p-3.5 sm:p-4 rounded-xl border transition-all space-y-2.5 min-w-0 ${
+                      className={`p-3.5 sm:p-4 rounded-xl border transition-all space-y-2.5 min-w-0 w-full box-border ${
                         isOverdue 
                           ? "bg-red-50/40 dark:bg-red-950/20 border-red-200 dark:border-red-900/40" 
                           : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full">
                         <div className="flex flex-wrap items-center gap-2.5 min-w-0">
                           <div className="min-w-0">
                             <h4 className="text-sm font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-1.5 min-w-0">
@@ -9602,7 +9602,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </div>
 
                         {!isSubmitted ? (
-                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 sm:mt-0">
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
                             <Button
                               size="sm"
                               variant="outline"
@@ -9656,7 +9656,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             )}
                           </div>
                         ) : (
-                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 sm:mt-0">
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
                             {/* View Full RAF button specifically for Dr. Praveen Nagula who submitted the RAF */}
                             {isNagula && (
                               <Button
@@ -9772,7 +9772,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           </div>
 
-          <DialogFooter className="p-4 px-5 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/50 dark:bg-slate-900/50 flex flex-row items-center justify-between gap-2">
+          <DialogFooter className="p-4 px-6 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/70 dark:bg-slate-900/70 flex flex-row items-center justify-between gap-3 w-full box-border">
             <Button
               variant="outline"
               size="sm"
@@ -9780,7 +9780,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 setIsTrackModalOpen(false)
                 if (trackingManuscript) handleOpenAssign(trackingManuscript, true)
               }}
-              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/30 cursor-pointer"
+              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/30 cursor-pointer whitespace-nowrap"
             >
               <UserPlus className="h-3.5 w-3.5 mr-1" />
               Invite Alternate Reviewer
@@ -9788,7 +9788,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             <Button
               size="sm"
               onClick={() => setIsTrackModalOpen(false)}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer whitespace-nowrap"
             >
               Close Tracker
             </Button>
