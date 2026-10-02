@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import {
   Mail,
   Send,
@@ -11,7 +11,9 @@ import {
   RefreshCw,
   X,
   FileText,
-  Globe
+  Globe,
+  Trash2,
+  RotateCcw
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -58,6 +60,47 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
   const [isSending, setIsSending] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [languagePreset, setLanguagePreset] = useState<"en" | "de">("en")
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const defaultBodyRef = useRef("")
+  const defaultSubjectRef = useRef("")
+
+  const handleDeleteSelectionOrClear = () => {
+    if (textareaRef.current) {
+      const el = textareaRef.current
+      const start = el.selectionStart
+      const end = el.selectionEnd
+      if (start !== null && end !== null && start !== end) {
+        const cur = el.value
+        const updated = cur.slice(0, start) + cur.slice(end)
+        setBodyText(updated)
+        requestAnimationFrame(() => {
+          el.focus()
+          el.setSelectionRange(start, start)
+        })
+        return
+      }
+    }
+    setBodyText("")
+    textareaRef.current?.focus()
+  }
+
+  const handleSelectAll = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus()
+      textareaRef.current.select()
+    }
+  }
+
+  const handleResetTemplate = () => {
+    if (defaultBodyRef.current) {
+      setBodyText(defaultBodyRef.current)
+    }
+    if (defaultSubjectRef.current) {
+      setSubject(defaultSubjectRef.current)
+    }
+    textareaRef.current?.focus()
+  }
 
   const handleJournalChange = (newJournal: string) => {
     const oldJournal = selectedJournal
@@ -184,6 +227,9 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
         setBodyText(initialBody)
         setSubject(initialSubject)
       }
+
+      defaultBodyRef.current = initialBody
+      defaultSubjectRef.current = initialSubject
 
       setRecipientEmail(config.recipientEmail)
       setActiveTab("compose")
@@ -394,15 +440,66 @@ export function EmailDispatchDialog({ language = "en", config }: EmailDispatchDi
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {isDe ? "Nachrichtentext (Freitext oder Vorlage)" : "Message Body (Editable for this recipient)"}
-                </label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {isDe ? "Nachrichtentext (Freitext oder Vorlage)" : "Message Body (Editable for this recipient)"}
+                  </label>
+                  <div className="flex items-center gap-1.5 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={handleSelectAll}
+                      className="px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer font-medium transition-all"
+                      title="Select all text in box (Ctrl+A)"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteSelectionOrClear}
+                      className="px-2 py-0.5 rounded text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 cursor-pointer font-medium transition-all flex items-center gap-1"
+                      title="Delete selected text or clear box"
+                    >
+                      <Trash2 className="h-2.5 w-2.5" />
+                      <span>Delete Selected</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResetTemplate}
+                      className="px-2 py-0.5 rounded text-[#0b99ff] hover:text-[#0088e0] bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 cursor-pointer font-medium transition-all flex items-center gap-1"
+                      title="Reset template to default"
+                    >
+                      <RotateCcw className="h-2.5 w-2.5" />
+                      <span>Reset</span>
+                    </button>
+                  </div>
+                </div>
                 <textarea
+                  ref={textareaRef}
                   rows={9}
                   value={bodyText}
                   onChange={(e) => setBodyText(e.target.value)}
-                  className="w-full p-3 text-xs font-mono leading-relaxed bg-white dark:bg-[#20222a] border border-slate-200 dark:border-[#272832] rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Delete" || e.code === "Delete") {
+                      const target = e.currentTarget
+                      const start = target.selectionStart
+                      const end = target.selectionEnd
+                      if (start !== null && end !== null && start !== end) {
+                        e.preventDefault()
+                        const cur = target.value
+                        const updated = cur.slice(0, start) + cur.slice(end)
+                        setBodyText(updated)
+                        requestAnimationFrame(() => {
+                          target.setSelectionRange(start, start)
+                        })
+                      }
+                    }
+                  }}
+                  className="w-full p-3 text-xs font-mono leading-relaxed bg-white dark:bg-[#20222a] border border-slate-200 dark:border-[#272832] rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff] select-text"
                 />
               </div>
             </div>

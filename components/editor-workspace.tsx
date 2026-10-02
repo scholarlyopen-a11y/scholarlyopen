@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { 
   LayoutDashboard, 
   FileText, 
@@ -510,6 +510,7 @@ export function EditorWorkspace({
   const [assignEmailBody, setAssignEmailBody] = useState("")
   const [assignEmailTab, setAssignEmailTab] = useState<"edit" | "preview">("edit")
   const [isAssignSending, setIsAssignSending] = useState(false)
+  const editorAssignEmailBodyRef = useRef<HTMLTextAreaElement>(null)
 
   // Live Reviewer Progress Popup Modal State
   const [selectedPaperForReviewTracking, setSelectedPaperForReviewTracking] = useState<JmManuscript | null>(null)
@@ -4396,15 +4397,93 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
               {/* Body Edit or Preview */}
               {assignEmailTab === "edit" ? (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Schreiben:" : "Letter Body:"}
-                  </label>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      {isDe ? "Schreiben:" : "Letter Body:"}
+                    </label>
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (editorAssignEmailBodyRef.current) {
+                            editorAssignEmailBodyRef.current.focus()
+                            editorAssignEmailBodyRef.current.select()
+                          }
+                        }}
+                        className="px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer font-medium transition-all"
+                        title="Select all text (Ctrl+A)"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (editorAssignEmailBodyRef.current) {
+                            const el = editorAssignEmailBodyRef.current
+                            const start = el.selectionStart
+                            const end = el.selectionEnd
+                            if (start !== null && end !== null && start !== end) {
+                              const cur = el.value
+                              setAssignEmailBody(cur.slice(0, start) + cur.slice(end))
+                              requestAnimationFrame(() => {
+                                el.focus()
+                                el.setSelectionRange(start, start)
+                              })
+                              return
+                            }
+                          }
+                          setAssignEmailBody("")
+                          editorAssignEmailBodyRef.current?.focus()
+                        }}
+                        className="px-2 py-0.5 rounded text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 cursor-pointer font-medium transition-all"
+                        title="Delete selected text or clear"
+                      >
+                        Delete Selected
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (selectedPaperForReviewers) {
+                            const defaultSubject = `Review Invitation: ${selectedPaperForReviewers.id} - ${selectedPaperForReviewers.title}`
+                            const defaultBody = `Dear {{recipientName}},\n\nYou have been invited to serve as an expert peer reviewer for the following manuscript submitted to ${selectedPaperForReviewers.journal || user.journal}:\n\nManuscript ID: ${selectedPaperForReviewers.id}\nTitle: ${selectedPaperForReviewers.title}\n\nWe would be grateful if you could provide your expert assessment on the originality, methodology, and data integrity of this work. This evaluation is conducted under double-blind peer review standards in full compliance with COPE guidelines.\n\nWe kindly request that you complete your evaluation within 14 calendar days of acceptance.\n\nPlease use the buttons below to access your reviewer scorecard or confirm your availability.`
+                            setAssignEmailSubject(defaultSubject)
+                            setAssignEmailBody(defaultBody)
+                          }
+                        }}
+                        className="px-2 py-0.5 rounded text-[#0b99ff] hover:text-[#0088e0] bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 cursor-pointer font-medium transition-all"
+                        title="Reset template to default"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
                   <textarea
+                    ref={editorAssignEmailBodyRef}
                     rows={9}
                     value={assignEmailBody}
                     onChange={(e) => setAssignEmailBody(e.target.value)}
-                    className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseUp={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerUp={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Delete" || e.code === "Delete") {
+                        const target = e.currentTarget
+                        const start = target.selectionStart
+                        const end = target.selectionEnd
+                        if (start !== null && end !== null && start !== end) {
+                          e.preventDefault()
+                          const cur = target.value
+                          const updated = cur.slice(0, start) + cur.slice(end)
+                          setAssignEmailBody(updated)
+                          requestAnimationFrame(() => {
+                            target.setSelectionRange(start, start)
+                          })
+                        }
+                      }
+                    }}
+                    className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed select-text"
                   />
                 </div>
               ) : (

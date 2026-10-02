@@ -102,6 +102,51 @@ export async function GET(req: Request) {
     const email = searchParams.get("email")
 
     let results = [...globalReviewerHistory]
+
+    // Read persistent sent review invitations from Supabase storage / local file
+    try {
+      let sentList: any[] = []
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/sent-invitations.json?t=${Date.now()}`, { cache: "no-store" })
+      if (res.ok) {
+        const data = await res.json()
+        if (data && Array.isArray(data.sentInvitations)) {
+          sentList = data.sentInvitations
+        }
+      } else {
+        const localSentPath = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
+        if (fs.existsSync(localSentPath)) {
+          const parsed = JSON.parse(fs.readFileSync(localSentPath, "utf-8"))
+          if (Array.isArray(parsed?.sentInvitations)) sentList = parsed.sentInvitations
+        }
+      }
+
+      for (const s of sentList) {
+        const isReviewInv = s.campaignType === "editorial_outreach" || (s.subject && s.subject.toLowerCase().includes("review invitation"))
+        if (isReviewInv && s.recipientName && s.recipientEmail) {
+          const matchPid = s.paperId || (s.subject ? s.subject.match(/([A-Z]{3,5}-\d{2}-[A-Z0-9]+)/)?.[1] : null) || ""
+          const exists = results.some(r => 
+            r.reviewerEmail.toLowerCase() === s.recipientEmail.toLowerCase() &&
+            (r.paperId.toLowerCase() === matchPid.toLowerCase() || (s.subject && s.subject.toLowerCase().includes(r.paperId.toLowerCase())))
+          )
+          if (!exists) {
+            results.push({
+              id: s.id || `SENT-REV-${Date.now()}-${s.recipientEmail}`,
+              paperId: matchPid || "SOMED-26-RW01",
+              paperTitle: s.paperTitle || s.subject?.split(" - ")?.[1] || "Manuscript",
+              journal: s.journal || "Scholarly Open",
+              reviewerName: s.recipientName,
+              reviewerEmail: s.recipientEmail,
+              invitedDate: s.timestamp ? s.timestamp.split("T")[0] : "2026-10-01",
+              status: "Invited",
+              deadline: "2026-10-15"
+            })
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not sync sent invitations in reviewers route:", e)
+    }
+
     if (paperId) {
       const pid = paperId.toLowerCase().trim()
       results = results.filter(r => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, useCallback } from "react"
+import { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { 
   LayoutDashboard, 
@@ -400,6 +400,8 @@ export function JournalManagerWorkspace({
   const [jmOpenAlexResults, setJmOpenAlexResults] = useState<any[] | null>(null)
   const [isJmSearchingOpenAlex, setIsJmSearchingOpenAlex] = useState(false)
   const [jmOpenAlexQuery, setJmOpenAlexQuery] = useState("")
+  const [jmOpenAlexPage, setJmOpenAlexPage] = useState(1)
+  const [hideAlreadyInvited, setHideAlreadyInvited] = useState(true)
 
   // Scholar Scout (Lead Finder & Editorial Outreach Suite) State
   const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
@@ -1801,10 +1803,26 @@ export function JournalManagerWorkspace({
   const [assignEmailBody, setAssignEmailBody] = useState("")
   const [assignEmailTab, setAssignEmailTab] = useState<"edit" | "preview">("edit")
   const [isAssignSending, setIsAssignSending] = useState(false)
+  const assignEmailBodyRef = useRef<HTMLTextAreaElement>(null)
+  const newRevCustomBodyRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleFetchJmOpenAlexReviewers = async (paper?: JmManuscript | null, query?: string) => {
+  const handleFetchJmOpenAlexReviewers = async (paper?: JmManuscript | null, query?: string, page: number = 1, append: boolean = false) => {
     setIsJmSearchingOpenAlex(true)
     try {
+      const pid = (paper?.id || selectedManuscript?.id || "").toLowerCase()
+      const excludeEmailsList: string[] = []
+      if (pid) {
+        sentEmailsHistory.forEach(s => {
+          const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
+          if (matchPid && s.recipientEmail) {
+            excludeEmailsList.push(s.recipientEmail.toLowerCase().trim())
+          }
+        })
+        paperReviewerHistory.forEach(r => {
+          if (r.reviewerEmail) excludeEmailsList.push(r.reviewerEmail.toLowerCase().trim())
+        })
+      }
+
       const res = await fetch("/api/editorial360/match-reviewers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1815,13 +1833,22 @@ export function JournalManagerWorkspace({
           authorName: paper?.authorName,
           authorAffiliation: paper?.authorAffiliation,
           journal: paper?.journal,
-          customQuery: query
+          customQuery: query,
+          page: page,
+          excludeEmails: excludeEmailsList
         })
       })
       if (res.ok) {
         const data = await res.json()
         if (data.reviewers && data.reviewers.length > 0) {
-          setJmOpenAlexResults(data.reviewers)
+          if (append) {
+            setJmOpenAlexResults(prev => [...(prev || []), ...data.reviewers])
+          } else {
+            setJmOpenAlexResults(data.reviewers)
+          }
+          setJmOpenAlexPage(page)
+        } else if (!append && page === 1) {
+          setJmOpenAlexResults([])
         }
       }
     } catch (e) {
@@ -2287,10 +2314,140 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   const acceptedList = productionList
   const integrityCasesList = initialManuscripts.filter(m => Boolean(m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)))
 
+  // Track already invited reviewer emails and names for active manuscript to prevent duplicate invites
+  const alreadyInvitedEmailsSet = useMemo(() => {
+    const set = new Set<string>()
+    const pid = (selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
+    if (pid) {
+      sentEmailsHistory.forEach(s => {
+        const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
+        if (matchPid && s.recipientEmail) {
+          set.add(s.recipientEmail.toLowerCase().trim())
+        }
+      })
+      paperReviewerHistory.forEach(r => {
+        if (r.reviewerEmail) set.add(r.reviewerEmail.toLowerCase().trim())
+      })
+    }
+    return set
+  }, [selectedManuscript?.id, trackingManuscript?.id, sentEmailsHistory, paperReviewerHistory])
+
+  const alreadyInvitedNamesSet = useMemo(() => {
+    const set = new Set<string>()
+    const pid = (selectedManuscript?.id || trackingManuscript?.id || "").toLowerCase().trim()
+    if (pid) {
+      sentEmailsHistory.forEach(s => {
+        const matchPid = (s.paperId && s.paperId.toLowerCase() === pid) || (s.subject && s.subject.toLowerCase().includes(pid))
+        if (matchPid && s.recipientName) {
+          set.add(s.recipientName.toLowerCase().trim())
+        }
+      })
+      paperReviewerHistory.forEach(r => {
+        if (r.reviewerName) set.add(r.reviewerName.toLowerCase().trim())
+      })
+      if (selectedManuscript?.reviewers) {
+        selectedManuscript.reviewers.forEach(r => set.add(r.toLowerCase().trim()))
+      }
+      if (trackingManuscript?.reviewers) {
+        trackingManuscript.reviewers.forEach(r => set.add(r.toLowerCase().trim()))
+      }
+    }
+    return set
+  }, [selectedManuscript?.id, trackingManuscript?.id, selectedManuscript?.reviewers, trackingManuscript?.reviewers, sentEmailsHistory, paperReviewerHistory])
+
+  // Unified reviewer history list for Review Tracker modal, incorporating persistent sent invitations
+  const modalReviewerDisplayList = useMemo(() => {
+    if (!trackingManuscript) return []
+    const isMedAortic = trackingManuscript.id === "SOMED-26-RW01" || Boolean(trackingManuscript.title?.includes("Prevent Earlier"))
+    const msId = trackingManuscript.id?.toLowerCase() || ""
+
+    const rawList: {
+      id: string
+      name: string
+      email: string
+      invitedDate: string
+      status: "Invited" | "Accepted" | "Declined" | "Completed"
+      deadline?: string
+      declineReason?: string
+      declineReferral?: string
+    }[] = []
+
+    if (paperReviewerHistory.length > 0) {
+      paperReviewerHistory.forEach(h => {
+        rawList.push({
+          id: h.id,
+          name: h.reviewerName?.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : h.reviewerName,
+          email: h.reviewerEmail,
+          invitedDate: h.invitedDate,
+          status: h.status,
+          deadline: h.deadline || "2026-08-29",
+          declineReason: h.declineReason,
+          declineReferral: h.declineReferral
+        })
+      })
+    }
+
+    if (isMedAortic) {
+      if (!rawList.some(r => r.name.toLowerCase().includes("nagula") || r.email.toLowerCase().includes("nagula"))) {
+        rawList.push({ id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed", deadline: "2026-08-29" })
+      }
+      if (!rawList.some(r => r.name.toLowerCase().includes("aziza") || r.email.toLowerCase().includes("aziza"))) {
+        rawList.push({ id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted", deadline: "2026-08-29" })
+      }
+    } else if (rawList.length === 0 && trackingManuscript.reviewers && trackingManuscript.reviewers.length > 0) {
+      trackingManuscript.reviewers.forEach((revName, idx) => {
+        rawList.push({
+          id: `REV-FALLBACK-${idx}`,
+          name: revName.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : revName,
+          email: revName.toLowerCase().includes("nagula") ? "drpraveennagula@gmail.com" : (revName.toLowerCase().includes("aziza") ? "ragabaziza61@gmail.com" : "reviewer@scholarlyopen.org"),
+          invitedDate: "2026-08-15",
+          status: revName.toLowerCase().includes("nagula") ? ("Completed" as const) : ("Accepted" as const),
+          deadline: "2026-08-29"
+        })
+      })
+    }
+
+    // Merge persistent sent invitations for this manuscript (such as the members invited via outreach)
+    sentEmailsHistory.forEach(s => {
+      const matchPid = (s.paperId && s.paperId.toLowerCase() === msId) ||
+        (s.subject && s.subject.toLowerCase().includes(msId)) ||
+        (isMedAortic && (s.subject?.toLowerCase().includes("prevent earlier") || s.subject?.toLowerCase().includes("aortic dissection")))
+      
+      if (matchPid && s.recipientName && s.recipientEmail) {
+        const alreadyPresent = rawList.some(r => 
+          r.email.toLowerCase() === s.recipientEmail.toLowerCase() ||
+          r.name.toLowerCase() === s.recipientName.toLowerCase() ||
+          r.name.toLowerCase().includes(s.recipientName.toLowerCase()) ||
+          s.recipientName.toLowerCase().includes(r.name.toLowerCase())
+        )
+        if (!alreadyPresent) {
+          rawList.push({
+            id: s.id || `sent-${s.recipientEmail}`,
+            name: s.recipientName,
+            email: s.recipientEmail,
+            invitedDate: s.timestamp ? s.timestamp.split("T")[0] : "2026-10-01",
+            status: "Invited",
+            deadline: "2026-10-15"
+          })
+        }
+      }
+    })
+
+    const seenKeys = new Set<string>()
+    return rawList.filter(item => {
+      const key = (item.email || item.name).toLowerCase()
+      if (seenKeys.has(key)) return false
+      seenKeys.add(key)
+      return true
+    })
+  }, [trackingManuscript, paperReviewerHistory, sentEmailsHistory])
+
   // Handle open Assign Modal
-  const handleOpenAssign = (ms: JmManuscript) => {
+  const handleOpenAssign = (ms: JmManuscript, isAlternate = false) => {
     setSelectedManuscript(ms)
-    setSelectedReviewers(ms.reviewers || [])
+    // NEVER pre-select existing reviewers. When inviting alternate/fresh reviewers,
+    // starting with an empty selection prevents accidentally re-inviting already assigned reviewers.
+    setSelectedReviewers([])
     const boardCandidates = getBoardCandidatesForJournal(ms.journal, ms.author || ms.authorName)
     const defaultEd = ms.assignedEditorName || (boardCandidates.length > 0 ? boardCandidates[0].name : "Weihua Gong, M.D., Ph.D.")
     setSelectedEditor(defaultEd)
@@ -2315,6 +2472,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     const defaultFrom = getJournalReplyTo(ms.journal) || "editor.med@scholarlyopen.org"
     setAssignFromEmail(defaultFrom)
     setAssignSenderName(`${ms.journal} Editorial Office`)
+
+    if (isAlternate) {
+      setJmReviewerSourceTab("suggested")
+      const seedQuery = ms.keywords?.join(" ") || (ms.title ? ms.title.slice(0, 60) : "")
+      if (seedQuery) {
+        setJmOpenAlexQuery(seedQuery)
+      }
+      setJmOpenAlexPage(1)
+      handleFetchJmOpenAlexReviewers(ms, seedQuery || jmOpenAlexQuery, 1, false)
+    }
+
     setIsAssignModalOpen(true)
   }
 
@@ -2504,6 +2672,22 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         })
       }).catch(e => console.error("Invitation email dispatch error:", e))
     }))
+
+    // Prepend newly dispatched records to sentEmailsHistory immediately
+    const nowIso = new Date().toISOString()
+    const newlyDispatchedRecords: SentEmailRecord[] = assignRecipients.map(rec => ({
+      id: `SENT-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      recipientName: rec.name.trim(),
+      recipientEmail: rec.email.trim(),
+      subject: assignEmailSubject,
+      paperId: msId,
+      paperTitle: msTitle,
+      journal: msJournal,
+      campaignType: "editorial_outreach" as const,
+      timestamp: nowIso,
+      status: "Delivered" as const
+    }))
+    setSentEmailsHistory(prev => [...newlyDispatchedRecords, ...prev])
 
     // Refresh reviewer history cache immediately
     fetch("/api/editorial360/reviewers")
@@ -7203,124 +7387,237 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             )}
 
             {/* TAB 2: GLOBAL SCHOLARS (CLEAN MINIMAL METADATA) */}
-            {jmReviewerSourceTab === "suggested" && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 w-full">
-                  <div className="relative flex-1 min-w-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={jmOpenAlexQuery}
-                      onChange={(e) => setJmOpenAlexQuery(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery)
-                        }
-                      }}
-                      placeholder="Search global scholars by topic or name..."
-                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    disabled={isJmSearchingOpenAlex}
-                    onClick={() => handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery)}
-                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-4 rounded-xl cursor-pointer shadow-xs shrink-0"
-                  >
-                    {isJmSearchingOpenAlex ? "Searching..." : "Search"}
-                  </Button>
-                </div>
+            {jmReviewerSourceTab === "suggested" && (() => {
+              const allCandidates = (jmOpenAlexResults || [
+                {
+                  name: "Prof. Hiroshi Tanaka",
+                  institution: "University of Tokyo (Japan)",
+                  email: "h.tanaka@u-tokyo.ac.jp",
+                  specialty: "Juvenile Diabetes Retinopathy",
+                  metrics: "42 papers · 1,420 citations"
+                },
+                {
+                  name: "Dr. Sarah Jenkins",
+                  institution: "University of Edinburgh (UK)",
+                  email: "s.jenkins@ed.ac.uk",
+                  specialty: "Deep Learning Clinical Triage",
+                  metrics: "19 papers · 540 citations"
+                },
+                {
+                  name: "Prof. Claire Dupond",
+                  institution: "Sorbonne Université (France)",
+                  email: "claire.dupond@sorbonne-universite.fr",
+                  specialty: "Microvascular Biomarkers",
+                  metrics: "31 papers · 890 citations"
+                }
+              ])
 
-                {isJmSearchingOpenAlex && (
-                  <div className="p-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-                    <span className="h-4 w-4 border-2 border-[#0b99ff] border-t-transparent rounded-full animate-spin" />
-                    <span>Searching global scholars graph...</span>
-                  </div>
-                )}
+              const totalAlreadyInvited = allCandidates.filter(rev => {
+                const isEmailInvited = rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
+                const isNameInvited = rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
+                return Boolean(isEmailInvited || isNameInvited)
+              }).length
 
-                <div className="space-y-1.5">
-                  {(jmOpenAlexResults || [
-                    {
-                      name: "Prof. Hiroshi Tanaka",
-                      institution: "University of Tokyo (Japan)",
-                      email: "h.tanaka@u-tokyo.ac.jp",
-                      specialty: "Juvenile Diabetes Retinopathy",
-                      metrics: "42 papers · 1,420 citations"
-                    },
-                    {
-                      name: "Dr. Sarah Jenkins",
-                      institution: "University of Edinburgh (UK)",
-                      email: "s.jenkins@ed.ac.uk",
-                      specialty: "Deep Learning Clinical Triage",
-                      metrics: "19 papers · 540 citations"
-                    },
-                    {
-                      name: "Prof. Claire Dupond",
-                      institution: "Sorbonne Université (France)",
-                      email: "claire.dupond@sorbonne-universite.fr",
-                      specialty: "Microvascular Biomarkers",
-                      metrics: "31 papers · 890 citations"
-                    }
-                  ]).map((rev, idx) => {
-                    const isChecked = selectedReviewers.includes(rev.name)
-                    return (
-                      <div
-                        key={idx}
-                        onClick={() => {
-                          if (isChecked) {
-                            setSelectedReviewers(prev => prev.filter(n => n !== rev.name))
-                          } else {
-                            setSelectedReviewers(prev => [...prev, rev.name])
-                            // Automatically persist the reviewer's real email into externalReviewersList so it is NEVER lost
-                            const candidateEmail = rev.email || (
-                              rev.name.toLowerCase().includes("tanaka") ? "h.tanaka@u-tokyo.ac.jp" :
-                              rev.name.toLowerCase().includes("jenkins") ? "s.jenkins@ed.ac.uk" :
-                              rev.name.toLowerCase().includes("dupond") ? "claire.dupond@sorbonne-universite.fr" :
-                              rev.name.toLowerCase().includes("wang x") ? "wxiaozeng@163.com" :
-                              rev.name.toLowerCase().includes("wang b") ? "wangbindl@hotmail.com" :
-                              rev.name.toLowerCase().includes("zhong w") ? "wuzhong71@scu.edu.cn" :
-                              ""
-                            )
-                            if (candidateEmail) {
-                              setExternalReviewersList(prev => {
-                                const withoutThis = prev.filter(x => x.name.toLowerCase() !== rev.name.toLowerCase())
-                                return [...withoutThis, {
-                                  name: rev.name,
-                                  email: candidateEmail,
-                                  affiliation: rev.institution || rev.specialty || ""
-                                }]
-                              })
-                            }
+              const visibleCandidates = hideAlreadyInvited
+                ? allCandidates.filter(rev => {
+                    const isEmailInvited = rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
+                    const isNameInvited = rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
+                    return !isEmailInvited && !isNameInvited
+                  })
+                : allCandidates
+
+              return (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 w-full">
+                    <div className="relative flex-1 min-w-0">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={jmOpenAlexQuery}
+                        onChange={(e) => setJmOpenAlexQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault()
+                            setJmOpenAlexPage(1)
+                            handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery, 1, false)
                           }
                         }}
-                        className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                          isChecked ? "border-[#0b99ff] bg-[#0b99ff]/10" : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:border-slate-300"
-                        }`}
+                        placeholder="Search global scholars by topic or name..."
+                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      disabled={isJmSearchingOpenAlex}
+                      onClick={() => {
+                        setJmOpenAlexPage(1)
+                        handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery, 1, false)
+                      }}
+                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-4 rounded-xl cursor-pointer shadow-xs shrink-0"
+                    >
+                      {isJmSearchingOpenAlex ? "Searching..." : "Search"}
+                    </Button>
+                  </div>
+
+                  {/* Filter & Batch Navigation Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-100/80 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px]">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300 font-medium select-none">
+                      <input
+                        type="checkbox"
+                        checked={hideAlreadyInvited}
+                        onChange={(e) => setHideAlreadyInvited(e.target.checked)}
+                        className="rounded text-[#0b99ff] h-3.5 w-3.5 cursor-pointer"
+                      />
+                      <span>Hide already invited scholars</span>
+                      {totalAlreadyInvited > 0 && (
+                        <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-1.5 py-0.2 rounded text-[10px] font-bold border border-amber-300 dark:border-amber-800">
+                          {totalAlreadyInvited} hidden
+                        </span>
+                      )}
+                    </label>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-500 font-medium text-[11px]">Batch {jmOpenAlexPage}</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={isJmSearchingOpenAlex}
+                        onClick={() => {
+                          const nextP = jmOpenAlexPage + 1
+                          setJmOpenAlexPage(nextP)
+                          handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery, nextP, false)
+                        }}
+                        className="h-6.5 text-[11px] px-2.5 rounded-lg border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 font-semibold text-[#0b99ff]"
                       >
-                        <div className="space-y-0.5 pr-2">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-semibold text-slate-900 dark:text-white text-xs">{rev.name}</span>
-                            <span className="text-[11px] text-slate-500">· {rev.institution}</span>
-                            {rev.email && (
-                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
-                                ({rev.email})
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">
-                            <span className="text-slate-700 dark:text-slate-300 font-medium">{rev.specialty}</span>
-                            <span>•</span>
-                            <span className="text-[#0b99ff] font-medium">{rev.metrics}</span>
-                          </div>
-                        </div>
-                        <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded text-[#0b99ff] h-4 w-4 shrink-0" />
+                        <RefreshCw className={`h-3 w-3 mr-1 ${isJmSearchingOpenAlex ? "animate-spin" : ""}`} />
+                        Load Next Batch of Scholars
+                      </Button>
+                    </div>
+                  </div>
+
+                  {isJmSearchingOpenAlex && (
+                    <div className="p-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                      <span className="h-4 w-4 border-2 border-[#0b99ff] border-t-transparent rounded-full animate-spin" />
+                      <span>Searching global scholars graph...</span>
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    {visibleCandidates.length === 0 && !isJmSearchingOpenAlex ? (
+                      <div className="p-6 text-center text-slate-500 space-y-2 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                        <p className="font-semibold text-xs text-slate-700 dark:text-slate-300">
+                          {totalAlreadyInvited > 0 
+                            ? `All ${totalAlreadyInvited} scholars in this batch have already received review invitations for this paper.` 
+                            : "No scholars found for this query."}
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          Click &ldquo;Load Next Batch of Scholars&rdquo; to fetch fresh, uninvited candidates from the live global graph.
+                        </p>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            const nextP = jmOpenAlexPage + 1
+                            setJmOpenAlexPage(nextP)
+                            handleFetchJmOpenAlexReviewers(selectedManuscript, jmOpenAlexQuery, nextP, false)
+                          }}
+                          className="h-7 text-xs bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg font-semibold cursor-pointer"
+                        >
+                          Load Next Batch of Scholars →
+                        </Button>
                       </div>
-                    )
-                  })}
+                    ) : (
+                      visibleCandidates.map((rev, idx) => {
+                        const isEmailInvited = rev.email && alreadyInvitedEmailsSet.has(rev.email.toLowerCase().trim())
+                        const isNameInvited = rev.name && alreadyInvitedNamesSet.has(rev.name.toLowerCase().trim())
+                        const isAlreadyInvited = Boolean(isEmailInvited || isNameInvited)
+                        const isChecked = selectedReviewers.includes(rev.name)
+
+                        if (isAlreadyInvited) {
+                          return (
+                            <div
+                              key={idx}
+                              className="p-2.5 rounded-xl border border-amber-300 dark:border-amber-800/80 bg-amber-50/50 dark:bg-amber-950/20 flex items-center justify-between cursor-not-allowed opacity-80"
+                              title="Scholar has already been invited to review this manuscript"
+                            >
+                              <div className="space-y-0.5 pr-2">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{rev.name}</span>
+                                  <span className="text-[11px] text-slate-500">· {rev.institution}</span>
+                                  <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                                    <Check className="h-3 w-3" /> Already Invited
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">
+                                  <span className="text-slate-600 dark:text-slate-400 font-medium">{rev.specialty}</span>
+                                  <span>•</span>
+                                  <span className="text-slate-500 font-mono text-[10px]">{rev.email}</span>
+                                </div>
+                              </div>
+                              <input type="checkbox" disabled checked={false} className="rounded text-slate-300 h-4 w-4 shrink-0 cursor-not-allowed opacity-40" />
+                            </div>
+                          )
+                        }
+
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              if (isChecked) {
+                                setSelectedReviewers(prev => prev.filter(n => n !== rev.name))
+                              } else {
+                                setSelectedReviewers(prev => [...prev, rev.name])
+                                const candidateEmail = rev.email || (
+                                  rev.name.toLowerCase().includes("tanaka") ? "h.tanaka@u-tokyo.ac.jp" :
+                                  rev.name.toLowerCase().includes("jenkins") ? "s.jenkins@ed.ac.uk" :
+                                  rev.name.toLowerCase().includes("dupond") ? "claire.dupond@sorbonne-universite.fr" :
+                                  rev.name.toLowerCase().includes("wang x") ? "wxiaozeng@163.com" :
+                                  rev.name.toLowerCase().includes("wang b") ? "wangbindl@hotmail.com" :
+                                  rev.name.toLowerCase().includes("zhong w") ? "wuzhong71@scu.edu.cn" :
+                                  ""
+                                )
+                                if (candidateEmail) {
+                                  setExternalReviewersList(prev => {
+                                    const withoutThis = prev.filter(x => x.name.toLowerCase() !== rev.name.toLowerCase())
+                                    return [...withoutThis, {
+                                      name: rev.name,
+                                      email: candidateEmail,
+                                      affiliation: rev.institution || rev.specialty || ""
+                                    }]
+                                  })
+                                }
+                              }
+                            }}
+                            className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                              isChecked ? "border-[#0b99ff] bg-[#0b99ff]/10" : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:border-slate-300"
+                            }`}
+                          >
+                            <div className="space-y-0.5 pr-2">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-semibold text-slate-900 dark:text-white text-xs">{rev.name}</span>
+                                <span className="text-[11px] text-slate-500">· {rev.institution}</span>
+                                {rev.email && (
+                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                                    ({rev.email})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-500 flex-wrap">
+                                <span className="text-slate-700 dark:text-slate-300 font-medium">{rev.specialty}</span>
+                                <span>•</span>
+                                <span className="text-[#0b99ff] font-medium">{rev.metrics}</span>
+                              </div>
+                            </div>
+                            <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded text-[#0b99ff] h-4 w-4 shrink-0" />
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
 
             {/* TAB 3: INVITE EXTERNAL */}
             {jmReviewerSourceTab === "external" && (
@@ -7763,15 +8060,95 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                   {/* Body Edit or Preview */}
                   {assignEmailTab === "edit" ? (
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                        Letter Body:
-                      </label>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                          Reviewer Invitation Letter Body:
+                        </label>
+                        <div className="flex items-center gap-1.5 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (assignEmailBodyRef.current) {
+                                assignEmailBodyRef.current.focus()
+                                assignEmailBodyRef.current.select()
+                              }
+                            }}
+                            className="px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer font-medium transition-all"
+                            title="Select all text in box (Ctrl+A)"
+                          >
+                            Select All
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (assignEmailBodyRef.current) {
+                                const el = assignEmailBodyRef.current
+                                const start = el.selectionStart
+                                const end = el.selectionEnd
+                                if (start !== null && end !== null && start !== end) {
+                                  const cur = el.value
+                                  setAssignEmailBody(cur.slice(0, start) + cur.slice(end))
+                                  requestAnimationFrame(() => {
+                                    el.focus()
+                                    el.setSelectionRange(start, start)
+                                  })
+                                  return
+                                }
+                              }
+                              setAssignEmailBody("")
+                              assignEmailBodyRef.current?.focus()
+                            }}
+                            className="px-2 py-0.5 rounded text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 cursor-pointer font-medium transition-all flex items-center gap-1"
+                            title="Delete selected text or clear box"
+                          >
+                            <Trash2 className="h-2.5 w-2.5" />
+                            <span>Delete Selected</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedManuscript) {
+                                const defaultSubject = `Review Invitation: ${selectedManuscript.id} - ${selectedManuscript.title}`
+                                const defaultBody = `Dear {{recipientName}},\n\nYou have been invited to serve as an expert peer reviewer for the following manuscript submitted to ${selectedManuscript.journal}:\n\nManuscript ID: ${selectedManuscript.id}\nTitle: ${selectedManuscript.title}\n\nWe would be grateful if you could provide your expert assessment on the originality, methodology, and data integrity of this work. This evaluation is conducted under double-blind peer review standards in full compliance with COPE guidelines.\n\nWe kindly request that you complete your evaluation within 14 calendar days of acceptance.\n\nPlease use the buttons below to access your reviewer scorecard or confirm your availability.`
+                                setAssignEmailSubject(defaultSubject)
+                                setAssignEmailBody(defaultBody)
+                              }
+                            }}
+                            className="px-2 py-0.5 rounded text-[#0b99ff] hover:text-[#0088e0] bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 cursor-pointer font-medium transition-all flex items-center gap-1"
+                            title="Reset template to default"
+                          >
+                            <RotateCcw className="h-2.5 w-2.5" />
+                            <span>Reset</span>
+                          </button>
+                        </div>
+                      </div>
                       <textarea
+                        ref={assignEmailBodyRef}
                         rows={10}
                         value={assignEmailBody}
                         onChange={(e) => setAssignEmailBody(e.target.value)}
-                        className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onMouseUp={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onPointerUp={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Delete" || e.code === "Delete") {
+                            const target = e.currentTarget
+                            const start = target.selectionStart
+                            const end = target.selectionEnd
+                            if (start !== null && end !== null && start !== end) {
+                              e.preventDefault()
+                              const cur = target.value
+                              const updated = cur.slice(0, start) + cur.slice(end)
+                              setAssignEmailBody(updated)
+                              requestAnimationFrame(() => {
+                                target.setSelectionRange(start, start)
+                              })
+                            }
+                          }
+                        }}
+                        className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#18191e] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed select-text"
                       />
                     </div>
                   ) : (
@@ -8529,25 +8906,94 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
                         <label className="font-bold text-slate-700 dark:text-slate-300">Letter Body (Customizable)</label>
-                        <button
-                          type="button"
-                          onClick={() => setNewRevCustomBody("")}
-                          className="text-[10px] text-[#0b99ff] hover:underline cursor-pointer"
-                        >
-                          Reset Default
-                        </button>
+                        <div className="flex items-center gap-1.5 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (newRevCustomBodyRef.current) {
+                                newRevCustomBodyRef.current.focus()
+                                newRevCustomBodyRef.current.select()
+                              }
+                            }}
+                            className="px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 cursor-pointer font-medium transition-all"
+                            title="Select all text in box (Ctrl+A)"
+                          >
+                            Select All
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (newRevCustomBodyRef.current) {
+                                const el = newRevCustomBodyRef.current
+                                const start = el.selectionStart
+                                const end = el.selectionEnd
+                                if (start !== null && end !== null && start !== end) {
+                                  const cur = el.value
+                                  setNewRevCustomBody(cur.slice(0, start) + cur.slice(end))
+                                  requestAnimationFrame(() => {
+                                    el.focus()
+                                    el.setSelectionRange(start, start)
+                                  })
+                                  return
+                                }
+                              }
+                              setNewRevCustomBody(" ")
+                              newRevCustomBodyRef.current?.focus()
+                            }}
+                            className="px-2 py-0.5 rounded text-rose-600 dark:text-rose-400 hover:text-rose-700 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 cursor-pointer font-medium transition-all flex items-center gap-1"
+                            title="Delete selected text or clear box"
+                          >
+                            <Trash2 className="h-2.5 w-2.5" />
+                            <span>Delete Selected</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewRevCustomBody(
+                                `Dear ${newRevName || "Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via PayPal, Payoneer and major digital payment rails (no bank transfers) or 25% APC Publication Credit voucher\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the formal invitation guidelines.`
+                              )
+                            }}
+                            className="px-2 py-0.5 rounded text-[#0b99ff] hover:text-[#0088e0] bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 cursor-pointer font-medium transition-all flex items-center gap-1"
+                            title="Reset template to default"
+                          >
+                            <RotateCcw className="h-2.5 w-2.5" />
+                            <span>Reset Default</span>
+                          </button>
+                        </div>
                       </div>
                       <textarea
+                        ref={newRevCustomBodyRef}
                         rows={7}
                         value={
-                          newRevCustomBody ||
-                          `Dear ${newRevName || "Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via PayPal, Payoneer and major digital payment rails (no bank transfers) or 25% APC Publication Credit voucher\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the formal invitation guidelines.`
+                          newRevCustomBody !== null && newRevCustomBody !== undefined
+                            ? newRevCustomBody
+                            : `Dear ${newRevName || "Colleague"},\n\nOn behalf of the Editorial Office of ${newRevJournal}, we cordially invite you to serve as an expert peer referee.\n\nGiven your notable scholarship in ${newRevSpecialty || "this research area"}, your independent critical assessment would provide essential guidance to our editorial desk and authors.\n\nKey Reviewer Terms & Details:\n• Journal: ${newRevJournal}\n• Evaluation Track: ${newRevPaperId !== "general" ? `Manuscript ${newRevPaperId}` : "Accredited Reviewer Pool Appointment"}\n• Turnaround Window: 14 Calendar Days\n• Micro-Honorarium: €35.00 – €50.00 cash grant via PayPal, Payoneer and major digital payment rails (no bank transfers) or 25% APC Publication Credit voucher\n• Certification: Academic Peer Review Dossier & Gateway Verification\n\nPlease confirm your availability to evaluate by reviewing the formal invitation guidelines.`
                         }
                         onChange={(e) => setNewRevCustomBody(e.target.value)}
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-800 dark:text-slate-200 font-mono text-[11px] leading-relaxed resize-none"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onMouseUp={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onPointerUp={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Delete" || e.code === "Delete") {
+                            const target = e.currentTarget
+                            const start = target.selectionStart
+                            const end = target.selectionEnd
+                            if (start !== null && end !== null && start !== end) {
+                              e.preventDefault()
+                              const cur = target.value
+                              const updated = cur.slice(0, start) + cur.slice(end)
+                              setNewRevCustomBody(updated)
+                              requestAnimationFrame(() => {
+                                target.setSelectionRange(start, start)
+                              })
+                            }
+                          }
+                        }}
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-800 dark:text-slate-200 font-mono text-[11px] leading-relaxed resize-none select-text"
                       />
                     </div>
 
@@ -8694,34 +9140,34 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* MODAL 6: PEER REVIEW PROGRESS & REVIEWER TRACKING                         */}
       {/* ========================================================================= */}
       <Dialog open={isTrackModalOpen} onOpenChange={setIsTrackModalOpen}>
-        <DialogContent className="max-w-3xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex flex-wrap items-center justify-between gap-2 pr-6">
+        <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[88vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl rounded-2xl">
+          <DialogHeader className="p-5 pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0 pr-12">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2">
               <span>Review Tracker</span>
-              <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20">
+              <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 shrink-0">
                 {trackingManuscript?.id}
               </span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 line-clamp-2 mt-1">
               {trackingManuscript?.title}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2 text-xs">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-4 text-xs min-w-0">
             {/* Handling Editor Info & Invitation */}
             {trackingManuscript?.assignedEditorName ? (
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
                     <UserCheck className="h-4 w-4" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-slate-400 font-medium block text-[11px] uppercase tracking-wider">Handling Editor</span>
-                    <span className="text-sm font-bold text-slate-900 dark:text-white">{trackingManuscript.assignedEditorName}</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white truncate block">{trackingManuscript.assignedEditorName}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded border border-emerald-200 dark:border-emerald-900/30">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
                     Managing Active Round
                   </span>
                   <Button
@@ -8731,29 +9177,29 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       setEditorInviteSuccessMsg(null)
                       setIsInviteEditorModalOpen(true)
                     }}
-                    className="h-7 text-[11px] font-semibold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="h-7 text-[11px] font-semibold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap"
                   >
                     Change / Reassign
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="p-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-300 dark:border-amber-700/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
-                <div className="flex items-start sm:items-center gap-3">
+              <div className="p-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-300 dark:border-amber-700/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in min-w-0">
+                <div className="flex items-start sm:items-center gap-3 min-w-0">
                   <div className="h-9 w-9 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700/60 mt-0.5 sm:mt-0">
                     <AlertTriangle className="h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
                         No Handling Editor Assigned Yet
                       </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 shrink-0">
                         Action Required
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
-                      Double-blind peer review is underway with 2 reviewers, but no Handling Editor has been appointed yet. As Journal Manager, you can invite an editor from the board or invite a guest handling editor.
+                      Double-blind peer review is underway, but no Handling Editor has been appointed yet. As Journal Manager, you can invite an editor from the board or invite a guest handling editor.
                     </p>
                   </div>
                 </div>
@@ -8764,9 +9210,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setEditorInviteSuccessMsg(null)
                     setIsInviteEditorModalOpen(true)
                   }}
-                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-3.5 rounded-lg shadow-sm cursor-pointer shrink-0 transition-all"
+                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-3.5 rounded-lg shadow-sm cursor-pointer shrink-0 transition-all whitespace-nowrap"
                 >
-                  <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                  <UserPlus className="h-3.5 w-3.5 mr-1" />
                   Invite / Assign Handling Editor
                 </Button>
               </div>
@@ -8774,15 +9220,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
             {/* 1/2 Reviews Active Banner for SOMED-26-RW01 */}
             {(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.title?.includes("Prevent Earlier")) && (
-              <div className="p-3.5 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0 border border-sky-200 dark:border-sky-800">
+              <div className="p-3.5 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0 animate-in fade-in">
+                <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+                  <div className="h-8 w-8 rounded-lg bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0 border border-sky-200 dark:border-sky-800 mt-0.5 sm:mt-0">
                     <Clock className="h-4 w-4" />
                   </div>
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-2">
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 dark:text-white text-xs flex flex-wrap items-center gap-2">
                       <span>Peer Review Round in Progress (1 of 2 Reports Completed)</span>
-                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20">50% Logged</span>
+                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">50% Logged</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                       Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is currently reviewing.
@@ -8797,9 +9243,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setViewingRafData(PRAVEEN_NAGULA_RAF)
                     setIsViewingRafModalOpen(true)
                   }}
-                  className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs"
+                  className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap mt-1 sm:mt-0"
                 >
-                  <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400" />
+                  <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400 shrink-0" />
                   View Dr. Nagula&apos;s RAF
                 </Button>
               </div>
@@ -8807,14 +9253,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
             {/* 2/2 Complete Banner with Prompt Editor Action */}
             {((trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && trackingManuscript?.id !== "SOMED-26-RW01") && (
-              <div className="p-3.5 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
-                <div className="flex items-center gap-2.5">
+              <div className="p-3.5 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0 animate-in fade-in">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 shrink-0" />
-                  <div>
+                  <div className="min-w-0">
                     <div className="font-bold text-slate-900 dark:text-white text-xs">
                       All Assigned Reviews Completed (2/2)
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                       Peer review reports logged and ready for {trackingManuscript?.assignedEditorName || "Handling Editor"}&apos;s official verdict.
                     </div>
                   </div>
@@ -8841,7 +9287,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       }
                     })
                   }}
-                  className={`text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 transition-all ${
+                  className={`text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap ${
                     promptedEditors[trackingManuscript?.id || ""]
                       ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700 hover:bg-indigo-100"
                       : "bg-purple-600 hover:bg-purple-700 text-white shadow-xs"
@@ -8887,29 +9333,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-slate-500 font-medium">
-                    {(() => {
-                      const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
-                      const list = paperReviewerHistory.length > 0 
-                        ? paperReviewerHistory 
-                        : (isMedAortic
-                            ? [
-                                { id: "pn-01", paperId: trackingManuscript?.id || "SOMED-26-RW01", reviewerName: "Dr. Praveen Nagula", reviewerEmail: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as any },
-                                { id: "ra-02", paperId: trackingManuscript?.id || "SOMED-26-RW01", reviewerName: "Dr. Ragab Aziza", reviewerEmail: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as any }
-                              ]
-                            : (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0
-                                ? trackingManuscript.reviewers.map((r, i) => ({
-                                    id: `mock-${i}`,
-                                    paperId: trackingManuscript?.id || "",
-                                    reviewerName: r.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : r,
-                                    reviewerEmail: r.toLowerCase().includes("nagula") ? "drpraveennagula@gmail.com" : (r.toLowerCase().includes("aziza") ? "ragabaziza61@gmail.com" : "reviewer@scholarlyopen.org"),
-                                    invitedDate: "2026-08-15",
-                                    status: (r.toLowerCase().includes("nagula") ? "Completed" : "Accepted") as any
-                                  }))
-                                : []
-                              )
-                          )
-                      return `${list.length} logged`
-                    })()}
+                    {modalReviewerDisplayList.length} logged
                   </span>
                   <Button
                     size="sm"
@@ -8917,10 +9341,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     onClick={() => {
                       if (trackingManuscript) {
                         setIsTrackModalOpen(false)
-                        handleOpenAssign(trackingManuscript)
+                        handleOpenAssign(trackingManuscript, true)
                       }
                     }}
-                    className="h-7 text-[11px] font-semibold border-slate-200 dark:border-slate-800 cursor-pointer"
+                    className="h-7 text-[11px] font-semibold border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     <UserPlus className="h-3 w-3 mr-1 text-[#0b99ff]" />
                     Invite Reviewer
@@ -8928,67 +9352,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               </div>
 
-              {(() => {
-                const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
-
-                const rawList: {
-                  id: string
-                  name: string
-                  email: string
-                  invitedDate: string
-                  status: "Invited" | "Accepted" | "Declined" | "Completed"
-                  deadline?: string
-                  declineReason?: string
-                  declineReferral?: string
-                }[] = paperReviewerHistory.length > 0
-                  ? paperReviewerHistory.map(h => ({
-                      id: h.id,
-                      name: h.reviewerName?.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : h.reviewerName,
-                      email: h.reviewerEmail,
-                      invitedDate: h.invitedDate,
-                      status: h.status,
-                      deadline: h.deadline || "2026-08-29",
-                      declineReason: h.declineReason,
-                      declineReferral: h.declineReferral
-                    }))
-                  : (isMedAortic
-                      ? [
-                          { id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as const, deadline: "2026-08-29" },
-                          { id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" }
-                        ]
-                      : (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0
-                          ? trackingManuscript.reviewers.map((revName, idx) => ({
-                              id: `REV-FALLBACK-${idx}`,
-                              name: revName.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : revName,
-                              email: revName.toLowerCase().includes("nagula") ? "drpraveennagula@gmail.com" : (revName.toLowerCase().includes("aziza") ? "ragabaziza61@gmail.com" : "reviewer@scholarlyopen.org"),
-                              invitedDate: "2026-08-15",
-                              status: revName.toLowerCase().includes("nagula") ? ("Completed" as const) : ("Accepted" as const),
-                              deadline: "2026-08-29"
-                            }))
-                          : []
-                        )
-                    )
-
-                // Deduplicate displayList by email/name so identical items never repeat
-                const seenKeys = new Set<string>()
-                const displayList = rawList.filter(item => {
-                  const key = (item.email || item.name).toLowerCase()
-                  if (seenKeys.has(key)) return false
-                  seenKeys.add(key)
-                  return true
-                })
-
-                if (displayList.length === 0) {
-                  return (
-                    <div className="p-8 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                      <Users className="h-8 w-8 mx-auto text-slate-400 opacity-60" />
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No Reviewers Assigned Yet</p>
-                      <p className="text-[11px] text-slate-500">Click &ldquo;Invite Reviewer&rdquo; above to invite experts from the Reviewer Registry.</p>
-                    </div>
-                  )
-                }
-
-                return displayList.map((rev) => {
+              {modalReviewerDisplayList.length === 0 ? (
+                <div className="p-8 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
+                  <Users className="h-8 w-8 mx-auto text-slate-400 opacity-60" />
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No Reviewers Assigned Yet</p>
+                  <p className="text-[11px] text-slate-500">Click &ldquo;Invite Reviewer&rdquo; above to invite experts from the Reviewer Registry.</p>
+                </div>
+              ) : (
+                modalReviewerDisplayList.map((rev) => {
                   const revName = rev.name
                   const isDeclined = rev.status === "Declined"
                   const isInvitedOnly = rev.status === "Invited"
@@ -9032,15 +9403,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     return (
                       <div 
                         key={rev.id || revName}
-                        className="p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20 space-y-2.5 transition-all animate-in fade-in"
+                        className="p-3.5 sm:p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20 space-y-2.5 transition-all animate-in fade-in min-w-0"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="flex flex-wrap items-center gap-2.5">
-                            <div>
-                              <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
                                 {revName}
                               </h4>
-                              <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                                 {rev.email} · Invited on {rev.invitedDate}
                               </div>
                             </div>
@@ -9054,10 +9425,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             onClick={() => {
                               if (trackingManuscript) {
                                 setIsTrackModalOpen(false)
-                                handleOpenAssign(trackingManuscript)
+                                handleOpenAssign(trackingManuscript, true)
                               }
                             }}
-                            className="h-8 text-xs font-semibold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer whitespace-nowrap"
+                            className="h-8 text-xs font-semibold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer whitespace-nowrap shrink-0"
                           >
                             <UserPlus className="h-3.5 w-3.5 mr-1" />
                             Invite Replacement
@@ -9082,15 +9453,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     return (
                       <div 
                         key={rev.id || revName}
-                        className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/10 space-y-2.5 transition-all animate-in fade-in"
+                        className="p-3.5 sm:p-4 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/10 space-y-2.5 transition-all animate-in fade-in min-w-0"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="flex flex-wrap items-center gap-2.5">
-                            <div>
-                              <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
                                 {revName}
                               </h4>
-                              <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                                 {rev.email} · Dispatched on {rev.invitedDate}
                               </div>
                             </div>
@@ -9099,7 +9470,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 sm:mt-0">
                             <Button
                               size="sm"
                               variant="outline"
@@ -9135,34 +9506,34 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   return (
                     <div 
                       key={rev.id || revName}
-                      className={`p-4 rounded-xl border transition-all space-y-2.5 ${
+                      className={`p-3.5 sm:p-4 rounded-xl border transition-all space-y-2.5 min-w-0 ${
                         isOverdue 
                           ? "bg-red-50/40 dark:bg-red-950/20 border-red-200 dark:border-red-900/40" 
                           : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                          <div>
-                            <h4 className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap flex items-center gap-1.5">
-                              <span>{revName}</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-1.5 min-w-0">
+                              <span className="truncate">{revName}</span>
                               {isNagula && (
-                                <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                                <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800 shrink-0">
                                   Reviewer #1
                                 </span>
                               )}
                               {(revName.toLowerCase().includes("aziza") || rev.email.includes("aziza")) && (
-                                <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-1.5 py-0.5 rounded border border-[#0b99ff]/20">
+                                <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-1.5 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">
                                   Reviewer #2
                                 </span>
                               )}
                             </h4>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                               {rev.email}
                             </div>
                           </div>
                           {isSubmitted ? (
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
                                 Report Submitted ✓
                               </span>
@@ -9186,7 +9557,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </div>
 
                         {!isSubmitted ? (
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 sm:mt-0">
                             <Button
                               size="sm"
                               variant="outline"
@@ -9240,7 +9611,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             )}
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 sm:mt-0">
                             {/* View Full RAF button specifically for Dr. Praveen Nagula who submitted the RAF */}
                             {isNagula && (
                               <Button
@@ -9250,10 +9621,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   setViewingRafData(PRAVEEN_NAGULA_RAF)
                                   setIsViewingRafModalOpen(true)
                                 }}
-                                className="h-7.5 text-xs font-bold px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer transition-all shadow-xs"
+                                className="h-8 text-xs font-bold px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer transition-all shadow-xs whitespace-nowrap"
                               >
-                                <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400" />
-                                View Full Assessment Form (RAF)
+                                <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400 shrink-0" />
+                                View Dr. Nagula&apos;s RAF
                               </Button>
                             )}
 
@@ -9296,7 +9667,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 })
                                 handleOpenModeration(revObj)
                               }}
-                              className={`h-7.5 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all ${
+                              className={`h-8 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap ${
                                 isRemarksApproved
                                   ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
                                   : "text-[#0b99ff] border-[#0b99ff]/30 hover:bg-sky-50 dark:hover:bg-sky-950/30"
@@ -9352,19 +9723,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </div>
                   )
                 })
-              })()}
+              )}
             </div>
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+          <DialogFooter className="p-4 px-5 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/50 dark:bg-slate-900/50 flex flex-row items-center justify-between gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
                 setIsTrackModalOpen(false)
-                if (trackingManuscript) handleOpenAssign(trackingManuscript)
+                if (trackingManuscript) handleOpenAssign(trackingManuscript, true)
               }}
-              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg text-[#0b99ff]"
+              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/30 cursor-pointer"
             >
               <UserPlus className="h-3.5 w-3.5 mr-1" />
               Invite Alternate Reviewer
@@ -9372,7 +9743,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             <Button
               size="sm"
               onClick={() => setIsTrackModalOpen(false)}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
             >
               Close Tracker
             </Button>

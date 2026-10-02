@@ -115,10 +115,11 @@ async function fetchEuropePmcScholars(
   limit: number,
   isEcr: boolean,
   ecrSource?: string,
-  page: number = 1
+  page: number = 1,
+  excludeEmails: string[] = []
 ): Promise<{ reviewers: MatchedReviewerItem[]; totalHits: number }> {
   const results: MatchedReviewerItem[] = []
-  const seenEmails = new Set<string>()
+  const seenEmails = new Set<string>(excludeEmails.map(e => e.toLowerCase().trim()).filter(Boolean))
   const seenNames = new Set<string>()
   let totalHits = 0
 
@@ -243,10 +244,11 @@ async function fetchOpenAlexScholars(
   countryCode: string,
   limit: number,
   isEcr: boolean,
-  page: number = 1
+  page: number = 1,
+  excludeEmails: string[] = []
 ): Promise<{ reviewers: MatchedReviewerItem[]; totalHits: number }> {
   const results: MatchedReviewerItem[] = []
-  const seenEmails = new Set<string>()
+  const seenEmails = new Set<string>(excludeEmails.map(e => e.toLowerCase().trim()).filter(Boolean))
   const seenNames = new Set<string>()
   let totalHits = 0
 
@@ -587,6 +589,9 @@ export async function POST(req: Request) {
     const selectedCountry = (country || "all").toLowerCase().trim()
     const selectedEcrSource = (ecrSource || source || "all").toLowerCase()
     const searchQuery = (customQuery || query || keywords || title?.slice(0, 80) || "").trim() || (isEcr ? "machine learning biology medicine" : "clinical medicine engineering")
+    const excludeEmails: string[] = (Array.isArray(body.excludeEmails) ? body.excludeEmails : [])
+      .map((e: any) => String(e).toLowerCase().trim())
+      .filter(Boolean)
 
     const limit = Math.min(Math.max(Number(body.limit) || 25, 5), 100)
     const page = Math.max(Number(body.page) || 1, 1)
@@ -597,14 +602,14 @@ export async function POST(req: Request) {
     if (isEcr) {
       try {
         // Step 1: Query Europe PMC live scraper for preprints with genuine author correspondence emails
-        const liveEpmcEcr = await fetchEuropePmcScholars(searchQuery, selectedCountry, limit, true, selectedEcrSource, page)
+        const liveEpmcEcr = await fetchEuropePmcScholars(searchQuery, selectedCountry, limit, true, selectedEcrSource, page, excludeEmails)
         
         // Step 2: Query OpenAlex preprints for additional genuine emails if needed
         let combinedEcr = [...liveEpmcEcr.reviewers]
         let ecrHits = liveEpmcEcr.totalHits || 0
 
         if (combinedEcr.length < limit) {
-          const liveOpenAlexEcr = await fetchOpenAlexScholars(searchQuery, selectedCountry, limit - combinedEcr.length, true, page)
+          const liveOpenAlexEcr = await fetchOpenAlexScholars(searchQuery, selectedCountry, limit - combinedEcr.length, true, page, excludeEmails)
           ecrHits = Math.max(ecrHits, liveOpenAlexEcr.totalHits || 0)
           const seen = new Set(combinedEcr.map(c => c.email?.toLowerCase()))
           for (const cand of liveOpenAlexEcr.reviewers) {
@@ -679,13 +684,13 @@ export async function POST(req: Request) {
 
       if (isDataScienceQuery) {
         // Query OpenAlex first for Data Science / AI
-        const liveOpenAlexScholars = await fetchOpenAlexScholars(searchQuery, selectedCountry, limit, false, page)
+        const liveOpenAlexScholars = await fetchOpenAlexScholars(searchQuery, selectedCountry, limit, false, page, excludeEmails)
         combinedReviewers = [...liveOpenAlexScholars.reviewers]
         totalFoundHits = liveOpenAlexScholars.totalHits || 0
 
         // If needed, supplement with Europe PMC
         if (combinedReviewers.length < limit) {
-          const liveEpmc = await fetchEuropePmcScholars(searchQuery, selectedCountry, limit - combinedReviewers.length, false, undefined, page)
+          const liveEpmc = await fetchEuropePmcScholars(searchQuery, selectedCountry, limit - combinedReviewers.length, false, undefined, page, excludeEmails)
           totalFoundHits = Math.max(totalFoundHits, liveEpmc.totalHits || 0)
           const seen = new Set(combinedReviewers.map(r => r.email?.toLowerCase()))
           for (const cand of liveEpmc.reviewers) {
@@ -697,12 +702,12 @@ export async function POST(req: Request) {
         }
       } else {
         // Biomedical / General queries: Europe PMC first, then OpenAlex
-        const liveEpmcScholars = await fetchEuropePmcScholars(searchQuery, selectedCountry, limit, false, undefined, page)
+        const liveEpmcScholars = await fetchEuropePmcScholars(searchQuery, selectedCountry, limit, false, undefined, page, excludeEmails)
         combinedReviewers = [...liveEpmcScholars.reviewers]
         totalFoundHits = liveEpmcScholars.totalHits || 0
 
         if (combinedReviewers.length < limit) {
-          const liveOpenAlexScholars = await fetchOpenAlexScholars(searchQuery, selectedCountry, limit - combinedReviewers.length, false, page)
+          const liveOpenAlexScholars = await fetchOpenAlexScholars(searchQuery, selectedCountry, limit - combinedReviewers.length, false, page, excludeEmails)
           totalFoundHits = Math.max(totalFoundHits, liveOpenAlexScholars.totalHits || 0)
           const seen = new Set(combinedReviewers.map(r => r.email?.toLowerCase()))
           for (const cand of liveOpenAlexScholars.reviewers) {

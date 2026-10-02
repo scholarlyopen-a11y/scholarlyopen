@@ -63,6 +63,20 @@ function DialogContent({
           'bg-white dark:bg-[#18191e] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-5 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-2xl duration-200',
           className,
         )}
+        onPointerDownOutside={(e) => {
+          const target = e.target as HTMLElement
+          if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT')) {
+            e.preventDefault()
+          }
+          props.onPointerDownOutside?.(e)
+        }}
+        onInteractOutside={(e) => {
+          const target = e.target as HTMLElement
+          if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT')) {
+            e.preventDefault()
+          }
+          props.onInteractOutside?.(e)
+        }}
         {...props}
       >
         {children}
