@@ -397,7 +397,7 @@ export function JournalManagerWorkspace({
   // Assign Modal
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
   const [selectedManuscript, setSelectedManuscript] = useState<JmManuscript | null>(null)
-  const [selectedEditor, setSelectedEditor] = useState("Weihua Gong, M.D., Ph.D.")
+  const [selectedEditor, setSelectedEditor] = useState("Justice Kofi Boakye-Appiah, M.D., Ph.D.")
   const [selectedReviewers, setSelectedReviewers] = useState<string[]>([])
   const [jmReviewerSourceTab, setJmReviewerSourceTab] = useState<"matched" | "suggested" | "external">("matched")
   const [customRevName, setCustomRevName] = useState("")
@@ -1898,7 +1898,7 @@ export function JournalManagerWorkspace({
   // Handling Editor Invitation Modal from Track Review
   const [isInviteEditorModalOpen, setIsInviteEditorModalOpen] = useState(false)
   const [editorInviteMode, setEditorInviteMode] = useState<"board" | "custom">("board")
-  const [selectedBoardEditor, setSelectedBoardEditor] = useState("Weihua Gong, M.D., Ph.D.")
+  const [selectedBoardEditor, setSelectedBoardEditor] = useState("Justice Kofi Boakye-Appiah, M.D., Ph.D.")
   const [customEditorName, setCustomEditorName] = useState("")
   const [customEditorEmail, setCustomEditorEmail] = useState("")
   const [customEditorSubject, setCustomEditorSubject] = useState("")
@@ -2474,12 +2474,25 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     }
 
     if (isMedAortic) {
-      if (!rawList.some(r => r.name.toLowerCase().includes("nagula") || r.email.toLowerCase().includes("nagula"))) {
-        rawList.push({ id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed", deadline: "2026-08-29" })
-      }
-      if (!rawList.some(r => r.name.toLowerCase().includes("aziza") || r.email.toLowerCase().includes("aziza"))) {
-        rawList.push({ id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted", deadline: "2026-08-29" })
-      }
+      const knownCohort = [
+        { id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as const, deadline: "2026-08-29" },
+        { id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" },
+        { id: "REV-HIST-GB-03", name: "Guo B", email: "guo.baolei@zs-hospital.sh.cn", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-BS-04", name: "Bokhari S", email: "bokharsa@rwjms.rutgers.edu", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-QL-05", name: "Quéro L", email: "laurent.quero@aphp.fr", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-PL-06", name: "Pezzi L", email: "pezzi-l@placeholder.local", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-WX-07", name: "Wang X", email: "wxiaozeng@163.com", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-WB-08", name: "Wang B", email: "wangbindl@hotmail.com", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-ZW-09", name: "Zhong W", email: "wuzhong71@scu.edu.cn", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-YS-10", name: "Yidan Sun", email: "yidan.sun@wustl.edu", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-PDL-11", name: "P. de Leeuw", email: "p.deleeuw@mumc.nl", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-CD-12", name: "Claire Dupond", email: "claire.dupond@sorbonne-universite.fr", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
+      ]
+      knownCohort.forEach(k => {
+        if (!rawList.some(r => r.email.toLowerCase() === k.email.toLowerCase() || r.name.toLowerCase() === k.name.toLowerCase())) {
+          rawList.push(k)
+        }
+      })
     } else if (rawList.length === 0 && trackingManuscript.reviewers && trackingManuscript.reviewers.length > 0) {
       trackingManuscript.reviewers.forEach((revName, idx) => {
         rawList.push({
@@ -2557,15 +2570,16 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
 
   // Handle open Assign Modal
   const handleOpenAssign = (ms: JmManuscript, isAlternate = false) => {
-    setSelectedManuscript(ms)
-    // NEVER pre-select existing reviewers. When inviting alternate/fresh reviewers,
-    // starting with an empty selection prevents accidentally re-inviting already assigned reviewers.
-    setSelectedReviewers([])
-    const boardCandidates = getBoardCandidatesForJournal(ms.journal, ms.author || ms.authorName)
-    const defaultEd = ms.assignedEditorName || (boardCandidates.length > 0 ? boardCandidates[0].name : "Weihua Gong, M.D., Ph.D.")
-    setSelectedEditor(defaultEd)
-    const initialSubject = `Review Invitation: ${ms.id} - ${ms.title}`
-    const initialBody = `Dear {{recipientName}},
+    try {
+      setSelectedManuscript(ms)
+      // NEVER pre-select existing reviewers. When inviting alternate/fresh reviewers,
+      // starting with an empty selection prevents accidentally re-inviting already assigned reviewers.
+      setSelectedReviewers([])
+      const boardCandidates = getBoardCandidatesForJournal(ms.journal, ms.author || ms.authorName)
+      const defaultEd = ms.assignedEditorName || (boardCandidates.length > 0 ? boardCandidates[0].name : "Justice Kofi Boakye-Appiah, M.D., Ph.D.")
+      setSelectedEditor(defaultEd)
+      const initialSubject = `Review Invitation: ${ms.id} - ${ms.title}`
+      const initialBody = `Dear {{recipientName}},
 
 You have been invited to serve as an expert peer reviewer for the following manuscript submitted to ${ms.journal}:
 
@@ -2578,25 +2592,34 @@ We kindly request that you complete your evaluation within 14 calendar days of a
 
 Please use the buttons below to access your reviewer scorecard or confirm your availability.`
 
-    setAssignEmailSubject(initialSubject)
-    setAssignEmailBody(initialBody)
-    setAssignEmailTab("edit")
-    setAssignStep("select")
-    const defaultFrom = getJournalReplyTo(ms.journal) || "editor.med@scholarlyopen.org"
-    setAssignFromEmail(defaultFrom)
-    setAssignSenderName(`${ms.journal} Editorial Office`)
+      setAssignEmailSubject(initialSubject)
+      setAssignEmailBody(initialBody)
+      setAssignEmailTab("edit")
+      setAssignStep("select")
+      const defaultFrom = getJournalReplyTo(ms.journal) || "editor.med@scholarlyopen.org"
+      setAssignFromEmail(defaultFrom)
+      setAssignSenderName(`${ms.journal} Editorial Office`)
 
-    if (isAlternate) {
-      setJmReviewerSourceTab("suggested")
-      const seedQuery = ms.keywords?.join(" ") || (ms.title ? ms.title.slice(0, 60) : "")
-      if (seedQuery) {
-        setJmOpenAlexQuery(seedQuery)
+      if (isAlternate) {
+        setJmReviewerSourceTab("suggested")
+        const seedKeywords = Array.isArray(ms.keywords)
+          ? ms.keywords.join(" ")
+          : typeof ms.keywords === "string"
+          ? ms.keywords.replace(/[;,]/g, " ")
+          : ""
+        const seedQuery = seedKeywords.trim() || (ms.title ? ms.title.slice(0, 60) : "")
+        if (seedQuery) {
+          setJmOpenAlexQuery(seedQuery)
+        }
+        setJmOpenAlexPage(1)
+        handleFetchJmOpenAlexReviewers(ms, seedQuery || jmOpenAlexQuery, 1, false)
       }
-      setJmOpenAlexPage(1)
-      handleFetchJmOpenAlexReviewers(ms, seedQuery || jmOpenAlexQuery, 1, false)
-    }
 
-    setIsAssignModalOpen(true)
+      setIsAssignModalOpen(true)
+    } catch (err) {
+      console.error("Error in handleOpenAssign:", err)
+      setIsAssignModalOpen(true)
+    }
   }
 
   // Handle transition from Scholar Selection to Template Check & Dispatch View
@@ -2800,7 +2823,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       timestamp: nowIso,
       status: "Delivered" as const
     }))
-    setSentEmailsHistory(prev => [...newlyDispatchedRecords, ...prev])
+    setSentEmailsHistory(prev => {
+      const next = [...newlyDispatchedRecords, ...prev]
+      if (typeof window !== "undefined") {
+        try { localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(next)) } catch (e) {}
+      }
+      return next
+    })
+
+    // Persist to server sent-invitations database
+    fetch("/api/editorial360/sent-invitations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newlyDispatchedRecords)
+    }).catch(e => console.error("Failed to persist newly dispatched reviewer records:", e))
 
     // Dispatch live cross-desk activity feed notifications
     if (onAddNotification) {
@@ -8336,6 +8372,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     disabled={isAssignSending}
@@ -8345,6 +8382,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     Cancel
                   </Button>
                   <Button
+                    type="button"
                     size="sm"
                     onClick={handleProceedToDispatchCheck}
                     disabled={selectedReviewers.length === 0}
@@ -8358,6 +8396,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             ) : (
               <>
                 <Button
+                  type="button"
                   variant="outline"
                   size="sm"
                   disabled={isAssignSending}
@@ -8368,6 +8407,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </Button>
                 <div className="flex items-center gap-2">
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     disabled={isAssignSending}
@@ -8377,6 +8417,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     Cancel
                   </Button>
                   <Button
+                    type="button"
                     size="sm"
                     onClick={handleConfirmAssignment}
                     disabled={assignRecipients.length === 0 || isAssignSending}
@@ -9284,6 +9325,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     Managing Active Round
                   </span>
                   <Button
+                    type="button"
                     size="sm"
                     variant="outline"
                     onClick={() => {
@@ -9312,12 +9354,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 break-words">
-                      Double-blind peer review is underway, but no Handling Editor has been appointed yet. As Journal Manager, you can invite an editor from the board or invite a guest handling editor.
+                      Double-blind peer review is underway, but no Handling Editor is currently appointed (previous invite to Dr. Weihua Gong was unconfirmed / did not agree to handle). As Journal Manager, you can invite an editor from the board or invite a guest handling editor.
                     </p>
                   </div>
                 </div>
 
                 <Button
+                  type="button"
                   size="sm"
                   onClick={() => {
                     setEditorInviteSuccessMsg(null)
@@ -9344,12 +9387,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">50% Logged</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 break-words">
-                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is currently reviewing.
+                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is conducting his review via direct email correspondence.
                     </div>
                   </div>
                 </div>
 
                 <Button
+                  type="button"
                   size="sm"
                   variant="outline"
                   onClick={() => {
@@ -9380,6 +9424,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
 
                 <Button
+                  type="button"
                   size="sm"
                   onClick={() => {
                     if (!trackingManuscript?.assignedEditorName) {
@@ -9449,6 +9494,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     {modalReviewerDisplayList.length} logged
                   </span>
                   <Button
+                    type="button"
                     size="sm"
                     variant="outline"
                     onClick={() => {
@@ -9534,6 +9580,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </div>
 
                           <Button
+                            type="button"
                             size="sm"
                             onClick={() => {
                               if (trackingManuscript) {
@@ -9642,7 +9689,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               )}
                             </h4>
                             <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                              {rev.email}
+                              {rev.email} {isAziza && "· Arranged directly via email correspondence"}
                             </div>
                           </div>
                           {isSubmitted ? (
@@ -9662,6 +9709,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse"></span>
                               ⚠ Overdue by 3d
                             </span>
+                          ) : isAziza ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 whitespace-nowrap">
+                              <Mail className="h-3 w-3" /> Review Arranged via Email
+                            </span>
                           ) : (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 border border-[#0b99ff]/20 whitespace-nowrap">
                               Accepted · Reviewing (In Progress)
@@ -9670,59 +9721,106 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </div>
 
                         {!isSubmitted ? (
-                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleNudgeReviewer(revName)}
-                              disabled={isNudged}
-                              className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
-                                isNudged 
-                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
-                                  : isOverdue 
-                                    ? "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-900/50 dark:text-rose-300" 
-                                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
-                              }`}
-                            >
-                              {isNudged ? (
-                                <>
-                                  <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
-                                  Reminder Dispatched
-                                </>
-                              ) : isOverdue ? (
-                                <>
-                                  <AlertCircle className="h-3.5 w-3.5 mr-1 text-rose-600 dark:text-rose-400" />
-                                  Send Urgent Nudge
-                                </>
-                              ) : (
-                                <>
-                                  <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Send Reminder
-                                </>
-                              )}
-                            </Button>
-
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleExtendReviewer(revName)}
-                              className="h-8 text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 px-2.5 whitespace-nowrap"
-                            >
-                              +7d Extension
-                            </Button>
-
-                            {extraDays > 0 && (
+                          isAziza ? (
+                            <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
                               <Button
                                 size="sm"
-                                variant="ghost"
-                                onClick={() => handleResetReviewerExtension(revName)}
-                                title="Reset / Undo added days"
-                                className="h-8 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 rounded-lg cursor-pointer whitespace-nowrap"
+                                onClick={() => {
+                                  const azizaFeedback: JmReviewFeedback = {
+                                    id: "REV-FB-RA02",
+                                    paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                    reviewerName: "Dr. Ragab Aziza",
+                                    originality: 4,
+                                    commentsAuthor: "Review comments received via email correspondence:\n\n",
+                                    sanitizedCommentsAuthor: "Review comments received via email correspondence:\n\n",
+                                    commentsEditor: "Reviewer coordinated via direct email correspondence. Report entered by Journal Manager Desk.",
+                                    recommendation: "Minor Revision",
+                                    status: "Pending Moderation"
+                                  }
+                                  handleOpenModeration(azizaFeedback)
+                                }}
+                                className="h-8 text-xs font-bold px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-xs whitespace-nowrap flex items-center gap-1"
                               >
-                                ↺ Reset
+                                <FileText className="h-3.5 w-3.5" />
+                                Log / Enter Email Report
                               </Button>
-                            )}
-                          </div>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  window.location.href = `mailto:${rev.email}?subject=${encodeURIComponent(`Peer Review Follow-Up: ${trackingManuscript?.id} - ${trackingManuscript?.title}`)}&body=${encodeURIComponent(`Dear Dr. Ragab Aziza,\n\nFollowing up on our email correspondence regarding your evaluation of ${trackingManuscript?.id} (${trackingManuscript?.title}).\n\nWhenever your report is ready, please reply directly with your evaluation comments.\n\nWarm regards,\nEditorial Management Office\nScholarly Open: Medicine`)}`
+                                }}
+                                className="h-8 text-xs font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap flex items-center gap-1"
+                              >
+                                <Mail className="h-3.5 w-3.5 text-[#0b99ff]" />
+                                Email Follow-Up
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleExtendReviewer(revName)}
+                                className="h-8 text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 px-2.5 whitespace-nowrap"
+                              >
+                                +7d Extension
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleNudgeReviewer(revName)}
+                                disabled={isNudged}
+                                className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
+                                  isNudged 
+                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                                    : isOverdue 
+                                      ? "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-900/50 dark:text-rose-300" 
+                                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
+                                }`}
+                              >
+                                {isNudged ? (
+                                  <>
+                                    <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                    Reminder Dispatched
+                                  </>
+                                ) : isOverdue ? (
+                                  <>
+                                    <AlertCircle className="h-3.5 w-3.5 mr-1 text-rose-600 dark:text-rose-400" />
+                                    Send Urgent Nudge
+                                  </>
+                                ) : (
+                                  <>
+                                    <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                    Send Reminder
+                                  </>
+                                )}
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleExtendReviewer(revName)}
+                                className="h-8 text-xs font-semibold border-slate-200 dark:border-slate-800 cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 px-2.5 whitespace-nowrap"
+                              >
+                                +7d Extension
+                              </Button>
+
+                              {extraDays > 0 && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleResetReviewerExtension(revName)}
+                                  title="Reset / Undo added days"
+                                  className="h-8 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 rounded-lg cursor-pointer whitespace-nowrap"
+                                >
+                                  ↺ Reset
+                                </Button>
+                              )}
+                            </div>
+                          )
                         ) : (
                           <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
                             {/* View Full RAF button specifically for Dr. Praveen Nagula who submitted the RAF */}
@@ -9842,6 +9940,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
           <DialogFooter className="p-4 px-6 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/70 dark:bg-slate-900/70 flex flex-row items-center justify-between gap-3 w-full box-border">
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={() => {
@@ -9854,6 +9953,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               Invite Alternate Reviewer
             </Button>
             <Button
+              type="button"
               size="sm"
               onClick={() => setIsTrackModalOpen(false)}
               className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer whitespace-nowrap"
@@ -9937,23 +10037,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   return (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {boardList.map((cand) => {
+                        const isGong = cand.name.toLowerCase().includes("gong")
                         const isSelected = selectedBoardEditor === cand.name
                         return (
                           <div
                             key={cand.email}
                             onClick={() => {
+                              if (isGong) return
                               setSelectedBoardEditor(cand.name)
                               setCustomEditorEmail(cand.email)
                             }}
-                            className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
-                              isSelected
-                                ? "border-[#0b99ff] bg-[#0b99ff]/5 ring-1 ring-[#0b99ff]"
-                                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-[#121316]"
+                            className={`p-3 rounded-xl border text-left transition-all ${
+                              isGong 
+                                ? "opacity-60 bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 cursor-not-allowed"
+                                : isSelected
+                                  ? "border-[#0b99ff] bg-[#0b99ff]/5 ring-1 ring-[#0b99ff] cursor-pointer"
+                                  : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-[#121316] cursor-pointer"
                             }`}
                           >
-                            <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center justify-between mb-1 gap-2">
                               <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">{cand.name}</h5>
-                              {isSelected && <Check className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />}
+                              {isGong ? (
+                                <span className="text-[9px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-900 shrink-0">
+                                  Declined to handle
+                                </span>
+                              ) : (
+                                isSelected && <Check className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
+                              )}
                             </div>
                             <p className="text-[11px] text-[#0b99ff] font-medium">{cand.role}</p>
                             <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{cand.affiliation}</p>
