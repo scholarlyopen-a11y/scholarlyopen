@@ -4936,7 +4936,7 @@ export default function Editorial360Page() {
           // ==========================================
           <>
             <Header />
-            <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0b99ff]/5 via-transparent to-transparent">
+            <main className="flex-1 py-6 sm:py-8 md:py-10 px-3 sm:px-6 lg:px-8 bg-gradient-to-b from-primary/5 via-transparent to-transparent">
               <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
                 {/* Language Switcher & Badge */}
                 <div className="flex items-center justify-between">
@@ -5690,19 +5690,19 @@ export default function Editorial360Page() {
           // ==========================================
           <>
             <Header />
-            <main className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0b99ff]/5 via-transparent to-transparent">
-              <div className="w-full max-w-md space-y-8 animate-in fade-in duration-300">
+            <main className="flex-1 flex items-center justify-center py-4 sm:py-6 md:py-8 lg:py-10 px-3 sm:px-6 lg:px-8 min-h-[calc(100dvh-4.5rem)] bg-gradient-to-b from-primary/5 via-transparent to-transparent">
+              <div className="w-full max-w-sm sm:max-w-md space-y-3 sm:space-y-5 animate-in fade-in duration-300">
                 
                 {/* Login Container Header */}
                 <div className="flex flex-col items-center text-center">
                   {/* Light Font EN | DE Language Switcher Above Login */}
-                  <div className="flex items-center justify-center gap-1.5 text-xs font-light text-slate-400 select-none mb-2">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-light text-slate-400 select-none mb-1.5">
                     <button
                       type="button"
                       onClick={() => setLanguage("en")}
                       className={`transition-colors cursor-pointer ${
                         language === "en"
-                          ? "font-semibold text-[#0b99ff]"
+                          ? "font-semibold text-primary dark:text-emerald-400"
                           : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
                       }`}
                     >
@@ -5714,7 +5714,7 @@ export default function Editorial360Page() {
                       onClick={() => setLanguage("de")}
                       className={`transition-colors cursor-pointer ${
                         language === "de"
-                          ? "font-semibold text-[#0b99ff]"
+                          ? "font-semibold text-primary dark:text-emerald-400"
                           : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-light"
                       }`}
                     >
@@ -5722,20 +5722,20 @@ export default function Editorial360Page() {
                     </button>
                   </div>
 
-                  <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-1.5">
                     {mode === "login" 
                       ? (language === "de" ? "Anmelden" : "Login") 
                       : (language === "de" ? "Konto erstellen" : "Create account")}
                   </h1>
 
-                  <div className="flex h-10 w-auto items-center justify-center my-2 hover:scale-105 transition-all">
+                  <div className="flex h-8 sm:h-9 w-auto items-center justify-center my-1.5 hover:scale-105 transition-all">
                     <img 
                       src="/editorial360.svg" 
                       alt="editorial360" 
                       className="h-full w-auto object-contain" 
                     />
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
                     {language === "de" ? "Oder " : "Or "}
                     <button
                       type="button"
@@ -5754,8 +5754,8 @@ export default function Editorial360Page() {
                 
                 {mode === "login" ? (
                   // ================= LOGIN FORM =================
-                  <form onSubmit={handleLogin} className="pt-6">
-                    <CardContent className="space-y-4 px-6 py-2">
+                  <form onSubmit={handleLogin} className="pt-4 sm:pt-5">
+                    <CardContent className="space-y-3.5 sm:space-y-4 px-4 sm:px-6 py-2">
                       {error && (
                         <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 text-xs font-medium border border-red-200 dark:border-red-900/30">
                           {error}
@@ -5875,7 +5875,7 @@ export default function Editorial360Page() {
                       </div>
                     </CardContent>
                     
-                    <CardFooter className="flex flex-col gap-3 px-6 pb-6 pt-2">
+                    <CardFooter className="flex flex-col gap-2.5 sm:gap-3 px-4 sm:px-6 pb-4 sm:pb-6 pt-1.5 sm:pt-2">
                       <Button 
                         type="submit" 
                         disabled={loading}

@@ -83,21 +83,37 @@ export function Header() {
         background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-mid) 45%, var(--primary-dark) 100%)',
       }}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
-        <div className="flex lg:flex-1">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 lg:px-6 xl:px-8">
+        <div className="flex shrink-0 items-center">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center">
-            <div className="flex h-14 w-[210px] shrink-0 items-center sm:h-16 sm:w-[260px] lg:h-18 lg:w-[280px] xl:w-[340px]">
+            <div className="flex h-11 w-[165px] sm:h-13 sm:w-[200px] lg:h-14 lg:w-[220px] xl:h-16 xl:w-[280px] 2xl:w-[320px] shrink-0 items-center">
               <LogoSO variant="lockup" className="h-full w-auto object-contain" priority />
             </div>
           </Link>
         </div>
 
-        <div className="flex lg:hidden gap-2">
+        <div className="flex lg:hidden items-center gap-1 sm:gap-2">
+          {/* Theme Toggle Mobile */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="text-[var(--primary-foreground)] hover:bg-primary/10 h-8 w-8 p-0 cursor-pointer"
+            title={mounted && theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            aria-label="Toggle Theme"
+          >
+            {mounted && theme === "dark" ? (
+              <Sun className="h-4 w-4 text-amber-300" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
+
           {/* Language Toggle Mobile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10">
-                <Globe className="h-4 w-4 mr-1" />
+              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 h-8 px-2 text-xs">
+                <Globe className="h-3.5 w-3.5 mr-1" />
                 {language.toUpperCase()}
               </Button>
             </DropdownMenuTrigger>
@@ -114,21 +130,21 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-[var(--primary-foreground)] hover:bg-primary/10"
+            className="-m-1.5 inline-flex items-center justify-center rounded-md p-2 text-[var(--primary-foreground)] hover:bg-primary/10 cursor-pointer"
           >
             <span className="sr-only">Toggle menu</span>
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
-        <div className="hidden lg:flex lg:gap-x-0.5 xl:gap-x-1 items-center">
+        <div className="hidden lg:flex lg:gap-x-0.5 xl:gap-x-1.5 items-center justify-center flex-1 min-w-0 px-1">
           {navigation.map((item) =>
             item.children ? (
               <DropdownMenu key={item.name}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1.5 xl:px-2.5 py-1.5">
+                  <Button variant="ghost" className="text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1.5 xl:px-2.5 py-1 h-8 xl:h-9">
                     {item.name}
-                    <ChevronDown className="ml-1 h-3 w-3" />
+                    <ChevronDown className="ml-0.5 xl:ml-1 h-3 w-3 shrink-0" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-60">
@@ -185,7 +201,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-1.5 xl:px-2.5 py-1.5 text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
+                className="px-1.5 xl:px-2.5 py-1 text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
               >
                 {item.name}
               </Link>
@@ -193,13 +209,28 @@ export function Header() {
           )}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-2.5 xl:gap-3 shrink-0">
+        <div className="hidden lg:flex items-center justify-end gap-1.5 xl:gap-2.5 shrink-0">
+          {/* Theme Toggle Desktop */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="text-[var(--primary-foreground)] hover:bg-primary/10 h-8 w-8 p-0 cursor-pointer"
+            title={mounted && theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            aria-label="Toggle Theme"
+          >
+            {mounted && theme === "dark" ? (
+              <Sun className="h-4 w-4 text-amber-300" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
 
           {/* Language Toggle Dropdown Desktop */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-2.5 py-1.5 text-xs xl:text-sm font-semibold shrink-0 cursor-pointer flex items-center">
-                <Globe className="h-4 w-4 mr-1.5 opacity-90" />
+              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-2 py-1 text-xs xl:text-sm font-semibold shrink-0 cursor-pointer flex items-center h-8 xl:h-9">
+                <Globe className="h-3.5 w-3.5 xl:h-4 xl:w-4 mr-1 opacity-90" />
                 {language.toUpperCase()}
                 <ChevronDown className="ml-1 h-3 w-3 opacity-70" />
               </Button>
@@ -220,7 +251,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1.5 xl:px-3.5 xl:py-2 whitespace-nowrap shrink-0">
+          <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1 xl:px-3.5 xl:py-1.5 whitespace-nowrap shrink-0 h-8 xl:h-9">
             <Link href="/submit">{t("nav.submitManuscript")}</Link>
           </Button>
         </div>
@@ -228,7 +259,7 @@ export function Header() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border bg-background">
+        <div className="lg:hidden border-t border-border bg-background max-h-[calc(100dvh-4.5rem)] overflow-y-auto shadow-xl">
           <div className="space-y-1 px-4 py-4">
             {navigation.map((item) =>
               item.children ? (
