@@ -12,6 +12,7 @@ import { Footer } from "@/components/footer"
 import { useLanguage } from "@/lib/language-context"
 import { AntiSpamFields } from "@/components/anti-spam-fields"
 import { HumanVerification } from "@/components/human-verification"
+import { GLOBAL_COUNTRIES } from "@/lib/data/countries"
 
 const checklist = [
   "The manuscript is original and has not been published elsewhere",
@@ -255,25 +256,11 @@ export default function SubmitPage() {
                             required
                           >
                             <option value="">Select country / region</option>
-                            <option value="United States">United States</option>
-                            <option value="Germany">Germany (Deutschland)</option>
-                            <option value="United Kingdom">United Kingdom</option>
-                            <option value="Switzerland">Switzerland (Schweiz)</option>
-                            <option value="Austria">Austria (Österreich)</option>
-                            <option value="Canada">Canada</option>
-                            <option value="France">France</option>
-                            <option value="Netherlands">Netherlands</option>
-                            <option value="Australia">Australia</option>
-                            <option value="Japan">Japan</option>
-                            <option value="Sweden">Sweden</option>
-                            <option value="Singapore">Singapore</option>
-                            <option value="Italy">Italy</option>
-                            <option value="Spain">Spain</option>
-                            <option value="China">China</option>
-                            <option value="India">India</option>
-                            <option value="Brazil">Brazil</option>
-                            <option value="South Korea">South Korea</option>
-                            <option value="Other">Other / International</option>
+                            {GLOBAL_COUNTRIES.map((c) => (
+                              <option key={c.code} value={c.name}>
+                                {c.flag} {c.name}
+                              </option>
+                            ))}
                           </select>
                         </div>
                       </div>

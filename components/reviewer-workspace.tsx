@@ -65,6 +65,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { GLOBAL_COUNTRIES } from "@/lib/data/countries"
 
 export interface ReviewerProfile {
   title: string
@@ -4714,19 +4715,12 @@ COPE & Plan S Certified Archive
                       onChange={(e) => setFormCountry(e.target.value)}
                       className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
                     >
-                      <option value="Germany">Germany</option>
-                      <option value="United States">United States</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Switzerland">Switzerland</option>
-                      <option value="Austria">Austria</option>
-                      <option value="Canada">Canada</option>
-                      <option value="France">France</option>
-                      <option value="Netherlands">Netherlands</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Japan">Japan</option>
-                      <option value="Sweden">Sweden</option>
-                      <option value="Singapore">Singapore</option>
-                      <option value="Other">Other / International</option>
+                      <option value="">{isDe ? "Land auswählen..." : "Select Country..."}</option>
+                      {GLOBAL_COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.name}>
+                          {c.flag} {c.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

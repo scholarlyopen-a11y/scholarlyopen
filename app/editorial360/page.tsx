@@ -94,6 +94,7 @@ import type { ReviewAssessmentData } from "@/components/reviewer-workspace"
 import type { CrossDeskNotification } from "@/components/cross-desk-activity-feed"
 import { OFFICIAL_JOURNALS, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 import { EditorialBoardOnboarding, type EditorialBoardOnboardingData } from "@/components/editorial-board-onboarding"
+import { GLOBAL_COUNTRIES } from "@/lib/data/countries"
 
 const ReviewerWorkspace = dynamic(
   () => import("@/components/reviewer-workspace").then(mod => mod.ReviewerWorkspace),
@@ -6291,27 +6292,11 @@ export default function Editorial360Page() {
                           className="w-full px-3 py-2 text-sm rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 transition-all cursor-pointer"
                         >
                           <option value="">Select Country / Region...</option>
-                          <option value="United States">United States</option>
-                          <option value="United Kingdom">United Kingdom</option>
-                          <option value="Germany">Germany (Deutschland)</option>
-                          <option value="Nigeria">Nigeria</option>
-                          <option value="China">China (中国)</option>
-                          <option value="India">India</option>
-                          <option value="Canada">Canada</option>
-                          <option value="Australia">Australia</option>
-                          <option value="France">France</option>
-                          <option value="Switzerland">Switzerland (Schweiz)</option>
-                          <option value="Austria">Austria (Österreich)</option>
-                          <option value="Netherlands">Netherlands</option>
-                          <option value="Japan">Japan (日本)</option>
-                          <option value="Singapore">Singapore</option>
-                          <option value="South Korea">South Korea (대한민국)</option>
-                          <option value="Brazil">Brazil (Brasil)</option>
-                          <option value="South Africa">South Africa</option>
-                          <option value="Italy">Italy (Italia)</option>
-                          <option value="Spain">Spain (España)</option>
-                          <option value="Sweden">Sweden (Sverige)</option>
-                          <option value="Other">Other / International</option>
+                          {GLOBAL_COUNTRIES.map((c) => (
+                            <option key={c.code} value={c.name}>
+                              {c.flag} {c.name}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
@@ -11909,25 +11894,12 @@ export default function Editorial360Page() {
                         className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff] transition-all"
                         required
                       >
-                        <option value="United States">United States</option>
-                        <option value="Germany">Germany (Deutschland)</option>
-                        <option value="United Kingdom">United Kingdom</option>
-                        <option value="Switzerland">Switzerland (Schweiz)</option>
-                        <option value="Austria">Austria (Österreich)</option>
-                        <option value="Canada">Canada</option>
-                        <option value="France">France</option>
-                        <option value="Netherlands">Netherlands</option>
-                        <option value="Australia">Australia</option>
-                        <option value="Japan">Japan</option>
-                        <option value="Sweden">Sweden</option>
-                        <option value="Singapore">Singapore</option>
-                        <option value="Italy">Italy</option>
-                        <option value="Spain">Spain</option>
-                        <option value="China">China</option>
-                        <option value="India">India</option>
-                        <option value="Brazil">Brazil</option>
-                        <option value="South Korea">South Korea</option>
-                        <option value="Other / International">Other / International</option>
+                        <option value="">Select Country / Region...</option>
+                        {GLOBAL_COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.name}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -14006,41 +13978,12 @@ export default function Editorial360Page() {
                           onChange={(e) => setProfCountry(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
                         >
-                          <option value="Germany">{language === "de" ? "Deutschland" : "Germany"}</option>
-                          <option value="Switzerland">{language === "de" ? "Schweiz" : "Switzerland"}</option>
-                          <option value="Austria">{language === "de" ? "Österreich" : "Austria"}</option>
-                          <option value="United Kingdom">{language === "de" ? "Vereinigtes Königreich" : "United Kingdom"}</option>
-                          <option value="France">{language === "de" ? "Frankreich" : "France"}</option>
-                          <option value="Italy">{language === "de" ? "Italien" : "Italy"}</option>
-                          <option value="Spain">{language === "de" ? "Spanien" : "Spain"}</option>
-                          <option value="Netherlands">{language === "de" ? "Niederlande" : "Netherlands"}</option>
-                          <option value="Belgium">{language === "de" ? "Belgien" : "Belgium"}</option>
-                          <option value="Sweden">{language === "de" ? "Schweden" : "Sweden"}</option>
-                          <option value="Norway">{language === "de" ? "Norwegen" : "Norway"}</option>
-                          <option value="Denmark">{language === "de" ? "Dänemark" : "Denmark"}</option>
-                          <option value="Finland">{language === "de" ? "Finnland" : "Finland"}</option>
-                          <option value="Ireland">{language === "de" ? "Irland" : "Ireland"}</option>
-                          <option value="Portugal">{language === "de" ? "Portugal" : "Portugal"}</option>
-                          <option value="Poland">{language === "de" ? "Polen" : "Poland"}</option>
-                          <option value="Greece">{language === "de" ? "Griechenland" : "Greece"}</option>
-                          <option value="Czech Republic">{language === "de" ? "Tschechien" : "Czech Republic"}</option>
-                          <option value="Hungary">{language === "de" ? "Ungarn" : "Hungary"}</option>
-                          <option value="Romania">{language === "de" ? "Rumänien" : "Romania"}</option>
-                          <option value="Bulgaria">{language === "de" ? "Bulgarien" : "Bulgaria"}</option>
-                          <option value="Croatia">{language === "de" ? "Kroatien" : "Croatia"}</option>
-                          <option value="Slovakia">{language === "de" ? "Slowakei" : "Slovakia"}</option>
-                          <option value="Slovenia">{language === "de" ? "Slowenien" : "Slovenia"}</option>
-                          <option value="Estonia">{language === "de" ? "Estland" : "Estonia"}</option>
-                          <option value="Latvia">{language === "de" ? "Lettland" : "Latvia"}</option>
-                          <option value="Lithuania">{language === "de" ? "Litauen" : "Lithuania"}</option>
-                          <option value="Luxembourg">{language === "de" ? "Luxemburg" : "Luxembourg"}</option>
-                          <option value="Iceland">{language === "de" ? "Island" : "Iceland"}</option>
-                          <option value="Cyprus">{language === "de" ? "Zypern" : "Cyprus"}</option>
-                          <option value="Malta">{language === "de" ? "Malta" : "Malta"}</option>
-                          <option value="India">{language === "de" ? "Indien" : "India"}</option>
-                          <option value="United States">{language === "de" ? "Vereinigte Staaten" : "United States"}</option>
-                          <option value="Canada">{language === "de" ? "Kanada" : "Canada"}</option>
-                          <option value="Australia">{language === "de" ? "Australien" : "Australia"}</option>
+                          <option value="">{language === "de" ? "Land auswählen..." : "Select Country..."}</option>
+                          {GLOBAL_COUNTRIES.map((c) => (
+                            <option key={c.code} value={c.name}>
+                              {c.flag} {c.name}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -14171,41 +14114,12 @@ export default function Editorial360Page() {
                         }}
                         className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
                       >
-                        <option value="Germany">{language === "de" ? "Deutschland" : "Germany"}</option>
-                        <option value="Switzerland">{language === "de" ? "Schweiz" : "Switzerland"}</option>
-                        <option value="Austria">{language === "de" ? "Österreich" : "Austria"}</option>
-                        <option value="United Kingdom">{language === "de" ? "Vereinigtes Königreich" : "United Kingdom"}</option>
-                        <option value="France">{language === "de" ? "Frankreich" : "France"}</option>
-                        <option value="Italy">{language === "de" ? "Italien" : "Italy"}</option>
-                        <option value="Spain">{language === "de" ? "Spanien" : "Spain"}</option>
-                        <option value="Netherlands">{language === "de" ? "Niederlande" : "Netherlands"}</option>
-                        <option value="Belgium">{language === "de" ? "Belgien" : "Belgium"}</option>
-                        <option value="Sweden">{language === "de" ? "Schweden" : "Sweden"}</option>
-                        <option value="Norway">{language === "de" ? "Norwegen" : "Norway"}</option>
-                        <option value="Denmark">{language === "de" ? "Dänemark" : "Denmark"}</option>
-                        <option value="Finland">{language === "de" ? "Finnland" : "Finland"}</option>
-                        <option value="Ireland">{language === "de" ? "Irland" : "Ireland"}</option>
-                        <option value="Portugal">{language === "de" ? "Portugal" : "Portugal"}</option>
-                        <option value="Poland">{language === "de" ? "Polen" : "Poland"}</option>
-                        <option value="Greece">{language === "de" ? "Griechenland" : "Greece"}</option>
-                        <option value="Czech Republic">{language === "de" ? "Tschechien" : "Czech Republic"}</option>
-                        <option value="Hungary">{language === "de" ? "Ungarn" : "Hungary"}</option>
-                        <option value="Romania">{language === "de" ? "Rumänien" : "Romania"}</option>
-                        <option value="Bulgaria">{language === "de" ? "Bulgarien" : "Bulgaria"}</option>
-                        <option value="Croatia">{language === "de" ? "Kroatien" : "Croatia"}</option>
-                        <option value="Slovakia">{language === "de" ? "Slowakei" : "Slovakia"}</option>
-                        <option value="Slovenia">{language === "de" ? "Slowenien" : "Slovenia"}</option>
-                        <option value="Estonia">{language === "de" ? "Estland" : "Estonia"}</option>
-                        <option value="Latvia">{language === "de" ? "Lettland" : "Latvia"}</option>
-                        <option value="Lithuania">{language === "de" ? "Litauen" : "Lithuania"}</option>
-                        <option value="Luxembourg">{language === "de" ? "Luxemburg" : "Luxembourg"}</option>
-                        <option value="Iceland">{language === "de" ? "Island" : "Iceland"}</option>
-                        <option value="Cyprus">{language === "de" ? "Zypern" : "Cyprus"}</option>
-                        <option value="Malta">{language === "de" ? "Malta" : "Malta"}</option>
-                        <option value="India">{language === "de" ? "Indien" : "India"}</option>
-                        <option value="United States">{language === "de" ? "Vereinigte Staaten" : "United States"}</option>
-                        <option value="Canada">{language === "de" ? "Kanada" : "Canada"}</option>
-                        <option value="Australia">{language === "de" ? "Australien" : "Australia"}</option>
+                        <option value="">{language === "de" ? "Land auswählen..." : "Select Country..."}</option>
+                        {GLOBAL_COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.name}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
