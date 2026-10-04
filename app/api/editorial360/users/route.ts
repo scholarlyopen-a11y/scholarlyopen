@@ -16,6 +16,11 @@ export interface StoredUserRecord {
   status: string
   createdAt: string
   passwordHash?: string
+  photoUrl?: string
+  staffRole?: string
+  department?: string
+  officeLocation?: string
+  updatedAt?: string
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
@@ -26,6 +31,32 @@ const FILE_PATH = "users.json"
 const DATA_FILE_PATH = path.join(process.cwd(), "lib", "data", "users.json")
 
 const DEFAULT_USERS: StoredUserRecord[] = [
+  {
+    id: "USR-JM",
+    name: "Noor F.",
+    email: "info@scholarlyopen.org",
+    role: "jm",
+    affiliation: "Journal Management & Publishing Operations",
+    country: "Germany",
+    status: "Active",
+    staffRole: "Editorial Manager & Publishing Coordinator",
+    department: "Journal Management & Publishing Operations",
+    officeLocation: "Mainz Editorial Office & Global Desk",
+    createdAt: "2026-01-15T10:00:00.000Z"
+  },
+  {
+    id: "USR-JM2",
+    name: "Noor F.",
+    email: "manager@scholarlyopen.org",
+    role: "jm",
+    affiliation: "Journal Management & Publishing Operations",
+    country: "Germany",
+    status: "Active",
+    staffRole: "Editorial Manager & Publishing Coordinator",
+    department: "Journal Management & Publishing Operations",
+    officeLocation: "Mainz Editorial Office & Global Desk",
+    createdAt: "2026-01-15T10:00:00.000Z"
+  },
   {
     id: "USR-01",
     name: "Dr. Marcus Vance",
@@ -140,7 +171,11 @@ export async function POST(req: Request) {
       country = "",
       orcid = "",
       password = "",
-      status = "Active"
+      status = "Active",
+      photoUrl,
+      staffRole,
+      department,
+      officeLocation
     } = body
 
     if (!name || !email) {
@@ -179,7 +214,12 @@ export async function POST(req: Request) {
       orcid: orcid.trim(),
       status,
       createdAt: existingIndex >= 0 ? currentUsers[existingIndex].createdAt : new Date().toISOString(),
-      passwordHash: password ? `auth_hash_${Buffer.from(password).toString("base64").slice(0, 12)}` : undefined
+      passwordHash: password ? `auth_hash_${Buffer.from(password).toString("base64").slice(0, 12)}` : undefined,
+      photoUrl: photoUrl !== undefined ? photoUrl : (existingIndex >= 0 ? currentUsers[existingIndex].photoUrl : undefined),
+      staffRole: staffRole !== undefined ? staffRole : (existingIndex >= 0 ? currentUsers[existingIndex].staffRole : undefined),
+      department: department !== undefined ? department : (existingIndex >= 0 ? currentUsers[existingIndex].department : undefined),
+      officeLocation: officeLocation !== undefined ? officeLocation : (existingIndex >= 0 ? currentUsers[existingIndex].officeLocation : undefined),
+      updatedAt: new Date().toISOString()
     }
 
     let updatedUsers: StoredUserRecord[]
@@ -193,6 +233,57 @@ export async function POST(req: Request) {
     await saveStoredUsers(updatedUsers)
 
     return NextResponse.json({ success: true, user: newRecord })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json()
+    const { email } = body
+    if (!email) {
+      return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 })
+    }
+
+    const cleanEmail = email.trim().toLowerCase()
+    const currentUsers = await getStoredUsers()
+    const existingIndex = currentUsers.findIndex(u => u.email.toLowerCase() === cleanEmail)
+
+    const existingUser = existingIndex >= 0 ? currentUsers[existingIndex] : {
+      id: `USR-${Date.now().toString().slice(-4)}`,
+      name: body.name || cleanEmail.split("@")[0],
+      email: cleanEmail,
+      role: body.role || "author",
+      status: "Active",
+      createdAt: new Date().toISOString()
+    }
+
+    const updatedUser: StoredUserRecord = {
+      ...existingUser,
+      ...(body.name ? { name: body.name.trim() } : {}),
+      ...(body.role ? { role: body.role } : {}),
+      ...(body.affiliation !== undefined ? { affiliation: body.affiliation.trim() } : {}),
+      ...(body.country !== undefined ? { country: body.country.trim() } : {}),
+      ...(body.orcid !== undefined ? { orcid: body.orcid.trim() } : {}),
+      ...(body.photoUrl !== undefined ? { photoUrl: body.photoUrl } : {}),
+      ...(body.staffRole !== undefined ? { staffRole: body.staffRole } : {}),
+      ...(body.department !== undefined ? { department: body.department } : {}),
+      ...(body.officeLocation !== undefined ? { officeLocation: body.officeLocation } : {}),
+      updatedAt: new Date().toISOString()
+    }
+
+    let updatedUsers: StoredUserRecord[]
+    if (existingIndex >= 0) {
+      updatedUsers = [...currentUsers]
+      updatedUsers[existingIndex] = updatedUser
+    } else {
+      updatedUsers = [updatedUser, ...currentUsers]
+    }
+
+    await saveStoredUsers(updatedUsers)
+
+    return NextResponse.json({ success: true, user: updatedUser })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }

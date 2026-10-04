@@ -1401,6 +1401,40 @@ export default function Editorial360Page() {
         .then(res => res.json())
         .then(data => {
           if (data?.users && Array.isArray(data.users)) {
+            // Synchronize active user profile photo & metadata across sessions/devices (Noor in India, etc.)
+            const jmEmails = ["manager@scholarlyopen.org", "info@scholarlyopen.org", "scholarlyopen@gmail.com"]
+            const matchedCloudUser = data.users.find((u: any) => {
+              if (!u.email) return false
+              const umail = u.email.toLowerCase()
+              if (email && umail === email.toLowerCase()) return true
+              if (role === "jm" && jmEmails.includes(umail)) return true
+              return false
+            })
+
+            if (matchedCloudUser) {
+              if (matchedCloudUser.photoUrl) {
+                setProfPhotoUrl(matchedCloudUser.photoUrl)
+                if (role === "editor") setEditorPhotoUrl(matchedCloudUser.photoUrl)
+                if (role === "author") setAuthorPhotoUrl(matchedCloudUser.photoUrl)
+                try {
+                  localStorage.setItem("editorial360_user_photo", matchedCloudUser.photoUrl)
+                  const curSess = sessionStorage.getItem("editorial360_session")
+                  if (curSess) {
+                    const parsedSess = JSON.parse(curSess)
+                    parsedSess.profPhotoUrl = matchedCloudUser.photoUrl
+                    sessionStorage.setItem("editorial360_session", JSON.stringify(parsedSess))
+                  }
+                } catch (e) {}
+              }
+              if (role === "jm") {
+                if (matchedCloudUser.name) setJmFullName(matchedCloudUser.name)
+                if (matchedCloudUser.staffRole) setJmStaffRole(matchedCloudUser.staffRole)
+                if (matchedCloudUser.department) setJmDepartment(matchedCloudUser.department)
+                if (matchedCloudUser.officeLocation) setJmOfficeLocation(matchedCloudUser.officeLocation)
+                if (matchedCloudUser.country) setProfCountry(matchedCloudUser.country)
+              }
+            }
+
             setUsers(prev => {
               const existingEmails = new Set(prev.map(u => u.email.toLowerCase()))
               const newFromApi: WorkspaceUser[] = data.users
@@ -3463,6 +3497,42 @@ export default function Editorial360Page() {
         }
         window.scrollTo({ top: 0, left: 0, behavior: "instant" })
       }
+      // Fetch latest cloud profile photo for user so multi-device / multi-national accounts immediately sync
+      fetch("/api/editorial360/users")
+        .then(res => res.json())
+        .then(userData => {
+          if (userData?.users && Array.isArray(userData.users)) {
+            const jmAliases = ["manager@scholarlyopen.org", "info@scholarlyopen.org", "scholarlyopen@gmail.com"]
+            const cloudUser = userData.users.find((u: any) => {
+              const umail = (u.email || "").toLowerCase()
+              if (umail === cleanEmail.toLowerCase()) return true
+              if (effectiveRole === "jm" && jmAliases.includes(umail)) return true
+              return false
+            })
+            if (cloudUser?.photoUrl) {
+              setProfPhotoUrl(cloudUser.photoUrl)
+              if (effectiveRole === "editor") setEditorPhotoUrl(cloudUser.photoUrl)
+              if (effectiveRole === "author") setAuthorPhotoUrl(cloudUser.photoUrl)
+              try {
+                localStorage.setItem("editorial360_user_photo", cloudUser.photoUrl)
+                const curSess = sessionStorage.getItem("editorial360_session")
+                if (curSess) {
+                  const parsedSess = JSON.parse(curSess)
+                  parsedSess.profPhotoUrl = cloudUser.photoUrl
+                  sessionStorage.setItem("editorial360_session", JSON.stringify(parsedSess))
+                }
+              } catch (e) {}
+            }
+            if (effectiveRole === "jm" && cloudUser) {
+              if (cloudUser.name) setJmFullName(cloudUser.name)
+              if (cloudUser.staffRole) setJmStaffRole(cloudUser.staffRole)
+              if (cloudUser.department) setJmDepartment(cloudUser.department)
+              if (cloudUser.officeLocation) setJmOfficeLocation(cloudUser.officeLocation)
+            }
+          }
+        })
+        .catch(err => console.warn("Cloud profile fetch on login warning:", err))
+
       setSuccess("Successfully authenticated into the editorial360 workspace.")
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search)
@@ -6835,9 +6905,9 @@ export default function Editorial360Page() {
             </div>
           </header>
 
-          <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+          <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-w-0">
             {/* Responsive Left Sidebar Navigation Tabs */}
-            <aside className="w-full md:w-68 lg:w-72 bg-white dark:bg-[#15161b] border-b md:border-b-0 md:border-r border-slate-200 dark:border-[#272832] p-4 md:p-5 flex flex-col justify-between shrink-0 transition-colors">
+            <aside className="w-full md:w-64 lg:w-72 bg-white dark:bg-[#15161b] border-b md:border-b-0 md:border-r border-slate-200 dark:border-[#272832] p-4 md:p-5 flex flex-col justify-between shrink-0 transition-colors">
               <div className="space-y-4 md:space-y-6">
 
                 {/* Left Navigation Links matching screenshot */}
@@ -7363,8 +7433,8 @@ export default function Editorial360Page() {
             </aside>
 
             {/* Main scrollable body workspace content */}
-            <main ref={workspaceMainRef} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-100/50 dark:bg-[#121316] transition-colors">
-              <div className="max-w-[1600px] mx-auto space-y-6 animate-in fade-in duration-300">
+            <main ref={workspaceMainRef} className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 bg-slate-100/50 dark:bg-[#121316] transition-colors">
+              <div className="max-w-[1600px] w-full min-w-0 mx-auto space-y-6 animate-in fade-in duration-300">
                 
                 {/* Banner Status Header (Admin Only) */}
                 {role === "admin" && (
@@ -13620,6 +13690,38 @@ export default function Editorial360Page() {
                     }
                   } catch (e) {}
 
+                  // Cloud synchronize user record so all remote devices & co-workers (e.g. Noor in India) see updates immediately
+                  const syncSubmitEmails = Array.from(new Set([
+                    email?.toLowerCase(),
+                    role === "jm" ? "manager@scholarlyopen.org" : null,
+                    role === "jm" ? "info@scholarlyopen.org" : null,
+                    role === "jm" ? "scholarlyopen@gmail.com" : null,
+                    role === "editor" ? editorEmail?.toLowerCase() : null,
+                  ].filter(Boolean) as string[]))
+
+                  for (const syncMail of syncSubmitEmails) {
+                    fetch("/api/editorial360/users", {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        email: syncMail,
+                        photoUrl: profPhotoUrl || "",
+                        ...(role === "jm" ? {
+                          name: jmFullName,
+                          staffRole: jmStaffRole,
+                          department: jmDepartment,
+                          officeLocation: jmOfficeLocation,
+                          country: profCountry
+                        } : {}),
+                        ...(role === "editor" ? {
+                          name: editorName,
+                          affiliation: editorInstitution,
+                          country: editorCountry
+                        } : {})
+                      })
+                    }).catch(() => {})
+                  }
+
                   if (role === "reviewer") {
                     setReviewerProfile(prev => {
                       const next = {
@@ -13678,46 +13780,106 @@ export default function Editorial360Page() {
                         onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (file) {
+                            // 1. Immediate local base64 preview
                             const reader = new FileReader()
-                            reader.onloadend = () => {
-                              const photoStr = reader.result as string
-                              setProfPhotoUrl(photoStr)
-                              try {
-                                localStorage.setItem("editorial360_user_photo", photoStr)
-                                const sessionStr = sessionStorage.getItem("editorial360_session")
-                                if (sessionStr) {
-                                  const sess = JSON.parse(sessionStr)
-                                  sess.profPhotoUrl = photoStr
-                                  if (role === "editor") sess.editorPhotoUrl = photoStr
-                                  sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
-                                }
-                              } catch (e) {}
+                            reader.onloadend = async () => {
+                              const localPreviewStr = reader.result as string
+                              setProfPhotoUrl(localPreviewStr)
+                              if (role === "editor") setEditorPhotoUrl(localPreviewStr)
 
-                              if (role === "editor") {
-                                setEditorPhotoUrl(photoStr)
-                              } else if (role === "jm") {
-                                try {
-                                  const savedJm = localStorage.getItem("editorial360_jm_profile")
-                                  const jmObj = savedJm ? JSON.parse(savedJm) : {}
-                                  jmObj.photoUrl = photoStr
-                                  localStorage.setItem("editorial360_jm_profile", JSON.stringify(jmObj))
-                                } catch (e) {}
-                              } else if (role === "reviewer") {
-                                setReviewerProfile(prev => {
-                                  const next = {
-                                    name: prev?.name || profFullName || "Dr. Marcus Vance",
-                                    email: prev?.email || email || "reviewer@scholarlyopen.org",
-                                    institution: prev?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
-                                    orcid: prev?.orcid || profOrcid || "0000-0004-7711-2093",
-                                    ...prev,
-                                    photoUrl: photoStr
-                                  }
-                                  try {
-                                    localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
-                                    if (next.email) localStorage.setItem(`so_reviewer_profile_${next.email}`, JSON.stringify(next))
-                                  } catch (err) {}
-                                  return next
+                              // 2. Upload file to Supabase Cloud Storage via API
+                              try {
+                                const formData = new FormData()
+                                formData.append("file", file)
+                                formData.append("fileType", "avatar")
+                                formData.append("manuscriptId", "profiles")
+
+                                const uploadRes = await fetch("/api/editorial360/upload", {
+                                  method: "POST",
+                                  body: formData
                                 })
+                                const uploadData = await uploadRes.json()
+                                const cloudUrl = (uploadRes.ok && uploadData?.fileUrl) ? uploadData.fileUrl : localPreviewStr
+
+                                if (uploadData?.fileUrl) {
+                                  setProfPhotoUrl(uploadData.fileUrl)
+                                  if (role === "editor") setEditorPhotoUrl(uploadData.fileUrl)
+                                }
+
+                                // 3. Persist locally for active session
+                                try {
+                                  localStorage.setItem("editorial360_user_photo", cloudUrl)
+                                  const sessionStr = sessionStorage.getItem("editorial360_session")
+                                  if (sessionStr) {
+                                    const sess = JSON.parse(sessionStr)
+                                    sess.profPhotoUrl = cloudUrl
+                                    if (role === "editor") sess.editorPhotoUrl = cloudUrl
+                                    sessionStorage.setItem("editorial360_session", JSON.stringify(sess))
+                                  }
+                                } catch (e) {}
+
+                                if (role === "jm") {
+                                  try {
+                                    const savedJm = localStorage.getItem("editorial360_jm_profile")
+                                    const jmObj = savedJm ? JSON.parse(savedJm) : {}
+                                    jmObj.photoUrl = cloudUrl
+                                    localStorage.setItem("editorial360_jm_profile", JSON.stringify(jmObj))
+                                  } catch (e) {}
+                                } else if (role === "reviewer") {
+                                  setReviewerProfile(prev => {
+                                    const next = {
+                                      name: prev?.name || profFullName || "Dr. Marcus Vance",
+                                      email: prev?.email || email || "reviewer@scholarlyopen.org",
+                                      institution: prev?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
+                                      orcid: prev?.orcid || profOrcid || "0000-0004-7711-2093",
+                                      ...prev,
+                                      photoUrl: cloudUrl
+                                    }
+                                    try {
+                                      localStorage.setItem("so_reviewer_profile_default", JSON.stringify(next))
+                                      if (next.email) localStorage.setItem(`so_reviewer_profile_${next.email}`, JSON.stringify(next))
+                                    } catch (err) {}
+                                    return next
+                                  })
+                                }
+
+                                // 4. Cloud Synchronize user profile via /api/editorial360/users (accessible to all devices & Noor in India)
+                                const syncEmails = Array.from(new Set([
+                                  email?.toLowerCase(),
+                                  role === "jm" ? "manager@scholarlyopen.org" : null,
+                                  role === "jm" ? "info@scholarlyopen.org" : null,
+                                  role === "jm" ? "scholarlyopen@gmail.com" : null,
+                                  role === "editor" ? editorEmail?.toLowerCase() : null,
+                                ].filter(Boolean) as string[]))
+
+                                for (const syncMail of syncEmails) {
+                                  try {
+                                    await fetch("/api/editorial360/users", {
+                                      method: "PATCH",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({
+                                        email: syncMail,
+                                        photoUrl: cloudUrl,
+                                        ...(role === "jm" ? {
+                                          name: jmFullName || "Noor F.",
+                                          staffRole: jmStaffRole || "Editorial Manager",
+                                          department: jmDepartment,
+                                          officeLocation: jmOfficeLocation,
+                                          country: profCountry
+                                        } : {}),
+                                        ...(role === "editor" ? {
+                                          name: editorName,
+                                          affiliation: editorInstitution,
+                                          country: editorCountry
+                                        } : {})
+                                      })
+                                    })
+                                  } catch (err) {
+                                    console.warn("User photo cloud sync warning:", err)
+                                  }
+                                }
+                              } catch (err) {
+                                console.error("Cloud avatar upload failure:", err)
                               }
                             }
                             reader.readAsDataURL(file)
@@ -13728,7 +13890,7 @@ export default function Editorial360Page() {
                     {((role === "editor" && editorPhotoUrl) || profPhotoUrl || (role === "reviewer" && reviewerProfile?.photoUrl)) && (
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={async () => {
                           setProfPhotoUrl("")
                           try {
                             localStorage.removeItem("editorial360_user_photo")
@@ -13752,6 +13914,25 @@ export default function Editorial360Page() {
                               } catch (err) {}
                               return next
                             })
+                          }
+
+                          // Sync removal to Cloud User Record
+                          const syncEmails = Array.from(new Set([
+                            email?.toLowerCase(),
+                            role === "jm" ? "manager@scholarlyopen.org" : null,
+                            role === "jm" ? "info@scholarlyopen.org" : null,
+                            role === "jm" ? "scholarlyopen@gmail.com" : null,
+                            role === "editor" ? editorEmail?.toLowerCase() : null,
+                          ].filter(Boolean) as string[]))
+
+                          for (const syncMail of syncEmails) {
+                            try {
+                              await fetch("/api/editorial360/users", {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ email: syncMail, photoUrl: "" })
+                              })
+                            } catch (e) {}
                           }
                         }}
                         className="px-2.5 py-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"

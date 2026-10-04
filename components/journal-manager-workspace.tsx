@@ -4394,7 +4394,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
 
             {/* Sub-tab Navigation */}
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex-wrap">
               <button
                 type="button"
                 onClick={() => setScoutSubTab("finder")}
@@ -4493,8 +4493,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl p-5 shadow-xs space-y-4">
                 
                 {/* Top Row: Search Input + 13 Official Journals Dropdown + Country Filter + Page Size Limit */}
-                <div className="flex flex-col md:flex-row items-center gap-3">
-                  <div className="relative flex-1 w-full">
+                <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3">
+                  <div className="relative flex-1 w-full min-w-0">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                     <input
                       type="text"
@@ -4511,104 +4511,109 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     />
                   </div>
 
-                  {/* 13 Official Journals Dropdown */}
-                  <div className="w-full md:w-72 shrink-0">
-                    <select
-                      value={scoutTargetJournal}
-                      onChange={(e) => setScoutTargetJournal(e.target.value)}
-                      className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                      title="Select official journal desk for outreach"
-                    >
-                      <option value="all">All Journals (General Portfolio)</option>
-                      {OFFICIAL_JOURNALS.map((j) => (
-                        <option key={j.name} value={j.name}>
-                          {j.name} ({j.email})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Country / Region Filter Dropdown */}
-                  <div className="w-full md:w-56 shrink-0">
-                    <select
-                      value={scoutCountry}
-                      onChange={(e) => {
-                        const newCountry = e.target.value
-                        setScoutCountry(newCountry)
-                        handleSearchScoutScholars(undefined, 1, scoutLimit, newCountry)
-                      }}
-                      className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] font-medium cursor-pointer"
-                      title="Filter scholar harvest by country or region"
-                    >
-                      <optgroup label="🌍 Regional Groupings">
-                        {REGIONAL_COUNTRY_GROUPS.map((g) => (
-                          <option key={g.code} value={g.code}>
-                            {g.flag} {g.name}
+                  {/* Filter Controls Row: Wraps gracefully on iPad / tablet so width never pushes outside container */}
+                  <div className="flex flex-wrap sm:flex-nowrap md:flex-wrap lg:flex-nowrap items-center gap-2.5 shrink-0">
+                    {/* 13 Official Journals Dropdown */}
+                    <div className="w-full sm:w-64 lg:w-72">
+                      <select
+                        value={scoutTargetJournal}
+                        onChange={(e) => setScoutTargetJournal(e.target.value)}
+                        className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] truncate"
+                        title="Select official journal desk for outreach"
+                      >
+                        <option value="all">All Journals (General Portfolio)</option>
+                        {OFFICIAL_JOURNALS.map((j) => (
+                          <option key={j.name} value={j.name}>
+                            {j.name} ({j.email})
                           </option>
                         ))}
-                      </optgroup>
-                      <optgroup label="🌐 All Countries (A - Z)">
-                        {GLOBAL_COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {c.flag} {c.name} ({c.code.toUpperCase()})
-                          </option>
-                        ))}
-                      </optgroup>
-                    </select>
-                  </div>
+                      </select>
+                    </div>
 
-                  {/* Search Limit Dropdown */}
-                  <div className="w-full md:w-28 shrink-0">
-                    <select
-                      value={scoutLimit}
-                      onChange={(e) => {
-                        const newLimit = parseInt(e.target.value, 10)
-                        setScoutLimit(newLimit)
-                        handleSearchScoutScholars(undefined, 1, newLimit, scoutCountry)
-                      }}
-                      className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                      title="Result batch limit per search"
-                    >
-                      <option value="10">10 / pg</option>
-                      <option value="25">25 / pg</option>
-                      <option value="50">50 / pg</option>
-                      <option value="100">100 / pg</option>
-                    </select>
-                  </div>
+                    {/* Country / Region Filter Dropdown */}
+                    <div className="w-full sm:w-48 lg:w-52">
+                      <select
+                        value={scoutCountry}
+                        onChange={(e) => {
+                          const newCountry = e.target.value
+                          setScoutCountry(newCountry)
+                          handleSearchScoutScholars(undefined, 1, scoutLimit, newCountry)
+                        }}
+                        className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] font-medium cursor-pointer truncate"
+                        title="Filter scholar harvest by country or region"
+                      >
+                        <optgroup label="🌍 Regional Groupings">
+                          {REGIONAL_COUNTRY_GROUPS.map((g) => (
+                            <option key={g.code} value={g.code}>
+                              {g.flag} {g.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="🌐 All Countries (A - Z)">
+                          {GLOBAL_COUNTRIES.map((c) => (
+                            <option key={c.code} value={c.code}>
+                              {c.flag} {c.name} ({c.code.toUpperCase()})
+                            </option>
+                          ))}
+                        </optgroup>
+                      </select>
+                    </div>
 
-                  <Button
-                    type="button"
-                    disabled={isScouting}
-                    onClick={() => handleSearchScoutScholars()}
-                    className="w-full md:w-auto bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-10 px-5 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
-                  >
-                    {isScouting ? (
-                      <>
-                        <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Extracting Scholars...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Search className="h-3.5 w-3.5" />
-                        <span>Extract Scholars</span>
-                      </>
-                    )}
-                  </Button>
-                  {/* Quick Invite button for manual outreach (LinkedIn / email contacts) */}
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (scoutTargetJournal && scoutTargetJournal !== "all") {
-                        setQuickInviteJournal(scoutTargetJournal)
-                      }
-                      setIsQuickInviteOpen(true)
-                    }}
-                    className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-10 px-4 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
-                    title="Invite someone you found on LinkedIn or via email directly"
-                  >
-                    <UserPlus className="h-3.5 w-3.5" />
-                    <span>Quick Invite</span>
-                  </Button>
+                    {/* Search Limit Dropdown */}
+                    <div className="w-24 shrink-0">
+                      <select
+                        value={scoutLimit}
+                        onChange={(e) => {
+                          const newLimit = parseInt(e.target.value, 10)
+                          setScoutLimit(newLimit)
+                          handleSearchScoutScholars(undefined, 1, newLimit, scoutCountry)
+                        }}
+                        className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                        title="Result batch limit per search"
+                      >
+                        <option value="10">10 / pg</option>
+                        <option value="25">25 / pg</option>
+                        <option value="50">50 / pg</option>
+                        <option value="100">100 / pg</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                      <Button
+                        type="button"
+                        disabled={isScouting}
+                        onClick={() => handleSearchScoutScholars()}
+                        className="flex-1 sm:flex-initial bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-10 px-4 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
+                      >
+                        {isScouting ? (
+                          <>
+                            <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Extracting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Search className="h-3.5 w-3.5" />
+                            <span>Extract Scholars</span>
+                          </>
+                        )}
+                      </Button>
+                      {/* Quick Invite button for manual outreach (LinkedIn / email contacts) */}
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (scoutTargetJournal && scoutTargetJournal !== "all") {
+                            setQuickInviteJournal(scoutTargetJournal)
+                          }
+                          setIsQuickInviteOpen(true)
+                        }}
+                        className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-10 px-4 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
+                        title="Invite someone you found on LinkedIn or via email directly"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                        <span>Quick Invite</span>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Quick Topic Chips: Dynamically adapts to show trending keywords for selected journal */}
