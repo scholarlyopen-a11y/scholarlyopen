@@ -47,7 +47,7 @@ const baseEditors: EditorMember[] = [
     slug: "francis-verpoort",
     name: "Prof. Francis Verpoort",
     role: "Editor-in-Chief",
-    affiliation: "State Key Laboratory of Advanced Technology for Material Synthesis and Processing, Wuhan University of Technology, China & Joint Institute of Chemical Research (FFMiEN), Peoples Friendship University of Russia (RUDN University), Moscow, Russia",
+    affiliation: "State Key Laboratory of Advanced Technology for Material Synthesis and Processing, Wuhan University of Technology, China",
     specialization: "Organometallic chemistry, Metal-Organic Frameworks (MOFs), Porous-Organic Polymers, catalysis, clean energy, and CO₂ capture.",
     email: "editor.chem@scholarlyopen.org",
     orcid: "0000-0002-5184-5500",
