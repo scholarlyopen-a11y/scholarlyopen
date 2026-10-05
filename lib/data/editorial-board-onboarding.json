@@ -31,34 +31,6 @@
       "hasAcceptedTerms": true,
       "consentProfileUpload": true,
       "acceptedAt": "2026-10-05T09:30:00.000Z"
-    },
-    {
-      "id": "EBM-CACCIOLA",
-      "slug": "francesco-cacciola",
-      "name": "Francesco Cacciola, Ph.D.",
-      "email": "cacciolaf@unime.it",
-      "role": "Associate Editor & Handling Editor",
-      "journal": "Scholarly Open: Chemistry",
-      "journalSlug": "chemistry",
-      "affiliation": "University of Messina, Department of Biomedical, Dental, Morphological and Functional Imaging Sciences, Italy",
-      "department": "Department of Biomedical, Dental, Morphological and Functional Imaging Sciences",
-      "country": "Italy",
-      "specialization": "Food Chemistry, Chromatography, Mass Spectrometry, Bioactive Natural Compounds",
-      "researchInterests": [
-        "Food Chemistry",
-        "Analytical Chemistry",
-        "Mass Spectrometry",
-        "Chromatography",
-        "Natural Products"
-      ],
-      "biography": "Prof. Francesco Cacciola is an Associate Professor of Food Chemistry at the University of Messina, Italy. His research focuses on the development of innovative chromatographic and mass spectrometry techniques for the characterization of food lipids, polyphenols, and bioactive natural products.",
-      "photoUrl": "/images/editors/1781087227071.jpeg",
-      "orcid": "0000-0003-1296-7633",
-      "status": "Pending JM Approval",
-      "jmApproved": false,
-      "hasAcceptedTerms": true,
-      "consentProfileUpload": true,
-      "acceptedAt": "2026-10-05T10:13:00.000Z"
     }
   ],
   "lastUpdated": "2026-10-05T13:47:00.000Z"
