@@ -164,7 +164,8 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                     <img 
                       src={editor.imageUrl} 
                       alt={editor.name} 
-                      className="relative h-32 w-32 rounded-full object-cover object-center" 
+                      className="relative h-32 w-32 rounded-full object-cover" 
+                      style={{ objectPosition: "center 15%" }}
                     />
                   ) : (
                     <div className="relative h-32 w-32 rounded-full bg-secondary text-secondary-foreground font-bold flex items-center justify-center text-4xl">
@@ -224,6 +225,21 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                       <span className="flex items-center gap-2.5">
                         <span className="bg-primary/10 text-primary rounded-md text-[9px] font-extrabold h-4.5 px-2 flex items-center border border-primary/20">ORCID</span>
                         <span>ORCID Registry</span>
+                      </span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+
+                  {editor.scopusId && (
+                    <a 
+                      href={`https://www.scopus.com/authid/detail.uri?authorId=${editor.scopusId}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 hover:bg-amber-500/5 hover:border-amber-500/30 hover:text-amber-600 transition-all text-sm text-muted-foreground"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <span className="bg-amber-500/10 text-amber-600 rounded-md text-[9px] font-extrabold h-4.5 px-2 flex items-center border border-amber-500/20">SCOPUS</span>
+                        <span>Scopus Profile</span>
                       </span>
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>
@@ -357,6 +373,40 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                   )}
                 </div>
               </section>
+
+              {/* Editorial Appointments Section */}
+              {editor.editorialRoles && editor.editorialRoles.length > 0 && (
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 border-l-4 border-accent pl-3">
+                    <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">Editorial & Advisory Appointments</h2>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {editor.editorialRoles.map((role, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 flex items-start gap-2.5 shadow-xs">
+                        <BookOpen className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span className="text-xs text-foreground/90 font-medium leading-relaxed">{role}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Honors, Academies & Accolades Section */}
+              {editor.honors && editor.honors.length > 0 && (
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 border-l-4 border-accent pl-3">
+                    <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">Honors, Academies & Accolades</h2>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {editor.honors.map((honor, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 flex items-start gap-2.5 shadow-xs">
+                        <Award className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                        <span className="text-xs text-foreground/90 font-medium leading-relaxed">{honor}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Selected Publications Section */}
               {editor.personalPublications && editor.personalPublications.length > 0 && (

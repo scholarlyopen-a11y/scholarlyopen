@@ -147,10 +147,38 @@ export function JournalPage({
             imageUrl: defaultPhoto,
             email: officialEmail,
             orcid: liveEiC.orcid,
+            scopusId: liveEiC.scopusId || (cleanSlug.includes("verpoort") ? "7004225244" : undefined),
             googleScholar: liveEiC.googleScholar || liveEiC.scholarUrl,
             linkedin: liveEiC.linkedin,
             researchGate: liveEiC.researchGate,
             biography: liveEiC.biography,
+            editorialRoles: liveEiC.editorialRoles || (cleanSlug.includes("verpoort") ? [
+              "Editor-in-Chief, Chemistry Africa (Springer-Nature)",
+              "Editor-in-Chief, Nanocatalysis (Frontiers)",
+              "Editor, Applied Organometallic Chemistry (Wiley)",
+              "Editor, Frontiers in Chemistry",
+              "Editorial Board, Inorganics (MDPI)",
+              "Editorial Board, Catalysts (MDPI)",
+              "Editorial Board, Molecules (MDPI)",
+              "Editorial Board, Applied Sciences (MDPI)",
+              "Editorial Board, Advances in Materials Research"
+            ] : undefined),
+            honors: liveEiC.honors || (cleanSlug.includes("verpoort") ? [
+              "Academician of the European Academy of Sciences and Arts (EASA)",
+              "Academician of the Russian Academy of Natural Sciences (RNAS)",
+              "Academician of the Mexican Academy of Sciences (AMC)",
+              "National Distinguished Expert, PR China",
+              "Officer of the Order of Leopold II by King Albert II of Belgium",
+              "Fellow of the Royal Society of Chemistry (FRSC)",
+              "Fellow of the Indian Chemical Society (FICS)",
+              "Fellow of the Royal Society of Arts (FRSA)",
+              "Dr. Basudev Banerjee Memorial Award (Indian Chemical Society)",
+              "\"Chime\" Award from Hubei Province, China",
+              "Director General, World Industrial Technology Organization (WITO)",
+              "Jury Chair, International Expert Council of the Palladium Global Science Award (2025)",
+              "Top 2% Scientist, Stanford University (5 consecutive years)",
+              "Elsevier China Highly Cited Researcher (2024)"
+            ] : undefined),
             expertise: Array.isArray(liveEiC.researchInterests) ? liveEiC.researchInterests : []
           })
         }

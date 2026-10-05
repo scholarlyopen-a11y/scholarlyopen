@@ -9,6 +9,7 @@ export interface EditorMember {
   imageUrl?: string
   email?: string
   orcid?: string
+  scopusId?: string
   linkedin?: string
   researchGate?: string
   googleScholar?: string
@@ -36,10 +37,218 @@ export interface EditorMember {
     doi?: string
     link?: string
   }[]
+  editorialRoles?: string[]
+  honors?: string[]
   publicationsNote?: string
 }
 
 const baseEditors: EditorMember[] = [
+  {
+    slug: "francis-verpoort",
+    name: "Prof. Francis Verpoort",
+    role: "Editor-in-Chief",
+    affiliation: "State Key Laboratory of Advanced Technology for Material Synthesis and Processing, Wuhan University of Technology, China & Joint Institute of Chemical Research (FFMiEN), Peoples Friendship University of Russia (RUDN University), Moscow, Russia",
+    specialization: "Organometallic chemistry, Metal-Organic Frameworks (MOFs), Porous-Organic Polymers, catalysis, clean energy, and CO₂ capture.",
+    email: "editor.chem@scholarlyopen.org",
+    orcid: "0000-0002-5184-5500",
+    scopusId: "7004225244",
+    googleScholar: "https://scholar.google.com/citations?user=gxwFIAYAAAAJ&hl=eng",
+    imageUrl: "/images/editors/francis-verpoort.png",
+    journalSlug: "chemistry",
+    assignedSections: [
+      "Coordination & Organometallic Chemistry",
+      "Metal-Organic Frameworks (MOFs) & Porous Polymers",
+      "Heterogeneous & Homogeneous Catalysis",
+      "CO₂ Capture, Conversion & Clean Energy",
+      "Functional Hybrid Materials"
+    ],
+    expertise: [
+      "Organometallic Chemistry",
+      "Metal-Organic Frameworks (MOFs)",
+      "Porous-Organic Polymers",
+      "Catalysis",
+      "Clean Energy",
+      "CO₂ Capture",
+      "Functional Materials",
+      "Nanocatalysis"
+    ],
+    badges: [
+      "Editor-in-Chief",
+      "Academician EASA",
+      "Academician RNAS",
+      "Academician AMC",
+      "FRSC",
+      "FICS",
+      "Top 2% Scientist",
+      "Highly Cited Researcher"
+    ],
+    welcomeMessage: "As Editor-in-Chief of Scholarly Open: Chemistry, my commitment is to advance groundbreaking discoveries in molecular architecture, sustainable catalysis, and functional materials through rigorous, transparent, and rapid peer review. We warmly invite authors worldwide to contribute original works shaping modern chemistry.",
+    stats: [
+      { label: "H-Index", value: "84", description: "Google Scholar Citation Index" },
+      { label: "Citations", value: "25,000+", description: "Global Scientific Citations" },
+      { label: "Publications", value: "500+", description: "Peer-reviewed journal papers" },
+      { label: "Patents", value: "21", description: "International & commercialized patents" }
+    ],
+    editorialRoles: [
+      "Editor-in-Chief, Chemistry Africa (Springer-Nature, 2019–present)",
+      "Editor-in-Chief, Nanocatalysis (Frontiers, 2020–present)",
+      "Editor, Applied Organometallic Chemistry (Wiley, 2008–present)",
+      "Editor, Frontiers in Chemistry (2019–present)",
+      "Editorial Board, Inorganics (MDPI, 2017–present)",
+      "Editorial Board, Catalysts (MDPI, 2020–present)",
+      "Editorial Board, Molecules (MDPI, 2020–present)",
+      "Editorial Board, Applied Sciences (MDPI, 2019–present)",
+      "Editorial Board, Advances in Materials Research (2017–present)",
+      "Editorial Board, Journal of Chemistry Letters (2021–present)",
+      "Advisory Board, Journal of Chemistry and Material Sciences (2024–present)",
+      "Advisory Board, Frontiers in Chemical Sciences (2024–present)"
+    ],
+    honors: [
+      "Academician of the European Academy of Sciences and Arts (EASA, 2021)",
+      "Academician of the Russian Academy of Natural Sciences (RNAS, 2022)",
+      "Academician of the Mexican Academy of Sciences (AMC, 2022)",
+      "Academician of the World Academy of Sustainable Development",
+      "National Distinguished Expert, People's Republic of China (2012)",
+      "High-level Expert of the Russian Federation (2015)",
+      "Appointed Officer of the Order of Leopold II by King Albert II of Belgium (2010)",
+      "Elected Fellow of the Royal Society of Chemistry (FRSC, 2020)",
+      "Elected Fellow of the Indian Chemical Society (FICS, 2021)",
+      "Elected Fellow of the Royal Society of Arts (FRSA, 2019)",
+      "Dr. Basudev Banerjee Memorial Award (Indian Chemical Society, 2019)",
+      "\"Chime\" Award from Hubei Province, China (2023)",
+      "Director General, World Industrial Technology Organization (WITO)",
+      "Jury Chair, International Expert Council of the Palladium Global Science Award (2025)",
+      "Top 2% Scientist in the World, Stanford University (5 consecutive years)",
+      "Elsevier China Highly Cited Researcher (2024)"
+    ],
+    timeline: [
+      {
+        year: "1985",
+        title: "B.Sc. in Industrial Chemistry",
+        description: "Technical University Brugge-Oostende, Belgium (Graduated with Great Distinction).",
+        type: "education"
+      },
+      {
+        year: "1989",
+        title: "B.Sc. in Chemistry",
+        description: "Katholieke Universiteit Leuven (KU Leuven), Belgium.",
+        type: "education"
+      },
+      {
+        year: "1991",
+        title: "M.Sc. in Inorganic Chemistry",
+        description: "Ghent University, Belgium.",
+        type: "education"
+      },
+      {
+        year: "1996",
+        title: "Ph.D. in Organometallics & Catalysis",
+        description: "Ghent University, Belgium. Appointed Assistant Professor the same year.",
+        type: "education"
+      },
+      {
+        year: "2006",
+        title: "Full Professor & Lab Director",
+        description: "Promoted to Full Professor at Ghent University; Head of Lab of Organometallics and Catalysis; CEO & Founder of ViaCatt (2004–2007).",
+        type: "career"
+      },
+      {
+        year: "2010",
+        title: "Officer of the Order of Leopold II",
+        description: "Conferred by King Albert II of Belgium for outstanding services to the nation.",
+        type: "milestone"
+      },
+      {
+        year: "2011",
+        title: "Chair Professor at Wuhan University of Technology",
+        description: "State Key Laboratory of Advanced Technology for Material Synthesis and Processing; Director of Functional Hybrid Materials Laboratory.",
+        type: "career"
+      },
+      {
+        year: "2012",
+        title: "National Distinguished Expert of China",
+        description: "Selected under the National High-Level Talents Special Support Plan.",
+        type: "milestone"
+      },
+      {
+        year: "2019–2022",
+        title: "Elected to Multiple Academies & Fellowships",
+        description: "Elected Academician of EASA (2021), RNAS (2022), and AMC (2022); Fellow of RSC (2020) and ICS (2021); Banerjee Award (2019).",
+        type: "milestone"
+      },
+      {
+        year: "2023–2025",
+        title: "Chime Award & WITO Director General",
+        description: "Awarded Chime Award (Hubei); Director General of WITO; Elected Jury Chair of the Palladium Global Science Award (2025).",
+        type: "milestone"
+      },
+      {
+        year: "2026",
+        title: "Editor-in-Chief, Scholarly Open: Chemistry",
+        description: "Appointed to lead Scholarly Open: Chemistry and shape the international journal's editorial strategy and research scope.",
+        type: "milestone"
+      }
+    ],
+    biography: `Prof. Francis Verpoort, Chair Professor, State Key Laboratory of Advanced Technology for Material Synthesis and Processing, Wuhan University of Technology, China Professor Joint Institute of Chemical Research (FFMiEN), Peoples Friendship University of Russia (RUDN University), Moscow, Russia Prof. Francis Verpoort is a distinguished expert in organometallic chemistry and functional materials. He leads the Laboratory of Functional Hybrid Materials at Wuhan University of Technology and is the founder and CEO of SAIS Ltd, a company specializing in chemistry, materials, and engineering solutions. In addition to his research, Prof. Verpoort plays an active role in scientific publishing. He serves as the Editor of Applied Organometallic Chemistry, Editor-in-Chief of Chemistry Africa and Nanocatalysis, and is a member of the editorial boards of several other prestigious journals. His research focuses on organometallic chemistry, Metal-Organic Frameworks (MOFs), and Porous-Organic Polymers, with applications in catalysis, clean energy, and CO₂ capture. He has received numerous prestigious accolades, including the Dr. Basudev Banerjee Memorial Award and the “Chime” Award from Hubei Province, China. He also holds fellowships from the Royal Society of Chemistry, the Indian Chemical Society, and the International Engineering and Technology Institute. Prof. Francis Verpoort serves as Director General of the World Industrial Technology Organization (WITO), a global non-profit platform dedicated to advancing industrial technology innovation, cross-sector collaboration, and sustainable development worldwide. In 2025, he was also elected as Jury Chair of the International Expert Council of the Palladium Global Science Award (PGSA) In recognition of his outstanding contributions to science and technology, Prof. Verpoort has been elected as a member of the European Academy of Sciences and Arts, the Russian Academy of Natural Sciences, and the Mexican Academy of Sciences. Additionally, he has been designated a "National Distinguished Expert" in the People’s Republic of China.`,
+    personalPublications: [
+      {
+        title: "Mechanism and Performance of Melamine-Based Metal-Free Organic Polymers with Modulated Nitrogen Structures for Catalyzing CO2 Cycloaddition",
+        journal: "Catalysts",
+        year: "2026",
+        doi: "10.3390/catal16010143",
+        link: "https://doi.org/10.3390/catal16010143"
+      },
+      {
+        title: "Facile molten salt synthesis of Co@ NC catalysts enables highly efficient HMF-to-FDCA conversion under mild conditions",
+        journal: "Chemical Engineering Journal",
+        year: "2026",
+        doi: "10.1016/j.cej.2026.172617",
+        link: "https://doi.org/10.1016/j.cej.2026.172617"
+      },
+      {
+        title: "Nature-inspired diatomic Zn-Cu pairs trigger active two OH*-involved oxygen reduction reaction",
+        journal: "Nano Energy",
+        year: "2025",
+        doi: "10.1016/j.nanoen.2025.110861",
+        link: "https://doi.org/10.1016/j.nanoen.2025.110861"
+      },
+      {
+        title: "The Nature of Structural Defects in ZIF-8 Revealed with 1H and 31P MAS NMR and X-Ray Absorption Spectroscopy",
+        journal: "Angewandte Chemie International Edition",
+        year: "2025",
+        doi: "10.1002/anie.202414823",
+        link: "https://doi.org/10.1002/anie.202414823"
+      },
+      {
+        title: "Metal–organic frameworks: versatile heterogeneous catalysts for efficient catalytic organic transformations",
+        journal: "Chemical Society Reviews",
+        year: "2015",
+        doi: "10.1039/C4CS00394K",
+        link: "https://doi.org/10.1039/C4CS00394K"
+      },
+      {
+        title: "Metal organic frameworks mimicking natural enzymes: a structural and functional analogy",
+        journal: "Chemical Society Reviews",
+        year: "2016",
+        doi: "10.1039/C6CS00047H",
+        link: "https://doi.org/10.1039/C6CS00047H"
+      },
+      {
+        title: "Rational Design of Holey 2D non-layered Transition Metal Carbide/Nitride Heterostructure Nanosheets for Highly Efficient Water Oxidation",
+        journal: "Advanced Energy Materials",
+        year: "2019",
+        doi: "10.1002/aenm.201803768",
+        link: "https://doi.org/10.1002/aenm.201803768"
+      },
+      {
+        title: "Ruthenium-Based Olefin Metathesis Catalysts Derived from Alkynes",
+        journal: "Chemical Reviews",
+        year: "2010",
+        doi: "10.1021/cr9003504",
+        link: "https://doi.org/10.1021/cr9003504"
+      }
+    ]
+  },
   {
     slug: "mohamed-eletmany",
     name: "Mohamed R. Eletmany, Ph.D.",
@@ -1131,21 +1340,31 @@ const onboardedList: EditorMember[] = (
           jSlug = o.journal.toLowerCase().replace("scholarly open:", "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
         }
 
+        const matchingBase = baseEditors.find(be => be.slug === cleanSlug || be.name.toLowerCase() === o.name.toLowerCase())
+
         return {
+          ...matchingBase,
           slug: cleanSlug,
           name: o.name,
-          role: o.role || "Editorial Board Member",
-          affiliation: o.affiliation || "University / Academic Institution",
-          specialization: o.specialization || (Array.isArray(o.researchInterests) ? o.researchInterests.join(", ") : "Academic Peer Review & Research"),
-          imageUrl: o.photoUrl || undefined,
+          role: o.role || matchingBase?.role || "Editorial Board Member",
+          affiliation: o.affiliation || matchingBase?.affiliation || "University / Academic Institution",
+          specialization: o.specialization || matchingBase?.specialization || (Array.isArray(o.researchInterests) ? o.researchInterests.join(", ") : "Academic Peer Review & Research"),
+          imageUrl: o.photoUrl || matchingBase?.imageUrl || undefined,
           email: jSlug === "chemistry" ? "editor.chem@scholarlyopen.org" : (o.email && o.email.endsWith("@scholarlyopen.org") ? o.email : (jSlug ? `editor.${jSlug.replace(/[^a-z0-9]/g, "")}@scholarlyopen.org` : "info@scholarlyopen.org")),
-          orcid: o.orcid || undefined,
-          googleScholar: o.googleScholar || undefined,
-          linkedin: o.linkedin || undefined,
-          biography: o.biography || undefined,
-          expertise: Array.isArray(o.researchInterests) ? o.researchInterests : undefined,
-          journalSlug: jSlug,
-          badges: ["Verified Board Member", "COPE Ethics Verified"]
+          orcid: o.orcid || matchingBase?.orcid || undefined,
+          scopusId: o.scopusId || matchingBase?.scopusId || undefined,
+          googleScholar: o.googleScholar || matchingBase?.googleScholar || undefined,
+          linkedin: o.linkedin || matchingBase?.linkedin || undefined,
+          biography: o.biography || matchingBase?.biography || undefined,
+          expertise: Array.isArray(o.researchInterests) && o.researchInterests.length > 0 ? o.researchInterests : matchingBase?.expertise,
+          journalSlug: jSlug || matchingBase?.journalSlug,
+          badges: matchingBase?.badges || ["Verified Board Member", "COPE Ethics Verified"],
+          timeline: matchingBase?.timeline,
+          stats: matchingBase?.stats,
+          personalPublications: matchingBase?.personalPublications,
+          editorialRoles: matchingBase?.editorialRoles,
+          honors: matchingBase?.honors,
+          welcomeMessage: matchingBase?.welcomeMessage
         }
       })
     : []

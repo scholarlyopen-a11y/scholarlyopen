@@ -27,12 +27,15 @@ export interface EditorMember {
   imageUrl?: string
   email?: string
   orcid?: string
+  scopusId?: string
   biography?: string
   googleScholar?: string
   linkedin?: string
   researchGate?: string
   assignedSections?: string[]
   expertise?: string[]
+  editorialRoles?: string[]
+  honors?: string[]
   totalReviews?: number
   avgScore?: number
   acceptedRate?: number
@@ -75,7 +78,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
           <img 
             src={editor.imageUrl} 
             alt={editor.name} 
-            className="h-24 w-24 rounded-full object-cover shrink-0 ring-2 ring-primary/20 shadow-sm" 
+            className="h-24 w-24 rounded-full object-cover shrink-0" 
             style={{ objectPosition: "center 15%" }}
           />
         ) : (
@@ -109,7 +112,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                   <img 
                     src={editor.imageUrl} 
                     alt={editor.name} 
-                    className="h-14 w-14 rounded-full object-cover shrink-0 ring-1 ring-slate-900/10 shadow-sm" 
+                    className="h-14 w-14 rounded-full object-cover shrink-0" 
                     style={{ objectPosition: "center 15%" }}
                   />
                 ) : (
@@ -179,8 +182,30 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                 </div>
               )}
 
+              {editor.editorialRoles && editor.editorialRoles.length > 0 && (
+                <div className="border-t border-border pt-3">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Editorial & Advisory Appointments</h4>
+                  <ul className="text-xs text-foreground/80 space-y-1 list-disc list-inside">
+                    {editor.editorialRoles.map((role, idx) => (
+                      <li key={idx} className="leading-snug">{role}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {editor.honors && editor.honors.length > 0 && (
+                <div className="border-t border-border pt-3">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Honors, Academies & Accolades</h4>
+                  <ul className="text-xs text-foreground/80 space-y-1 list-disc list-inside">
+                    {editor.honors.map((honor, idx) => (
+                      <li key={idx} className="leading-snug">{honor}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div className="border-t border-border pt-4 flex flex-col gap-2">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact Information</h4>
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact & Academic Profiles</h4>
                 <div className="flex flex-wrap gap-x-6 gap-y-2 mt-1">
                   {displayEmail && (
                     <a 
@@ -200,6 +225,17 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                     >
                       <span className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-sm text-[8px] font-bold h-3.5 px-1 mr-1.5">ID</span>
                       ORCID: {editor.orcid}
+                    </a>
+                  )}
+                  {editor.scopusId && (
+                    <a 
+                      href={`https://www.scopus.com/authid/detail.uri?authorId=${editor.scopusId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-xs text-amber-600 hover:underline transition-colors"
+                    >
+                      <span className="inline-flex items-center justify-center bg-amber-500/10 text-amber-600 rounded-sm text-[8px] font-bold h-3.5 px-1 mr-1.5">SCOPUS</span>
+                      Scopus: {editor.scopusId}
                     </a>
                   )}
                   {editor.googleScholar && (
