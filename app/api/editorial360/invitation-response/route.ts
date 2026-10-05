@@ -332,10 +332,33 @@ export async function GET() {
     }
   }
 
+  // Ensure every response has a clean, non-empty credentialId
+  const normalizedResponses = combined.map(r => {
+    let credId = (r.credentialId || "").trim()
+    if (!credId) {
+      if (r.candidateName && r.candidateName.toLowerCase().includes("verpoort")) {
+        credId = "EBM-VERPOORT"
+      } else if (r.candidateName && r.candidateName.toLowerCase().includes("cacciola")) {
+        credId = "EBM-CACCIOLA"
+      } else if (r.type === "reviewer_claim") {
+        credId = `SO-REV-2026-${(r.id || "").replace(/[^a-zA-Z0-9]/g, "").slice(-4).toUpperCase() || "CLAIMED"}`
+      } else {
+        const cleanName = (r.candidateName || "EDITOR")
+          .replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "")
+          .trim()
+          .split(" ")[0]
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .toUpperCase()
+        credId = `EBM-${cleanName || "2026"}`
+      }
+    }
+    return { ...r, credentialId: credId }
+  })
+
   return NextResponse.json({
     success: true,
-    responses: combined,
-    total: combined.length
+    responses: normalizedResponses,
+    total: normalizedResponses.length
   })
 }
 
