@@ -120,6 +120,9 @@ export function EditorialBoardOnboarding({
           const urlParams = new URLSearchParams(window.location.search)
           const token = urlParams.get("token") || urlParams.get("invite")
           if (token) queryParams.set("token", token)
+          if (urlParams.get("redo") === "true" || urlParams.get("reset") === "true") {
+            queryParams.set("redo", "true")
+          }
         }
 
         const res = await fetch(`/api/editorial360/invitation-verify?${queryParams.toString()}`)
@@ -212,8 +215,20 @@ export function EditorialBoardOnboarding({
       setErrorMsg("Please select your country of affiliation. This is required for the editorial registry.")
       return
     }
+    if (!orcid.trim()) {
+      setErrorMsg("Please provide your ORCID iD (e.g. 0000-0002-1875-1033). This is mandatory for the official editorial registry.")
+      return
+    }
+    if (!interestsText.trim()) {
+      setErrorMsg("Please provide your primary keywords and research areas.")
+      return
+    }
     if (!biography.trim() || biography.trim().length < 50) {
       setErrorMsg("Please provide a short academic biography (at least 50 characters). This appears on the journal masthead.")
+      return
+    }
+    if (!photoPreview && !photoUrl) {
+      setErrorMsg("Please upload your professional portrait photo. A photo is mandatory for the public journal masthead.")
       return
     }
     if (!cvFileName.trim() && !cvBase64) {
@@ -366,6 +381,13 @@ export function EditorialBoardOnboarding({
               >
                 Sign In to editorial360
               </Button>
+              <button
+                type="button"
+                onClick={() => setAlreadyAccepted(false)}
+                className="text-xs text-slate-500 hover:text-[#0b99ff] dark:text-slate-400 dark:hover:text-[#0b99ff] underline underline-offset-4 py-2 transition-colors cursor-pointer"
+              >
+                Need to complete, update, or re-upload your profile & CV? Click here to open the form
+              </button>
             </div>
           </div>
         </Card>
@@ -536,8 +558,12 @@ export function EditorialBoardOnboarding({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                  <span>ORCID iD</span>
-                  <span className="text-[10px] text-slate-400">16-digit</span>
+                  <span className="flex items-center gap-1">
+                    ORCID iD <span className="text-rose-500">*</span>
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-semibold bg-rose-50 dark:bg-rose-950/60 px-1 py-0.5 rounded border border-rose-200 dark:border-rose-800">
+                    Mandatory (16-digit)
+                  </span>
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[#a6ce39] font-bold text-xs select-none">
@@ -567,8 +593,8 @@ export function EditorialBoardOnboarding({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                Primary Keywords & Research Areas
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                Primary Keywords & Research Areas <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
@@ -662,10 +688,18 @@ export function EditorialBoardOnboarding({
               </div>
 
               {/* Profile Photo */}
-              <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
+              <div className={`p-3.5 rounded-lg border transition-all space-y-2 ${
+                !photoPreview && !photoUrl && errorMsg.includes("photo")
+                  ? "border-rose-400 bg-rose-50/50 dark:bg-rose-950/20"
+                  : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30"
+              }`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Profile Photo (Recommended)</span>
-                  <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">Recommended for masthead avatar & public listing</span>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                    Profile Photo <span className="text-rose-500">*</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-rose-500 bg-rose-50 dark:bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-800">
+                    Mandatory (JPG/PNG)
+                  </span>
                 </div>
 
                 <input 

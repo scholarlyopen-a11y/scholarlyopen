@@ -106,7 +106,12 @@ export async function GET(req: Request) {
     })
   }
 
-  const alreadyAccepted = !!existingEditor || matchedInvite?.status === "Accepted"
+  const redo = searchParams.get("redo") === "true" || searchParams.get("reset") === "true" || searchParams.get("force") === "true"
+
+  // Only lock as alreadyAccepted if the editor has already been formally approved by Journal Manager
+  // or is active, and redo/force was not requested. If pending approval, let them update/re-complete!
+  const isApproved = existingEditor?.jmApproved === true || existingEditor?.status === "Active Handling Editor"
+  const alreadyAccepted = !redo && (isApproved || (matchedInvite?.status === "Accepted" && isApproved))
 
   return NextResponse.json({
     ok: true,
