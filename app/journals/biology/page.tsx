@@ -5,8 +5,9 @@ import { editors } from "@/lib/data/editors"
 
 export default function BiologyPage() {
   const journalEditors = editors.filter(e => e.journalSlug === "biology")
-  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
-  const editorialBoard = journalEditors.filter(e => e.role.includes("Editorial Board"))
+  const editorInChief = journalEditors.find(e => e.role?.toLowerCase().includes("chief"))
+  const associateEditors = journalEditors.filter(e => e.role?.toLowerCase().includes("associate"))
+  const editorialBoard = journalEditors.filter(e => !e.role?.toLowerCase().includes("chief") && !e.role?.toLowerCase().includes("associate"))
 
   return (
     <JournalPage
@@ -42,6 +43,7 @@ export default function BiologyPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "biology")}
       journalSlug="biology"
+      editorInChief={editorInChief}
       associateEditors={associateEditors}
       editorialBoard={editorialBoard}
     />

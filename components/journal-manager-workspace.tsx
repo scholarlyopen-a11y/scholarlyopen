@@ -85,7 +85,9 @@ export interface SentEmailRecord {
   journal: string
   campaignType: "call_for_papers" | "ebm" | "eic" | "associate_editor" | string
   subject: string
-  body: string
+  body?: string
+  paperId?: string
+  paperTitle?: string
   status: "Delivered" | "Dispatched" | "Simulated"
 }
 
@@ -148,6 +150,7 @@ export interface JmReviewFeedback {
   id: string
   paperId: string
   reviewerName: string
+  reviewerEmail?: string
   originality: number
   methodology?: number
   clarity?: number
@@ -448,6 +451,18 @@ export function JournalManagerWorkspace({
   const [gatewaySearch, setGatewaySearch] = useState("")
   const [selectedCandidateDossier, setSelectedCandidateDossier] = useState<any | null>(null)
 
+  // Candidate Approval & Customizable Welcome Email State
+  const [approvalModalCandidate, setApprovalModalCandidate] = useState<any | null>(null)
+  const [approvalTempPassword, setApprovalTempPassword] = useState<string>("")
+  const [approvalEmailSubject, setApprovalEmailSubject] = useState<string>("")
+  const [approvalEmailBody, setApprovalEmailBody] = useState<string>("")
+  const [approvalExtraNotes, setApprovalExtraNotes] = useState<string>("")
+  const [approvalSendEmail, setApprovalSendEmail] = useState<boolean>(true)
+  const [isApprovingCandidate, setIsApprovingCandidate] = useState<boolean>(false)
+  const [approvalPreviewMode, setApprovalPreviewMode] = useState<boolean>(false)
+  const [approvalSuccessMessage, setApprovalSuccessMessage] = useState<string>("")
+  const [copiedApprovalPassword, setCopiedApprovalPassword] = useState<boolean>(false)
+
   // Manual / Past Submission Ingestion State
   const [isManualImportOpen, setIsManualImportOpen] = useState(false)
   const [manualMsId, setManualMsId] = useState("SOMED-26-MS201")
@@ -649,42 +664,294 @@ export function JournalManagerWorkspace({
     })
   }
 
-  const handleToggleCandidateApproval = async (candidate: any) => {
-    const nextApproved = !candidate.jmApproved
-    const targetEmail = candidate.candidateEmail || candidate.email
+  const generateSecureTempPassword = (name: string) => {
+    const clean = (name || "").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().split(" ")[0].replace(/[^a-zA-Z]/g, "")
+    const prefix = clean ? clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase() : "Editor"
+    return `${prefix}2026!`
+  }
+
+  const buildDefaultWelcomeBody = (candidate: any, tempPwd: string, extraNote: string = "") => {
+    const name = candidate.candidateName || candidate.name || "Colleague"
+    const journalName = candidate.journal || "Scholarly Open"
+    const roleTitle = candidate.type === "eic" 
+      ? "Editor-in-Chief" 
+      : candidate.type === "ae" 
+      ? "Associate Editor" 
+      : candidate.type === "reviewer_claim" 
+      ? "Certified Peer Reviewer" 
+      : (candidate.role || "Editorial Board Member & Handling Editor")
+    const targetEmail = (candidate.candidateEmail || candidate.email || "").trim()
+
+    let body = `Dear ${name},
+
+We are pleased to officially confirm your appointment as ${roleTitle} for ${journalName}. On behalf of Scholarly Open and our global academic community, we warmly welcome you to our editorial leadership team.
+
+Your Editorial360 workspace credentials and platform access have been activated:
+
+• Access Portal: https://www.scholarlyopen.org/editorial360
+• Login Email: ${targetEmail}
+• Temporary Password: ${tempPwd}
+
+Important Security Notice:
+Upon your initial login, please navigate immediately to "Profile Settings" (accessible by clicking your profile name in the upper right corner) -> "Security & Password" to set a secure, private permanent password.
+
+As a valued member of our editorial leadership, you have full privileges to oversee submissions, coordinate rigorous peer reviews, and help guide the editorial scope of the journal.`
+
+    if (extraNote && extraNote.trim()) {
+      body += `\n\nSpecial Remarks from Journal Management:\n${extraNote.trim()}`
+    }
+
+    body += `\n\nWe look forward to an impactful collaboration. Please feel free to reach out to us at any time if you have questions or require assistance.
+
+With warm regards,
+
+Journal Management & Editorial Operations
+Scholarly Open
+info@scholarlyopen.org | https://www.scholarlyopen.org`
+
+    return body
+  }
+
+  const handleOpenCandidateApprovalModal = (candidate: any) => {
+    // Dismiss candidate profile dossier dialog if open to prevent Radix UI dialog stacking collisions
+    setSelectedCandidateDossier(null)
+
+    const targetEmail = candidate.candidateEmail || candidate.email || ""
+    const candidateName = candidate.candidateName || candidate.name || "Colleague"
+    const journalName = candidate.journal || "Scholarly Open"
+    const tempPwd = generateSecureTempPassword(candidateName)
+    const subject = candidate.type === "reviewer_claim"
+      ? `Official Welcome & Peer Reviewer Activation — ${journalName}`
+      : `Official Appointment & Welcome to the Editorial Board — ${journalName}`
+    const body = buildDefaultWelcomeBody(candidate, tempPwd, "")
+
+    setApprovalModalCandidate(candidate)
+    setApprovalTempPassword(tempPwd)
+    setApprovalEmailSubject(subject)
+    setApprovalEmailBody(body)
+    setApprovalExtraNotes("")
+    setApprovalSendEmail(true)
+    setApprovalPreviewMode(false)
+  }
+
+  const handleRegenerateApprovalPassword = () => {
+    const candidateName = approvalModalCandidate?.candidateName || approvalModalCandidate?.name || "Editor"
+    const clean = candidateName.replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().split(" ")[0].replace(/[^a-zA-Z]/g, "") || "Editor"
+    const rand = Math.floor(1000 + Math.random() * 9000)
+    const newPwd = `${clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()}#${rand}!`
+    const oldPwd = approvalTempPassword
+    setApprovalTempPassword(newPwd)
+    if (oldPwd && approvalEmailBody.includes(oldPwd)) {
+      setApprovalEmailBody(approvalEmailBody.replace(oldPwd, newPwd))
+    }
+  }
+
+  const handleUpdateApprovalPassword = (newPwd: string) => {
+    const oldPwd = approvalTempPassword
+    setApprovalTempPassword(newPwd)
+    if (oldPwd && approvalEmailBody.includes(oldPwd)) {
+      setApprovalEmailBody(approvalEmailBody.replace(oldPwd, newPwd))
+    }
+  }
+
+  const handleAppendApprovalExtraNote = () => {
+    if (!approvalExtraNotes.trim()) return
+    const noteText = `\n\nSpecial Remarks from Journal Management:\n${approvalExtraNotes.trim()}\n`
+    setApprovalEmailBody(prev => {
+      if (prev.includes("With warm regards")) {
+        return prev.replace("With warm regards", `${noteText}\nWith warm regards`)
+      }
+      return `${prev}${noteText}`
+    })
+    setApprovalExtraNotes("")
+  }
+
+  const handleConfirmApprovalAndSendEmail = async () => {
+    if (!approvalModalCandidate) return
+    const candidate = approvalModalCandidate
+    const targetEmail = (candidate.candidateEmail || candidate.email || "").trim()
     if (!targetEmail) return
 
+    setIsApprovingCandidate(true)
     try {
+      const candidateName = candidate.candidateName || candidate.name || "Colleague"
+      const journalName = candidate.journal || "Scholarly Open"
+      const roleTitle = candidate.type === "eic" 
+        ? "Editor-in-Chief" 
+        : candidate.type === "ae" 
+        ? "Associate Editor" 
+        : candidate.type === "reviewer_claim" 
+        ? "Certified Peer Reviewer" 
+        : (candidate.role || "Editorial Board Member & Handling Editor")
+      const userRole = candidate.type === "reviewer_claim" ? "reviewer" : "editor"
+      const finalPassword = approvalTempPassword.trim() || "Scholarly2026!"
+
+      // 1. Register or update the user in /api/editorial360/users with the assigned password
+      await fetch("/api/editorial360/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: candidateName,
+          email: targetEmail,
+          role: userRole,
+          staffRole: roleTitle,
+          password: finalPassword,
+          affiliation: candidate.affiliation || "",
+          country: candidate.country || "",
+          orcid: candidate.orcid || "",
+          photoUrl: candidate.photoUrl || "",
+          status: "Active"
+        })
+      })
+
+      // 2. Cache in localStorage for immediate offline/client-side session access
+      if (typeof window !== "undefined") {
+        try {
+          const pwdObj = JSON.stringify({ password: finalPassword })
+          localStorage.setItem("editorial360_permanent_user_" + targetEmail.toLowerCase(), pwdObj)
+          if (userRole === "editor") {
+            localStorage.setItem("editorial360_permanent_editor_" + targetEmail.toLowerCase(), pwdObj)
+          } else {
+            localStorage.setItem("editorial360_permanent_reviewer_" + targetEmail.toLowerCase(), pwdObj)
+          }
+        } catch (e) {}
+      }
+
+      // 3. Dispatch welcome email if enabled
+      if (approvalSendEmail) {
+        await fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: targetEmail,
+            customSubject: approvalEmailSubject.trim(),
+            customBody: approvalEmailBody.trim(),
+            recipientName: candidateName,
+            journal: journalName,
+            role: userRole,
+            actionLabel: "Access Editorial360 Portal",
+            actionUrl: "https://www.scholarlyopen.org/editorial360",
+            includeEditorial360Logo: true,
+            senderName: "Scholarly Open Journal Management"
+          })
+        })
+      }
+
+      // 4. Update candidate status in backend records
       if (candidate.type === "reviewer_claim") {
-        const nextStatus = nextApproved ? "Active Referee" : "Pending JM Approval"
         await Promise.all([
           fetch("/api/editorial360/invitation-response", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: targetEmail, jmApproved: nextApproved, status: nextStatus })
+            body: JSON.stringify({ email: targetEmail, jmApproved: true, status: "Active Referee" })
           }),
           fetch("/api/editorial360/reviewer-tests", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ candidateEmail: targetEmail, jmApproved: nextApproved, status: nextApproved ? "Passed - Account Active" : "Pending JM Approval" })
+            body: JSON.stringify({ candidateEmail: targetEmail, jmApproved: true, status: "Passed - Account Active" })
           })
         ])
         setGatewayResponses(prev => prev.map(r => {
           if ((r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) || r.id === candidate.id) {
-            return { ...r, jmApproved: nextApproved, status: nextStatus }
+            return { ...r, jmApproved: true, status: "Active Referee" }
           }
           return r
         }))
         setGatewayTests(prev => prev.map(t => {
           if (t.candidateEmail && t.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) {
-            return { ...t, jmApproved: nextApproved, status: nextApproved ? "Passed - Account Active" : "Pending JM Approval" }
+            return { ...t, jmApproved: true, status: "Passed - Account Active" }
+          }
+          return t
+        }))
+      } else {
+        await Promise.all([
+          fetch("/api/editorial360/editors", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: targetEmail,
+              jmApproved: true,
+              status: "Active Handling Editor"
+            })
+          }),
+          fetch("/api/editorial360/invitation-response", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: targetEmail, jmApproved: true, status: "Active Handling Editor" })
+          })
+        ])
+        setGatewayResponses(prev => prev.map(r => {
+          if ((r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) || r.id === candidate.id) {
+            return { ...r, jmApproved: true, status: "Active Handling Editor" }
+          }
+          return r
+        }))
+      }
+
+      // 5. Update open dossier if viewing
+      if (selectedCandidateDossier) {
+        setSelectedCandidateDossier((prev: any) => prev ? {
+          ...prev,
+          jmApproved: true,
+          status: candidate.type === "reviewer_claim" ? "Active Referee" : "Active Handling Editor"
+        } : null)
+      }
+
+      // 6. Close modal & show confirmation
+      setApprovalModalCandidate(null)
+      setApprovalSuccessMessage(`Approved ${candidateName}! Welcome email dispatched to ${targetEmail}.`)
+      setTimeout(() => setApprovalSuccessMessage(""), 7000)
+    } catch (err) {
+      console.error("Failed to approve candidate & send welcome email:", err)
+    } finally {
+      setIsApprovingCandidate(false)
+    }
+  }
+
+  const handleToggleCandidateApproval = async (candidate: any) => {
+    if (!candidate) return
+
+    // If candidate is NOT approved yet, open customizable approval & welcome email modal
+    if (!candidate.jmApproved) {
+      handleOpenCandidateApprovalModal(candidate)
+      return
+    }
+
+    const nextApproved = false
+    const targetEmail = candidate.candidateEmail || candidate.email
+    if (!targetEmail) return
+
+    try {
+      if (candidate.type === "reviewer_claim") {
+        const nextStatus = "Pending JM Approval"
+        await Promise.all([
+          fetch("/api/editorial360/invitation-response", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: targetEmail, jmApproved: false, status: nextStatus })
+          }),
+          fetch("/api/editorial360/reviewer-tests", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ candidateEmail: targetEmail, jmApproved: false, status: nextStatus })
+          })
+        ])
+        setGatewayResponses(prev => prev.map(r => {
+          if ((r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) || r.id === candidate.id) {
+            return { ...r, jmApproved: false, status: nextStatus }
+          }
+          return r
+        }))
+        setGatewayTests(prev => prev.map(t => {
+          if (t.candidateEmail && t.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) {
+            return { ...t, jmApproved: false, status: nextStatus }
           }
           return t
         }))
         if (selectedCandidateDossier) {
           setSelectedCandidateDossier((prev: any) => prev ? {
             ...prev,
-            jmApproved: nextApproved,
+            jmApproved: false,
             status: nextStatus
           } : null)
         }
@@ -696,28 +963,28 @@ export function JournalManagerWorkspace({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: targetEmail,
-          jmApproved: nextApproved,
-          status: nextApproved ? "Active Handling Editor" : "Pending JM Approval"
+          jmApproved: false,
+          status: "Pending JM Approval"
         })
       })
       await fetch("/api/editorial360/invitation-response", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: targetEmail, jmApproved: nextApproved, status: nextApproved ? "Active Handling Editor" : "Pending JM Approval" })
+        body: JSON.stringify({ email: targetEmail, jmApproved: false, status: "Pending JM Approval" })
       })
 
       if (res.ok) {
         setGatewayResponses(prev => prev.map(r => {
           if ((r.candidateEmail && r.candidateEmail.toLowerCase() === targetEmail.toLowerCase()) || r.id === candidate.id) {
-            return { ...r, jmApproved: nextApproved, status: nextApproved ? "Active Handling Editor" : "Pending JM Approval" }
+            return { ...r, jmApproved: false, status: "Pending JM Approval" }
           }
           return r
         }))
         if (selectedCandidateDossier) {
           setSelectedCandidateDossier((prev: any) => prev ? {
             ...prev,
-            jmApproved: nextApproved,
-            status: nextApproved ? "Active Handling Editor" : "Pending JM Approval"
+            jmApproved: false,
+            status: "Pending JM Approval"
           } : null)
         }
       }
@@ -2518,6 +2785,7 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
       const knownCohort = [
         { id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as const, deadline: "2026-08-29" },
         { id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" },
+        { id: "REV-HIST-CG-13", name: "Dr. Chaud GJ", email: "germanchaud@gmail.com", invitedDate: "2026-10-01", status: "Accepted" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-GB-03", name: "Guo B", email: "guo.baolei@zs-hospital.sh.cn", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-BS-04", name: "Bokhari S", email: "bokharsa@rwjms.rutgers.edu", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-QL-05", name: "Quéro L", email: "laurent.quero@aphp.fr", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
@@ -6490,6 +6758,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </button>
                               <button
                                 type="button"
+                                onClick={() => handleOpenCandidateApprovalModal(resp)}
+                                title="Open & Customize Welcome Appointment Letter / Activation Email"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-300 hover:bg-sky-100 transition-all cursor-pointer shadow-2xs"
+                              >
+                                <Mail className="h-3.5 w-3.5 text-sky-600" />
+                                <span>Welcome Letter</span>
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => handleToggleCandidateApproval(resp)}
                                 title={resp.jmApproved ? (resp.type === "reviewer_claim" ? "Revoke Referee Approval" : "Revoke / Unpublish from Masthead") : (resp.type === "reviewer_claim" ? "Approve Referee & Activate Privileges" : "Approve & Publish to Public Masthead")}
                                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
@@ -9578,11 +9855,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-slate-900 dark:text-white text-xs flex flex-wrap items-center gap-2">
-                      <span>Peer Review Round in Progress (1 of 2 Reports Completed)</span>
-                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">50% Logged</span>
+                      <span>Peer Review Round in Progress (1 of 3 Reports Completed · 2 Active Referees Reviewing)</span>
+                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">1 Report Logged</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 break-words">
-                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is conducting his review via direct email correspondence.
+                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is conducting his review via direct email correspondence. Reviewer #3 (Dr. Chaud GJ) has accepted the invitation and is evaluating the manuscript.
                     </div>
                   </div>
                 </div>
@@ -12188,6 +12465,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <Button
                       type="button"
                       size="sm"
+                      onClick={() => handleOpenCandidateApprovalModal(selectedCandidateDossier)}
+                      className="text-xs font-bold h-8 px-3 rounded-lg bg-sky-600 hover:bg-sky-700 text-white cursor-pointer"
+                    >
+                      <Mail className="h-3.5 w-3.5 mr-1" />
+                      <span>{selectedCandidateDossier.jmApproved ? "Edit Welcome Letter" : "Approve with Welcome Letter"}</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
                       onClick={() => handleToggleCandidateApproval(selectedCandidateDossier)}
                       className={`text-xs font-bold h-8 px-3 rounded-lg cursor-pointer ${
                         selectedCandidateDossier.jmApproved
@@ -12255,6 +12541,316 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           )}
         </DialogContent>
       </Dialog>
+
+      {/* ========================================================================= */}
+      {/* CANDIDATE APPROVAL & CUSTOMIZABLE WELCOME EMAIL MODAL                      */}
+      {/* ========================================================================= */}
+      <Dialog open={!!approvalModalCandidate} onOpenChange={(open) => { if (!open) setApprovalModalCandidate(null) }}>
+        <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto p-0 rounded-3xl bg-white dark:bg-[#18191e] border-slate-200 dark:border-slate-800 shadow-2xl z-[70]">
+          {approvalModalCandidate && (
+            <div>
+              {/* Header */}
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 via-sky-50/40 to-slate-50 dark:from-slate-900/60 dark:via-sky-950/20 dark:to-slate-900/60">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold shadow-md shadow-sky-500/20">
+                      <Mail className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                        Approve Candidate & Send Welcome Appointment Letter
+                      </DialogTitle>
+                      <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Customize credentials, personalize the appointment letter, or append extra remarks before activating.
+                      </DialogDescription>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Editorial Board Approval</span>
+                  </span>
+                </div>
+
+                {/* Candidate Overview Card */}
+                <div className="mt-4 p-3.5 rounded-2xl bg-white/80 dark:bg-[#1f2028] border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                      {(approvalModalCandidate.candidateName || approvalModalCandidate.name || "E").slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>{approvalModalCandidate.candidateName || approvalModalCandidate.name}</span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-[#0b99ff]/10 text-[#0b99ff]">
+                          {approvalModalCandidate.type === "eic" 
+                            ? "Editor-in-Chief" 
+                            : approvalModalCandidate.type === "ae" 
+                            ? "Associate Editor" 
+                            : approvalModalCandidate.type === "reviewer_claim" 
+                            ? "Peer Reviewer" 
+                            : (approvalModalCandidate.role || "Handling Editor")}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                        <span className="font-mono">{approvalModalCandidate.candidateEmail || approvalModalCandidate.email}</span>
+                        <span>•</span>
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{approvalModalCandidate.journal || "Scholarly Open"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body Form */}
+              <div className="p-6 space-y-5">
+                {/* Temporary Password Row */}
+                <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Lock className="h-3.5 w-3.5 text-[#0b99ff]" />
+                      <span>Generated Temporary Password (Editable)</span>
+                    </label>
+                    <span className="text-[11px] text-slate-400">User will be prompted to change this on first login</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={approvalTempPassword}
+                      onChange={(e) => handleUpdateApprovalPassword(e.target.value)}
+                      className="flex-1 px-3.5 py-2 text-sm font-mono font-medium rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#0b99ff]"
+                      placeholder="e.g. Scholarly2026!"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRegenerateApprovalPassword}
+                      className="text-xs font-semibold h-9 px-3 rounded-xl border-slate-300 dark:border-slate-700"
+                      title="Generate new temporary password"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                      Regenerate
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (typeof navigator !== "undefined" && navigator.clipboard) {
+                          navigator.clipboard.writeText(approvalTempPassword)
+                          setCopiedApprovalPassword(true)
+                          setTimeout(() => setCopiedApprovalPassword(false), 2500)
+                        }
+                      }}
+                      className="text-xs font-semibold h-9 px-3 rounded-xl border-slate-300 dark:border-slate-700"
+                    >
+                      {copiedApprovalPassword ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 mr-1 text-emerald-600" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5 mr-1" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Email Subject */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                    <span>Email Subject Line (Editable)</span>
+                    <span className="text-[11px] text-slate-400 font-normal">Official appointment subject</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={approvalEmailSubject}
+                    onChange={(e) => setApprovalEmailSubject(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#0b99ff]"
+                  />
+                </div>
+
+                {/* Extra Remarks from Journal Manager */}
+                <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+                      <span>Extra Remarks / Personal Message from Journal Manager</span>
+                    </label>
+                    <span className="text-[10px] uppercase font-bold text-amber-600 tracking-wider">Customizable</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={approvalExtraNotes}
+                      onChange={(e) => setApprovalExtraNotes(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          handleAppendApprovalExtraNote()
+                        }
+                      }}
+                      placeholder="e.g. We would be pleased to have you chair the upcoming Special Issue on Functional Materials..."
+                      className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-amber-300/80 dark:border-amber-800 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleAppendApprovalExtraNote}
+                      disabled={!approvalExtraNotes.trim()}
+                      className="text-xs font-bold h-8 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white shrink-0"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      Append to Letter
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-amber-700/80 dark:text-amber-400">
+                    Type any custom message above and click &quot;Append to Letter&quot; to insert it into the email body, or edit the body directly below.
+                  </p>
+                </div>
+
+                {/* Email Body & Preview Toggle */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Edit3 className="h-3.5 w-3.5 text-[#0b99ff]" />
+                      <span>Official Appointment Letter Body (Fully Editable)</span>
+                    </label>
+                    <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <button
+                        type="button"
+                        onClick={() => setApprovalPreviewMode(false)}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+                          !approvalPreviewMode
+                            ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-2xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                        }`}
+                      >
+                        Edit Content
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setApprovalPreviewMode(true)}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+                          approvalPreviewMode
+                            ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-2xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                        }`}
+                      >
+                        <Eye className="h-3 w-3 inline mr-1" />
+                        Preview Email
+                      </button>
+                    </div>
+                  </div>
+
+                  {!approvalPreviewMode ? (
+                    <textarea
+                      rows={14}
+                      value={approvalEmailBody}
+                      onChange={(e) => setApprovalEmailBody(e.target.value)}
+                      className="w-full p-4 text-xs font-mono rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#18191e] text-slate-900 dark:text-white leading-relaxed focus:outline-hidden focus:ring-2 focus:ring-[#0b99ff]"
+                      placeholder="Type the appointment letter..."
+                    />
+                  ) : (
+                    <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-4">
+                      <div className="border-b border-slate-200 dark:border-slate-800 pb-3 flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider">
+                            {approvalModalCandidate.journal || "Scholarly Open"}
+                          </div>
+                          <div className="font-bold text-sm text-slate-900 dark:text-white">
+                            {approvalEmailSubject}
+                          </div>
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          To: {approvalModalCandidate.candidateEmail || approvalModalCandidate.email}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed space-y-2">
+                        {approvalEmailBody}
+                      </div>
+                      <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <span className="text-[11px] text-slate-400">
+                          Primary Action: Access editorial360 Portal (https://www.scholarlyopen.org/editorial360)
+                        </span>
+                        <span className="text-[11px] font-semibold text-emerald-600">
+                          Branded Scholarly Open Template
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dispatch via SMTP toggle */}
+                <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={approvalSendEmail}
+                      onChange={(e) => setApprovalSendEmail(e.target.checked)}
+                      className="rounded text-[#0b99ff] focus:ring-[#0b99ff] h-4 w-4"
+                    />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      Send official welcome email to recipient via SMTP immediately
+                    </span>
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {approvalSendEmail ? "SMTP Dispatch Enabled" : "Silent Approval (No Email)"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setApprovalModalCandidate(null)}
+                  disabled={isApprovingCandidate}
+                  className="rounded-xl text-xs font-semibold"
+                >
+                  Cancel
+                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleConfirmApprovalAndSendEmail}
+                    disabled={isApprovingCandidate}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold px-4 h-9 shadow-md shadow-emerald-600/20 cursor-pointer"
+                  >
+                    {isApprovingCandidate ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                        <span>Approving & Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                        <span>{approvalSendEmail ? "Approve & Send Welcome Email" : "Approve & Activate Account"}</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Persistent Approval Notification Toast */}
+      {approvalSuccessMessage && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md p-4 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5">
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-white" />
+          <p className="text-xs font-semibold leading-relaxed">{approvalSuccessMessage}</p>
+          <button type="button" onClick={() => setApprovalSuccessMessage("")} className="ml-auto text-white/80 hover:text-white">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* INGEST MANUAL / LEGACY SUBMISSION MODAL                                   */}

@@ -37,10 +37,10 @@ export interface CrossDeskNotification {
   paperId: string
   paperTitle: string
   journal: string
-  type: "im_escalation" | "im_flag" | "eic_desk_reject" | "eic_inquiry" | "eic_raw_data" | "eic_cleared" | "jm_assignment" | "decision_completed" | "review_complete" | "editorial_board_joined"
+  type: "im_escalation" | "im_flag" | "eic_desk_reject" | "eic_inquiry" | "eic_raw_data" | "eic_cleared" | "jm_assignment" | "decision_completed" | "review_complete" | "editorial_board_joined" | "editor_decision" | "author_submission" | "raw_outreach" | (string & {})
   severity: "urgent" | "high" | "normal" | "info"
   actorName: string
-  actorRole: "Research Integrity Office" | "Editor-in-Chief" | "Journal Manager Desk" | "Editorial Office" | "Peer Review Desk" | "Editorial Board"
+  actorRole: "Research Integrity Office" | "Editor-in-Chief" | "Journal Manager Desk" | "Editorial Office" | "Peer Review Desk" | "Editorial Board" | "Author Desk" | (string & {})
   headline: string
   summary: string
   dispatchedLetter?: string

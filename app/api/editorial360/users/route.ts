@@ -214,7 +214,7 @@ export async function POST(req: Request) {
       orcid: orcid.trim(),
       status,
       createdAt: existingIndex >= 0 ? currentUsers[existingIndex].createdAt : new Date().toISOString(),
-      passwordHash: password ? `auth_hash_${Buffer.from(password).toString("base64").slice(0, 12)}` : undefined,
+      passwordHash: password ? `auth_hash_${Buffer.from(password.trim()).toString("base64")}` : (existingIndex >= 0 ? currentUsers[existingIndex].passwordHash : undefined),
       photoUrl: photoUrl !== undefined ? photoUrl : (existingIndex >= 0 ? currentUsers[existingIndex].photoUrl : undefined),
       staffRole: staffRole !== undefined ? staffRole : (existingIndex >= 0 ? currentUsers[existingIndex].staffRole : undefined),
       department: department !== undefined ? department : (existingIndex >= 0 ? currentUsers[existingIndex].department : undefined),
@@ -270,6 +270,7 @@ export async function PATCH(req: Request) {
       ...(body.staffRole !== undefined ? { staffRole: body.staffRole } : {}),
       ...(body.department !== undefined ? { department: body.department } : {}),
       ...(body.officeLocation !== undefined ? { officeLocation: body.officeLocation } : {}),
+      ...(body.password ? { passwordHash: `auth_hash_${Buffer.from(body.password.trim()).toString("base64")}` } : {}),
       updatedAt: new Date().toISOString()
     }
 

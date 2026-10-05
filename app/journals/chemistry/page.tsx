@@ -5,8 +5,9 @@ import { editors } from "@/lib/data/editors"
 
 export default function ChemistryPage() {
   const journalEditors = editors.filter(e => e.journalSlug === "chemistry")
-  const associateEditors = journalEditors.filter(e => e.role === "Associate Editor")
-  const editorialBoard = journalEditors.filter(e => e.role.includes("Editorial Board"))
+  const editorInChief = journalEditors.find(e => e.role?.toLowerCase().includes("chief"))
+  const associateEditors = journalEditors.filter(e => e.role?.toLowerCase().includes("associate"))
+  const editorialBoard = journalEditors.filter(e => !e.role?.toLowerCase().includes("chief") && !e.role?.toLowerCase().includes("associate"))
 
   return (
     <JournalPage
@@ -42,6 +43,7 @@ export default function ChemistryPage() {
       ]}
       sampleArticles={articles.filter(a => a.journalSlug === "chemistry")}
       journalSlug="chemistry"
+      editorInChief={editorInChief}
       associateEditors={associateEditors}
       editorialBoard={editorialBoard}
     />

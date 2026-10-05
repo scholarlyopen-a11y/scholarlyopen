@@ -26,6 +26,10 @@ export interface EditorMember {
   imageUrl?: string
   email?: string
   orcid?: string
+  biography?: string
+  googleScholar?: string
+  linkedin?: string
+  researchGate?: string
   assignedSections?: string[]
   expertise?: string[]
   totalReviews?: number
@@ -151,6 +155,13 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                 </div>
               )}
 
+              {editor.biography && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Biography</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">{editor.biography}</p>
+                </div>
+              )}
+
               <div className="border-t border-border pt-4 flex flex-col gap-2">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact Information</h4>
                 <div className="flex flex-wrap gap-x-6 gap-y-2 mt-1">
@@ -172,6 +183,39 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                     >
                       <span className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-sm text-[8px] font-bold h-3.5 px-1 mr-1.5">ID</span>
                       ORCID: {editor.orcid}
+                    </a>
+                  )}
+                  {editor.googleScholar && (
+                    <a 
+                      href={editor.googleScholar}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-xs text-[#0b99ff] hover:underline transition-colors"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      Google Scholar
+                    </a>
+                  )}
+                  {editor.linkedin && (
+                    <a 
+                      href={editor.linkedin.startsWith("http") ? editor.linkedin : `https://linkedin.com/in/${editor.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-xs text-[#0a66c2] hover:underline transition-colors"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      LinkedIn
+                    </a>
+                  )}
+                  {editor.researchGate && (
+                    <a 
+                      href={editor.researchGate.startsWith("http") ? editor.researchGate : `https://www.researchgate.net/profile/${editor.researchGate}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-xs text-[#00ccbb] hover:underline transition-colors"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      ResearchGate
                     </a>
                   )}
                 </div>

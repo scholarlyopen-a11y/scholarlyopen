@@ -370,7 +370,7 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
   date: "2026-09-14",
   assignedEditorName: undefined,
   editorAssigned: false,
-  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza"],
+  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ"],
   fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
   fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
   fileSize: "38.6 KB",
@@ -1085,10 +1085,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     await Promise.all(selectedReviewerNames.map(async (revName) => {
       const lower = revName.trim().toLowerCase()
       const extRev = externalReviewersList.find(x => x.name.toLowerCase() === lower || lower.includes(x.name.toLowerCase()))
-      const openAiRev = openAiResults?.find(x => x.name?.toLowerCase() === lower || lower.includes(x.name?.toLowerCase()))
-      const regRev = reviewersList.find(x => x.name.toLowerCase() === lower || lower.includes(x.name.toLowerCase()))
+      const openAiRev = openAiResults?.find((x: any) => x.name?.toLowerCase() === lower || lower.includes(x.name?.toLowerCase()))
 
-      let targetEmail = extRev?.email || openAiRev?.email || (regRev as any)?.email
+      let targetEmail = extRev?.email || openAiRev?.email
       if (!targetEmail || targetEmail === "reviewer@scholarlyopen.org") {
         if (lower.includes("nagula") || lower.includes("praveen")) targetEmail = "drpraveennagula@gmail.com"
         else if (lower.includes("aziza") || lower.includes("ragab")) targetEmail = "ragab.aziza@agr.kfs.edu.eg"

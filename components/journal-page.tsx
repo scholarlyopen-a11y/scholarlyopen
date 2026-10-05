@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { type ReactNode } from "react"
+import { useState, useEffect, type ReactNode } from "react"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -91,6 +91,118 @@ export function JournalPage({
   editorialBoard = placeholderEditorialBoard,
 }: JournalPageProps) {
   const { t } = useLanguage()
+
+  const [currentEiC, setCurrentEiC] = useState<EditorMember>(editorInChief)
+  const [currentAssociateEditors, setCurrentAssociateEditors] = useState<EditorMember[]>(associateEditors)
+  const [currentEditorialBoard, setCurrentEditorialBoard] = useState<EditorMember[]>(editorialBoard)
+
+  useEffect(() => {
+    setCurrentEiC(editorInChief)
+  }, [editorInChief])
+
+  useEffect(() => {
+    setCurrentAssociateEditors(associateEditors)
+  }, [associateEditors])
+
+  useEffect(() => {
+    setCurrentEditorialBoard(editorialBoard)
+  }, [editorialBoard])
+
+  // Real-time synchronization: Fetch approved editorial board members from live API
+  useEffect(() => {
+    let isMounted = true
+    async function syncLiveApprovedEditors() {
+      try {
+        const res = await fetch(`/api/editorial360/editors?journal=${encodeURIComponent(journalSlug)}&t=${Date.now()}`)
+        if (!res.ok) return
+        const data = await res.json()
+        if (!isMounted || !data.success || !Array.isArray(data.editors)) return
+
+        const approved = data.editors.filter((e: any) => e.jmApproved === true)
+        if (approved.length === 0) return
+
+        // 1. Live Editor-in-Chief
+        const liveEiC = approved.find((e: any) => e.role?.toLowerCase().includes("chief"))
+        if (liveEiC) {
+          setCurrentEiC({
+            name: liveEiC.name,
+            role: liveEiC.role || "Editor-in-Chief",
+            affiliation: liveEiC.affiliation || "Academic Institution",
+            specialization: liveEiC.specialization || (Array.isArray(liveEiC.researchInterests) ? liveEiC.researchInterests.join(", ") : "Academic Research & Peer Review"),
+            imageUrl: liveEiC.photoUrl,
+            email: liveEiC.email,
+            orcid: liveEiC.orcid,
+            googleScholar: liveEiC.googleScholar || liveEiC.scholarUrl,
+            linkedin: liveEiC.linkedin,
+            researchGate: liveEiC.researchGate,
+            biography: liveEiC.biography,
+            expertise: Array.isArray(liveEiC.researchInterests) ? liveEiC.researchInterests : []
+          })
+        }
+
+        // 2. Live Associate Editors
+        const liveAEs = approved.filter((e: any) => e.role?.toLowerCase().includes("associate"))
+        if (liveAEs.length > 0) {
+          const mappedAEs: EditorMember[] = liveAEs.map((e: any) => ({
+            name: e.name,
+            role: e.role || "Associate Editor",
+            affiliation: e.affiliation || "Academic Institution",
+            specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
+            imageUrl: liveEiC && liveEiC.email === e.email ? liveEiC.photoUrl : e.photoUrl,
+            email: e.email,
+            orcid: e.orcid,
+            googleScholar: e.googleScholar || e.scholarUrl,
+            linkedin: e.linkedin,
+            researchGate: e.researchGate,
+            biography: e.biography,
+            expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
+          }))
+          setCurrentAssociateEditors(prev => {
+            const combined = [...mappedAEs]
+            for (const existing of prev) {
+              if (existing.name !== "Position open" && !combined.some(c => c.name.toLowerCase() === existing.name.toLowerCase())) {
+                combined.push(existing)
+              }
+            }
+            return combined
+          })
+        }
+
+        // 3. Live Editorial Board Members
+        const liveBoard = approved.filter((e: any) => !e.role?.toLowerCase().includes("chief") && !e.role?.toLowerCase().includes("associate"))
+        if (liveBoard.length > 0) {
+          const mappedBoard: EditorMember[] = liveBoard.map((e: any) => ({
+            name: e.name,
+            role: e.role || "Editorial Board Member",
+            affiliation: e.affiliation || "Academic Institution",
+            specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
+            imageUrl: e.photoUrl,
+            email: e.email,
+            orcid: e.orcid,
+            googleScholar: e.googleScholar || e.scholarUrl,
+            linkedin: e.linkedin,
+            researchGate: e.researchGate,
+            biography: e.biography,
+            expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
+          }))
+          setCurrentEditorialBoard(prev => {
+            const combined = [...mappedBoard]
+            for (const existing of prev) {
+              if (existing.name !== "Position open" && !combined.some(c => c.name.toLowerCase() === existing.name.toLowerCase())) {
+                combined.push(existing)
+              }
+            }
+            return combined
+          })
+        }
+      } catch (err) {
+        console.warn("Could not sync live approved editors:", err)
+      }
+    }
+
+    syncLiveApprovedEditors()
+    return () => { isMounted = false }
+  }, [journalSlug])
 
   const brandThemes: Record<string, { bgColor: string; border: string; text: string; subtext: string; buttonOutline: string; iconBg: string; badge: string }> = {
     "biology": {
@@ -379,9 +491,9 @@ export function JournalPage({
               <p className="text-muted-foreground">Our distinguished editorial board members are leading experts in their fields, overseeing our rigorous peer review and ensuring high publication standards.</p>
             </div>
             <JournalEditorialBoard
-              editorInChief={editorInChief}
-              associateEditors={associateEditors}
-              editorialBoard={editorialBoard}
+              editorInChief={currentEiC}
+              associateEditors={currentAssociateEditors}
+              editorialBoard={currentEditorialBoard}
             />
 
             <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">

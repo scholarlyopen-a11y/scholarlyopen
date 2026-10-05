@@ -5,6 +5,7 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 import { getStoredDisapproved, saveStoredDisapproved, DisapprovedCandidateRecord } from "../disapproved-candidates/route"
+import { getJournalReplyTo } from "@/lib/data/journal-contacts"
 
 export interface InvitationResponseRecord {
   id: string
@@ -514,6 +515,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Name is required" }, { status: 400 })
     }
 
+    // Mandatory checks for editorial board onboarding
+    if (type === "eic" || type === "ae" || type === "board") {
+      if (!biography || biography.trim().length < 50) {
+        return NextResponse.json({ 
+          success: false, 
+          error: "Academic Biography (minimum 50 characters) is required for editorial board appointment." 
+        }, { status: 400 })
+      }
+      if (!cvFileName && !cvBase64) {
+        return NextResponse.json({ 
+          success: false, 
+          error: "A Curriculum Vitae (CV) document (PDF or DOCX) is mandatory for editorial board appointment." 
+        }, { status: 400 })
+      }
+    }
+
     const cleanEmail = (candidateEmail || "").trim().toLowerCase()
     const cleanOrcid = (orcid || "").trim()
 
@@ -659,16 +676,23 @@ export async function POST(req: Request) {
               <strong>Role / Category:</strong> ${roleLabel}<br>
               <strong>Journal Portfolio:</strong> ${journal}<br>
               <strong>Affiliation:</strong> ${affiliation || "Academic Institution"}${department ? ` (${department})` : ""}${country ? `, ${country}` : ""}<br>
-              ${orcid ? `<strong>ORCID iD:</strong> <a href="https://orcid.org/${orcid}" style="color: #0b99ff;">${orcid}</a><br>` : ""}
-              ${cvFileName ? `<strong>Uploaded CV:</strong> ${cvFileName} (${cvFileSize || "Uploaded"})<br>` : ""}
-              ${photoUrl ? `<strong>Photo:</strong> High-resolution profile photo attached<br>` : ""}
-              ${Array.isArray(researchInterests) && researchInterests.length > 0 ? `<strong>Research Interests:</strong> ${researchInterests.join(", ")}<br>` : ""}
+              ${orcid ? `<strong>ORCID iD:</strong> <a href="https://orcid.org/${orcid}" style="color: #0b99ff;" target="_blank">${orcid}</a><br>` : ""}
+              ${googleScholar ? `<strong>Google Scholar:</strong> <a href="${googleScholar}" style="color: #0b99ff;" target="_blank">${googleScholar}</a><br>` : ""}
+              ${cvFileName ? `<strong>Uploaded CV:</strong> <span style="font-weight: bold; color: #0f172a;">${cvFileName}</span> (${cvFileSize || "Attached"})<br>` : ""}
+              ${Array.isArray(researchInterests) && researchInterests.length > 0 ? `<strong>Research Interests:</strong> <span style="color: #0b99ff; font-weight: 600;">${researchInterests.join(", ")}</span><br>` : ""}
               <strong>Decision / Action:</strong> ${decision.toUpperCase()}<br>
               ${credentialId ? `<strong>Credential ID:</strong> ${credentialId}<br>` : ""}
               <strong>Website Profile Upload Consent:</strong> ${consentProfileUpload ? "Granted (GDPR Compliant)" : "Pending"}<br>
               <strong>Terms Accepted:</strong> ${hasAcceptedTerms ? "Yes (COPE & Rigor Standards)" : "No"}<br>
               <strong>Timestamp:</strong> ${new Date().toUTCString()}
             </p>
+
+            ${photoUrl ? `
+              <div style="margin: 16px 0; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; display: inline-block;">
+                <strong style="display: block; margin-bottom: 8px; font-size: 12px; color: #1e293b;">Candidate Profile Photo:</strong>
+                <img src="${photoUrl}" alt="${candidateName}" style="width: 130px; height: 130px; object-fit: cover; border-radius: 8px; border: 2px solid #0b99ff; display: block;" />
+              </div>
+            ` : ""}
 
             ${biography ? `
               <div style="background-color: #f8fafc; border-left: 3px solid #0b99ff; padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
@@ -696,9 +720,11 @@ export async function POST(req: Request) {
           }
         }
 
+        const targetJournalEmail = getJournalReplyTo(journal)
         await transporter.sendMail({
           from: `"editorial360 Notifications" <${from}>`,
           to: "info@scholarlyopen.org",
+          cc: `scholarlyopen@gmail.com, ${targetJournalEmail}`,
           replyTo: candidateEmail || "info@scholarlyopen.org",
           subject,
           html: htmlContent,

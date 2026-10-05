@@ -1,3 +1,58 @@
 {
-  "onboardedEditors": []
+  "onboardedEditors": [
+    {
+      "id": "EBM-VERPOORT",
+      "name": "Prof. Francis Verpoort",
+      "email": "francis@whut.edu.cn",
+      "role": "Editor-in-Chief",
+      "journal": "Scholarly Open: Chemistry",
+      "journalSlug": "chemistry",
+      "affiliation": "Wuhan University of Technology, State Key Laboratory of Advanced Technology for Materials Synthesis and Processing, China & Ghent University, Belgium",
+      "department": "State Key Laboratory of Advanced Technology for Materials Synthesis and Processing",
+      "country": "China",
+      "specialization": "Inorganic and Coordination Chemistry, Organometallic Chemistry, Catalysis, Metal-Organic Frameworks (MOFs)",
+      "researchInterests": [
+        "Coordination Chemistry",
+        "Catalysis",
+        "Organometallics",
+        "Metal-Organic Frameworks (MOFs)",
+        "Inorganic Synthesis"
+      ],
+      "biography": "Prof. Francis Verpoort is a Chair Professor at the State Key Laboratory of Advanced Technology for Materials Synthesis and Processing, Wuhan University of Technology, China, and an affiliated professor at Ghent University, Belgium. His research focuses on coordination chemistry, homogeneous and heterogeneous catalysis, and advanced porous coordination polymers.",
+      "orcid": "0000-0002-5184-5500",
+      "status": "Pending JM Approval",
+      "jmApproved": false,
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "acceptedAt": "2026-10-05T09:30:00.000Z"
+    },
+    {
+      "id": "EBM-CACCIOLA",
+      "name": "Prof. Francesco Cacciola",
+      "email": "cacciolaf@unime.it",
+      "role": "Associate Editor & Handling Editor",
+      "journal": "Scholarly Open: Chemistry",
+      "journalSlug": "chemistry",
+      "affiliation": "University of Messina, Department of Biomedical, Dental, Morphological and Functional Imaging Sciences, Italy",
+      "department": "Department of Biomedical, Dental, Morphological and Functional Imaging Sciences",
+      "country": "Italy",
+      "specialization": "Food Chemistry, Chromatography, Mass Spectrometry, Bioactive Natural Compounds",
+      "researchInterests": [
+        "Food Chemistry",
+        "Analytical Chemistry",
+        "Mass Spectrometry",
+        "Chromatography",
+        "Natural Products"
+      ],
+      "biography": "Prof. Francesco Cacciola is an Associate Professor of Food Chemistry at the University of Messina, Italy. His research focuses on the development of innovative chromatographic and mass spectrometry techniques for the characterization of food lipids, polyphenols, and bioactive natural products.",
+      "photoUrl": "/images/editors/1781087227071.jpeg",
+      "orcid": "0000-0003-1296-7633",
+      "status": "Pending JM Approval",
+      "jmApproved": false,
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "acceptedAt": "2026-10-05T10:13:00.000Z"
+    }
+  ],
+  "lastUpdated": "2026-10-05T13:47:00.000Z"
 }

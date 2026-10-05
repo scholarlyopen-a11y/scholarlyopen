@@ -1,6 +1,8 @@
 export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
+import nodemailer from "nodemailer"
+import { getJournalReplyTo } from "@/lib/data/journal-contacts"
 
 export interface ReviewerHistoryItem {
   id: string
@@ -540,6 +542,79 @@ export async function PATCH(req: Request) {
       }
     } catch (e) {
       console.warn("Could not sync reviewer response to Supabase sent-invitations:", e)
+    }
+
+    // Dispatch instant email alert to the Journal Office (e.g. editor.med@scholarlyopen.org) & Journal Manager Desk
+    if (action === "accept" || action === "decline") {
+      try {
+        const smtpHost = process.env.SMTP_HOST
+        const smtpPort = Number(process.env.SMTP_PORT) || 587
+        const smtpUser = process.env.SMTP_USER
+        const smtpPass = process.env.SMTP_PASS
+        const smtpFrom = process.env.SMTP_FROM || smtpUser
+
+        if (smtpHost && smtpUser && smtpPass) {
+          const transporter = nodemailer.createTransport({
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpPort === 465,
+            auth: { user: smtpUser, pass: smtpPass }
+          })
+
+          const journalName = finalRecord.journal || "Scholarly Open: Medicine"
+          const journalEmail = getJournalReplyTo(journalName)
+          const isAccepted = action === "accept"
+          const subject = `[${journalName}] Peer Review ${isAccepted ? "ACCEPTED" : "DECLINED"}: ${finalRecord.reviewerName} (${finalRecord.paperId})`
+
+          const html = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+              <div style="border-bottom: 3px solid ${isAccepted ? "#0b99ff" : "#ef4444"}; padding-bottom: 14px; margin-bottom: 18px;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: ${isAccepted ? "#0b99ff" : "#ef4444"};">
+                  ${journalName} &bull; Peer Review Alert
+                </div>
+                <h2 style="color: #0f172a; margin: 6px 0 4px 0; font-size: 19px;">
+                  Review Invitation ${isAccepted ? "Accepted ✓" : "Declined ✕"}
+                </h2>
+                <span style="display: inline-block; background-color: ${isAccepted ? "#ecfdf5" : "#fef2f2"}; color: ${isAccepted ? "#047857" : "#b91c1c"}; font-size: 11px; font-weight: bold; padding: 3px 9px; border-radius: 9999px; border: 1px solid ${isAccepted ? "#a7f3d0" : "#fecaca"};">
+                  ${isAccepted ? "Referee Confirmed & In Progress" : "Referee Declined"}
+                </span>
+              </div>
+
+              <div style="font-size: 13px; color: #334155; line-height: 1.6; margin-bottom: 18px;">
+                <p style="margin: 6px 0;"><strong>Manuscript ID:</strong> <span style="font-family: monospace; font-weight: bold; color: #0b99ff;">${finalRecord.paperId}</span></p>
+                <p style="margin: 6px 0;"><strong>Manuscript Title:</strong> ${finalRecord.paperTitle || "Submitted Manuscript"}</p>
+                <p style="margin: 6px 0;"><strong>Reviewer:</strong> ${finalRecord.reviewerName} (&lt;${finalRecord.reviewerEmail}&gt;)</p>
+                <p style="margin: 6px 0;"><strong>Response Action:</strong> ${isAccepted ? '<span style="color: #059669; font-weight: bold;">ACCEPTED</span>' : '<span style="color: #dc2626; font-weight: bold;">DECLINED</span>'}</p>
+                ${isAccepted && finalRecord.deadline ? `<p style="margin: 6px 0;"><strong>Target Report Deadline:</strong> <span style="font-weight: bold; color: #0f172a;">${finalRecord.deadline}</span> (14 calendar days)</p>` : ""}
+                ${!isAccepted ? `
+                  <div style="background: #f8fafc; border-left: 3px solid #ef4444; padding: 10px 14px; margin: 12px 0; border-radius: 0 6px 6px 0;">
+                    <p style="margin: 0; font-size: 12px; color: #475569;"><strong>Reason for Declining:</strong> ${finalRecord.declineReason || "Schedule conflict / Unavailable"}</p>
+                    ${finalRecord.declineReferral ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #475569;"><strong>Recommended Alternate:</strong> ${finalRecord.declineReferral}</p>` : ""}
+                  </div>
+                ` : ""}
+                <p style="color: #64748b; font-size: 11px; margin-top: 14px;"><strong>Timestamp:</strong> ${new Date().toUTCString()}</p>
+              </div>
+
+              <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://www.scholarlyopen.org"}/editorial360" style="display: inline-block; background: #0b99ff; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 12px; padding: 10px 22px; border-radius: 8px;">
+                  Open Review Tracker in editorial360
+                </a>
+              </div>
+            </div>
+          `
+
+          await transporter.sendMail({
+            from: `"editorial360 Notifications" <${smtpFrom}>`,
+            to: journalEmail,
+            cc: "scholarlyopen@gmail.com, info@scholarlyopen.org",
+            replyTo: finalRecord.reviewerEmail,
+            subject,
+            html
+          })
+        }
+      } catch (mailErr) {
+        console.warn("Could not dispatch reviewer response notification email:", mailErr)
+      }
     }
 
     return NextResponse.json({ ok: true, record: finalRecord })
