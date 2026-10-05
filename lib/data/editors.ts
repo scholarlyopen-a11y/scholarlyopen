@@ -73,7 +73,6 @@ const baseEditors: EditorMember[] = [
       "Nanocatalysis"
     ],
     badges: [
-      "Editor-in-Chief",
       "Academician EASA",
       "Academician RNAS",
       "Academician AMC",
@@ -195,8 +194,8 @@ const baseEditors: EditorMember[] = [
         title: "Mechanism and Performance of Melamine-Based Metal-Free Organic Polymers with Modulated Nitrogen Structures for Catalyzing CO2 Cycloaddition",
         journal: "Catalysts",
         year: "2026",
-        doi: "10.3390/catal16010143",
-        link: "https://doi.org/10.3390/catal16010143"
+        doi: "10.3390/catal16020143",
+        link: "https://doi.org/10.3390/catal16020143"
       },
       {
         title: "Facile molten salt synthesis of Co@ NC catalysts enables highly efficient HMF-to-FDCA conversion under mild conditions",
@@ -223,15 +222,15 @@ const baseEditors: EditorMember[] = [
         title: "Metal–organic frameworks: versatile heterogeneous catalysts for efficient catalytic organic transformations",
         journal: "Chemical Society Reviews",
         year: "2015",
-        doi: "10.1039/C4CS00394K",
-        link: "https://doi.org/10.1039/C4CS00394K"
+        doi: "10.1039/C4CS00395K",
+        link: "https://doi.org/10.1039/C4CS00395K"
       },
       {
         title: "Metal organic frameworks mimicking natural enzymes: a structural and functional analogy",
         journal: "Chemical Society Reviews",
         year: "2016",
-        doi: "10.1039/C6CS00047H",
-        link: "https://doi.org/10.1039/C6CS00047H"
+        doi: "10.1039/C6CS00047A",
+        link: "https://doi.org/10.1039/C6CS00047A"
       },
       {
         title: "Rational Design of Holey 2D non-layered Transition Metal Carbide/Nitride Heterostructure Nanosheets for Highly Efficient Water Oxidation",
@@ -244,8 +243,8 @@ const baseEditors: EditorMember[] = [
         title: "Ruthenium-Based Olefin Metathesis Catalysts Derived from Alkynes",
         journal: "Chemical Reviews",
         year: "2010",
-        doi: "10.1021/cr9003504",
-        link: "https://doi.org/10.1021/cr9003504"
+        doi: "10.1021/cr900346r",
+        link: "https://doi.org/10.1021/cr900346r"
       }
     ]
   },

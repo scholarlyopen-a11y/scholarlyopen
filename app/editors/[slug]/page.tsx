@@ -184,11 +184,11 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                     {editor.name}
                   </h1>
                   <div className="flex justify-center gap-2 flex-wrap">
-                    <Badge className="bg-primary/10 text-primary border-0 font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5">
+                    <Badge className="bg-primary/10 text-primary border border-primary/20 font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5">
                       {editor.role}
                     </Badge>
-                    {editor.badges?.map(b => (
-                      <Badge key={b} className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5">
+                    {editor.badges?.filter(b => b.toLowerCase() !== editor.role.toLowerCase()).map(b => (
+                      <Badge key={b} variant="outline" className="bg-primary/10 text-primary border-primary/20 font-semibold uppercase tracking-wider text-[10px] px-2.5 py-0.5">
                         {b}
                       </Badge>
                     ))}
@@ -421,28 +421,53 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                     </p>
                   )}
                   <div className="space-y-4">
-                    {editor.personalPublications.map((pub, idx) => (
-                      <div key={idx} className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-900/40 hover:bg-slate-50 dark:hover:bg-slate-900/85 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-300 flex flex-col justify-between gap-3 group">
-                        <div className="space-y-1">
-                          <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug group-hover:text-primary transition-colors">
-                            {pub.title}
-                          </h4>
-                          <p className="text-xs text-muted-foreground">
-                            <span className="font-semibold text-slate-600 dark:text-slate-400">{pub.journal}</span> • <span>{pub.year}</span>
-                          </p>
+                    {editor.personalPublications.map((pub, idx) => {
+                      const targetUrl = pub.link || (pub.doi ? `https://doi.org/${pub.doi}` : undefined)
+                      return (
+                        <div key={idx} className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-900/40 hover:bg-slate-50 dark:hover:bg-slate-900/85 hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 flex flex-col justify-between gap-3 group">
+                          <div className="space-y-1.5">
+                            {targetUrl ? (
+                              <a 
+                                href={targetUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug group-hover:text-primary transition-colors block"
+                              >
+                                {pub.title}
+                              </a>
+                            ) : (
+                              <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">
+                                {pub.title}
+                              </h4>
+                            )}
+                            <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                              <span className="font-semibold text-slate-700 dark:text-slate-300">{pub.journal}</span>
+                              <span>•</span>
+                              <span>{pub.year}</span>
+                              {pub.doi && (
+                                <>
+                                  <span>•</span>
+                                  <span className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800/80 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-400">
+                                    DOI: {pub.doi}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {targetUrl && (
+                            <a 
+                              href={targetUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="inline-flex items-center text-xs font-semibold text-primary hover:underline gap-1.5 w-fit"
+                            >
+                              <span>View Source / Publisher</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
                         </div>
-                        {pub.link && (
-                          <a 
-                            href={pub.link} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="inline-flex items-center text-xs font-semibold text-primary hover:underline gap-1 w-fit"
-                          >
-                            View Source <ExternalLink className="h-3 w-3" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </section>
               )}
