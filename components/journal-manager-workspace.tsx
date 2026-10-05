@@ -4095,6 +4095,39 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               <div className="text-xs text-slate-500 dark:text-slate-400">
                                 Author: <span className="font-semibold text-slate-700 dark:text-slate-300">{ms.authorName || "Principal Author"}</span>
                               </div>
+
+                              {/* Manuscript File Download & Quick Access */}
+                              <div className="pt-1 flex items-center gap-1.5 flex-wrap">
+                                <a
+                                  href={ms.fileUrl || (ms.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : ms.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                                  download={ms.fileName || (ms.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${ms.id}_Main_Document.docx`)}
+                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 hover:bg-[#0b99ff]/10 text-slate-700 hover:text-[#0b99ff] dark:bg-slate-800 dark:hover:bg-[#0b99ff]/20 dark:text-slate-300 dark:hover:text-[#0b99ff] border border-slate-200 dark:border-slate-700 text-[11px] font-semibold transition-all group max-w-[280px]"
+                                  title={`Download ${ms.fileName || (ms.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Main_Document.docx")}`}
+                                >
+                                  <FileText className="h-3 w-3 text-[#0b99ff] shrink-0 group-hover:scale-110 transition-transform" />
+                                  <span className="truncate max-w-[150px] font-medium">
+                                    {ms.fileName || (ms.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Main_Manuscript.docx")}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono shrink-0">
+                                    ({ms.fileSize || (ms.id === "SOMED-26-RW01" ? "38.6 KB" : "2.4 MB")})
+                                  </span>
+                                  <Download className="h-3 w-3 text-slate-400 group-hover:text-[#0b99ff] shrink-0" />
+                                </a>
+
+                                {ms.revisedFileUrl && (
+                                  <a
+                                    href={ms.revisedFileUrl}
+                                    download={ms.revisedFileName || `${ms.id}_Revised_Manuscript.docx`}
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold transition-all"
+                                    title="Download Revised Manuscript (R1)"
+                                  >
+                                    <FileText className="h-2.5 w-2.5 text-emerald-600" />
+                                    <span>R1</span>
+                                    <Download className="h-2.5 w-2.5" />
+                                  </a>
+                                )}
+                              </div>
+
                               {isAccepted && (
                                 <div className="text-[11px] text-slate-500 font-normal pt-0.5">
                                   DOI: <span className="font-medium text-slate-700 dark:text-slate-300">10.59236/{ms.journal.toLowerCase().includes("medicine") ? "somed" : "soeas"}.2026.{ms.id.slice(-3)}</span>
@@ -4144,7 +4177,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           {/* 5. Actions (Centered) */}
                           <td className="px-4 py-4 align-top text-center min-w-[220px]">
                             <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                              {isTriage && (
+                              {isTriage ? (
                                 <>
                                   <Button
                                     variant="outline"
@@ -4154,6 +4187,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                       setIsPreQualityModalOpen(true)
                                     }}
                                     className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
+                                    title="Pre-Check Quality Assessment and file integrity"
                                   >
                                     <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
                                     Pre-Check
@@ -4166,6 +4200,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     Assign
                                   </Button>
                                 </>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedManuscript(ms)
+                                    setIsPreQualityModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
+                                  title="View submitted files, download manuscript & inspect dossier"
+                                >
+                                  <FileText className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Dossier / Files
+                                </Button>
                               )}
 
                               {isUnderReview && (
@@ -8532,7 +8580,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         <DialogContent className="sm:max-w-xl max-h-[85vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-5 flex flex-col shadow-2xl">
           <DialogHeader className="pb-1">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between gap-2 pr-6">
-              <span>Pre-Check</span>
+              <span>{Boolean(selectedManuscript?.status === "Awaiting Initial Check" || selectedManuscript?.status === "Submitted" || selectedManuscript?.status === "Draft") ? "Pre-Check Quality Assessment" : "Manuscript Files & Dossier"}</span>
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
                 {selectedManuscript?.id}
               </span>
@@ -8738,29 +8786,47 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <DialogFooter className="flex flex-row items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsQueryAuthorOpen(true)}
-              className="text-xs font-semibold text-amber-700 dark:text-amber-300 border-amber-300 hover:bg-amber-50 dark:border-amber-900/40 h-8 px-3 rounded-lg cursor-pointer"
+              onClick={() => setIsPreQualityModalOpen(false)}
+              className="text-xs font-medium text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 h-8 px-3 rounded-lg cursor-pointer"
             >
-              <AlertCircle className="h-3.5 w-3.5 mr-1 text-amber-500" />
-              Return to Author
+              Close
             </Button>
-            <Button
-              size="sm"
-              disabled={!allChecksComplete}
-              onClick={() => {
-                if (selectedManuscript) {
-                  handleOpenAssign(selectedManuscript)
-                  setIsPreQualityModalOpen(false)
-                }
-              }}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg"
-            >
-              Pass Pre-Check & Proceed
-            </Button>
+            <div className="flex items-center gap-2">
+              {Boolean(selectedManuscript?.status === "Awaiting Initial Check" || selectedManuscript?.status === "Submitted" || selectedManuscript?.status === "Draft") ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsQueryAuthorOpen(true)}
+                    className="text-xs font-semibold text-amber-700 dark:text-amber-300 border-amber-300 hover:bg-amber-50 dark:border-amber-900/40 h-8 px-3 rounded-lg cursor-pointer"
+                  >
+                    <AlertCircle className="h-3.5 w-3.5 mr-1 text-amber-500" />
+                    Return to Author
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={!allChecksComplete}
+                    onClick={() => {
+                      if (selectedManuscript) {
+                        handleOpenAssign(selectedManuscript)
+                        setIsPreQualityModalOpen(false)
+                      }
+                    }}
+                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+                  >
+                    Pass Pre-Check & Proceed
+                  </Button>
+                </>
+              ) : (
+                <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  Pre-Check Cleared ✓ &bull; Stage: {selectedManuscript?.status}
+                </div>
+              )}
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -9391,6 +9457,52 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 space-y-4 text-xs min-w-0 w-full box-border">
+            {/* Quick Manuscript File Download Card for Track Review */}
+            <div className="p-3 sm:p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 w-full box-border">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="h-8 w-8 rounded-lg bg-[#0b99ff]/10 text-[#0b99ff] flex items-center justify-center shrink-0 border border-[#0b99ff]/20">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-slate-400 font-medium block text-[10px] uppercase tracking-wider">
+                    Manuscript Document
+                  </span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white truncate block">
+                    {trackingManuscript?.fileName || (trackingManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Main_Manuscript.docx")}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    {trackingManuscript?.fileSize || (trackingManuscript?.id === "SOMED-26-RW01" ? "38.6 KB" : "2.4 MB")} &bull; Original Submission
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                <a
+                  href={trackingManuscript?.fileUrl || (trackingManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : trackingManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                  download={trackingManuscript?.fileName || (trackingManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${trackingManuscript?.id || "Manuscript"}_Main_Document.docx`)}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                  title="Download Manuscript (.docx)"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download Manuscript</span>
+                </a>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (trackingManuscript) {
+                      setSelectedManuscript(trackingManuscript)
+                      setIsPreQualityModalOpen(true)
+                    }
+                  }}
+                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap"
+                >
+                  <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                  All Files &amp; Dossier
+                </Button>
+              </div>
+            </div>
+
             {/* Handling Editor Info & Invitation */}
             {trackingManuscript?.assignedEditorName ? (
               <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border">
