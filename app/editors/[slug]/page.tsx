@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: EditorPageProps) {
   const editor = editors.find((e) => e.slug === slug)
   if (!editor) return {}
 
-  const titleText = `Dr. ${editor.name} | ${editor.role} | Scholarly Open`
+  const titleText = `${editor.name} | ${editor.role} | Scholarly Open`
   const descText = `${editor.name} is an ${editor.role} at Scholarly Open (${editor.affiliation}), specializing in ${editor.specialization.toLowerCase()}`
 
   return {

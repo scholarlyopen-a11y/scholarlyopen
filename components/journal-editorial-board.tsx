@@ -65,7 +65,13 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
 
   const editorSlug = editor.slug || (
     !isOpen 
-      ? editor.name.toLowerCase().replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+      ? editor.name
+          .toLowerCase()
+          .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
+          .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
       : undefined
   )
   

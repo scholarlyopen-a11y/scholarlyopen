@@ -45,7 +45,7 @@ export interface EditorMember {
 const baseEditors: EditorMember[] = [
   {
     slug: "francis-verpoort",
-    name: "Prof. Francis Verpoort",
+    name: "Francis Verpoort, Ph.D.",
     role: "Editor-in-Chief",
     affiliation: "State Key Laboratory of Advanced Technology for Material Synthesis and Processing, Wuhan University of Technology, China",
     specialization: "Organometallic chemistry, Metal-Organic Frameworks (MOFs), Porous-Organic Polymers, catalysis, clean energy, and CO₂ capture.",
@@ -1330,6 +1330,7 @@ const onboardedList: EditorMember[] = (
         const cleanSlug = (o.name || "editor")
           .toLowerCase()
           .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
+          .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
           .trim()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-+|-+$/g, "")

@@ -132,7 +132,13 @@ export function JournalPage({
         // 1. Live Editor-in-Chief
         const liveEiC = approved.find((e: any) => e.role?.toLowerCase().includes("chief"))
         if (liveEiC) {
-          const cleanSlug = (liveEiC.name || "editor").toLowerCase().replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+          const cleanSlug = (liveEiC.name || "editor")
+            .toLowerCase()
+            .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
+            .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+            .trim()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")
           const defaultPhoto = cleanSlug.includes("verpoort") ? "/images/editors/francis-verpoort.png" : (liveEiC.photoUrl || undefined)
           const officialEmail = (journalSlug === "chemistry" || cleanSlug.includes("verpoort")) 
             ? "editor.chem@scholarlyopen.org" 
