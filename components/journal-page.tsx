@@ -92,20 +92,28 @@ export function JournalPage({
 }: JournalPageProps) {
   const { t } = useLanguage()
 
-  const [currentEiC, setCurrentEiC] = useState<EditorMember>(editorInChief)
-  const [currentAssociateEditors, setCurrentAssociateEditors] = useState<EditorMember[]>(associateEditors)
-  const [currentEditorialBoard, setCurrentEditorialBoard] = useState<EditorMember[]>(editorialBoard)
+  const [currentEiC, setCurrentEiC] = useState<EditorMember>(editorInChief || placeholderEditorInChief)
+  const [currentAssociateEditors, setCurrentAssociateEditors] = useState<EditorMember[]>(
+    associateEditors && associateEditors.length > 0 ? associateEditors : placeholderAssociateEditors
+  )
+  const [currentEditorialBoard, setCurrentEditorialBoard] = useState<EditorMember[]>(
+    editorialBoard && editorialBoard.length > 0 ? editorialBoard : placeholderEditorialBoard
+  )
 
   useEffect(() => {
-    setCurrentEiC(editorInChief)
+    setCurrentEiC(editorInChief || placeholderEditorInChief)
   }, [editorInChief])
 
   useEffect(() => {
-    setCurrentAssociateEditors(associateEditors)
+    setCurrentAssociateEditors(
+      associateEditors && associateEditors.length > 0 ? associateEditors : placeholderAssociateEditors
+    )
   }, [associateEditors])
 
   useEffect(() => {
-    setCurrentEditorialBoard(editorialBoard)
+    setCurrentEditorialBoard(
+      editorialBoard && editorialBoard.length > 0 ? editorialBoard : placeholderEditorialBoard
+    )
   }, [editorialBoard])
 
   // Real-time synchronization: Fetch approved editorial board members from live API
@@ -124,13 +132,20 @@ export function JournalPage({
         // 1. Live Editor-in-Chief
         const liveEiC = approved.find((e: any) => e.role?.toLowerCase().includes("chief"))
         if (liveEiC) {
+          const cleanSlug = (liveEiC.name || "editor").toLowerCase().replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+          const defaultPhoto = cleanSlug.includes("verpoort") ? "/images/editors/francis-verpoort.png" : (liveEiC.photoUrl || undefined)
+          const officialEmail = (journalSlug === "chemistry" || cleanSlug.includes("verpoort")) 
+            ? "editor.chem@scholarlyopen.org" 
+            : (liveEiC.email?.endsWith("@scholarlyopen.org") ? liveEiC.email : `editor.${journalSlug}@scholarlyopen.org`)
+
           setCurrentEiC({
+            slug: cleanSlug,
             name: liveEiC.name,
             role: liveEiC.role || "Editor-in-Chief",
             affiliation: liveEiC.affiliation || "Academic Institution",
             specialization: liveEiC.specialization || (Array.isArray(liveEiC.researchInterests) ? liveEiC.researchInterests.join(", ") : "Academic Research & Peer Review"),
-            imageUrl: liveEiC.photoUrl,
-            email: liveEiC.email,
+            imageUrl: defaultPhoto,
+            email: officialEmail,
             orcid: liveEiC.orcid,
             googleScholar: liveEiC.googleScholar || liveEiC.scholarUrl,
             linkedin: liveEiC.linkedin,

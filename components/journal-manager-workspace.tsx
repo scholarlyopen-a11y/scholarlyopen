@@ -682,6 +682,9 @@ export function JournalManagerWorkspace({
       : (candidate.role || "Editorial Board Member & Handling Editor")
     const targetEmail = (candidate.candidateEmail || candidate.email || "").trim()
 
+    const editorSlug = (candidate.slug || name.replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")).toLowerCase()
+    const profileUrl = `https://www.scholarlyopen.org/editors/${editorSlug}`
+
     let body = `Dear ${name},
 
 We are pleased to officially confirm your appointment as ${roleTitle} for ${journalName}. On behalf of Scholarly Open and our global academic community, we warmly welcome you to our editorial leadership team.
@@ -694,6 +697,11 @@ Your Editorial360 workspace credentials and platform access have been activated:
 
 Important Security Notice:
 Upon your initial login, please navigate immediately to "Profile Settings" (accessible by clicking your profile name in the upper right corner) -> "Security & Password" to set a secure, private permanent password.
+
+Public Editorial Masthead & Profile Verification:
+Your profile is published on our official journal masthead. Please review your public profile page to verify your affiliation, academic biography, and scholarly links:
+• Public Profile: ${profileUrl}
+If any modifications are needed, you may update them directly in your Editorial360 Profile Settings or reply to this letter.
 
 As a valued member of our editorial leadership, you have full privileges to oversee submissions, coordinate rigorous peer reviews, and help guide the editorial scope of the journal.`
 

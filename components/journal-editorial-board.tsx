@@ -19,6 +19,7 @@ import { useLanguage } from "@/lib/language-context"
 export interface EditorMember {
   id?: string
   slug?: string
+  journalSlug?: string
   name: string
   role: string
   affiliation: string
@@ -50,6 +51,20 @@ interface JournalEditorialBoardProps {
 
 function EditorCard({ editor, featured = false }: { editor: EditorMember; featured?: boolean }) {
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  const isOpen = editor.name.toLowerCase() === "position open"
+
+  // Always use official journal editorial contact email per Scholarly Open EB standard
+  const displayEmail = editor.email && editor.email.endsWith("@scholarlyopen.org")
+    ? editor.email
+    : (editor.journalSlug === "chemistry" || editor.role?.toLowerCase().includes("chemistry") || editor.name.includes("Verpoort") || editor.affiliation?.toLowerCase().includes("messina"))
+    ? "editor.chem@scholarlyopen.org"
+    : (editor.journalSlug ? `editor.${editor.journalSlug.replace(/[^a-z0-9]/g, "")}@scholarlyopen.org` : "info@scholarlyopen.org")
+
+  const editorSlug = editor.slug || (
+    !isOpen 
+      ? editor.name.toLowerCase().replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+      : undefined
+  )
   
   return (
     <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center p-2 ${
@@ -60,7 +75,8 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
           <img 
             src={editor.imageUrl} 
             alt={editor.name} 
-            className="h-24 w-24 rounded-full object-cover object-center shrink-0" 
+            className="h-24 w-24 rounded-full object-cover shrink-0 ring-2 ring-primary/20 shadow-sm" 
+            style={{ objectPosition: "center 15%" }}
           />
         ) : (
           <div className="h-24 w-24 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
@@ -73,7 +89,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         <h4 className="text-base font-bold text-foreground mt-2 mb-0.5">{editor.name}</h4>
         <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed mb-3">{editor.affiliation}</p>
         
-        {editor.name === "Position Open" ? (
+        {isOpen ? (
           <Link href="/join-editorial-board" className="w-auto">
             <Button variant="outline" size="sm" className="w-auto h-8 px-4 text-[11px] font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
               Apply Now
@@ -93,7 +109,8 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                   <img 
                     src={editor.imageUrl} 
                     alt={editor.name} 
-                    className="h-14 w-14 rounded-full object-cover object-center shrink-0 ring-1 ring-slate-900/10 shadow-sm" 
+                    className="h-14 w-14 rounded-full object-cover shrink-0 ring-1 ring-slate-900/10 shadow-sm" 
+                    style={{ objectPosition: "center 15%" }}
                   />
                 ) : (
                   <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
@@ -165,13 +182,13 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
               <div className="border-t border-border pt-4 flex flex-col gap-2">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact Information</h4>
                 <div className="flex flex-wrap gap-x-6 gap-y-2 mt-1">
-                  {editor.email && (
+                  {displayEmail && (
                     <a 
-                      href={`mailto:${editor.email}`}
+                      href={`mailto:${displayEmail}`}
                       className="inline-flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
                     >
                       <Mail className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                      {editor.email}
+                      {displayEmail}
                     </a>
                   )}
                   {editor.orcid && (
@@ -221,10 +238,10 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                 </div>
               </div>
 
-              {editor.slug && (
+              {editorSlug && (
                 <div className="border-t border-border pt-4 mt-4">
                   <Button size="sm" className="w-full text-xs font-semibold" asChild>
-                    <Link href={`/editors/${editor.slug}`}>
+                    <Link href={`/editors/${editorSlug}`}>
                       View Full Profile Page
                       <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
                     </Link>
@@ -391,6 +408,44 @@ export function JournalEditorialBoard({
     specialization: "Currently appointing",
   }
 
+  const defaultOpenAssociateEditors: EditorMember[] = [
+    {
+      name: "Position Open",
+      role: "Associate Editor",
+      affiliation: "Seeking qualified experts in this field.",
+      specialization: "Editorial Board",
+    },
+    {
+      name: "Position Open",
+      role: "Associate Editor",
+      affiliation: "Seeking qualified experts in this field.",
+      specialization: "Editorial Board",
+    }
+  ]
+
+  const defaultOpenEditorialBoard: EditorMember[] = [
+    {
+      name: "Position Open",
+      role: "Editorial Board Member",
+      affiliation: "Seeking qualified experts in this field.",
+      specialization: "Editorial Board",
+    },
+    {
+      name: "Position Open",
+      role: "Editorial Board Member",
+      affiliation: "Seeking qualified experts in this field.",
+      specialization: "Editorial Board",
+    }
+  ]
+
+  const displayAssociateEditors = associateEditors && associateEditors.length > 0 
+    ? associateEditors 
+    : defaultOpenAssociateEditors
+
+  const displayEditorialBoard = editorialBoard && editorialBoard.length > 0 
+    ? editorialBoard 
+    : defaultOpenEditorialBoard
+
   return (
     <div className="space-y-12">
       {/* Editor-in-Chief */}
@@ -402,28 +457,24 @@ export function JournalEditorialBoard({
       </div>
       
       {/* Associate Editors */}
-      {associateEditors.length > 0 && (
-        <div>
-          <h3 className="text-xl font-semibold mb-6">{t("editorial.seniorEditors")}</h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {associateEditors.map((editor, index) => (
-              <EditorCard key={`${editor.role}-${index}`} editor={editor} />
-            ))}
-          </div>
+      <div>
+        <h3 className="text-xl font-semibold mb-6">{t("editorial.seniorEditors")}</h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {displayAssociateEditors.map((editor, index) => (
+            <EditorCard key={`${editor.role}-${index}`} editor={editor} />
+          ))}
         </div>
-      )}
+      </div>
       
       {/* Editorial Board */}
-      {editorialBoard.length > 0 && (
-        <div>
-          <h3 className="text-xl font-semibold mb-6">{t("editorial.boardMembers")}</h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {editorialBoard.map((editor, index) => (
-              <EditorCard key={`${editor.role}-${index}`} editor={editor} />
-            ))}
-          </div>
+      <div>
+        <h3 className="text-xl font-semibold mb-6">{t("editorial.boardMembers")}</h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {displayEditorialBoard.map((editor, index) => (
+            <EditorCard key={`${editor.role}-${index}`} editor={editor} />
+          ))}
         </div>
-      )}
+      </div>
     </div>
   )
 }

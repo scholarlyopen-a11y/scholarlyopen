@@ -1138,7 +1138,7 @@ const onboardedList: EditorMember[] = (
           affiliation: o.affiliation || "University / Academic Institution",
           specialization: o.specialization || (Array.isArray(o.researchInterests) ? o.researchInterests.join(", ") : "Academic Peer Review & Research"),
           imageUrl: o.photoUrl || undefined,
-          email: o.email || undefined,
+          email: jSlug === "chemistry" ? "editor.chem@scholarlyopen.org" : (o.email && o.email.endsWith("@scholarlyopen.org") ? o.email : (jSlug ? `editor.${jSlug.replace(/[^a-z0-9]/g, "")}@scholarlyopen.org` : "info@scholarlyopen.org")),
           orcid: o.orcid || undefined,
           googleScholar: o.googleScholar || undefined,
           linkedin: o.linkedin || undefined,
@@ -1153,5 +1153,17 @@ const onboardedList: EditorMember[] = (
 
 export const editors: EditorMember[] = [
   ...onboardedList,
-  ...baseEditors.filter(be => !onboardedList.some(ol => ol.name.toLowerCase() === be.name.toLowerCase() || (ol.journalSlug === be.journalSlug && be.name === "Position Open")))
+  ...baseEditors.filter(be => !onboardedList.some(ol => {
+    if (ol.name.toLowerCase() === be.name.toLowerCase()) return true
+    if (ol.journalSlug === be.journalSlug && be.name === "Position Open") {
+      const isOlEic = ol.role?.toLowerCase().includes("chief")
+      const isBeEic = be.role?.toLowerCase().includes("chief")
+      const isOlAe = ol.role?.toLowerCase().includes("associate")
+      const isBeAe = be.role?.toLowerCase().includes("associate")
+      if (isOlEic && isBeEic) return true
+      if (isOlAe && isBeAe) return true
+      return false
+    }
+    return false
+  }))
 ]
