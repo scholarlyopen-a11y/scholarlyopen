@@ -672,7 +672,7 @@ export function JournalManagerWorkspace({
 
   const buildDefaultWelcomeBody = (candidate: any, tempPwd: string, extraNote: string = "") => {
     const name = candidate.candidateName || candidate.name || "Colleague"
-    const journalName = candidate.journal || "Scholarly Open"
+    const journalName = candidate.journal || "Scholarly Open: Chemistry"
     const roleTitle = candidate.type === "eic" 
       ? "Editor-in-Chief" 
       : candidate.type === "ae" 
@@ -684,12 +684,13 @@ export function JournalManagerWorkspace({
 
     const editorSlug = (candidate.slug || name.replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")).toLowerCase()
     const profileUrl = `https://www.scholarlyopen.org/editors/${editorSlug}`
+    const journalEmail = getJournalReplyTo(journalName)
 
     let body = `Dear ${name},
 
 We are pleased to officially confirm your appointment as ${roleTitle} for ${journalName}. On behalf of Scholarly Open and our global academic community, we warmly welcome you to our editorial leadership team.
 
-Your Editorial360 workspace credentials and platform access have been activated:
+Your editorial360 workspace credentials and platform access have been activated:
 
 • Access Portal: https://www.scholarlyopen.org/editorial360
 • Login Email: ${targetEmail}
@@ -701,7 +702,7 @@ Upon your initial login, please navigate immediately to "Profile Settings" (acce
 Public Editorial Masthead & Profile Verification:
 Your profile is published on our official journal masthead. Please review your public profile page to verify your affiliation, academic biography, and scholarly links:
 • Public Profile: ${profileUrl}
-If any modifications are needed, you may update them directly in your Editorial360 Profile Settings or reply to this letter.
+If any modifications are needed, you may update them directly in your editorial360 Profile Settings or reply to this letter.
 
 As a valued member of our editorial leadership, you have full privileges to oversee submissions, coordinate rigorous peer reviews, and help guide the editorial scope of the journal.`
 
@@ -711,11 +712,13 @@ As a valued member of our editorial leadership, you have full privileges to over
 
     body += `\n\nWe look forward to an impactful collaboration. Please feel free to reach out to us at any time if you have questions or require assistance.
 
-With warm regards,
+Sincerely,
 
-Journal Management & Editorial Operations
-Scholarly Open
-info@scholarlyopen.org | https://www.scholarlyopen.org`
+Noor F.
+Journal Management & Editorial Office
+${journalName}
+Scholarly Open Publishing Group
+${journalEmail} | https://www.scholarlyopen.org`
 
     return body
   }
@@ -766,6 +769,9 @@ info@scholarlyopen.org | https://www.scholarlyopen.org`
     if (!approvalExtraNotes.trim()) return
     const noteText = `\n\nSpecial Remarks from Journal Management:\n${approvalExtraNotes.trim()}\n`
     setApprovalEmailBody(prev => {
+      if (prev.includes("Sincerely,")) {
+        return prev.replace("Sincerely,", `${noteText}\nSincerely,`)
+      }
       if (prev.includes("With warm regards")) {
         return prev.replace("With warm regards", `${noteText}\nWith warm regards`)
       }
@@ -827,20 +833,25 @@ info@scholarlyopen.org | https://www.scholarlyopen.org`
 
       // 3. Dispatch welcome email if enabled
       if (approvalSendEmail) {
+        const journalEmail = getJournalReplyTo(journalName)
+        const ccAddresses = `scholarlyopen@gmail.com, ${journalEmail}`
+
         await fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: targetEmail,
+            cc: ccAddresses,
+            fromEmail: journalEmail,
             customSubject: approvalEmailSubject.trim(),
             customBody: approvalEmailBody.trim(),
             recipientName: candidateName,
             journal: journalName,
             role: userRole,
-            actionLabel: "Access Editorial360 Portal",
+            actionLabel: "Access editorial360 Portal",
             actionUrl: "https://www.scholarlyopen.org/editorial360",
             includeEditorial360Logo: true,
-            senderName: "Scholarly Open Journal Management"
+            senderName: `Noor F. | ${journalName}`
           })
         })
       }
@@ -12609,7 +12620,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
                         <span className="font-mono">{approvalModalCandidate.candidateEmail || approvalModalCandidate.email}</span>
                         <span>•</span>
-                        <span className="font-medium text-slate-700 dark:text-slate-300">{approvalModalCandidate.journal || "Scholarly Open"}</span>
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{approvalModalCandidate.journal || "Scholarly Open: Chemistry"}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1 font-mono">
+                        <span className="font-semibold text-slate-400 uppercase text-[10px]">CC:</span>
+                        <span className="text-[#0b99ff]">scholarlyopen@gmail.com</span>
+                        <span className="text-slate-300">,</span>
+                        <span className="text-[#0b99ff]">{getJournalReplyTo(approvalModalCandidate.journal || "Scholarly Open: Chemistry")}</span>
                       </div>
                     </div>
                   </div>
@@ -12770,30 +12787,98 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       placeholder="Type the appointment letter..."
                     />
                   ) : (
-                    <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-4">
-                      <div className="border-b border-slate-200 dark:border-slate-800 pb-3 flex items-center justify-between">
-                        <div>
-                          <div className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider">
-                            {approvalModalCandidate.journal || "Scholarly Open"}
+                    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316] shadow-sm">
+                      {/* Standard Dual-Brand Header (CFPs & EBMs standard) */}
+                      {(() => {
+                        const journalName = approvalModalCandidate.journal || "Scholarly Open: Chemistry"
+                        const branding = getJournalBranding(journalName)
+                        const fullJournalName = journalName.includes("Scholarly Open")
+                          ? journalName
+                          : `Scholarly Open: ${branding.cleanName}`
+                        const journalEmail = getJournalReplyTo(journalName)
+                        return (
+                          <div>
+                            <div className="flex items-center justify-between p-4 pb-3.5 border-b-2 border-[#0b99ff] gap-4 bg-white dark:bg-[#121316]">
+                              <div className="flex items-center">
+                                <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain dark:hidden" />
+                                <img src="/logo-full-color.svg" alt="Scholarly Open" className="h-8 sm:h-9 w-auto object-contain hidden dark:block brightness-125" />
+                              </div>
+                              <div className="flex items-center gap-2.5 text-right">
+                                <div>
+                                  <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                                    {fullJournalName}
+                                  </div>
+                                  <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
+                                    Peer-Reviewed Journal
+                                  </div>
+                                </div>
+                                <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shrink-0">
+                                  <img
+                                    src={`/journal-icons/${branding.slug}.svg`}
+                                    alt={branding.cleanName}
+                                    className="w-6 h-6 object-contain"
+                                    onError={(e) => {
+                                      (e.currentTarget as HTMLElement).style.display = 'none'
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            {/* Addressing & CC Bar */}
+                            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between text-[11px] gap-2">
+                              <div>
+                                <span className="text-slate-400 font-medium">To: </span>
+                                <span className="font-mono text-slate-700 dark:text-slate-300 font-semibold">{approvalModalCandidate.candidateEmail || approvalModalCandidate.email}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-mono text-[10px]">
+                                <span className="font-bold text-slate-400">CC:</span>
+                                <span className="bg-sky-50 dark:bg-sky-950/60 text-[#0b99ff] px-1.5 py-0.5 rounded border border-sky-100 dark:border-sky-900">scholarlyopen@gmail.com</span>
+                                <span>,</span>
+                                <span className="bg-sky-50 dark:bg-sky-950/60 text-[#0b99ff] px-1.5 py-0.5 rounded border border-sky-100 dark:border-sky-900">{journalEmail}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="font-bold text-sm text-slate-900 dark:text-white">
-                            {approvalEmailSubject}
-                          </div>
+                        )
+                      })()}
+
+                      {/* Email Body */}
+                      <div className="p-5 space-y-4">
+                        <div className="text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed font-sans">
+                          {approvalEmailBody}
                         </div>
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          To: {approvalModalCandidate.candidateEmail || approvalModalCandidate.email}
-                        </span>
+
+                        {/* Call to Action Button */}
+                        <div className="pt-2">
+                          <a
+                            href="/editorial360"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0b99ff] text-white text-xs font-bold rounded-lg shadow-xs hover:bg-[#0077cc] transition-colors"
+                          >
+                            <span>Access editorial360 Portal</span>
+                          </a>
+                        </div>
                       </div>
-                      <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed space-y-2">
-                        {approvalEmailBody}
-                      </div>
-                      <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                        <span className="text-[11px] text-slate-400">
-                          Primary Action: Access editorial360 Portal (https://www.scholarlyopen.org/editorial360)
-                        </span>
-                        <span className="text-[11px] font-semibold text-emerald-600">
-                          Branded Scholarly Open Template
-                        </span>
+
+                      {/* Corporate & Compliance Footer (CFPs & EBMs standard) */}
+                      <div className="p-4 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 text-center space-y-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+                        <p className="font-semibold text-slate-700 dark:text-slate-300">
+                          Scholarly Open Editorial Office • International Open Access Publishing
+                        </p>
+                        <p className="text-[9px] text-slate-500">
+                          Rigorous Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards<br />
+                          &copy; 2026 Scholarly Open • Open Access CC BY 4.0 • editorial360 Platform
+                        </p>
+                        <div className="pt-1 flex items-center justify-center gap-2 text-[10px]">
+                          <span className="text-[#0b99ff]">Access editorial360 Portal</span>
+                          <span>•</span>
+                          <span>Ethics &amp; Malpractice Policies</span>
+                        </div>
+                        <div className="pt-2">
+                          <span className="inline-block px-3 py-1 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-semibold">
+                            ✕ Opt-Out / Do Not Contact
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}

@@ -5954,7 +5954,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <span>Permanent Credentials Saved Successfully!</span>
                 </div>
                 <p className="text-xs leading-relaxed">
-                  Your permanent password has been linked to <strong>{permanentEmail}</strong>. You can now log in directly from the Editorial360 login page using this email and password anytime.
+                  Your permanent password has been linked to <strong>{permanentEmail}</strong>. You can now log in directly from the editorial360 login page using this email and password anytime.
                 </p>
                 <div className="pt-2">
                   <Button

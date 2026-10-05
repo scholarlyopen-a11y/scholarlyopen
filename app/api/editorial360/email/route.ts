@@ -180,6 +180,9 @@ export async function POST(req: Request) {
     const normalizedTo = body.to.trim().toLowerCase()
     const defaultCc = "scholarlyopen@gmail.com"
     const ccRecipient = body.cc ? body.cc.trim() : (normalizedTo !== defaultCc ? defaultCc : undefined)
+    const ccList = ccRecipient
+      ? ccRecipient.split(",").map((c: string) => c.trim()).filter((c: string) => Boolean(c) && c.toLowerCase() !== normalizedTo)
+      : []
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
       const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"
@@ -204,7 +207,7 @@ export async function POST(req: Request) {
         replyTo: replyToEmail,         // Replies go to journal inbox
         envelope: {
           from: smtpEnvelopeSender,    // Must match SMTP_USER for Namecheap auth
-          to: [body.to.trim(), ...(ccRecipient ? [ccRecipient] : [])]
+          to: [body.to.trim(), ...ccList]
         },
         subject: finalSubject,
         text: plainTextWithOptOut,

@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       
       <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 24px 0;">
         Hello ${name || "Colleague"},<br><br>
-        To complete your registration on the <strong>Scholarly Open Editorial360™</strong> platform, please enter the single-use 6-digit verification code below:
+        To complete your registration on the <strong>Scholarly Open editorial360™</strong> platform, please enter the single-use 6-digit verification code below:
       </p>
 
       <!-- Code Box -->
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
           to: normEmail,
           subject: `Your Scholarly Open Verification Code: ${generatedCode}`,
           html: htmlBody,
-          text: `Your Scholarly Open Editorial360 verification code is: ${generatedCode}. It will expire in 10 minutes.`
+          text: `Your Scholarly Open editorial360 verification code is: ${generatedCode}. It will expire in 10 minutes.`
         })
       } catch (mailError: any) {
         console.warn("Could not dispatch SMTP email, but OTP is recorded:", mailError?.message)
