@@ -196,6 +196,8 @@ export async function POST(req: Request) {
         }
       })
 
+      const unsubscribeUrl = `${baseUrl}/editorial360?action=unsubscribe&email=${encodeURIComponent(body.to.trim())}&journal=${encodeURIComponent(journal)}`
+
       const mailOptions: nodemailer.SendMailOptions = {
         from: formattedFrom,          // Journal display email shown to recipient
         to: body.to.trim(),
@@ -206,7 +208,12 @@ export async function POST(req: Request) {
         },
         subject: finalSubject,
         text: plainTextWithOptOut,
-        html: finalHtml
+        html: finalHtml,
+        headers: {
+          "List-Unsubscribe": `<${unsubscribeUrl}>, <mailto:${replyToEmail}?subject=Unsubscribe>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          "X-Entity-Ref-ID": `SO-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
+        }
       }
 
       if (ccRecipient) {
