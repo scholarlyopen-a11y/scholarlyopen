@@ -182,28 +182,6 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                 </div>
               )}
 
-              {editor.editorialRoles && editor.editorialRoles.length > 0 && (
-                <div className="border-t border-border pt-3">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Editorial & Advisory Appointments</h4>
-                  <ul className="text-xs text-foreground/80 space-y-1 list-disc list-inside">
-                    {editor.editorialRoles.map((role, idx) => (
-                      <li key={idx} className="leading-snug">{role}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {editor.honors && editor.honors.length > 0 && (
-                <div className="border-t border-border pt-3">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Honors, Academies & Accolades</h4>
-                  <ul className="text-xs text-foreground/80 space-y-1 list-disc list-inside">
-                    {editor.honors.map((honor, idx) => (
-                      <li key={idx} className="leading-snug">{honor}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
               <div className="border-t border-border pt-4 flex flex-col gap-2">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact & Academic Profiles</h4>
                 <div className="flex flex-wrap gap-x-6 gap-y-2 mt-1">
