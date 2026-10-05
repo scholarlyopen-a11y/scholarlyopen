@@ -682,7 +682,25 @@ export function JournalManagerWorkspace({
       : (candidate.role || "Editorial Board Member & Handling Editor")
     const targetEmail = (candidate.candidateEmail || candidate.email || "").trim()
 
-    const editorSlug = (candidate.slug || name.replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")).toLowerCase()
+    // Resolve canonical editor slug from editors database or cleanly slugify name
+    const cleanLookupName = (name || "").toLowerCase()
+      .replace(/^(prof\.|dr\.|associate prof\.|assoc\.|mr\.|ms\.)\s*/i, "")
+      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+      .trim()
+
+    const matchingEditor = editors.find(e => 
+      (e.email && targetEmail && e.email.toLowerCase() === targetEmail.toLowerCase()) ||
+      (cleanLookupName && (
+        e.slug.toLowerCase().includes(cleanLookupName.replace(/[^a-z0-9]+/g, "-")) ||
+        e.name.toLowerCase().includes(cleanLookupName.split(" ")[0])
+      ))
+    )
+
+    const editorSlug = candidate.slug 
+      || matchingEditor?.slug 
+      || cleanLookupName
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
     const profileUrl = `https://www.scholarlyopen.org/editors/${editorSlug}`
     const journalEmail = getJournalReplyTo(journalName)
 

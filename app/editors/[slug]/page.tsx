@@ -19,15 +19,65 @@ interface EditorPageProps {
   }>
 }
 
+function findEditorBySlug(rawSlug: string) {
+  if (!rawSlug) return undefined
+  const slug = decodeURIComponent(rawSlug).toLowerCase().trim()
+  
+  // 1. Direct slug match
+  let found = editors.find((e) => e.slug.toLowerCase() === slug)
+  if (found) return found
+
+  // 2. Strip post-nominal credentials from slug (e.g. francis-verpoort-ph-d -> francis-verpoort, or -phd, -md, -m-d, -dsc)
+  const normalizedSlug = slug
+    .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d)$/i, "")
+    .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d)-/i, "-")
+  found = editors.find((e) => e.slug.toLowerCase() === normalizedSlug)
+  if (found) return found
+
+  // 3. Match against hyphenated name with and without credentials
+  found = editors.find((e) => {
+    const rawNameSlug = e.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+    const cleanNameSlug = e.name.toLowerCase()
+      .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
+      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+    return rawNameSlug === slug || cleanNameSlug === slug || cleanNameSlug === normalizedSlug
+  })
+  if (found) return found
+
+  // 4. Substring / fallback match (e.g., "verpoort" in slug)
+  if (slug.length >= 4) {
+    found = editors.find(e => e.slug.includes(slug) || slug.includes(e.slug))
+    if (found) return found
+  }
+
+  return undefined
+}
+
 export async function generateStaticParams() {
-  return editors.map((editor) => ({
-    slug: editor.slug,
-  }))
+  const allSlugs = new Set<string>()
+  editors.forEach((editor) => {
+    allSlugs.add(editor.slug)
+    const rawNameSlug = editor.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+    if (rawNameSlug) allSlugs.add(rawNameSlug)
+    const cleanNameSlug = editor.name.toLowerCase()
+      .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
+      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+    if (cleanNameSlug) allSlugs.add(cleanNameSlug)
+    if (editor.slug === "francis-verpoort") {
+      allSlugs.add("francis-verpoort-ph-d")
+      allSlugs.add("francis-verpoort-phd")
+    }
+  })
+  return Array.from(allSlugs).map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: EditorPageProps) {
   const { slug } = await params
-  const editor = editors.find((e) => e.slug === slug)
+  const editor = findEditorBySlug(slug)
   if (!editor) return {}
 
   const titleText = `${editor.name} | ${editor.role} | Scholarly Open`
@@ -61,7 +111,7 @@ export async function generateMetadata({ params }: EditorPageProps) {
 
 export default async function EditorProfilePage({ params }: EditorPageProps) {
   const { slug } = await params
-  const editor = editors.find((e) => e.slug === slug)
+  const editor = findEditorBySlug(slug)
   
   if (!editor) {
     notFound()

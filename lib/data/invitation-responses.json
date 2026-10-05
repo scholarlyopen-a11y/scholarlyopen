@@ -2,6 +2,7 @@
   "responses": [
     {
       "id": "RESP-VERPOORT",
+      "slug": "francis-verpoort",
       "type": "eic",
       "candidateName": "Prof. Francis Verpoort",
       "candidateEmail": "francis@whut.edu.cn",
@@ -20,6 +21,7 @@
     },
     {
       "id": "RESP-CACCIOLA",
+      "slug": "francesco-cacciola",
       "type": "ae",
       "candidateName": "Prof. Francesco Cacciola",
       "candidateEmail": "cacciolaf@unime.it",

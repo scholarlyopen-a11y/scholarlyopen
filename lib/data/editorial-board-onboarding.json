@@ -2,6 +2,7 @@
   "onboardedEditors": [
     {
       "id": "EBM-VERPOORT",
+      "slug": "francis-verpoort",
       "name": "Francis Verpoort, Ph.D.",
       "email": "francis@whut.edu.cn",
       "role": "Editor-in-Chief",
@@ -33,6 +34,7 @@
     },
     {
       "id": "EBM-CACCIOLA",
+      "slug": "francesco-cacciola",
       "name": "Francesco Cacciola, Ph.D.",
       "email": "cacciolaf@unime.it",
       "role": "Associate Editor & Handling Editor",
