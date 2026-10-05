@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Unlock, Leaf, Heart, Settings, Stethoscope, Cpu, Sprout, UsersRound, HeartPulse, Atom } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,33 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function HomePage() {
   const { t } = useLanguage()
+  const [editorCount, setEditorCount] = useState<number | string>("6")
+
+  useEffect(() => {
+    let isMounted = true
+    async function syncLiveEditorCount() {
+      try {
+        const res = await fetch(`/api/editorial360/editors?t=${Date.now()}`)
+        if (!res.ok) return
+        const data = await res.json()
+        if (!isMounted || !data.success || !Array.isArray(data.editors)) return
+
+        const approved = data.editors.filter((e: any) => e.jmApproved === true)
+        const baseFounding = 5
+        const onboardedApproved = approved.filter((e: any) => 
+          !["Mohamed R. Eletmany", "Weihua Gong", "Sam Lee", "Justice Kofi Boakye-Appiah", "Prashant Kumar"].some(b => (e.name || "").toLowerCase().includes(b.toLowerCase()))
+        )
+        const totalCount = baseFounding + onboardedApproved.length
+        if (totalCount >= 6) {
+          setEditorCount(totalCount)
+        }
+      } catch (e) {
+        // Fallback remains 6
+      }
+    }
+    syncLiveEditorCount()
+    return () => { isMounted = false }
+  }, [])
 
   const features = [
     {
@@ -150,7 +178,7 @@ export default function HomePage() {
   const stats = [
     { value: "100%", label: t("stats.openAccess") },
     { value: "13", label: t("stats.journals") },
-    { value: "5", label: t("stats.editors") },
+    { value: String(editorCount), label: t("stats.editors") },
     { value: "Global", label: t("stats.reach") },
     { value: "COPE", label: t("stats.guidelines") },
   ]

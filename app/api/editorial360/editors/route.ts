@@ -112,7 +112,11 @@ export async function GET(req: Request) {
       editors = editors.filter(e => e.email.toLowerCase() === email.toLowerCase())
     }
     if (journal) {
-      editors = editors.filter(e => e.journal.toLowerCase().includes(journal.toLowerCase()))
+      const jLower = journal.toLowerCase()
+      editors = editors.filter(e => 
+        (e.journal && e.journal.toLowerCase().includes(jLower)) ||
+        (e.journalSlug && e.journalSlug.toLowerCase() === jLower)
+      )
     }
 
     return NextResponse.json({ success: true, editors, total: editors.length })
