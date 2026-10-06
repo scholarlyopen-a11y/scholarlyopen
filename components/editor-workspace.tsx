@@ -439,7 +439,7 @@ export function EditorWorkspace({
     if (Array.isArray(initialManuscripts) && initialManuscripts.length > 0) {
       return initialManuscripts
     }
-    return [DEFAULT_MEDICINE_MANUSCRIPT]
+    return []
   })
 
   // Synchronize whenever initialManuscripts updates from parent or cloud
@@ -505,7 +505,7 @@ export function EditorWorkspace({
 
   // Selected paper for Reviewer Assignment
   const [selectedPaperForReviewers, setSelectedPaperForReviewers] = useState<JmManuscript | null>(null)
-  const [selectedReviewerNames, setSelectedReviewerNames] = useState<string[]>(["Dr. Marcus Vance"])
+  const [selectedReviewerNames, setSelectedReviewerNames] = useState<string[]>([])
   const [reviewerSourceTab, setReviewerSourceTab] = useState<"matched" | "suggested" | "external">("matched")
   const [customRevName, setCustomRevName] = useState("")
   const [customRevEmail, setCustomRevEmail] = useState("")
@@ -707,10 +707,13 @@ export function EditorWorkspace({
   const activeManuscripts = useMemo(() => {
     const sourceList = (manuscripts && manuscripts.length > 0)
       ? manuscripts
-      : ((initialManuscripts && initialManuscripts.length > 0) ? initialManuscripts : [DEFAULT_MEDICINE_MANUSCRIPT])
+      : ((initialManuscripts && initialManuscripts.length > 0) ? initialManuscripts : [])
 
     let list = isChiefEditor
-      ? sourceList
+      ? sourceList.filter(m => {
+          if (!user?.journal || user.journal === "Scholarly Open") return true
+          return m.journal?.toLowerCase().includes(user.journal.toLowerCase()) || user.journal.toLowerCase().includes(m.journal?.toLowerCase())
+        })
       : sourceList.filter(m => {
           if (!user?.name && !user?.email) return false
           
@@ -725,12 +728,12 @@ export function EditorWorkspace({
           return matchesName || matchesEmail
         })
 
-    // Absolute fallback guarantee: if Dr. Weihua Gong is on desk, inject SOMED-26-RW01 if missing
+    // Absolute fallback guarantee: only for Dr. Weihua Gong, inject SOMED-26-RW01 if missing
     if (isGongUser && !list.some(m => m.id === "SOMED-26-RW01")) {
       list = [DEFAULT_MEDICINE_MANUSCRIPT, ...list]
     }
     return list
-  }, [isChiefEditor, manuscripts, initialManuscripts, user?.name, user?.email, isGongUser])
+  }, [isChiefEditor, manuscripts, initialManuscripts, user?.name, user?.email, user?.journal, isGongUser])
 
   // Filter counts (Synchronized 1:1 with Journal Manager Workspace)
   const triageCount = activeManuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft").length
@@ -738,8 +741,8 @@ export function EditorWorkspace({
   const revisionCount = activeManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation").length
   const decisionCount = activeManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected").length
 
-  const readyForVerdictCount = activeManuscripts.filter(m => m.status === "Under Review" && (m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
-  const inProgressReviewCount = activeManuscripts.filter(m => m.status === "Under Review" && !(m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))).length
+  const readyForVerdictCount = activeManuscripts.filter(m => m.status === "Under Review" && (m.id === "SOEAS-26-RS102" || reviews.filter(r => r.manuscriptId === m.id).length >= 2)).length
+  const inProgressReviewCount = activeManuscripts.filter(m => m.status === "Under Review" && !(m.id === "SOEAS-26-RS102" || reviews.filter(r => r.manuscriptId === m.id).length >= 2)).length
   const escalatedPaperIds = (integrityAlerts || []).filter(a => a.status === "Escalated").map(a => a.paperId)
   const integrityCount = activeManuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)).length
   const escalatedCount = integrityCount
@@ -761,9 +764,9 @@ export function EditorWorkspace({
     } else if (selectedStageFilter === "review") {
       matchesStage = m.status === "Under Review"
       if (matchesStage && reviewSubFilter === "ready") {
-        matchesStage = m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))
+        matchesStage = m.id === "SOEAS-26-RS102" || reviews.filter(r => r.manuscriptId === m.id).length >= 2
       } else if (matchesStage && reviewSubFilter === "in_progress") {
-        matchesStage = !(m.id === "SOEAS-26-RS102" || (m.reviewers && m.reviewers.length > 1 && m.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance")))
+        matchesStage = !(m.id === "SOEAS-26-RS102" || reviews.filter(r => r.manuscriptId === m.id).length >= 2)
       }
     } else if (selectedStageFilter === "revision") {
       matchesStage = m.status === "Revision Required" || m.status === "Revision Under Evaluation"
@@ -813,10 +816,6 @@ export function EditorWorkspace({
     })
     if (paper.reviewers && Array.isArray(paper.reviewers)) {
       paper.reviewers.forEach(name => reviewerNames.add(name))
-    }
-    if (reviewerNames.size === 0) {
-      reviewerNames.add("Dr. Evelyn Vane")
-      reviewerNames.add("Dr. Marcus Vance")
     }
 
     const emailMap: Record<string, string> = {
@@ -1040,7 +1039,7 @@ export function EditorWorkspace({
 
   const handleOpenReviewersModal = (paper: JmManuscript) => {
     setSelectedPaperForReviewers(paper)
-    const defaultRevs = paper.reviewers && paper.reviewers.length > 0 ? paper.reviewers : ["Dr. Marcus Vance", "Prof. Elena Rostova"]
+    const defaultRevs = paper.reviewers && paper.reviewers.length > 0 ? paper.reviewers : []
     setSelectedReviewerNames(defaultRevs)
     const initialSubject = `Review Invitation: ${paper.id} - ${paper.title}`
     const initialBody = `Dear {{recipientName}},
@@ -1776,7 +1775,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               const isRevision = paper.status === "Revision Required"
               const isAccepted = paper.status === "Accepted"
               const isRejected = paper.status === "Rejected"
-              const isReviewsComplete = paper.id === "SOEAS-26-RS102" || (paper.reviewers && paper.reviewers.length > 1 && paper.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))
+              const isReviewsComplete = paper.id === "SOEAS-26-RS102" || reviews.filter(r => r.manuscriptId === paper.id).length >= 2
 
               return (
                 <Card key={paper.id} className="p-4 sm:p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl space-y-3.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
@@ -1813,14 +1812,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">{paper.title}</h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Author: <strong className="text-slate-700 dark:text-slate-300">{paper.authorName || "Dr. Marcus Vance"}</strong> · {paper.authorAffiliation || "Charité – Universitätsmedizin Berlin"}
+                      Author: <strong className="text-slate-700 dark:text-slate-300">{paper.authorName || "Author"}</strong>{paper.authorAffiliation ? ` · ${paper.authorAffiliation}` : ""}
                     </p>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
                     <div className="space-y-1">
                       <div className="text-slate-600 dark:text-slate-400">
-                        Assigned Reviewers: <span className="font-semibold text-slate-800 dark:text-slate-200">{paper.reviewers && paper.reviewers.length > 0 ? paper.reviewers.join(", ") : (isTriage ? "None assigned yet" : "Dr. Marcus Vance, Prof. Elena Rostova")}</span>
+                        Assigned Reviewers: <span className="font-semibold text-slate-800 dark:text-slate-200">{paper.reviewers && paper.reviewers.length > 0 ? paper.reviewers.join(", ") : "None assigned yet"}</span>
                       </div>
                       {(() => {
                         const matchingEscalation = (integrityAlerts || []).find(a => a.paperId === paper.id && a.status === "Escalated")
@@ -1991,14 +1990,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </p>
             </div>
             <span className="text-xs font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-3 py-1.5 rounded-xl border border-[#0b99ff]/20 shrink-0">
-              {manuscripts.filter(m => m.status === "Under Review").length} {isDe ? "Aktive Begutachtungen" : "Active Manuscripts Under Review"}
+              {activeManuscripts.filter(m => m.status === "Under Review").length} {isDe ? "Aktive Begutachtungen" : "Active Manuscripts Under Review"}
             </span>
           </div>
 
           <div className="p-4 sm:p-5 space-y-4">
-            {manuscripts.filter(m => m.status === "Under Review").map((m) => {
-              const isAllReviewsIn = m.id === "SOEAS-26-RS102"
-              const isSingleReviewer = m.id === "SOSSH-26-SRW107"
+            {activeManuscripts.filter(m => m.status === "Under Review").length === 0 ? (
+              <div className="p-8 text-center bg-slate-50 dark:bg-[#131418] rounded-xl border border-slate-200/80 dark:border-[#272832] text-slate-500 text-xs">
+                {isDe ? "Keine aktiven Begutachtungen auf Ihrem Schreibtisch." : "No active manuscripts currently under review on your desk."}
+              </div>
+            ) : activeManuscripts.filter(m => m.status === "Under Review").map((m) => {
+              const matchingReviews = (reviews || []).filter(r => r.paperId === m.id || (r.paperTitle && m.title && r.paperTitle.toLowerCase() === m.title.toLowerCase()))
+              const assignedReviewers = m.reviewers && m.reviewers.length > 0 ? m.reviewers : []
+              const hasAllReviews = assignedReviewers.length >= 2 && assignedReviewers.every(revName => matchingReviews.some(r => r.reviewerName?.toLowerCase() === revName.toLowerCase()))
 
               return (
                 <div key={m.id} className="p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#131418] space-y-4 shadow-2xs">
@@ -2019,174 +2023,118 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {isAllReviewsIn ? (
+                      {hasAllReviews ? (
                         <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-800 flex items-center gap-1.5 shadow-2xs">
                           <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
-                          2/2 Scorecards Complete
+                          Scorecards Complete ({matchingReviews.length}/{assignedReviewers.length})
                         </span>
                       ) : (
                         <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 px-2.5 py-1 rounded-full border border-sky-200 dark:border-sky-800">
-                          Cycle Target: 14 Days
+                          {matchingReviews.length} of {Math.max(assignedReviewers.length, 2)} Reviews In
                         </span>
                       )}
                     </div>
                   </div>
 
                   {/* Dynamic Reviewer Cards Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    
-                    {/* Reviewer 1 */}
-                    <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="space-y-0.5">
-                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
-                          <span>Reviewer 1: Dr. Marcus Vance</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">Verified</span>
+                  {(() => {
+                    if (assignedReviewers.length === 0 && matchingReviews.length === 0) {
+                      return (
+                        <div className="p-4 rounded-xl border border-dashed border-slate-200 dark:border-[#272832] text-center text-slate-500 text-xs">
+                          {isDe ? "Noch keine Fachgutachter für dieses Manuskript zugewiesen." : "No peer reviewers assigned yet for this manuscript. Click 'Assign Reviewers' below to invite expert referees."}
                         </div>
-                        <div className="text-[11px] text-emerald-600 font-semibold">
-                          Scorecard Complete · Recommendation: Minor Revision
-                        </div>
-                        <div className="text-[10px] text-slate-400">Evaluated on {m.date} · 5/5 Criteria Completed</div>
-                      </div>
+                      )
+                    }
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        {endorsedReviewerScores[`${m.id}-rev1`] ? (
-                          <div className="flex items-center gap-1.5 bg-emerald-100/80 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
-                            <Award className="h-3.5 w-3.5 text-emerald-600" />
-                            <div className="text-right leading-none">
-                              <span className="text-[11px] font-extrabold text-emerald-800 dark:text-emerald-200 block">
-                                Rigor Score: {endorsedReviewerScores[`${m.id}-rev1`].score}%
-                              </span>
-                              <span className="text-[9px] text-emerald-600 font-medium">
-                                {endorsedReviewerScores[`${m.id}-rev1`].tier}
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={() => setScoringReviewerData({
-                              paperId: m.id,
-                              paperTitle: m.title,
-                              reviewerKey: `${m.id}-rev1`,
-                              reviewerName: "Dr. Marcus Vance",
-                              recommendation: "Minor Revision",
-                              submissionDate: m.date,
-                              rigorScore: 92,
-                              methodologyChecked: true,
-                              constructiveChecked: true,
-                              citationsChecked: true,
-                              editorNotes: "Constructive feedback on baseline calibration parameters."
-                            })}
-                            className="h-7 px-2.5 text-xs bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold rounded-lg shadow-xs cursor-pointer"
-                          >
-                            <Award className="h-3 w-3 mr-1" />
-                            Evaluate Rigor Score
-                          </Button>
-                        )}
-                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
-                          100% ✓
-                        </span>
-                      </div>
-                    </div>
+                    const reviewerEntries: { name: string; review?: any; index: number }[] = assignedReviewers.map((revName, idx) => {
+                      const matchRev = matchingReviews.find(r => r.reviewerName?.toLowerCase() === revName.toLowerCase())
+                      return { name: revName, review: matchRev, index: idx + 1 }
+                    })
 
-                    {/* Reviewer 2 (or completed for SOEAS-26-RS102) */}
-                    {isAllReviewsIn ? (
-                      <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="space-y-0.5">
-                          <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
-                            <span>Reviewer 2: Dr. Evelyn Vane</span>
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">Verified</span>
-                          </div>
-                          <div className="text-[11px] text-emerald-600 font-semibold">
-                            Scorecard Complete · Recommendation: Accept
-                          </div>
-                          <div className="text-[10px] text-slate-400">Evaluated on 2026-06-08 · 5/5 Criteria Completed</div>
-                        </div>
+                    matchingReviews.forEach((rev) => {
+                      if (!reviewerEntries.some(e => e.name.toLowerCase() === (rev.reviewerName || "").toLowerCase())) {
+                        reviewerEntries.push({ name: rev.reviewerName || `Reviewer ${reviewerEntries.length + 1}`, review: rev, index: reviewerEntries.length + 1 })
+                      }
+                    })
 
-                        <div className="flex items-center gap-2 shrink-0">
-                          {endorsedReviewerScores[`${m.id}-rev2`] ? (
-                            <div className="flex items-center gap-1.5 bg-emerald-100/80 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
-                              <Award className="h-3.5 w-3.5 text-emerald-600" />
-                              <div className="text-right leading-none">
-                                <span className="text-[11px] font-extrabold text-emerald-800 dark:text-emerald-200 block">
-                                  Rigor Score: {endorsedReviewerScores[`${m.id}-rev2`].score}%
-                                </span>
-                                <span className="text-[9px] text-emerald-600 font-medium">
-                                  {endorsedReviewerScores[`${m.id}-rev2`].tier}
-                                </span>
+                    return (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        {reviewerEntries.map((entry) => {
+                          const hasSubmitted = Boolean(entry.review)
+                          return (
+                            <div 
+                              key={`${m.id}-rev-${entry.name}`}
+                              className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                                hasSubmitted 
+                                  ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10"
+                                  : "border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/10"
+                              }`}
+                            >
+                              <div className="space-y-0.5">
+                                <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
+                                  <span>Reviewer {entry.index}: {entry.name}</span>
+                                  {hasSubmitted && (
+                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">Verified</span>
+                                  )}
+                                </div>
+                                {hasSubmitted ? (
+                                  <>
+                                    <div className="text-[11px] text-emerald-600 font-semibold">
+                                      Scorecard Complete · Recommendation: {entry.review?.recommendation || "Submitted"}
+                                    </div>
+                                    <div className="text-[10px] text-slate-400">
+                                      {entry.review?.submittedAt ? `Evaluated on ${new Date(entry.review.submittedAt).toLocaleDateString()}` : "Evaluation submitted"}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="text-[11px] text-amber-600 font-semibold">
+                                      Evaluation in Progress
+                                    </div>
+                                    <div className="text-[10px] text-slate-400">Invitation Accepted</div>
+                                  </>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                {hasSubmitted ? (
+                                  <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
+                                    100% ✓
+                                  </span>
+                                ) : (
+                                  nudgedReviewers.includes(`${m.id}-${entry.name}`) ? (
+                                    <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-3 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
+                                      <Check className="h-3.5 w-3.5" /> Nudged
+                                    </span>
+                                  ) : (
+                                    <Button
+                                      onClick={() => {
+                                        triggerConfirm({
+                                          title: "Send Reviewer Deadline Reminder?",
+                                          message: `Dispatch an official peer review reminder email to ${entry.name} for manuscript ${m.id}?`,
+                                          confirmButtonLabel: "Yes, Send Reminder",
+                                          confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
+                                          onConfirm: () => {
+                                            setNudgedReviewers(prev => [...prev, `${m.id}-${entry.name}`])
+                                            triggerToast(`✓ Deadline reminder email dispatched to ${entry.name}.`)
+                                          }
+                                        })
+                                      }}
+                                      variant="outline"
+                                      className="text-xs h-8 px-3 border-amber-300 text-amber-700 dark:text-amber-300 hover:bg-amber-100 cursor-pointer shadow-2xs font-semibold"
+                                    >
+                                      <Bell className="h-3.5 w-3.5 mr-1 text-amber-600" />
+                                      {isDe ? "Erinnern" : "Nudge"}
+                                    </Button>
+                                  )
+                                )}
                               </div>
                             </div>
-                          ) : (
-                            <Button
-                              size="sm"
-                              onClick={() => setScoringReviewerData({
-                                paperId: m.id,
-                                paperTitle: m.title,
-                                reviewerKey: `${m.id}-rev2`,
-                                reviewerName: "Dr. Evelyn Vane",
-                                recommendation: "Accept",
-                                submissionDate: "2026-06-08",
-                                rigorScore: 96,
-                                methodologyChecked: true,
-                                constructiveChecked: true,
-                                citationsChecked: true,
-                                editorNotes: "Comprehensive literature contextualization and thorough validation."
-                              })}
-                              className="h-7 px-2.5 text-xs bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold rounded-lg shadow-xs cursor-pointer"
-                            >
-                              <Award className="h-3 w-3 mr-1" />
-                              Evaluate Rigor Score
-                            </Button>
-                          )}
-                          <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800">
-                            100% ✓
-                          </span>
-                        </div>
+                          )
+                        })}
                       </div>
-                    ) : (
-                      <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/10 flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <div className="font-bold text-slate-900 dark:text-white">
-                            Reviewer 2: {isSingleReviewer ? "Prof. Hiroshi Tanaka" : "Prof. Elena Rostova"}
-                          </div>
-                          <div className="text-[11px] text-amber-600 font-semibold">
-                            Evaluation in Progress · Due in 4 days
-                          </div>
-                          <div className="text-[10px] text-slate-400">Double-Blind Invitation Accepted</div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {nudgedReviewers.includes(`${m.id}-rev2`) ? (
-                            <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-3 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
-                              <Check className="h-3.5 w-3.5" /> Nudged (Cc: Desk)
-                            </span>
-                          ) : (
-                            <Button
-                              onClick={() => {
-                                const revName = isSingleReviewer ? "Prof. Hiroshi Tanaka" : "Prof. Elena Rostova"
-                                triggerConfirm({
-                                  title: "Send Reviewer Deadline Reminder?",
-                                  message: `Are you sure you want to dispatch an official double-blind peer review reminder email to ${revName} for manuscript ${m.id}? A formal notification will also be logged at the Journal Manager Desk.`,
-                                  confirmButtonLabel: "Yes, Send Reminder",
-                                  confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-                                  onConfirm: () => {
-                                    setNudgedReviewers(prev => [...prev, `${m.id}-rev2`])
-                                    triggerToast(`✓ Official deadline reminder email dispatched to ${revName}.`)
-                                  }
-                                })
-                              }}
-                              variant="outline"
-                              className="text-xs h-8 px-3 border-amber-300 text-amber-700 dark:text-amber-300 hover:bg-amber-100 cursor-pointer shadow-2xs font-semibold"
-                            >
-                              <Bell className="h-3.5 w-3.5 mr-1 text-amber-600" />
-                              {isDe ? "Erinnern" : "Nudge"}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                  </div>
+                    )
+                  })()}
 
                   {/* Reviewer Decline Alert Banner */}
                   {editorReviewerHistory[m.id.toLowerCase()]?.some(h => h.status === "Declined") && (
@@ -2356,7 +2304,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Status: {m.status}</span>
                   </div>
                   <h4 className="text-sm font-bold text-slate-900 dark:text-white">{m.title}</h4>
-                  <div className="text-[11px] text-slate-500">Author: {m.authorName || "Dr. Marcus Vance"}</div>
+                  <div className="text-[11px] text-slate-500">Author: {m.authorName || m.author || "Author"}</div>
                 </div>
 
                 <div className="shrink-0">
@@ -2602,7 +2550,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           )}
                         </div>
                         <div className="text-[11px] text-slate-500">
-                          Author: {m.authorName || "Dr. Marcus Vance"} · {m.journal}
+                          Author: {m.authorName || m.author || "Author"} · {m.journal}
                         </div>
                       </div>
 
@@ -2779,7 +2727,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   (r.paperId && selectedPaperForReviewTracking?.id && r.paperId.toLowerCase() === selectedPaperForReviewTracking.id.toLowerCase()) ||
                   (r.paperTitle && selectedPaperForReviewTracking?.title && r.paperTitle.toLowerCase() === selectedPaperForReviewTracking.title.toLowerCase())
                 )
-                const assignedList = selectedPaperForReviewTracking?.reviewers || ["Dr. Marcus Vance", "Prof. Elena Rostova"]
+                const assignedList = selectedPaperForReviewTracking?.reviewers || []
 
                 return (
                   <div className="space-y-2">
@@ -3120,133 +3068,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         )
                       })
                     ) : (
-                      <>
-                        {/* Reviewer 1 (Fallback Demo) */}
-                        <div className={`p-3 rounded-xl border transition-all ${
-                          expandedReviewerScorecard === "rev1" 
-                            ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
-                            : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
-                        }`}>
-                          <div className="flex items-center justify-between font-bold flex-wrap gap-2">
-                            <span className="text-slate-900 dark:text-white">
-                              Reviewer 1 (Dr. Marcus Vance)
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setExpandedReviewerScorecard(expandedReviewerScorecard === "rev1" ? null : "rev1")}
-                              className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
-                            >
-                              {expandedReviewerScorecard === "rev1" ? "Hide Details ▲" : "View Details ▼"}
-                            </button>
-                          </div>
-
-                          {expandedReviewerScorecard === "rev1" && (
-                            <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.0 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Clarity</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                                </div>
-                              </div>
-
-                              <div className="space-y-1">
-                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Comments to Author:
-                                </span>
-                                <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                                  <p>1. Benchmarking against baseline datasets is sound and persuasive.</p>
-                                  <p>2. Expand dynamic range annotations on Figure 3 (Panels B & C) for contrast.</p>
-                                  <p>3. Clarify sample preparation conditions and variance controls in Section 3.2.</p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-1">
-                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Confidential Editor Notes:
-                                </span>
-                                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed">
-                                  &ldquo;Methodology is sound. Requested additions to Figure 3 and Section 3.2 are minor and should not require external re-review.&rdquo;
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Reviewer 2 (Fallback Demo) */}
-                        <div className={`p-3 rounded-xl border transition-all ${
-                          expandedReviewerScorecard === "rev2" 
-                            ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
-                            : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
-                        }`}>
-                          <div className="flex items-center justify-between font-bold flex-wrap gap-2">
-                            <span className="text-slate-900 dark:text-white">
-                              Reviewer 2 (Prof. Elena Rostova)
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setExpandedReviewerScorecard(expandedReviewerScorecard === "rev2" ? null : "rev2")}
-                              className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
-                            >
-                              {expandedReviewerScorecard === "rev2" ? "Hide Details ▲" : "View Details ▼"}
-                            </button>
-                          </div>
-
-                          {expandedReviewerScorecard === "rev2" && (
-                            <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.0 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">5.0 / 5.0</strong>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Clarity</span>
-                                  <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">4.5 / 5.0</strong>
-                                </div>
-                              </div>
-
-                              <div className="space-y-1">
-                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Comments to Author:
-                                </span>
-                                <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                                  <p>1. Significant clinical implications for pediatric cohorts with practical utility.</p>
-                                  <p>2. Explicitly report demographic cohort age ranges and standard deviations in Table 2.</p>
-                                  <p>3. Resolve typographic inconsistencies in the discussion section on page 8.</p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-1">
-                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Confidential Editor Notes:
-                                </span>
-                                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed">
-                                  &ldquo;Strong paper with high citation potential. No ethical or data issues observed. Recommend publication once Table 2 is expanded.&rdquo;
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </>
+                      <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-[#131418] rounded-xl border border-dashed border-slate-200 dark:border-[#272832]">
+                        {isDe ? "Noch keine Gutachten für dieses Manuskript eingereicht." : "No peer review reports submitted yet for this manuscript."}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -3810,25 +3634,27 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {/* TAB 3: ROUND 1 SCORECARDS REFERENCE */}
             {revisionTab === "reports" && (
               <div className="space-y-2">
-                <div className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] space-y-1">
-                  <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white">
-                    <span>Reviewer 1 (Dr. Marcus Vance)</span>
-                    <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.2 rounded border border-[#0b99ff]/20">Minor Revision</span>
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-400 text-[11px]">
-                    &ldquo;High scientific rigor. Recommend minor revisions to baseline calibration parameters in Figure 3 and Section 3.2.&rdquo;
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] space-y-1">
-                  <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white">
-                    <span>Reviewer 2 (Prof. Elena Rostova)</span>
-                    <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.2 rounded border border-[#0b99ff]/20">Minor Revision</span>
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-400 text-[11px]">
-                    &ldquo;Suggest adding demographic breakdown table to substantiate cohort claims and fixing minor typos on page 8.&rdquo;
-                  </p>
-                </div>
+                {(() => {
+                  const revs = (reviews || []).filter(r => r.paperId === selectedRevisionForEvaluation?.id)
+                  if (revs.length === 0) {
+                    return (
+                      <div className="p-4 text-center text-slate-500 text-xs bg-slate-50 dark:bg-[#131418] rounded-xl border border-dashed border-slate-200 dark:border-[#272832]">
+                        {isDe ? "Keine Berichte aus der ersten Runde vorhanden." : "No round 1 reports recorded for this manuscript."}
+                      </div>
+                    )
+                  }
+                  return revs.map((r, i) => (
+                    <div key={r.id || i} className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] space-y-1">
+                      <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white">
+                        <span>Reviewer {i + 1} ({r.reviewerName || "Peer Reviewer"})</span>
+                        <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.2 rounded border border-[#0b99ff]/20">{r.recommendation}</span>
+                      </div>
+                      <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+                        &ldquo;{r.commentsAuthor || r.summary || "Evaluation submitted."}&rdquo;
+                      </p>
+                    </div>
+                  ))
+                })()}
               </div>
             )}
           </div>
@@ -4609,7 +4435,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 {selectedPaperForDetail?.title}
               </h3>
               <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
-                <span>Author: <strong className="text-slate-800 dark:text-slate-200">{selectedPaperForDetail?.authorName || "Dr. Evelyn Vane"}</strong></span>
+                <span>Author: <strong className="text-slate-800 dark:text-slate-200">{selectedPaperForDetail?.authorName || selectedPaperForDetail?.author || "Author"}</strong></span>
                 {selectedPaperForDetail?.authorAffiliation && (
                   <>
                     <span>·</span>
@@ -4903,7 +4729,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         </div>
 
                         <div className="space-y-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line font-serif">
-                          {selectedPaperForDetail?.coverLetter || `Dear Editor-in-Chief,\n\nWe are pleased to submit our original research article titled "${selectedPaperForDetail?.title}" for publication consideration in ${selectedPaperForDetail?.journal}.\n\nThis work presents novel empirical insights and open clinical frameworks that directly align with your journal's scope. We confirm that this manuscript represents original work, has not been published previously, and is not currently under consideration by any other journal.\n\nAll authors have reviewed the final draft, agreed to its submission, and disclosed all relevant funding grants and institutional approvals.\n\nSincerely,\n${selectedPaperForDetail?.authorName || "Dr. Evelyn Vane"}\n${selectedPaperForDetail?.authorAffiliation || "Institute of Advanced Medical Sciences"}`}
+                          {selectedPaperForDetail?.coverLetter || `Dear Editor-in-Chief,\n\nWe are pleased to submit our original research article titled "${selectedPaperForDetail?.title}" for publication consideration in ${selectedPaperForDetail?.journal}.\n\nThis work presents novel empirical insights and open clinical frameworks that directly align with your journal's scope. We confirm that this manuscript represents original work, has not been published previously, and is not currently under consideration by any other journal.\n\nAll authors have reviewed the final draft, agreed to its submission, and disclosed all relevant funding grants and institutional approvals.\n\nSincerely,\n${selectedPaperForDetail?.authorName || selectedPaperForDetail?.author || "Author"}\n${selectedPaperForDetail?.authorAffiliation || ""}`}
                         </div>
                       </div>
                     </div>

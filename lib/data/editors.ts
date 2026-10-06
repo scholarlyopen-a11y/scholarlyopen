@@ -249,6 +249,30 @@ const baseEditors: EditorMember[] = [
     ]
   },
   {
+    slug: "francesco-cacciola",
+    name: "Francesco Cacciola",
+    role: "Associate Editor",
+    affiliation: "University of Messina",
+    specialization: "Advanced analytical chromatography, particularly LC and comprehensive LC×LC, coupled with mass spectrometry for the chemical characterization of complex natural products and food matrices.",
+    email: "editor.chem@scholarlyopen.org",
+    orcid: "0000-0003-1296-7633",
+    imageUrl: "/images/editors/francesco-cacciola.jpeg",
+    journalSlug: "chemistry",
+    biography: "Francesco Cacciola serves as an Associate Editor for Scholarly Open: Chemistry and is affiliated with the University of Messina, Italy.\n\nHis research activities focus on advanced analytical chromatography, particularly LC and comprehensive LC×LC, coupled with mass spectrometry for the chemical characterization of complex natural products and food matrices. Key research areas include food chemistry, phytochemistry, natural-product metabolomics, bioactive compounds, food quality, authenticity and safety, and the development of sustainable analytical methodologies.\n\nAdditional research interests include the in-vitro evaluation of antioxidant and antimicrobial activities and the integration of complementary chromatographic and mass-spectrometric platforms for comprehensive characterization of natural products and foods.",
+    expertise: [
+      "Advanced analytical chromatography (LC and LC×LC)",
+      "Mass spectrometry",
+      "Chemical characterization of complex natural products and food matrices",
+      "Food chemistry",
+      "Phytochemistry",
+      "Natural-product metabolomics",
+      "Bioactive compounds",
+      "Food quality, authenticity and safety",
+      "Sustainable analytical methodologies",
+      "Antioxidant and antimicrobial activities"
+    ]
+  },
+  {
     slug: "mohamed-eletmany",
     name: "Mohamed R. Eletmany, Ph.D.",
     role: "Associate Editor",
@@ -821,14 +845,6 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     affiliation: "Seeking qualified experts in this field.",
     specialization: "Editorial Board",
     journalSlug: "biology",
-  },
-  {
-    slug: "position-open-chemistry-ae-1",
-    name: "Position Open",
-    role: "Associate Editor",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
-    journalSlug: "chemistry",
   },
   {
     slug: "position-open-chemistry-ae-2",

@@ -211,7 +211,7 @@ const QUESTIONNAIRE_CRITERIA = [
 ]
 
 function getFormattedReviewerName(title?: string, name?: string): string {
-  const rawName = (name || "Marcus Vance").trim()
+  const rawName = (name || "Referee").trim()
   const rawTitle = (title || "").trim()
   if (!rawTitle) return rawName
   const titleRegex = /^(prof\.?\s*dr\.?|dr\.?|assoc\.?\s*prof\.?|assist\.?\s*prof\.?|md|phd)\s+/i
@@ -222,8 +222,8 @@ function getFormattedReviewerName(title?: string, name?: string): string {
 }
 
 function getReviewerInitials(name?: string): string {
-  const rawName = (name || "Marcus Vance").replace(/^(prof\.?\s*dr\.?|dr\.?|assoc\.?\s*prof\.?|assist\.?\s*prof\.?|md|phd)\s+/i, '').trim()
-  if (!rawName) return "MV"
+  const rawName = (name || "Referee").replace(/^(prof\.?\s*dr\.?|dr\.?|assoc\.?\s*prof\.?|assist\.?\s*prof\.?|md|phd)\s+/i, '').trim()
+  if (!rawName) return "RF"
   const parts = rawName.split(/\s+/).filter(Boolean)
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()

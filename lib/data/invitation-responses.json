@@ -18,6 +18,27 @@
       "jmApproved": true,
       "hasAcceptedTerms": true,
       "consentProfileUpload": true
+    },
+    {
+      "id": "RESP-CACCIOLA",
+      "slug": "francesco-cacciola",
+      "type": "ae",
+      "candidateName": "Prof. Francesco Cacciola, Ph.D.",
+      "candidateEmail": "cacciolaf@unime.it",
+      "journal": "Scholarly Open: Chemistry",
+      "decision": "yes",
+      "credentialId": "EBM-CACCIOLA",
+      "timestamp": "2026-10-05T10:13:00.000Z",
+      "notes": "Associate Editor appointment accepted via verified portal",
+      "affiliation": "Department of Chemical, Biological, Pharmaceutical and Environmental Sciences, University of Messina, Italy",
+      "department": "Department of Chemical, Biological, Pharmaceutical and Environmental Sciences",
+      "country": "Italy",
+      "photoUrl": "/images/editors/francesco-cacciola.jpeg",
+      "orcid": "0000-0003-1296-7633",
+      "status": "Live on Masthead",
+      "jmApproved": true,
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true
     }
   ]
 }

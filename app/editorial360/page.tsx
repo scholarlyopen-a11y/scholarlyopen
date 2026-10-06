@@ -3562,13 +3562,13 @@ export default function Editorial360Page() {
           if (currentEditorPhotoUrl) setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isCacciola) {
-          currentEditorName = "Prof. Francesco Cacciola"
-          currentEditorRank = "Associate Editor & Handling Editor"
+          currentEditorName = "Francesco Cacciola"
+          currentEditorRank = "Associate Editor"
           currentEditorJournal = "Scholarly Open: Chemistry"
           currentEditorInstitution = "University of Messina"
           currentEditorCountry = "Italy"
-          currentEditorOrcid = "0000-0002-1875-1033"
-          currentEditorPhotoUrl = matchedCloudUser?.photoUrl || "/images/editors/1781087227071.jpeg"
+          currentEditorOrcid = "0000-0003-1296-7633"
+          currentEditorPhotoUrl = matchedCloudUser?.photoUrl || "/images/editors/francesco-cacciola.jpeg"
 
           setEditorName(currentEditorName)
           setEditorRank(currentEditorRank)
@@ -3697,6 +3697,11 @@ export default function Editorial360Page() {
           setProfRank("Corresponding Author & Principal Investigator")
           setProfInstitution("Applied Clinical EBM Institute (ACEI), Honolulu, Hawaii / Grand Canyon University")
           setProfCountry("United States")
+        } else {
+          const authorUser = users.find(u => u.email?.toLowerCase() === cleanEmail.toLowerCase())
+          const cleanAuthorName = authorUser?.name || regName || cleanEmail.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, l => l.toUpperCase())
+          setProfFullName(cleanAuthorName)
+          if (authorUser?.affiliation) setProfInstitution(authorUser.affiliation)
         }
       }
 
@@ -7081,10 +7086,10 @@ export default function Editorial360Page() {
                           onClick={() => {
                             setIsUserMenuOpen(false)
                             if (role === "reviewer") {
-                              const activeName = reviewerProfile?.name || profFullName || regName || (email.includes("reviewer") ? "Dr. Marcus Vance" : "Dr. Marcus Vance")
-                              const activeInst = reviewerProfile?.institution || profInstitution || "Charité – Universitätsmedizin Berlin"
+                              const activeName = reviewerProfile?.name || profFullName || regName || (email === "reviewer@scholarlyopen.org" ? "Dr. Marcus Vance" : (email ? email.split('@')[0] : "Reviewer"))
+                              const activeInst = reviewerProfile?.institution || profInstitution || (email === "reviewer@scholarlyopen.org" ? "Charité – Universitätsmedizin Berlin" : "")
                               const activePhoto = reviewerProfile?.photoUrl || profPhotoUrl || ""
-                              const activeOrcid = reviewerProfile?.orcid || profOrcid || regOrcid || "0000-0004-7711-2093"
+                              const activeOrcid = reviewerProfile?.orcid || profOrcid || regOrcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : "")
                               setProfFullName(activeName)
                               setProfInstitution(activeInst)
                               setProfPhotoUrl(activePhoto)
@@ -7912,13 +7917,13 @@ export default function Editorial360Page() {
                   <ReviewerWorkspace
                     language={language}
                     user={{
-                      name: reviewerProfile?.name || (email.includes("reviewer") ? "Dr. Marcus Vance" : (regName || profFullName || "Academic Referee")),
-                      email: reviewerProfile?.email || email || regEmail || (email.includes("reviewer") ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
-                      orcid: reviewerProfile?.orcid || (email.includes("reviewer") ? "0000-0004-7711-2093" : (profOrcid || regOrcid || "")),
-                      institution: reviewerProfile?.institution || (email.includes("reviewer") ? "Charité – Universitätsmedizin Berlin" : (profInstitution || "Academic Institution")),
+                      name: reviewerProfile?.name || (email === "reviewer@scholarlyopen.org" ? "Dr. Marcus Vance" : (regName || profFullName || (email ? email.split('@')[0] : "Academic Referee"))),
+                      email: reviewerProfile?.email || email || regEmail || (email === "reviewer@scholarlyopen.org" ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
+                      orcid: reviewerProfile?.orcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : (profOrcid || regOrcid || "")),
+                      institution: reviewerProfile?.institution || (email === "reviewer@scholarlyopen.org" ? "Charité – Universitätsmedizin Berlin" : (profInstitution || "Academic Institution")),
                       photoUrl: reviewerProfile?.photoUrl || profPhotoUrl
                     }}
-                    initialProfile={reviewerProfile || (email.includes("reviewer") ? {
+                    initialProfile={reviewerProfile || (email === "reviewer@scholarlyopen.org" ? {
                       name: "Dr. Marcus Vance",
                       email: "m.vance@university-charite.de",
                       institution: "Charité – Universitätsmedizin Berlin",
@@ -7945,7 +7950,7 @@ export default function Editorial360Page() {
                 {/* ================= 4. AUTHOR WORKSPACE ================= */}
                 {role === "author" && (() => {
                   const isDe = language === "de"
-                  const isDemoAuthor = email === "author@scholarlyopen.org" || email === "author@example.com" || email === "e.vane@university.edu" || email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me")
+                  const isDemoAuthor = email === "author@scholarlyopen.org"
                   const authorFiltered = isDemoAuthor 
                     ? manuscripts 
                     : manuscripts.filter(m => 
@@ -7966,7 +7971,7 @@ export default function Editorial360Page() {
                     (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
                     uniqueManuscripts.some(m => m.id === "SOMED-26-RW01" && (m.author?.toLowerCase().includes("sam") || m.authorName?.toLowerCase().includes("sam") || m.authorEmail?.toLowerCase().includes("applied.ebm.institute") || m.authorEmail?.toLowerCase().includes("proton.me")))
                   )
-                  const displayAuthorName = isSamLee ? "Sam Lee" : (profFullName || "Dr. Evelyn Vane")
+                  const displayAuthorName = isSamLee ? "Sam Lee" : (profFullName || regName || (email ? email.split('@')[0] : "Author"))
 
                   const translateStatus = (st: string) => {
                     if (!isDe) return st
@@ -9586,13 +9591,13 @@ export default function Editorial360Page() {
                                   {profPhotoUrl ? (
                                     <img src={profPhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                                   ) : (
-                                    <span>{isSamLee ? "SL" : (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() : "EV")}</span>
+                                    <span>{isSamLee ? "SL" : (profFullName ? profFullName.replace(/^Dr\.\s*/i, '').split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU"))}</span>
                                   )}
                                 </div>
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                                      {isSamLee ? "Sam Lee" : (profFullName ? (profFullName.startsWith("Dr.") ? profFullName : `Dr. ${profFullName}`) : "Dr. Evelyn Vane")}
+                                      {isSamLee ? "Sam Lee" : (profFullName ? (profFullName.startsWith("Dr.") ? profFullName : `Dr. ${profFullName}`) : (regName || (email ? email.split('@')[0] : "Author")))}
                                     </h3>
                                     {isOrcidVerified && (
                                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#A6CE39]/10 text-[#6a9a1f] dark:text-[#A6CE39] border border-[#A6CE39]/30">
@@ -12490,7 +12495,7 @@ export default function Editorial360Page() {
                       <button
                         type="button"
                         onClick={() => {
-                          const author = `${newFirstName} ${newLastName}`.trim() || profFullName || "Dr. Evelyn Vane"
+                          const author = `${newFirstName} ${newLastName}`.trim() || profFullName || regName || (email ? email.split('@')[0] : "Author")
                           const title = newTitle || "Our Research Manuscript"
                           const journal = newJournal || "Scholarly Open"
                           setNewCoverLetter(
@@ -13957,15 +13962,15 @@ export default function Editorial360Page() {
                   if (role === "reviewer") {
                     setReviewerProfile(prev => {
                       const next = {
-                        name: profFullName || prev?.name || "Dr. Marcus Vance",
+                        name: profFullName || prev?.name || (email === "reviewer@scholarlyopen.org" ? "Dr. Marcus Vance" : (regName || (email ? email.split('@')[0] : "Academic Referee"))),
                         email: prev?.email || email || "reviewer@scholarlyopen.org",
-                        institution: profInstitution || prev?.institution || "Charité – Universitätsmedizin Berlin",
-                        orcid: profOrcid || prev?.orcid || "0000-0004-7711-2093",
+                        institution: profInstitution || prev?.institution || (email === "reviewer@scholarlyopen.org" ? "Charité – Universitätsmedizin Berlin" : "Academic Institution"),
+                        orcid: profOrcid || prev?.orcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : ""),
                         photoUrl: profPhotoUrl || prev?.photoUrl || "",
-                        badges: prev?.badges || ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"],
-                        country: profCountry || prev?.country || "Germany",
+                        badges: prev?.badges || (email === "reviewer@scholarlyopen.org" ? ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"] : ["Registered Reviewer", "COPE Ethics Verified"]),
+                        country: profCountry || prev?.country || "International",
                         ...prev,
-                        title: profRank || prev?.title || "Senior Researcher",
+                        title: profRank || prev?.title || "Researcher",
                         specialization: profSpecialization || prev?.specialization || ""
                       }
                       try {
@@ -14060,10 +14065,10 @@ export default function Editorial360Page() {
                                 } else if (role === "reviewer") {
                                   setReviewerProfile(prev => {
                                     const next = {
-                                      name: prev?.name || profFullName || "Dr. Marcus Vance",
+                                      name: prev?.name || profFullName || (email === "reviewer@scholarlyopen.org" ? "Dr. Marcus Vance" : (regName || (email ? email.split('@')[0] : "Academic Referee"))),
                                       email: prev?.email || email || "reviewer@scholarlyopen.org",
-                                      institution: prev?.institution || profInstitution || "Charité – Universitätsmedizin Berlin",
-                                      orcid: prev?.orcid || profOrcid || "0000-0004-7711-2093",
+                                      institution: prev?.institution || profInstitution || (email === "reviewer@scholarlyopen.org" ? "Charité – Universitätsmedizin Berlin" : "Academic Institution"),
+                                      orcid: prev?.orcid || profOrcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : ""),
                                       ...prev,
                                       photoUrl: cloudUrl
                                     }

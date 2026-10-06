@@ -375,13 +375,13 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
           <div className="border-t border-border pt-4 flex flex-col gap-2">
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact Information</h4>
             <div className="flex flex-wrap gap-x-6 gap-y-2 mt-1">
-              {editor.email && (
+              {displayEmail && (
                 <a 
-                  href={`mailto:${editor.email}`}
+                  href={`mailto:${displayEmail}`}
                   className="inline-flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Mail className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                  {editor.email}
+                  {displayEmail}
                 </a>
               )}
               {editor.orcid && (

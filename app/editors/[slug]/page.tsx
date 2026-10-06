@@ -325,14 +325,14 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                     </a>
                   )}
 
-                  {editor.email && (
+                  {editor.email && editor.email.endsWith("@scholarlyopen.org") && (
                     <a 
                       href={`mailto:${editor.email}`}
                       className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all text-sm text-muted-foreground"
                     >
                       <span className="flex items-center gap-2.5">
                         <Mail className="h-4.5 w-4.5 text-muted-foreground" />
-                        <span>Email Contact</span>
+                        <span>Journal Editorial Office</span>
                       </span>
                       <Mail className="h-3.5 w-3.5" />
                     </a>
