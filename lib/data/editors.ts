@@ -288,6 +288,182 @@ const baseEditors: EditorMember[] = [
       "Ranked #459 in Italy & #13,075 Worldwide in Chemistry (Research.com 2026)",
       "Listed among Top Italian Scientists (Google Scholar Database, h-index ≥ 30)",
       "Young Researchers Award (2008)"
+    ],
+    editorialRoles: [
+      "Associate Editor, Molecules (MDPI, 2026–present; Editorial Board 2019–2026)",
+      "Editorial Advisory Board, Chemistry & Biodiversity (Wiley, 2026–present)",
+      "Editorial Board, Journal of Chromatography A (Elsevier, 2025–present)",
+      "Editorial Board, International Journal of Food Properties (Taylor & Francis, 2026–present)",
+      "Editorial Board, Journal of Essential Oil Research (Taylor & Francis, 2017–present)",
+      "Member of the President's Technical Secretariat, Italian Chemical Society (SCI, 2026–2028)",
+      "Associate Editor, Scholarly Open: Chemistry (2026–present)"
+    ],
+    timeline: [
+      {
+        year: "2004",
+        title: "Master Degree in Pharmacy (Laurea)",
+        description: "Graduated with 110/110 magna cum laude at the University of Messina, defending a thesis on Micro-HPLC-ESI-MS determination of anthocyanins in red wines.",
+        type: "education"
+      },
+      {
+        year: "2005",
+        title: "Licensed Pharmacist Qualification",
+        description: "Passed the Italian National State Board Examination, obtaining professional qualification as a Pharmacist.",
+        type: "milestone"
+      },
+      {
+        year: "2005–2006",
+        title: "Visiting Scholar, University of Pardubice (Czech Republic)",
+        description: "Stage funded by the EU 'Com-Chrom' network (HPRN-CT-2001-00180) and Bonino-Pulejo Foundation under Prof. Ing. Pavel Jandera, developing 2D-LC separation methods for polyphenols.",
+        type: "education"
+      },
+      {
+        year: "2009",
+        title: "Ph.D. in Food Chemistry and Safety",
+        description: "Doctorate awarded by the University of Messina, defending a doctoral thesis entitled 'Employment of High Resolution HPLC Techniques for the Analysis of Complex Matrices'.",
+        type: "education"
+      },
+      {
+        year: "2009–2010",
+        title: "Visiting Post-Doctoral Fellow, U.S. FDA (CFSAN)",
+        description: "Awarded scholarship at the Center for Food Safety and Applied Nutrition, U.S. Food and Drug Administration (College Park, MD, USA) under Dr. Jeanne Rader, characterizing bioactive compounds in Stevia rebaudiana.",
+        type: "career"
+      },
+      {
+        year: "2011–2012",
+        title: "Post-Doctoral Fellow, Chromaleont S.r.l. & Univ. of Messina",
+        description: "Research scholarship with University of Messina spin-off Chromaleont S.r.l. and the Mediterranean Separation Foundation on polyphenols and innovative stationary phases.",
+        type: "career"
+      },
+      {
+        year: "2012–2017",
+        title: "Assistant Professor in Food Chemistry (SSD CHIM/10)",
+        description: "Faculty appointment (RTD-A and RTD-B Tenure Track) in Food Chemistry at the University of Messina, teaching food analysis and advanced chromatographic instrumentation.",
+        type: "career"
+      },
+      {
+        year: "2017–2024",
+        title: "Associate Professor in Food Chemistry (SSD CHIM/10)",
+        description: "Tenured Associate Professor at the Department of Chemical, Biological, Pharmaceutical and Environmental Sciences, University of Messina.",
+        type: "career"
+      },
+      {
+        year: "2018",
+        title: "The Analytical Scientist's 'Top 40 Under 40'",
+        description: "Included in the international Power List of the 40 most influential analytical scientists under 40 worldwide; also recognized among Top Italian Scientists (h-index ≥ 30).",
+        type: "milestone"
+      },
+      {
+        year: "2023–Present",
+        title: "Stanford/Elsevier World's Top 2% Scientist",
+        description: "Ranked among the top 2% of scientists globally in Chemistry; ranked #459 in Italy by Research.com (2026).",
+        type: "milestone"
+      },
+      {
+        year: "2024–Present",
+        title: "Full Professor in Food Chemistry (SSD CHIM/10)",
+        description: "Full Professor at the Department of Chemical, Biological, Pharmaceutical and Environmental Sciences, University of Messina.",
+        type: "career"
+      },
+      {
+        year: "2026",
+        title: "Associate Editor, Scholarly Open: Chemistry",
+        description: "Appointed Associate Editor overseeing food chemistry, analytical separations, and natural product characterization.",
+        type: "milestone"
+      }
+    ],
+    personalPublications: [
+      {
+        title: "Scouting of different separation strategies for phenolic compounds in comprehensive two-dimensional liquid chromatography",
+        journal: "Journal of Chromatography A",
+        year: "2026",
+        doi: "10.1016/j.chroma.2025.466654",
+        link: "https://doi.org/10.1016/j.chroma.2025.466654"
+      },
+      {
+        title: "QSRR-based insights into the chromatographic behaviour of phenolic derivatives on biomimetic stationary phases",
+        journal: "Journal of Chromatography A",
+        year: "2026",
+        doi: "10.1016/j.chroma.2026.466967",
+        link: "https://doi.org/10.1016/j.chroma.2026.466967"
+      },
+      {
+        title: "Phenolic Profiling of Olive (Olea europaea L. cv. Nocellara Messinese) Samples by Comprehensive 2D Liquid Chromatography",
+        journal: "ChemFoodChem",
+        year: "2026",
+        doi: "10.1002/cfch.70009",
+        link: "https://doi.org/10.1002/cfch.70009"
+      },
+      {
+        title: "Exploring Bioactive Polyphenolic Compounds in Food and Natural Real-World Samples II: Molecular Diversity, Functionality, and Future Directions",
+        journal: "Molecules",
+        year: "2026",
+        doi: "10.3390/molecules31030537",
+        link: "https://doi.org/10.3390/molecules31030537"
+      },
+      {
+        title: "Comprehensive two-dimensional liquid chromatography as a powerful tool for the analysis of food and food products",
+        journal: "TrAC Trends in Analytical Chemistry",
+        year: "2020",
+        doi: "10.1016/j.trac.2020.115894",
+        link: "https://doi.org/10.1016/j.trac.2020.115894"
+      },
+      {
+        title: "Complementary analytical liquid chromatography methods for the characterization of aqueous phase from pyrolysis of lignocellulosic biomasses",
+        journal: "Analytical Chemistry",
+        year: "2014",
+        doi: "10.1021/ac5038957",
+        link: "https://doi.org/10.1021/ac5038957"
+      },
+      {
+        title: "High performance characterization of triacylglycerols in milk and milk-related samples by liquid chromatography and mass spectrometry",
+        journal: "Journal of Chromatography A",
+        year: "2014",
+        doi: "10.1016/j.chroma.2014.07.073",
+        link: "https://doi.org/10.1016/j.chroma.2014.07.073"
+      },
+      {
+        title: "Potential of comprehensive chromatography in food analysis",
+        journal: "TrAC Trends in Analytical Chemistry",
+        year: "2013",
+        doi: "10.1016/j.trac.2013.07.008",
+        link: "https://doi.org/10.1016/j.trac.2013.07.008"
+      },
+      {
+        title: "Mass spectrometry detection in comprehensive liquid chromatography: Basic concepts, instrumental aspects, applications and trends",
+        journal: "Mass Spectrometry Reviews",
+        year: "2012",
+        doi: "10.1002/mas.20353",
+        link: "https://doi.org/10.1002/mas.20353"
+      },
+      {
+        title: "Online comprehensive RPLC × RPLC with mass spectrometry detection for the analysis of proteome samples",
+        journal: "Analytical Chemistry",
+        year: "2011",
+        doi: "10.1021/ac102656b",
+        link: "https://doi.org/10.1021/ac102656b"
+      },
+      {
+        title: "Employing ultra high pressure liquid chromatography as the second dimension in a comprehensive two-dimensional system for analysis of Stevia rebaudiana extracts",
+        journal: "Journal of Chromatography A",
+        year: "2011",
+        doi: "10.1016/j.chroma.2010.08.081",
+        link: "https://doi.org/10.1016/j.chroma.2010.08.081"
+      },
+      {
+        title: "Comprehensive two-dimensional liquid chromatography to quantify polyphenols in red wines",
+        journal: "Journal of Chromatography A",
+        year: "2009",
+        doi: "10.1016/j.chroma.2009.04.001",
+        link: "https://doi.org/10.1016/j.chroma.2009.04.001"
+      },
+      {
+        title: "Comprehensive multidimensional liquid chromatography: Theory and applications",
+        journal: "Journal of Chromatography A",
+        year: "2008",
+        doi: "10.1016/j.chroma.2007.06.074",
+        link: "https://doi.org/10.1016/j.chroma.2007.06.074"
+      }
     ]
   },
   {
