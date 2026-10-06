@@ -3562,13 +3562,13 @@ export default function Editorial360Page() {
           if (currentEditorPhotoUrl) setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isCacciola) {
-          currentEditorName = "Francesco Cacciola"
+          currentEditorName = "Francesco Cacciola, Ph.D."
           currentEditorRank = "Associate Editor"
           currentEditorJournal = "Scholarly Open: Chemistry"
-          currentEditorInstitution = "University of Messina"
+          currentEditorInstitution = "Food Chemistry (SSD CHIM/10) at the University of Messina, Messina, Italy"
           currentEditorCountry = "Italy"
           currentEditorOrcid = "0000-0003-1296-7633"
-          currentEditorPhotoUrl = matchedCloudUser?.photoUrl || "/images/editors/francesco-cacciola.jpeg"
+          currentEditorPhotoUrl = matchedCloudUser?.photoUrl || "/images/editors/francesco-cacciola.png"
 
           setEditorName(currentEditorName)
           setEditorRank(currentEditorRank)

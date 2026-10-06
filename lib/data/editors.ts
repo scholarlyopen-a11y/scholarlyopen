@@ -250,26 +250,44 @@ const baseEditors: EditorMember[] = [
   },
   {
     slug: "francesco-cacciola",
-    name: "Francesco Cacciola",
+    name: "Francesco Cacciola, Ph.D.",
     role: "Associate Editor",
-    affiliation: "University of Messina",
-    specialization: "Advanced analytical chromatography, particularly LC and comprehensive LC×LC, coupled with mass spectrometry for the chemical characterization of complex natural products and food matrices.",
+    affiliation: "Food Chemistry (SSD CHIM/10) at the University of Messina, Messina, Italy",
+    specialization: "Conventional and innovative LC techniques (fast LC, LC×LC) and coupled techniques (LC×LC-MS, LC×LC-MS/MS) for the study of bioactive compounds in complex natural matrices.",
     email: "editor.chem@scholarlyopen.org",
     orcid: "0000-0003-1296-7633",
-    imageUrl: "/images/editors/francesco-cacciola.jpeg",
+    imageUrl: "/images/editors/francesco-cacciola.png",
     journalSlug: "chemistry",
-    biography: "Francesco Cacciola serves as an Associate Editor for Scholarly Open: Chemistry and is affiliated with the University of Messina, Italy.\n\nHis research activities focus on advanced analytical chromatography, particularly LC and comprehensive LC×LC, coupled with mass spectrometry for the chemical characterization of complex natural products and food matrices. Key research areas include food chemistry, phytochemistry, natural-product metabolomics, bioactive compounds, food quality, authenticity and safety, and the development of sustainable analytical methodologies.\n\nAdditional research interests include the in-vitro evaluation of antioxidant and antimicrobial activities and the integration of complementary chromatographic and mass-spectrometric platforms for comprehensive characterization of natural products and foods.",
+    biography: "Prof. Dr. Francesco Cacciola is Full Professor in Food Chemistry (starting from 01/10/2024) at the Dipartimento di Scienze Chimiche, Biologiche, Farmaceutiche ed Ambientali of the University of Messina, Italy. Born in Messina in December 1980, he got his High School Scientific Diploma in Messina in July 1999 (final mark: 100/100) and afterwards graduated in Pharmacy with 110/110 cum laude at the University of Messina in 2004, discussing a thesis entitled \"Micro/HPLC/ESI/MS for the determination of anthocyanins in red wines\". After graduation, from February 2005 to August 2006, he was visiting guest at the Department of Analytical Chemistry of the Faculty of Chemical Technology at the University of Pardubice (Czech Republic) for a stage sponsored by an international project (International Research Training Network) called \"Training Young Researchers in Miniaturized Comprehensive Liquid Chromatography\" (Acronym Com-Chrom) (Contract No. HPRN-CT-2001-00180) and by \"Bonino-Pulejo Foundation\" under the supervision of Prof. Ing. Pavel Jandera, DrSc. He developed innovative analytical methods for the two-dimensional separation of polyphenols in beverages and plant extracts. In December 2005 he obtained the qualification to be a pharmacist.\n\nHe received his Ph.D. in \"Food and Safety Chemistry\" at the University of Messina in 2009, defending a thesis entitled \"Employment of High Resolution HPLC Techniques for the Analysis of Complex Matrices\". In 2009 he was awarded a scholarship to work for one year as post-doctoral fellow at the Center for Food Safety and Applied Nutrition (CFSAN), Food and Drug Administration (FDA) in College Park, Maryland, USA, under the supervision of Dr. Jeanne Rader. During his research stay, he worked on the characterization of bioactive compounds contained in Stevia rebaudiana extracts by two-dimensional liquid chromatography. From February 2011 to January 2012, he was awarded a scholarship by the Society Chromaleont s.r.l., a spin-off of the University of Messina, for the characterization of polyphenols and the investigation of innovative stationary phases. These researches were performed at the Dipartimento Farmaco-Chimico according to the convention between such Society and \"The Mediterranean Separation Foundation Research and Training Center\" belonging to the Dipartimento Farmaco-Chimico of the University of Messina. He currently teaches several courses devoted to Food Chemistry at the University of Messina.\n\nHe won the \"Young Researchers award\" in 2008 for the scientific productivity carried out in 2007. He also won two travel grants to attend the \"National Symposium on Food Chemistry\" in Perugia (Italy) in 2008 and \"HPLC 2009\" in Dresden (Germany) in 2009, respectively. In September 2018, the international scientific journal \"The Analytical Scientist\" included him in the international list of the 40 most influential scientists \"under 40\" in the Analytical Sciences (Analytical Scientist's 2018 Power List \"Top 40 under 40\") for the application of advanced analytical techniques to the characterization of food and natural products. From 2018: Listed among the Top Italian Scientists according to Google Scholar Database (with h-index >= 30). From 2023, he has been included in the list, made by Stanford University and Elsevier, among the top 2% of Scientists from all over the world in \"Chemistry\". According to Research.com, for the 2026 Edition of Ranking of Best Scientists in the field of Chemistry, he has been ranked 459 in Italy and 13075 in the world.\n\nUp to September 8th, 2026, he is author and co-author of 291 articles published (275 in indexed international scientific journals), 16 book chapters edited by international publishers, 5 abstracts in international journals and 3 in-extenso contributions in national symposia. He is also author and co-author of 156 oral (32 invited lectures) and 147 poster communications in national and international symposia.\n\nBibliometric Parameters (as of September 2026):\n• Total citations: 10,970 (Google Scholar); 8,272 (Scopus)\n• H-Index: 56 (Google Scholar); 49 (Scopus)\n• Total Impact Factor: 1,074 (reference IF 2025; 935 publication year IF)\n• Average Impact Factor: 4.0 (3.4 publication year IF)",
     expertise: [
-      "Advanced analytical chromatography (LC and LC×LC)",
-      "Mass spectrometry",
-      "Chemical characterization of complex natural products and food matrices",
+      "Conventional & innovative LC techniques (fast LC, LC×LC)",
+      "Coupled techniques (LC×LC-MS, LC×LC-MS/MS)",
       "Food chemistry",
-      "Phytochemistry",
-      "Natural-product metabolomics",
-      "Bioactive compounds",
-      "Food quality, authenticity and safety",
-      "Sustainable analytical methodologies",
-      "Antioxidant and antimicrobial activities"
+      "Bioactive compounds in complex natural matrices",
+      "Polyphenols & carotenoids",
+      "Lipidomics (triacylglycerols & phospholipids)",
+      "Phytochemistry & metabolomics",
+      "Food quality, authenticity & safety"
+    ],
+    badges: [
+      "Full Professor",
+      "Top 2% Scientist",
+      "Top 40 under 40",
+      "Top Italian Scientists"
+    ],
+    stats: [
+      { label: "Citations", value: "10,970+", description: "Google Scholar (8,272 on Scopus)" },
+      { label: "H-Index", value: "56", description: "Google Scholar (49 on Scopus)" },
+      { label: "Publications", value: "291+", description: "275 indexed international journal papers" },
+      { label: "Impact Factor", value: "1,074", description: "Cumulative Journal Impact Factor" }
+    ],
+    honors: [
+      "Full Professor in Food Chemistry (SSD CHIM/10), University of Messina (2024–present)",
+      "Stanford University & Elsevier Top 2% Scientist in Chemistry (2023–present)",
+      "The Analytical Scientist's 2018 Power List: Top 40 Under 40 in Analytical Sciences",
+      "Ranked #459 in Italy & #13,075 Worldwide in Chemistry (Research.com 2026)",
+      "Listed among Top Italian Scientists (Google Scholar Database, h-index ≥ 30)",
+      "Young Researchers Award (2008)"
     ]
   },
   {

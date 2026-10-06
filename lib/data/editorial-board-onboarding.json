@@ -35,13 +35,14 @@
     {
       "id": "EBM-CACCIOLA",
       "slug": "francesco-cacciola",
-      "name": "Francesco Cacciola",
+      "name": "Francesco Cacciola, Ph.D.",
       "email": "cacciolaf@unime.it",
       "role": "Associate Editor",
       "journal": "Scholarly Open: Chemistry",
       "journalSlug": "chemistry",
-      "affiliation": "University of Messina",
+      "affiliation": "Food Chemistry (SSD CHIM/10) at the University of Messina, Messina, Italy",
       "country": "Italy",
+      "photoUrl": "/images/editors/francesco-cacciola.png",
       "specialization": "Advanced analytical chromatography, particularly LC and comprehensive LC×LC, coupled with mass spectrometry for the chemical characterization of complex natural products and food matrices.",
       "researchInterests": [
         "Advanced analytical chromatography (LC and LC×LC)",
