@@ -439,7 +439,7 @@ export function JournalManagerWorkspace({
   // Reviewer Registry & History Tracking States
   const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
   const [globalReviewerHistory, setGlobalReviewerHistory] = useState<ReviewerHistoryItem[]>([])
-  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr" | "gateway" | "watchlist">("directory")
+  const [reviewerRegistryTab, setReviewerRegistryTab] = useState<"directory" | "history" | "ecr" | "gateway" | "editors" | "watchlist">("directory")
   const [isLoadingPaperHistory, setIsLoadingPaperHistory] = useState(false)
 
   // Reviewer Gateway Tests & Onboarding State
@@ -6328,7 +6328,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   : reviewerRegistryTab === "ecr" 
                   ? "Early Career Researcher (ECR) Invitations" 
                   : reviewerRegistryTab === "gateway"
-                  ? "Reviewer Gateway Onboarding & Assessments"
+                  ? "Reviewer Gateway Assessments & Test Candidates"
+                  : reviewerRegistryTab === "editors"
+                  ? "Editorial Leadership & Board Onboarding Desk"
                   : reviewerRegistryTab === "watchlist"
                   ? "Journal Integrity Watchlist & Disapproved Directory"
                   : "Reviewer History"}
@@ -6340,6 +6342,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   ? "Source and invite emerging scholars and preprint lead authors from bioRxiv, medRxiv, and arXiv."
                   : reviewerRegistryTab === "gateway"
                   ? "Scholars who completed the Reviewer Gateway qualification test (≥80%) and registered referee accounts."
+                  : reviewerRegistryTab === "editors"
+                  ? "Official appointments and verified onboarding records for Editors-in-Chief (EiCs), Associate Editors (AEs), and Editorial Board Members (EBMs)."
                   : reviewerRegistryTab === "watchlist"
                   ? "Disapproved candidates and unverified entries remembered across the journal network for audit and prevention."
                   : "Complete dispatch, acceptance, and declination log across all journal desks."}
@@ -6372,10 +6376,30 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   }`}
                 >
                   <Award className="h-3.5 w-3.5 text-[#0b99ff]" />
-                  <span>Gateway Onboarding</span>
-                  {(gatewayTests.length + gatewayResponses.length) > 0 && (
+                  <span>Reviewer Gateway Tests</span>
+                  {gatewayTests.length > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#0b99ff]/10 text-[#0b99ff] font-bold">
-                      {gatewayTests.length + gatewayResponses.length}
+                      {gatewayTests.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReviewerRegistryTab("editors")
+                    fetchGatewayData()
+                  }}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                    reviewerRegistryTab === "editors"
+                      ? "bg-white dark:bg-[#18191e] text-emerald-600 dark:text-emerald-400 shadow-xs font-bold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Editorial Leadership & Board</span>
+                  {gatewayResponses.length > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold">
+                      {gatewayResponses.length}
                     </span>
                   )}
                 </button>
@@ -6458,10 +6482,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     {gatewayTests.filter(t => t.status === "Passed - Account Active").length}
                   </span>
                 </div>
-                <div className="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/40 dark:bg-indigo-950/20">
-                  <span className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">Responses Dispatched</span>
-                  <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 block">
-                    {gatewayResponses.length}
+                <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Pass Rate</span>
+                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                    {gatewayTests.length > 0 ? Math.round((gatewayTests.filter(t => t.passed).length / gatewayTests.length) * 100) : 0}%
                   </span>
                 </div>
               </div>
@@ -6666,21 +6690,81 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </table>
                 </div>
               </div>
+            </div>
+          ) : reviewerRegistryTab === "editors" ? (
+            <div className="p-5 space-y-6 font-sans">
+              {/* Summary KPIs for Editorial Leadership */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Total Appointees</span>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white mt-0.5 block">{gatewayResponses.length}</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Live on Masthead</span>
+                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                    {gatewayResponses.length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20">
+                  <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wider block">Chemistry Portfolio</span>
+                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5 block">
+                    {gatewayResponses.filter((r: any) => r.journal?.toLowerCase().includes("chem") || r.journal?.toLowerCase().includes("applied")).length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/40 dark:bg-indigo-950/20">
+                  <span className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">Active Credentials</span>
+                  <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 block">
+                    {gatewayResponses.filter((r: any) => r.credentialId).length}
+                  </span>
+                </div>
+              </div>
+
+              {/* Search & Actions Bar for Editorial Leadership */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="relative w-full sm:w-80">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search editor, email, journal, affiliation, or credential..."
+                    value={gatewaySearch}
+                    onChange={(e) => setGatewaySearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131418] text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={fetchGatewayData}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-slate-600 dark:text-slate-300 cursor-pointer"
+                  >
+                    <RotateCcw className={`w-3.5 h-3.5 ${isLoadingGateway ? "animate-spin" : ""}`} />
+                    Refresh
+                  </button>
+                  <Link
+                    href="/editorial-board"
+                    target="_blank"
+                    className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Open Editorial Board
+                  </Link>
+                </div>
+              </div>
 
               {/* Incoming Official Responses Desk */}
               <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-[#131418] shadow-xs">
                 <div className="px-4 py-3 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-[#0b99ff]" />
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Official Invitation & Onboarding Responses Desk
+                      Official Editorial Appointments & Onboarding Responses Desk
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                       Live Telemetry · {gatewayResponses.length} Appointees
                     </span>
                   </div>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Live audit desk tracking accepted invitations and onboarding confirmations (EiC, Associate Editors, Board Members & Referees)
+                    Official records for Editors-in-Chief (EiCs), Associate Editors (AEs), and Editorial Board Members (EBMs)
                   </span>
                 </div>
 
