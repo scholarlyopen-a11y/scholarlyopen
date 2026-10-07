@@ -1300,9 +1300,22 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
 
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{user.journal || "Scholarly Open: Medicine"}</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  {user.journal || (user.name?.toLowerCase().includes("cacciola") || user.name?.toLowerCase().includes("verpoort") ? "Scholarly Open: Chemistry" : isGongUser ? "Scholarly Open: Medicine" : "Scholarly Open")}
+                </span>
                 <span className="text-slate-300 dark:text-slate-700 select-none">|</span>
-                <span>{user.institution || (isGongUser ? "Shanghai Jiao Tong University School of Medicine, China" : "Academic Medical Center")}{user.country ? ` (${user.country})` : ""}</span>
+                <span>
+                  {user.institution || (
+                    user.name?.toLowerCase().includes("cacciola")
+                      ? "Food Chemistry (SSD CHIM/10) at University of Messina"
+                      : user.name?.toLowerCase().includes("verpoort")
+                      ? "Wuhan University of Technology / Ghent University"
+                      : isGongUser
+                      ? "Shanghai Jiao Tong University School of Medicine, China"
+                      : "Scholarly Open Editorial Board"
+                  )}
+                  {user.country ? ` (${user.country})` : ""}
+                </span>
                 <span className="text-slate-300 dark:text-slate-700 select-none">|</span>
                 <span className="text-slate-600 dark:text-slate-400 font-medium">{user.email}</span>
               </div>
@@ -1313,7 +1326,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   {isDe ? "Forschungsschwerpunkte & Fachgebiete:" : "Research Interests & Scope:"}
                 </span>
                 <span>
-                  {user.specialization || (isGongUser ? "Cardiovascular Surgery · Clinical Oncology · Evidence-Based Medicine · Organ Transplantation" : "Clinical Medicine & Academic Peer Review")}
+                  {user.specialization || (
+                    user.name?.toLowerCase().includes("cacciola")
+                      ? "Food Chemistry · Comprehensive 2D-LC (LC×LC) · Mass Spectrometry (MS/MS) · Bioactive Compounds & Natural Matrices"
+                      : user.name?.toLowerCase().includes("verpoort")
+                      ? "Inorganic & Coordination Chemistry · Catalysis · Advanced Nanomaterials"
+                      : isGongUser
+                      ? "Cardiovascular Surgery · Clinical Oncology · Evidence-Based Medicine · Organ Transplantation"
+                      : user.journal?.toLowerCase().includes("chem")
+                      ? "Analytical Chemistry · Organic & Sustainable Synthesis · Molecular Sciences"
+                      : "Peer-Reviewed Scholarly Publishing & Peer Review"
+                  )}
                 </span>
               </div>
             </div>
@@ -1367,178 +1390,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         )
       })()}
 
-      {/* ========================================================================= */}
-      {/* WHITE BOX 1: EDITORIAL DESK METRICS (UNIFORM & DECENT)                    */}
-      {/* ========================================================================= */}
-      <div className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#272832] pb-3">
-          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-            {isDe ? "Redaktions-Kennzahlen" : "Editorial Desk Metrics"}
-          </h3>
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
-            {isDe ? "COPE-Beirats-Governance" : "COPE Verified Governance"}
-          </span>
-        </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-2 text-center items-start pt-2">
-          {/* 1. Decision turnaround */}
-          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
-            <Clock className="h-5 w-5 text-slate-500 dark:text-slate-400" />
-            <div className="text-xl sm:text-2xl font-extrabold text-[#0b99ff] mt-2 mb-1">
-              {reviewCount > 0 ? "Under Review" : "14–21 Days"}
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "BEWERTUNGSSTATUS" : "EVALUATION STATUS"}
-            </div>
-          </div>
-
-          {/* 2. Board Rigor score */}
-          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
-            <Star className="h-5 w-5 text-slate-500 dark:text-slate-400" />
-            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              100%
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "COPE-BEIRATS-AUDIT" : "COPE AUDIT RIGOR"}
-            </div>
-          </div>
-
-          {/* 3. Decisions Rendered */}
-          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
-            <FileCheck2 className="h-5 w-5 text-slate-500 dark:text-slate-400" />
-            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              {decisionCount}
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "ABGESCHLOSSENE ENTSCHEIDUNGEN" : "DECISIONS RENDERED"}
-            </div>
-          </div>
-
-          {/* 4. Active Manuscripts */}
-          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
-            <Award className="h-5 w-5 text-slate-500 dark:text-slate-400" />
-            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              {activeManuscripts.length}
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "AKTIVE ARTIKEL" : "ASSIGNED PAPERS"}
-            </div>
-          </div>
-
-          {/* 5. Editorial Standing */}
-          <div className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#131418] transition-colors">
-            <TrendingUp className="h-5 w-5 text-slate-500 dark:text-slate-400" />
-            <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 mb-1">
-              Associate
-            </div>
-            <div className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase leading-tight max-w-[120px]">
-              {isDe ? "BEIRATSRANG" : "EDITORIAL BOARD TIER"}
-            </div>
-          </div>
-        </div>
-
-        {/* Share ORCID & LinkedIn */}
-        <div className="flex items-center justify-center sm:justify-end gap-5 pt-3 border-t border-slate-100 dark:border-[#272832] text-xs">
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                window.open("https://orcid.org", "_blank")
-              }
-            }}
-            className="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium cursor-pointer transition-colors"
-          >
-            <Link2 className="h-3.5 w-3.5" />
-            <span>Share ORCID</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                const text = encodeURIComponent("I am a verified Handling Editor with Scholarly Open! Track our double-blind peer review stewardship and academic badges.")
-                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
-              }
-            }}
-            className="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium cursor-pointer transition-colors"
-          >
-            <Linkedin className="h-3.5 w-3.5" />
-            <span>Share LinkedIn</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* WHITE BOX 2: EARNED ACADEMIC PRESTIGE BADGES (UNIFORM & DECENT)           */}
-      {/* ========================================================================= */}
-      <div className="p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-[#272832] bg-white dark:bg-[#18191e] shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 dark:border-[#272832] pb-3">
-          <div>
-            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-              {isDe ? "Erhaltene Auszeichnungen & Abzeichen" : "Earned Academic Prestige Badges"}
-            </h3>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {isDe ? "Freigeschaltet durch redaktionelle Leitung & Doppelblind-Qualität" : "Unlocked through verified editorial decisions & rigor"}
-            </span>
-          </div>
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 w-fit">
-            {isDe ? "4 Aktive Auszeichnungen" : "4 Active Badges"}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {/* Badge 1 */}
-          <div className="p-4 rounded-xl border border-slate-200/80 dark:border-[#272832] bg-slate-50/50 dark:bg-[#131418] hover:bg-slate-100/60 dark:hover:bg-[#18191e] text-center flex flex-col items-center transition-all">
-            <div className="h-11 w-11 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mb-2.5 border border-slate-300/60 dark:border-slate-700">
-              <Trophy className="h-5 w-5" />
-            </div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-              Distinguished Editor 2026
-            </div>
-            <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-              {isDe ? "EDITORIAL BOARD AUSZEICHNUNG" : "EDITORIAL BOARD COMMENDATION"}
-            </div>
-          </div>
-
-          {/* Badge 2 */}
-          <div className="p-4 rounded-xl border border-slate-200/80 dark:border-[#272832] bg-slate-50/50 dark:bg-[#131418] hover:bg-slate-100/60 dark:hover:bg-[#18191e] text-center flex flex-col items-center transition-all">
-            <div className="h-11 w-11 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mb-2.5 border border-slate-300/60 dark:border-slate-700">
-              <Zap className="h-5 w-5" />
-            </div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-              Rapid Decisioner
-            </div>
-            <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-              {isDe ? "TOP 5% SCHNELLIGKEIT (<14 TAGE)" : "TOP 5% DECISION SPEED (<14D)"}
-            </div>
-          </div>
-
-          {/* Badge 3 */}
-          <div className="p-4 rounded-xl border border-slate-200/80 dark:border-[#272832] bg-slate-50/50 dark:bg-[#131418] hover:bg-slate-100/60 dark:hover:bg-[#18191e] text-center flex flex-col items-center transition-all">
-            <div className="h-11 w-11 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mb-2.5 border border-slate-300/60 dark:border-slate-700">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-              COPE Ethics Certified
-            </div>
-            <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-              {isDe ? "PUBLIKATIONSETHIK VERIFIZIERT" : "PUBLICATION ETHICS VERIFIED"}
-            </div>
-          </div>
-
-          {/* Badge 4 */}
-          <div className="p-4 rounded-xl border border-slate-200/80 dark:border-[#272832] bg-slate-50/50 dark:bg-[#131418] hover:bg-slate-100/60 dark:hover:bg-[#18191e] text-center flex flex-col items-center transition-all">
-            <div className="h-11 w-11 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mb-2.5 border border-slate-300/60 dark:border-slate-700">
-              <Star className="h-5 w-5" />
-            </div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-              5-Star Rigor Guardian
-            </div>
-            <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-              {isDe ? "EDITORIAL RIGOR AUSZEICHNUNG" : "EDITORIAL RIGOR DISTINCTION"}
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ========================================================================= */}
       {/* 2. RESPONSIVE SUB-NAVIGATION TAB STRIP (Omitted when managed by parent)   */}
@@ -2336,14 +2188,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 Total Submissions (Active)
               </span>
               <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
-                {manuscripts.filter(m => {
-                  if (user?.journal && user.journal !== "Scholarly Open") {
-                    return m.journal?.toLowerCase().includes(user.journal.toLowerCase()) || user.journal.toLowerCase().includes(m.journal?.toLowerCase())
-                  }
-                  return m.journal?.toLowerCase().includes("medicine") || (isGongUser && m.id === "SOMED-26-RW01")
-                }).length} <span className="text-xs font-medium text-slate-500">Manuscripts</span>
+                {activeManuscripts.length} <span className="text-xs font-medium text-slate-500">Manuscripts</span>
               </div>
-              <span className="text-xs font-medium text-[#0b99ff] block">{user?.journal || "Scholarly Open: Medicine"}</span>
+              <span className="text-xs font-medium text-[#0b99ff] block">
+                {user?.journal || (user?.name?.toLowerCase().includes("cacciola") || user?.name?.toLowerCase().includes("verpoort") ? "Scholarly Open: Chemistry" : isGongUser ? "Scholarly Open: Medicine" : "Scholarly Open")}
+              </span>
             </div>
 
             <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
@@ -2373,7 +2222,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <div className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
                 High <span className="text-xs font-medium text-slate-500">Rigor</span>
               </div>
-              <span className="text-xs font-medium text-emerald-600 block">Evidence-Based Medicine</span>
+              <span className="text-xs font-medium text-emerald-600 block">
+                {user?.journal?.toLowerCase().includes("chem") || user?.name?.toLowerCase().includes("cacciola") || user?.name?.toLowerCase().includes("verpoort")
+                  ? "Peer-Reviewed Chemistry"
+                  : isGongUser || user?.journal?.toLowerCase().includes("med")
+                  ? "Evidence-Based Medicine"
+                  : "COPE Publishing Standards"}
+              </span>
             </div>
           </div>
 
@@ -2432,25 +2287,37 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </div>
 
           <div className="p-4 sm:p-5 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/10 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-500 block">Avg. Similarity Index</span>
-                <span className="text-xl font-bold text-emerald-600">4.2%</span>
-                <span className="text-[11px] text-slate-400 block mt-0.5">Threshold: &lt;15%</span>
-              </div>
+            {(() => {
+              const activeCount = activeManuscripts.length
+              const avgPlag = activeCount > 0
+                ? (activeManuscripts.reduce((acc, m) => acc + (Number(m.plagiarismScore) || 0), 0) / activeCount).toFixed(1)
+                : "0.0"
+              const avgAi = activeCount > 0
+                ? (activeManuscripts.reduce((acc, m) => acc + (Number(m.aiScore) || 0), 0) / activeCount).toFixed(1)
+                : "0.0"
 
-              <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/10 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-500 block">AI Text Confidence</span>
-                <span className="text-xl font-bold text-emerald-600">2.1%</span>
-                <span className="text-[11px] text-slate-400 block mt-0.5">Threshold: &lt;10%</span>
-              </div>
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/10 text-center">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block">Avg. Similarity Index</span>
+                    <span className="text-xl font-bold text-emerald-600">{avgPlag}%</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5">Threshold: &lt;15%</span>
+                  </div>
 
-              <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/10 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-500 block">Image Forensics</span>
-                <span className="text-xl font-bold text-emerald-600">100% Passed</span>
-                <span className="text-[11px] text-slate-400 block mt-0.5">No spliced figures</span>
-              </div>
-            </div>
+                  <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/10 text-center">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block">AI Text Confidence</span>
+                    <span className="text-xl font-bold text-emerald-600">{avgAi}%</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5">Threshold: &lt;10%</span>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/10 text-center">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block">Image Forensics</span>
+                    <span className="text-xl font-bold text-emerald-600">100% Passed</span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5">No spliced figures</span>
+                  </div>
+                </div>
+              )
+            })()}
 
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-[#272832] pb-3">
@@ -2461,7 +2328,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <p className="text-[11px] text-slate-500">
                     {integrityFilterMode === "flagged"
                       ? (isDe ? `Zeigt ${integrityCount} Manuskripte mit Integritätswarnung oder Eskalation.` : `Showing ${integrityCount} manuscripts with active integrity flags or escalations.`)
-                      : (isDe ? `Zeigt alle ${manuscripts.length} Manuskripte im Portfolio.` : `Showing all ${manuscripts.length} portfolio manuscripts.`)}
+                      : (isDe ? `Zeigt alle ${activeManuscripts.length} Manuskripte im Portfolio.` : `Showing all ${activeManuscripts.length} portfolio manuscripts.`)}
                   </p>
                 </div>
 
@@ -2500,7 +2367,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                         integrityFilterMode === "all" ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                       }`}>
-                        {manuscripts.length}
+                        {activeManuscripts.length}
                       </span>
                     </span>
                   </button>
@@ -2509,8 +2376,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
               {(() => {
                 const list = integrityFilterMode === "flagged"
-                  ? manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30))
-                  : manuscripts
+                  ? activeManuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30))
+                  : activeManuscripts
 
                 if (list.length === 0) {
                   return (

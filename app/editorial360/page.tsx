@@ -6159,7 +6159,7 @@ export default function Editorial360Page() {
                               if (cleanMail.includes("verpoort") || cleanMail === "francis@whut.edu.cn") {
                                 setSuccess("Account Verified: Prof. Francis Verpoort (Editor-in-Chief, Scholarly Open: Chemistry). Your initial access password is: Verpoort2026! (You can also change it anytime in Profile Settings).")
                               } else if (cleanMail.includes("cacciola") || cleanMail === "cacciolaf@unime.it") {
-                                setSuccess("Account Verified: Prof. Francesco Cacciola (Handling Editor). Your password is: Ciccio81! or Cacciola2026!.")
+                                setSuccess("Account Verified: Francesco Cacciola, Ph.D. (Associate Editor, Scholarly Open: Chemistry). Your password is: Ciccio81! or Cacciola2026!.")
                               } else {
                                 setSuccess(
                                   language === "de" 
@@ -6743,37 +6743,64 @@ export default function Editorial360Page() {
               )}
 
               {/* Editor Quick Badges in Main Header */}
-              {role === "editor" && (
-                <div className="hidden md:flex items-center gap-2 mr-1">
-                  {/* Active Submissions Badge */}
-                  <div
-                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
-                    title={language === "de" ? "Aktive redaktionelle Manuskripte" : "Active Manuscripts Under Handling"}
-                  >
-                    <FileText className="h-3.5 w-3.5 text-[#0b99ff]" />
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">
-                      {language === "de" ? `${manuscripts.length} Manuskripte aktiv` : `${manuscripts.length} Active Submissions`}
-                    </span>
-                  </div>
+              {role === "editor" && (() => {
+                const isChief = editorRank?.toLowerCase().includes("chief") || editorRank?.toLowerCase().includes("managing") || editorName?.toLowerCase().includes("aris thorne")
+                const activeEditorCount = manuscripts.filter((m: any) => {
+                  if (editorName?.toLowerCase().includes("gong") || editorEmail?.toLowerCase().includes("gong")) {
+                    return m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")
+                  }
+                  if (isChief) {
+                    if (!editorJournal || editorJournal === "Scholarly Open") return true
+                    return m.journal?.toLowerCase().includes(editorJournal.toLowerCase()) || editorJournal.toLowerCase().includes(m.journal?.toLowerCase())
+                  }
+                  const userNorm = editorName ? editorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
+                  const edNorm = m.assignedEditorName ? m.assignedEditorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
+                  const matchesName = Boolean(edNorm && userNorm && (edNorm === userNorm || edNorm.includes(userNorm) || userNorm.includes(edNorm)))
+                  const matchesEmail = Boolean(m.assignedEditorEmail && editorEmail && m.assignedEditorEmail.toLowerCase().trim() === editorEmail.toLowerCase().trim())
+                  return matchesName || matchesEmail
+                }).length
 
-                  {/* Official ORCID Identity Badge for Editor */}
-                  <a
-                    href="https://orcid.org/0000-0002-9842-1102"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
-                    title={language === "de" ? "Verifiziertes ORCID-Profil des Herausgebers" : "View Editor's Verified ORCID Record"}
-                  >
-                    <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
-                      iD
-                    </span>
-                    <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
-                      0000-0002-9842-1102
-                    </span>
-                    <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
-                  </a>
-                </div>
-              )}
+                const activeOrcid = editorOrcid || (
+                  editorName?.toLowerCase().includes("cacciola") ? "0000-0003-1296-7633" :
+                  editorName?.toLowerCase().includes("verpoort") ? "0000-0002-5184-5500" :
+                  editorName?.toLowerCase().includes("gong") ? "0000-0002-0213-7313" :
+                  "0000-0002-9842-1102"
+                )
+
+                return (
+                  <div className="hidden md:flex items-center gap-2 mr-1">
+                    {/* Active Submissions Badge */}
+                    <div
+                      className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
+                      title={language === "de" ? "Aktive redaktionelle Manuskripte" : "Active Manuscripts Under Handling"}
+                    >
+                      <FileText className="h-3.5 w-3.5 text-[#0b99ff]" />
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">
+                        {language === "de" ? `${activeEditorCount} Manuskripte aktiv` : `${activeEditorCount} Active Submissions`}
+                      </span>
+                    </div>
+
+                    {/* Official ORCID Identity Badge for Editor */}
+                    {activeOrcid && (
+                      <a
+                        href={`https://orcid.org/${activeOrcid}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
+                        title={language === "de" ? "Verifiziertes ORCID-Profil des Herausgebers" : "View Editor's Verified ORCID Record"}
+                      >
+                        <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
+                          iD
+                        </span>
+                        <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
+                          {activeOrcid}
+                        </span>
+                        <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
+                      </a>
+                    )}
+                  </div>
+                )
+              })()}
 
               {/* 1. Dark/Light Mode Toggle */}
               <button
@@ -7907,7 +7934,13 @@ export default function Editorial360Page() {
                       journal: editorJournal,
                       institution: editorInstitution,
                       country: editorCountry,
-                      photoUrl: editorPhotoUrl
+                      photoUrl: editorPhotoUrl,
+                      orcid: editorOrcid || (editorName?.toLowerCase().includes("cacciola") ? "0000-0003-1296-7633" : editorName?.toLowerCase().includes("verpoort") ? "0000-0002-5184-5500" : undefined),
+                      specialization: editorName?.toLowerCase().includes("cacciola")
+                        ? "Food Chemistry · Comprehensive 2D-LC (LC×LC) · Mass Spectrometry (MS/MS) · Bioactive Compounds"
+                        : editorName?.toLowerCase().includes("verpoort")
+                        ? "Inorganic & Coordination Chemistry · Catalysis · Advanced Nanomaterials"
+                        : undefined
                     }}
                   />
                 )}
