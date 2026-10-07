@@ -38,6 +38,11 @@ const FILE_PATH = "reviewer-records.json"
 const LOCAL_DATA_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
 
 async function getStoredRecords(): Promise<{ tests: ReviewerTestRecord[]; registeredReviewers: any[] }> {
+  let cloudTests: ReviewerTestRecord[] = []
+  let cloudReviewers: any[] = []
+  let localTests: ReviewerTestRecord[] = []
+  let localReviewers: any[] = []
+
   // 1. Try Supabase Cloud Storage (primary)
   try {
     const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
@@ -45,31 +50,63 @@ async function getStoredRecords(): Promise<{ tests: ReviewerTestRecord[]; regist
     })
     if (res.ok) {
       const parsed = await res.json()
-      if (parsed && (Array.isArray(parsed.tests) || Array.isArray(parsed.registeredReviewers))) {
-        return {
-          tests: Array.isArray(parsed.tests) ? parsed.tests : [],
-          registeredReviewers: Array.isArray(parsed.registeredReviewers) ? parsed.registeredReviewers : []
-        }
+      if (parsed) {
+        if (Array.isArray(parsed.tests)) cloudTests = parsed.tests
+        if (Array.isArray(parsed.registeredReviewers)) cloudReviewers = parsed.registeredReviewers
       }
     }
   } catch (e) {
     console.warn("Supabase fetch reviewer-records warning:", e)
   }
 
-  // 2. Fallback to local file
+  // 2. Fallback / local file
   try {
     if (fs.existsSync(LOCAL_DATA_PATH)) {
       const raw = fs.readFileSync(LOCAL_DATA_PATH, "utf-8")
       const parsed = JSON.parse(raw)
-      return {
-        tests: Array.isArray(parsed.tests) ? parsed.tests : [],
-        registeredReviewers: Array.isArray(parsed.registeredReviewers) ? parsed.registeredReviewers : []
+      if (parsed) {
+        if (Array.isArray(parsed.tests)) localTests = parsed.tests
+        if (Array.isArray(parsed.registeredReviewers)) localReviewers = parsed.registeredReviewers
       }
     }
   } catch (e) {
     console.error("Error reading reviewer-records.json:", e)
   }
-  return { tests: [], registeredReviewers: [] }
+
+  const mergedTestsMap = new Map<string, ReviewerTestRecord>()
+  for (const t of localTests) {
+    const k = (t.id || t.candidateEmail || "").toLowerCase().trim()
+    if (k) mergedTestsMap.set(k, t)
+  }
+  for (const t of cloudTests) {
+    const k = (t.id || t.candidateEmail || "").toLowerCase().trim()
+    if (k) {
+      const ex = mergedTestsMap.get(k)
+      mergedTestsMap.set(k, { ...ex, ...t })
+    }
+  }
+
+  const mergedRevsMap = new Map<string, any>()
+  for (const r of localReviewers) {
+    const k = (r.id || r.email || "").toLowerCase().trim()
+    if (k) mergedRevsMap.set(k, r)
+  }
+  for (const r of cloudReviewers) {
+    const k = (r.id || r.email || "").toLowerCase().trim()
+    if (k) {
+      const ex = mergedRevsMap.get(k)
+      mergedRevsMap.set(k, { ...ex, ...r })
+    }
+  }
+
+  const finalTests = Array.from(mergedTestsMap.values())
+  const finalReviewers = Array.from(mergedRevsMap.values())
+
+  if (finalTests.length > cloudTests.length || finalReviewers.length > cloudReviewers.length) {
+    saveStoredRecords({ tests: finalTests, registeredReviewers: finalReviewers }).catch(() => {})
+  }
+
+  return { tests: finalTests, registeredReviewers: finalReviewers }
 }
 
 async function saveStoredRecords(data: { tests: ReviewerTestRecord[]; registeredReviewers: any[] }): Promise<boolean> {

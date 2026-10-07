@@ -1427,6 +1427,12 @@ ${journalEmail} | https://www.scholarlyopen.org`
     return () => clearInterval(interval)
   }, [fetchSentInvitations])
 
+  useEffect(() => {
+    fetchGatewayData()
+    const interval = setInterval(fetchGatewayData, 12000)
+    return () => clearInterval(interval)
+  }, [])
+
   // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 3,250/day across all 13 journals)
   const quotaInfo = useMemo(() => {
     const todayStr = new Date().toISOString().split("T")[0]
@@ -6367,9 +6373,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 >
                   <Award className="h-3.5 w-3.5 text-[#0b99ff]" />
                   <span>Gateway Onboarding</span>
-                  {gatewayTests.length > 0 && (
+                  {(gatewayTests.length + gatewayResponses.length) > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#0b99ff]/10 text-[#0b99ff] font-bold">
-                      {gatewayTests.length}
+                      {gatewayTests.length + gatewayResponses.length}
                     </span>
                   )}
                 </button>
@@ -6499,6 +6505,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <Award className="w-4 h-4 text-[#0b99ff]" />
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                       Gateway Onboarding & Assessment Records
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/30">
+                      {gatewayTests.length} Registered Referees
                     </span>
                   </div>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -6667,7 +6676,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       Official Invitation & Onboarding Responses Desk
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                      Live Telemetry
+                      Live Telemetry · {gatewayResponses.length} Appointees
                     </span>
                   </div>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -6689,7 +6698,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                      {gatewayResponses.map((resp: any) => (
+                      {gatewayResponses
+                        .filter((resp: any) => {
+                          if (!gatewaySearch.trim()) return true
+                          const q = gatewaySearch.toLowerCase()
+                          return (
+                            resp.candidateName?.toLowerCase().includes(q) ||
+                            resp.candidateEmail?.toLowerCase().includes(q) ||
+                            resp.journal?.toLowerCase().includes(q) ||
+                            resp.credentialId?.toLowerCase().includes(q) ||
+                            resp.affiliation?.toLowerCase().includes(q)
+                          )
+                        })
+                        .map((resp: any) => (
                         <tr key={resp.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                           <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             <div className="font-bold text-slate-900 dark:text-white">{resp.candidateName}</div>

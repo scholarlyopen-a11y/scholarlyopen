@@ -66,7 +66,10 @@ const SENT_FILE_PATH = path.join(process.cwd(), "lib", "data", "sent-invitations
 const LOCAL_RESPONSES_PATH = path.join(process.cwd(), "lib", "data", "invitation-responses.json")
 
 async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
-  // 1. Try Supabase Cloud Storage (primary)
+  let cloudResponses: InvitationResponseRecord[] = []
+  let localResponses: InvitationResponseRecord[] = []
+
+  // 1. Fetch from Supabase Cloud Storage
   try {
     const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${RESPONSES_FILE}?t=${Date.now()}`, {
       cache: "no-store"
@@ -74,25 +77,50 @@ async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
     if (res.ok) {
       const data = await res.json()
       if (data && Array.isArray(data.responses)) {
-        return data.responses
+        cloudResponses = data.responses
       }
     }
   } catch (e) {
     console.warn("Supabase fetch invitation-responses warning:", e)
   }
 
-  // 2. Fallback to local file
+  // 2. Read local file
   try {
     if (fs.existsSync(LOCAL_RESPONSES_PATH)) {
       const raw = fs.readFileSync(LOCAL_RESPONSES_PATH, "utf-8")
       const parsed = JSON.parse(raw)
       if (parsed && Array.isArray(parsed.responses)) {
-        return parsed.responses
+        localResponses = parsed.responses
       }
     }
   } catch (e) {}
 
-  return responseStore
+  if (localResponses.length === 0 && cloudResponses.length === 0) {
+    localResponses = responseStore
+  }
+
+  // Merge map: local + cloud, keyed by unique ID or slug/email
+  const mergedMap = new Map<string, InvitationResponseRecord>()
+  for (const r of localResponses) {
+    const key = (r.id || r.slug || r.candidateEmail || "").toLowerCase().trim()
+    if (key) mergedMap.set(key, r)
+  }
+  for (const r of cloudResponses) {
+    const key = (r.id || r.slug || r.candidateEmail || "").toLowerCase().trim()
+    if (key) {
+      const existing = mergedMap.get(key)
+      mergedMap.set(key, { ...existing, ...r })
+    }
+  }
+
+  const merged = Array.from(mergedMap.values())
+
+  // If cloud was missing any entries from local (e.g. RESP-CACCIOLA), sync merged list up to Supabase
+  if (merged.length > cloudResponses.length) {
+    saveStoredResponses(merged).catch(() => {})
+  }
+
+  return merged
 }
 
 async function saveStoredResponses(responses: InvitationResponseRecord[]): Promise<boolean> {
@@ -125,21 +153,54 @@ async function saveStoredResponses(responses: InvitationResponseRecord[]): Promi
 }
 
 async function getStoredEditors(): Promise<any[]> {
+  let cloudEditors: any[] = []
+  let localEditors: any[] = []
+
   try {
     const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${EDITORS_FILE}?t=${Date.now()}`, { cache: "no-store" })
     if (res.ok) {
       const parsed = await res.json()
-      if (parsed && Array.isArray(parsed.onboardedEditors)) return parsed.onboardedEditors
+      if (parsed && Array.isArray(parsed.onboardedEditors)) cloudEditors = parsed.onboardedEditors
     }
   } catch (e) {}
+
   try {
     if (fs.existsSync(EDITORS_FILE_PATH)) {
       const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
       const parsed = JSON.parse(raw)
-      if (parsed && Array.isArray(parsed.onboardedEditors)) return parsed.onboardedEditors
+      if (parsed && Array.isArray(parsed.onboardedEditors)) localEditors = parsed.onboardedEditors
     }
   } catch (e) {}
-  return []
+
+  const mergedMap = new Map<string, any>()
+  for (const e of localEditors) {
+    const key = (e.id || e.slug || e.email || "").toLowerCase().trim()
+    if (key) mergedMap.set(key, e)
+  }
+  for (const e of cloudEditors) {
+    const key = (e.id || e.slug || e.email || "").toLowerCase().trim()
+    if (key) {
+      const existing = mergedMap.get(key)
+      mergedMap.set(key, { ...existing, ...e })
+    }
+  }
+
+  const merged = Array.from(mergedMap.values())
+
+  if (merged.length > cloudEditors.length) {
+    fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${EDITORS_FILE}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: JSON.stringify({ onboardedEditors: merged, lastUpdated: new Date().toISOString() })
+    }).catch(() => {})
+  }
+
+  return merged
 }
 
 async function saveEditorToCloud(editor: any) {
