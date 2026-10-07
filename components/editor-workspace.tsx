@@ -591,7 +591,7 @@ export function EditorWorkspace({
 
   // Permanent Credentials / Password Setup State
   const [isPermanentRegisterModalOpen, setIsPermanentRegisterModalOpen] = useState(false)
-  const [permanentEmail, setPermanentEmail] = useState(() => user?.email || "126010@sh9hospital.org.cn")
+  const [permanentEmail, setPermanentEmail] = useState(() => user?.email || (isGongUser ? "126010@sh9hospital.org.cn" : "editor@scholarlyopen.org"))
   const [permanentPassword, setPermanentPassword] = useState("")
   const [confirmPermanentPassword, setConfirmPermanentPassword] = useState("")
   const [permanentSaveSuccess, setPermanentSaveSuccess] = useState(false)
@@ -1242,38 +1242,40 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       )}
 
       {/* ========================================================================= */}
-      {/* 0. 1-CLICK AUTHENTICATED SESSION BANNER & PERMANENT REGISTRATION           */}
+      {/* 0. 1-CLICK AUTHENTICATED SESSION BANNER FOR DR. WEIHUA GONG (MEDICINE)    */}
       {/* ========================================================================= */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-50 via-white to-sky-50/60 dark:from-sky-950/30 dark:via-[#18191e] dark:to-sky-950/20 border border-sky-200/80 dark:border-sky-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
-        <div className="flex items-start gap-3.5">
-          <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff] shrink-0 mt-0.5 border border-[#0b99ff]/20">
-            <Key className="h-5 w-5" />
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#0b99ff] text-white">
-                1-Click Authenticated Session
-              </span>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                Welcome, {user?.name || "Dr. Weihua Gong"}
-              </h4>
+      {isGongUser && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-50 via-white to-sky-50/60 dark:from-sky-950/30 dark:via-[#18191e] dark:to-sky-950/20 border border-sky-200/80 dark:border-sky-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff] shrink-0 mt-0.5 border border-[#0b99ff]/20">
+              <Key className="h-5 w-5" />
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-              You are securely signed in as Handling Editor for manuscript <strong>SOMED-26-RW01</strong>. To set a permanent password or register your preferred email address for future editorial assignments, click <strong>Set Permanent Password</strong>.
-            </p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#0b99ff] text-white">
+                  1-Click Authenticated Session
+                </span>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Welcome, {user?.name || "Dr. Weihua Gong"}
+                </h4>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                You are securely signed in as Handling Editor for manuscript <strong>SOMED-26-RW01</strong>. To set a permanent password or register your preferred email address for future editorial assignments, click <strong>Set Permanent Password</strong>.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
+            <Button
+              type="button"
+              onClick={() => setIsPermanentRegisterModalOpen(true)}
+              className="bg-[#0b99ff] hover:bg-[#0077cc] text-white text-xs font-bold h-9 px-4 rounded-xl shadow-xs cursor-pointer transition-all"
+            >
+              <Key className="h-3.5 w-3.5 mr-1.5" />
+              <span>Set Permanent Password</span>
+            </Button>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
-          <Button
-            type="button"
-            onClick={() => setIsPermanentRegisterModalOpen(true)}
-            className="bg-[#0b99ff] hover:bg-[#0077cc] text-white text-xs font-bold h-9 px-4 rounded-xl shadow-xs cursor-pointer transition-all"
-          >
-            <Key className="h-3.5 w-3.5 mr-1.5" />
-            <span>Set Permanent Password</span>
-          </Button>
-        </div>
-      </div>
+      )}
 
       {/* ========================================================================= */}
       {/* 1. CLEAN EDITOR IDENTITY & DESK PROFILE                                   */}
@@ -2334,9 +2336,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 Total Submissions (Active)
               </span>
               <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
-                {manuscripts.filter(m => m.journal?.toLowerCase().includes("medicine") || m.id === "SOMED-26-RW01").length} <span className="text-xs font-medium text-slate-500">Manuscripts</span>
+                {manuscripts.filter(m => {
+                  if (user?.journal && user.journal !== "Scholarly Open") {
+                    return m.journal?.toLowerCase().includes(user.journal.toLowerCase()) || user.journal.toLowerCase().includes(m.journal?.toLowerCase())
+                  }
+                  return m.journal?.toLowerCase().includes("medicine") || (isGongUser && m.id === "SOMED-26-RW01")
+                }).length} <span className="text-xs font-medium text-slate-500">Manuscripts</span>
               </div>
-              <span className="text-xs font-medium text-[#0b99ff] block">Scholarly Open: Medicine</span>
+              <span className="text-xs font-medium text-[#0b99ff] block">{user?.journal || "Scholarly Open: Medicine"}</span>
             </div>
 
             <div className="space-y-1 px-0 lg:px-4 lg:border-r border-slate-100 dark:border-[#272832]">
@@ -5803,7 +5810,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <input
                     type="text"
                     disabled
-                    value={user?.name || "Weihua Gong, M.D., Ph.D."}
+                    value={user?.name || "Handling Editor"}
                     className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-500 font-semibold cursor-not-allowed"
                   />
                 </div>
@@ -5813,12 +5820,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     Preferred Official Email Address
                   </label>
                   <div className="space-y-1.5">
-                    {[
-                      "126010@sh9hospital.org.cn",
-                      "weihua.gong@googlemail.com",
-                      "15088755988@163.com",
-                      "editor.med@scholarlyopen.org"
-                    ].map((em) => (
+                    {(isGongUser
+                      ? [
+                          "126010@sh9hospital.org.cn",
+                          "weihua.gong@googlemail.com",
+                          "15088755988@163.com",
+                          "editor.med@scholarlyopen.org"
+                        ]
+                      : Array.from(new Set([
+                          user?.email,
+                          `${user?.name ? user.name.toLowerCase().replace(/[^a-z0-9]/g, ".") : "editor"}@scholarlyopen.org`,
+                          "editor@scholarlyopen.org"
+                        ].filter(Boolean) as string[]))
+                    ).map((em) => (
                       <label key={em} className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-[#0b99ff] cursor-pointer text-xs">
                         <input
                           type="radio"
@@ -5831,6 +5845,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         {em === "126010@sh9hospital.org.cn" && (
                           <span className="ml-auto text-[10px] font-bold px-1.5 py-0.2 rounded bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300">
                             Hospital Official
+                          </span>
+                        )}
+                        {em.endsWith("@scholarlyopen.org") && (
+                          <span className="ml-auto text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            Scholarly Open Internal
                           </span>
                         )}
                       </label>
@@ -5900,8 +5919,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       "editorial360_permanent_editor_" + permanentEmail.toLowerCase(),
                       JSON.stringify({
                         email: permanentEmail,
-                        name: user?.name || "Weihua Gong, M.D., Ph.D.",
-                        journal: user?.journal || "Scholarly Open: Medicine",
+                        name: user?.name || (isGongUser ? "Weihua Gong, M.D., Ph.D." : "Editor"),
+                        journal: user?.journal || (isGongUser ? "Scholarly Open: Medicine" : "Scholarly Open"),
                         password: permanentPassword,
                         registeredAt: new Date().toISOString()
                       })
