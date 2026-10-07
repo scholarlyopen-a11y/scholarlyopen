@@ -77,6 +77,27 @@ import { OFFICIAL_JOURNALS, getJournalReplyTo } from "@/lib/data/journal-contact
 import { REGIONAL_COUNTRY_GROUPS, GLOBAL_COUNTRIES } from "@/lib/data/countries"
 import { editors } from "@/lib/data/editors"
 
+export function formatAcademicCredentialName(name: string): string {
+  if (!name) return ""
+  let cleaned = name.replace(/^(?:Prof(?:essor)?\.?\s*(?:Dr\.?)?|Dr\.?)\s+/i, "").trim()
+  if (cleaned.toLowerCase() === "francis verpoort") {
+    cleaned = "Francis Verpoort, Ph.D."
+  } else if (cleaned.toLowerCase() === "francesco cacciola") {
+    cleaned = "Francesco Cacciola, Ph.D."
+  } else if (cleaned.toLowerCase() === "bolutife olofinjana") {
+    cleaned = "Bolutife Olofinjana, Ph.D."
+  } else if (cleaned.toLowerCase() === "prashant kumar") {
+    cleaned = "Prashant Kumar, Ph.D."
+  } else if (cleaned.toLowerCase() === "wenxiong sun (孙文雄)" || cleaned.toLowerCase() === "wenxiong sun") {
+    cleaned = "Wenxiong Sun, Ph.D. (孙文雄)"
+  } else if (cleaned.toLowerCase() === "praveen nagula") {
+    cleaned = "Praveen Nagula, Ph.D."
+  } else if (cleaned.toLowerCase() === "ragab aziza") {
+    cleaned = "Ragab Aziza, Ph.D."
+  }
+  return cleaned
+}
+
 export interface SentEmailRecord {
   id: string
   timestamp: string
@@ -5196,7 +5217,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           type="text"
                           value={quickInviteName}
                           onChange={e => setQuickInviteName(e.target.value)}
-                          placeholder="e.g. Prof. Francis Collins"
+                          placeholder="e.g. Francis Collins, M.D., Ph.D."
                           className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/40 focus:border-[#0b99ff]"
                         />
                       </div>
@@ -6797,7 +6818,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         .map((resp: any) => (
                         <tr key={resp.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                           <td className="py-3.5 px-4 align-middle whitespace-nowrap">
-                            <div className="font-bold text-slate-900 dark:text-white">{resp.candidateName}</div>
+                            <div className="font-bold text-slate-900 dark:text-white">{formatAcademicCredentialName(resp.candidateName)}</div>
                             {resp.candidateEmail && (
                               <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">{resp.candidateEmail}</div>
                             )}
@@ -12404,7 +12425,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">
-                        {selectedCandidateDossier.candidateName}
+                        {formatAcademicCredentialName(selectedCandidateDossier.candidateName)}
                       </h3>
                       <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         Appointment Confirmed
@@ -12729,7 +12750,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </div>
                     <div>
                       <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                        <span>{approvalModalCandidate.candidateName || approvalModalCandidate.name}</span>
+                        <span>{formatAcademicCredentialName(approvalModalCandidate.candidateName || approvalModalCandidate.name)}</span>
                         <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-[#0b99ff]/10 text-[#0b99ff]">
                           {approvalModalCandidate.type === "eic" 
                             ? "Editor-in-Chief" 

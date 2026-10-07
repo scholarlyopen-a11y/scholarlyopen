@@ -3545,7 +3545,7 @@ export default function Editorial360Page() {
         const matchedCloudUser = users.find(u => u.email?.toLowerCase() === cleanEmail.toLowerCase())
 
         if (isVerpoort) {
-          currentEditorName = "Prof. Francis Verpoort"
+          currentEditorName = "Francis Verpoort, Ph.D."
           currentEditorRank = "Editor-in-Chief"
           currentEditorJournal = "Scholarly Open: Chemistry"
           currentEditorInstitution = "Wuhan University of Technology"
@@ -3626,7 +3626,7 @@ export default function Editorial360Page() {
           setEditorCountry(currentEditorCountry)
           setEditorEmail(cleanEmail)
         } else if (isKumar) {
-          currentEditorName = "Prof. Prashant Kumar"
+          currentEditorName = "Prashant Kumar, Ph.D."
           currentEditorRank = "Editorial Board Member & Handling Editor"
           currentEditorJournal = "Scholarly Open: Environmental Science"
           currentEditorInstitution = "Global Centre for Clean Air Research (GCARE), School of Engineering, University of Surrey"
@@ -3649,7 +3649,7 @@ export default function Editorial360Page() {
         } else {
           // Derive natural academic name from email
           const cleanName = cleanEmail.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, l => l.toUpperCase())
-          currentEditorName = `Prof. ${cleanName}`
+          currentEditorName = `${cleanName}, Ph.D.`
           currentEditorRank = "Editorial Board Member & Handling Editor"
           currentEditorJournal = editorJournal || "Scholarly Open: Environmental Science"
           currentEditorInstitution = editorInstitution || "Academic Department & Research Center"
@@ -3666,8 +3666,8 @@ export default function Editorial360Page() {
         const isBolutife = cleanEmail.toLowerCase().includes("olofinjana") || cleanEmail.toLowerCase().includes("bolutife")
         if (isBolutife) {
           currentReviewerProfile = {
-            title: "Prof.",
-            name: "Prof. Bolutife Olofinjana",
+            title: "Dr.",
+            name: "Bolutife Olofinjana, Ph.D.",
             email: cleanEmail,
             institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
             department: "Department of Physics and Engineering Physics",
@@ -6157,7 +6157,7 @@ export default function Editorial360Page() {
                             onClick={() => {
                               const cleanMail = email.trim().toLowerCase()
                               if (cleanMail.includes("verpoort") || cleanMail === "francis@whut.edu.cn") {
-                                setSuccess("Account Verified: Prof. Francis Verpoort (Editor-in-Chief, Scholarly Open: Chemistry). Your initial access password is: Verpoort2026! (You can also change it anytime in Profile Settings).")
+                                setSuccess("Account Verified: Francis Verpoort, Ph.D. (Editor-in-Chief, Scholarly Open: Chemistry). Your initial access password is: Verpoort2026! (You can also change it anytime in Profile Settings).")
                               } else if (cleanMail.includes("cacciola") || cleanMail === "cacciolaf@unime.it") {
                                 setSuccess("Account Verified: Francesco Cacciola, Ph.D. (Associate Editor, Scholarly Open: Chemistry). Your password is: Ciccio81! or Cacciola2026!.")
                               } else {

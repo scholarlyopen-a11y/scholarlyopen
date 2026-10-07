@@ -1178,7 +1178,7 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
   },
   {
     slug: "prashant-kumar",
-    name: "Prof. Prashant Kumar",
+    name: "Prashant Kumar, Ph.D.",
     role: "Editorial Board Member",
     affiliation: "Global Centre for Clean Air Research (GCARE), School of Engineering, University of Surrey, UK",
     specialization: "Air quality, aerosol science, low-cost sensing, nature-based solutions, and climate change mitigation.",

@@ -22,7 +22,7 @@
     },
     {
       "id": "TEST-2026-9142",
-      "candidateName": "Prof. Bolutife Olofinjana",
+      "candidateName": "Bolutife Olofinjana, Ph.D.",
       "candidateEmail": "b.olofinjana@oauife.edu.ng",
       "discipline": "engineering",
       "institution": "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
@@ -39,7 +39,7 @@
     },
     {
       "id": "TEST-2026-9040",
-      "candidateName": "Dr. Wenxiong Sun (孙文雄)",
+      "candidateName": "Wenxiong Sun, Ph.D. (孙文雄)",
       "candidateEmail": "102500216@hbut.edu.cn",
       "discipline": "engineering",
       "institution": "Hubei University of Technology",
@@ -58,7 +58,7 @@
   "registeredReviewers": [
     {
       "id": "REV-REG-01",
-      "name": "Prof. Bolutife Olofinjana",
+      "name": "Bolutife Olofinjana, Ph.D.",
       "email": "b.olofinjana@oauife.edu.ng",
       "status": "Active",
       "activeTasks": 0,
@@ -82,7 +82,7 @@
     },
     {
       "id": "REV-REG-02",
-      "name": "Dr. Wenxiong Sun (孙文雄)",
+      "name": "Wenxiong Sun, Ph.D. (孙文雄)",
       "email": "102500216@hbut.edu.cn",
       "status": "Active",
       "activeTasks": 0,
@@ -105,7 +105,7 @@
     },
     {
       "id": "REV-REG-03",
-      "name": "Dr. Praveen Nagula",
+      "name": "Praveen Nagula, Ph.D.",
       "email": "drpraveennagula@gmail.com",
       "status": "Active",
       "activeTasks": 0,
@@ -126,7 +126,7 @@
     },
     {
       "id": "REV-REG-04",
-      "name": "Dr. Ragab Aziza",
+      "name": "Ragab Aziza, Ph.D.",
       "email": "ragabaziza61@gmail.com",
       "status": "Active",
       "activeTasks": 1,

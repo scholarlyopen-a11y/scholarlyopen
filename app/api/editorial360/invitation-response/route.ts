@@ -42,7 +42,7 @@ let responseStore: InvitationResponseRecord[] = [
   {
     id: "RESP-1001",
     type: "reviewer_claim",
-    candidateName: "Dr. Wenxiong Sun (孙文雄)",
+    candidateName: "Wenxiong Sun, Ph.D. (孙文雄)",
     candidateEmail: "102500216@hbut.edu.cn",
     journal: "Scholarly Open: Engineering & Applied Sciences",
     decision: "claimed",
@@ -51,6 +51,21 @@ let responseStore: InvitationResponseRecord[] = [
     notes: "Reviewer profile activated via Reviewer Gateway qualification."
   }
 ]
+
+export function sanitizeAcademicName(name: string): string {
+  if (!name) return ""
+  let cleaned = name.replace(/^(?:Prof(?:essor)?\.?\s*(?:Dr\.?)?|Dr\.?)\s+/i, "").trim()
+  if (cleaned.toLowerCase() === "francis verpoort") {
+    cleaned = "Francis Verpoort, Ph.D."
+  } else if (cleaned.toLowerCase() === "francesco cacciola") {
+    cleaned = "Francesco Cacciola, Ph.D."
+  } else if (cleaned.toLowerCase() === "bolutife olofinjana") {
+    cleaned = "Bolutife Olofinjana, Ph.D."
+  } else if (cleaned.toLowerCase() === "prashant kumar") {
+    cleaned = "Prashant Kumar, Ph.D."
+  }
+  return cleaned
+}
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
@@ -113,7 +128,10 @@ async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
     }
   }
 
-  const merged = Array.from(mergedMap.values())
+  const merged = Array.from(mergedMap.values()).map(r => ({
+    ...r,
+    candidateName: r.candidateName ? sanitizeAcademicName(r.candidateName) : r.candidateName
+  }))
 
   // If cloud was missing any entries from local (e.g. RESP-CACCIOLA), sync merged list up to Supabase
   if (merged.length > cloudResponses.length) {
@@ -124,6 +142,10 @@ async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
 }
 
 async function saveStoredResponses(responses: InvitationResponseRecord[]): Promise<boolean> {
+  const sanitized = responses.map(r => ({
+    ...r,
+    candidateName: r.candidateName ? sanitizeAcademicName(r.candidateName) : r.candidateName
+  }))
   let ok = false
   // 1. Save to Supabase Cloud Storage
   try {
@@ -135,7 +157,7 @@ async function saveStoredResponses(responses: InvitationResponseRecord[]): Promi
         "Content-Type": "application/json",
         "x-upsert": "true"
       },
-      body: JSON.stringify({ responses, lastUpdated: new Date().toISOString() })
+      body: JSON.stringify({ responses: sanitized, lastUpdated: new Date().toISOString() })
     })
     ok = res.ok
   } catch (e) {
@@ -146,7 +168,7 @@ async function saveStoredResponses(responses: InvitationResponseRecord[]): Promi
   try {
     const dir = path.dirname(LOCAL_RESPONSES_PATH)
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(LOCAL_RESPONSES_PATH, JSON.stringify({ responses }, null, 2), "utf-8")
+    fs.writeFileSync(LOCAL_RESPONSES_PATH, JSON.stringify({ responses: sanitized }, null, 2), "utf-8")
   } catch (e) {}
 
   return ok
