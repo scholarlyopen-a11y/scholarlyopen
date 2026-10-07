@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { useTheme } from "next-themes"
@@ -3188,6 +3188,78 @@ export default function Editorial360Page() {
   const [editorEmail, setEditorEmail] = useState("a.thorne@scholarlyopen.org")
   const [editorPhotoUrl, setEditorPhotoUrl] = useState("")
   const [editorOrcid, setEditorOrcid] = useState("0000-0002-9842-1102")
+
+  // Dynamically scoped manuscripts for currently logged-in editor
+  const editorScopedManuscripts = useMemo(() => {
+    if (role !== "editor") return manuscripts
+    const isGong = Boolean(
+      (editorName && (editorName.toLowerCase().includes("gong") || editorName.toLowerCase().includes("weihua"))) ||
+      (editorEmail && (
+        editorEmail.toLowerCase().includes("gong") ||
+        editorEmail.toLowerCase().includes("126010") ||
+        editorEmail.toLowerCase().includes("15088755988") ||
+        editorEmail.toLowerCase().includes("sh9hospital") ||
+        editorEmail.toLowerCase().includes("editor.med")
+      ))
+    )
+    const isChief = editorRank?.toLowerCase().includes("chief") || editorRank?.toLowerCase().includes("managing") || editorName?.toLowerCase().includes("aris thorne")
+    
+    return manuscripts.filter((m: any) => {
+      if (isGong) {
+        return m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")
+      }
+      if (isChief) {
+        if (!editorJournal || editorJournal === "Scholarly Open") return true
+        return m.journal?.toLowerCase().includes(editorJournal.toLowerCase()) || editorJournal.toLowerCase().includes(m.journal?.toLowerCase())
+      }
+      const userNorm = editorName ? editorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
+      const edNorm = m.assignedEditorName ? m.assignedEditorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
+      const matchesName = Boolean(edNorm && userNorm && (edNorm === userNorm || edNorm.includes(userNorm) || userNorm.includes(edNorm)))
+      const matchesEmail = Boolean(m.assignedEditorEmail && editorEmail && m.assignedEditorEmail.toLowerCase().trim() === editorEmail.toLowerCase().trim())
+      return matchesName || matchesEmail
+    })
+  }, [manuscripts, role, editorName, editorEmail, editorRank, editorJournal])
+
+  // Dynamically scoped notifications for currently logged-in editor
+  const editorScopedNotifications = useMemo(() => {
+    if (role !== "editor") return crossDeskNotifications
+    const isGong = Boolean(
+      (editorName && (editorName.toLowerCase().includes("gong") || editorName.toLowerCase().includes("weihua"))) ||
+      (editorEmail && (
+        editorEmail.toLowerCase().includes("gong") ||
+        editorEmail.toLowerCase().includes("126010") ||
+        editorEmail.toLowerCase().includes("15088755988") ||
+        editorEmail.toLowerCase().includes("sh9hospital") ||
+        editorEmail.toLowerCase().includes("editor.med")
+      ))
+    )
+    const isChief = editorRank?.toLowerCase().includes("chief") || editorRank?.toLowerCase().includes("managing") || editorName?.toLowerCase().includes("aris thorne")
+
+    const scopedPaperIds = new Set(editorScopedManuscripts.map(m => m.id))
+
+    return crossDeskNotifications.filter(n => {
+      // Gong's medical paper SOMED-26-RW01 is strictly restricted to Gong and Aris Thorne (Chief)
+      if (n.paperId === "SOMED-26-RW01") {
+        return isGong || isChief
+      }
+      if (n.paperId && !scopedPaperIds.has(n.paperId) && !isChief) {
+        return false
+      }
+      if (n.journal && editorJournal && editorJournal !== "Scholarly Open" && !isChief) {
+        const jNorm = editorJournal.toLowerCase()
+        const nNorm = n.journal.toLowerCase()
+        if (!nNorm.includes(jNorm) && !jNorm.includes(nNorm)) return false
+      }
+      if (n.recipient && n.recipient !== "Editorial Desk" && !isChief) {
+        const uNorm = editorName ? editorName.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim() : ""
+        const rNorm = n.recipient.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim()
+        if (!rNorm.includes(uNorm) && !uNorm.includes(rNorm)) return false
+      }
+      return true
+    })
+  }, [crossDeskNotifications, role, editorName, editorEmail, editorRank, editorJournal, editorScopedManuscripts])
+
+  const activeDisplayNotifications = role === "editor" ? editorScopedNotifications : crossDeskNotifications
 
   // Profile Security & Password Management States
   const [isChangingPassword, setIsChangingPassword] = useState(false)
@@ -6744,21 +6816,7 @@ export default function Editorial360Page() {
 
               {/* Editor Quick Badges in Main Header */}
               {role === "editor" && (() => {
-                const isChief = editorRank?.toLowerCase().includes("chief") || editorRank?.toLowerCase().includes("managing") || editorName?.toLowerCase().includes("aris thorne")
-                const activeEditorCount = manuscripts.filter((m: any) => {
-                  if (editorName?.toLowerCase().includes("gong") || editorEmail?.toLowerCase().includes("gong")) {
-                    return m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")
-                  }
-                  if (isChief) {
-                    if (!editorJournal || editorJournal === "Scholarly Open") return true
-                    return m.journal?.toLowerCase().includes(editorJournal.toLowerCase()) || editorJournal.toLowerCase().includes(m.journal?.toLowerCase())
-                  }
-                  const userNorm = editorName ? editorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
-                  const edNorm = m.assignedEditorName ? m.assignedEditorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
-                  const matchesName = Boolean(edNorm && userNorm && (edNorm === userNorm || edNorm.includes(userNorm) || userNorm.includes(edNorm)))
-                  const matchesEmail = Boolean(m.assignedEditorEmail && editorEmail && m.assignedEditorEmail.toLowerCase().trim() === editorEmail.toLowerCase().trim())
-                  return matchesName || matchesEmail
-                }).length
+                const activeEditorCount = editorScopedManuscripts.length
 
                 const activeOrcid = editorOrcid || (
                   editorName?.toLowerCase().includes("cacciola") ? "0000-0003-1296-7633" :
@@ -6881,7 +6939,7 @@ export default function Editorial360Page() {
                   title={language === "de" ? "Benachrichtigungen" : "Notifications"}
                 >
                   <Bell className="h-4 w-4" />
-                  {crossDeskNotifications.filter(n => !n.isRead).length > 0 && (
+                  {activeDisplayNotifications.filter(n => !n.isRead).length > 0 && (
                     <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#18191e] animate-pulse" />
                   )}
                 </button>
@@ -6899,10 +6957,10 @@ export default function Editorial360Page() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        {crossDeskNotifications.filter(n => !n.isRead).length > 0 ? (
+                        {activeDisplayNotifications.filter(n => !n.isRead).length > 0 ? (
                           <>
                             <span className="text-[10px] font-bold bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full">
-                              {crossDeskNotifications.filter(n => !n.isRead).length} {language === "de" ? "Neu" : "New"}
+                              {activeDisplayNotifications.filter(n => !n.isRead).length} {language === "de" ? "Neu" : "New"}
                             </span>
                             <button
                               type="button"
@@ -6923,12 +6981,12 @@ export default function Editorial360Page() {
                       className="py-2 space-y-2 max-h-80 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                     >
-                      {crossDeskNotifications.length === 0 ? (
+                      {activeDisplayNotifications.length === 0 ? (
                         <div className="p-4 text-center text-xs text-slate-400">
-                          {language === "de" ? "Keine wichtigen Mitteilungen vorhanden." : "No live notifications yet."}
+                          {language === "de" ? "Keine Mitteilungen vorhanden. Ihr Desk ist auf dem neuesten Stand." : "No live notifications yet. Your desk is clear and up to date."}
                         </div>
                       ) : (
-                        crossDeskNotifications.map((item) => (
+                        activeDisplayNotifications.map((item) => (
                           <div
                             key={item.id}
                             onClick={() => {
@@ -6962,7 +7020,7 @@ export default function Editorial360Page() {
                     </div>
                     <div className="pt-2 border-t border-slate-100 dark:border-[#272832] flex items-center justify-between text-[11px] text-slate-400">
                       <span>{language === "de" ? "Wichtige Statusänderungen & Entscheide" : "Important status changes & decisions"}</span>
-                      {crossDeskNotifications.some(n => !n.isRead) && (
+                      {activeDisplayNotifications.some(n => !n.isRead) && (
                         <button
                           type="button"
                           onClick={handleMarkAllNotificationsRead}
@@ -7455,7 +7513,7 @@ export default function Editorial360Page() {
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                           activeEditorTab === "desk" ? "bg-[#0b99ff]/20 text-[#0b99ff]" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                         }`}>
-                          {manuscripts.length}
+                          {editorScopedManuscripts.length}
                         </span>
                       </button>
 
@@ -7473,7 +7531,7 @@ export default function Editorial360Page() {
                           <span>{language === "de" ? "Gutachten-Tracking" : "Review Tracker"}</span>
                         </div>
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#0b99ff]/20 text-[#0b99ff]">
-                          {manuscripts.filter(m => m.status === "Under Review").length} Live
+                          {editorScopedManuscripts.filter(m => m.status === "Under Review").length} Live
                         </span>
                       </button>
 
@@ -7490,7 +7548,7 @@ export default function Editorial360Page() {
                         <span>{language === "de" ? "Forschungsintegrität" : "Research Integrity"}</span>
                         {(() => {
                           const escalatedPaperIds = (integrityAlerts || []).filter(a => a.status === "Escalated").map(a => a.paperId)
-                          const count = manuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)).length
+                          const count = editorScopedManuscripts.filter(m => escalatedPaperIds.includes(m.id) || m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)).length
                           return count > 0 ? (
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
                               {count}
@@ -7871,7 +7929,7 @@ export default function Editorial360Page() {
                     language={language}
                     activeTab={activeEditorTab}
                     onTabChange={setActiveEditorTab}
-                    manuscripts={manuscripts as any}
+                    manuscripts={editorScopedManuscripts as any}
                     reviews={reviews as any}
                     onReleaseComments={(revId, sanitizedText) => {
                       setReviews(prev => {
@@ -7898,7 +7956,7 @@ export default function Editorial360Page() {
                     }}
                     integrityAlerts={integrityAlerts}
                     onResolveIntegrity={handleResolveIntegrity}
-                    notifications={crossDeskNotifications}
+                    notifications={editorScopedNotifications}
                     onAddNotification={handleAddCrossDeskNotification}
                     onMarkAsRead={handleMarkNotificationRead}
                     onMarkAllAsRead={handleMarkAllNotificationsRead}
