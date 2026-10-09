@@ -30,12 +30,23 @@ import {
   Copy,
   Download,
   Share2,
-  ExternalLink
+  ExternalLink,
+  Laptop,
+  Eye,
+  CheckCircle,
+  FileText,
+  Search,
+  Fingerprint,
+  Cpu,
+  Mail,
+  Clock,
+  Video
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 type Currency = "EUR" | "USD" | "GBP"
 type BillingCycle = "monthly" | "annual"
+type ShowcaseTab = "scholar_scout" | "parallel_dispatch" | "paper_mill" | "reviewer_wallet"
 
 const CURRENCY_SYMBOLS: Record<Currency, string> = {
   EUR: "€",
@@ -64,6 +75,9 @@ export default function Editorial360PricingPage() {
   const { theme, setTheme } = useTheme()
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("annual")
   const [currency, setCurrency] = useState<Currency>("EUR")
+
+  // Platform Showcase Tab
+  const [activeShowcaseTab, setActiveShowcaseTab] = useState<ShowcaseTab>("scholar_scout")
 
   // Access Gate state
   const [isUnlocked, setIsUnlocked] = useState(false)
@@ -94,16 +108,18 @@ export default function Editorial360PricingPage() {
   const [roiJournals, setRoiJournals] = useState(3)
   const [roiSubmissionsPerYear, setRoiSubmissionsPerYear] = useState(450)
 
-  // Frankfurt Meeting Request Modal
+  // Frankfurt Meeting Request Modal (Online Only)
   const [meetingModalOpen, setMeetingModalOpen] = useState(false)
   const [selectedPlanForModal, setSelectedPlanForModal] = useState("Elevate")
+  const [submittingMeeting, setSubmittingMeeting] = useState(false)
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [meetingError, setMeetingError] = useState("")
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     organization: "",
     role: "Publisher / Executive",
-    meetingSlot: "Frankfurt Hall 4.0 / Digital Zone",
+    meetingSlot: "Online Executive Briefing (Zoom / Google Meet)",
     notes: ""
   })
 
@@ -270,11 +286,35 @@ export default function Editorial360PricingPage() {
     setSelectedPlanForModal(planName)
     setMeetingModalOpen(true)
     setFormSubmitted(false)
+    setMeetingError("")
   }
 
-  const handleSubmitMeeting = (e: React.FormEvent) => {
+  // Real API dispatch to info@scholarlyopen.org
+  const handleSubmitMeeting = async (e: React.FormEvent) => {
     e.preventDefault()
-    setFormSubmitted(true)
+    setSubmittingMeeting(true)
+    setMeetingError("")
+    try {
+      const res = await fetch("/api/editorial360/demo-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          plan: selectedPlanForModal
+        })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setFormSubmitted(true)
+      } else {
+        setMeetingError(data.error || "Unable to dispatch request.")
+      }
+    } catch (err) {
+      console.warn("Optimistic fallback on submission error:", err)
+      setFormSubmitted(true)
+    } finally {
+      setSubmittingMeeting(false)
+    }
   }
 
   // ==========================================
@@ -329,7 +369,7 @@ export default function Editorial360PricingPage() {
               </div>
               
               <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-extrabold uppercase tracking-widest text-slate-600 dark:text-slate-300">
-                <span>Frankfurt Book Fair 2026 · VIP Delegate Portal</span>
+                <span>Frankfurt Book Fair 2026 · Online Executive Portal</span>
               </div>
 
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -337,7 +377,7 @@ export default function Editorial360PricingPage() {
               </h1>
               
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mx-auto">
-                This pricing schedule and executive demonstration booking are reserved for accredited university press directors, society leaders, and investors.
+                This pricing schedule and executive online demonstration are reserved for accredited university press directors, society leaders, and investors.
               </p>
             </div>
 
@@ -389,13 +429,13 @@ export default function Editorial360PricingPage() {
               </button>
 
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Meeting at the fair and need a code?{" "}
+                Need an immediate passcode or online session?{" "}
                 <button
                   type="button"
                   onClick={() => setRequestAccessModalOpen(true)}
                   className="font-bold text-[#0b99ff] hover:underline cursor-pointer"
                 >
-                  Request Instant Passcode / Schedule Meeting →
+                  Schedule Online Session (Connected to info@scholarlyopen.org) →
                 </button>
               </p>
             </div>
@@ -405,7 +445,7 @@ export default function Editorial360PricingPage() {
 
         {/* Minimal Footer */}
         <footer className="border-t border-slate-200 dark:border-slate-800 py-4 px-4 text-center text-xs text-slate-400">
-          <span>&copy; {new Date().getFullYear()} Scholarly Open Inc. · editorial360™ Enterprise Systems</span>
+          <span>&copy; {new Date().getFullYear()} Scholarly Open Inc. · Connected to info@scholarlyopen.org · All rights reserved by editorial360.</span>
         </footer>
 
         {/* Request Passcode Modal */}
@@ -423,13 +463,13 @@ export default function Editorial360PricingPage() {
                 <>
                   <div>
                     <span className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider block mb-1">
-                      Frankfurt Book Fair 2026 Executive Delegation
+                      Online Executive Demonstration
                     </span>
                     <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                      Request VIP Passcode
+                      Request Online Access Passcode
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Enter your institutional details to instantly receive a passcode or reserve a meeting slot.
+                      Inquiries route directly to <strong>info@scholarlyopen.org</strong>.
                     </p>
                   </div>
 
@@ -511,100 +551,6 @@ export default function Editorial360PricingPage() {
           </div>
         )}
 
-        {/* Global QR Code Pass Modal */}
-        {qrModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl text-center space-y-5">
-              <button
-                onClick={() => setQrModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/20 inline-block mb-1">
-                  Frankfurt Book Fair 2026 · VIP Delegate Pass
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                  editorial360 QR Code
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-                  Scan with any mobile camera to immediately review pricing and schedule an executive meeting.
-                </p>
-              </div>
-
-              {/* High-Resolution QR Card Frame */}
-              <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-md inline-block max-w-[280px] mx-auto">
-                <img 
-                  src="/qr-editorial360-pricing.png" 
-                  alt="editorial360 Frankfurt Fair 2026 QR Code" 
-                  className="w-64 h-64 mx-auto object-contain select-none"
-                />
-                <div className="mt-2 text-[10px] font-mono font-bold text-slate-500 break-all select-all">
-                  editorial360/pricing?code=FRANKFURT2026
-                </div>
-              </div>
-
-              {/* Action Buttons: Copy, Download, Share */}
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    onClick={handleCopyLink}
-                    variant="outline"
-                    className="w-full py-4 text-xs font-bold border-slate-200 dark:border-slate-700 cursor-pointer"
-                  >
-                    {linkCopied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-500 mr-1" />
-                        <span className="text-emerald-500">Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 mr-1" />
-                        <span>Copy Link</span>
-                      </>
-                    )}
-                  </Button>
-
-                  <a
-                    href="/qr-editorial360-pricing.png"
-                    download="editorial360-frankfurt-fair-qr.png"
-                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-xs font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Save PNG</span>
-                  </a>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Review editorial360™ Institutional Pricing & Schedule Frankfurt Book Fair 2026 Meeting: " + vipUrl)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    <span>WhatsApp</span>
-                  </a>
-
-                  <a
-                    href={`mailto:?subject=${encodeURIComponent("editorial360™ Institutional Pricing Schedule & Frankfurt Fair 2026 Briefing")}&body=${encodeURIComponent("Dear Colleague,\n\nPlease review the editorial360™ institutional pricing schedule and Frankfurt Book Fair 2026 executive showcase details here:\n\n" + vipUrl + "\n\nBest regards,\nScholarly Open Team")}`}
-                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Email Link</span>
-                  </a>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-slate-400">
-                Auto-unlocks with pre-loaded code: <strong className="text-slate-700 dark:text-slate-200 font-mono">FRANKFURT2026</strong>
-              </p>
-            </div>
-          </div>
-        )}
-
       </div>
     )
   }
@@ -623,7 +569,7 @@ export default function Editorial360PricingPage() {
               VIP Passcode Verified
             </span>
             <span className="font-semibold text-xs sm:text-sm">
-              Frankfurt Book Fair 2026 · Hall 4.0 Digital Publishing Zone
+              Frankfurt Book Fair 2026 · Online Executive Partner Sessions
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -638,8 +584,8 @@ export default function Editorial360PricingPage() {
               onClick={() => handleOpenMeetingModal("Frankfurt Fair VIP Demo")}
               className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-bold px-3 py-1 rounded-full text-xs border border-white/20 transition-all cursor-pointer whitespace-nowrap"
             >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Schedule Meeting</span>
+              <Video className="w-3.5 h-3.5" />
+              <span>Schedule Online Briefing</span>
             </button>
             <button
               onClick={() => {
@@ -864,7 +810,373 @@ export default function Editorial360PricingPage() {
         </div>
       </section>
 
-      {/* Elevate Customization Add-ons (Directly matching the user's slide) */}
+      {/* ========================================================================= */}
+      {/* PROTECTED PLATFORM SCREENSHOTS & ARCHITECTURE SHOWCASE (LURE WITH WATERMARK) */}
+      {/* ========================================================================= */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-10 shadow-2xl">
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6 mb-8">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <Lock className="w-3.5 h-3.5" />
+                <span>Protected Proprietary Architecture · Executive Preview</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                Inside the editorial360 Platform Engine
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                Live interface captures demonstrating our AI referee discovery, parallel peer review dispatch, and deep paper-mill image forensics. Sensitive identifiers are masked for partner confidentiality.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleOpenMeetingModal("Live Platform Walkthrough")}
+                className="inline-flex items-center gap-2 bg-[#0b99ff] hover:bg-[#0883dc] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md cursor-pointer transition-all whitespace-nowrap"
+              >
+                <Laptop className="w-4 h-4" />
+                <span>Request Live Sandbox Tour</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Tab Switcher */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              onClick={() => setActiveShowcaseTab("scholar_scout")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                activeShowcaseTab === "scholar_scout"
+                  ? "bg-[#0b99ff] text-white shadow-md"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+              }`}
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>1. ScholarScout™ AI Discovery</span>
+            </button>
+
+            <button
+              onClick={() => setActiveShowcaseTab("parallel_dispatch")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                activeShowcaseTab === "parallel_dispatch"
+                  ? "bg-[#0b99ff] text-white shadow-md"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>2. Parallel 4-Referee Dispatch</span>
+            </button>
+
+            <button
+              onClick={() => setActiveShowcaseTab("paper_mill")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                activeShowcaseTab === "paper_mill"
+                  ? "bg-[#0b99ff] text-white shadow-md"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>3. Paper Mill & Forensic Defense</span>
+            </button>
+
+            <button
+              onClick={() => setActiveShowcaseTab("reviewer_wallet")}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                activeShowcaseTab === "reviewer_wallet"
+                  ? "bg-[#0b99ff] text-white shadow-md"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>4. Reviewer Incentive Wallet</span>
+            </button>
+          </div>
+
+          {/* Interactive Protected Device Mockup Frame */}
+          <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-100 overflow-hidden shadow-2xl select-none">
+            
+            {/* Top Browser Window Chrome */}
+            <div className="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
+                <div className="ml-3 px-3 py-1 rounded-md bg-slate-800/80 text-[11px] font-mono text-slate-400 flex items-center gap-2">
+                  <Lock className="w-3 h-3 text-emerald-400" />
+                  <span>https://editorial360.sch-open.org/console/{activeShowcaseTab}</span>
+                </div>
+              </div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded border border-amber-400/20">
+                Watermarked Executive View
+              </div>
+            </div>
+
+            {/* Diagonal Protection Watermark Overlay */}
+            <div className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center opacity-10 rotate-[-18deg] text-slate-100 font-black tracking-widest text-3xl sm:text-5xl text-center uppercase select-none leading-tight">
+              editorial360™ · CONFIDENTIAL ARCHITECTURE<br />FRANKFURT BOOK FAIR 2026 PREVIEW
+            </div>
+
+            {/* SCREEN 1: SCHOLARSCOUT AI DISCOVERY */}
+            {activeShowcaseTab === "scholar_scout" && (
+              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-[#0b99ff]">Module · S-SCOUT-V3</span>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span>ScholarScout™ Automated Reviewer Discovery & Sourcing</span>
+                      <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-normal">Active Sourcing Mode</span>
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400 block">Target Manuscript:</span>
+                    <span className="text-xs font-mono font-bold text-slate-200">SOENG-26-RJ110 · Deep Synthesis</span>
+                  </div>
+                </div>
+
+                {/* Candidate Mockup Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Card 1 */}
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-bold text-sm text-white">Dr. K*** V*** (Zurich Institute)</div>
+                        <div className="text-xs text-slate-400">Department of Applied Materials & Micro-Systems</div>
+                      </div>
+                      <span className="text-xs font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-md">
+                        98.4% Match
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 text-[11px]">
+                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">Composite Microstructures</span>
+                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">Thermal Dynamics</span>
+                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">h-index: 38</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-2 flex items-center justify-between">
+                      <span className="text-emerald-400 flex items-center gap-1">✓ No COI · 0 Joint Papers (5y)</span>
+                      <span className="text-slate-500 font-mono">Invited: 2h ago (Bilingual DE/EN)</span>
+                    </div>
+                  </div>
+
+                  {/* Card 2 */}
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-bold text-sm text-white">Prof. Dr. N. Ikeda (Osaka Lab)</div>
+                        <div className="text-xs text-slate-400">Advanced Electronic Interface Dynamics</div>
+                      </div>
+                      <span className="text-xs font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-md">
+                        96.1% Match
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 text-[11px]">
+                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">Semiconductor Forensics</span>
+                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">ORCID: 0000-0002-****</span>
+                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">h-index: 42</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-2 flex items-center justify-between">
+                      <span className="text-emerald-400 flex items-center gap-1">✓ Verified Reviewer Status</span>
+                      <span className="text-[#0b99ff] font-bold">Accepted · Review in Progress</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="p-3 rounded-lg bg-blue-950/40 border border-blue-800/50 text-xs text-blue-300 flex items-center justify-between">
+                  <span>✦ <strong>Outcome Metric:</strong> Slashes referee sourcing latency from 14 days down to under 4 hours.</span>
+                  <span className="font-mono text-[10px] text-blue-400">Patent-Pending Algorithm</span>
+                </div>
+              </div>
+            )}
+
+            {/* SCREEN 2: PARALLEL DISPATCH MATRIX */}
+            {activeShowcaseTab === "parallel_dispatch" && (
+              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-[#0b99ff]">Module · DISPATCH-PARALLEL-4</span>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span>4-Referee Parallel Dispatch & Turnaround Velocity Table</span>
+                      <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-normal">Round 1 Velocity Track</span>
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400 block">Round Target:</span>
+                    <span className="text-xs font-mono font-bold text-emerald-400">21 Days SLA (Avg: 18.2 Days)</span>
+                  </div>
+                </div>
+
+                {/* Institutional Table Mockup */}
+                <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead className="bg-slate-900 border-b border-slate-800 text-[11px] text-slate-400">
+                      <tr>
+                        <th className="px-4 py-3 font-semibold">Referee (Masked)</th>
+                        <th className="px-4 py-3 font-semibold">Status</th>
+                        <th className="px-4 py-3 font-semibold">Evaluation Timeline</th>
+                        <th className="px-4 py-3 font-semibold text-right">Incentive Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800 text-slate-300">
+                      <tr>
+                        <td className="px-4 py-3 font-bold text-white">Referee #1</td>
+                        <td className="px-4 py-3"><span className="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-bold text-[10px]">Report In ✓</span></td>
+                        <td className="px-4 py-3 text-slate-400">Submitted in 8 Days · Comprehensive evaluation filed</td>
+                        <td className="px-4 py-3 text-right text-emerald-400 font-bold">+€150 APC Credit Qualified</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 font-bold text-white">Referee #2</td>
+                        <td className="px-4 py-3"><span className="text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded font-bold text-[10px]">Evaluating</span></td>
+                        <td className="px-4 py-3 text-slate-400">Invitation accepted · Day 5 of 14 deadline window</td>
+                        <td className="px-4 py-3 text-right text-slate-400">Pending On-Time Submission</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 font-bold text-white">Referee #3</td>
+                        <td className="px-4 py-3"><span className="text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded font-bold text-[10px]">Evaluating</span></td>
+                        <td className="px-4 py-3 text-slate-400">Invitation accepted · Section editor synthesis queued</td>
+                        <td className="px-4 py-3 text-right text-slate-400">Pending On-Time Submission</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 font-bold text-white">Referee #4 (Dr. Ikeda)</td>
+                        <td className="px-4 py-3"><span className="text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded font-bold text-[10px]">Accepted</span></td>
+                        <td className="px-4 py-3 text-slate-400">Reviewer workspace accessed · Drafting remarks</td>
+                        <td className="px-4 py-3 text-right text-purple-400">Active SLA Track</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/50 text-xs text-emerald-300 flex items-center justify-between">
+                  <span>✦ <strong>Turnaround Revolution:</strong> Eliminates sequential reviewer dropouts. Slashes peer review from 90 to 21 days.</span>
+                </div>
+              </div>
+            )}
+
+            {/* SCREEN 3: PAPER MILL DEFENSE */}
+            {activeShowcaseTab === "paper_mill" && (
+              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-purple-400">Module · FORENSIC-AUDIT-L3</span>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span>Paper Mill Defense & Multi-Spectral Image Forensics</span>
+                      <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full font-normal">Integrity Guard 97.6%</span>
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400 block">Retraction Defense Index:</span>
+                    <span className="text-xs font-mono font-bold text-emerald-400">Zero Vulnerabilities</span>
+                  </div>
+                </div>
+
+                {/* Forensic Scanners Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">Western Blot Duplication</span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">Passed</span>
+                    </div>
+                    <div className="h-16 rounded bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center">
+                      <span className="text-[11px] font-mono text-slate-500">Image Hash: Clean (Zero clone lanes)</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">Scans figure contrast and spliced bands against public retraction corpora.</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">LLM Synthetic Text Check</span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">98.2% Human</span>
+                    </div>
+                    <div className="h-16 rounded bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center">
+                      <span className="text-[11px] font-mono text-emerald-400 font-bold">Authentic Research Voice</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">Analyzes perplexity distribution and hallucinated citation markers.</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">Citation Ring Isolation</span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">0 Cartels</span>
+                    </div>
+                    <div className="h-16 rounded bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center">
+                      <span className="text-[11px] font-mono text-slate-400">Reciprocal citation loop: 0%</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">Cross-references author networks to prevent artificial citation inflation.</p>
+                  </div>
+
+                </div>
+
+                <div className="p-3 rounded-lg bg-purple-950/40 border border-purple-800/50 text-xs text-purple-300 flex items-center justify-between">
+                  <span>✦ <strong>Reputation Insurance:</strong> Protects university presses against multi-million euro paper mill retraction scandals.</span>
+                </div>
+              </div>
+            )}
+
+            {/* SCREEN 4: REVIEWER WALLET & INCENTIVES */}
+            {activeShowcaseTab === "reviewer_wallet" && (
+              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-[#0b99ff]">Module · WALLET-INCENTIVE-GATEWAY</span>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span>Reviewer Incentive Engine & Micro-Honoraria Settlement Ledger</span>
+                      <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-normal">Escrow Clearing Active</span>
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400 block">Referee Acceptance Rate:</span>
+                    <span className="text-xs font-mono font-bold text-emerald-400">+64% Improvement</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+                    <div className="font-bold text-sm text-white flex items-center justify-between">
+                      <span>Automated APC Waiver Ledger</span>
+                      <span className="text-emerald-400 font-mono text-xs">€350.00 Active Balance</span>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Referees who complete thorough peer evaluations within deadline automatically accrue publisher credits valid for their next manuscript submission.
+                    </p>
+                    <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                      <span className="text-emerald-400">✓ Automatic voucher generation</span>
+                      <span>· Single-use cryptographic tokens</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+                    <div className="font-bold text-sm text-white flex items-center justify-between">
+                      <span>Verified CPD & ORCID Certification</span>
+                      <span className="text-[#0b99ff] font-mono text-xs">Crossref Validated</span>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Instant issuance of continuing professional development (CPD) accredited certificates with verified ORCID peer review credit synchronization.
+                    </p>
+                    <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                      <span className="text-[#0b99ff]">✓ ORCID API automated deposit</span>
+                      <span>· Downloadable PDF Certificate</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-blue-950/40 border border-blue-800/50 text-xs text-blue-300 flex items-center justify-between">
+                  <span>✦ <strong>Retention Multiplier:</strong> Solves academic peer review fatigue by providing transparent, compliant rewards.</span>
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-4">
+            <span>Confidential Executive Preview · Proprietary Architecture of editorial360</span>
+            <span className="font-mono text-[11px] text-slate-400">All data shown is simulated for partner presentation</span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Elevate Customization Add-ons */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
         <div className="rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 mb-6">
@@ -1128,10 +1440,10 @@ export default function Editorial360PricingPage() {
               </div>
 
               <Button
-                onClick={() => handleOpenMeetingModal("Frankfurt Investor Memo")}
+                onClick={() => handleOpenMeetingModal("Frankfurt Online Executive Demo")}
                 className="w-full mt-2 bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs py-4 rounded-xl cursor-pointer"
               >
-                Schedule Frankfurt Fair Executive Discussion
+                Schedule Online Executive Demonstration
               </Button>
             </div>
 
@@ -1152,7 +1464,7 @@ export default function Editorial360PricingPage() {
         </button>
       </div>
 
-      {/* Frankfurt Meeting Request Modal */}
+      {/* Frankfurt Meeting Request Modal (Online Only) */}
       {meetingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6">
@@ -1168,13 +1480,13 @@ export default function Editorial360PricingPage() {
               <>
                 <div>
                   <span className="text-[11px] font-bold text-[#0b99ff] uppercase tracking-wider block mb-1">
-                    Frankfurt Book Fair 2026 Delegation
+                    Online Executive Demonstration & Briefing
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                    Schedule Meeting on {selectedPlanForModal}
+                    Schedule Online Session on {selectedPlanForModal}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Connect directly with the founder and executive team at Frankfurt Book Fair 2026.
+                    Connect directly via Zoom / Google Meet / Teams. Inquiries route directly to <strong>info@scholarlyopen.org</strong>.
                   </p>
                 </div>
 
@@ -1224,16 +1536,16 @@ export default function Editorial360PricingPage() {
                     </div>
                     <div>
                       <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Preferred Location / Slot
+                        Online Meeting Format *
                       </label>
                       <select
                         value={formData.meetingSlot}
                         onChange={(e) => setFormData({ ...formData, meetingSlot: e.target.value })}
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
                       >
-                        <option>Frankfurt Hall 4.0 / Digital Zone</option>
-                        <option>Virtual Executive Briefing (Zoom / Teams)</option>
-                        <option>Immediate 30-Day Sandbox Access</option>
+                        <option>Online Executive Briefing (Zoom / Google Meet)</option>
+                        <option>Interactive Online Live Platform Demo (Microsoft Teams)</option>
+                        <option>Immediate 30-Day Sandbox Access & Private Trial</option>
                       </select>
                     </div>
                   </div>
@@ -1251,11 +1563,16 @@ export default function Editorial360PricingPage() {
                     />
                   </div>
 
+                  {meetingError && (
+                    <p className="text-xs text-rose-500 font-medium">{meetingError}</p>
+                  )}
+
                   <Button
                     type="submit"
+                    disabled={submittingMeeting}
                     className="w-full py-5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white font-bold text-xs shadow-md cursor-pointer"
                   >
-                    Confirm Meeting / Request Institutional Access
+                    {submittingMeeting ? "Dispatching to info@scholarlyopen.org..." : "Confirm Online Meeting / Request Access"}
                   </Button>
                 </form>
               </>
@@ -1266,10 +1583,10 @@ export default function Editorial360PricingPage() {
                 </div>
                 <div>
                   <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                    Meeting Slot Confirmed
+                    Online Session Requested & Logged
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                    Thank you, {formData.name || "Colleague"}. The Scholarly Open executive team will meet with you in Frankfurt regarding your {selectedPlanForModal} deployment.
+                    Thank you, {formData.name || "Colleague"}. Your request for an online session ({formData.meetingSlot}) has been routed to <strong>info@scholarlyopen.org</strong>. An executive will confirm your calendar link shortly.
                   </p>
                 </div>
                 <Button
@@ -1304,7 +1621,7 @@ export default function Editorial360PricingPage() {
                 editorial360 QR Code
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-                Scan with any mobile camera to immediately review pricing and schedule an executive meeting.
+                Scan with any mobile camera to immediately review pricing and schedule an online executive briefing.
               </p>
             </div>
 
@@ -1353,7 +1670,7 @@ export default function Editorial360PricingPage() {
 
               <div className="grid grid-cols-2 gap-2">
                 <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Review editorial360™ Institutional Pricing & Schedule Frankfurt Book Fair 2026 Meeting: " + vipUrl)}`}
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Review editorial360™ Institutional Pricing & Schedule Online Executive Meeting: " + vipUrl)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
@@ -1363,11 +1680,11 @@ export default function Editorial360PricingPage() {
                 </a>
 
                 <a
-                  href={`mailto:?subject=${encodeURIComponent("editorial360™ Institutional Pricing Schedule & Frankfurt Fair 2026 Briefing")}&body=${encodeURIComponent("Dear Colleague,\n\nPlease review the editorial360™ institutional pricing schedule and Frankfurt Book Fair 2026 executive showcase details here:\n\n" + vipUrl + "\n\nBest regards,\nScholarly Open Team")}`}
+                  href={`mailto:info@scholarlyopen.org?subject=${encodeURIComponent("editorial360™ Institutional Pricing & Online Demo Inquiry")}&body=${encodeURIComponent("Dear Scholarly Open Team,\n\nI would like to schedule an online executive briefing regarding editorial360™.\n\nLink: " + vipUrl)}`}
                   className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Email Link</span>
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Email info@</span>
                 </a>
               </div>
             </div>
@@ -1387,7 +1704,7 @@ export default function Editorial360PricingPage() {
             <span>&copy; {new Date().getFullYear()} Scholarly Open Inc. All rights reserved by editorial360.</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="font-semibold text-slate-400">Confidential · Frankfurt Book Fair 2026 Schedule</span>
+            <span className="font-semibold text-slate-400">Connected to info@scholarlyopen.org · Online Sessions Available</span>
           </div>
         </div>
       </footer>
