@@ -6192,15 +6192,6 @@ export default function Editorial360Page() {
                           </button>
                         </p>
                       )}
-                      <div className="pt-2 flex items-center justify-center">
-                        <Link
-                          href="/editorial360/pricing"
-                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0b99ff] hover:text-[#0883dc] bg-[#0b99ff]/5 hover:bg-[#0b99ff]/10 border border-[#0b99ff]/20 px-3 py-1 rounded-full transition-all shadow-2xs"
-                        >
-                          <Sparkles className="w-3 h-3 text-amber-500" />
-                          <span>Frankfurt Fair 2026 · Publisher Pricing & 3 Tiers →</span>
-                        </Link>
-                      </div>
                     </div>
                   ) : (
                     <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
@@ -6807,13 +6798,6 @@ export default function Editorial360Page() {
               <span className="text-[10px] uppercase font-bold tracking-widest text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20 hidden sm:inline-block">
                 Workspace
               </span>
-              <Link 
-                href="/editorial360/pricing"
-                className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] dark:hover:text-[#0b99ff] bg-slate-100/80 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-800 transition-all shadow-2xs"
-              >
-                <Sparkles className="w-3 h-3 text-amber-500" />
-                <span>Pricing & Plans</span>
-              </Link>
             </div>
 
             {/* Theme, Translation, Notification & User Profile Actions */}

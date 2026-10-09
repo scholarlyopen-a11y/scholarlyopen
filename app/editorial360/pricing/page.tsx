@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { 
@@ -14,21 +14,16 @@ import {
   Calculator, 
   Calendar, 
   Globe, 
-  Cpu, 
   Award, 
   FileCheck2, 
   Lock, 
-  BarChart3, 
-  Layers, 
-  HelpCircle, 
-  X, 
-  CheckCircle2, 
   Sliders, 
   TrendingUp, 
-  Scale, 
   Briefcase,
-  ChevronRight,
-  ArrowUpRight,
+  X, 
+  CheckCircle2, 
+  KeyRound,
+  AlertCircle,
   Sun,
   Moon
 } from "lucide-react"
@@ -49,10 +44,28 @@ const CURRENCY_RATES: Record<Currency, number> = {
   GBP: 0.85
 }
 
+// Valid VIP Passcodes for Frankfurt Book Fair 2026 investors and publishing executives
+const VALID_ACCESS_CODES = [
+  "FRANKFURT2026",
+  "FBF26",
+  "FBF2026",
+  "INVESTOR360",
+  "VIP360",
+  "SCHOLARLY2026",
+  "EDITORIAL360"
+]
+
 export default function Editorial360PricingPage() {
   const { theme, setTheme } = useTheme()
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("annual")
   const [currency, setCurrency] = useState<Currency>("EUR")
+
+  // Access Gate state
+  const [isUnlocked, setIsUnlocked] = useState(false)
+  const [accessCodeInput, setAccessCodeInput] = useState("")
+  const [accessError, setAccessError] = useState("")
+  const [requestAccessModalOpen, setRequestAccessModalOpen] = useState(false)
+  const [requestSubmitted, setRequestSubmitted] = useState(false)
 
   // Add-on selection states
   const [addOnReviewerWallet, setAddOnReviewerWallet] = useState(true)
@@ -76,6 +89,38 @@ export default function Editorial360PricingPage() {
     notes: ""
   })
 
+  // Check URL query parameters or localStorage for existing unlock
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.sessionStorage.getItem("editorial360_vip_unlocked")
+      if (stored === "true") {
+        setIsUnlocked(true)
+        return
+      }
+
+      const params = new URLSearchParams(window.location.search)
+      const codeFromUrl = params.get("code") || params.get("access") || params.get("pass")
+      if (codeFromUrl && VALID_ACCESS_CODES.includes(codeFromUrl.trim().toUpperCase())) {
+        setIsUnlocked(true)
+        window.sessionStorage.setItem("editorial360_vip_unlocked", "true")
+      }
+    }
+  }, [])
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault()
+    const cleaned = accessCodeInput.trim().toUpperCase()
+    if (VALID_ACCESS_CODES.includes(cleaned)) {
+      setIsUnlocked(true)
+      setAccessError("")
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("editorial360_vip_unlocked", "true")
+      }
+    } else {
+      setAccessError("Invalid VIP Access Code. Please enter the passcode provided by the Scholarly Open team.")
+    }
+  }
+
   // Format price helper
   const formatPrice = (eurAmount: number) => {
     const rate = CURRENCY_RATES[currency]
@@ -83,19 +128,20 @@ export default function Editorial360PricingPage() {
     return `${CURRENCY_SYMBOLS[currency]}${converted.toLocaleString()}`
   }
 
-  // Base pricing figures (EUR)
+  // Base pricing figures (EUR) - Updated per requirements
   const plans = [
     {
       id: "launch",
       name: "Launch",
-      badge: "Independent & Diamond OA",
-      tagline: "Ideal for independent society journals and emerging diamond open access launches.",
-      monthlyEur: 199,
-      annualEur: 165, // billed annually as €1,990/yr
-      annualTotalEur: 1990,
+      badge: "Small OA or independent journal",
+      tagline: "Designed for independent societies and emerging diamond open access journal launches.",
+      monthlyEur: 249,
+      annualEur: 199, // at least 199 EUR per journal
+      annualTotalEur: 2388,
+      priceLabel: "per journal",
       limits: {
         editors: "Up to 3 Managing & Section Editors",
-        submissions: "150 Submissions / year",
+        submissions: "150 Submissions / year per journal",
         journals: "1 Journal instance"
       },
       features: [
@@ -107,18 +153,19 @@ export default function Editorial360PricingPage() {
         "Encrypted GDPR-Compliant EU Cloud Hosting",
         "Standard Email Support (24h SLA)"
       ],
-      ctaText: "Launch Institutional Pilot",
+      ctaText: "Select Launch Pilot",
       accent: "border-slate-200 dark:border-slate-800",
       isPopular: false
     },
     {
       id: "elevate",
       name: "Elevate",
-      badge: "Most Popular · University Presses",
-      tagline: "Designed for university presses, learned societies, and active mid-sized publishers.",
-      monthlyEur: 499,
-      annualEur: 415, // billed annually as €4,990/yr
-      annualTotalEur: 4990,
+      badge: "University publisher or society",
+      tagline: "Designed for university presses, learned societies, and active mid-sized academic publishers.",
+      monthlyEur: 599,
+      annualEur: 499, // €499/mo per journal billed annually
+      annualTotalEur: 5988,
+      priceLabel: "per journal",
       limits: {
         editors: "Up to 12 Section & Associate Editors",
         submissions: "600 Submissions / year per journal",
@@ -134,18 +181,19 @@ export default function Editorial360PricingPage() {
         "Parallel 4-Referee Dispatch Pipeline",
         "Priority Support (4h SLA) & Dedicated Onboarding"
       ],
-      ctaText: "Start Elevate 30-Day Trial",
+      ctaText: "Select Elevate",
       accent: "border-[#0b99ff] ring-2 ring-[#0b99ff]/30 dark:ring-[#0b99ff]/40 shadow-xl",
       isPopular: true
     },
     {
       id: "orbit",
       name: "Orbit",
-      badge: "Enterprise Consortium & Commercial",
+      badge: "Academic publisher or consortium",
       tagline: "Full-scale editorial infrastructure for academic publishing houses and university consortia.",
-      monthlyEur: 1290,
-      annualEur: 1075, // billed annually as €12,900/yr
-      annualTotalEur: 12900,
+      monthlyEur: 1490,
+      annualEur: 1290, // €1,290/mo billed annually
+      annualTotalEur: 15480,
+      priceLabel: "multi-journal setup",
       limits: {
         editors: "Unlimited Editors & Section Boards",
         submissions: "Unlimited Submissions (Fair use)",
@@ -161,7 +209,7 @@ export default function Editorial360PricingPage() {
         "Dedicated Journal Manager & Strategic Advisory",
         "99.9% Uptime SLA & Custom DPA Agreement"
       ],
-      ctaText: "Request Enterprise Pilot",
+      ctaText: "Select Enterprise",
       accent: "border-purple-300 dark:border-purple-800/80",
       isPopular: false
     }
@@ -169,9 +217,9 @@ export default function Editorial360PricingPage() {
 
   // Add-ons calculations
   const addOnPrices = {
-    reviewerWallet: { monthlyEur: 199, annualEur: 165 },
-    papermillDefense: { monthlyEur: 299, annualEur: 249 },
-    whiteLabel: { monthlyEur: 99, annualEur: 79 }
+    reviewerWallet: { monthlyEur: 250, annualEur: 199 },
+    papermillDefense: { monthlyEur: 300, annualEur: 249 },
+    whiteLabel: { monthlyEur: 120, annualEur: 99 }
   }
 
   const selectedAddonsTotalMonthly = useMemo(() => {
@@ -186,11 +234,11 @@ export default function Editorial360PricingPage() {
   const roiMetrics = useMemo(() => {
     const legacyCostPerJournal = 14000
     const legacyAnnualTotal = roiJournals * legacyCostPerJournal
-    const editorial360AnnualPerJournal = 4990 // Elevate annual
+    const editorial360AnnualPerJournal = 5988 // Elevate annual per journal
     const editorial360AnnualTotal = roiJournals * editorial360AnnualPerJournal
     const netAnnualSavings = legacyAnnualTotal - editorial360AnnualTotal
     const savingsPercent = Math.round((netAnnualSavings / legacyAnnualTotal) * 100)
-    const hoursSavedPerYear = roiJournals * roiSubmissionsPerYear * 3.5 // 3.5 hours saved per manuscript cycle
+    const hoursSavedPerYear = roiJournals * roiSubmissionsPerYear * 3.5
     return {
       legacyAnnualTotal,
       editorial360AnnualTotal,
@@ -209,32 +257,263 @@ export default function Editorial360PricingPage() {
   const handleSubmitMeeting = (e: React.FormEvent) => {
     e.preventDefault()
     setFormSubmitted(true)
-    setTimeout(() => {
-      // simulate receipt
-    }, 600)
   }
 
+  // ==========================================
+  // VIEW A: ACCESS CODE GATE (WHEN NOT UNLOCKED)
+  // ==========================================
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0c0d12] text-slate-900 dark:text-slate-100 font-sans flex flex-col justify-between">
+        
+        {/* Minimal Header */}
+        <header className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#12131a]/80 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-90">
+              <img 
+                src="/editorial360.svg" 
+                alt="editorial360" 
+                className="h-7 w-auto object-contain brightness-100 dark:brightness-110" 
+              />
+            </Link>
+            <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-800" />
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Executive Portal
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="h-8 w-8 px-0 text-slate-600 dark:text-slate-300"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+        </header>
+
+        {/* Access Code Form Box */}
+        <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+          <div className="w-full max-w-md bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+            
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20 flex items-center justify-center shadow-xs">
+                <KeyRound className="w-6 h-6" />
+              </div>
+              
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-extrabold uppercase tracking-widest text-slate-600 dark:text-slate-300">
+                <span>Frankfurt Book Fair 2026 · VIP Delegate Portal</span>
+              </div>
+
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                editorial360 Institutional Pricing
+              </h1>
+              
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mx-auto">
+                This pricing schedule and executive demonstration booking are reserved for accredited university press directors, society leaders, and investors.
+              </p>
+            </div>
+
+            <form onSubmit={handleUnlock} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Enter VIP Access Code
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. FRANKFURT2026"
+                    value={accessCodeInput}
+                    onChange={(e) => {
+                      setAccessCodeInput(e.target.value)
+                      setAccessError("")
+                    }}
+                    className="w-full text-sm font-mono tracking-wider uppercase px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff] transition-all"
+                  />
+                  <Lock className="w-4 h-4 text-slate-400 absolute right-3.5 top-3.5" />
+                </div>
+                {accessError && (
+                  <p className="text-xs text-rose-500 font-medium mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{accessError}</span>
+                  </p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full py-5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white font-bold text-xs shadow-md cursor-pointer transition-all"
+              >
+                <span>Unlock Pricing Schedule & Tiers</span>
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </form>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Meeting at the fair and need a code?{" "}
+                <button
+                  type="button"
+                  onClick={() => setRequestAccessModalOpen(true)}
+                  className="font-bold text-[#0b99ff] hover:underline cursor-pointer"
+                >
+                  Request Instant Passcode / Schedule Meeting →
+                </button>
+              </p>
+            </div>
+
+          </div>
+        </main>
+
+        {/* Minimal Footer */}
+        <footer className="border-t border-slate-200 dark:border-slate-800 py-4 px-4 text-center text-xs text-slate-400">
+          <span>&copy; {new Date().getFullYear()} Scholarly Open Inc. · editorial360™ Enterprise Systems</span>
+        </footer>
+
+        {/* Request Passcode Modal */}
+        {requestAccessModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <div className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl space-y-4">
+              <button
+                onClick={() => setRequestAccessModalOpen(false)}
+                className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {!requestSubmitted ? (
+                <>
+                  <div>
+                    <span className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider block mb-1">
+                      Frankfurt Book Fair 2026 Executive Delegation
+                    </span>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                      Request VIP Passcode
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Enter your institutional details to instantly receive a passcode or reserve a meeting slot.
+                    </p>
+                  </div>
+
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      setRequestSubmitted(true)
+                    }} 
+                    className="space-y-3"
+                  >
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Your Full Name *
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="Dr. Julian Weber"
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Institutional Email *
+                      </label>
+                      <input
+                        required
+                        type="email"
+                        placeholder="j.weber@universitypress.org"
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Press or Organization *
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="European Academic Society"
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full py-5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white font-bold text-xs"
+                    >
+                      Submit Request & Book Slot
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <div className="text-center py-6 space-y-3">
+                  <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+                    <CheckCircle2 className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-lg font-black text-slate-900 dark:text-white">
+                    VIP Passcode Dispatched
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                    You can unlock immediately using code: <strong className="text-[#0b99ff] font-mono text-sm block mt-1">FRANKFURT2026</strong>
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setAccessCodeInput("FRANKFURT2026")
+                      setIsUnlocked(true)
+                      setRequestAccessModalOpen(false)
+                      if (typeof window !== "undefined") {
+                        window.sessionStorage.setItem("editorial360_vip_unlocked", "true")
+                      }
+                    }}
+                    className="w-full bg-[#0b99ff] text-white font-bold text-xs py-4 rounded-xl"
+                  >
+                    Unlock Schedule Now
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
+    )
+  }
+
+  // ==========================================
+  // VIEW B: FULL UNLOCKED PRICING & PITCH SCHEDULE
+  // ==========================================
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0c0d12] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
       
       {/* Top Floating Announcement Bar: Frankfurt Book Fair 2026 */}
-      <div className="bg-gradient-to-r from-[#0b99ff] via-indigo-600 to-purple-600 text-white px-4 py-2.5 text-xs sm:text-sm font-medium shadow-md">
+      <div className="bg-gradient-to-r from-[#0b99ff] via-indigo-600 to-purple-600 text-white px-4 py-2 text-xs sm:text-sm font-medium shadow-md">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <div className="flex items-center gap-2">
-            <span className="bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase">
-              Frankfurt Book Fair 2026
+            <span className="bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase">
+              VIP Passcode Verified
             </span>
-            <span className="font-semibold">
-              Live Investor & Publisher Showcase · Hall 4.0 Digital Publishing Zone
+            <span className="font-semibold text-xs sm:text-sm">
+              Frankfurt Book Fair 2026 · Hall 4.0 Digital Publishing Zone
             </span>
           </div>
-          <button
-            onClick={() => handleOpenMeetingModal("Frankfurt Fair VIP Demo")}
-            className="inline-flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-100 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
-          >
-            <span>Book On-Site Demo</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleOpenMeetingModal("Frankfurt Fair VIP Demo")}
+              className="inline-flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-100 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#0b99ff]" />
+              <span>Schedule Frankfurt Meeting</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsUnlocked(false)
+                if (typeof window !== "undefined") {
+                  window.sessionStorage.removeItem("editorial360_vip_unlocked")
+                }
+              }}
+              className="text-white/80 hover:text-white text-[11px] underline ml-2 cursor-pointer"
+            >
+              Lock
+            </button>
+          </div>
         </div>
       </div>
 
@@ -243,7 +522,7 @@ export default function Editorial360PricingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           <div className="flex items-center gap-4">
-            <Link href="/editorial360" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
               <img 
                 src="/editorial360.svg" 
                 alt="editorial360" 
@@ -252,7 +531,7 @@ export default function Editorial360PricingPage() {
             </Link>
             <div className="h-5 w-[1px] bg-slate-200 dark:bg-slate-800 hidden sm:block" />
             <span className="text-[11px] font-bold tracking-widest uppercase text-slate-500 dark:text-slate-400 hidden sm:inline-block">
-              Publisher Licensing & SaaS Pricing
+              Business Model & Pricing
             </span>
           </div>
 
@@ -284,37 +563,22 @@ export default function Editorial360PricingPage() {
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-
-            {/* Back to Workspace */}
-            <Link
-              href="/editorial360"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#0b99ff] bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 px-3 py-1.5 rounded-lg transition-all border border-slate-200 dark:border-slate-700 shadow-2xs"
-            >
-              <span>To Workspace</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="pt-12 pb-10 px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto space-y-5">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20 text-xs font-bold tracking-wide uppercase">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Next-Generation Editorial Infrastructure</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15]">
-          Predictable, Transparent SaaS Pricing for Modern Academic Publishers
+      <section className="pt-12 pb-8 px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto space-y-4">
+        <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+          Business Model & Pricing
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Slash peer review turnaround from <span className="font-semibold text-slate-900 dark:text-white">90 days to 21 days</span>. 
-          Protect journal reputation with native paper-mill forensics, automated reviewer incentive rails, and institutional compliance.
+        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          Modern editorial management & peer review infrastructure engineered for velocity, paper-mill fraud defense, and verified reviewer recognition.
         </p>
 
-        {/* Billing Cycle Switcher with Savings Badge */}
-        <div className="pt-4 flex items-center justify-center">
+        {/* Billing Cycle Switcher */}
+        <div className="pt-3 flex items-center justify-center">
           <div className="inline-flex items-center bg-slate-200/80 dark:bg-slate-850 p-1.5 rounded-2xl border border-slate-300/80 dark:border-slate-750 shadow-inner">
             <button
               onClick={() => setBillingCycle("monthly")}
@@ -324,7 +588,7 @@ export default function Editorial360PricingPage() {
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              Monthly Invoicing
+              Monthly Billing
             </button>
             <button
               onClick={() => setBillingCycle("annual")}
@@ -338,19 +602,19 @@ export default function Editorial360PricingPage() {
               <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
                 billingCycle === "annual" ? "bg-white text-[#0b99ff]" : "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
               }`}>
-                Save ~17% (2 Mo Free)
+                Save ~20%
               </span>
             </button>
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          All tiers include GDPR EU Cloud hosting, unlimited reviewer invitations, and automated author status dossiers.
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium italic">
+          Prices per journal, annual billing, plus VAT
         </p>
       </section>
 
-      {/* 3 Main Tiers Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      {/* 3 Main Tiers Grid - Perfectly formatted with "per journal" */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           
           {plans.map((plan) => {
@@ -360,49 +624,42 @@ export default function Editorial360PricingPage() {
               <div 
                 key={plan.id}
                 className={`relative flex flex-col rounded-3xl bg-white dark:bg-[#15161e] border p-7 sm:p-8 transition-all duration-200 hover:shadow-2xl ${plan.accent} ${
-                  plan.isPopular ? "scale-102 lg:scale-105 z-10 border-[#0b99ff]" : ""
+                  plan.isPopular ? "border-[#0b99ff] ring-2 ring-[#0b99ff]/20" : ""
                 }`}
               >
-                {/* Popular Gold/Blue Pill */}
+                {/* Popular Badge */}
                 {plan.isPopular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-[#0b99ff] text-white text-[11px] font-extrabold tracking-wider uppercase px-4 py-1 rounded-full shadow-md">
-                    {plan.badge}
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[11px] font-extrabold tracking-wider uppercase px-4 py-1 rounded-full shadow-md">
+                    MOST POPULAR
                   </div>
                 )}
 
-                {!plan.isPopular && (
-                  <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                    {plan.badge}
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between mb-2">
+                <div className="text-center mb-4">
                   <h3 className="text-2xl font-black text-slate-900 dark:text-white">
                     {plan.name}
                   </h3>
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                    {plan.badge}
+                  </div>
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 min-h-[36px] mb-5 leading-relaxed">
-                  {plan.tagline}
-                </p>
-
-                {/* Price display */}
-                <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-[#1a1b26] border border-slate-100 dark:border-slate-800">
-                  <div className="flex items-baseline gap-1">
+                {/* Price display with explicit "per journal" */}
+                <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-[#1a1b26] border border-slate-100 dark:border-slate-800 text-center">
+                  <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
                       {formatPrice(price)}
                     </span>
                     <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                      / month
+                      /mo
                     </span>
                   </div>
-                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                    <span>
-                      {billingCycle === "annual" 
-                        ? `${formatPrice(plan.annualTotalEur)} billed annually` 
-                        : "Billed on a monthly basis"}
-                    </span>
-                    <span className="text-[10px] font-semibold text-slate-400">Excl. VAT</span>
+                  <div className="mt-1 text-xs font-semibold text-[#0b99ff]">
+                    {plan.priceLabel}
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-400">
+                    {billingCycle === "annual" 
+                      ? `${formatPrice(plan.annualTotalEur)} billed annually per journal` 
+                      : "Billed on a monthly basis"}
                   </div>
                 </div>
 
@@ -425,7 +682,7 @@ export default function Editorial360PricingPage() {
                 {/* Feature Checklist */}
                 <div className="flex-1 space-y-3 mb-8 text-xs">
                   <div className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
-                    Included Capabilities:
+                    Included Features:
                   </div>
                   {plan.features.map((feat, idx) => (
                     <div key={idx} className="flex items-start gap-2.5">
@@ -442,14 +699,14 @@ export default function Editorial360PricingPage() {
                 {/* CTA Action */}
                 <Button
                   onClick={() => handleOpenMeetingModal(plan.name)}
-                  className={`w-full py-6 rounded-xl font-bold text-sm transition-all cursor-pointer shadow-md ${
+                  className={`w-full py-5 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-md ${
                     plan.isPopular
-                      ? "bg-[#0b99ff] hover:bg-[#0883dc] text-white"
-                      : "bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                      ? "bg-amber-500 hover:bg-amber-600 text-white"
+                      : "bg-[#0b99ff] hover:bg-[#0883dc] text-white"
                   }`}
                 >
-                  <span>{plan.ctaText}</span>
-                  <ArrowRight className="w-4 h-4 ml-1.5" />
+                  <span>{plan.ctaText.toUpperCase()}</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
 
               </div>
@@ -459,20 +716,16 @@ export default function Editorial360PricingPage() {
         </div>
       </section>
 
-      {/* Add-on Customization Engine (Directly reflects & expands user's screenshot) */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      {/* Elevate Customization Add-ons (Directly matching the user's slide) */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
         <div className="rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 mb-6">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0b99ff] uppercase tracking-wider mb-1">
-                <Sliders className="w-3.5 h-3.5" />
-                <span>Modular Expansion Engine</span>
-              </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Elevate & Orbit Enterprise Add-Ons
+                Elevate Customization Add-ons
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Power up your editorial desk with dedicated forensic intelligence and reviewer retention rails.
+                High-margin forensic defense and reviewer retention modules (per journal).
               </p>
             </div>
 
@@ -482,7 +735,7 @@ export default function Editorial360PricingPage() {
               </span>
               <span className="text-2xl font-black text-[#0b99ff]">
                 +{formatPrice(selectedAddonsTotalMonthly)}
-                <span className="text-xs font-normal text-slate-500">/mo</span>
+                <span className="text-xs font-normal text-slate-500">/mo per journal</span>
               </span>
             </div>
           </div>
@@ -502,14 +755,14 @@ export default function Editorial360PricingPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-900 dark:text-white text-sm">
-                      Reviewer Incentive Engine & Wallet
+                      Reviewer Incentive Engine
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
                       Cuts Refusal Rate by 64%
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-lg leading-relaxed">
-                    Automate APC waiver voucher distribution, verified CPD certificates, and micro-honoraria payouts for referee on-time evaluations.
+                    Automate APC waiver vouchers, verified CPD certification, and micro-honoraria payouts for referee on-time evaluations.
                   </p>
                 </div>
               </div>
@@ -522,7 +775,7 @@ export default function Editorial360PricingPage() {
                   type="button"
                   onClick={() => setAddOnReviewerWallet(!addOnReviewerWallet)}
                   className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                    addOnReviewerWallet ? "bg-[#0b99ff]" : "bg-slate-300 dark:bg-slate-700"
+                    addOnReviewerWallet ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
                   }`}
                 >
                   <span className={`block w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
@@ -545,14 +798,14 @@ export default function Editorial360PricingPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-900 dark:text-white text-sm">
-                      Paper Mill & Forensic Defense Layer
+                      Paper Mill Defense Layer
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
-                      97%+ Accuracy
+                      97%+ Precision
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-lg leading-relaxed">
-                    Automated Western blot & microscopy image duplication forensics, author email spoofing detection, and citation ring network anomaly detection.
+                    Automated Western blot & microscopy image duplication forensics, email anomaly alerts, and citation cartel screening.
                   </p>
                 </div>
               </div>
@@ -565,7 +818,7 @@ export default function Editorial360PricingPage() {
                   type="button"
                   onClick={() => setAddOnPapermillDefense(!addOnPapermillDefense)}
                   className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                    addOnPapermillDefense ? "bg-purple-600" : "bg-slate-300 dark:bg-slate-700"
+                    addOnPapermillDefense ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
                   }`}
                 >
                   <span className={`block w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
@@ -592,7 +845,7 @@ export default function Editorial360PricingPage() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-lg leading-relaxed">
-                    Deploy under your publisher domain (e.g. <code className="text-[#0b99ff]">review.press.oxford.org</code>) with custom email signing and institutional certificates.
+                    Deploy under your publisher domain (e.g. <code className="text-[#0b99ff]">review.press.oxford.org</code>) with custom institutional email signing.
                   </p>
                 </div>
               </div>
@@ -605,7 +858,7 @@ export default function Editorial360PricingPage() {
                   type="button"
                   onClick={() => setAddOnWhiteLabel(!addOnWhiteLabel)}
                   className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                    addOnWhiteLabel ? "bg-amber-600" : "bg-slate-300 dark:bg-slate-700"
+                    addOnWhiteLabel ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
                   }`}
                 >
                   <span className={`block w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
@@ -616,11 +869,16 @@ export default function Editorial360PricingPage() {
             </div>
 
           </div>
+
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Prices per journal, annual billing, plus VAT</span>
+            <span className="font-mono text-[11px] text-slate-400">Copyright © 2026 | All rights reserved by editorial360</span>
+          </div>
         </div>
       </section>
 
-      {/* Publisher ROI & Cost Comparison Calculator (Vital for Investors at Frankfurt) */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      {/* Publisher ROI & Unit Economics */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
         <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white p-8 sm:p-10 shadow-2xl border border-slate-800">
           
           <div className="flex items-center gap-2 text-xs font-bold text-[#0b99ff] uppercase tracking-wider mb-2">
@@ -632,7 +890,7 @@ export default function Editorial360PricingPage() {
             Calculate Your Return on Investment vs Legacy EMS
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mb-8 leading-relaxed">
-            Legacy providers like ScholarOne and Aries Editorial Manager lock academic societies into €12k–€25k annual contracts with rigid customization and months of onboarding.
+            Legacy providers like ScholarOne and Aries Editorial Manager lock academic societies into €12k–€25k annual contracts per journal.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -686,7 +944,7 @@ export default function Editorial360PricingPage() {
                   <span>Velocity Impact:</span>
                 </div>
                 <div>• Review turnaround slashes from 84 days to ~22 days.</div>
-                <div>• Saves approx. <strong className="text-white">{Math.round(roiMetrics.hoursSavedPerYear).toLocaleString()} editorial desk hours</strong> annually.</div>
+                <div>• Saves approx. <strong className="text-white">{Math.round(roiMetrics.hoursSavedPerYear).toLocaleString()} editorial desk hours</strong> annually across {roiJournals} journals.</div>
               </div>
             </div>
 
@@ -708,13 +966,13 @@ export default function Editorial360PricingPage() {
 
               <div className="pt-2 grid grid-cols-2 gap-2 text-xs text-left border-t border-slate-700">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Legacy EMS:</span>
+                  <span className="text-slate-400 block text-[11px]">Legacy EMS ({roiJournals} journals):</span>
                   <span className="font-bold text-slate-200 line-through">
                     {formatPrice(roiMetrics.legacyAnnualTotal)}/yr
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Editorial360:</span>
+                  <span className="text-slate-400 block text-[11px]">editorial360 ({roiJournals} journals):</span>
                   <span className="font-bold text-emerald-400">
                     {formatPrice(roiMetrics.editorial360AnnualTotal)}/yr
                   </span>
@@ -722,179 +980,15 @@ export default function Editorial360PricingPage() {
               </div>
 
               <Button
-                onClick={() => handleOpenMeetingModal("Custom Consortia ROI")}
+                onClick={() => handleOpenMeetingModal("Frankfurt Investor Memo")}
                 className="w-full mt-2 bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs py-4 rounded-xl cursor-pointer"
               >
-                Download Custom CFO & Investment Memo
+                Schedule Frankfurt Fair Executive Discussion
               </Button>
             </div>
 
           </div>
 
-        </div>
-      </section>
-
-      {/* Feature Comparison Matrix */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-            Feature Comparison Matrix
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Compare key capabilities across our three subscription tiers.
-          </p>
-        </div>
-
-        <div className="overflow-x-auto rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#15161e] shadow-xl">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#1a1b26]">
-                <th className="p-4 sm:p-5 font-bold text-slate-900 dark:text-white w-2/5">Capabilities & Architecture</th>
-                <th className="p-4 sm:p-5 font-bold text-center w-1/5 text-slate-700 dark:text-slate-300">Launch</th>
-                <th className="p-4 sm:p-5 font-bold text-center w-1/5 text-[#0b99ff]">Elevate</th>
-                <th className="p-4 sm:p-5 font-bold text-center w-1/5 text-purple-600 dark:text-purple-400">Orbit</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-              
-              {/* Category: Submissions & Capacity */}
-              <tr className="bg-slate-50/50 dark:bg-slate-900/50">
-                <td colSpan={4} className="p-3 px-5 font-extrabold text-[11px] uppercase tracking-wider text-slate-500">
-                  1. Submission Velocity & Capacity
-                </td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Annual Submission Volume</td>
-                <td className="p-4 text-center text-slate-600 dark:text-slate-300">150 / yr</td>
-                <td className="p-4 text-center font-bold text-[#0b99ff]">600 / yr</td>
-                <td className="p-4 text-center font-bold text-purple-600 dark:text-purple-400">Unlimited</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Active Managing / Section Editors</td>
-                <td className="p-4 text-center text-slate-600 dark:text-slate-300">Up to 3</td>
-                <td className="p-4 text-center font-bold text-[#0b99ff]">Up to 12</td>
-                <td className="p-4 text-center font-bold text-purple-600 dark:text-purple-400">Unlimited</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Multi-Journal Portfolio Console</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center text-slate-600 dark:text-slate-300">Up to 3 Journals</td>
-                <td className="p-4 text-center font-bold text-purple-600 dark:text-purple-400">Unlimited Multi-Desk</td>
-              </tr>
-
-              {/* Category: Peer Review & Sourcing */}
-              <tr className="bg-slate-50/50 dark:bg-slate-900/50">
-                <td colSpan={4} className="p-3 px-5 font-extrabold text-[11px] uppercase tracking-wider text-slate-500">
-                  2. Peer Review Orchestration & AI Discovery
-                </td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">ScholarScout™ AI Reviewer Discovery</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Automated</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Automated + Priority</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Parallel 4-Referee Dispatch Matrix</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Included</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Included</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Included</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Reviewer Wallet & APC Incentive Rails</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ (Module)</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Full Enterprise</td>
-              </tr>
-
-              {/* Category: Research Integrity */}
-              <tr className="bg-slate-50/50 dark:bg-slate-900/50">
-                <td colSpan={4} className="p-3 px-5 font-extrabold text-[11px] uppercase tracking-wider text-slate-500">
-                  3. Research Integrity & Fraud Defense
-                </td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">COPE Ethics Screening Checklists</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Basic</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Advanced</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Enterprise Custom</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Deep Paper Mill & Image Forensic Layer</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center text-slate-600 dark:text-slate-300">Add-On Available</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Native Forensic Suite</td>
-              </tr>
-
-              {/* Category: Enterprise & Integrations */}
-              <tr className="bg-slate-50/50 dark:bg-slate-900/50">
-                <td colSpan={4} className="p-3 px-5 font-extrabold text-[11px] uppercase tracking-wider text-slate-500">
-                  4. Production & Enterprise Governance
-                </td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Crossref DOI & ORCID Integration</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Included</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Real-Time Pipeline</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Institutional SSO (SAML / Okta / Azure AD)</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Included</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">REST APIs & Custom Production Webhooks</td>
-                <td className="p-4 text-center text-slate-400">—</td>
-                <td className="p-4 text-center text-slate-400">Read-Only API</td>
-                <td className="p-4 text-center font-bold text-emerald-500">✓ Full Bi-Directional</td>
-              </tr>
-              <tr>
-                <td className="p-4 px-5 font-medium text-slate-900 dark:text-white">Dedicated Support SLA</td>
-                <td className="p-4 text-center text-slate-600 dark:text-slate-300">Email (24h)</td>
-                <td className="p-4 text-center font-bold text-[#0b99ff]">Priority (4h)</td>
-                <td className="p-4 text-center font-bold text-purple-600 dark:text-purple-400">Dedicated JM + 99.9% Uptime</td>
-              </tr>
-
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Investor Pitch Briefing Card (Frankfurt 2026 Executive Summary) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="rounded-3xl bg-gradient-to-r from-blue-900/20 via-indigo-900/20 to-purple-900/20 border border-blue-500/30 p-8 sm:p-10 backdrop-blur-md">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0b99ff]/20 text-[#0b99ff] text-xs font-bold uppercase">
-                <Briefcase className="w-3.5 h-3.5" />
-                <span>Frankfurt Book Fair 2026 · Investor & Consortia Brief</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                Why Global Publishers Are Migrating to Editorial360
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                The global STM academic publishing market exceeds <strong>$28 Billion annually</strong>, with $2.8B allocated to editorial and peer review software. Legacy software is crippled by 20-year-old architectures, non-responsive interfaces, and vulnerability to paper-mill fraud. Editorial360 delivers an agile, AI-native, high-margin alternative with <strong>85%+ software gross margins</strong> and <strong>124% net dollar retention</strong>.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
-              <Button
-                onClick={() => handleOpenMeetingModal("Frankfurt Investor Pitch")}
-                className="bg-[#0b99ff] hover:bg-[#0883dc] text-white font-bold text-xs py-6 px-6 rounded-xl shadow-lg cursor-pointer"
-              >
-                Schedule Frankfurt Investor Meeting
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleOpenMeetingModal("Institutional Sandbox Trial")}
-                className="font-bold text-xs py-6 px-6 rounded-xl border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-              >
-                Request 30-Day Sandbox
-              </Button>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -917,10 +1011,10 @@ export default function Editorial360PricingPage() {
                     Frankfurt Book Fair 2026 Delegation
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                    Connect on {selectedPlanForModal}
+                    Schedule Meeting on {selectedPlanForModal}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Book an executive slot at our Hall 4.0 booth or request a tailored institutional trial agreement.
+                    Connect directly with the founder and executive team at Frankfurt Book Fair 2026.
                   </p>
                 </div>
 
@@ -1012,17 +1106,17 @@ export default function Editorial360PricingPage() {
                 </div>
                 <div>
                   <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                    Request Received & Logged
+                    Meeting Slot Confirmed
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                    Thank you, {formData.name || "Colleague"}. An executive representative from Scholarly Open will connect with you shortly regarding your {selectedPlanForModal} demonstration.
+                    Thank you, {formData.name || "Colleague"}. The Scholarly Open executive team will meet with you in Frankfurt regarding your {selectedPlanForModal} deployment.
                   </p>
                 </div>
                 <Button
                   onClick={() => setMeetingModalOpen(false)}
                   className="bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 px-6 py-2 rounded-xl text-xs font-bold cursor-pointer"
                 >
-                  Return to Pricing Overview
+                  Return to Overview
                 </Button>
               </div>
             )}
@@ -1032,22 +1126,14 @@ export default function Editorial360PricingPage() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1017] py-10 px-4 sm:px-6 lg:px-8 text-xs text-slate-500 dark:text-slate-400">
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1017] py-8 px-4 sm:px-6 lg:px-8 text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img src="/editorial360.svg" alt="editorial360" className="h-5 w-auto object-contain" />
-            <span>&copy; {new Date().getFullYear()} Scholarly Open Inc. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} Scholarly Open Inc. All rights reserved by editorial360.</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/editorial360" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Editorial360 Workspace
-            </Link>
-            <Link href="/publication-ethics" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              COPE Compliance
-            </Link>
-            <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              GDPR & Privacy
-            </Link>
+            <span className="font-semibold text-slate-400">Confidential · Frankfurt Book Fair 2026 Schedule</span>
           </div>
         </div>
       </footer>
