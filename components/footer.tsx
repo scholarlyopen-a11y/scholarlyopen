@@ -144,6 +144,7 @@ export function Footer() {
     aboutUs: [
       { name: t("nav.about"), href: "/about" },
       { name: t("nav.aimsScope"), href: "/aims-scope" },
+      { name: "Editorial360™ Pricing & Licensing", href: "/editorial360/pricing" },
       { name: t("nav.contact"), href: "/contact" },
     ],
     policies: [

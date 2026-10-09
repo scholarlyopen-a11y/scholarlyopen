@@ -6192,6 +6192,15 @@ export default function Editorial360Page() {
                           </button>
                         </p>
                       )}
+                      <div className="pt-2 flex items-center justify-center">
+                        <Link
+                          href="/editorial360/pricing"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#0b99ff] hover:text-[#0883dc] bg-[#0b99ff]/5 hover:bg-[#0b99ff]/10 border border-[#0b99ff]/20 px-3 py-1 rounded-full transition-all shadow-2xs"
+                        >
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span>Frankfurt Fair 2026 · Publisher Pricing & 3 Tiers →</span>
+                        </Link>
+                      </div>
                     </div>
                   ) : (
                     <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
@@ -6798,6 +6807,13 @@ export default function Editorial360Page() {
               <span className="text-[10px] uppercase font-bold tracking-widest text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20 hidden sm:inline-block">
                 Workspace
               </span>
+              <Link 
+                href="/editorial360/pricing"
+                className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] dark:hover:text-[#0b99ff] bg-slate-100/80 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-800 transition-all shadow-2xs"
+              >
+                <Sparkles className="w-3 h-3 text-amber-500" />
+                <span>Pricing & Plans</span>
+              </Link>
             </div>
 
             {/* Theme, Translation, Notification & User Profile Actions */}
@@ -14993,58 +15009,96 @@ export default function Editorial360Page() {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                        {/* Referee 1 */}
-                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #1</span>
-                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                              Report In ✓
-                            </span>
-                          </div>
-                          <p className="text-slate-500 text-[11px] leading-relaxed">
-                            Full evaluation submitted · Awaiting editorial synthesis
-                          </p>
-                        </div>
-
-                        {/* Referee 2 */}
-                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #2</span>
-                            <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded-full border border-[#0b99ff]/20">
-                              Evaluating
-                            </span>
-                          </div>
-                          <p className="text-slate-500 text-[11px] leading-relaxed">
-                            Invitation accepted · Active review evaluation underway
-                          </p>
-                        </div>
-
-                        {/* Referee 3 */}
-                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #3</span>
-                            <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded-full border border-[#0b99ff]/20">
-                              Evaluating
-                            </span>
-                          </div>
-                          <p className="text-slate-500 text-[11px] leading-relaxed">
-                            Invitation accepted · Active review evaluation underway
-                          </p>
-                        </div>
-
-                        {/* Referee 4 */}
-                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #4</span>
-                            <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800">
-                              Accepted
-                            </span>
-                          </div>
-                          <p className="text-slate-500 text-[11px] leading-relaxed">
-                            Invitation accepted · Active review evaluation underway
-                          </p>
-                        </div>
+                      {/* Elite Institutional Table */}
+                      <div className="overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#18191e] shadow-2xs">
+                        <table className="w-full text-left text-xs border-collapse">
+                          <thead className="bg-slate-50/80 dark:bg-[#14151a] border-b border-slate-200 dark:border-slate-800 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                            <tr>
+                              <th className="px-4 py-3 font-semibold">Referee (Masked)</th>
+                              <th className="px-4 py-3 font-semibold">Evaluation Status</th>
+                              <th className="px-4 py-3 font-semibold">Current Progress</th>
+                              <th className="px-4 py-3 font-semibold text-right">Round / Track</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                            <tr className="hover:bg-slate-50/60 dark:hover:bg-[#1f2027]/40 transition-colors">
+                              <td className="px-4 py-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                  <span>Referee #1</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                                  Report In ✓
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                                Full evaluation submitted · Awaiting editorial synthesis
+                              </td>
+                              <td className="px-4 py-3 text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                                Round 1 · Double-Blind
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-50/60 dark:hover:bg-[#1f2027]/40 transition-colors">
+                              <td className="px-4 py-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="h-2 w-2 rounded-full bg-[#0b99ff]" />
+                                  <span>Referee #2</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/20">
+                                  Evaluating
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                                Invitation accepted · Active review evaluation underway
+                              </td>
+                              <td className="px-4 py-3 text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                                Round 1 · Double-Blind
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-50/60 dark:hover:bg-[#1f2027]/40 transition-colors">
+                              <td className="px-4 py-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="h-2 w-2 rounded-full bg-[#0b99ff]" />
+                                  <span>Referee #3</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/20">
+                                  Evaluating
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                                Invitation accepted · Active review evaluation underway
+                              </td>
+                              <td className="px-4 py-3 text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                                Round 1 · Double-Blind
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-slate-50/60 dark:hover:bg-[#1f2027]/40 transition-colors">
+                              <td className="px-4 py-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="h-2 w-2 rounded-full bg-sky-500" />
+                                  <span>Referee #4</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2.5 py-0.5 rounded-full border border-sky-200 dark:border-sky-800">
+                                  Accepted
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                                Invitation accepted · Active review evaluation underway
+                              </td>
+                              <td className="px-4 py-3 text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                                Round 1 · Double-Blind
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
 
                       <div className="flex items-start gap-2 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
