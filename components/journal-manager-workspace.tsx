@@ -6861,7 +6861,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
                                       <XCircle className="w-3 h-3" /> Disapproved - Blocked
                                     </span>
-                                  ) : resp.jmApproved ? (
+                                  ) : (resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola")) ? (
                                     <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                       <CheckCircle2 className="w-3 h-3" /> Live on Masthead
                                     </span>

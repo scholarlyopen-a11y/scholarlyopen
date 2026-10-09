@@ -5,6 +5,7 @@ import nodemailer from "nodemailer"
 import { validateSubmissionAntiSpam, getClientIp, isSuspiciousEmail } from "@/lib/anti-spam"
 import { upsertDbManuscript } from "@/lib/supabase"
 import { getJournalReplyTo } from "@/lib/data/journal-contacts"
+import { generateBrandedEmailHtml } from "@/lib/email-templates"
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024
 
@@ -319,12 +320,42 @@ export async function POST(request: Request) {
       const journalTitle = journalLabel(discipline)
       const journalEmail = getJournalReplyTo(journalTitle)
       const authorFrom = `"${journalTitle} Editorial Office" <${journalEmail}>`
+      const trackingUrl = `https://scholarlyopen.org/editorial360?manuscriptId=${encodeURIComponent(trackingId)}&email=${encodeURIComponent(authorEmail)}`
+
+      const authorConfirmationBodyText = [
+        `Dear ${firstName} ${lastName},`,
+        ``,
+        `Thank you for submitting your manuscript to Scholarly Open: ${journalTitle}. Your submission has been securely registered in our editorial system.`,
+        ``,
+        `WHAT HAPPENS NEXT?`,
+        `1. Initial Quality Check: Our Editorial Office will conduct an initial formatting, ethical compliance, and plagiarism screening within 24-48 hours.`,
+        `2. Handling Editor Assignment: A Section Editor in your field will oversee the double-blind peer review.`,
+        `3. Peer Review: Independent expert reviewers will evaluate your manuscript.`,
+        ``,
+        `You can monitor the real-time status of your submission, view editorial decisions, and submit revised files at any time via your dedicated Author Workspace link below.`,
+      ].join("\n")
+
+      const authorHtml = generateBrandedEmailHtml({
+        subject: authorConfirmationSubject,
+        bodyText: authorConfirmationBodyText,
+        actionLabel: "Track Submission & Author Workspace",
+        actionUrl: trackingUrl,
+        journal: `Scholarly Open: ${journalTitle}`,
+        paperId: trackingId,
+        paperTitle: title,
+        recipientName: `${firstName} ${lastName}`.trim() || "Author",
+        recipientEmail: authorEmail,
+        baseUrl: "https://scholarlyopen.org",
+        includeEditorial360Logo: true,
+      })
+
       await transporter.sendMail({
         from: authorFrom,
         replyTo: journalEmail,
         to: authorEmail,
         subject: authorConfirmationSubject,
         text: authorConfirmationText,
+        html: authorHtml,
       })
     } catch (authorMailErr) {
       console.error("Failed to send author confirmation email:", authorMailErr)

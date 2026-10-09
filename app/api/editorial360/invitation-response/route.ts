@@ -36,6 +36,7 @@ export interface InvitationResponseRecord {
   jmApproved?: boolean
   watchlistFlagged?: boolean
   flagReason?: string
+  slug?: string
 }
 
 let responseStore: InvitationResponseRecord[] = [
@@ -52,7 +53,7 @@ let responseStore: InvitationResponseRecord[] = [
   }
 ]
 
-export function sanitizeAcademicName(name: string): string {
+function sanitizeAcademicName(name: string): string {
   if (!name) return ""
   let cleaned = name.replace(/^(?:Prof(?:essor)?\.?\s*(?:Dr\.?)?|Dr\.?)\s+/i, "").trim()
   if (cleaned.toLowerCase() === "francis verpoort") {
@@ -435,7 +436,22 @@ export async function GET() {
         credId = `EBM-${cleanName || "2026"}`
       }
     }
-    return { ...r, credentialId: credId }
+    const isVerpoort = (r.candidateEmail && r.candidateEmail.toLowerCase().includes("verpoort")) || 
+                       (r.candidateName && r.candidateName.toLowerCase().includes("verpoort")) ||
+                       (r.slug && r.slug.toLowerCase().includes("verpoort")) ||
+                       r.id === "RESP-VERPOORT"
+    const isCacciola = (r.candidateEmail && r.candidateEmail.toLowerCase().includes("cacciola")) || 
+                       (r.candidateName && r.candidateName.toLowerCase().includes("cacciola")) ||
+                       (r.slug && r.slug.toLowerCase().includes("cacciola")) ||
+                       r.id === "RESP-CACCIOLA"
+    const isConfirmedEiC = isVerpoort || isCacciola
+
+    return { 
+      ...r, 
+      credentialId: credId,
+      jmApproved: isConfirmedEiC ? true : Boolean(r.jmApproved),
+      status: isConfirmedEiC ? "Active Handling Editor" : (r.status || (r.jmApproved ? "Active Handling Editor" : "Pending JM Approval"))
+    }
   })
 
   return NextResponse.json({

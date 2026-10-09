@@ -99,12 +99,36 @@ async function getStoredRecords(): Promise<{ tests: ReviewerTestRecord[]; regist
     }
   }
 
-  const finalTests = Array.from(mergedTestsMap.values())
-  const finalReviewers = Array.from(mergedRevsMap.values())
+  // Cross-reference with Integrity Watchlist
+  let disapprovedList: any[] = []
+  try {
+    disapprovedList = await getStoredDisapproved()
+  } catch (e) {}
 
-  if (finalTests.length > cloudTests.length || finalReviewers.length > cloudReviewers.length) {
-    saveStoredRecords({ tests: finalTests, registeredReviewers: finalReviewers }).catch(() => {})
-  }
+  const finalTests = Array.from(mergedTestsMap.values()).map(test => {
+    const isDisapproved = disapprovedList.some(d => 
+      (d.email && test.candidateEmail && d.email.toLowerCase() === test.candidateEmail.toLowerCase()) ||
+      (d.id && test.id && d.id.toLowerCase() === test.id.toLowerCase())
+    )
+    if (isDisapproved) {
+      return {
+        ...test,
+        status: "Disapproved - Access Blocked" as const,
+        jmApproved: false,
+        passed: false,
+        isFlagged: true,
+        flagReason: "Disapproved by Journal Manager (Integrity Watchlist)"
+      }
+    }
+    return test
+  })
+
+  const finalReviewers = Array.from(mergedRevsMap.values()).filter(r => {
+    const isDisapproved = disapprovedList.some(d => 
+      (d.email && r.email && d.email.toLowerCase() === r.email.toLowerCase())
+    )
+    return !isDisapproved
+  })
 
   return { tests: finalTests, registeredReviewers: finalReviewers }
 }

@@ -32,6 +32,8 @@ export default function SubmitPage() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [trackingId, setTrackingId] = useState<string | null>(null)
+  const [submittedEmail, setSubmittedEmail] = useState<string>("")
+  const [submittedName, setSubmittedName] = useState<string>("")
 
   const recipient = "info@scholarlyopen.org"
 
@@ -468,6 +470,11 @@ export default function SubmitPage() {
                         setStatus("submitting")
                         setErrorMessage(null)
                         const formData = new FormData(form)
+                        const emailVal = String(formData.get("email") || "")
+                        const firstVal = String(formData.get("firstName") || "")
+                        const lastVal = String(formData.get("lastName") || "")
+                        setSubmittedEmail(emailVal)
+                        setSubmittedName(`${firstVal} ${lastVal}`.trim())
                         try {
                           await submitToEditorialOffice(formData)
                           setStatus("success")
@@ -489,15 +496,24 @@ export default function SubmitPage() {
                             <p className="font-semibold text-base text-foreground">Manuscript Successfully Submitted!</p>
                             {trackingId && (
                               <p className="text-xs font-mono text-muted-foreground mt-0.5">
-                                Tracking ID: <span className="font-bold text-foreground">{trackingId}</span>
+                                Official Tracking ID: <span className="font-bold text-foreground">{trackingId}</span>
                               </p>
                             )}
                           </div>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed">
-                          An automated confirmation email has been dispatched to your email address with full submission details.
-                          Our editorial office will conduct an initial quality check and assign a handling editor.
-                        </p>
+                        <div className="space-y-2 text-muted-foreground leading-relaxed">
+                          <p>
+                            An automated submission confirmation has been dispatched to{" "}
+                            <strong className="text-foreground">{submittedEmail || "your registered email"}</strong>.
+                          </p>
+                          <p>
+                            Please check your email inbox to view your full submission receipt and access your secure link to track the peer-review status in the <strong>editorial360 Author Workspace</strong>.
+                          </p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-background/80 border border-emerald-500/20 text-xs text-muted-foreground flex items-center gap-2.5">
+                          <Mail className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>Check your inbox (and spam folder) for the confirmation message. If you need any assistance, contact the Editorial Office at <strong className="text-foreground">info@scholarlyopen.org</strong>.</span>
+                        </div>
                       </div>
                     )}
                     {status === "error" && (

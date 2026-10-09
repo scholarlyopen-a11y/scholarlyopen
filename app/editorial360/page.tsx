@@ -1021,16 +1021,46 @@ export default function Editorial360Page() {
       const urlTitle = params.get("title") || ""
 
       if (urlAction && (urlAction === "accept" || urlAction === "decline")) {
-        setInvitationAction(urlAction as "accept" | "decline")
-        setInvitationPaperId(urlId)
-        if (urlJournal) setInvitationJournal(urlJournal)
-        if (urlTitle) setInvitationTitle(urlTitle)
-        if (urlEmail) {
-          setInvitationReviewerEmail(urlEmail)
-          setEmail(urlEmail)
+        let alreadyAccepted = false
+        if (urlAction === "accept" && urlEmail) {
+          try {
+            const isOnboarded = localStorage.getItem(`so_reviewer_onboarded_${urlEmail}`) === "true"
+            const activeReviewsStr = localStorage.getItem(`editorial360_active_reviews_${urlEmail}`)
+            if (isOnboarded || activeReviewsStr) {
+              alreadyAccepted = true
+            }
+          } catch (e) {}
         }
-        if (urlName) {
-          setInvitationReviewerName(urlName)
+
+        if (alreadyAccepted) {
+          // Bypass acceptance modal: Auto-resume reviewer session directly
+          setRole("reviewer")
+          setEmail(urlEmail)
+          setIsLoggedIn(true)
+          setActiveReviewerTab("overview")
+          try {
+            const storedProfile = localStorage.getItem(`so_reviewer_profile_${urlEmail}`)
+            if (storedProfile) {
+              setReviewerProfile(JSON.parse(storedProfile))
+            }
+          } catch (e) {}
+          setSuccess(
+            language === "de"
+              ? `Begutachtung für [${urlId || "SOMED-26-RW01"}] ist bereits aktiv. Willkommen im Begutachter-Workspace!`
+              : `Review assignment for [${urlId || "SOMED-26-RW01"}] is already accepted and active. Resuming your evaluation workspace.`
+          )
+        } else {
+          setInvitationAction(urlAction as "accept" | "decline")
+          setInvitationPaperId(urlId)
+          if (urlJournal) setInvitationJournal(urlJournal)
+          if (urlTitle) setInvitationTitle(urlTitle)
+          if (urlEmail) {
+            setInvitationReviewerEmail(urlEmail)
+            setEmail(urlEmail)
+          }
+          if (urlName) {
+            setInvitationReviewerName(urlName)
+          }
         }
       }
 
@@ -1221,6 +1251,20 @@ export default function Editorial360Page() {
         setIsLoggedIn(true)
         setActiveAuthorTab("submissions")
         setSuccess(`Welcome ${claimName ? claimName : "Author"}! Manuscript ${claimId} has been linked to your active Author Desk.`)
+      }
+
+      const urlManuscriptId = params.get("manuscriptId")
+      if (urlManuscriptId) {
+        setRole("author")
+        if (urlEmail) setEmail(urlEmail)
+        if (urlName) setProfFullName(urlName)
+        setIsLoggedIn(true)
+        setActiveAuthorTab("submissions")
+        setSuccess(
+          language === "de"
+            ? `Manuskript [${urlManuscriptId}] aktiv. Willkommen in Ihrem Autoren-Dashboard!`
+            : `Manuscript [${urlManuscriptId}] active. Welcome to your Author Workspace!`
+        )
       }
 
       if (urlAction === "handling_editor" || urlAction === "accept_editor") {
@@ -1701,7 +1745,7 @@ export default function Editorial360Page() {
     journal: "Scholarly Open: Medicine",
     status: "Under Review",
     date: "2026-09-14",
-    reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ"],
+    reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Dr. Ikeda N"],
     integrityStatus: "Clean",
     plagiarismScore: 4,
     aiScore: 2,
@@ -6119,7 +6163,7 @@ export default function Editorial360Page() {
                   <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-1.5">
                     {mode === "login" 
                       ? (language === "de" ? "Anmelden" : "Login") 
-                      : (language === "de" ? "Konto erstellen" : "Create account")}
+                      : (language === "de" ? "Offizielle Einladung aktivieren" : "Activate Invited Appointment")}
                   </h1>
 
                   <div className="flex h-8 sm:h-9 w-auto items-center justify-center my-1.5 hover:scale-105 transition-all">
@@ -6129,18 +6173,37 @@ export default function Editorial360Page() {
                       className="h-full w-auto object-contain" 
                     />
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
-                    {language === "de" ? "Oder " : "Or "}
-                    <button
-                      type="button"
-                      onClick={() => toggleMode(mode === "login" ? "register" : "login")}
-                      className="text-slate-900 dark:text-slate-100 hover:underline font-bold focus:outline-none cursor-pointer"
-                    >
-                      {mode === "login" 
-                        ? (language === "de" ? "Neues Konto erstellen" : "Create account") 
-                        : (language === "de" ? "Mit bestehendem Konto anmelden" : "Sign in to existing account")}
-                    </button>
-                  </p>
+                  
+                  {mode === "login" ? (
+                    <div className="space-y-0.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        {language === "de" 
+                          ? "Offizielles Zugangsportal für Herausgeber, Redaktion & Gutachter" 
+                          : "Official Executive & Reviewer Editorial Management Portal"}
+                      </p>
+                      {isInvitedFlow && (
+                        <p className="text-xs text-slate-600 dark:text-slate-400 font-medium pt-1">
+                          <button
+                            type="button"
+                            onClick={() => toggleMode("register")}
+                            className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
+                          >
+                            {language === "de" ? "Offizielle Einladung aktivieren →" : "Activate Invited Profile →"}
+                          </button>
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                      <button
+                        type="button"
+                        onClick={() => toggleMode("login")}
+                        className="text-[#0b99ff] hover:underline font-bold focus:outline-none cursor-pointer"
+                      >
+                        {language === "de" ? "← Zurück zur Anmeldung" : "← Back to Sign In"}
+                      </button>
+                    </p>
+                  )}
                 </div>
 
                 {/* Login/Registration Card container */}
@@ -6293,14 +6356,6 @@ export default function Editorial360Page() {
                           ? (language === "de" ? "Wird authentifiziert..." : "Authenticating...") 
                           : (language === "de" ? "Anmelden" : "Sign In")}
                       </Button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSuccess(language === "de" ? "Magic-Link wurde per E-Mail gesendet!" : "Magic sign-in link sent to your email!")}
-                        className="w-full text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0b99ff] py-1.5 transition-all text-center cursor-pointer"
-                      >
-                        {language === "de" ? "Mit Direktlink anmelden" : "Sign in with direct magic link"}
-                      </button>
                       
                       {/* PeerJ-Inspired SSO Social Bar */}
                       <div className="w-full pt-1">
@@ -6695,8 +6750,19 @@ export default function Editorial360Page() {
                 )}
               </Card>
               
-              <div className="text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
+              <div className="text-center text-xs text-slate-500 dark:text-slate-400 font-medium space-y-1.5">
                 <p>
+                  {language === "de" ? "Manuskript einreichen?" : "Looking to submit a manuscript?"}{" "}
+                  <Link href="/submit" className="text-[#0b99ff] hover:underline font-semibold">
+                    {language === "de" ? "Autorenportal (/submit)" : "Author Portal (/submit)"}
+                  </Link>
+                  <span className="mx-1.5 text-slate-300 dark:text-slate-700">•</span>
+                  {language === "de" ? "Als Gutachter bewerben?" : "Apply as Reviewer?"}{" "}
+                  <Link href="/reviewer-gateway" className="text-[#0b99ff] hover:underline font-semibold">
+                    Reviewer Gateway
+                  </Link>
+                </p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
                   By logging in, you agree to Scholarly Open's{" "}
                   <Link href="/privacy" className="underline hover:text-slate-600 dark:hover:text-slate-400">
                     Privacy Policy
@@ -14761,12 +14827,16 @@ export default function Editorial360Page() {
                   </table>
                 </div>
 
-                {/* Footer Note */}
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-normal">
-                  {language === "de" 
-                    ? "Förderzuschüsse werden bei Annahme des Manuskripts automatisch angerechnet. Integritätsfälle oder verspätete Berichte setzen die Stufenqualifikation zurück." 
-                    : "Grant waivers are automatically applied upon manuscript acceptance. Integrity cases or delayed reports reset the tier qualification."}
-                </p>
+                {/* Strict Timeliness Policy Note */}
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed flex items-start gap-2">
+                  <Clock className="h-4 w-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                  <div>
+                    <strong>{language === "de" ? "Strikte Frist- & Pünktlichkeitsregel:" : "Strict Turnaround & Timeliness Policy:"}</strong>{" "}
+                    {language === "de" 
+                      ? "Vergünstigungen (APC-Waivers und Merit Points) werden ausschließlich für fristgerecht innerhalb der 14-tägigen Begutachtungsfrist eingereichte Gutachten gewährt. Verspätete oder überfällige Berichte erhalten keine Vouchers und setzen die Stufenqualifikation zurück." 
+                      : "Publication benefits (APC waiver vouchers and merit points) are exclusively granted for evaluations completed within the agreed 14-day turnaround window. Overdue or delinquent reviews forfeit all vouchers and reset tier progress."}
+                  </div>
+                </div>
               </div>
 
               <DialogFooter className="pt-2">
@@ -14783,27 +14853,27 @@ export default function Editorial360Page() {
 
           {/* 12. AUTHOR: MINIMALIST & CLEAN MANUSCRIPT DOSSIER */}
           <Dialog open={isManuscriptDetailsOpen} onOpenChange={setIsManuscriptDetailsOpen}>
-            <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden shadow-xl transition-colors">
+            <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-4xl lg:max-w-5xl max-h-[92vh] flex flex-col p-0 overflow-hidden shadow-2xl transition-colors">
               {/* Header */}
-              <DialogHeader className="p-5 sm:p-6 pb-4 border-b border-slate-100 dark:border-[#272832] space-y-2 shrink-0 text-left">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold tabular-nums px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-[#131418] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#272832]">
+              <DialogHeader className="p-5 sm:p-6 pb-4 border-b border-slate-100 dark:border-[#272832] space-y-2.5 shrink-0 text-left">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="text-xs font-bold tabular-nums px-3 py-1 rounded-lg bg-slate-100 dark:bg-[#131418] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-[#272832]">
                       {selectedManuscriptDetails?.id}
                     </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                       {selectedManuscriptDetails?.journal} · {selectedManuscriptDetails?.date}
                     </span>
                   </div>
                   {selectedManuscriptDetails && (
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold border ${
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
                       selectedManuscriptDetails.status === "Accepted"
                         ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60"
                         : selectedManuscriptDetails.status === "Revision Required"
                         ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60"
-                        : "bg-slate-100 dark:bg-[#131418] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#272832]"
+                        : "bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] dark:text-sky-300 border-sky-200/80 dark:border-sky-800/60"
                     }`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${
+                      <span className={`h-2 w-2 rounded-full ${
                         selectedManuscriptDetails.status === "Accepted" ? "bg-emerald-500" :
                         selectedManuscriptDetails.status === "Revision Required" ? "bg-amber-500" : "bg-[#0b99ff]"
                       }`} />
@@ -14811,79 +14881,79 @@ export default function Editorial360Page() {
                     </span>
                   )}
                 </div>
-                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white leading-snug">
+                <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
                   {selectedManuscriptDetails?.title || "Manuscript Dossier"}
                 </DialogTitle>
-                <DialogDescription className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+                <DialogDescription className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 pt-0.5">
+                  <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
                   <span>Double-Blind Peer Review · Referee and author identities masked</span>
                 </DialogDescription>
               </DialogHeader>
 
               {/* Dossier Body */}
               {selectedManuscriptDetails && (
-                <div className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs [scrollbar-width:thin]">
+                <div className="p-5 sm:p-7 overflow-y-auto space-y-6 text-xs [scrollbar-width:thin]">
                   
                   {/* 1. Linear Minimalist Timeline */}
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 block">
+                  <div className="space-y-2.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 block">
                       {language === "de" ? "Meilensteine & Redaktionsstatus" : "Editorial Progress & Milestones"}
                     </span>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                       {/* Step 1: Ingest Check */}
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center gap-2.5">
-                        <span className="h-6 w-6 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center gap-3">
+                        <span className="h-7 w-7 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
                           1
                         </span>
-                        <div className="min-w-0">
-                          <div className="font-bold text-slate-900 dark:text-white truncate">Ingest Check</div>
-                          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Passed</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-slate-900 dark:text-white text-xs">Ingest Check</div>
+                          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Passed</p>
                         </div>
                       </div>
 
                       {/* Step 2: Editor Assignment */}
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center gap-2.5">
-                        <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center gap-3">
+                        <span className={`h-7 w-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                           (selectedManuscriptDetails.editorAssigned || selectedManuscriptDetails.assignedEditorName)
                             ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400"
                             : "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
                         }`}>
                           2
                         </span>
-                        <div className="min-w-0">
-                          <div className="font-bold text-slate-900 dark:text-white truncate">Editor</div>
-                          <p className={`text-[11px] font-medium truncate ${
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-slate-900 dark:text-white text-xs">Editor</div>
+                          <p className={`text-[11px] font-semibold leading-tight ${
                             (selectedManuscriptDetails.editorAssigned || selectedManuscriptDetails.assignedEditorName)
                               ? "text-emerald-600 dark:text-emerald-400"
                               : "text-amber-600 dark:text-amber-400"
-                          }`}>
+                          }`} title={selectedManuscriptDetails.assignedEditorName}>
                             {selectedManuscriptDetails.assignedEditorName || (selectedManuscriptDetails.editorAssigned ? "Assigned" : "Unassigned")}
                           </p>
                         </div>
                       </div>
 
                       {/* Step 3: Peer Review */}
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center gap-2.5">
-                        <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center gap-3">
+                        <span className={`h-7 w-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                           selectedManuscriptDetails.reviewers.length > 0
                             ? "bg-sky-100 dark:bg-sky-950 text-[#0b99ff] dark:text-sky-400"
                             : "bg-slate-200 dark:bg-[#272832] text-slate-600 dark:text-slate-400"
                         }`}>
                           3
                         </span>
-                        <div className="min-w-0">
-                          <div className="font-bold text-slate-900 dark:text-white truncate">Peer Review</div>
-                          <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium truncate">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-slate-900 dark:text-white text-xs">Peer Review</div>
+                          <p className="text-[11px] text-[#0b99ff] dark:text-sky-400 font-semibold leading-tight">
                             {selectedManuscriptDetails.reviewers.length > 0 
-                              ? `${selectedManuscriptDetails.reviewers.length} Reviewers Active`
+                              ? `${selectedManuscriptDetails.reviewers.length} Active Referees`
                               : "Not Started"}
                           </p>
                         </div>
                       </div>
 
                       {/* Step 4: Decision */}
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center gap-2.5">
-                        <span className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center gap-3">
+                        <span className={`h-7 w-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                           selectedManuscriptDetails.status === "Accepted"
                             ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400"
                             : selectedManuscriptDetails.status === "Revision Required"
@@ -14892,16 +14962,16 @@ export default function Editorial360Page() {
                         }`}>
                           4
                         </span>
-                        <div className="min-w-0">
-                          <div className="font-bold text-slate-900 dark:text-white truncate">Decision</div>
-                          <p className="text-[11px] text-slate-500 font-medium truncate">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-slate-900 dark:text-white text-xs">Decision</div>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium leading-tight">
                             {selectedManuscriptDetails.status === "Accepted"
                               ? "Accepted"
                               : selectedManuscriptDetails.status === "Revision Required"
                               ? "Revision Required"
                               : selectedManuscriptDetails.status === "Rejected"
                               ? "Rejected"
-                              : "Pending (~2-4 Wks)"}
+                              : "Pending (~2–4 Wks)"}
                           </p>
                         </div>
                       </div>
@@ -14910,62 +14980,75 @@ export default function Editorial360Page() {
 
                   {/* Real-Time Live Peer Review Status Panel for Author (COPE Double-Blind Masked) */}
                   {selectedManuscriptDetails.reviewers.length > 0 && (
-                    <div className="p-4 rounded-xl bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="p-4 sm:p-5 rounded-2xl bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200/90 dark:border-sky-900/50 space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-[#0b99ff]" />
-                          <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
                             Double-Blind Peer Review Round 1 ({selectedManuscriptDetails.reviewers.length} Active Referees)
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                          1 Report Submitted · 2 In Progress
+                        <span className="text-[11px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-3 py-1 rounded-full border border-[#0b99ff]/20">
+                          1 Report Submitted · 3 In Progress
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                         {/* Referee 1 */}
-                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1">
+                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #1</span>
-                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                               Report In ✓
                             </span>
                           </div>
-                          <p className="text-slate-500 text-[11px] leading-tight">
+                          <p className="text-slate-500 text-[11px] leading-relaxed">
                             Full evaluation submitted · Awaiting editorial synthesis
                           </p>
                         </div>
 
                         {/* Referee 2 */}
-                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1">
+                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #2</span>
-                            <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-1.5 py-0.5 rounded border border-[#0b99ff]/20">
+                            <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded-full border border-[#0b99ff]/20">
                               Evaluating
                             </span>
                           </div>
-                          <p className="text-slate-500 text-[11px] leading-tight">
+                          <p className="text-slate-500 text-[11px] leading-relaxed">
                             Invitation accepted · Active review evaluation underway
                           </p>
                         </div>
 
                         {/* Referee 3 */}
-                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1">
+                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #3</span>
-                            <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-1.5 py-0.5 rounded border border-[#0b99ff]/20">
+                            <span className="text-[10px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded-full border border-[#0b99ff]/20">
+                              Evaluating
+                            </span>
+                          </div>
+                          <p className="text-slate-500 text-[11px] leading-relaxed">
+                            Invitation accepted · Active review evaluation underway
+                          </p>
+                        </div>
+
+                        {/* Referee 4 */}
+                        <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800 space-y-1.5 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Referee #4</span>
+                            <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800">
                               Accepted
                             </span>
                           </div>
-                          <p className="text-slate-500 text-[11px] leading-tight">
+                          <p className="text-slate-500 text-[11px] leading-relaxed">
                             Invitation accepted · Active review evaluation underway
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 pt-0.5">
-                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <div className="flex items-start gap-2 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
+                        <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
                         <span>
                           <strong>COPE Double-Blind Guarantee:</strong> Referee identities remain strictly masked to the author. Anonymized reports and editorial decision letters will be released once the Handling Editor concludes the evaluation round.
                         </span>

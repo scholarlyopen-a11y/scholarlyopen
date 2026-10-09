@@ -676,6 +676,8 @@ export function ReviewerWorkspace({
   const [evalCopeCheck, setEvalCopeCheck] = useState(false)
   const [evalError, setEvalError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [lastDraftSavedAt, setLastDraftSavedAt] = useState<string | null>(null)
+  const [draftSavedToast, setDraftSavedToast] = useState<string | null>(null)
 
   // Are-You-Sure Confirmation Dialog State
   const [confirmDialogState, setConfirmDialogState] = useState<{
@@ -932,10 +934,81 @@ export function ReviewerWorkspace({
   const handleOpenEval = (rev: ActiveReviewItem) => {
     setSelectedReviewForEval(rev)
     setEvalError("")
+
+    // Check for locally saved draft
+    const draftKey = `editorial360_draft_eval_${rev.manuscriptId || rev.id}_${profile?.email || user?.email || ""}`
+    try {
+      const stored = localStorage.getItem(draftKey)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed.generalComments || parsed.specificComments || parsed.editorConfidentialComments) {
+          setGeneralComments(parsed.generalComments || "")
+          setSpecificComments(parsed.specificComments || "")
+          setEditorConfidentialComments(parsed.editorConfidentialComments || "")
+          if (parsed.recommendation) setRecommendation(parsed.recommendation)
+          if (parsed.answers) setAnswers(parsed.answers)
+          if (parsed.notes) setNotes(parsed.notes)
+          if (parsed.priorityRating) setPriorityRating(parsed.priorityRating)
+          if (parsed.savedAt) setLastDraftSavedAt(parsed.savedAt)
+          setEvalCopeCheck(Boolean(parsed.evalCopeCheck))
+          return
+        }
+      }
+    } catch (e) {}
+
     setGeneralComments("")
     setSpecificComments("")
     setEditorConfidentialComments("")
+    setLastDraftSavedAt(null)
     setEvalCopeCheck(false)
+  }
+
+  // Auto-save review draft as reviewer types
+  useEffect(() => {
+    if (!selectedReviewForEval) return
+    if (!generalComments && !specificComments && !editorConfidentialComments) return
+
+    const draftKey = `editorial360_draft_eval_${selectedReviewForEval.manuscriptId || selectedReviewForEval.id}_${profile?.email || user?.email || ""}`
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const draftData = {
+      generalComments,
+      specificComments,
+      editorConfidentialComments,
+      recommendation,
+      answers,
+      notes,
+      priorityRating,
+      evalCopeCheck,
+      savedAt: timeStr
+    }
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(draftData))
+      setLastDraftSavedAt(timeStr)
+    } catch (e) {}
+  }, [generalComments, specificComments, editorConfidentialComments, recommendation, answers, notes, priorityRating, evalCopeCheck, selectedReviewForEval, profile?.email, user?.email])
+
+  // Explicit Manual Save Draft Handler
+  const handleManualSaveDraft = () => {
+    if (!selectedReviewForEval) return
+    const draftKey = `editorial360_draft_eval_${selectedReviewForEval.manuscriptId || selectedReviewForEval.id}_${profile?.email || user?.email || ""}`
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const draftData = {
+      generalComments,
+      specificComments,
+      editorConfidentialComments,
+      recommendation,
+      answers,
+      notes,
+      priorityRating,
+      evalCopeCheck,
+      savedAt: timeStr
+    }
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(draftData))
+      setLastDraftSavedAt(timeStr)
+      setDraftSavedToast(isDe ? `Entwurf gespeichert (${timeStr}) ✓` : `Draft saved (${timeStr}) ✓`)
+      setTimeout(() => setDraftSavedToast(null), 3500)
+    } catch (e) {}
   }
 
   const handleSubmitEvaluation = (e: React.FormEvent) => {
@@ -988,13 +1061,47 @@ export function ReviewerWorkspace({
           }
 
           onSubmitScorecard(payload)
-          setPoints(prev => Math.min(100, prev + 12))
+
+          // Strict Turnaround Benefit Policy: Only reviewers who complete on-time receive points & waiver voucher
+          const isOverdue = (currentPaper.daysLeft !== undefined && currentPaper.daysLeft < 0) || 
+            Boolean(currentPaper.deadline && new Date(currentPaper.deadline).getTime() < Date.now() - 86400000)
+          if (!isOverdue) {
+            setPoints(prev => Math.min(100, prev + 12))
+            // Generate on-time APC credit voucher / benefit
+            const voucherCode = `REV-WAV25-${(currentPaper.manuscriptId || currentPaper.id || "SO").replace(/[^a-zA-Z0-9]/g, "").slice(-8)}-${Math.floor(1000 + Math.random() * 9000)}`
+            const newVoucher = {
+              id: `VOUCH-${Date.now()}`,
+              code: voucherCode,
+              discount: "25%",
+              paperId: currentPaper.manuscriptId || currentPaper.id,
+              awardedBy: "Editorial Office (On-Time Completion)",
+              awardedAt: new Date().toISOString().split("T")[0],
+              validUntil: "2027-12-31",
+              status: "Active" as const,
+              reason: "On-Time Peer Review Completion (<14 Days)"
+            }
+            setAwardedVouchers(prev => [newVoucher, ...prev])
+            try {
+              const email = user?.email || profile?.email || "reviewer@scholarlyopen.org"
+              const vKey = `editorial360_reviewer_vouchers_${email}`
+              const existing = JSON.parse(localStorage.getItem(vKey) || "[]")
+              existing.unshift(newVoucher)
+              localStorage.setItem(vKey, JSON.stringify(existing))
+            } catch (e) {}
+          } else {
+            console.warn("Peer review evaluation submitted past deadline: waiver voucher and merit points withheld per editorial turnaround policy.")
+          }
+
           const newDone = (reviewsDone || 0) + 1
           setReviewsDone(newDone)
           try {
             const email = user?.email || "reviewer@scholarlyopen.org"
             localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, String(newDone))
+            // Remove draft after successful submission
+            const draftKey = `editorial360_draft_eval_${currentPaper.manuscriptId || currentPaper.id}_${profile?.email || user?.email || ""}`
+            localStorage.removeItem(draftKey)
           } catch (e) {}
+          setLastDraftSavedAt(null)
           setSelectedReviewForEval(null)
         }, 600)
       }
@@ -3664,6 +3771,12 @@ COPE & Plan S Certified Archive
                 </h2>
               </div>
               <div className="flex items-center gap-2">
+                {lastDraftSavedAt && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Draft saved ({lastDraftSavedAt})
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
                   <ShieldCheck className="h-3 w-3" />
                   AI Index: Clean (3%)
@@ -4055,24 +4168,43 @@ COPE & Plan S Certified Archive
               </div>
             </div>
 
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center justify-between">
-              <Button
-                type="button"
-                onClick={() => setSelectedReviewForEval(null)}
-                variant="ghost"
-                className="text-xs font-semibold cursor-pointer"
-              >
-                {isDe ? "Schließen / Entwurf speichern" : "Save Draft & Close"}
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-5 py-2 cursor-pointer"
-              >
-                {isSubmitting 
-                  ? (isDe ? "Wird übermittelt..." : "Submitting...") 
-                  : (isDe ? "Gutachten einreichen (+12 Pkt)" : "Submit Evaluation (+12 Pts)")}
-              </Button>
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <Button
+                  type="button"
+                  onClick={handleManualSaveDraft}
+                  variant="outline"
+                  className="text-xs font-semibold cursor-pointer border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 shadow-2xs"
+                >
+                  <Save className="h-3.5 w-3.5 text-[#0b99ff]" />
+                  <span>{isDe ? "Entwurf speichern" : "Save Draft"}</span>
+                </Button>
+                {draftSavedToast && (
+                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 animate-in fade-in duration-200">
+                    {draftSavedToast}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={() => setSelectedReviewForEval(null)}
+                  variant="ghost"
+                  className="text-xs font-semibold cursor-pointer text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                >
+                  {isDe ? "Schließen" : "Close"}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-sm"
+                >
+                  {isSubmitting 
+                    ? (isDe ? "Wird übermittelt..." : "Submitting...") 
+                    : (isDe ? "Gutachten einreichen (+12 Pkt)" : "Submit Evaluation (+12 Pts)")}
+                </Button>
+              </div>
             </div>
           </form>
         </DialogContent>

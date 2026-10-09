@@ -9,16 +9,18 @@
       "department": "Research Scholar",
       "score": 85,
       "totalQuestions": 10,
-      "passed": true,
-      "status": "Pending JM Approval",
+      "passed": false,
+      "status": "Disapproved - Access Blocked",
       "credentialId": "SO-REV-2026-2DFD47",
       "date": "Sep 30, 2026",
       "timestamp": "2026-09-30T20:29:39.000Z",
       "orcid": "",
-      "notes": "Self-registered via Reviewer Gateway assessment. Flagged for JM institutional verification, CV, and ORCID check.",
+      "notes": "Candidate identity disapproved by Journal Manager. Access blocked from peer review privileges.",
       "email": "palak28chitkara@gmail.com",
       "name": "Palak Chitkara, Research Scholar",
-      "jmApproved": false
+      "jmApproved": false,
+      "isFlagged": true,
+      "flagReason": "Disapproved by Journal Manager (Unverified Institutional Credentials)"
     },
     {
       "id": "TEST-2026-9142",

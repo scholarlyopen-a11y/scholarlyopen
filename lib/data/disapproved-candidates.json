@@ -1,4 +1,17 @@
 {
-  "disapproved": [],
-  "lastUpdated": "2026-10-01T07:50:00.000Z"
+  "disapproved": [
+    {
+      "id": "WATCH-2026-001",
+      "name": "Palak Chitkara, Research Scholar",
+      "email": "palak28chitkara@gmail.com",
+      "orcid": "",
+      "institution": "Academic Institution (Unverified)",
+      "credentialId": "SO-REV-2026-2DFD47",
+      "disapprovedAt": "2026-10-01T08:00:00.000Z",
+      "disapprovedBy": "Journal Manager",
+      "status": "Disapproved",
+      "reason": "Unverified Institutional Affiliation / Disapproved by Journal Manager"
+    }
+  ],
+  "lastUpdated": "2026-10-09T06:50:00.000Z"
 }
