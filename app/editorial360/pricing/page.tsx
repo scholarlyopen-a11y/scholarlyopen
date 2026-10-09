@@ -25,7 +25,12 @@ import {
   KeyRound,
   AlertCircle,
   Sun,
-  Moon
+  Moon,
+  QrCode,
+  Copy,
+  Download,
+  Share2,
+  ExternalLink
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -66,6 +71,19 @@ export default function Editorial360PricingPage() {
   const [accessError, setAccessError] = useState("")
   const [requestAccessModalOpen, setRequestAccessModalOpen] = useState(false)
   const [requestSubmitted, setRequestSubmitted] = useState(false)
+
+  // QR Modal & Sharing State
+  const [qrModalOpen, setQrModalOpen] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const vipUrl = "https://www.scholarlyopen.org/editorial360/pricing?code=FRANKFURT2026"
+
+  const handleCopyLink = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(vipUrl)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2500)
+    }
+  }
 
   // Add-on selection states
   const [addOnReviewerWallet, setAddOnReviewerWallet] = useState(true)
@@ -281,14 +299,24 @@ export default function Editorial360PricingPage() {
               Executive Portal
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-8 w-8 px-0 text-slate-600 dark:text-slate-300"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setQrModalOpen(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 px-3 py-1.5 rounded-lg border border-[#0b99ff]/20 transition-all cursor-pointer shadow-2xs"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span>Show QR Pass</span>
+            </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="h-8 w-8 px-0 text-slate-600 dark:text-slate-300"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+          </div>
         </header>
 
         {/* Access Code Form Box */}
@@ -349,7 +377,17 @@ export default function Editorial360PricingPage() {
               </Button>
             </form>
 
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
+            {/* Quick QR Code Display Button */}
+            <div className="pt-2 text-center space-y-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setQrModalOpen(true)}
+                className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
+              >
+                <QrCode className="w-4 h-4 text-[#0b99ff]" />
+                <span>Display Mobile QR Code (For Investors to Scan)</span>
+              </button>
+
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Meeting at the fair and need a code?{" "}
                 <button
@@ -473,6 +511,100 @@ export default function Editorial360PricingPage() {
           </div>
         )}
 
+        {/* Global QR Code Pass Modal */}
+        {qrModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl text-center space-y-5">
+              <button
+                onClick={() => setQrModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/20 inline-block mb-1">
+                  Frankfurt Book Fair 2026 · VIP Delegate Pass
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                  editorial360 QR Code
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
+                  Scan with any mobile camera to immediately review pricing and schedule an executive meeting.
+                </p>
+              </div>
+
+              {/* High-Resolution QR Card Frame */}
+              <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-md inline-block max-w-[280px] mx-auto">
+                <img 
+                  src="/qr-editorial360-pricing.png" 
+                  alt="editorial360 Frankfurt Fair 2026 QR Code" 
+                  className="w-64 h-64 mx-auto object-contain select-none"
+                />
+                <div className="mt-2 text-[10px] font-mono font-bold text-slate-500 break-all select-all">
+                  editorial360/pricing?code=FRANKFURT2026
+                </div>
+              </div>
+
+              {/* Action Buttons: Copy, Download, Share */}
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={handleCopyLink}
+                    variant="outline"
+                    className="w-full py-4 text-xs font-bold border-slate-200 dark:border-slate-700 cursor-pointer"
+                  >
+                    {linkCopied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-500 mr-1" />
+                        <span className="text-emerald-500">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 mr-1" />
+                        <span>Copy Link</span>
+                      </>
+                    )}
+                  </Button>
+
+                  <a
+                    href="/qr-editorial360-pricing.png"
+                    download="editorial360-frankfurt-fair-qr.png"
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-xs font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Save PNG</span>
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Review editorial360™ Institutional Pricing & Schedule Frankfurt Book Fair 2026 Meeting: " + vipUrl)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+
+                  <a
+                    href={`mailto:?subject=${encodeURIComponent("editorial360™ Institutional Pricing Schedule & Frankfurt Fair 2026 Briefing")}&body=${encodeURIComponent("Dear Colleague,\n\nPlease review the editorial360™ institutional pricing schedule and Frankfurt Book Fair 2026 executive showcase details here:\n\n" + vipUrl + "\n\nBest regards,\nScholarly Open Team")}`}
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Email Link</span>
+                  </a>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-400">
+                Auto-unlocks with pre-loaded code: <strong className="text-slate-700 dark:text-slate-200 font-mono">FRANKFURT2026</strong>
+              </p>
+            </div>
+          </div>
+        )}
+
       </div>
     )
   }
@@ -496,11 +628,18 @@ export default function Editorial360PricingPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => handleOpenMeetingModal("Frankfurt Fair VIP Demo")}
+              onClick={() => setQrModalOpen(true)}
               className="inline-flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-100 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
             >
-              <Calendar className="w-3.5 h-3.5 text-[#0b99ff]" />
-              <span>Schedule Frankfurt Meeting</span>
+              <QrCode className="w-3.5 h-3.5 text-[#0b99ff]" />
+              <span>Show QR Code Pass</span>
+            </button>
+            <button
+              onClick={() => handleOpenMeetingModal("Frankfurt Fair VIP Demo")}
+              className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-bold px-3 py-1 rounded-full text-xs border border-white/20 transition-all cursor-pointer whitespace-nowrap"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Schedule Meeting</span>
             </button>
             <button
               onClick={() => {
@@ -536,6 +675,15 @@ export default function Editorial360PricingPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Show QR Code button */}
+            <button
+              onClick={() => setQrModalOpen(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 px-3 py-1.5 rounded-lg border border-[#0b99ff]/20 transition-all cursor-pointer shadow-2xs"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">QR Pass</span>
+            </button>
+
             {/* Currency Selector */}
             <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
               {(["EUR", "USD", "GBP"] as Currency[]).map((curr) => (
@@ -992,6 +1140,18 @@ export default function Editorial360PricingPage() {
         </div>
       </section>
 
+      {/* Floating QR Quick Launcher Button (Always accessible on Mobile & Desktop) */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          onClick={() => setQrModalOpen(true)}
+          className="flex items-center gap-2 bg-[#0b99ff] hover:bg-[#0883dc] text-white px-4 py-3 rounded-full shadow-2xl border-2 border-white/30 text-xs font-extrabold hover:scale-105 transition-all cursor-pointer group"
+          title="Display Frankfurt Fair QR Code"
+        >
+          <QrCode className="w-4 h-4" />
+          <span className="hidden sm:inline">Show Fair QR Pass</span>
+        </button>
+      </div>
+
       {/* Frankfurt Meeting Request Modal */}
       {meetingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -1121,6 +1281,100 @@ export default function Editorial360PricingPage() {
               </div>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* Global QR Code Pass Modal */}
+      {qrModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl text-center space-y-5">
+            <button
+              onClick={() => setQrModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-full border border-[#0b99ff]/20 inline-block mb-1">
+                Frankfurt Book Fair 2026 · VIP Delegate Pass
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                editorial360 QR Code
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
+                Scan with any mobile camera to immediately review pricing and schedule an executive meeting.
+              </p>
+            </div>
+
+            {/* High-Resolution QR Card Frame */}
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-md inline-block max-w-[280px] mx-auto">
+              <img 
+                src="/qr-editorial360-pricing.png" 
+                alt="editorial360 Frankfurt Fair 2026 QR Code" 
+                className="w-64 h-64 mx-auto object-contain select-none"
+              />
+              <div className="mt-2 text-[10px] font-mono font-bold text-slate-500 break-all select-all">
+                editorial360/pricing?code=FRANKFURT2026
+              </div>
+            </div>
+
+            {/* Action Buttons: Copy, Download, Share */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={handleCopyLink}
+                  variant="outline"
+                  className="w-full py-4 text-xs font-bold border-slate-200 dark:border-slate-700 cursor-pointer"
+                >
+                  {linkCopied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500 mr-1" />
+                      <span className="text-emerald-500">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 mr-1" />
+                      <span>Copy Link</span>
+                    </>
+                  )}
+                </Button>
+
+                <a
+                  href="/qr-editorial360-pricing.png"
+                  download="editorial360-frankfurt-fair-qr.png"
+                  className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-xs font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Save PNG</span>
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Review editorial360™ Institutional Pricing & Schedule Frankfurt Book Fair 2026 Meeting: " + vipUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>WhatsApp</span>
+                </a>
+
+                <a
+                  href={`mailto:?subject=${encodeURIComponent("editorial360™ Institutional Pricing Schedule & Frankfurt Fair 2026 Briefing")}&body=${encodeURIComponent("Dear Colleague,\n\nPlease review the editorial360™ institutional pricing schedule and Frankfurt Book Fair 2026 executive showcase details here:\n\n" + vipUrl + "\n\nBest regards,\nScholarly Open Team")}`}
+                  className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Email Link</span>
+                </a>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-400">
+              Auto-unlocks with pre-loaded code: <strong className="text-slate-700 dark:text-slate-200 font-mono">FRANKFURT2026</strong>
+            </p>
           </div>
         </div>
       )}
