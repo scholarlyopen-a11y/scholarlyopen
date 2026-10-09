@@ -40,7 +40,11 @@ import {
   Cpu,
   Mail,
   Clock,
-  Video
+  Video,
+  ClipboardList,
+  AlertTriangle,
+  Flame,
+  HelpCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -90,12 +94,82 @@ export default function Editorial360PricingPage() {
   const [qrModalOpen, setQrModalOpen] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const vipUrl = "https://www.scholarlyopen.org/editorial360/pricing?code=FRANKFURT2026"
+  const auditUrl = "https://www.scholarlyopen.org/editorial360/pricing?code=FRANKFURT2026&action=diagnostic"
 
   const handleCopyLink = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(vipUrl)
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2500)
+    }
+  }
+
+  // 30-sec Publisher Diagnostic Questionnaire State
+  const [auditModalOpen, setAuditModalOpen] = useState(false)
+  const [submittingAudit, setSubmittingAudit] = useState(false)
+  const [auditSubmitted, setAuditSubmitted] = useState(false)
+  const [auditCopied, setAuditCopied] = useState(false)
+  const [auditError, setAuditError] = useState("")
+  const [auditData, setAuditData] = useState({
+    name: "",
+    email: "",
+    organization: "",
+    role: "Journal Manager / Editor-in-Chief",
+    journalCount: "1-3 Journals",
+    currentSystem: "Clarivate ScholarOne",
+    turnaroundTime: "60 to 90 Days",
+    difficulties: [
+      "Reviewer fatigue & high decline rates (>60%)",
+      "Slow turnaround & manual reminder delays",
+      "High software licensing & maintenance costs (€12k–€25k+/yr)"
+    ],
+    keySwitchFeature: "",
+    notes: ""
+  })
+
+  const handleCopyAuditLink = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(auditUrl)
+      setAuditCopied(true)
+      setTimeout(() => setAuditCopied(false), 2500)
+    }
+  }
+
+  const handleToggleDifficulty = (item: string) => {
+    setAuditData(prev => {
+      const exists = prev.difficulties.includes(item)
+      if (exists) {
+        return { ...prev, difficulties: prev.difficulties.filter(d => d !== item) }
+      } else {
+        return { ...prev, difficulties: [...prev.difficulties, item] }
+      }
+    })
+  }
+
+  const handleSubmitAudit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmittingAudit(true)
+    setAuditError("")
+    try {
+      const res = await fetch("/api/editorial360/demo-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "audit",
+          ...auditData
+        })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setAuditSubmitted(true)
+      } else {
+        setAuditError(data.error || "Unable to submit audit.")
+      }
+    } catch (err) {
+      console.warn("Optimistic fallback on audit submit error:", err)
+      setAuditSubmitted(true)
+    } finally {
+      setSubmittingAudit(false)
     }
   }
 
@@ -123,13 +197,12 @@ export default function Editorial360PricingPage() {
     notes: ""
   })
 
-  // Check URL query parameters or localStorage for existing unlock
+  // Check URL query parameters or localStorage for existing unlock & action trigger
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = window.sessionStorage.getItem("editorial360_vip_unlocked")
       if (stored === "true") {
         setIsUnlocked(true)
-        return
       }
 
       const params = new URLSearchParams(window.location.search)
@@ -137,6 +210,11 @@ export default function Editorial360PricingPage() {
       if (codeFromUrl && VALID_ACCESS_CODES.includes(codeFromUrl.trim().toUpperCase())) {
         setIsUnlocked(true)
         window.sessionStorage.setItem("editorial360_vip_unlocked", "true")
+      }
+
+      const actionParam = params.get("action")
+      if (actionParam === "audit" || actionParam === "diagnostic") {
+        setAuditModalOpen(true)
       }
     }
   }, [])
@@ -342,6 +420,13 @@ export default function Editorial360PricingPage() {
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setAuditModalOpen(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-500/20 transition-all cursor-pointer shadow-2xs"
+            >
+              <ClipboardList className="w-3.5 h-3.5" />
+              <span>Take Workflow Audit</span>
+            </button>
+            <button
               onClick={() => setQrModalOpen(true)}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 px-3 py-1.5 rounded-lg border border-[#0b99ff]/20 transition-all cursor-pointer shadow-2xs"
             >
@@ -417,15 +502,24 @@ export default function Editorial360PricingPage() {
               </Button>
             </form>
 
-            {/* Quick QR Code Display Button */}
+            {/* Quick QR & 30-sec Diagnostic Buttons */}
             <div className="pt-2 text-center space-y-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setAuditModalOpen(true)}
+                className="w-full flex items-center justify-center gap-2 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/60 px-4 py-2.5 rounded-xl border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shadow-2xs"
+              >
+                <ClipboardList className="w-4 h-4 text-amber-500" />
+                <span>Take 30-sec Publisher Diagnostic</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setQrModalOpen(true)}
                 className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 transition-all cursor-pointer shadow-2xs"
               >
                 <QrCode className="w-4 h-4 text-[#0b99ff]" />
-                <span>Display Mobile QR Code (For Investors to Scan)</span>
+                <span>Display Mobile QR Code (For Scanning)</span>
               </button>
 
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -448,109 +542,6 @@ export default function Editorial360PricingPage() {
           <span>&copy; {new Date().getFullYear()} Scholarly Open Inc. · Connected to info@scholarlyopen.org · All rights reserved by editorial360.</span>
         </footer>
 
-        {/* Request Passcode Modal */}
-        {requestAccessModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <div className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl space-y-4">
-              <button
-                onClick={() => setRequestAccessModalOpen(false)}
-                className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              {!requestSubmitted ? (
-                <>
-                  <div>
-                    <span className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider block mb-1">
-                      Online Executive Demonstration
-                    </span>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                      Request Online Access Passcode
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Inquiries route directly to <strong>info@scholarlyopen.org</strong>.
-                    </p>
-                  </div>
-
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      setRequestSubmitted(true)
-                    }} 
-                    className="space-y-3"
-                  >
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Your Full Name *
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        placeholder="Dr. Julian Weber"
-                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Institutional Email *
-                      </label>
-                      <input
-                        required
-                        type="email"
-                        placeholder="j.weber@universitypress.org"
-                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Press or Organization *
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        placeholder="European Academic Society"
-                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full py-5 rounded-xl bg-[#0b99ff] hover:bg-[#0883dc] text-white font-bold text-xs"
-                    >
-                      Submit Request & Book Slot
-                    </Button>
-                  </form>
-                </>
-              ) : (
-                <div className="text-center py-6 space-y-3">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
-                    <CheckCircle2 className="w-7 h-7" />
-                  </div>
-                  <h4 className="text-lg font-black text-slate-900 dark:text-white">
-                    VIP Passcode Dispatched
-                  </h4>
-                  <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                    You can unlock immediately using code: <strong className="text-[#0b99ff] font-mono text-sm block mt-1">FRANKFURT2026</strong>
-                  </p>
-                  <Button
-                    onClick={() => {
-                      setAccessCodeInput("FRANKFURT2026")
-                      setIsUnlocked(true)
-                      setRequestAccessModalOpen(false)
-                      if (typeof window !== "undefined") {
-                        window.sessionStorage.setItem("editorial360_vip_unlocked", "true")
-                      }
-                    }}
-                    className="w-full bg-[#0b99ff] text-white font-bold text-xs py-4 rounded-xl"
-                  >
-                    Unlock Schedule Now
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
       </div>
     )
   }
@@ -562,27 +553,34 @@ export default function Editorial360PricingPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-[#0c0d12] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
       
       {/* Top Floating Announcement Bar: Frankfurt Book Fair 2026 */}
-      <div className="bg-gradient-to-r from-[#0b99ff] via-indigo-600 to-purple-600 text-white px-4 py-2 text-xs sm:text-sm font-medium shadow-md">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            <span className="bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase">
+      <div className="bg-[#0A192F] text-slate-200 border-b border-slate-800 px-4 py-2.5 text-xs sm:text-sm font-medium shadow-sm">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
+          <div className="flex items-center gap-2.5">
+            <span className="bg-blue-500/15 text-blue-300 border border-blue-400/20 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase">
               VIP Passcode Verified
             </span>
-            <span className="font-semibold text-xs sm:text-sm">
+            <span className="font-semibold text-xs sm:text-sm text-slate-100">
               Frankfurt Book Fair 2026 · Online Executive Partner Sessions
             </span>
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setAuditModalOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
+            >
+              <ClipboardList className="w-3.5 h-3.5" />
+              <span>30-sec Publisher Diagnostic</span>
+            </button>
+            <button
               onClick={() => setQrModalOpen(true)}
-              className="inline-flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-100 font-bold px-3 py-1 rounded-full text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white font-medium px-3 py-1 rounded-full text-xs border border-slate-700 transition-all cursor-pointer whitespace-nowrap"
             >
               <QrCode className="w-3.5 h-3.5 text-[#0b99ff]" />
-              <span>Show QR Code Pass</span>
+              <span>Show QR Code</span>
             </button>
             <button
               onClick={() => handleOpenMeetingModal("Frankfurt Fair VIP Demo")}
-              className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-bold px-3 py-1 rounded-full text-xs border border-white/20 transition-all cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 bg-[#0b99ff] hover:bg-[#0883dc] text-white font-semibold px-3 py-1 rounded-full text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
             >
               <Video className="w-3.5 h-3.5" />
               <span>Schedule Online Briefing</span>
@@ -594,7 +592,7 @@ export default function Editorial360PricingPage() {
                   window.sessionStorage.removeItem("editorial360_vip_unlocked")
                 }
               }}
-              className="text-white/80 hover:text-white text-[11px] underline ml-2 cursor-pointer"
+              className="text-slate-400 hover:text-slate-200 text-[11px] underline ml-1 cursor-pointer"
             >
               Lock
             </button>
@@ -621,6 +619,15 @@ export default function Editorial360PricingPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Publisher Diagnostic Button in Nav */}
+            <button
+              onClick={() => setAuditModalOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/60 px-3 py-1.5 rounded-lg border border-amber-300 dark:border-amber-800 transition-all cursor-pointer shadow-2xs"
+            >
+              <ClipboardList className="w-3.5 h-3.5 text-amber-500" />
+              <span>30-sec Diagnostic</span>
+            </button>
+
             {/* Show QR Code button */}
             <button
               onClick={() => setQrModalOpen(true)}
@@ -662,7 +669,7 @@ export default function Editorial360PricingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-12 pb-8 px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto space-y-4">
+      <section className="pt-12 pb-6 px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto space-y-4">
         <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
           Business Model & Pricing
         </h1>
@@ -672,7 +679,7 @@ export default function Editorial360PricingPage() {
         </p>
 
         {/* Billing Cycle Switcher */}
-        <div className="pt-3 flex items-center justify-center">
+        <div className="pt-2 flex items-center justify-center">
           <div className="inline-flex items-center bg-slate-200/80 dark:bg-slate-850 p-1.5 rounded-2xl border border-slate-300/80 dark:border-slate-750 shadow-inner">
             <button
               onClick={() => setBillingCycle("monthly")}
@@ -705,6 +712,44 @@ export default function Editorial360PricingPage() {
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium italic">
           Prices per journal, annual billing, plus VAT
         </p>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 30-SEC PUBLISHER DIAGNOSTIC CTA BANNER */}
+      {/* ========================================================================= */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+        <div className="rounded-2xl bg-[#0A192F] border border-blue-900/60 p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="space-y-2.5 text-center md:text-left z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 text-blue-300 text-[11px] font-bold uppercase tracking-wider border border-blue-400/20">
+              <ClipboardList className="w-3.5 h-3.5" />
+              <span>International Publisher Diagnostic · 30-Second Institutional Benchmark</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              What bottlenecks are you facing in your editorial workflow?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+              Complete our 30-second diagnostic. Flag where your workflow experiences friction (referee decline rates, slow turnaround, paper-mill risks, or high licensing fees) to view your real-time benchmark against editorial360.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto shrink-0 z-10">
+            <button
+              onClick={() => setAuditModalOpen(true)}
+              className="bg-[#0b99ff] hover:bg-[#0883dc] text-white font-bold text-xs px-6 py-3.5 rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span>Take 30-sec Publisher Diagnostic →</span>
+            </button>
+            <button
+              onClick={handleCopyAuditLink}
+              title="Copy direct link to diagnostic to send to publishers"
+              className="bg-slate-800/80 hover:bg-slate-750 text-slate-200 hover:text-white font-semibold text-xs px-4 py-3.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {auditCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              <span className="hidden lg:inline">{auditCopied ? "Link Copied!" : "Copy Diagnostic Link"}</span>
+            </button>
+          </div>
+        </div>
       </section>
 
       {/* 3 Main Tiers Grid - Perfectly formatted with "per journal" */}
@@ -811,18 +856,18 @@ export default function Editorial360PricingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* PROTECTED PLATFORM SCREENSHOTS & ARCHITECTURE SHOWCASE (LURE WITH WATERMARK) */}
+      {/* PROTECTED PLATFORM SCREENSHOTS & ARCHITECTURE SHOWCASE */}
       {/* ========================================================================= */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-10 shadow-2xl">
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6 mb-8">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold uppercase tracking-wider mb-2">
                 <Lock className="w-3.5 h-3.5" />
                 <span>Protected Proprietary Architecture · Executive Preview</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Inside the editorial360 Platform Engine
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
@@ -832,8 +877,15 @@ export default function Editorial360PricingPage() {
 
             <div className="flex items-center gap-2">
               <button
+                onClick={() => setAuditModalOpen(true)}
+                className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs cursor-pointer transition-all whitespace-nowrap"
+              >
+                <ClipboardList className="w-4 h-4" />
+                <span>30-sec Diagnostic</span>
+              </button>
+              <button
                 onClick={() => handleOpenMeetingModal("Live Platform Walkthrough")}
-                className="inline-flex items-center gap-2 bg-[#0b99ff] hover:bg-[#0883dc] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md cursor-pointer transition-all whitespace-nowrap"
+                className="inline-flex items-center gap-2 bg-[#0b99ff] hover:bg-[#0883dc] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs cursor-pointer transition-all whitespace-nowrap"
               >
                 <Laptop className="w-4 h-4" />
                 <span>Request Live Sandbox Tour</span>
@@ -845,10 +897,10 @@ export default function Editorial360PricingPage() {
           <div className="flex flex-wrap gap-2 mb-6">
             <button
               onClick={() => setActiveShowcaseTab("scholar_scout")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-2 ${
                 activeShowcaseTab === "scholar_scout"
-                  ? "bg-[#0b99ff] text-white shadow-md"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+                  ? "bg-[#0b99ff] text-white shadow-xs font-bold"
+                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700/60 font-semibold"
               }`}
             >
               <Search className="w-3.5 h-3.5" />
@@ -857,10 +909,10 @@ export default function Editorial360PricingPage() {
 
             <button
               onClick={() => setActiveShowcaseTab("parallel_dispatch")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-2 ${
                 activeShowcaseTab === "parallel_dispatch"
-                  ? "bg-[#0b99ff] text-white shadow-md"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+                  ? "bg-[#0b99ff] text-white shadow-xs font-bold"
+                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700/60 font-semibold"
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -869,10 +921,10 @@ export default function Editorial360PricingPage() {
 
             <button
               onClick={() => setActiveShowcaseTab("paper_mill")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-2 ${
                 activeShowcaseTab === "paper_mill"
-                  ? "bg-[#0b99ff] text-white shadow-md"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+                  ? "bg-[#0b99ff] text-white shadow-xs font-bold"
+                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700/60 font-semibold"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -881,10 +933,10 @@ export default function Editorial360PricingPage() {
 
             <button
               onClick={() => setActiveShowcaseTab("reviewer_wallet")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-2 ${
                 activeShowcaseTab === "reviewer_wallet"
-                  ? "bg-[#0b99ff] text-white shadow-md"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750"
+                  ? "bg-[#0b99ff] text-white shadow-xs font-bold"
+                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700/60 font-semibold"
               }`}
             >
               <Award className="w-3.5 h-3.5" />
@@ -892,279 +944,372 @@ export default function Editorial360PricingPage() {
             </button>
           </div>
 
-          {/* Interactive Protected Device Mockup Frame */}
-          <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-100 overflow-hidden shadow-2xl select-none">
+          {/* Interactive Protected Device Mockup Frame - Natural Screenshot Aesthetic */}
+          <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f141c] text-slate-900 dark:text-slate-100 overflow-hidden shadow-2xl select-none font-sans">
             
             {/* Top Browser Window Chrome */}
-            <div className="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+            <div className="bg-slate-100 dark:bg-[#151a24] border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
-                <div className="ml-3 px-3 py-1 rounded-md bg-slate-800/80 text-[11px] font-mono text-slate-400 flex items-center gap-2">
-                  <Lock className="w-3 h-3 text-emerald-400" />
-                  <span>https://editorial360.sch-open.org/console/{activeShowcaseTab}</span>
+                <span className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 inline-block" />
+                <div className="ml-3 px-3 py-1 rounded-md bg-white dark:bg-[#0f141c] border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-2 shadow-2xs">
+                  <Lock className="w-3 h-3 text-emerald-500" />
+                  <span>https://editorial360.scholarlyopen.org/editor/console/manuscript/CAIDH-2026-0842</span>
                 </div>
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded border border-amber-400/20">
-                Watermarked Executive View
+              <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-slate-800/80 px-2.5 py-0.5 rounded border border-slate-300/60 dark:border-slate-700/60">
+                editorial360™ Enterprise · Institutional Preview
               </div>
             </div>
 
-            {/* Diagonal Protection Watermark Overlay */}
-            <div className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center opacity-10 rotate-[-18deg] text-slate-100 font-black tracking-widest text-3xl sm:text-5xl text-center uppercase select-none leading-tight">
-              editorial360™ · CONFIDENTIAL ARCHITECTURE<br />FRANKFURT BOOK FAIR 2026 PREVIEW
+            {/* In-App Application Navigation Bar */}
+            <div className="bg-white dark:bg-[#121722] border-b border-slate-200 dark:border-slate-800 px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-3">
+                <span className="font-extrabold text-sm tracking-tight text-[#0b99ff]">
+                  editorial<span className="text-slate-900 dark:text-white">360</span>
+                </span>
+                <div className="h-4 w-[1px] bg-slate-200 dark:border-slate-800" />
+                <div className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                  <span>Clinical AI & Digital Health</span>
+                  <span className="text-[11px] font-normal text-slate-400">(ISSN 2974-8844)</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  Managing Editor Workspace
+                </span>
+                <span className="text-slate-500 dark:text-slate-400 text-xs hidden sm:inline">
+                  Prof. Dr. Julian Weber (Section Editor)
+                </span>
+              </div>
+            </div>
+
+            {/* In-App Manuscript Context Header Bar */}
+            <div className="bg-slate-50 dark:bg-[#161c28] border-b border-slate-200 dark:border-slate-800 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="font-mono font-bold text-slate-700 dark:text-slate-300">MS ID: CAIDH-2026-0842</span>
+                  <span>·</span>
+                  <span>Section: Original Research · Clinical ML</span>
+                  <span>·</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Under Double-Blind Peer Review</span>
+                </div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                  Prospective Multi-Centric Clinical Validation of Multimodal Foundation Models in Oncological Diagnostic Workflows
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Authors: Elena Rostova, M.D., Ph.D.¹; Marcus Chen, Ph.D.²; David K. Thorne, M.D.³ (Charité Berlin, Karolinska, Stanford)
+                </p>
+              </div>
+
+              <div className="sm:text-right shrink-0 bg-white dark:bg-[#111622] p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Review Velocity SLA</span>
+                <span className="font-mono font-extrabold text-emerald-600 dark:text-emerald-400 text-xs">
+                  Day 11 of 21 (Avg: 18.2 Days)
+                </span>
+              </div>
             </div>
 
             {/* SCREEN 1: SCHOLARSCOUT AI DISCOVERY */}
             {activeShowcaseTab === "scholar_scout" && (
-              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
-                  <div>
-                    <span className="text-[10px] font-mono uppercase text-[#0b99ff]">Module · S-SCOUT-V3</span>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <span>ScholarScout™ Automated Reviewer Discovery & Sourcing</span>
-                      <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-normal">Active Sourcing Mode</span>
-                    </h3>
+              <div className="p-5 sm:p-7 space-y-5 bg-white dark:bg-[#0f141c]">
+                
+                {/* Search & Semantic Query Bar */}
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#151b26] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Search className="w-4 h-4 text-[#0b99ff] shrink-0" />
+                    <span className="font-bold text-slate-700 dark:text-slate-300">Semantic Abstract Parsing:</span>
+                    <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded text-[11px]">Multimodal Attention</span>
+                    <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded text-[11px]">Radiogenomics</span>
+                    <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded text-[11px]">Validation Cohort</span>
+                    <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded text-[11px]">Histopathology</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Target Manuscript:</span>
-                    <span className="text-xs font-mono font-bold text-slate-200">SOENG-26-RJ110 · Deep Synthesis</span>
+                  <div className="text-[11px] text-slate-500 font-medium whitespace-nowrap">
+                    Filtered across 1.4M verified OpenAlex & Crossref profiles
                   </div>
                 </div>
 
-                {/* Candidate Mockup Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Candidate Referee Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   
-                  {/* Card 1 */}
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3 relative overflow-hidden">
+                  {/* Candidate 1 */}
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="font-bold text-sm text-white">Dr. K*** V*** (Zurich Institute)</div>
-                        <div className="text-xs text-slate-400">Department of Applied Materials & Micro-Systems</div>
+                        <div className="font-bold text-xs text-slate-900 dark:text-white">Dr. Katrin Varma, Ph.D.</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">ETH Zürich · Biosystems Science</div>
                       </div>
-                      <span className="text-xs font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-md">
+                      <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
                         98.4% Match
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 text-[11px]">
-                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">Composite Microstructures</span>
-                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">Thermal Dynamics</span>
-                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">h-index: 38</span>
+
+                    <div className="space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                      <div><strong>h-index:</strong> 41 · 127 Publications</div>
+                      <div><strong>Expertise:</strong> Multimodal AI, Diagnostic Imaging</div>
+                      <div className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ 0 Joint Papers with Authors (5y)</div>
                     </div>
-                    <div className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-2 flex items-center justify-between">
-                      <span className="text-emerald-400 flex items-center gap-1">✓ No COI · 0 Joint Papers (5y)</span>
-                      <span className="text-slate-500 font-mono">Invited: 2h ago (Bilingual DE/EN)</span>
+
+                    <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400 font-mono">Invited 1h ago</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">Verified Reviewer</span>
                     </div>
                   </div>
 
-                  {/* Card 2 */}
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3 relative overflow-hidden">
+                  {/* Candidate 2 */}
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="font-bold text-sm text-white">Prof. Dr. N. Ikeda (Osaka Lab)</div>
-                        <div className="text-xs text-slate-400">Advanced Electronic Interface Dynamics</div>
+                        <div className="font-bold text-xs text-slate-900 dark:text-white">Prof. Dr. Nobuo Ikeda</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">Kyoto University · Clinical Oncology</div>
                       </div>
-                      <span className="text-xs font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-md">
-                        96.1% Match
+                      <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                        96.2% Match
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 text-[11px]">
-                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">Semiconductor Forensics</span>
-                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">ORCID: 0000-0002-****</span>
-                      <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">h-index: 42</span>
+
+                    <div className="space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                      <div><strong>h-index:</strong> 48 · 210 Publications</div>
+                      <div><strong>Expertise:</strong> Radiogenomic Biomarkers, Oncology</div>
+                      <div className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Zero Conflict of Interest Cleared</div>
                     </div>
-                    <div className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-2 flex items-center justify-between">
-                      <span className="text-emerald-400 flex items-center gap-1">✓ Verified Reviewer Status</span>
-                      <span className="text-[#0b99ff] font-bold">Accepted · Review in Progress</span>
+
+                    <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                      <span className="text-[#0b99ff] font-bold">Invitation Accepted</span>
+                      <span className="text-slate-500">Review in Progress</span>
+                    </div>
+                  </div>
+
+                  {/* Candidate 3 */}
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-bold text-xs text-slate-900 dark:text-white">Dr. Sarah Al-Mansoor</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">Univ. of Cambridge · Radiology</div>
+                      </div>
+                      <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                        94.7% Match
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                      <div><strong>h-index:</strong> 34 · 88 Publications</div>
+                      <div><strong>Expertise:</strong> Radiomics, Decision Support</div>
+                      <div className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Institutional Affiliation Verified</div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">Eligible Referee</span>
+                      <span className="text-[#0b99ff] font-bold">Ready for Dispatch</span>
                     </div>
                   </div>
 
                 </div>
 
-                <div className="p-3 rounded-lg bg-blue-950/40 border border-blue-800/50 text-xs text-blue-300 flex items-center justify-between">
-                  <span>✦ <strong>Outcome Metric:</strong> Slashes referee sourcing latency from 14 days down to under 4 hours.</span>
-                  <span className="font-mono text-[10px] text-blue-400">Patent-Pending Algorithm</span>
+                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 text-xs text-blue-900 dark:text-blue-300 flex items-center justify-between">
+                  <span>✦ <strong>Outcome Metric:</strong> Slashes referee sourcing latency from 14 days down to under 4 hours with automated conflict-of-interest screening.</span>
                 </div>
               </div>
             )}
 
             {/* SCREEN 2: PARALLEL DISPATCH MATRIX */}
             {activeShowcaseTab === "parallel_dispatch" && (
-              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+              <div className="p-5 sm:p-7 space-y-5 bg-white dark:bg-[#0f141c]">
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div>
-                    <span className="text-[10px] font-mono uppercase text-[#0b99ff]">Module · DISPATCH-PARALLEL-4</span>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <span>4-Referee Parallel Dispatch & Turnaround Velocity Table</span>
-                      <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-normal">Round 1 Velocity Track</span>
-                    </h3>
+                    <h5 className="font-bold text-sm text-slate-900 dark:text-white">
+                      Parallel 4-Referee Tracking Matrix
+                    </h5>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Eliminates sequential reviewer dropouts by dispatching 4 qualified referees simultaneously with automated SLA milestone tracking.
+                    </p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Round Target:</span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">21 Days SLA (Avg: 18.2 Days)</span>
-                  </div>
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
+                    Target: 21 Days (On-Time: 92%)
+                  </span>
                 </div>
 
                 {/* Institutional Table Mockup */}
-                <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60">
+                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121722]">
                   <table className="w-full text-left text-xs border-collapse">
-                    <thead className="bg-slate-900 border-b border-slate-800 text-[11px] text-slate-400">
+                    <thead className="bg-slate-50 dark:bg-[#161c28] border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
                       <tr>
-                        <th className="px-4 py-3 font-semibold">Referee (Masked)</th>
-                        <th className="px-4 py-3 font-semibold">Status</th>
-                        <th className="px-4 py-3 font-semibold">Evaluation Timeline</th>
+                        <th className="px-4 py-3 font-semibold">Referee (Double-Blind ID)</th>
+                        <th className="px-4 py-3 font-semibold">Affiliation & Expertise</th>
+                        <th className="px-4 py-3 font-semibold">SLA Timeline</th>
+                        <th className="px-4 py-3 font-semibold">Evaluation Status</th>
+                        <th className="px-4 py-3 font-semibold">Score / Recommendation</th>
                         <th className="px-4 py-3 font-semibold text-right">Incentive Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800 text-slate-300">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                       <tr>
-                        <td className="px-4 py-3 font-bold text-white">Referee #1</td>
-                        <td className="px-4 py-3"><span className="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-bold text-[10px]">Report In ✓</span></td>
-                        <td className="px-4 py-3 text-slate-400">Submitted in 8 Days · Comprehensive evaluation filed</td>
-                        <td className="px-4 py-3 text-right text-emerald-400 font-bold">+€150 APC Credit Qualified</td>
+                        <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">Referee #1 (Prof. Ikeda)</td>
+                        <td className="px-4 py-3 text-slate-500">Kyoto University · Clinical Oncology</td>
+                        <td className="px-4 py-3 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">Submitted in 7 Days</td>
+                        <td className="px-4 py-3"><span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded font-bold text-[10px]">Report Filed ✓</span></td>
+                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">8.8/10 · Minor Revision</td>
+                        <td className="px-4 py-3 text-right text-emerald-600 dark:text-emerald-400 font-bold">+€150 APC Credit Vested</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 font-bold text-white">Referee #2</td>
-                        <td className="px-4 py-3"><span className="text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded font-bold text-[10px]">Evaluating</span></td>
-                        <td className="px-4 py-3 text-slate-400">Invitation accepted · Day 5 of 14 deadline window</td>
+                        <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">Referee #2 (Dr. Varma)</td>
+                        <td className="px-4 py-3 text-slate-500">ETH Zürich · Biosystems Science</td>
+                        <td className="px-4 py-3 font-mono text-slate-600 dark:text-slate-400">Day 5 of 14 (9d left)</td>
+                        <td className="px-4 py-3"><span className="text-[#0b99ff] bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded font-bold text-[10px]">Evaluating</span></td>
+                        <td className="px-4 py-3 text-slate-500">Remarks Drafted (3/4 sections)</td>
                         <td className="px-4 py-3 text-right text-slate-400">Pending On-Time Submission</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 font-bold text-white">Referee #3</td>
-                        <td className="px-4 py-3"><span className="text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded font-bold text-[10px]">Evaluating</span></td>
-                        <td className="px-4 py-3 text-slate-400">Invitation accepted · Section editor synthesis queued</td>
+                        <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">Referee #3 (Dr. Thorne)</td>
+                        <td className="px-4 py-3 text-slate-500">Stanford University · Radiology</td>
+                        <td className="px-4 py-3 font-mono text-slate-600 dark:text-slate-400">Day 6 of 14 (8d left)</td>
+                        <td className="px-4 py-3"><span className="text-[#0b99ff] bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded font-bold text-[10px]">Evaluating</span></td>
+                        <td className="px-4 py-3 text-slate-500">Methodology Review Active</td>
                         <td className="px-4 py-3 text-right text-slate-400">Pending On-Time Submission</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 font-bold text-white">Referee #4 (Dr. Ikeda)</td>
-                        <td className="px-4 py-3"><span className="text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded font-bold text-[10px]">Accepted</span></td>
-                        <td className="px-4 py-3 text-slate-400">Reviewer workspace accessed · Drafting remarks</td>
-                        <td className="px-4 py-3 text-right text-purple-400">Active SLA Track</td>
+                        <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">Referee #4 (Reserve Referee)</td>
+                        <td className="px-4 py-3 text-slate-500">Univ. of Cambridge · Clinical AI</td>
+                        <td className="px-4 py-3 font-mono text-slate-600 dark:text-slate-400">Day 1 of 14 (13d left)</td>
+                        <td className="px-4 py-3"><span className="text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded font-bold text-[10px]">Accepted</span></td>
+                        <td className="px-4 py-3 text-slate-500">Reviewer Workspace Accessed</td>
+                        <td className="px-4 py-3 text-right text-purple-600 dark:text-purple-400">Active SLA Track</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/50 text-xs text-emerald-300 flex items-center justify-between">
-                  <span>✦ <strong>Turnaround Revolution:</strong> Eliminates sequential reviewer dropouts. Slashes peer review from 90 to 21 days.</span>
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-xs text-emerald-900 dark:text-emerald-300 flex items-center justify-between">
+                  <span>✦ <strong>Turnaround Velocity:</strong> Slashes peer review duration from 90 days down to 21 days while maintaining strict editorial rigor.</span>
                 </div>
               </div>
             )}
 
             {/* SCREEN 3: PAPER MILL DEFENSE */}
             {activeShowcaseTab === "paper_mill" && (
-              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+              <div className="p-5 sm:p-7 space-y-5 bg-white dark:bg-[#0f141c]">
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div>
-                    <span className="text-[10px] font-mono uppercase text-purple-400">Module · FORENSIC-AUDIT-L3</span>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <span>Paper Mill Defense & Multi-Spectral Image Forensics</span>
-                      <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full font-normal">Integrity Guard 97.6%</span>
-                    </h3>
+                    <h5 className="font-bold text-sm text-slate-900 dark:text-white">
+                      Pre-Publication Scientific Integrity & Forensic Audit Report
+                    </h5>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Automated multi-spectral screening across image manipulation, synthetic AI text markers, and circular citation cartels.
+                    </p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Retraction Defense Index:</span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">Zero Vulnerabilities</span>
-                  </div>
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
+                    Integrity Rating: 99.4% (Zero Vulnerabilities)
+                  </span>
                 </div>
 
                 {/* Forensic Scanners Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">Western Blot Duplication</span>
-                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">Passed</span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Western Blot & Figure Duplication</span>
+                      <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded font-bold">Passed (99.4%)</span>
                     </div>
-                    <div className="h-16 rounded bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center">
-                      <span className="text-[11px] font-mono text-slate-500">Image Hash: Clean (Zero clone lanes)</span>
+                    <div className="p-2.5 rounded bg-white dark:bg-[#0f141c] border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+                      8 Figures scanned: Zero cloned bands or spliced lanes detected.
                     </div>
-                    <p className="text-[11px] text-slate-400">Scans figure contrast and spliced bands against public retraction corpora.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Differential contrast analysis cross-checked with retraction database.</p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">LLM Synthetic Text Check</span>
-                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">98.2% Human</span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Synthetic LLM Text Detection</span>
+                      <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded font-bold">98.6% Human Voice</span>
                     </div>
-                    <div className="h-16 rounded bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center">
-                      <span className="text-[11px] font-mono text-emerald-400 font-bold">Authentic Research Voice</span>
+                    <div className="p-2.5 rounded bg-white dark:bg-[#0f141c] border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                      Authentic Scholarly Perplexity Distribution
                     </div>
-                    <p className="text-[11px] text-slate-400">Analyzes perplexity distribution and hallucinated citation markers.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Analyzes phrase burstiness and validates all 42 cited DOIs in Crossref.</p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">Citation Ring Isolation</span>
-                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">0 Cartels</span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Citation Cartel & Network Analysis</span>
+                      <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded font-bold">0 Cartels (Clean)</span>
                     </div>
-                    <div className="h-16 rounded bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center">
-                      <span className="text-[11px] font-mono text-slate-400">Reciprocal citation loop: 0%</span>
+                    <div className="p-2.5 rounded bg-white dark:bg-[#0f141c] border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+                      Reciprocal citation loop: 0.0% · No author collusions.
                     </div>
-                    <p className="text-[11px] text-slate-400">Cross-references author networks to prevent artificial citation inflation.</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Cross-references historical author co-citation networks across 5 years.</p>
                   </div>
 
                 </div>
 
-                <div className="p-3 rounded-lg bg-purple-950/40 border border-purple-800/50 text-xs text-purple-300 flex items-center justify-between">
-                  <span>✦ <strong>Reputation Insurance:</strong> Protects university presses against multi-million euro paper mill retraction scandals.</span>
+                <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50 text-xs text-purple-900 dark:text-purple-300 flex items-center justify-between">
+                  <span>✦ <strong>Reputational Shield:</strong> Protects university presses against paper-mill scandals, mass retractions, and indexing derecognition.</span>
                 </div>
               </div>
             )}
 
             {/* SCREEN 4: REVIEWER WALLET & INCENTIVES */}
             {activeShowcaseTab === "reviewer_wallet" && (
-              <div className="p-6 sm:p-8 space-y-6 bg-slate-950 font-sans">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+              <div className="p-5 sm:p-7 space-y-5 bg-white dark:bg-[#0f141c]">
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div>
-                    <span className="text-[10px] font-mono uppercase text-[#0b99ff]">Module · WALLET-INCENTIVE-GATEWAY</span>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <span>Reviewer Incentive Engine & Micro-Honoraria Settlement Ledger</span>
-                      <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-normal">Escrow Clearing Active</span>
-                    </h3>
+                    <h5 className="font-bold text-sm text-slate-900 dark:text-white">
+                      Reviewer Incentive Engine & Micro-Honoraria Settlement Ledger
+                    </h5>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Transparent, academic-compliant incentives solving reviewer fatigue through APC credits and accredited CPD recognition.
+                    </p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block">Referee Acceptance Rate:</span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">+64% Improvement</span>
-                  </div>
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
+                    Referee Acceptance Rate: +64%
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                    <div className="font-bold text-sm text-white flex items-center justify-between">
-                      <span>Automated APC Waiver Ledger</span>
-                      <span className="text-emerald-400 font-mono text-xs">€350.00 Active Balance</span>
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-3">
+                    <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                      <span>Automated APC Waiver Credit Ledger</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold">€350.00 Active Balance</span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Referees who complete thorough peer evaluations within deadline automatically accrue publisher credits valid for their next manuscript submission.
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                      Referees who complete rigorous peer evaluations within the 14-day window automatically receive publisher credits redeemable for upcoming submissions.
                     </p>
-                    <div className="text-[11px] text-slate-500 flex items-center gap-2">
-                      <span className="text-emerald-400">✓ Automatic voucher generation</span>
-                      <span>· Single-use cryptographic tokens</span>
+                    <div className="text-[11px] text-slate-500 flex items-center gap-2 pt-1">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Single-use cryptographic vouchers</span>
+                      <span>· Valid for 24 months across portfolio</span>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                    <div className="font-bold text-sm text-white flex items-center justify-between">
-                      <span>Verified CPD & ORCID Certification</span>
-                      <span className="text-[#0b99ff] font-mono text-xs">Crossref Validated</span>
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#141924] space-y-3">
+                    <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                      <span>Verified CPD & Automated ORCID Sync</span>
+                      <span className="text-[#0b99ff] font-mono text-xs font-bold">Crossref & ORCID API Active</span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Instant issuance of continuing professional development (CPD) accredited certificates with verified ORCID peer review credit synchronization.
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                      Instant generation of accredited Continuing Professional Development (CPD) certificates with automatic peer review deposit into referee ORCID records.
                     </p>
-                    <div className="text-[11px] text-slate-500 flex items-center gap-2">
-                      <span className="text-[#0b99ff]">✓ ORCID API automated deposit</span>
-                      <span>· Downloadable PDF Certificate</span>
+                    <div className="text-[11px] text-slate-500 flex items-center gap-2 pt-1">
+                      <span className="text-[#0b99ff] font-semibold">✓ Automated ORCID peer-review deposit</span>
+                      <span>· Downloadable institutional PDF</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-lg bg-blue-950/40 border border-blue-800/50 text-xs text-blue-300 flex items-center justify-between">
-                  <span>✦ <strong>Retention Multiplier:</strong> Solves academic peer review fatigue by providing transparent, compliant rewards.</span>
+                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 text-xs text-blue-900 dark:text-blue-300 flex items-center justify-between">
+                  <span>✦ <strong>Reviewer Loyalty:</strong> Eliminates high decline rates by offering compliant academic recognition that researchers value.</span>
                 </div>
               </div>
             )}
+
+            {/* Subtle Institutional Watermark Seal */}
+            <div className="bg-slate-50 dark:bg-[#121722] border-t border-slate-200 dark:border-slate-800 px-5 py-2.5 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400">
+              <span className="font-mono">editorial360™ Enterprise · Confidential Demonstration Preview</span>
+              <span className="font-mono">Frankfurt Book Fair 2026 · Scholarly Open Inc.</span>
+            </div>
 
           </div>
 
@@ -1452,8 +1597,17 @@ export default function Editorial360PricingPage() {
         </div>
       </section>
 
-      {/* Floating QR Quick Launcher Button (Always accessible on Mobile & Desktop) */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* Floating QR & Diagnostic Quick Launcher Buttons */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-2.5 items-end">
+        <button
+          onClick={() => setAuditModalOpen(true)}
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-full shadow-2xl border-2 border-white/30 text-xs font-extrabold hover:scale-105 transition-all cursor-pointer group"
+          title="Open 30-sec Publisher Diagnostic"
+        >
+          <ClipboardList className="w-4 h-4" />
+          <span className="hidden sm:inline">30-sec Publisher Diagnostic</span>
+        </button>
+
         <button
           onClick={() => setQrModalOpen(true)}
           className="flex items-center gap-2 bg-[#0b99ff] hover:bg-[#0883dc] text-white px-4 py-3 rounded-full shadow-2xl border-2 border-white/30 text-xs font-extrabold hover:scale-105 transition-all cursor-pointer group"
@@ -1463,6 +1617,276 @@ export default function Editorial360PricingPage() {
           <span className="hidden sm:inline">Show Fair QR Pass</span>
         </button>
       </div>
+
+      {/* ========================================================================= */}
+      {/* 30-SEC PUBLISHER WORKFLOW & PAIN POINT DIAGNOSTIC MODAL */}
+      {/* ========================================================================= */}
+      {auditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+          <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-[#15161e] border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[90vh] overflow-y-auto">
+            
+            <button
+              onClick={() => setAuditModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {!auditSubmitted ? (
+              <>
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider mb-1.5">
+                    <ClipboardList className="w-3.5 h-3.5" />
+                    <span>30-sec Publisher Diagnostic</span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                    Publisher Workflow & System Difficulties
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Takes only 30 seconds. Identify your real-time bottlenecks and route directly to <strong>info@scholarlyopen.org</strong>.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmitAudit} className="space-y-5 text-left">
+                  
+                  {/* Q1: Current Legacy System */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <span>1. What software do you currently use for peer review?</span>
+                    </label>
+                    <select
+                      value={auditData.currentSystem}
+                      onChange={(e) => setAuditData({ ...auditData, currentSystem: e.target.value })}
+                      className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                    >
+                      <option>Clarivate ScholarOne Manuscripts</option>
+                      <option>Aries Editorial Manager (EM)</option>
+                      <option>PKP Open Journal Systems (OJS)</option>
+                      <option>Janeway / Ubiquity Press</option>
+                      <option>Scholastica</option>
+                      <option>Manual Email & Word / Shared Drive</option>
+                      <option>In-House Proprietary System</option>
+                      <option>Launching New Journal / None Yet</option>
+                    </select>
+                  </div>
+
+                  {/* Q2: Current Turnaround Time */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <span>2. Average peer review turnaround time from submission to first decision:</span>
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        "Under 30 Days",
+                        "30 to 60 Days",
+                        "60 to 90 Days",
+                        "90 to 120+ Days"
+                      ].map((tOption) => (
+                        <button
+                          type="button"
+                          key={tOption}
+                          onClick={() => setAuditData({ ...auditData, turnaroundTime: tOption })}
+                          className={`p-2.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer text-center ${
+                            auditData.turnaroundTime === tOption
+                              ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                              : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-750 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          {tOption}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Q3: Specific Real-Time Difficulties (Checkboxes) */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                      3. Select your primary real-time difficulties & frustrations (Select all that apply):
+                    </label>
+                    
+                    <div className="space-y-2">
+                      {[
+                        "Reviewer fatigue & high decline rates (>60% invitations rejected)",
+                        "Paper-mill threats, fabricated peer reviews & altered Western blot/figure images",
+                        "Antiquated 2000s interface causing author dropouts & editor frustration",
+                        "High annual software licensing & maintenance costs (€12k–€25k+/yr)",
+                        "Lack of automated reviewer honoraria, APC waiver credits & verified CPD rewards",
+                        "Manual manuscript tracking & missed reviewer reminder follow-ups",
+                        "Slow technical support & rigid, expensive customization workflows"
+                      ].map((diff) => {
+                        const isChecked = auditData.difficulties.includes(diff)
+                        return (
+                          <div
+                            key={diff}
+                            onClick={() => handleToggleDifficulty(diff)}
+                            className={`flex items-start gap-2.5 p-3 rounded-xl border transition-all cursor-pointer ${
+                              isChecked
+                                ? "bg-[#0b99ff]/5 border-[#0b99ff]/40 dark:bg-[#0b99ff]/10"
+                                : "bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-850"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}} // handled by parent div
+                              className="mt-0.5 rounded text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
+                            />
+                            <span className="text-xs text-slate-700 dark:text-slate-300 leading-snug">
+                              {diff}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Q4: Key Switch Trigger */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                      4. What single feature or factor would make you consider switching platforms?
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 21-day review cycle, automated referee matching, paper-mill fraud detection, or 60% lower cost"
+                      value={auditData.keySwitchFeature}
+                      onChange={(e) => setAuditData({ ...auditData, keySwitchFeature: e.target.value })}
+                      className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                    />
+                  </div>
+
+                  {/* Q5: Executive Contact Details */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Your Name *
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="Dr. Julian Weber"
+                        value={auditData.name}
+                        onChange={(e) => setAuditData({ ...auditData, name: e.target.value })}
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Work Email *
+                      </label>
+                      <input
+                        required
+                        type="email"
+                        placeholder="j.weber@universitypress.org"
+                        value={auditData.email}
+                        onChange={(e) => setAuditData({ ...auditData, email: e.target.value })}
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        University Press / Organization *
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="Oxford Academic Press"
+                        value={auditData.organization}
+                        onChange={(e) => setAuditData({ ...auditData, organization: e.target.value })}
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Portfolio Scale
+                      </label>
+                      <select
+                        value={auditData.journalCount}
+                        onChange={(e) => setAuditData({ ...auditData, journalCount: e.target.value })}
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]"
+                      >
+                        <option>1 Journal (Independent)</option>
+                        <option>2–5 Journals (University Press / Society)</option>
+                        <option>6–15 Journals (Multi-Journal Publisher)</option>
+                        <option>15+ Journals (Consortium / Commercial)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {auditError && (
+                    <p className="text-xs text-rose-500 font-medium">{auditError}</p>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={submittingAudit}
+                    className="w-full py-5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-md cursor-pointer transition-all"
+                  >
+                    {submittingAudit ? "Analyzing & Dispatching to info@scholarlyopen.org..." : "Submit 30-sec Diagnostic & Generate Instant Report →"}
+                  </Button>
+                </form>
+              </>
+            ) : (
+              <div className="text-center py-6 space-y-5">
+                <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+                  <CheckCircle2 className="w-9 h-9" />
+                </div>
+
+                <div>
+                  <h4 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                    30-sec Diagnostic Recorded & Dispatched
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto leading-relaxed">
+                    Thank you, {auditData.name || "Colleague"}. Your responses have been delivered to <strong>info@scholarlyopen.org</strong>.
+                  </p>
+                </div>
+
+                {/* Instant Diagnostic Scorecard */}
+                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-left space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Current Platform:</span>
+                    <span className="text-xs font-black text-rose-500">{auditData.currentSystem}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Current Turnaround:</span>
+                    <span className="text-xs font-bold text-amber-500">{auditData.turnaroundTime}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">editorial360 Projected Speed:</span>
+                    <span className="text-xs font-black text-emerald-500">21 Days SLA (72% Faster)</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Identified Bottlenecks:</span>
+                    <span className="text-xs font-bold text-[#0b99ff]">{auditData.difficulties.length} Critical Areas Addressed</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
+                  <Button
+                    onClick={() => {
+                      setAuditModalOpen(false)
+                      handleOpenMeetingModal("Audit Follow-up Review")
+                    }}
+                    className="bg-[#0b99ff] hover:bg-[#0883dc] text-white text-xs font-bold py-5 px-6 rounded-xl cursor-pointer"
+                  >
+                    Schedule Online Walkthrough Based on This Audit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setAuditModalOpen(false)}
+                    className="text-xs font-bold py-5 px-6 rounded-xl cursor-pointer"
+                  >
+                    Close & Return to Pricing
+                  </Button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
 
       {/* Frankfurt Meeting Request Modal (Online Only) */}
       {meetingModalOpen && (
