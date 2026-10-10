@@ -1020,8 +1020,22 @@ export function ReviewerWorkspace({
       return
     }
 
+    // Enforce mandatory 10-point questionnaire completion
+    const unansweredQuestions = QUESTIONNAIRE_CRITERIA.filter(item => !answers[item.id])
+    if (unansweredQuestions.length > 0) {
+      setEvalError(isDe 
+        ? `Bitte beantworten Sie alle 10 Kriterien im Gutachter-Fragebogen (${unansweredQuestions.length} noch unbeantwortet).` 
+        : `Please complete all 10 criteria in the Reviewer Questionnaire (${unansweredQuestions.length} criteria unanswered).`)
+      return
+    }
+
     if (generalComments.trim().length < 30) {
-      setEvalError(isDe ? "Bitte geben Sie ausführlichere allgemeine Kommentare ein (mindestens 30 Zeichen)." : "Please enter more substantive general comments (minimum 30 characters).")
+      setEvalError(isDe ? "Bitte geben Sie ausführlichere allgemeine Kommentare ein (mindestens 30 Zeichen)." : "Please enter substantive general comments to the author(s) (mandatory, minimum 30 characters).")
+      return
+    }
+
+    if (specificComments.trim().length < 20) {
+      setEvalError(isDe ? "Bitte geben Sie spezifische / zeilengenaue Anmerkungen ein (mindestens 20 Zeichen)." : "Please enter specific line-by-line comments to the author(s) (mandatory, minimum 20 characters).")
       return
     }
 
@@ -3880,9 +3894,15 @@ COPE & Plan S Certified Archive
 
               {/* Section 2: 10-Point Questionnaire Matrix */}
               <div className="space-y-3">
-                <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1.5">
-                  2. {isDe ? "Gutachter-Fragebogen (10 Kriterien)" : "Reviewer Questionnaire"}
-                </h3>
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide flex items-center gap-1.5">
+                    <span>2. {isDe ? "Gutachter-Fragebogen (10 Kriterien)" : "Reviewer Questionnaire (10 Criteria)"}</span>
+                    <span className="text-rose-500 font-bold">*</span>
+                  </h3>
+                  <span className="text-[10px] font-semibold text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/40">
+                    {isDe ? "Alle 10 Fragen erforderlich" : "All 10 criteria required"}
+                  </span>
+                </div>
 
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {QUESTIONNAIRE_CRITERIA.map((item, idx) => (
@@ -3901,7 +3921,7 @@ COPE & Plan S Certified Archive
                             className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors cursor-pointer ${
                               answers[item.id] === val 
                                 ? val === "yes" 
-                                  ? "bg-green-600 text-white" 
+                                   ? "bg-green-600 text-white" 
                                   : val === "no" 
                                   ? "bg-red-600 text-white" 
                                   : "bg-slate-700 text-white"
@@ -3948,13 +3968,15 @@ COPE & Plan S Certified Archive
 
               {/* Section 4: Comments to Authors */}
               <div className="space-y-4">
-                <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1.5">
-                  4. {isDe ? "Gutachter-Kommentare für den/die Autor(en)" : "Comments to Author(s)"}
+                <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1.5 flex items-center gap-1.5">
+                  <span>4. {isDe ? "Gutachter-Kommentare für den/die Autor(en)" : "Comments to Author(s)"}</span>
+                  <span className="text-rose-500 font-bold">*</span>
                 </h3>
 
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300">
-                    {isDe ? "Allgemeine Kommentare (Gesamteinschätzung, Stärken, Hauptaussagen):" : "General comments to the Author(s):"}
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                    <span>{isDe ? "Allgemeine Kommentare (Gesamteinschätzung, Stärken, Hauptaussagen) *" : "General comments to the Author(s) *"}</span>
+                    <span className="text-[10px] font-medium text-rose-500 dark:text-rose-400">({isDe ? "mind. 30 Zeichen" : "Mandatory, min. 30 chars"})</span>
                   </label>
                   <textarea
                     rows={3}
@@ -3966,8 +3988,9 @@ COPE & Plan S Certified Archive
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300">
-                    {isDe ? "Spezifische / Zeilengenaue Anmerkungen (Methoden, Gleichungen, Tabellen):" : "Specific line-by-line comments to the Author(s):"}
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                    <span>{isDe ? "Spezifische / Zeilengenaue Anmerkungen (Methoden, Gleichungen, Tabellen) *" : "Specific line-by-line comments to the Author(s) *"}</span>
+                    <span className="text-[10px] font-medium text-rose-500 dark:text-rose-400">({isDe ? "mind. 20 Zeichen" : "Mandatory, min. 20 chars"})</span>
                   </label>
                   <textarea
                     rows={4}
