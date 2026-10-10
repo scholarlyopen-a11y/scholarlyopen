@@ -252,6 +252,116 @@ export const PRAVEEN_NAGULA_RAF = {
   conflictOfInterest: "None"
 }
 
+export const CHAUD_GJ_RAF = {
+  reviewerName: "Dr. Chaud GJ",
+  reviewerEmail: "germanchaud@gmail.com",
+  manuscriptId: "SOMED-26-RW01",
+  manuscriptTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+  manuscriptType: "REVIEW ARTICLE",
+  typeOfReview: "DOUBLE-BLINDED",
+  journal: "Scholarly Open: Medicine",
+  dueDate: "On or before, 15th October, 2026",
+  submittedDate: "2026-10-09",
+  keyWords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking",
+  structure: {
+    lengthOfArticle: "too long",
+    numberOfTables: "needs tables",
+    numberOfFigures: "needs simplified diagram"
+  },
+  questionnaire: [
+    { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" as const },
+    { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" as const },
+    { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" as const },
+    { question: "Is the information on the Institutional Review Board approval stated?", answer: "No" as const },
+    { question: "Is the problem significant and concisely stated?", answer: "Yes" as const },
+    { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" as const },
+    { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "No" as const },
+    { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" as const },
+    { question: "Is adequate reference made to other work in the field?", answer: "Yes" as const },
+    { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" as const }
+  ],
+  priorityRating: 4, // 1 is highest priority, 10 is lowest priority
+  generalComments: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.",
+  specificComments: [
+    "Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.",
+    "Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.",
+    "Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.",
+    "Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).",
+    "Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).",
+    "Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.",
+    "Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.",
+    "Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality)."
+  ],
+  confidentialCommentsEditor: "Dear Editor-in-Chief,\n\nThank you for the opportunity to review this manuscript.\n\nThe authors address an important topic: the organization of healthcare systems for the prevention, recognition, and timely treatment of acute aortic dissection.\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nIf these discrepancies cannot be adequately resolved, the manuscript's scientific and ethical suitability for publication should be reconsidered.\n\nSincerely,\nDr. Chaud GJ",
+  recommendation: "Re-review and Accept with Major Changes",
+  willingToReviewRevision: "Yes",
+  conflictOfInterest: "None"
+}
+
+export function getRafDataForReview(
+  reviewerName?: string,
+  matchedReview?: any,
+  trackingManuscript?: any
+) {
+  const norm = (reviewerName || "").toLowerCase()
+  if (norm.includes("nagula")) {
+    return PRAVEEN_NAGULA_RAF
+  }
+  if (norm.includes("chaud")) {
+    return CHAUD_GJ_RAF
+  }
+  if (matchedReview) {
+    if (matchedReview.rafData || matchedReview.raf) {
+      return matchedReview.rafData || matchedReview.raf
+    }
+    const msId = trackingManuscript?.id || matchedReview.paperId || "SOMED-26-RW01"
+    const msTitle = trackingManuscript?.title || matchedReview.paperTitle || "Submitted Manuscript"
+    const msJournal = trackingManuscript?.journal || "Scholarly Open: Medicine"
+    const commAuth = matchedReview.commentsAuthor || matchedReview.originalComments || ""
+    const specificParts = commAuth.includes("Specific")
+      ? commAuth.split(/Specific.*?:/i)[1]?.trim().split(/\n(?:\d+\.|\-)\s+/).filter(Boolean)
+      : [commAuth]
+
+    return {
+      reviewerName: matchedReview.reviewerName || reviewerName || "Peer Reviewer",
+      reviewerEmail: matchedReview.reviewerEmail || "",
+      manuscriptId: msId,
+      manuscriptTitle: msTitle,
+      manuscriptType: "RESEARCH ARTICLE",
+      typeOfReview: "DOUBLE-BLINDED",
+      journal: msJournal,
+      dueDate: "On or before, 14 days from dispatch",
+      submittedDate: matchedReview.createdAt ? matchedReview.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
+      keyWords: Array.isArray(trackingManuscript?.keywords) ? trackingManuscript.keywords.join("; ") : (trackingManuscript?.keywords || "Peer Review; Scholarly Publishing"),
+      structure: {
+        lengthOfArticle: "appropriate",
+        numberOfTables: "adequate",
+        numberOfFigures: "adequate"
+      },
+      questionnaire: [
+        { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" as const },
+        { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" as const },
+        { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" as const },
+        { question: "Is the information on the Institutional Review Board approval stated?", answer: "Yes" as const },
+        { question: "Is the problem significant and concisely stated?", answer: "Yes" as const },
+        { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" as const },
+        { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "Yes" as const },
+        { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" as const },
+        { question: "Is adequate reference made to other work in the field?", answer: "Yes" as const },
+        { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" as const }
+      ],
+      priorityRating: matchedReview.originality ? Math.max(1, 11 - (matchedReview.originality * 2)) : 5,
+      generalComments: commAuth.split(/Specific.*?:/i)[0]?.trim() || commAuth,
+      specificComments: specificParts.length > 0 ? specificParts : [commAuth],
+      confidentialCommentsEditor: matchedReview.commentsEditor || "No confidential editor concerns noted.",
+      recommendation: matchedReview.recommendation || "Minor Revision",
+      willingToReviewRevision: "Yes",
+      conflictOfInterest: "None"
+    }
+  }
+  return PRAVEEN_NAGULA_RAF
+}
+
 export const getBoardCandidatesForJournal = (journalName?: string, authorName?: string) => {
   const targetJournal = journalName || "Scholarly Open: Medicine"
   const branding = getJournalBranding(targetJournal)
@@ -2408,24 +2518,44 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     }
   }, [activeTab, reviewerRegistryTab])
 
-  // Deduplicated and sanitized reviewer history
+  // Deduplicated and sanitized reviewer history - placed with accepted/completed reviewers above
   const cleanReviewerHistory = useMemo(() => {
     const seen = new Set<string>()
+    const getStatusPriority = (status?: string) => {
+      if (status === "Completed") return 1
+      if (status === "Accepted") return 2
+      if (status === "Invited") return 3
+      if (status === "Declined") return 4
+      return 5
+    }
+
     return (globalReviewerHistory || [])
       .filter(item => item && item.paperId !== "SOMED-26-RW820" && !item.id?.includes("820"))
-      .map(item => ({
-        ...item,
-        reviewerName: item.reviewerName?.toLowerCase().includes("ragab aziza") || item.reviewerName?.toLowerCase().includes("aziza")
-          ? "Dr. Ragab Aziza"
-          : item.reviewerName
-      }))
+      .map(item => {
+        const isChaud = item.reviewerName?.toLowerCase().includes("chaud") || item.reviewerEmail?.toLowerCase().includes("chaud")
+        const isCompleted = item.status === "Completed" || isChaud || (initialReviews && initialReviews.some(r => {
+          const rPaper = String(r.paperId || (r as any).manuscriptId || "").toLowerCase().trim()
+          const rName = (r.reviewerName || "").toLowerCase().replace(/^(?:prof(?:essor)?\.?\s*(?:dr\.?)?|dr\.?)\s+/i, "").trim()
+          const iName = (item.reviewerName || "").toLowerCase().replace(/^(?:prof(?:essor)?\.?\s*(?:dr\.?)?|dr\.?)\s+/i, "").trim()
+          return rPaper === item.paperId?.toLowerCase().trim() && rName && iName && (rName === iName || rName.includes(iName) || iName.includes(rName))
+        }))
+
+        return {
+          ...item,
+          reviewerName: item.reviewerName?.toLowerCase().includes("ragab aziza") || item.reviewerName?.toLowerCase().includes("aziza")
+            ? "Dr. Ragab Aziza"
+            : (isChaud ? "Dr. Chaud GJ" : item.reviewerName),
+          status: isCompleted ? ("Completed" as const) : item.status
+        }
+      })
       .filter(item => {
         const key = `${item.paperId}-${item.reviewerEmail}`.toLowerCase()
         if (seen.has(key)) return false
         seen.add(key)
         return true
       })
-  }, [globalReviewerHistory])
+      .sort((a, b) => getStatusPriority(a.status) - getStatusPriority(b.status))
+  }, [globalReviewerHistory, initialReviews])
 
   // Dedicated Forensics Investigation Modal
   const [isForensicsModalOpen, setIsForensicsModalOpen] = useState(false)
@@ -2566,17 +2696,20 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
         editorAssigned: false,
         assignedEditorName: undefined,
-        reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza"],
+        reviewers: ["Dr. Praveen Nagula", "Dr. Chaud GJ", "Dr. Ragab Aziza"],
         keywords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking"
       })
     }
 
     return list.map(m => {
-      // Ensure SOMED-26-RW01 has 2 active reviewers and keeps assignedEditorName if appointed
+      // Ensure SOMED-26-RW01 has active reviewers and keeps assignedEditorName if appointed
       if (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier")) {
         const cleanRev = (m.reviewers && m.reviewers.length > 0)
-          ? m.reviewers.map(r => r.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : r)
-          : ["Dr. Praveen Nagula", "Dr. Ragab Aziza"]
+          ? m.reviewers.map(r => r.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : (r.toLowerCase().includes("chaud") ? "Dr. Chaud GJ" : r))
+          : ["Dr. Praveen Nagula", "Dr. Chaud GJ", "Dr. Ragab Aziza"]
+        if (!cleanRev.some(r => r.toLowerCase().includes("chaud"))) {
+          cleanRev.splice(1, 0, "Dr. Chaud GJ")
+        }
         return {
           ...m,
           id: "SOMED-26-RW01",
@@ -2848,8 +2981,8 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     if (isMedAortic) {
       const knownCohort = [
         { id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as const, deadline: "2026-08-29" },
+        { id: "REV-HIST-CG-13", name: "Dr. Chaud GJ", email: "germanchaud@gmail.com", invitedDate: "2026-10-01", status: "Completed" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" },
-        { id: "REV-HIST-CG-13", name: "Dr. Chaud GJ", email: "germanchaud@gmail.com", invitedDate: "2026-10-01", status: "Accepted" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-GB-03", name: "Guo B", email: "guo.baolei@zs-hospital.sh.cn", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-BS-04", name: "Bokhari S", email: "bokharsa@rwjms.rutgers.edu", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-QL-05", name: "Quéro L", email: "laurent.quero@aphp.fr", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
@@ -2947,13 +3080,38 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     })
 
     const seenKeys = new Set<string>()
-    return rawList.filter(item => {
-      const key = String(item.email || item.name || "").toLowerCase().trim()
-      if (!key || seenKeys.has(key)) return false
-      seenKeys.add(key)
-      return true
-    })
-  }, [trackingManuscript, paperReviewerHistory, sentEmailsHistory])
+    const getStatusPriority = (item: typeof rawList[0]) => {
+      if (item.status === "Completed") return 1
+      if (item.status === "Accepted") return 2
+      if (item.status === "Invited") return 3
+      if (item.status === "Declined") return 4
+      return 5
+    }
+
+    return rawList
+      .filter(item => {
+        const key = String(item.email || item.name || "").toLowerCase().trim()
+        if (!key || seenKeys.has(key)) return false
+        seenKeys.add(key)
+        return true
+      })
+      .map(item => {
+        const isChaud = item.name?.toLowerCase().includes("chaud") || item.email?.toLowerCase().includes("chaud")
+        const hasSubmittedReview = (isChaud || (initialReviews && initialReviews.some(r => {
+          const rPaper = String(r.paperId || (r as any).manuscriptId || "").toLowerCase().trim()
+          const rName = (r.reviewerName || "").toLowerCase().replace(/^(?:prof(?:essor)?\.?\s*(?:dr\.?)?|dr\.?)\s+/i, "").trim()
+          const iName = (item.name || "").toLowerCase().replace(/^(?:prof(?:essor)?\.?\s*(?:dr\.?)?|dr\.?)\s+/i, "").trim()
+          const rEmail = (r.reviewerEmail || "").toLowerCase().trim()
+          const iEmail = (item.email || "").toLowerCase().trim()
+          return (rPaper === msId) && ((rName && iName && (rName === iName || rName.includes(iName) || iName.includes(rName))) || (rEmail && iEmail && rEmail === iEmail))
+        })))
+        if (hasSubmittedReview && item.status !== "Completed") {
+          return { ...item, status: "Completed" as const }
+        }
+        return item
+      })
+      .sort((a, b) => getStatusPriority(a) - getStatusPriority(b))
+  }, [trackingManuscript, paperReviewerHistory, sentEmailsHistory, initialReviews])
 
   // Handle open Assign Modal
   const handleOpenAssign = (ms: JmManuscript, isAlternate = false) => {
@@ -9355,6 +9513,69 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
           </div>
 
           <div className="space-y-3 py-2 text-xs">
+            {/* Full Reviewer Assessment Form (RAF) Scorecard Preview & Inspection for Journal Manager */}
+            {(() => {
+              const revName = moderatingReview?.reviewerName || ""
+              const matchedReview = initialReviews.find(r => 
+                (r.id && moderatingReview?.id && r.id === moderatingReview.id) ||
+                (r.paperId === moderatingReview?.paperId && r.reviewerName?.toLowerCase().includes(revName.toLowerCase().replace(/^(?:dr\.?|prof\.?)\s+/i, "")))
+              )
+              const raf = getRafDataForReview(revName, matchedReview, trackingManuscript)
+              const priority = raf?.priorityRating || (revName.toLowerCase().includes("chaud") ? 4 : 6)
+              const rec = raf?.recommendation || moderatingReview?.recommendation || "Completed"
+
+              return (
+                <div className="p-3.5 rounded-xl border border-sky-200 dark:border-sky-900/50 bg-sky-50/50 dark:bg-sky-950/20 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <FileText className="h-4 w-4 text-[#0b99ff]" />
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">
+                        Reviewer Assessment Form (RAF)
+                      </span>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                        {rec}
+                      </span>
+                      <span className="text-[10px] font-bold text-purple-700 bg-purple-100 dark:bg-purple-950/60 dark:text-purple-300 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                        Priority: {priority} / 10
+                      </span>
+                    </div>
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        setViewingRafData(raf)
+                        setIsViewingRafModalOpen(true)
+                      }}
+                      className="h-7 text-xs font-bold px-3 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white cursor-pointer shadow-xs flex items-center gap-1.5"
+                    >
+                      <Eye className="h-3 w-3" />
+                      View Complete RAF (Full Form)
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1.5 text-[11px] text-slate-600 dark:text-slate-400 border-t border-sky-100 dark:border-sky-900/40">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Article Length:</span>
+                      <strong className="text-slate-800 dark:text-slate-200">{raf?.structure?.lengthOfArticle || "adequate"}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Tables &amp; Figures:</span>
+                      <strong className="text-slate-800 dark:text-slate-200">{raf?.structure?.numberOfTables || "0"} tables · {raf?.structure?.numberOfFigures || "0"} figs</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Type of Review:</span>
+                      <strong className="text-slate-800 dark:text-slate-200 uppercase">{raf?.typeOfReview || "Double-Blinded"}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Revision Willingness:</span>
+                      <strong className="text-emerald-600 dark:text-emerald-400">✓ Yes</strong>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+
             <div className="space-y-1">
               <label className="font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                 <span>Author-Facing Review Comments (Sanitizable by JM)</span>
@@ -10017,7 +10238,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             )}
 
-            {/* 1/2 Reviews Active Banner for SOMED-26-RW01 */}
+            {/* 2/3 Reviews Active Banner for SOMED-26-RW01 */}
             {(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.title?.includes("Prevent Earlier")) && (
               <div className="p-3.5 sm:p-4 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border animate-in fade-in">
                 <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
@@ -10026,28 +10247,44 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-slate-900 dark:text-white text-xs flex flex-wrap items-center gap-2">
-                      <span>Peer Review Round in Progress (1 of 3 Reports Completed · 2 Active Referees Reviewing)</span>
-                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">1 Report Logged</span>
+                      <span>Peer Review Round in Progress (2 of 3 Reports Completed · 1 Active Referee Reviewing)</span>
+                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">2 Reports Logged</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 break-words">
-                      Reviewer #1 (Dr. Praveen Nagula) has submitted their full Electronic Assessment Form (Recommendation: Re-write &amp; Re-submit). Reviewer #2 (Dr. Ragab Aziza) is conducting his review via direct email correspondence. Reviewer #3 (Dr. Chaud GJ) has accepted the invitation and is evaluating the manuscript.
+                      Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. Chaud GJ) have submitted their full Electronic Assessment Forms (RAF). Reviewer #2 (Dr. Ragab Aziza) is conducting his review via direct email correspondence.
                     </div>
                   </div>
                 </div>
 
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setViewingRafData(PRAVEEN_NAGULA_RAF)
-                    setIsViewingRafModalOpen(true)
-                  }}
-                  className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap mt-1 md:mt-0"
-                >
-                  <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400 shrink-0" />
-                  View Dr. Nagula&apos;s RAF
-                </Button>
+                <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setViewingRafData(PRAVEEN_NAGULA_RAF)
+                      setIsViewingRafModalOpen(true)
+                    }}
+                    className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap"
+                  >
+                    <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400 shrink-0" />
+                    View Dr. Nagula&apos;s RAF
+                  </Button>
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setViewingRafData(CHAUD_GJ_RAF)
+                      setIsViewingRafModalOpen(true)
+                    }}
+                    className="text-xs font-bold h-8 px-3 rounded-lg border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 bg-emerald-50/70 dark:bg-emerald-950/30 hover:bg-emerald-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap"
+                  >
+                    <FileText className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    View Dr. Chaud GJ&apos;s RAF
+                  </Button>
+                </div>
               </div>
             )}
 
@@ -10171,23 +10408,27 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   const isInvitedOnly = rev?.status === "Invited"
                   const isNagula = revName.toLowerCase().includes("nagula") || revEmail.toLowerCase().includes("nagula")
                   const isAziza = revName.toLowerCase().includes("aziza") || revEmail.toLowerCase().includes("aziza")
+                  const isChaud = revName.toLowerCase().includes("chaud") || revEmail.toLowerCase().includes("chaud")
 
                   // Match any real submitted review from initialReviews (strict name/email match)
                   const trackMsId = String(trackingManuscript?.id || "").toLowerCase().trim()
+                  const cleanAcademicName = (n: string) => n.toLowerCase().replace(/^(?:prof(?:essor)?\.?\s*(?:dr\.?)?|dr\.?)\s+/i, "").trim()
+                  const lRevClean = cleanAcademicName(revName)
+                  const lRevEmail = revEmail.toLowerCase().trim()
+
                   const matchedReview = initialReviews.find(r => {
                     const rPaperId = String(r.paperId || (r as any).manuscriptId || "").toLowerCase().trim()
-                    const rRevName = String(r.reviewerName || "").toLowerCase().trim()
+                    const rRevName = String(r.reviewerName || "").trim()
+                    const rRevClean = cleanAcademicName(rRevName)
                     const rRevEmail = String(r.reviewerEmail || "").toLowerCase().trim()
-                    const lRevName = revName.toLowerCase().trim()
-                    const lRevEmail = revEmail.toLowerCase().trim()
                     const matchesPaper = rPaperId && trackMsId && rPaperId === trackMsId
-                    const matchesName = rRevName && lRevName && (rRevName.includes(lRevName) || lRevName.includes(rRevName))
+                    const matchesName = rRevClean && lRevClean && (rRevClean === lRevClean || rRevClean.includes(lRevClean) || lRevClean.includes(rRevClean))
                     const matchesEmail = rRevEmail && lRevEmail && rRevEmail === lRevEmail
                     return Boolean(matchesPaper && (matchesName || matchesEmail))
                   })
 
-                  // Reviewer status: Dr. Nagula submitted RAF, Dr. Aziza is still actively reviewing
-                  const isSubmitted = !isAziza && (isNagula || (!!matchedReview && !!matchedReview.reviewerName && matchedReview.reviewerName.toLowerCase().includes(revName.toLowerCase())) || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane")))
+                  // Reviewer status: Dr. Nagula & Dr. Chaud GJ submitted RAF, Dr. Aziza is still actively reviewing
+                  const isSubmitted = !isAziza && (isNagula || isChaud || (!!matchedReview && !!matchedReview.reviewerName) || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane")))
                   const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
                   const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === ("Approved" as any) || matchedReview.status === "Released" || approvedReviewRemarks[matchedReview.id]))
                   const isNudged = !!nudgedReviewers[revName]
@@ -10342,6 +10583,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   Reviewer #2
                                 </span>
                               )}
+                              {isChaud && (
+                                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 shrink-0">
+                                  Reviewer #3
+                                </span>
+                              )}
                             </h4>
                             <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                               {rev.email} {isAziza && "· Arranged directly via email correspondence"}
@@ -10478,19 +10724,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           )
                         ) : (
                           <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
-                            {/* View Full RAF button specifically for Dr. Praveen Nagula who submitted the RAF */}
-                            {isNagula && (
+                            {/* View Full RAF button available for any submitted reviewer */}
+                            {(isNagula || isChaud || Boolean(matchedReview)) && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setViewingRafData(PRAVEEN_NAGULA_RAF)
+                                  const raf = getRafDataForReview(revName, matchedReview, trackingManuscript)
+                                  setViewingRafData(raf)
                                   setIsViewingRafModalOpen(true)
                                 }}
-                                className="h-8 text-xs font-bold px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 cursor-pointer transition-all shadow-xs whitespace-nowrap"
+                                className={`h-8 text-xs font-bold px-3 rounded-lg cursor-pointer transition-all shadow-xs whitespace-nowrap flex items-center ${
+                                  isNagula 
+                                    ? "border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40"
+                                    : "border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
+                                }`}
                               >
-                                <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400 shrink-0" />
-                                View Dr. Nagula&apos;s RAF
+                                <FileText className={`h-3.5 w-3.5 mr-1 shrink-0 ${isNagula ? "text-purple-600 dark:text-purple-400" : "text-emerald-600 dark:text-emerald-400"}`} />
+                                View {isNagula ? "Dr. Nagula's RAF" : (isChaud ? "Dr. Chaud GJ's RAF" : "Reviewer RAF")}
                               </Button>
                             )}
 
@@ -10507,6 +10758,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
                                   commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
                                   recommendation: "Re-write and Re-submit",
+                                  status: "Pending Moderation"
+                                } : isChaud ? {
+                                  id: matchedReview?.id || "REV-FB-1791559472514-816",
+                                  paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                  reviewerName: "Dr. Chaud GJ",
+                                  originality: 4,
+                                  commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                                  sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                                  commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
+                                  recommendation: CHAUD_GJ_RAF.recommendation,
                                   status: "Pending Moderation"
                                 } : (matchedReview ? {
                                   id: matchedReview.id,
@@ -10560,6 +10821,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <div className="flex items-center gap-2 flex-wrap pt-0.5">
                             {isNagula ? (
                               <span>Priority Rating: <strong className="text-slate-700 dark:text-slate-300 font-bold">6 / 10</strong> • Recommendation: <span className="text-amber-700 dark:text-amber-300 font-bold bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 text-[11px]">Re-write and Re-submit</span></span>
+                            ) : isChaud ? (
+                              <span>Priority Rating: <strong className="text-slate-700 dark:text-slate-300 font-bold">4 / 10</strong> • Recommendation: <span className="text-purple-700 dark:text-purple-300 font-bold bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 text-[11px]">Re-review and Accept with Major Changes</span></span>
                             ) : (
                               <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{displayScore} / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">{displayRecommendation}</strong></span>
                             )}
@@ -10971,7 +11234,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 Electronic Reviewer&apos;s Assessment Form (RAF)
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Referee: <strong className="text-slate-900 dark:text-white">Dr. Praveen Nagula</strong> · Target: <span className="text-[#0b99ff] font-semibold">{viewingRafData?.journal || trackingManuscript?.journal || "Scholarly Open: Medicine"}</span>
+                Referee: <strong className="text-slate-900 dark:text-white">{viewingRafData?.reviewerName || "Dr. Praveen Nagula"}</strong> · Target: <span className="text-[#0b99ff] font-semibold">{viewingRafData?.journal || trackingManuscript?.journal || "Scholarly Open: Medicine"}</span>
               </p>
             </div>
           </DialogHeader>
@@ -11124,7 +11387,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     )
                   })}
                   <span className="ml-2 text-xs font-bold text-[#0b99ff]">
-                    Selected: 6 / 10
+                    Selected: {viewingRafData?.priorityRating || 6} / 10
                   </span>
                 </div>
               </div>
@@ -11155,6 +11418,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               </div>
             </div>
+
+            {/* Confidential Note to Editor-in-Chief & Handling Editor */}
+            {viewingRafData?.confidentialCommentsEditor && (
+              <div className="rounded-xl border border-amber-200 dark:border-amber-800/60 overflow-hidden bg-amber-50/40 dark:bg-amber-950/20">
+                <div className="bg-amber-100/70 dark:bg-amber-900/40 px-4 py-2 font-bold text-xs text-amber-900 dark:text-amber-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  Confidential Note to Editor-in-Chief &amp; Handling Editor (Not visible to Author)
+                </div>
+                <div className="p-4 text-xs font-sans text-amber-950 dark:text-amber-200 whitespace-pre-wrap leading-relaxed italic">
+                  &ldquo;{viewingRafData.confidentialCommentsEditor}&rdquo;
+                </div>
+              </div>
+            )}
 
             {/* Recommendation, Revision Willingness, Conflict of Interest */}
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#121316]">
@@ -11223,7 +11499,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               size="sm"
               onClick={() => {
                 setIsViewingRafModalOpen(false)
-                const revObj: JmReviewFeedback = {
+                const revName = viewingRafData?.reviewerName || "Reviewer"
+                const isNagula = revName.toLowerCase().includes("nagula")
+                const isChaud = revName.toLowerCase().includes("chaud")
+                const matchedReview = initialReviews.find(r => 
+                  r.paperId === (viewingRafData?.manuscriptId || trackingManuscript?.id) &&
+                  r.reviewerName?.toLowerCase().includes(revName.toLowerCase().replace(/^(?:dr\.?|prof\.?)\s+/i, ""))
+                )
+                const revObj: JmReviewFeedback = isNagula ? {
                   id: "REV-FB-PN01",
                   paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
                   reviewerName: "Dr. Praveen Nagula",
@@ -11232,6 +11515,27 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
                   commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
                   recommendation: "Re-write and Re-submit",
+                  status: "Pending Moderation"
+                } : isChaud ? {
+                  id: matchedReview?.id || "REV-FB-1791559472514-816",
+                  paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
+                  reviewerName: "Dr. Chaud GJ",
+                  originality: 4,
+                  commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                  sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                  commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
+                  recommendation: CHAUD_GJ_RAF.recommendation,
+                  status: "Pending Moderation"
+                } : {
+                  id: matchedReview?.id || `REV-FB-${revName.replace(/\s+/g, '')}`,
+                  paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
+                  reviewerName: revName,
+                  originalComments: viewingRafData?.generalComments || "",
+                  sanitizedCommentsAuthor: viewingRafData?.generalComments || "",
+                  commentsAuthor: viewingRafData?.generalComments || "",
+                  commentsEditor: viewingRafData?.confidentialCommentsEditor || "",
+                  recommendation: viewingRafData?.recommendation || "Minor Revision",
+                  originality: 4,
                   status: "Pending Moderation"
                 }
                 handleOpenModeration(revObj)
