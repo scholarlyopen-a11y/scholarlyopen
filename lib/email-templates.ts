@@ -959,36 +959,33 @@ export function generateBrandedEmailHtml(options: {
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 32px 12px;">
   <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px -2px rgba(0,0,0,0.06);">
-    <!-- Dual Brand Header: Scholarly Open (Left) & Official Journal Mark (Right) -->
-    <div style="background-color: #ffffff; padding: 20px 24px; border-bottom: 2px solid #005028;">
+    <!-- Standard Dual-Brand Header (CFPs & EBMs standard) -->
+    <div style="background-color: #ffffff; padding: 18px 24px; border-bottom: 2px solid #0b99ff;">
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; width: 100%;">
         <tr>
           <td valign="middle" align="left" style="text-align: left; vertical-align: middle;">
             <a href="${baseUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-                <tr>
-                  <td valign="middle" style="vertical-align: middle; padding-right: 12px;">
-                    <img src="${baseUrl}/logo-mark-01.png" alt="Scholarly Open" width="42" height="34" style="width: 42px; height: 34px; display: block; border: 0;" />
-                  </td>
-                  <td valign="middle" style="vertical-align: middle;">
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 19px; font-weight: 800; color: #005028; line-height: 1.1; letter-spacing: -0.2px;">
-                      Scholarly Open <span style="font-size: 12px; font-weight: 600; color: #64748b;">i.G.</span>
-                    </div>
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 10px; font-weight: 700; color: #F6BB14; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;">
-                      Open Access Publishing
-                    </div>
-                  </td>
-                </tr>
-              </table>
+              <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" height="34" style="height: 34px; max-height: 36px; width: auto; display: block; border: 0;" />
             </a>
           </td>
           <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
-            <div style="font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-              ${journal && journal !== "all" && journal.includes("Scholarly Open") ? journal : `Scholarly Open: ${branding.cleanName}`}
-            </div>
-            <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-              Peer-Reviewed Journal
-            </div>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse: collapse; display: inline-table;">
+              <tr>
+                <td valign="middle" align="right" style="text-align: right; vertical-align: middle; padding-right: 10px;">
+                  <div style="font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    ${journal && journal !== "all" && journal.includes("Scholarly Open") ? journal : `Scholarly Open: ${branding.cleanName}`}
+                  </div>
+                  <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    Peer-Reviewed Journal
+                  </div>
+                </td>
+                <td valign="middle" align="center" style="vertical-align: middle; width: 34px; height: 34px; text-align: center;">
+                  <div style="width: 32px; height: 32px; border-radius: 8px; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 4px; display: inline-block; vertical-align: middle; text-align: center; box-sizing: border-box;">
+                    <img src="${baseUrl}/journal-icons/${branding.slug}.svg" alt="${branding.cleanName}" width="22" height="22" style="width: 22px; height: 22px; display: block; border: 0; margin: 0 auto;" />
+                  </div>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
