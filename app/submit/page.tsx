@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers, Printer, Copy, Check, ExternalLink } from "lucide-react"
+import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers, Printer, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -189,7 +189,7 @@ export default function SubmitPage() {
 
                     <div className="py-1">
                       <span className="text-xs text-muted-foreground block mb-1">Registered Author Email</span>
-                      <span className="font-medium font-mono text-xs sm:text-sm text-foreground">{submissionReceipt.authorEmail}</span>
+                      <span className="font-medium text-foreground">{submissionReceipt.authorEmail}</span>
                     </div>
 
                     <div className="py-1">
@@ -218,10 +218,10 @@ export default function SubmitPage() {
                     <div className="p-4 rounded-lg border border-border bg-card">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-foreground text-xs font-bold border border-border">2</span>
-                        <span className="font-semibold text-sm text-foreground">Editor Assignment</span>
+                        <span className="font-semibold text-sm text-foreground">Handling Editor Assignment</span>
                       </div>
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        Allocation to an Associate Editor specialized in your research discipline to oversee independent review.
+                        Allocation to a Handling Editor specialized in your research discipline to oversee independent peer review.
                       </p>
                     </div>
 
@@ -239,12 +239,28 @@ export default function SubmitPage() {
 
                 {/* Action Buttons */}
                 <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                  <Button asChild size="lg" className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700">
-                    <Link href={`/editorial360?manuscriptId=${encodeURIComponent(submissionReceipt.trackingId)}&email=${encodeURIComponent(submissionReceipt.authorEmail)}`}>
-                      Open Author Workspace
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <Button
+                      type="button"
+                      size="lg"
+                      onClick={() => window.print()}
+                      className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 cursor-pointer"
+                    >
+                      <Printer className="h-4 w-4" />
+                      Print / Save Receipt
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="lg"
+                      className="gap-2 cursor-pointer"
+                    >
+                      <a href={`mailto:info@scholarlyopen.org?subject=Manuscript%20Inquiry:%20[${encodeURIComponent(submissionReceipt.trackingId)}]%20${encodeURIComponent(submissionReceipt.title)}`}>
+                        <Mail className="h-4 w-4" />
+                        Contact Editorial Office
+                      </a>
+                    </Button>
+                  </div>
 
                   <Button
                     variant="ghost"
@@ -255,7 +271,7 @@ export default function SubmitPage() {
                       setSelectedFileName(null)
                       setAgreed(false)
                     }}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
                   >
                     Submit Another Manuscript
                   </Button>

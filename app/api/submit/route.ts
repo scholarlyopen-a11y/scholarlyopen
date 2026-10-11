@@ -2,7 +2,7 @@ export const runtime = "nodejs"
 
 import nodemailer from "nodemailer"
 
-import { validateSubmissionAntiSpam, getClientIp, isSuspiciousEmail } from "@/lib/anti-spam"
+import { validateSubmissionAntiSpam, getClientIp, isSuspiciousEmail, checkRateLimit } from "@/lib/anti-spam"
 import { upsertDbManuscript } from "@/lib/supabase"
 import { getJournalReplyTo } from "@/lib/data/journal-contacts"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
@@ -194,26 +194,12 @@ export async function POST(request: Request) {
   const formTimestamp = safeText(formData.get("_form_ts"), 50)
   const verificationToken = safeText(formData.get("human_verification_token"), 500)
 
-  // Anti-Spam & Bot Validation Check
-  const spamCheck = validateSubmissionAntiSpam({
-    honeypot,
-    formTimestamp,
-    email: authorEmail,
-    name: `${firstName} ${lastName}`.trim(),
-    messageOrTitle: `${title} ${abstract}`.trim(),
-    ip,
-    verificationToken,
-  })
-
-  if (spamCheck.isSpam) {
-    if (spamCheck.action === "silent_drop") {
-      const mockJournalCode = getJournalShortCode(discipline)
-      const mockYr = new Date().getFullYear().toString().slice(-2)
-      const mockTypeCode = getArticleTypeCode(articleType)
-      const mockSeq = String(Math.floor(101 + Math.random() * 899))
-      return Response.json({ ok: true, trackingId: `${mockJournalCode}-${mockYr}-${mockTypeCode}${mockSeq}` })
+  // Anti-Spam Rate Limit Check
+  if (ip && ip !== "unknown") {
+    const rateCheck = checkRateLimit(ip, 12, 10 * 60 * 1000)
+    if (rateCheck.isLimited) {
+      return Response.json({ ok: false, error: "Too many submission attempts. Please wait a few minutes." }, { status: 429 })
     }
-    return Response.json({ ok: false, error: "Too many requests. Please wait a moment." }, { status: 429 })
   }
 
   if (!firstName || !lastName || !authorEmail || !affiliation || !discipline || !articleType || !title || !abstract) {
@@ -271,12 +257,11 @@ export async function POST(request: Request) {
     `Date Received: ${new Date().toISOString().split("T")[0]}`,
     ``,
     `WHAT HAPPENS NEXT?`,
-    `1. Initial Quality Check: Our Editorial Office will conduct an initial formatting and ethical integrity check.`,
-    `2. Handling Editor Assignment: An Associate Editor will be assigned to manage peer review.`,
-    `3. Peer Review: Your manuscript will be evaluated by independent peer reviewers.`,
+    `1. Initial Quality Check: Our Editorial Office will conduct an initial formatting, ethical compliance, and plagiarism screening within 24-48 hours.`,
+    `2. Handling Editor Assignment: A Handling Editor specialized in your research discipline will oversee independent peer review.`,
+    `3. Peer Review: Your manuscript will be evaluated by independent expert referees.`,
     ``,
-    `You can track the progress of your peer review, view reviewer comments, and upload revisions anytime in our editorial360 workspace:`,
-    `https://scholarlyopen.org/editorial360?manuscriptId=${trackingId}`,
+    `Please quote your Tracking ID (${trackingId}) in all correspondence with the editorial office.`,
     ``,
     `Best regards,`,
     `Editorial Office | Scholarly Open`,
@@ -308,72 +293,73 @@ export async function POST(request: Request) {
       : []
 
   // 1. Send notification to editorial office
-  await transporter.sendMail({
-    from: smtpFrom,
-    to: recipient,
-    replyTo: authorEmail,
-    envelope: {
-      from: smtpUser,
-      to: [recipient, "scholarlyopen@gmail.com"],
-    },
-    subject,
-    text,
-    attachments,
-  })
+  try {
+    await transporter.sendMail({
+      from: smtpFrom,
+      to: recipient,
+      replyTo: authorEmail,
+      envelope: {
+        from: smtpUser,
+        to: [recipient, "scholarlyopen@gmail.com"],
+      },
+      subject,
+      text,
+      attachments,
+    })
+    console.log(`[Submit] Editorial notification sent for ${trackingId}`)
+  } catch (editorialErr) {
+    console.error(`[Submit] Failed to send editorial notification for ${trackingId}:`, editorialErr)
+  }
 
-  // 2. Send automated confirmation email directly to the submitter/registrant's email (only if verified valid address)
-  if (!isSuspiciousEmail(authorEmail)) {
-    try {
-      const journalTitle = journalLabel(discipline)
-      const journalEmail = getJournalReplyTo(journalTitle)
-      const authorFrom = `"${journalTitle} Editorial Office" <${journalEmail}>`
-      const trackingUrl = `https://scholarlyopen.org/editorial360?manuscriptId=${encodeURIComponent(trackingId)}&email=${encodeURIComponent(authorEmail)}`
+  // 2. Send automated confirmation email directly to the submitter/registrant's email
+  try {
+    const journalTitle = journalLabel(discipline)
+    const journalEmail = getJournalReplyTo(journalTitle)
+    const authorFrom = `"${journalTitle} Editorial Office" <${journalEmail}>`
 
-      const authorConfirmationBodyText = [
-        `Dear ${firstName} ${lastName},`,
-        ``,
-        `Thank you for submitting your manuscript to Scholarly Open: ${journalTitle}. Your submission has been securely registered in our editorial system.`,
-        ``,
-        `WHAT HAPPENS NEXT?`,
-        `1. Initial Quality Check: Our Editorial Office will conduct an initial formatting, ethical compliance, and plagiarism screening within 24-48 hours.`,
-        `2. Handling Editor Assignment: A Section Editor in your field will oversee the double-blind peer review.`,
-        `3. Peer Review: Independent expert reviewers will evaluate your manuscript.`,
-        ``,
-        `You can monitor the real-time status of your submission, view editorial decisions, and submit revised files at any time via your dedicated Author Workspace link below.`,
-      ].join("\n")
+    const authorConfirmationBodyText = [
+      `Dear ${firstName} ${lastName},`,
+      ``,
+      `Thank you for submitting your manuscript to Scholarly Open: ${journalTitle}. Your submission has been securely registered in our editorial system under Tracking ID: ${trackingId}.`,
+      ``,
+      `WHAT HAPPENS NEXT?`,
+      `1. Initial Quality Check: Our Editorial Office will conduct an initial formatting, ethical compliance, and plagiarism screening within 24-48 hours.`,
+      `2. Handling Editor Assignment: A Handling Editor specialized in your research discipline will oversee independent peer review.`,
+      `3. Peer Review: Independent expert reviewers will evaluate your manuscript.`,
+      ``,
+      `Please quote your Tracking ID (${trackingId}) in all correspondence with the editorial office at ${journalEmail} or info@scholarlyopen.org.`,
+    ].join("\n")
 
-      const authorHtml = generateBrandedEmailHtml({
-        subject: authorConfirmationSubject,
-        bodyText: authorConfirmationBodyText,
-        actionLabel: "Track Submission & Author Workspace",
-        actionUrl: trackingUrl,
-        journal: `Scholarly Open: ${journalTitle}`,
-        paperId: trackingId,
-        paperTitle: title,
-        recipientName: `${firstName} ${lastName}`.trim() || "Author",
-        recipientEmail: authorEmail,
-        baseUrl: "https://scholarlyopen.org",
-        includeEditorial360Logo: true,
-      })
+    const authorHtml = generateBrandedEmailHtml({
+      subject: authorConfirmationSubject,
+      bodyText: authorConfirmationBodyText,
+      journal: `Scholarly Open: ${journalTitle}`,
+      paperId: trackingId,
+      paperTitle: title,
+      recipientName: `${firstName} ${lastName}`.trim() || "Author",
+      recipientEmail: authorEmail,
+      baseUrl: "https://scholarlyopen.org",
+      includeEditorial360Logo: false,
+    })
 
-      const defaultCc = "scholarlyopen@gmail.com"
-      const authorCc = authorEmail.toLowerCase() !== defaultCc ? [defaultCc] : []
+    const defaultCc = "scholarlyopen@gmail.com"
+    const authorCc = authorEmail.toLowerCase() !== defaultCc ? [defaultCc] : []
 
-      await transporter.sendMail({
-        from: authorFrom,
-        replyTo: journalEmail,
-        to: authorEmail,
-        envelope: {
-          from: smtpUser, // Mandatory for Namecheap cPanel authentication
-          to: [authorEmail, ...authorCc],
-        },
-        subject: authorConfirmationSubject,
-        text: authorConfirmationText,
-        html: authorHtml,
-      })
-    } catch (authorMailErr) {
-      console.error("Failed to send author confirmation email:", authorMailErr)
-    }
+    const authorInfo = await transporter.sendMail({
+      from: authorFrom,
+      replyTo: journalEmail,
+      to: authorEmail,
+      envelope: {
+        from: smtpUser, // Mandatory for Namecheap cPanel authentication
+        to: [authorEmail, ...authorCc],
+      },
+      subject: authorConfirmationSubject,
+      text: authorConfirmationText,
+      html: authorHtml,
+    })
+    console.log(`[Submit] Author confirmation successfully sent for ${trackingId}:`, authorInfo.messageId)
+  } catch (authorMailErr) {
+    console.error(`[Submit] Failed to send author confirmation email for ${trackingId}:`, authorMailErr)
   }
 
   // 3. Persist submission in live Supabase cloud database
