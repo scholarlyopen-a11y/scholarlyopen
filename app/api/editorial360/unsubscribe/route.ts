@@ -107,7 +107,7 @@ export async function GET(req: Request) {
       <a href="https://www.scholarlyopen.org" class="btn">Return to Scholarly Open</a>
     </div>
     <div class="footer">
-      Scholarly Open Publishing Group • Mainz, Germany<br>
+      Scholarly Open i.G. • Mainz, Germany<br>
       Adhering to COPE Ethical Standards & CAN-SPAM / GDPR Regulations
     </div>
   </div>

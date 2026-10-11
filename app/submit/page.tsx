@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers, Printer, Copy, Check } from "lucide-react"
+import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers, Printer, Copy, Check, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -94,7 +94,7 @@ export default function SubmitPage() {
                   Manuscript Submission Receipt
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Scholarly Open Publishing Group • Editorial Office
+                  Scholarly Open i.G. • Editorial Office
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function SubmitPage() {
 
                     <div className="py-1">
                       <span className="text-xs text-muted-foreground block mb-1">Registered Author Email</span>
-                      <span className="font-medium text-foreground">{submissionReceipt.authorEmail}</span>
+                      <span className="font-sans font-medium text-foreground break-all">{submissionReceipt.authorEmail}</span>
                     </div>
 
                     <div className="py-1">
@@ -241,10 +241,21 @@ export default function SubmitPage() {
                 <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <Button
+                      asChild
+                      size="lg"
+                      className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 cursor-pointer shadow-sm"
+                    >
+                      <a href={`/editorial360?manuscriptId=${encodeURIComponent(submissionReceipt.trackingId)}&email=${encodeURIComponent(submissionReceipt.authorEmail)}`}>
+                        <ExternalLink className="h-4 w-4" />
+                        Track in editorial360 Workspace
+                      </a>
+                    </Button>
+                    <Button
                       type="button"
+                      variant="outline"
                       size="lg"
                       onClick={() => window.print()}
-                      className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 cursor-pointer"
+                      className="gap-2 cursor-pointer"
                     >
                       <Printer className="h-4 w-4" />
                       Print / Save Receipt

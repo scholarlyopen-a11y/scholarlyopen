@@ -1258,7 +1258,7 @@ REFEREE INSTRUCTIONS & EVALUATION RUBRIC:
 - Provide confidential recommendations for the Handling Editor in Section 2.
 - Submit final scorecard via editorial360 Referee Workspace to claim your €50 honorarium.
 
-Scholarly Open Publishing Group • editorial360 Governance Framework
+Scholarly Open i.G. • editorial360 Governance Framework
 COPE & Plan S Certified Archive
 `
       handleDownloadFile(`${id}_Complete_Blinded_Package.txt`, content)
@@ -4244,7 +4244,7 @@ COPE & Plan S Certified Archive
               </span>
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Official academic peer review recognition issued by Scholarly Open Publishing Group.
+              Official academic peer review recognition issued by Scholarly Open i.G.
             </DialogDescription>
           </DialogHeader>
 

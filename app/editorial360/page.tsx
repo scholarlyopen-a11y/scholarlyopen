@@ -1256,7 +1256,10 @@ export default function Editorial360Page() {
       const urlManuscriptId = params.get("manuscriptId")
       if (urlManuscriptId) {
         setRole("author")
-        if (urlEmail) setEmail(urlEmail)
+        if (urlEmail) {
+          setEmail(urlEmail)
+          setRegEmail(urlEmail)
+        }
         if (urlName) setProfFullName(urlName)
         setIsLoggedIn(true)
         setActiveAuthorTab("submissions")
@@ -1559,6 +1562,20 @@ export default function Editorial360Page() {
               const localOnly = prev.filter(p => !cloudIds.has(p.id))
               return [...mapped, ...localOnly]
             })
+
+            // If arrived via author link, sync author profile with their active submitted manuscript
+            if (urlManuscriptId) {
+              const currentActive = mapped.find(m => m.id === urlManuscriptId)
+              if (currentActive) {
+                if (currentActive.authorName) setProfFullName(currentActive.authorName)
+                if (currentActive.authorAffiliation) setProfInstitution(currentActive.authorAffiliation)
+                if (currentActive.authorCountry) setProfCountry(currentActive.authorCountry)
+                if (currentActive.authorEmail) {
+                  setEmail(currentActive.authorEmail)
+                  setRegEmail(currentActive.authorEmail)
+                }
+              }
+            }
           }
         })
         .catch(err => console.warn("Could not fetch cloud manuscripts:", err))
@@ -3347,7 +3364,42 @@ export default function Editorial360Page() {
     })
   }, [crossDeskNotifications, role, editorName, editorEmail, editorRank, editorJournal, editorScopedManuscripts])
 
-  const activeDisplayNotifications = role === "editor" ? editorScopedNotifications : crossDeskNotifications
+  // Author-specific notifications: strictly isolate author notifications from internal reviewer/JM/board chatter
+  const authorScopedNotifications = useMemo(() => {
+    if (role !== "author") return []
+    const urlMsId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("manuscriptId") : null
+    const authorMsIds = new Set(
+      manuscripts
+        .filter(m => 
+          (urlMsId && m.id && m.id.toLowerCase() === urlMsId.toLowerCase()) ||
+          (email && m.authorEmail && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
+          (profFullName && m.authorName && m.authorName.toLowerCase().includes(profFullName.toLowerCase()))
+        )
+        .map(m => m.id)
+    )
+
+    return crossDeskNotifications.filter(n => {
+      // Suppress board appointments, reviewer outreach, candidate approvals, and internal triage notes
+      if (n.paperId === "SO-CHEM-BOARD" || n.paperId?.includes("-BOARD")) return false
+      if (n.actorRole === "Editorial Leadership Desk" || n.recipient === "Journal Manager Desk") return false
+      if (n.type === "jm_assignment" && (!n.paperId || !authorMsIds.has(n.paperId))) return false
+      if (n.id?.startsWith("NOTIF-EBM-") || n.id?.startsWith("NOTIF-OUTREACH-") || n.id?.startsWith("NOTIF-INV-")) return false
+
+      // Author's own manuscript status updates & notifications
+      if (n.paperId && authorMsIds.has(n.paperId)) return true
+      if (n.recipient && email && n.recipient.toLowerCase() === email.toLowerCase()) return true
+      if (n.recipient && profFullName && n.recipient.toLowerCase().includes(profFullName.toLowerCase())) return true
+
+      return false
+    })
+  }, [crossDeskNotifications, role, manuscripts, email, profFullName])
+
+  const activeDisplayNotifications = 
+    role === "editor" 
+      ? editorScopedNotifications 
+      : role === "author" 
+      ? authorScopedNotifications 
+      : crossDeskNotifications
 
   // Profile Security & Password Management States
   const [isChangingPassword, setIsChangingPassword] = useState(false)
@@ -6011,7 +6063,7 @@ export default function Editorial360Page() {
 
                     <div className="flex justify-between items-center py-1">
                       <span className="text-slate-500 font-medium">Publishing House:</span>
-                      <span className="text-slate-600 dark:text-slate-400">Scholarly Open Publishing Group · Mainz, Germany</span>
+                      <span className="text-slate-600 dark:text-slate-400">Scholarly Open i.G. · Mainz, Germany</span>
                     </div>
                   </div>
 
@@ -8152,10 +8204,14 @@ export default function Editorial360Page() {
                 {role === "author" && (() => {
                   const isDe = language === "de"
                   const isDemoAuthor = email === "author@scholarlyopen.org"
+                  const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
+                  const activeUrlMsId = urlParams ? urlParams.get("manuscriptId") : null
+
                   const authorFiltered = isDemoAuthor 
                     ? manuscripts 
                     : manuscripts.filter(m => 
-                        (m.authorEmail && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
+                        (activeUrlMsId && m.id && m.id.toLowerCase() === activeUrlMsId.toLowerCase()) ||
+                        (m.authorEmail && email && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
                         (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase()))
                       )
                   // Deduplicate manuscripts array by ID and Title and sort by newest status update / activity first
@@ -15438,7 +15494,7 @@ export default function Editorial360Page() {
                         />
                       </div>
                       <div className="text-xs text-slate-500 space-y-0.5 font-sans">
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">Scholarly Open Publishing Group</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">Scholarly Open i.G.</p>
                         <p>Rheinallee 88, 55120 Mainz, Germany</p>
                         <p>USt-IdNr / VAT: DE 349 812 048 · Tax Ref: 26/671/09214</p>
                         <p>editorial@scholarlyopen.org · www.scholarlyopen.org</p>

@@ -861,7 +861,7 @@ export function EditorialBoardOnboarding({
       </Card>
 
       <div className="text-center text-[11px] text-slate-400 mt-6">
-        Scholarly Open Publishing Group · Mainz, Germany · COPE Guidelines Governed · All Rights Reserved
+        Scholarly Open i.G. · Mainz, Germany · COPE Guidelines Governed · All Rights Reserved
       </div>
     </div>
   )

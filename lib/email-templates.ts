@@ -53,7 +53,7 @@ Sincerely,
 Noor F.
 Editorial Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Accept Review Invitation",
     actionUrlPlaceholder: "{{portalUrl}}?action=accept&id={{paperId}}",
     placeholders: [
@@ -82,7 +82,7 @@ Sincerely,
 Noor F.
 Editorial Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Access Reviewer Scorecard",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -105,7 +105,7 @@ Sincerely,
 Noor F.
 Journal Management Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Access Reviewer Dashboard",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -131,7 +131,7 @@ Please use the secure button below to accept this invitation, complete your prof
 Sincerely,
 Noor F.
 Editorial Operations & Administration
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Accept Invitation & Activate Account",
     actionUrlPlaceholder: "{{portalUrl}}?action=activate_invite&role={{roleKey}}&email={{recipientEmail}}&name={{recipientName}}",
     includeEditorial360Logo: true,
@@ -163,7 +163,7 @@ Sincerely,
 Noor F.
 Journal Management Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Track Submission Status",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -188,7 +188,7 @@ Sincerely,
 Noor F.
 Editorial Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Upload Corrected Files",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -213,7 +213,7 @@ Sincerely,
 Noor F.
 Editorial Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Upload Revised Manuscript",
     actionUrlPlaceholder: "{{portalUrl}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -388,7 +388,7 @@ Sincerely,
 Noor F.
 Journal Management Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Accept Editorial Board Invitation",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}&email={{recipientEmail}}&journal={{journal}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -430,7 +430,7 @@ Mit freundlichen Grüßen / Sincerely,
 Noor F.
 Journal Management Office
 {{journal}}
-Scholarly Open Publishing Group (Mainz, Deutschland)`,
+Scholarly Open i.G. (Mainz, Deutschland)`,
     actionLabel: "Accept Editorial Board Invitation",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=accept_board&name={{recipientName}}&email={{recipientEmail}}&journal={{journal}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -470,7 +470,7 @@ Sincerely,
 Noor F.
 Executive Nominations Committee
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Confirm EiC Appointment (Yes)",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -518,7 +518,7 @@ Mit freundlichen Grüßen / Sincerely,
 Noor F.
 Executive Nominations Committee
 {{journal}}
-Scholarly Open Publishing Group (Mainz, Deutschland)`,
+Scholarly Open i.G. (Mainz, Deutschland)`,
     actionLabel: "Confirm EiC Appointment (Yes)",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/editorial360?action=eic_decision&decision=yes&name={{recipientName}}",
     placeholders: COMMON_PLACEHOLDERS
@@ -549,7 +549,7 @@ Sincerely,
 Noor F.
 Journal Management Office
 {{journal}}
-Scholarly Open Publishing Group`,
+Scholarly Open i.G.`,
     actionLabel: "Submit Manuscript",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/submit",
     placeholders: COMMON_PLACEHOLDERS
@@ -587,7 +587,7 @@ Mit freundlichen Grüßen / Sincerely,
 Noor F.
 Journal Management Office
 {{journal}}
-Scholarly Open Publishing Group (Mainz, Deutschland)`,
+Scholarly Open i.G. (Mainz, Deutschland)`,
     actionLabel: "Submit Manuscript",
     actionUrlPlaceholder: "https://www.scholarlyopen.org/submit",
     placeholders: COMMON_PLACEHOLDERS
@@ -624,7 +624,7 @@ Mit freundlichen Grüßen / Sincerely,
 Noor F.
 Editorial Office
 {{journal}}
-Scholarly Open Publishing Group (Mainz, Deutschland)`,
+Scholarly Open i.G. (Mainz, Deutschland)`,
     actionLabel: "Accept Review Invitation",
     actionUrlPlaceholder: "{{portalUrl}}?action=accept&id={{paperId}}",
     placeholders: [
@@ -960,30 +960,35 @@ export function generateBrandedEmailHtml(options: {
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 32px 12px;">
   <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px -2px rgba(0,0,0,0.06);">
     <!-- Dual Brand Header: Scholarly Open (Left) & Official Journal Mark (Right) -->
-    <div style="background-color: #ffffff; padding: 22px 28px; border-bottom: 2px solid #0b99ff;">
+    <div style="background-color: #ffffff; padding: 20px 24px; border-bottom: 2px solid #005028;">
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; width: 100%;">
         <tr>
           <td valign="middle" align="left" style="text-align: left; vertical-align: middle;">
             <a href="${baseUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
-              <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" height="44" style="height: 44px; max-height: 44px; width: auto; max-width: 220px; display: block; border: 0;" />
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                <tr>
+                  <td valign="middle" style="vertical-align: middle; padding-right: 12px;">
+                    <img src="${baseUrl}/logo-mark-01.png" alt="Scholarly Open" width="42" height="34" style="width: 42px; height: 34px; display: block; border: 0;" />
+                  </td>
+                  <td valign="middle" style="vertical-align: middle;">
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 19px; font-weight: 800; color: #005028; line-height: 1.1; letter-spacing: -0.2px;">
+                      Scholarly Open <span style="font-size: 12px; font-weight: 600; color: #64748b;">i.G.</span>
+                    </div>
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 10px; font-weight: 700; color: #F6BB14; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;">
+                      Open Access Publishing
+                    </div>
+                  </td>
+                </tr>
+              </table>
             </a>
           </td>
           <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-left: auto;">
-              <tr>
-                <td valign="middle" align="right" style="text-align: right; padding-right: 12px; vertical-align: middle;">
-                  <div style="font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                    ${journal && journal !== "all" && journal.includes("Scholarly Open") ? journal : `Scholarly Open: ${branding.cleanName}`}
-                  </div>
-                  <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                    Peer-Reviewed Journal
-                  </div>
-                </td>
-                <td valign="middle" align="center" style="vertical-align: middle; text-align: center; width: 34px;">
-                  <img src="${baseUrl}/journal-icons/${branding.slug}.svg" width="30" height="30" alt="${branding.cleanName}" style="display: block; width: 30px; height: 30px; border: 0;" />
-                </td>
-              </tr>
-            </table>
+            <div style="font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.25; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+              ${journal && journal !== "all" && journal.includes("Scholarly Open") ? journal : `Scholarly Open: ${branding.cleanName}`}
+            </div>
+            <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+              Peer-Reviewed Journal
+            </div>
           </td>
         </tr>
       </table>
@@ -999,31 +1004,24 @@ export function generateBrandedEmailHtml(options: {
     <!-- Corporate / Compliance Footer -->
     <div style="background-color: #f8fafc; padding: 22px 28px; border-top: 1px solid #e2e8f0; font-size: 11px; line-height: 1.6; color: #64748b; text-align: center;">
       <div style="font-weight: 700; color: #475569; margin-bottom: 4px; font-size: 11px;">
-        Scholarly Open Editorial Office • International Open Access Publishing
+        Scholarly Open i.G. • Editorial Office • Mainz, Germany
       </div>
       <div style="color: #64748b;">
         Rigorous Double-Blind Peer Review • Committee on Publication Ethics (COPE) Standards<br>
-        &copy; ${currentYear} Scholarly Open • Open Access CC BY 4.0 • editorial360 Platform
+        &copy; ${currentYear} Scholarly Open i.G. • Open Access CC BY 4.0 • editorial360 Platform
       </div>
       <div style="margin-top: 8px;">
-        <a href="${baseUrl}/editorial360" style="color: #0b99ff; text-decoration: none; font-weight: 600;">Access editorial360 Portal</a> • 
+        <a href="${baseUrl}/editorial360" style="color: #005028; text-decoration: none; font-weight: 600;">Access editorial360 Portal</a> • 
         <a href="${baseUrl}/about" style="color: #64748b; text-decoration: none;">Ethics &amp; Malpractice Policies</a>
       </div>
 
       <!-- Anti-Spam / Solicitation Compliance (CAN-SPAM / GDPR) & Opt-Out Button -->
       <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-size: 10px; color: #94a3b8; line-height: 1.5; text-align: center;">
         <p style="margin: 0 0 8px 0;">
-          You received this academic invitation based on your published scholarship and expertise in this field. 
-          If you do not wish to receive further invitations or editorial notices from ${branding.cleanName}, you may opt out at any time:
+          You received this academic correspondence regarding your manuscript or peer review activity with ${branding.cleanName}.
         </p>
-        <div style="margin: 8px 0 10px 0;">
-          <a href="${baseUrl}/api/editorial360/unsubscribe?email=${encodeURIComponent(recipientEmail || "")}&journal=${encodeURIComponent(journal)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 6px; text-decoration: none;">
-            ✕ Opt-Out / Do Not Contact
-          </a>
-        </div>
         <p style="margin: 0; font-size: 10px; color: #94a3b8;">
-          Clicking the button immediately records your preference in our suppression register to refrain from all future contacts.<br>
-          Scholarly Open Publishing Group &bull; Editorial Office &bull; Mainz, Germany &bull; <a href="${baseUrl}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>
+          Scholarly Open i.G. &bull; Editorial Office &bull; Mainz, Germany &bull; <a href="${baseUrl}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>
         </p>
       </div>
     </div>

@@ -317,6 +317,8 @@ export async function POST(request: Request) {
     const journalEmail = getJournalReplyTo(journalTitle)
     const authorFrom = `"${journalTitle} Editorial Office" <${journalEmail}>`
 
+    const trackingUrl = `https://www.scholarlyopen.org/editorial360?manuscriptId=${encodeURIComponent(trackingId)}&email=${encodeURIComponent(authorEmail)}`
+
     const authorConfirmationBodyText = [
       `Dear ${firstName} ${lastName},`,
       ``,
@@ -326,6 +328,8 @@ export async function POST(request: Request) {
       `1. Initial Quality Check: Our Editorial Office will conduct an initial formatting, ethical compliance, and plagiarism screening within 24-48 hours.`,
       `2. Handling Editor Assignment: A Handling Editor specialized in your research discipline will oversee independent peer review.`,
       `3. Peer Review: Independent expert reviewers will evaluate your manuscript.`,
+      ``,
+      `You can monitor real-time editorial workflow milestones, review reports, and timeline benchmarks directly inside your dedicated editorial360 Author Workspace using the link below:`,
       ``,
       `Please quote your Tracking ID (${trackingId}) in all correspondence with the editorial office at ${journalEmail} or info@scholarlyopen.org.`,
     ].join("\n")
@@ -338,8 +342,10 @@ export async function POST(request: Request) {
       paperTitle: title,
       recipientName: `${firstName} ${lastName}`.trim() || "Author",
       recipientEmail: authorEmail,
-      baseUrl: "https://scholarlyopen.org",
-      includeEditorial360Logo: false,
+      baseUrl: "https://www.scholarlyopen.org",
+      actionLabel: "Access editorial360 Author Workspace",
+      actionUrl: trackingUrl,
+      includeEditorial360Logo: true,
     })
 
     const defaultCc = "scholarlyopen@gmail.com"
