@@ -73,6 +73,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml, getJournalBranding } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
+import { ForensicsInvestigationSuite } from "./forensics-investigation-suite"
 import { OFFICIAL_JOURNALS, getJournalReplyTo } from "@/lib/data/journal-contacts"
 import { REGIONAL_COUNTRY_GROUPS, GLOBAL_COUNTRIES } from "@/lib/data/countries"
 import { editors } from "@/lib/data/editors"
@@ -12293,244 +12294,53 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {/* ========================================================================= */}
       {/* MODAL 9: DEDICATED INTEGRITY FORENSICS INVESTIGATION SUITE                 */}
       {/* ========================================================================= */}
-      <Dialog open={isForensicsModalOpen} onOpenChange={setIsForensicsModalOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans rounded-2xl p-6 flex flex-col shadow-2xl overflow-hidden">
-          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between gap-3 pr-6">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                  <ShieldAlert className="h-4 w-4" />
-                </div>
-                <div>
-                  <DialogTitle className="text-base font-bold text-slate-900 dark:text-white leading-tight">
-                    Forensic Dossier
-                  </DialogTitle>
-                  <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                    Similarity scans, synthetic text detection & figure forensics
-                  </DialogDescription>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 whitespace-nowrap">
-                {forensicsManuscript?.id || "SOSSH-26-SRW107"}
-              </span>
-            </div>
-          </DialogHeader>
-
-          {forensicsManuscript && (() => {
-            const plag = forensicsManuscript.plagiarismScore || 34
-            const ai = forensicsManuscript.aiScore || 15
-            const isCriticalPlag = plag > 25
-            const isHighAi = ai > 50
-
-            return (
-              <div className="space-y-4 py-3 text-xs overflow-y-auto pr-1">
-                {/* Paper Summary Box */}
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {forensicsManuscript.journal} • Submitted {forensicsManuscript.date}
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
-                    {forensicsManuscript.title}
-                  </h4>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap pt-0.5">
-                    <span>Corresponding Author: <strong className="text-slate-700 dark:text-slate-300">{forensicsManuscript.authorName || "Dr. Helen Vance"}</strong></span>
-                    <span>•</span>
-                    <span>Assigned Editor: <strong className="text-slate-700 dark:text-slate-300">{forensicsManuscript.assignedEditorName || "Prof. Aris Thorne"}</strong></span>
-                  </div>
-                </div>
-
-                {/* Status / Action Notification Banner */}
-                {forensicActionStatus && (
-                  <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center gap-2 font-medium">
-                    <CheckCheck className="h-4 w-4 shrink-0 text-slate-600 dark:text-slate-400" />
-                    <span>{forensicActionStatus}</span>
-                  </div>
-                )}
-
-                {/* Primary Violation Alert Card (Subtle & Clean) */}
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <AlertTriangle className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                      <span>
-                        {isCriticalPlag 
-                          ? `Flag: ${plag}% Text Overlap Detected`
-                          : isHighAi 
-                          ? `Flag: ${ai}% Synthetic Text Probability`
-                          : `Integrity Anomaly Flag`}
-                      </span>
-                    </span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                      Review Needed
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {isCriticalPlag
-                      ? `Algorithmic cross-reference against Crossref, arXiv, and SSRN indicates verbatim phrasing in Literature Review & Empirical Estimation (Sections 2.1–3.4) matching a 2024 repository deposit without formal quotation marks.`
-                      : isHighAi
-                      ? `Stylometric entropy scan detected structural repetitive patterns in Methodology (Paragraphs 3-6) exceeding standard baseline threshold.`
-                      : `Automated scan identified potential figure contrast alterations and unverified preprint citations.`}
-                  </p>
-                </div>
-
-                {/* 3 Metric Breakdown Grid (Restrained Neutral Styling) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {/* Similarity */}
-                  <div className="p-3 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200/90 dark:border-slate-800 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">iThenticate Scan</span>
-                      <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-slate-200 dark:border-slate-700">
-                        {plag > 15 ? "Over Limit" : "Passed"}
-                      </span>
-                    </div>
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {plag}%
-                    </div>
-                    <div className="text-[11px] text-slate-500 leading-tight">
-                      Matched: SSRN-2024-8120 & arXiv
-                    </div>
-                  </div>
-
-                  {/* AI Content */}
-                  <div className="p-3 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200/90 dark:border-slate-800 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">AI Probability</span>
-                      <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-slate-200 dark:border-slate-700">
-                        {ai > 30 ? "Elevated" : "Low Risk"}
-                      </span>
-                    </div>
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {ai}%
-                    </div>
-                    <div className="text-[11px] text-slate-500 leading-tight">
-                      Stylometric syntax variance
-                    </div>
-                  </div>
-
-                  {/* Figure & Image Forensics */}
-                  <div className="p-3 rounded-xl bg-white dark:bg-[#15161b] border border-slate-200/90 dark:border-slate-800 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">Figure Forensics</span>
-                      <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-slate-200 dark:border-slate-700">
-                        Inspected
-                      </span>
-                    </div>
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                      4 Panels
-                    </div>
-                    <div className="text-[11px] text-slate-500 leading-tight">
-                      No clone stamp / tampering
-                    </div>
-                  </div>
-                </div>
-
-                {/* Author Notes & Preprint Attribution */}
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">Author Declaration & Preprint Note</span>
-                    <span className="text-[10px] text-slate-400 font-medium">Provided at Submission</span>
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed italic bg-white dark:bg-[#18191e] p-2.5 rounded-lg border border-slate-200 dark:border-slate-800">
-                    "A preliminary working draft was shared on SSRN in late 2024. The empirical dataset, regressions, and conclusions submitted here have been substantially expanded and are proprietary to this author team."
-                  </p>
-                </div>
-
-                {/* Operational Quick Actions (Restrained, Professional) */}
-                <div className="space-y-2 pt-1">
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Editorial & Forensic Next Steps
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (onAddNotification) {
-                          onAddNotification({
-                            paperId: forensicsManuscript.id,
-                            paperTitle: forensicsManuscript.title,
-                            journal: forensicsManuscript.journal,
-                            type: "im_escalation",
-                            severity: "urgent",
-                            actorName: user?.name || "Noor F.",
-                            actorRole: "Journal Manager Desk",
-                            headline: "Forensic Escalation Submitted",
-                            summary: `Escalated ${forensicsManuscript.id} (${plag}% similarity) to Research Integrity Office for formal review.`,
-                            recipient: "Research Integrity Advisor"
-                          })
-                        }
-                        setForensicActionStatus(`✓ Case ${forensicsManuscript.id} officially escalated to Research Integrity Advisor (RIA).`)
-                      }}
-                      className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-xl px-3.5 cursor-pointer shadow-xs"
-                    >
-                      <ShieldAlert className="h-3.5 w-3.5 mr-1" />
-                      Escalate to RIA
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (onAddNotification) {
-                          onAddNotification({
-                            paperId: forensicsManuscript.id,
-                            paperTitle: forensicsManuscript.title,
-                            journal: forensicsManuscript.journal,
-                            type: "eic_inquiry",
-                            severity: "high",
-                            actorName: user?.name || "Noor F.",
-                            actorRole: "Journal Manager Desk",
-                            headline: "Author Clarification Dispatched",
-                            summary: `Requested formal citation clarification and uncropped raw files for ${forensicsManuscript.id}.`,
-                            dispatchedLetter: `Dear ${forensicsManuscript.authorName || "Author"},\n\nPlease provide formal clarification regarding the ${plag}% text overlap identified by our automated forensic scans.\n\nSincerely,\nEditorial Office`,
-                            recipient: forensicsManuscript.authorName || "Corresponding Author"
-                          })
-                        }
-                        setForensicActionStatus(`✓ Formal inquiry dispatched to ${forensicsManuscript.authorName || "Author"}.`)
-                      }}
-                      className="h-8 text-xs font-semibold bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 cursor-pointer text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80 shadow-2xs"
-                    >
-                      <Mail className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                      Query Author
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setForensicActionStatus(`✓ Flag cleared for ${forensicsManuscript.id}. Preprint attribution verified authentic.`)
-                      }}
-                      className="h-8 text-xs font-semibold bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 cursor-pointer text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80 shadow-2xs"
-                    >
-                      <Check className="h-3.5 w-3.5 mr-1 text-emerald-600" />
-                      Clear Flag (Verified)
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )
-          })()}
-
-          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between sm:justify-between">
-            <a
-              href="/downloads/Rights_Retention_Cover_Letter_Template.txt"
-              download={`${forensicsManuscript?.id || "Manuscript"}_Forensics_Audit_Report.pdf`}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span>Download Full Forensic Audit (.pdf)</span>
-            </a>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsForensicsModalOpen(false)}
-              className="text-xs font-semibold h-8 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer shadow-2xs"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ForensicsInvestigationSuite
+        open={isForensicsModalOpen}
+        onOpenChange={setIsForensicsModalOpen}
+        manuscript={forensicsManuscript}
+        onEscalateToRia={(paperId) => {
+          if (onAddNotification && forensicsManuscript) {
+            onAddNotification({
+              paperId: forensicsManuscript.id,
+              paperTitle: forensicsManuscript.title,
+              journal: forensicsManuscript.journal,
+              type: "im_escalation",
+              severity: "urgent",
+              actorName: user?.name || "Noor F.",
+              actorRole: "Journal Manager Desk",
+              headline: "Forensic Escalation Submitted",
+              summary: `Escalated ${forensicsManuscript.id} to Research Integrity Office for formal review.`,
+              recipient: "Research Integrity Advisor"
+            })
+          }
+          setForensicActionStatus(`✓ Case ${paperId} officially escalated to Research Integrity Advisor (RIA).`)
+        }}
+        onQueryAuthor={(paperId) => {
+          if (onAddNotification && forensicsManuscript) {
+            onAddNotification({
+              paperId: forensicsManuscript.id,
+              paperTitle: forensicsManuscript.title,
+              journal: forensicsManuscript.journal,
+              type: "eic_inquiry",
+              severity: "high",
+              actorName: user?.name || "Noor F.",
+              actorRole: "Journal Manager Desk",
+              headline: "Author Clarification Dispatched",
+              summary: `Requested formal citation clarification and uncropped raw files for ${forensicsManuscript.id}.`,
+              dispatchedLetter: `Dear ${forensicsManuscript.authorName || "Author"},\n\nPlease provide formal clarification regarding the automated forensic scans.\n\nSincerely,\nEditorial Office`,
+              recipient: forensicsManuscript.authorName || "Corresponding Author"
+            })
+          }
+          setForensicActionStatus(`✓ Formal inquiry dispatched to ${forensicsManuscript?.authorName || "Author"}.`)
+        }}
+        onClearFlag={(paperId) => {
+          setForensicActionStatus(`✓ Flag cleared for ${paperId}. Attribution and data verified authentic.`)
+          if (onUpdateManuscriptStatus) {
+            onUpdateManuscriptStatus(paperId, "Awaiting Initial Check")
+          }
+        }}
+        language={language}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL 10: FORMAL EDITORIAL DECISION LETTER VIEWER                         */}

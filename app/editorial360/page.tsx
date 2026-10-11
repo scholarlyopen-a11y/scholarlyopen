@@ -95,6 +95,7 @@ import type { CrossDeskNotification } from "@/components/cross-desk-activity-fee
 import { OFFICIAL_JOURNALS, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 import { EditorialBoardOnboarding, type EditorialBoardOnboardingData } from "@/components/editorial-board-onboarding"
 import { GLOBAL_COUNTRIES } from "@/lib/data/countries"
+import { ForensicsInvestigationSuite } from "@/components/forensics-investigation-suite"
 
 const ReviewerWorkspace = dynamic(
   () => import("@/components/reviewer-workspace").then(mod => mod.ReviewerWorkspace),
@@ -13766,98 +13767,40 @@ export default function Editorial360Page() {
             </DialogContent>
           </Dialog>
 
-          {/* 8. QC Admin: INTEGRITY FORENSICS INVESTIGATION MODAL */}
-          <Dialog open={isForensicsOpen} onOpenChange={setIsForensicsOpen}>
-            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg transition-colors">
-              <DialogHeader>
-                <DialogTitle className="text-lg font-bold text-red-500 dark:text-red-400 flex items-center gap-2">
-                  <ShieldAlert className="h-5 w-5 " />
-                  QC Admin Integrity Forensics Suite
-                </DialogTitle>
-                <DialogDescription className="text-slate-500 dark:text-slate-400">
-                  Analyze algorithmic scan metrics for case file reference {activeAlertId}.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4 py-2">
-                {integrityAlerts.find(a => a.id === activeAlertId) && (() => {
-                  const alert = integrityAlerts.find(a => a.id === activeAlertId)!
-                  return (
-                    <div className="space-y-4">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-550">{alert.journal}</span>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">{alert.title}</h4>
-                      </div>
+          {/* 8. QC Admin / RIA: FORENSICS INVESTIGATION SUITE */}
+          {(() => {
+            const alert = integrityAlerts.find(a => a.id === activeAlertId)
+            const activeManuscript = alert ? {
+              id: alert.id,
+              title: alert.title,
+              journal: alert.journal,
+              plagiarismScore: alert.type.includes("Similarity") ? parseInt(alert.score) || 34 : 12,
+              aiScore: alert.type.includes("AI") ? parseInt(alert.score) || 88 : 8,
+              integrityStatus: "Flagged",
+              authorName: "Dr. Elena Rostova",
+              authorEmail: "elena.rostova@biotech-research.edu"
+            } : null
 
-                      <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-3.5 rounded border border-slate-200 dark:border-slate-800">
-                        <div>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Check Modality</span>
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{alert.type}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Algorithmic Score</span>
-                          <span className="text-xs font-bold text-red-500 dark:text-red-400">{alert.score}</span>
-                        </div>
-                      </div>
-
-                      {/* Forensics graphs */}
-                      <div className="space-y-2.5">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Analysis Scan Breakdown</span>
-                        <div className="space-y-2 bg-slate-50 dark:bg-slate-950 p-3 rounded border border-slate-200 dark:border-slate-800 text-xs">
-                          {alert.type === "AI Content Index" ? (
-                            <>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-[11px] text-slate-700 dark:text-slate-300">
-                                  <span>LLM Generated Probability</span>
-                                  <span className="text-red-500 font-bold">88%</span>
-                                </div>
-                                <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                  <div className="h-full bg-gradient-to-r from-yellow-500 to-red-500" style={{ width: "88%" }} />
-                                </div>
-                              </div>
-                              <p className="text-[10.5px] text-slate-500 dark:text-slate-400 leading-relaxed pt-1.5">
-                                Scanned passages match predictable LLM structural parameters. Focus flagged segments on: <i>Methodology (Paragraphs 3-6)</i>.
-                              </p>
-                            </>
-                          ) : (
-                            <>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-[11px] text-slate-700 dark:text-slate-300">
-                                  <span>Direct Similarity Match</span>
-                                  <span className="text-red-500 font-bold">34%</span>
-                                </div>
-                                <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                  <div className="h-full bg-red-500" style={{ width: "34%" }} />
-                                </div>
-                              </div>
-                              <p className="text-[10.5px] text-slate-500 dark:text-slate-400 leading-relaxed pt-1.5">
-                                Matched sources: <i>International Labor Statistics Review (2024) (21% similarity)</i>, <i>SSRN Working Paper 10928 (13% similarity)</i>.
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end gap-2.5 pt-2">
-                        <Button
-                          onClick={() => onTriggerResolveIntegrity(alert.id, "clear")}
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs cursor-pointer"
-                        >
-                          Clear Flag (Approve)
-                        </Button>
-                        <Button
-                          onClick={() => onTriggerResolveIntegrity(alert.id, "escalate")}
-                          className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs cursor-pointer shadow-xs"
-                        >
-                          Escalate Case to EIC
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                })()}
-              </div>
-            </DialogContent>
-          </Dialog>
+            return (
+              <ForensicsInvestigationSuite
+                open={isForensicsOpen}
+                onOpenChange={setIsForensicsOpen}
+                manuscript={activeManuscript}
+                onEscalateToRia={(paperId) => {
+                  onTriggerResolveIntegrity(paperId, "escalate")
+                  setIsForensicsOpen(false)
+                }}
+                onQueryAuthor={() => {
+                  setIsForensicsOpen(false)
+                }}
+                onClearFlag={(paperId) => {
+                  onTriggerResolveIntegrity(paperId, "clear")
+                  setIsForensicsOpen(false)
+                }}
+                language={language}
+              />
+            )
+          })()}
 
           {/* 8B. QC Admin / IM: EIC ESCALATION BRIEFING MODAL */}
           <Dialog open={isEscalateModalOpen} onOpenChange={setIsEscalateModalOpen}>

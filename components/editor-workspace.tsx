@@ -60,6 +60,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { JmManuscript, JmReviewer } from "./journal-manager-workspace"
 import { CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml } from "@/lib/email-templates"
+import { ForensicsInvestigationSuite } from "./forensics-investigation-suite"
 
 export interface EditorReviewFeedback {
   id: string
@@ -5079,91 +5080,27 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         </DialogContent>
       </Dialog>
 
-      {/* ================= MODAL: INTEGRITY PRE-SCAN INSPECTOR ================= */}
-      <Dialog open={!!selectedPaperForIntegrity} onOpenChange={(open) => !open && setSelectedPaperForIntegrity(null)}>
-        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-md rounded-2xl p-6">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              {(selectedPaperForIntegrity?.integrityStatus === "Flagged" || (selectedPaperForIntegrity?.plagiarismScore || 0) > 15 || (selectedPaperForIntegrity?.aiScore || 0) > 30) ? (
-                <ShieldAlert className="h-5 w-5 text-red-600" />
-              ) : (
-                <ShieldCheck className="h-5 w-5 text-emerald-600" />
-              )}
-              Automated Integrity & Forensic Report
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Manuscript ID: {selectedPaperForIntegrity?.id} · {selectedPaperForIntegrity?.title}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 py-2 text-xs">
-            <div className="grid grid-cols-2 gap-2">
-              <div className={`p-3 rounded-xl border text-center ${
-                (selectedPaperForIntegrity?.plagiarismScore || 0) > 15
-                  ? "bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/40"
-                  : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40"
-              }`}>
-                <span className="text-[10px] uppercase font-bold text-slate-500 block">Similarity Index</span>
-                <span className={`text-lg font-bold ${
-                  (selectedPaperForIntegrity?.plagiarismScore || 0) > 15 ? "text-red-600" : "text-emerald-600"
-                }`}>
-                  {selectedPaperForIntegrity?.plagiarismScore ?? 4}% { (selectedPaperForIntegrity?.plagiarismScore || 0) > 15 ? "(Flagged)" : "(Clear)" }
-                </span>
-              </div>
-              <div className={`p-3 rounded-xl border text-center ${
-                (selectedPaperForIntegrity?.aiScore || 0) > 30
-                  ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40"
-                  : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40"
-              }`}>
-                <span className="text-[10px] uppercase font-bold text-slate-500 block">AI Text Prob.</span>
-                <span className={`text-lg font-bold ${
-                  (selectedPaperForIntegrity?.aiScore || 0) > 30 ? "text-amber-600" : "text-emerald-600"
-                }`}>
-                  {selectedPaperForIntegrity?.aiScore ?? 2}% { (selectedPaperForIntegrity?.aiScore || 0) > 30 ? "(Elevated AI)" : "(Human)" }
-                </span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-1.5 text-[11px]">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400">Figure Image Forensics:</span>
-                <span className={`font-bold ${selectedPaperForIntegrity?.id === "SOSSH-26-SRW107" ? "text-red-600" : "text-emerald-600"}`}>
-                  {selectedPaperForIntegrity?.id === "SOSSH-26-SRW107" ? "Potential duplication flagged ⚠️" : "No manipulation detected ✓"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400">COPE Ethics Declaration:</span>
-                <span className="font-bold text-emerald-600">Verified ✓</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400">Competing Interests:</span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">None Declared ✓</span>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-[#272832]">
-            <Button
-              onClick={() => {
-                const paper = selectedPaperForIntegrity
-                setSelectedPaperForIntegrity(null)
-                if (paper) setSelectedPaperForImEscalation(paper)
-              }}
-              variant="outline"
-              className="text-xs h-8.5 px-3 border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-400 cursor-pointer"
-            >
-              <AlertCircle className="h-3.5 w-3.5 mr-1 text-rose-500" />
-              Escalate to IM & JM
-            </Button>
-            <Button
-              onClick={() => setSelectedPaperForIntegrity(null)}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8.5 px-4 cursor-pointer"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* ================= MODAL: INTEGRITY & FORENSIC INVESTIGATION SUITE ================= */}
+      <ForensicsInvestigationSuite
+        open={!!selectedPaperForIntegrity}
+        onOpenChange={(open) => !open && setSelectedPaperForIntegrity(null)}
+        manuscript={selectedPaperForIntegrity}
+        onEscalateToRia={(paperId) => {
+          const paper = selectedPaperForIntegrity
+          setSelectedPaperForIntegrity(null)
+          if (paper) setSelectedPaperForImEscalation(paper)
+        }}
+        onQueryAuthor={(paperId) => {
+          setSelectedPaperForIntegrity(null)
+          triggerToast(`✓ Formal clarification request opened for ${paperId}.`)
+        }}
+        onClearFlag={(paperId) => {
+          setManuscripts(prev => prev.map(m => m.id === paperId ? { ...m, integrityStatus: "Clean" } : m))
+          setSelectedPaperForIntegrity(null)
+          triggerToast(`✓ Integrity flag cleared for ${paperId}. Verified authentic.`)
+        }}
+        language={language}
+      />
 
       {/* ================= MODAL: ESCALATE TO INTEGRITY MANAGER (IM) ================= */}
       <Dialog open={!!selectedPaperForImEscalation} onOpenChange={(open) => !open && setSelectedPaperForImEscalation(null)}>
