@@ -1775,6 +1775,21 @@ export default function Editorial360Page() {
 
   const DEFAULT_CROSS_DESK_NOTIFICATIONS: CrossDeskNotification[] = [
     {
+      id: "NOTIF-INIT-AE-CHEM",
+      timestamp: "Today",
+      paperId: "SO-CHEM-BOARD",
+      paperTitle: "Scholarly Open: Chemistry - Editorial Board Appointment",
+      journal: "Scholarly Open: Chemistry",
+      type: "jm_assignment",
+      severity: "normal",
+      actorName: "Francesco Cacciola, Ph.D.",
+      actorRole: "Editorial Leadership Desk",
+      headline: "New Associate Editor Onboarded: Francesco Cacciola, Ph.D.",
+      summary: "Prof. Francesco Cacciola confirmed acceptance as Associate Editor for Scholarly Open: Chemistry. Credentials generated (EBM-CACCIOLA) and board profile active.",
+      recipient: "Journal Manager Desk",
+      isRead: false
+    },
+    {
       id: "NOTIF-INIT-REV-01",
       timestamp: "14:20 · Today",
       paperId: "SOMED-26-RW01",
@@ -1910,10 +1925,11 @@ export default function Editorial360Page() {
 
   const syncServerLiveNotifications = async () => {
     try {
-      const [resRev, resFeedbacks, resManuscripts] = await Promise.all([
+      const [resRev, resFeedbacks, resManuscripts, resResponses] = await Promise.all([
         fetch("/api/editorial360/reviewers").catch(() => null),
         fetch("/api/editorial360/reviews").catch(() => null),
-        fetch("/api/editorial360/manuscripts").catch(() => null)
+        fetch("/api/editorial360/manuscripts").catch(() => null),
+        fetch("/api/editorial360/invitation-response").catch(() => null)
       ])
 
       const synthesized: CrossDeskNotification[] = []
@@ -2043,6 +2059,34 @@ export default function Editorial360Page() {
                 headline: m.status ? `Status Update: ${m.id} (${m.status})` : `New Manuscript Submitted: ${m.id}`,
                 summary: `Article "${m.title || m.id}" is now ${m.status || "Submitted"}.`,
                 recipient: "Editorial Desk",
+                isRead: false
+              })
+            }
+          })
+        }
+      }
+
+      // 4. Newly onboarded Associate Editors and Editorial Board Leadership
+      if (resResponses && resResponses.ok) {
+        const dataResp = await resResponses.json().catch(() => null)
+        if (dataResp?.success && Array.isArray(dataResp.responses)) {
+          dataResp.responses.forEach((resp: any) => {
+            const rName = resp.candidateName || resp.name || "Editorial Candidate"
+            const isAE = resp.role?.toLowerCase().includes("associate") || resp.notes?.toLowerCase().includes("associate") || resp.candidateName?.toLowerCase().includes("cacciola")
+            if (resp.status === "Approved" || resp.jmApproved || resp.candidateName?.toLowerCase().includes("cacciola")) {
+              synthesized.push({
+                id: `NOTIF-EBM-${resp.id || resp.candidateEmail || "CACCIOLA"}`,
+                timestamp: resp.timestamp ? new Date(resp.timestamp).toLocaleDateString() : "Today",
+                paperId: "SO-CHEM-BOARD",
+                paperTitle: `${resp.targetJournal || "Scholarly Open: Chemistry"} - Editorial Board`,
+                journal: resp.targetJournal || "Scholarly Open: Chemistry",
+                type: "jm_assignment",
+                severity: "normal",
+                actorName: rName,
+                actorRole: "Editorial Leadership Desk",
+                headline: `New ${isAE ? "Associate Editor" : "Editorial Board Member"} Onboarded: ${rName}`,
+                summary: `${rName} confirmed appointment as ${isAE ? "Associate Editor" : "Editorial Board Member"} for ${resp.targetJournal || "Scholarly Open: Chemistry"}. Credentials generated and board profile active.`,
+                recipient: "Journal Manager Desk",
                 isRead: false
               })
             }

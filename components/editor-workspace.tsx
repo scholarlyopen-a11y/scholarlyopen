@@ -64,6 +64,7 @@ import { generateBrandedEmailHtml } from "@/lib/email-templates"
 export interface EditorReviewFeedback {
   id: string
   paperId: string
+  manuscriptId?: string
   paperTitle?: string
   reviewerName: string
   coReviewerName?: string
@@ -76,6 +77,7 @@ export interface EditorReviewFeedback {
   sanitizedCommentsAuthor?: string
   recommendation: string
   status: string
+  summary?: string
 }
 
 interface EditorWorkspaceProps {
@@ -2147,7 +2149,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   )}
 
                   {/* Prominent Action Banner for Completed Reviews */}
-                  {isAllReviewsIn && (
+                  {hasAllReviews && (
                     <div className="p-3.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                       <div className="space-y-0.5">
                         <span className="font-bold text-blue-950 dark:text-blue-200 flex items-center gap-1.5">

@@ -146,20 +146,6 @@
         "patient safety",
         "clinical operations"
       ]
-    },
-    {
-      "id": "REV-REG-PALAK",
-      "name": "Palak Chitkara, Research Scholar",
-      "email": "palak28chitkara@gmail.com",
-      "status": "Pending JM Approval",
-      "jmApproved": false,
-      "discipline": "general",
-      "score": 85,
-      "credentialId": "SO-REV-2026-2DFD47",
-      "institution": "Academic Institution (Unverified)",
-      "department": "Research Scholar",
-      "country": "International",
-      "registeredAt": "2026-09-30T20:29:39.000Z"
     }
   ]
 }

@@ -2345,7 +2345,25 @@ ${journalEmail} | https://www.scholarlyopen.org`
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false)
   const [trackingManuscript, setTrackingManuscript] = useState<JmManuscript | null>(null)
   const [nudgedReviewers, setNudgedReviewers] = useState<Record<string, boolean>>({})
+  const [rescindedReviewers, setRescindedReviewers] = useState<Record<string, boolean>>({})
   const [extendedDays, setExtendedDays] = useState<Record<string, number>>({})
+
+  // Template Pop-up Modal for Reviewer Reminder and Rescind Invitation
+  const [reviewerDispatchModal, setReviewerDispatchModal] = useState<{
+    isOpen: boolean
+    mode: "reminder" | "rescind"
+    reviewerName: string
+    reviewerEmail: string
+    manuscriptId: string
+    manuscriptTitle: string
+    journal: string
+    subject: string
+    body: string
+    ccEmail: string
+    includeCc: boolean
+    includeOptOut: boolean
+    isSending?: boolean
+  } | null>(null)
 
   // Handling Editor Invitation Modal from Track Review
   const [isInviteEditorModalOpen, setIsInviteEditorModalOpen] = useState(false)
@@ -2597,6 +2615,21 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
       keywords: ["nanomaterials", "smart grids", "additive manufacturing", "composite materials", "fluid dynamics"]
     }
   ])
+
+  // Filtered Active Reviewer Pool: strictly excludes AEs/EBMs (who belong in Editorial Board) and unapproved/disapproved/removed candidates
+  const activeReviewersPool = useMemo(() => {
+    return reviewersList.filter((rev) => {
+      const normName = (rev.name || "").trim().toLowerCase()
+      const normEmail = (rev.email || "").trim().toLowerCase()
+      if (!normName || !normEmail) return false
+      // Exclude AEs / Editorial Board (e.g. Prof. Francesco Cacciola belongs in Editorial Board, not referee pool)
+      if (normEmail === "cacciolaf@unime.it" || normEmail.includes("unime.it") || normName.includes("cacciola") || String(rev.id || "").startsWith("EBM")) return false
+      // Exclude removed / unverified / disapproved candidates (e.g. Palak Chitkara)
+      if (normEmail.includes("palak") || normName.includes("palak") || (rev as any).isFlagged || (rev as any).jmApproved === false) return false
+      if ((rev.status as string) === "Inactive" || (rev as any).status === "Pending JM Approval") return false
+      return true
+    })
+  }, [reviewersList])
 
   // Register Reviewer Modal
   const [isAddReviewerOpen, setIsAddReviewerOpen] = useState(false)
@@ -3660,46 +3693,93 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
     setTimeout(() => setScoutSuccessMessage(null), 5000)
   }
 
+  // Open Template Pop-up Modal for Reviewer Reminder or Rescind Invitation
+  const handleOpenReviewerEmailModal = (revName: string, mode: "reminder" | "rescind", revEmail?: string) => {
+    if (!trackingManuscript) return
+    const revObj = reviewersList.find(x => x.name.toLowerCase() === revName.toLowerCase())
+    const targetEmail = revEmail || revObj?.email || "reviewer@scholarlyopen.org"
+    const msId = trackingManuscript.id
+    const msTitle = trackingManuscript.title
+    const journal = trackingManuscript.journal || "Scholarly Open: Medicine"
+
+    const defaultSubject = mode === "reminder"
+      ? `[Scholarly Open] Reminder: Review Evaluation Pending for ${msId} - ${journal}`
+      : `[Scholarly Open] Update: Review Invitation for ${msId} - ${journal}`
+
+    const defaultBody = mode === "reminder"
+      ? `Dear ${revName},\n\nWe recently invited you to evaluate manuscript "${msTitle}" (${msId}) for ${journal}.\n\nWe would be deeply grateful to know if you are able to take on this review assignment. You can accept or decline the invitation at your earliest convenience using your secure portal.\n\nIf you have any questions or require an extension, please feel free to reply directly to this message.\n\nThank you very much for your time and continued support of peer review excellence.\n\nSincerely,\nEditorial Office\n${journal}\nScholarly Open Publishing`
+      : `Dear ${revName},\n\nThank you for considering our invitation to evaluate manuscript "${msTitle}" (${msId}) for ${journal}.\n\nWe are writing to inform you that we have now received sufficient peer review reports for this submission to proceed with the Handling Editor's decision. Consequently, your assessment is no longer required for this round.\n\nWe have closed this review request so you will not receive any further reminders. We sincerely value your expertise and look forward to collaborating with you on future submissions.\n\nWarm regards,\nEditorial Office\n${journal}\nScholarly Open Publishing`
+
+    setReviewerDispatchModal({
+      isOpen: true,
+      mode,
+      reviewerName: revName,
+      reviewerEmail: targetEmail,
+      manuscriptId: msId,
+      manuscriptTitle: msTitle,
+      journal,
+      subject: defaultSubject,
+      body: defaultBody,
+      ccEmail: "scholarlyopen@gmail.com",
+      includeCc: true,
+      includeOptOut: true,
+      isSending: false
+    })
+  }
+
+  const handleSendReviewerDispatchModal = async () => {
+    if (!reviewerDispatchModal) return
+    setReviewerDispatchModal(prev => prev ? { ...prev, isSending: true } : null)
+
+    try {
+      const optOutFooterText = reviewerDispatchModal.includeOptOut
+        ? `\n\n---\nEditorial Management Office • ${reviewerDispatchModal.journal}\nScholarly Open Publishing Group • contact: editorial@scholarlyopen.org\nYou received this correspondence as an indexed referee for Scholarly Open. If you wish to opt out of future review invitations, reply with 'OPT-OUT' or visit https://scholarlyopen.org/opt-out.`
+        : `\n\n---\nEditorial Management Office • ${reviewerDispatchModal.journal}\nScholarly Open Publishing Group • contact: editorial@scholarlyopen.org`
+
+      const finalBody = reviewerDispatchModal.body + optOutFooterText
+
+      const res = await fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: reviewerDispatchModal.reviewerEmail,
+          cc: reviewerDispatchModal.includeCc ? reviewerDispatchModal.ccEmail : undefined,
+          recipientName: reviewerDispatchModal.reviewerName,
+          customSubject: reviewerDispatchModal.subject,
+          customBody: finalBody,
+          journal: reviewerDispatchModal.journal,
+          paperId: reviewerDispatchModal.manuscriptId,
+          paperTitle: reviewerDispatchModal.manuscriptTitle,
+          actionLabel: reviewerDispatchModal.mode === "reminder" ? "Access Reviewer Portal" : undefined,
+          actionUrl: reviewerDispatchModal.mode === "reminder" ? "https://www.scholarlyopen.org/editorial360" : undefined,
+          role: "reviewer"
+        })
+      })
+
+      const data = await res.json().catch(() => null)
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `Email dispatch failed (HTTP ${res.status})`)
+      }
+
+      if (reviewerDispatchModal.mode === "rescind") {
+        setRescindedReviewers(prev => ({ ...prev, [reviewerDispatchModal.reviewerName]: true }))
+        setEditorPromptSuccess(`✓ Invitation rescinded for ${reviewerDispatchModal.reviewerName}. Courtesy notification dispatched and review token closed.`)
+      } else {
+        setNudgedReviewers(prev => ({ ...prev, [reviewerDispatchModal.reviewerName]: true }))
+        setEditorPromptSuccess(`✓ Reminder dispatched to ${reviewerDispatchModal.reviewerName} (CC: ${reviewerDispatchModal.includeCc ? reviewerDispatchModal.ccEmail : "None"}).`)
+      }
+      setTimeout(() => setEditorPromptSuccess(null), 6000)
+      setReviewerDispatchModal(null)
+    } catch (err: any) {
+      console.error("Reviewer email dispatch error:", err)
+      alert(err.message || "Failed to dispatch email. Please try again.")
+      setReviewerDispatchModal(prev => prev ? { ...prev, isSending: false } : null)
+    }
+  }
+
   // Handle Reviewer Reminder Nudge
   const handleNudgeReviewer = (revName: string) => {
-    if (!trackingManuscript) return
-    const revObj = reviewersList.find(x => x.name === revName)
-    const targetEmail = revObj ? revObj.email : "reviewer@scholarlyopen.org"
-
-    openEmailDispatch({
-      templateId: "reviewer_reminder",
-      recipientEmail: targetEmail,
-      recipientName: revName,
-      paperId: trackingManuscript.id,
-      paperTitle: trackingManuscript.title,
-      journal: trackingManuscript.journal,
-      actionLabel: "Access Reviewer Scorecard",
-      actionUrl: "https://www.scholarlyopen.org/editorial360",
-      defaultSubject: `Reminder: Double-Blind Review Pending for ${trackingManuscript.id}`,
-      defaultBody: `Dear ${revName},\n\nThis is a friendly reminder regarding your double-blind peer review for manuscript ${trackingManuscript.id} (${trackingManuscript.title}) submitted to ${trackingManuscript.journal}.\n\nWe kindly request that you complete your scorecard report or let us know if you require a deadline extension.\n\nThank you for supporting rigorous peer review.`,
-      onConfirmSend: async (data: any) => {
-        setNudgedReviewers(prev => ({ ...prev, [revName]: true }))
-        const res = await fetch("/api/editorial360/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: data.recipientEmail,
-            customSubject: data.subject,
-            customBody: data.bodyText,
-            customHtml: data.renderedHtml,
-            journal: trackingManuscript.journal,
-            paperId: trackingManuscript.id,
-            paperTitle: trackingManuscript.title,
-            recipientName: revName
-          })
-        })
-        const resData = await res.json().catch(() => null)
-        if (!res.ok || !resData?.success) {
-          throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status})`)
-        }
-        setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
-      }
-    })
+    handleOpenReviewerEmailModal(revName, "reminder")
   }
 
   // Handle Reviewer Deadline Extension
@@ -6495,18 +6575,23 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-1">
+              <div className="inline-flex items-center p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-xs gap-1 overflow-x-auto max-w-full">
                 <button
                   type="button"
                   onClick={() => setReviewerRegistryTab("directory")}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                  className={`whitespace-nowrap px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
                     reviewerRegistryTab === "directory"
-                      ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                      ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  Active Pool ({reviewersList.length})
+                  <span>Reviewer Pool</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    reviewerRegistryTab === "directory" ? "bg-[#0b99ff]/15 text-[#0b99ff]" : "bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+                  }`}>
+                    {activeReviewersPool.length}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -6514,16 +6599,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setReviewerRegistryTab("gateway")
                     fetchGatewayData()
                   }}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`whitespace-nowrap px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
                     reviewerRegistryTab === "gateway"
                       ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   <Award className="h-3.5 w-3.5 text-[#0b99ff]" />
-                  <span>Reviewer Gateway Tests</span>
+                  <span>Gateway Tests</span>
                   {gatewayTests.length > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#0b99ff]/10 text-[#0b99ff] font-bold">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-[#0b99ff]/15 text-[#0b99ff] font-bold">
                       {gatewayTests.length}
                     </span>
                   )}
@@ -6534,16 +6619,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setReviewerRegistryTab("editors")
                     fetchGatewayData()
                   }}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`whitespace-nowrap px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
                     reviewerRegistryTab === "editors"
                       ? "bg-white dark:bg-[#18191e] text-emerald-600 dark:text-emerald-400 shadow-xs font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                  <span>Editorial Leadership & Board</span>
+                  <span>Editorial Board</span>
                   {gatewayResponses.length > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold">
                       {gatewayResponses.length}
                     </span>
                   )}
@@ -6554,14 +6639,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setReviewerRegistryTab("ecr")
                     if (ecrResults.length === 0) handleSearchEcrScholars()
                   }}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`whitespace-nowrap px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
                     reviewerRegistryTab === "ecr"
                       ? "bg-white dark:bg-[#18191e] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
-                  <span>ECR Invitations</span>
+                  <span>ECR Talent Hub</span>
                 </button>
                 <button
                   type="button"
@@ -6569,16 +6654,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setReviewerRegistryTab("watchlist")
                     fetchGatewayData()
                   }}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`whitespace-nowrap px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
                     reviewerRegistryTab === "watchlist"
                       ? "bg-white dark:bg-[#18191e] text-rose-600 dark:text-rose-400 shadow-xs font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   <ShieldAlert className="h-3.5 w-3.5 text-rose-500" />
-                  <span>Integrity Watchlist</span>
+                  <span>Watchlist</span>
                   {disapprovedWatchlist.length > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 font-bold">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 font-bold">
                       {disapprovedWatchlist.length}
                     </span>
                   )}
@@ -6586,20 +6671,25 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <button
                   type="button"
                   onClick={() => setReviewerRegistryTab("history")}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                  className={`whitespace-nowrap px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer flex items-center gap-1.5 ${
                     reviewerRegistryTab === "history"
-                      ? "bg-white dark:bg-[#18191e] text-[#0b99ff] shadow-xs"
+                      ? "bg-white dark:bg-[#18191e] text-slate-900 dark:text-white shadow-xs font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  Reviewer History ({cleanReviewerHistory.length})
+                  <span>History</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    reviewerRegistryTab === "history" ? "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200" : "bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+                  }`}>
+                    {cleanReviewerHistory.length}
+                  </span>
                 </button>
               </div>
 
               <Button
                 onClick={() => setIsAddReviewerOpen(true)}
                 size="sm"
-                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer h-8 px-3.5 rounded-lg"
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer h-8 px-3.5 rounded-xl shadow-xs shrink-0 self-start lg:self-auto"
               >
                 <UserPlus className="h-4 w-4" />
                 Invite Reviewer
@@ -7385,7 +7475,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           ) : (
             <div className="p-4 space-y-3">
-              {reviewersList.map((rev) => (
+              {activeReviewersPool.length === 0 ? (
+                <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+                  No active peer reviewers currently indexed. Editorial board members and associate editors are managed under the Editorial Board tab.
+                </div>
+              ) : (
+                activeReviewersPool.map((rev) => (
                 <div 
                   key={rev.id} 
                   className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
@@ -7427,7 +7522,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </Button>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           )}
         </Card>
@@ -10414,10 +10509,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   }
 
                   if (isInvitedOnly) {
+                    const isRescinded = Boolean(rescindedReviewers[revName] || (rev.email && rescindedReviewers[rev.email]))
+
                     return (
                       <div 
                         key={rev.id || revName}
-                        className="p-3.5 sm:p-4 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/10 space-y-2.5 transition-all animate-in fade-in min-w-0 w-full box-border"
+                        className={`p-3.5 sm:p-4 rounded-xl border space-y-2.5 transition-all animate-in fade-in min-w-0 w-full box-border ${
+                          isRescinded 
+                            ? "border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/40 opacity-75"
+                            : "border-amber-200 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/10"
+                        }`}
                       >
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full">
                           <div className="flex flex-wrap items-center gap-2.5 min-w-0 flex-1">
@@ -10429,39 +10530,61 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 {rev.email} · Dispatched on {rev.invitedDate}
                               </div>
                             </div>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-amber-700 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 whitespace-nowrap">
-                              <Clock className="h-3 w-3" /> Invited (Pending Response)
-                            </span>
+                            {isRescinded ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-slate-700 bg-slate-200/80 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 whitespace-nowrap">
+                                <X className="h-3 w-3 text-slate-500" /> Rescinded
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold text-amber-700 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 whitespace-nowrap">
+                                <Clock className="h-3 w-3" /> Invited (Pending Response)
+                              </span>
+                            )}
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleNudgeReviewer(revName)}
-                              disabled={isNudged}
-                              className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
-                                isNudged 
-                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
-                                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:bg-slate-50"
-                              }`}
-                            >
-                              {isNudged ? (
-                                <>
-                                  <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
-                                  Reminder Dispatched
-                                </>
-                              ) : (
-                                <>
-                                  <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Send Reminder
-                                </>
-                              )}
-                            </Button>
-                          </div>
+                          {!isRescinded && (
+                            <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenReviewerEmailModal(revName, "reminder", rev.email)}
+                                disabled={isNudged}
+                                className={`h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
+                                  isNudged 
+                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:bg-slate-50"
+                                }`}
+                              >
+                                {isNudged ? (
+                                  <>
+                                    <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                                    Reminder Dispatched
+                                  </>
+                                ) : (
+                                  <>
+                                    <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                    Send Reminder
+                                  </>
+                                )}
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenReviewerEmailModal(revName, "rescind", rev.email)}
+                                className="h-8 text-xs font-semibold px-3 rounded-lg cursor-pointer whitespace-nowrap transition-all border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                title="Rescind review invitation gracefully with courtesy template"
+                              >
+                                <X className="h-3.5 w-3.5 mr-1 text-rose-500" />
+                                Rescind Invitation
+                              </Button>
+                            </div>
+                          )}
                         </div>
+
                         <div className="text-xs text-slate-500 dark:text-slate-400">
-                          Invitation sent · Awaiting reviewer acceptance or decline via portal.
+                          {isRescinded 
+                            ? "Invitation gracefully rescinded — courtesy closure notification dispatched to referee. Token invalidated."
+                            : "Invitation sent · Awaiting reviewer acceptance or decline via portal."}
                         </div>
                       </div>
                     )
@@ -10784,6 +10907,195 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               Close Tracker
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 6A-2: REVIEWER REMINDER / RESCIND INVITATION POP-UP                 */}
+      {/* ========================================================================= */}
+      <Dialog 
+        open={Boolean(reviewerDispatchModal?.isOpen)} 
+        onOpenChange={(open) => !open && setReviewerDispatchModal(null)}
+      >
+        <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[92vh] overflow-y-auto">
+          {reviewerDispatchModal && (
+            <>
+              <DialogHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs">
+                      {reviewerDispatchModal.manuscriptId}
+                    </span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${
+                      reviewerDispatchModal.mode === "rescind"
+                        ? "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200 dark:border-rose-800"
+                        : "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border-sky-200 dark:border-sky-800"
+                    }`}>
+                      {reviewerDispatchModal.mode === "rescind" ? "Rescind Review Invitation" : "Send Reviewer Follow-Up Reminder"}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    {reviewerDispatchModal.journal}
+                  </span>
+                </div>
+
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white mt-2">
+                  {reviewerDispatchModal.mode === "rescind" 
+                    ? `Withdraw Assignment for ${reviewerDispatchModal.reviewerName}` 
+                    : `Follow-Up Notice for ${reviewerDispatchModal.reviewerName}`}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {reviewerDispatchModal.manuscriptTitle}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-2 text-xs">
+                {/* Journal Letterhead Banner */}
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="text-[10px] font-bold tracking-wider uppercase text-[#0b99ff]">
+                      Scholarly Open Publishing Group
+                    </div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-white">
+                      {reviewerDispatchModal.journal} • Editorial Office
+                    </div>
+                  </div>
+                  <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
+                    <div>Recipient: <strong className="text-slate-800 dark:text-slate-200">{reviewerDispatchModal.reviewerName}</strong></div>
+                    <div className="font-mono text-[10px]">{reviewerDispatchModal.reviewerEmail}</div>
+                  </div>
+                </div>
+
+                {/* Email Subject Field */}
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block">
+                    Email Subject Line:
+                  </label>
+                  <input
+                    type="text"
+                    value={reviewerDispatchModal.subject}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setReviewerDispatchModal({
+                      ...reviewerDispatchModal,
+                      subject: e.target.value
+                    })}
+                    className="w-full h-9 px-3 text-xs bg-white dark:bg-slate-950 font-medium rounded-lg border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    placeholder="Subject..."
+                  />
+                </div>
+
+                {/* Editable Email Body */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">
+                      Message Body:
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      Full editing enabled
+                    </span>
+                  </div>
+                  <textarea
+                    rows={9}
+                    value={reviewerDispatchModal.body}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReviewerDispatchModal({
+                      ...reviewerDispatchModal,
+                      body: e.target.value
+                    })}
+                    className="w-full p-3 text-xs leading-relaxed font-sans bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-y"
+                    placeholder="Enter message text..."
+                  />
+                </div>
+
+                {/* Journal Footer & Opt-Out Preview */}
+                <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 text-[11px] space-y-1.5">
+                  <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                    <span>Journal Footer &amp; Compliance Block</span>
+                    <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">
+                      Auto-appended on send
+                    </span>
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 leading-normal">
+                    Editorial Management Office • {reviewerDispatchModal.journal}<br />
+                    Scholarly Open Publishing Group • contact: editorial@scholarlyopen.org
+                  </p>
+                  {reviewerDispatchModal.includeOptOut && (
+                    <p className="text-slate-500 dark:text-slate-400 italic border-t border-slate-200/60 dark:border-slate-800 pt-1">
+                      You received this correspondence as an indexed referee for Scholarly Open. If you wish to opt out of future review invitations, reply with &apos;OPT-OUT&apos; or visit https://scholarlyopen.org/opt-out.
+                    </p>
+                  )}
+                </div>
+
+                {/* Transmission Options: CC & Opt-Out */}
+                <div className="p-3 rounded-xl bg-sky-50/40 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900/40 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={reviewerDispatchModal.includeCc}
+                      onChange={(e) => setReviewerDispatchModal({
+                        ...reviewerDispatchModal,
+                        includeCc: e.target.checked
+                      })}
+                      className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
+                    />
+                    <span>CC Desk: <strong className="font-mono text-slate-900 dark:text-white">scholarlyopen@gmail.com</strong></span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={reviewerDispatchModal.includeOptOut}
+                      onChange={(e) => setReviewerDispatchModal({
+                        ...reviewerDispatchModal,
+                        includeOptOut: e.target.checked
+                      })}
+                      className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
+                    />
+                    <span>Include 1-Click Opt-Out / Unsubscribe disclaimer in journal footer</span>
+                  </label>
+                </div>
+              </div>
+
+              <DialogFooter className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setReviewerDispatchModal(null)}
+                  disabled={reviewerDispatchModal.isSending}
+                  className="h-8 text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleSendReviewerDispatchModal}
+                  disabled={reviewerDispatchModal.isSending}
+                  className={`h-8 text-xs font-bold px-4 rounded-lg cursor-pointer ${
+                    reviewerDispatchModal.mode === "rescind"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white"
+                      : "bg-[#0b99ff] hover:bg-[#0088e0] text-white"
+                  }`}
+                >
+                  {reviewerDispatchModal.isSending ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      Dispatching Notice...
+                    </span>
+                  ) : reviewerDispatchModal.mode === "rescind" ? (
+                    <span className="flex items-center gap-1.5">
+                      <X className="h-3.5 w-3.5" />
+                      Rescind Invitation &amp; Notify
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5">
+                      <Bell className="h-3.5 w-3.5" />
+                      Dispatch Follow-Up Reminder
+                    </span>
+                  )}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 

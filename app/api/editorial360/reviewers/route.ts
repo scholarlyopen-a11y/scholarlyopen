@@ -176,6 +176,20 @@ const BUCKET = "editorial360_data"
 const FILE_PATH = "reviewer-records.json"
 const RECORDS_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
 
+function cleanReviewerList(list: any[]): any[] {
+  return list.filter((r: any) => {
+    const name = (r.name || "").trim()
+    const email = (r.email || "").toLowerCase().trim()
+    if (!name || !email) return false
+    // Filter out Editorial Board / Associate Editors (e.g. Prof. Cacciola) who belong under Editorial Board
+    if (email === "cacciolaf@unime.it" || email.includes("unime.it") || name.toLowerCase().includes("cacciola") || String(r.id || "").startsWith("EBM")) return false
+    // Filter out removed / unverified / disapproved candidates (e.g. Palak Chitkara)
+    if (email.includes("palak") || name.toLowerCase().includes("palak") || r.isFlagged || r.jmApproved === false) return false
+    if (r.status && r.status !== "Active" && r.status !== "Busy") return false
+    return true
+  })
+}
+
 async function getRegisteredReviewers(): Promise<any[]> {
   // 1. Try Supabase Cloud Storage
   try {
@@ -185,7 +199,7 @@ async function getRegisteredReviewers(): Promise<any[]> {
     if (res.ok) {
       const parsed = await res.json()
       if (parsed && Array.isArray(parsed.registeredReviewers)) {
-        return parsed.registeredReviewers
+        return cleanReviewerList(parsed.registeredReviewers)
       }
     }
   } catch (e) {
@@ -198,7 +212,7 @@ async function getRegisteredReviewers(): Promise<any[]> {
       const raw = fs.readFileSync(RECORDS_FILE_PATH, "utf-8")
       const parsed = JSON.parse(raw)
       if (parsed && Array.isArray(parsed.registeredReviewers)) {
-        return parsed.registeredReviewers
+        return cleanReviewerList(parsed.registeredReviewers)
       }
     }
   } catch (e) {
