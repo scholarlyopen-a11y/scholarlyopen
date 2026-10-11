@@ -4586,38 +4586,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 Author: <span className="font-semibold text-slate-700 dark:text-slate-300">{ms.authorName || "Principal Author"}</span>
                               </div>
 
-                              {/* Manuscript File Download & Quick Access */}
-                              <div className="pt-1 flex items-center gap-1.5 flex-wrap">
-                                <a
-                                  href={ms.fileUrl || (ms.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : ms.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                                  download={ms.fileName || (ms.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${ms.id}_Main_Document.docx`)}
-                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 hover:bg-[#0b99ff]/10 text-slate-700 hover:text-[#0b99ff] dark:bg-slate-800 dark:hover:bg-[#0b99ff]/20 dark:text-slate-300 dark:hover:text-[#0b99ff] border border-slate-200 dark:border-slate-700 text-[11px] font-semibold transition-all group max-w-[280px]"
-                                  title={`Download ${ms.fileName || (ms.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Main_Document.docx")}`}
-                                >
-                                  <FileText className="h-3 w-3 text-[#0b99ff] shrink-0 group-hover:scale-110 transition-transform" />
-                                  <span className="truncate max-w-[150px] font-medium">
-                                    {ms.fileName || (ms.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Main_Manuscript.docx")}
-                                  </span>
-                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono shrink-0">
-                                    ({ms.fileSize || (ms.id === "SOMED-26-RW01" ? "38.6 KB" : "2.4 MB")})
-                                  </span>
-                                  <Download className="h-3 w-3 text-slate-400 group-hover:text-[#0b99ff] shrink-0" />
-                                </a>
-
-                                {ms.revisedFileUrl && (
-                                  <a
-                                    href={ms.revisedFileUrl}
-                                    download={ms.revisedFileName || `${ms.id}_Revised_Manuscript.docx`}
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold transition-all"
-                                    title="Download Revised Manuscript (R1)"
-                                  >
-                                    <FileText className="h-2.5 w-2.5 text-emerald-600" />
-                                    <span>R1</span>
-                                    <Download className="h-2.5 w-2.5" />
-                                  </a>
-                                )}
-                              </div>
-
                               {isAccepted && (
                                 <div className="text-[11px] text-slate-500 font-normal pt-0.5">
                                   DOI: <span className="font-medium text-slate-700 dark:text-slate-300">10.59236/{ms.journal.toLowerCase().includes("medicine") ? "somed" : "soeas"}.2026.{ms.id.slice(-3)}</span>
@@ -4690,6 +4658,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     Assign
                                   </Button>
                                 </>
+                              ) : isUnderReview ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setTrackingManuscript(ms)
+                                    setIsTrackModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
+                                >
+                                  <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Track Review
+                                </Button>
                               ) : (
                                 <Button
                                   variant="outline"
@@ -4703,21 +4684,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 >
                                   <FileText className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
                                   Dossier / Files
-                                </Button>
-                              )}
-
-                              {isUnderReview && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setTrackingManuscript(ms)
-                                    setIsTrackModalOpen(true)
-                                  }}
-                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
-                                >
-                                  <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Track Review
                                 </Button>
                               )}
 
@@ -10174,19 +10140,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
             {/* Handling Editor Info & Invitation */}
             {trackingManuscript?.assignedEditorName ? (
-              <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border">
+              <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3 min-w-0 w-full box-border">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
                     <UserCheck className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="text-slate-400 font-medium block text-[11px] uppercase tracking-wider">Handling Editor</span>
-                    <span className="text-sm font-bold text-slate-900 dark:text-white truncate block">{trackingManuscript.assignedEditorName}</span>
+                    <span className="text-slate-400 font-medium block text-[10px] uppercase tracking-wider">Handling Editor</span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white truncate block">{trackingManuscript.assignedEditorName}</span>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
-                    Managing Active Round
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/30 whitespace-nowrap">
+                    Active
                   </span>
                   <Button
                     type="button"
@@ -10196,30 +10162,25 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       setEditorInviteSuccessMsg(null)
                       setIsInviteEditorModalOpen(true)
                     }}
-                    className="h-7 text-[11px] font-semibold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap"
+                    className="h-7 text-xs font-medium text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap"
                   >
                     Change / Reassign
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="p-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-300 dark:border-amber-700/60 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 animate-in fade-in min-w-0 w-full box-border">
-                <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                  <div className="h-9 w-9 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700/60 mt-0.5 sm:mt-0">
-                    <AlertTriangle className="h-5 w-5" />
+              <div className="p-3 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 rounded-xl flex items-center justify-between gap-3 min-w-0 w-full box-border">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="h-8 w-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700/60">
+                    <AlertTriangle className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                        No Handling Editor Assigned Yet
-                      </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 shrink-0">
-                        Action Required
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 break-words">
-                      Double-blind peer review is underway, but no Handling Editor is currently appointed (previous invite to Dr. Weihua Gong was unconfirmed / did not agree to handle). As Journal Manager, you can invite an editor from the board or invite a guest handling editor.
-                    </p>
+                    <span className="text-xs font-bold text-amber-900 dark:text-amber-200 block">
+                      No Handling Editor Assigned
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block truncate">
+                      Peer review in progress. Appoint an editor to handle the final decision.
+                    </span>
                   </div>
                 </div>
 
@@ -10230,61 +10191,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     setEditorInviteSuccessMsg(null)
                     setIsInviteEditorModalOpen(true)
                   }}
-                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-3.5 rounded-lg shadow-sm cursor-pointer shrink-0 transition-all whitespace-nowrap mt-1 md:mt-0"
+                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-3 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap"
                 >
                   <UserPlus className="h-3.5 w-3.5 mr-1" />
-                  Invite / Assign Handling Editor
+                  Assign Handling Editor
                 </Button>
-              </div>
-            )}
-
-            {/* 2/3 Reviews Active Banner for SOMED-26-RW01 */}
-            {(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.title?.includes("Prevent Earlier")) && (
-              <div className="p-3.5 sm:p-4 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border animate-in fade-in">
-                <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
-                  <div className="h-8 w-8 rounded-lg bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0 border border-sky-200 dark:border-sky-800 mt-0.5 sm:mt-0">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-slate-900 dark:text-white text-xs flex flex-wrap items-center gap-2">
-                      <span>Peer Review Round in Progress (2 of 3 Reports Completed · 1 Active Referee Reviewing)</span>
-                      <span className="text-[10px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded border border-[#0b99ff]/20 shrink-0">2 Reports Logged</span>
-                    </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 break-words">
-                      Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. Chaud GJ) have submitted their full Electronic Assessment Forms (RAF). Reviewer #2 (Dr. Ragab Aziza) is conducting his review via direct email correspondence.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setViewingRafData(PRAVEEN_NAGULA_RAF)
-                      setIsViewingRafModalOpen(true)
-                    }}
-                    className="text-xs font-bold h-8 px-3 rounded-lg border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50/70 dark:bg-purple-950/30 hover:bg-purple-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap"
-                  >
-                    <FileText className="h-3.5 w-3.5 mr-1 text-purple-600 dark:text-purple-400 shrink-0" />
-                    View Dr. Nagula&apos;s RAF
-                  </Button>
-
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setViewingRafData(CHAUD_GJ_RAF)
-                      setIsViewingRafModalOpen(true)
-                    }}
-                    className="text-xs font-bold h-8 px-3 rounded-lg border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 bg-emerald-50/70 dark:bg-emerald-950/30 hover:bg-emerald-100 cursor-pointer shrink-0 transition-all shadow-xs whitespace-nowrap"
-                  >
-                    <FileText className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    View Dr. Chaud GJ&apos;s RAF
-                  </Button>
-                </div>
               </div>
             )}
 
@@ -10447,9 +10358,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     ? ((mrAny.scores.novelty + mrAny.scores.methodology + mrAny.scores.clarity + mrAny.scores.significance) / 4).toFixed(1)
                     : (matchedReview?.originality ? `${matchedReview.originality}.0` : "4.8"))
                   const displayRecommendation = isNagula ? "Re-write and Re-submit" : (matchedReview?.recommendation || "Minor Revision")
-                  const displayQuote = isNagula 
-                    ? "The review article to be concised. Tables to be provided. Specific: too low references for a review article; what has been changed over the years in the management to be mentioned; the manuscript to be neatly structured to have a good orientation for the reader regarding the topic; no figures were provided; atleast tables to be there."
-                    : (matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || "The methodology is rigorous and well-supported. Minor clarifications required in Section 4.")
 
                   if (isDeclined) {
                     return (
@@ -10843,12 +10751,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <span>Invitation accepted • Target report due: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{targetDeadlineDate}</strong></span>
                         )}
                       </div>
-
-                      {isSubmitted && (
-                        <div className="p-2.5 bg-white dark:bg-[#121316] border border-slate-200/80 dark:border-slate-800 rounded-lg text-[11px] text-slate-600 dark:text-slate-400 italic">
-                          &ldquo;{displayQuote}&rdquo;
-                        </div>
-                      )}
                     </div>
                   )
                 })
