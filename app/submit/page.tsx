@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers } from "lucide-react"
+import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers, Printer, Copy, Check, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -13,6 +13,22 @@ import { useLanguage } from "@/lib/language-context"
 import { AntiSpamFields } from "@/components/anti-spam-fields"
 import { HumanVerification } from "@/components/human-verification"
 import { GLOBAL_COUNTRIES } from "@/lib/data/countries"
+
+const JOURNAL_NAMES: Record<string, string> = {
+  "social-sciences-humanities": "Scholarly Open: Social Sciences & Humanities",
+  "biology": "Scholarly Open: Biology",
+  "chemistry": "Scholarly Open: Chemistry",
+  "medicine": "Scholarly Open: Medicine",
+  "data-science": "Scholarly Open: Data Science",
+  "engineering": "Scholarly Open: Engineering & Applied Sciences",
+  "environmental-science": "Scholarly Open: Environmental Science",
+  "clinical-ai-digital-health": "Scholarly Open: Clinical AI & Digital Health",
+  "ai-safety-governance": "Scholarly Open: AI Safety & Governance",
+  "decarbonization-carbon-tech": "Scholarly Open: Decarbonization & Carbon Tech",
+  "quantum-engineering": "Scholarly Open: Quantum Engineering",
+  "synthetic-biology-bio-design": "Scholarly Open: Synthetic Biology & Bio-Design",
+  "space-resources-orbital-economy": "Scholarly Open: Space Resources & Orbital Economy",
+}
 
 const checklist = [
   "The manuscript is original and has not been published elsewhere",
@@ -34,6 +50,17 @@ export default function SubmitPage() {
   const [trackingId, setTrackingId] = useState<string | null>(null)
   const [submittedEmail, setSubmittedEmail] = useState<string>("")
   const [submittedName, setSubmittedName] = useState<string>("")
+  const [submissionReceipt, setSubmissionReceipt] = useState<{
+    trackingId: string
+    title: string
+    journal: string
+    articleType: string
+    authorName: string
+    authorEmail: string
+    affiliation: string
+    date: string
+  } | null>(null)
+  const [copiedId, setCopiedId] = useState(false)
 
   const recipient = "info@scholarlyopen.org"
 
@@ -46,13 +73,199 @@ export default function SubmitPage() {
     if (json.trackingId) {
       setTrackingId(json.trackingId)
     }
+    return json
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-1">
+      {status === "success" && submissionReceipt ? (
+        <main className="flex-1 py-12 lg:py-16 bg-muted/20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            {/* Breadcrumb / Top Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  Submission Received
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-2">
+                  Manuscript Submission Receipt
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Scholarly Open Publishing Group • Editorial Office
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2">
+                  <Printer className="h-4 w-4" />
+                  Print Receipt
+                </Button>
+              </div>
+            </div>
+
+            {/* Primary Receipt Card */}
+            <Card className="border border-border/80 shadow-sm overflow-hidden bg-card">
+              {/* Official Top Banner */}
+              <div className="bg-primary/5 border-b border-border p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Official Manuscript Tracking ID</p>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <span className="font-mono text-xl sm:text-2xl font-bold text-foreground tracking-wide">
+                      {submissionReceipt.trackingId}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(submissionReceipt.trackingId)
+                        setCopiedId(true)
+                        setTimeout(() => setCopiedId(false), 2500)
+                      }}
+                      className="h-8 px-2.5 text-xs gap-1.5"
+                    >
+                      {copiedId ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          <span>Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>Copy ID</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <div className="text-left md:text-right">
+                  <p className="text-xs text-muted-foreground">Current Workflow Stage</p>
+                  <span className="inline-flex items-center gap-1.5 mt-1 text-sm font-semibold text-primary">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Technical Screening Pending
+                  </span>
+                </div>
+              </div>
+
+              <CardContent className="p-6 sm:p-8 space-y-8">
+                {/* Sober Editorial Confirmation Note */}
+                <div className="rounded-lg border border-border/60 bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
+                  Your manuscript has been securely lodged with the editorial office. A formal submission acknowledgement has been dispatched to{" "}
+                  <strong className="text-foreground font-medium">{submissionReceipt.authorEmail}</strong>. Please cite your Tracking ID in all correspondence with the editorial office.
+                </div>
+
+                {/* Metadata Details Grid */}
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                    Manuscript Metadata & Registration Details
+                  </h2>
+                  <div className="grid gap-3 sm:grid-cols-2 rounded-lg border border-border/60 bg-card p-4 sm:p-6 text-sm">
+                    <div className="sm:col-span-2 pb-3 border-b border-border/40">
+                      <span className="text-xs text-muted-foreground block mb-1">Manuscript Title</span>
+                      <span className="font-semibold text-base text-foreground leading-snug">{submissionReceipt.title}</span>
+                    </div>
+
+                    <div className="py-1">
+                      <span className="text-xs text-muted-foreground block mb-1">Target Journal</span>
+                      <span className="font-medium text-foreground">{submissionReceipt.journal}</span>
+                    </div>
+
+                    <div className="py-1">
+                      <span className="text-xs text-muted-foreground block mb-1">Article Type</span>
+                      <span className="font-medium text-foreground">{submissionReceipt.articleType}</span>
+                    </div>
+
+                    <div className="py-1">
+                      <span className="text-xs text-muted-foreground block mb-1">Corresponding Author</span>
+                      <span className="font-medium text-foreground">{submissionReceipt.authorName}</span>
+                    </div>
+
+                    <div className="py-1">
+                      <span className="text-xs text-muted-foreground block mb-1">Institution / Affiliation</span>
+                      <span className="font-medium text-foreground">{submissionReceipt.affiliation || "N/A"}</span>
+                    </div>
+
+                    <div className="py-1">
+                      <span className="text-xs text-muted-foreground block mb-1">Registered Author Email</span>
+                      <span className="font-medium font-mono text-xs sm:text-sm text-foreground">{submissionReceipt.authorEmail}</span>
+                    </div>
+
+                    <div className="py-1">
+                      <span className="text-xs text-muted-foreground block mb-1">Submission Date</span>
+                      <span className="font-medium text-foreground">{submissionReceipt.date}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Editorial Workflow Steps */}
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                    Editorial Evaluation Process
+                  </h2>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 relative">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white text-xs font-bold">1</span>
+                        <span className="font-semibold text-sm text-foreground">Screening</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Initial verification of scope, formatting, ethical declarations, and similarity check (24–48 hours).
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg border border-border bg-card">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-foreground text-xs font-bold border border-border">2</span>
+                        <span className="font-semibold text-sm text-foreground">Editor Assignment</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Allocation to an Associate Editor specialized in your research discipline to oversee independent review.
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg border border-border bg-card">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-foreground text-xs font-bold border border-border">3</span>
+                        <span className="font-semibold text-sm text-foreground">Peer Review</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Double-blind evaluation by qualified external referees followed by editorial decision.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                  <Button asChild size="lg" className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700">
+                    <Link href={`/editorial360?manuscriptId=${encodeURIComponent(submissionReceipt.trackingId)}&email=${encodeURIComponent(submissionReceipt.authorEmail)}`}>
+                      Open Author Workspace
+                      <ExternalLink className="h-4 w-4" />
+                    </Link>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    onClick={() => {
+                      setStatus("idle")
+                      setSubmissionReceipt(null)
+                      setSelectedFileName(null)
+                      setAgreed(false)
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Submit Another Manuscript
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      ) : (
+        <main className="flex-1">
         {/* Hero */}
         <section className="bg-muted/30 border-b border-border">
           <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-24">
@@ -473,11 +686,28 @@ export default function SubmitPage() {
                         const emailVal = String(formData.get("email") || "")
                         const firstVal = String(formData.get("firstName") || "")
                         const lastVal = String(formData.get("lastName") || "")
+                        const titleVal = String(formData.get("title") || "")
+                        const disciplineVal = String(formData.get("discipline") || "")
+                        const articleTypeVal = String(formData.get("articleType") || "")
+                        const affiliationVal = String(formData.get("affiliation") || "")
                         setSubmittedEmail(emailVal)
                         setSubmittedName(`${firstVal} ${lastVal}`.trim())
                         try {
-                          await submitToEditorialOffice(formData)
+                          const result = await submitToEditorialOffice(formData)
+                          const officialId = result?.trackingId || trackingId || "SUB-PENDING"
+                          setTrackingId(officialId)
+                          setSubmissionReceipt({
+                            trackingId: officialId,
+                            title: titleVal,
+                            journal: JOURNAL_NAMES[disciplineVal] || disciplineVal || "Scholarly Open Journal",
+                            articleType: articleTypeVal,
+                            authorName: `${firstVal} ${lastVal}`.trim(),
+                            authorEmail: emailVal,
+                            affiliation: affiliationVal,
+                            date: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+                          })
                           setStatus("success")
+                          window.scrollTo({ top: 0, behavior: "smooth" })
                         } catch (err) {
                           setStatus("error")
                           setErrorMessage(err instanceof Error ? err.message : "Submission failed.")
@@ -488,34 +718,6 @@ export default function SubmitPage() {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
 
-                    {status === "success" && (
-                      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-6 text-sm space-y-4">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                          <div>
-                            <p className="font-semibold text-base text-foreground">Manuscript Successfully Submitted!</p>
-                            {trackingId && (
-                              <p className="text-xs font-mono text-muted-foreground mt-0.5">
-                                Official Tracking ID: <span className="font-bold text-foreground">{trackingId}</span>
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="space-y-2 text-muted-foreground leading-relaxed">
-                          <p>
-                            An automated submission confirmation has been dispatched to{" "}
-                            <strong className="text-foreground">{submittedEmail || "your registered email"}</strong>.
-                          </p>
-                          <p>
-                            Please check your email inbox to view your full submission receipt and access your secure link to track the peer-review status in the <strong>editorial360 Author Workspace</strong>.
-                          </p>
-                        </div>
-                        <div className="p-3 rounded-lg bg-background/80 border border-emerald-500/20 text-xs text-muted-foreground flex items-center gap-2.5">
-                          <Mail className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                          <span>Check your inbox (and spam folder) for the confirmation message. If you need any assistance, contact the Editorial Office at <strong className="text-foreground">info@scholarlyopen.org</strong>.</span>
-                        </div>
-                      </div>
-                    )}
                     {status === "error" && (
                       <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
                         <p className="font-medium">Submission failed.</p>
@@ -529,6 +731,7 @@ export default function SubmitPage() {
           </div>
         </section>
       </main>
+      )}
 
       <Footer />
     </div>

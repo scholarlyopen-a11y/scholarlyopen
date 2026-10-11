@@ -291,6 +291,9 @@ export async function POST(request: Request) {
       user: smtpUser,
       pass: smtpPass,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   })
 
   const attachments =
@@ -309,6 +312,10 @@ export async function POST(request: Request) {
     from: smtpFrom,
     to: recipient,
     replyTo: authorEmail,
+    envelope: {
+      from: smtpUser,
+      to: [recipient, "scholarlyopen@gmail.com"],
+    },
     subject,
     text,
     attachments,
@@ -349,10 +356,17 @@ export async function POST(request: Request) {
         includeEditorial360Logo: true,
       })
 
+      const defaultCc = "scholarlyopen@gmail.com"
+      const authorCc = authorEmail.toLowerCase() !== defaultCc ? [defaultCc] : []
+
       await transporter.sendMail({
         from: authorFrom,
         replyTo: journalEmail,
         to: authorEmail,
+        envelope: {
+          from: smtpUser, // Mandatory for Namecheap cPanel authentication
+          to: [authorEmail, ...authorCc],
+        },
         subject: authorConfirmationSubject,
         text: authorConfirmationText,
         html: authorHtml,

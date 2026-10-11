@@ -86,7 +86,7 @@ export function Header() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 lg:px-6 xl:px-8">
         <div className="flex shrink-0 items-center">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center">
-            <div className="flex h-11 w-[165px] sm:h-13 sm:w-[200px] lg:h-14 lg:w-[220px] xl:h-16 xl:w-[280px] 2xl:w-[320px] shrink-0 items-center">
+            <div className="flex h-10 w-[145px] sm:h-12 sm:w-[170px] lg:h-12 lg:w-[175px] xl:h-14 xl:w-[240px] 2xl:w-[280px] shrink-0 items-center">
               <LogoSO variant="lockup" className="h-full w-auto object-contain" priority />
             </div>
           </Link>
@@ -137,85 +137,88 @@ export function Header() {
           </button>
         </div>
 
-        <div className="hidden lg:flex lg:gap-x-0.5 xl:gap-x-1.5 items-center justify-center flex-1 min-w-0 px-1">
-          {navigation.map((item) =>
-            item.children ? (
-              <DropdownMenu key={item.name}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1.5 xl:px-2.5 py-1 h-8 xl:h-9">
-                    {item.name}
-                    <ChevronDown className="ml-0.5 xl:ml-1 h-3 w-3 shrink-0" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-60">
-                  {item.isJournals ? (
-                    <>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
-                          Core Series
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent className="w-64">
-                            {coreJournals.map((child) => (
-                              <DropdownMenuItem key={child.name} asChild>
-                                <Link href={child.href} className="w-full cursor-pointer text-sm">
-                                  {child.name}
-                                </Link>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-                      
-                      <DropdownMenuSeparator />
-                      
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
-                          Emerging Frontiers
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent className="w-64">
-                            {frontiersJournals.map((child) => (
-                              <DropdownMenuItem key={child.name} asChild>
-                                <Link href={child.href} className="w-full cursor-pointer text-sm">
-                                  {child.name}
-                                </Link>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-                    </>
-                  ) : (
-                    item.children.map((child) => (
-                      <DropdownMenuItem key={child.name} asChild>
-                        <Link href={child.href} className="w-full cursor-pointer text-sm">
-                          {child.name}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="px-1.5 xl:px-2.5 py-1 text-xs xl:text-sm font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
-              >
-                {item.name}
-              </Link>
-            )
-          )}
+        {/* Desktop Navigation - Home link omitted since Logo navigates Home, preserving horizontal breathing room */}
+        <div className="hidden lg:flex lg:gap-x-0.5 xl:gap-x-1 items-center justify-center flex-1 min-w-0 px-1.5 overflow-hidden">
+          {navigation
+            .filter((item) => item.name !== t("nav.home"))
+            .map((item) =>
+              item.children ? (
+                <DropdownMenu key={item.name}>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="text-[11px] xl:text-xs 2xl:text-sm font-semibold text-[var(--primary-foreground)] hover:bg-primary/10 whitespace-nowrap px-1.5 xl:px-2 py-1 h-8 xl:h-9">
+                      {item.name}
+                      <ChevronDown className="ml-0.5 h-2.5 w-2.5 xl:h-3 xl:w-3 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-60">
+                    {item.isJournals ? (
+                      <>
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
+                            Core Series
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent className="w-64">
+                              {coreJournals.map((child) => (
+                                <DropdownMenuItem key={child.name} asChild>
+                                  <Link href={child.href} className="w-full cursor-pointer text-sm">
+                                    {child.name}
+                                  </Link>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
+                            Emerging Frontiers
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent className="w-64">
+                              {frontiersJournals.map((child) => (
+                                <DropdownMenuItem key={child.name} asChild>
+                                  <Link href={child.href} className="w-full cursor-pointer text-sm">
+                                    {child.name}
+                                  </Link>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                      </>
+                    ) : (
+                      item.children.map((child) => (
+                        <DropdownMenuItem key={child.name} asChild>
+                          <Link href={child.href} className="w-full cursor-pointer text-sm">
+                            {child.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="px-1.5 xl:px-2 py-1 text-[11px] xl:text-xs 2xl:text-sm font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors whitespace-nowrap"
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
         </div>
 
-        <div className="hidden lg:flex items-center justify-end gap-1.5 xl:gap-2.5 shrink-0">
+        <div className="hidden lg:flex items-center justify-end gap-1 xl:gap-2 shrink-0">
           {/* Theme Toggle Desktop */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="text-[var(--primary-foreground)] hover:bg-primary/10 h-8 w-8 p-0 cursor-pointer"
+            className="text-[var(--primary-foreground)] hover:bg-primary/10 h-8 w-8 p-0 shrink-0 cursor-pointer"
             title={mounted && theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
             aria-label="Toggle Theme"
           >
@@ -229,10 +232,10 @@ export function Header() {
           {/* Language Toggle Dropdown Desktop */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-2 py-1 text-xs xl:text-sm font-semibold shrink-0 cursor-pointer flex items-center h-8 xl:h-9">
-                <Globe className="h-3.5 w-3.5 xl:h-4 xl:w-4 mr-1 opacity-90" />
+              <Button variant="ghost" size="sm" className="text-[var(--primary-foreground)] hover:bg-primary/10 px-1.5 xl:px-2 py-1 text-[11px] xl:text-xs font-semibold shrink-0 cursor-pointer flex items-center h-8">
+                <Globe className="h-3 w-3 xl:h-3.5 xl:w-3.5 mr-1 opacity-90" />
                 {language.toUpperCase()}
-                <ChevronDown className="ml-1 h-3 w-3 opacity-70" />
+                <ChevronDown className="ml-0.5 h-2.5 w-2.5 opacity-70" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-36">
@@ -252,7 +255,10 @@ export function Header() {
           </DropdownMenu>
           
           <Button variant="accent" asChild className="border border-accent/60 text-xs xl:text-sm px-2.5 py-1 xl:px-3.5 xl:py-1.5 whitespace-nowrap shrink-0 h-8 xl:h-9">
-            <Link href="/submit">{t("nav.submitManuscript")}</Link>
+            <Link href="/submit">
+              <span className="lg:inline xl:hidden">Submit</span>
+              <span className="hidden xl:inline">{t("nav.submitManuscript")}</span>
+            </Link>
           </Button>
         </div>
       </nav>
