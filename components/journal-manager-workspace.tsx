@@ -2580,6 +2580,8 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   const [isForensicsModalOpen, setIsForensicsModalOpen] = useState(false)
   const [forensicsManuscript, setForensicsManuscript] = useState<JmManuscript | null>(null)
   const [forensicActionStatus, setForensicActionStatus] = useState<string | null>(null)
+  const [readingManuscript, setReadingManuscript] = useState<JmManuscript | null>(null)
+  const [reviewerDispatchTab, setReviewerDispatchTab] = useState<"edit" | "preview">("edit")
 
   // Reviewer Registry List
   const [reviewersList, setReviewersList] = useState<JmReviewer[]>([
@@ -4768,21 +4770,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 </Button>
                               )}
 
-                              {Boolean(selectedStageFilter === "integrity" || ms.integrityStatus === "Flagged" || (Number(ms.plagiarismScore) > 15) || (Number(ms.aiScore) > 30)) && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setForensicsManuscript(ms)
-                                    setForensicActionStatus(null)
-                                    setIsForensicsModalOpen(true)
-                                  }}
-                                  className="h-8 text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border-red-200 dark:border-red-800 px-2.5 rounded-lg cursor-pointer"
-                                >
-                                  <ShieldAlert className="h-3.5 w-3.5 mr-1 text-red-600" />
-                                  Forensics
-                                </Button>
-                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setForensicsManuscript(ms)
+                                  setForensicActionStatus(null)
+                                  setIsForensicsModalOpen(true)
+                                }}
+                                className={`h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer transition-colors ${
+                                  ms.integrityStatus === "Flagged" || Number(ms.plagiarismScore) > 15
+                                    ? "text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border-red-200 dark:border-red-800 font-bold"
+                                    : "text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                }`}
+                                title="Open Side-by-Side Comparator & Forensic Suite"
+                              >
+                                <Split className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                Side-by-Side
+                              </Button>
 
                               {ms.status === "Revision Required" && (
                                 <Button
@@ -10207,29 +10212,60 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                <a
-                  href={trackingManuscript?.fileUrl || (trackingManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : trackingManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                  download={trackingManuscript?.fileName || (trackingManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${trackingManuscript?.id || "Manuscript"}_Main_Document.docx`)}
-                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold shadow-xs transition-all cursor-pointer whitespace-nowrap"
-                  title="Download Manuscript (.docx)"
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    if (trackingManuscript) {
+                      setReadingManuscript(trackingManuscript)
+                    }
+                  }}
+                  className="h-8 px-3 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold shadow-xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                  title="Open Manuscript in In-System Interactive Reader"
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Download Manuscript</span>
-                </a>
+                  <BookOpen className="h-3.5 w-3.5" />
+                  <span>Interactive Manuscript Reader</span>
+                </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={() => {
                     if (trackingManuscript) {
+                      setForensicsManuscript(trackingManuscript)
+                      setForensicActionStatus(null)
+                      setIsForensicsModalOpen(true)
+                    }
+                  }}
+                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                  title="Open Side-by-Side Comparator & Forensic Suite"
+                >
+                  <Split className="h-3.5 w-3.5 text-[#0b99ff]" />
+                  <span>Side-by-Side Forensics</span>
+                </Button>
+                <a
+                  href={trackingManuscript?.fileUrl || (trackingManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : trackingManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                  download={trackingManuscript?.fileName || (trackingManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${trackingManuscript?.id || "Manuscript"}_Main_Document.docx`)}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                  title="Download Manuscript (.docx)"
+                >
+                  <Download className="h-3.5 w-3.5 text-slate-400" />
+                  <span>Download .docx</span>
+                </a>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (trackingManuscript) {
                       setSelectedManuscript(trackingManuscript)
                       setIsPreQualityModalOpen(true)
                     }
                   }}
-                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap"
+                  className="h-8 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer whitespace-nowrap"
                 >
                   <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                  All Files &amp; Dossier
+                  Dossier
                 </Button>
               </div>
             </div>
@@ -10918,10 +10954,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         open={Boolean(reviewerDispatchModal?.isOpen)} 
         onOpenChange={(open) => !open && setReviewerDispatchModal(null)}
       >
-        <DialogContent className="max-w-2xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[92vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl w-full bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans max-h-[90vh] flex flex-col p-6 overflow-hidden rounded-2xl shadow-2xl">
           {reviewerDispatchModal && (
             <>
-              <DialogHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
+              <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0 pr-10">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs">
@@ -10940,122 +10976,226 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </span>
                 </div>
 
-                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white mt-2">
-                  {reviewerDispatchModal.mode === "rescind" 
-                    ? `Withdraw Assignment for ${reviewerDispatchModal.reviewerName}` 
-                    : `Follow-Up Notice for ${reviewerDispatchModal.reviewerName}`}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  {reviewerDispatchModal.manuscriptTitle}
-                </DialogDescription>
+                <div className="flex items-center justify-between gap-3 mt-2 flex-wrap">
+                  <div>
+                    <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+                      {reviewerDispatchModal.mode === "rescind" 
+                        ? `Withdraw Assignment for ${reviewerDispatchModal.reviewerName}` 
+                        : `Follow-Up Notice for ${reviewerDispatchModal.reviewerName}`}
+                    </DialogTitle>
+                    <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-md">
+                      {reviewerDispatchModal.manuscriptTitle}
+                    </DialogDescription>
+                  </div>
+
+                  {/* Mode Switcher: Edit vs Live Email Preview */}
+                  <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setReviewerDispatchTab("edit")}
+                      className={`px-3 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                        reviewerDispatchTab === "edit"
+                          ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs"
+                          : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <Edit className="h-3 w-3" />
+                      <span>Edit Notice</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReviewerDispatchTab("preview")}
+                      className={`px-3 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                        reviewerDispatchTab === "preview"
+                          ? "bg-white dark:bg-slate-800 text-[#0b99ff] shadow-2xs font-bold"
+                          : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <Eye className="h-3 w-3" />
+                      <span>Preview Live Email</span>
+                    </button>
+                  </div>
+                </div>
               </DialogHeader>
 
-              <div className="space-y-4 py-2 text-xs">
-                {/* Journal Letterhead Banner */}
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                  <div className="space-y-0.5">
-                    <div className="text-[10px] font-bold tracking-wider uppercase text-[#0b99ff]">
-                      Scholarly Open i.G.
+              <div className="flex-1 overflow-y-auto pr-1 py-3 text-xs space-y-4 [scrollbar-width:thin]">
+                {reviewerDispatchTab === "edit" ? (
+                  <>
+                    {/* Journal Letterhead Banner */}
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <div className="text-[10px] font-bold tracking-wider uppercase text-[#0b99ff]">
+                          Scholarly Open i.G.
+                        </div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white">
+                          {reviewerDispatchModal.journal} • Editorial Office
+                        </div>
+                      </div>
+                      <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
+                        <div>Recipient: <strong className="text-slate-800 dark:text-slate-200">{reviewerDispatchModal.reviewerName}</strong></div>
+                        <div className="font-mono text-[10px]">{reviewerDispatchModal.reviewerEmail}</div>
+                      </div>
                     </div>
-                    <div className="text-xs font-bold text-slate-900 dark:text-white">
-                      {reviewerDispatchModal.journal} • Editorial Office
+
+                    {/* Email Subject Field */}
+                    <div className="space-y-1.5">
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block">
+                        Email Subject Line:
+                      </label>
+                      <input
+                        type="text"
+                        value={reviewerDispatchModal.subject}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setReviewerDispatchModal({
+                          ...reviewerDispatchModal,
+                          subject: e.target.value
+                        })}
+                        className="w-full h-9 px-3 text-xs bg-white dark:bg-slate-950 font-medium rounded-lg border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                        placeholder="Subject..."
+                      />
+                    </div>
+
+                    {/* Editable Email Body */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">
+                          Message Body:
+                        </label>
+                        <span className="text-[11px] text-slate-400">
+                          Full editing enabled
+                        </span>
+                      </div>
+                      <textarea
+                        rows={7}
+                        value={reviewerDispatchModal.body}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReviewerDispatchModal({
+                          ...reviewerDispatchModal,
+                          body: e.target.value
+                        })}
+                        className="w-full p-3 text-xs leading-relaxed font-sans bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-y"
+                        placeholder="Enter message text..."
+                      />
+                    </div>
+
+                    {/* Journal Footer & Opt-Out Preview */}
+                    <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 text-[11px] space-y-1.5">
+                      <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                        <span>Journal Footer &amp; Compliance Block</span>
+                        <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">
+                          Auto-appended on send
+                        </span>
+                      </div>
+                      <p className="text-slate-500 dark:text-slate-400 leading-normal">
+                        Editorial Management Office • {reviewerDispatchModal.journal}<br />
+                        Scholarly Open i.G. • contact: editorial@scholarlyopen.org
+                      </p>
+                      {reviewerDispatchModal.includeOptOut && (
+                        <p className="text-slate-500 dark:text-slate-400 italic border-t border-slate-200/60 dark:border-slate-800 pt-1">
+                          You received this correspondence as an indexed referee for Scholarly Open. If you wish to opt out of future review invitations, reply with &apos;OPT-OUT&apos; or visit https://scholarlyopen.org/opt-out.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Transmission Options: CC & Opt-Out */}
+                    <div className="p-3 rounded-xl bg-sky-50/40 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900/40 space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={reviewerDispatchModal.includeCc}
+                          onChange={(e) => setReviewerDispatchModal({
+                            ...reviewerDispatchModal,
+                            includeCc: e.target.checked
+                          })}
+                          className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
+                        />
+                        <span>CC Desk: <strong className="font-mono text-slate-900 dark:text-white">scholarlyopen@gmail.com</strong></span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={reviewerDispatchModal.includeOptOut}
+                          onChange={(e) => setReviewerDispatchModal({
+                            ...reviewerDispatchModal,
+                            includeOptOut: e.target.checked
+                          })}
+                          className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
+                        />
+                        <span>Include 1-Click Opt-Out / Unsubscribe disclaimer in journal footer</span>
+                      </label>
+                    </div>
+                  </>
+                ) : (
+                  /* LIVE EMAIL PREVIEW VIEW */
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-1 font-mono">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400 uppercase text-[10px]">From:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">editorial@scholarlyopen.org (Scholarly Open Editorial Desk)</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400 uppercase text-[10px]">To:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">{reviewerDispatchModal.reviewerName} &lt;{reviewerDispatchModal.reviewerEmail}&gt;</span>
+                      </div>
+                      {reviewerDispatchModal.includeCc && (
+                        <div className="flex items-center justify-between text-[#0b99ff]">
+                          <span className="text-slate-400 uppercase text-[10px]">CC:</span>
+                          <span>scholarlyopen@gmail.com</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
+                        <span className="text-slate-400 uppercase text-[10px]">Subject:</span>
+                        <span className="font-bold text-slate-900 dark:text-white font-sans">{reviewerDispatchModal.subject}</span>
+                      </div>
+                    </div>
+
+                    {/* Rendered HTML Letter Container */}
+                    <div className="p-5 rounded-2xl bg-white dark:bg-[#121317] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 font-sans text-xs text-slate-800 dark:text-slate-200">
+                      {/* Branded Letter Header */}
+                      <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-black tracking-widest text-[#005028] uppercase">SCHOLARLY OPEN</span>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{reviewerDispatchModal.journal}</h4>
+                        </div>
+                        <span className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">
+                          {reviewerDispatchModal.manuscriptId}
+                        </span>
+                      </div>
+
+                      {/* Letter Body Paragraphs */}
+                      <div className="space-y-3 leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300 text-xs">
+                        {reviewerDispatchModal.body}
+                      </div>
+
+                      {/* Primary Call to Action Button in Email */}
+                      <div className="pt-2 text-center">
+                        <div className="inline-block py-2.5 px-6 rounded-lg bg-[#005028] text-white font-bold text-xs tracking-wide shadow-xs cursor-default">
+                          {reviewerDispatchModal.mode === "rescind" ? "Acknowledge Rescission" : "Access Reviewer Evaluation Portal"}
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1.5 font-mono">
+                          Secure Link: https://www.scholarlyopen.org/editorial360?action={reviewerDispatchModal.mode === "rescind" ? "rescind_ack" : "evaluate"}&amp;id={reviewerDispatchModal.manuscriptId}
+                        </p>
+                      </div>
+
+                      {/* Letter Footer */}
+                      <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
+                        <div>Warm regards,</div>
+                        <div className="font-bold text-slate-800 dark:text-slate-200">Editorial Management Office</div>
+                        <div>{reviewerDispatchModal.journal} • Scholarly Open i.G.</div>
+                        <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/60 leading-normal">
+                          &copy; 2026 Scholarly Open i.G. &bull; Open Access CC BY 4.0 &bull; editorial360 Platform
+                          {reviewerDispatchModal.includeOptOut && (
+                            <span className="block mt-1 italic">
+                              You received this correspondence as an indexed referee. To unsubscribe or opt out of review requests, reply with &apos;OPT-OUT&apos;.
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
-                    <div>Recipient: <strong className="text-slate-800 dark:text-slate-200">{reviewerDispatchModal.reviewerName}</strong></div>
-                    <div className="font-mono text-[10px]">{reviewerDispatchModal.reviewerEmail}</div>
-                  </div>
-                </div>
-
-                {/* Email Subject Field */}
-                <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block">
-                    Email Subject Line:
-                  </label>
-                  <input
-                    type="text"
-                    value={reviewerDispatchModal.subject}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setReviewerDispatchModal({
-                      ...reviewerDispatchModal,
-                      subject: e.target.value
-                    })}
-                    className="w-full h-9 px-3 text-xs bg-white dark:bg-slate-950 font-medium rounded-lg border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                    placeholder="Subject..."
-                  />
-                </div>
-
-                {/* Editable Email Body */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="font-bold text-slate-700 dark:text-slate-300">
-                      Message Body:
-                    </label>
-                    <span className="text-[11px] text-slate-400">
-                      Full editing enabled
-                    </span>
-                  </div>
-                  <textarea
-                    rows={9}
-                    value={reviewerDispatchModal.body}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReviewerDispatchModal({
-                      ...reviewerDispatchModal,
-                      body: e.target.value
-                    })}
-                    className="w-full p-3 text-xs leading-relaxed font-sans bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-y"
-                    placeholder="Enter message text..."
-                  />
-                </div>
-
-                {/* Journal Footer & Opt-Out Preview */}
-                <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 text-[11px] space-y-1.5">
-                  <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                    <span>Journal Footer &amp; Compliance Block</span>
-                    <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">
-                      Auto-appended on send
-                    </span>
-                  </div>
-                  <p className="text-slate-500 dark:text-slate-400 leading-normal">
-                    Editorial Management Office • {reviewerDispatchModal.journal}<br />
-                    Scholarly Open i.G. • contact: editorial@scholarlyopen.org
-                  </p>
-                  {reviewerDispatchModal.includeOptOut && (
-                    <p className="text-slate-500 dark:text-slate-400 italic border-t border-slate-200/60 dark:border-slate-800 pt-1">
-                      You received this correspondence as an indexed referee for Scholarly Open. If you wish to opt out of future review invitations, reply with &apos;OPT-OUT&apos; or visit https://scholarlyopen.org/opt-out.
-                    </p>
-                  )}
-                </div>
-
-                {/* Transmission Options: CC & Opt-Out */}
-                <div className="p-3 rounded-xl bg-sky-50/40 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900/40 space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={reviewerDispatchModal.includeCc}
-                      onChange={(e) => setReviewerDispatchModal({
-                        ...reviewerDispatchModal,
-                        includeCc: e.target.checked
-                      })}
-                      className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
-                    />
-                    <span>CC Desk: <strong className="font-mono text-slate-900 dark:text-white">scholarlyopen@gmail.com</strong></span>
-                  </label>
-
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={reviewerDispatchModal.includeOptOut}
-                      onChange={(e) => setReviewerDispatchModal({
-                        ...reviewerDispatchModal,
-                        includeOptOut: e.target.checked
-                      })}
-                      className="rounded border-slate-300 text-[#0b99ff] focus:ring-[#0b99ff] cursor-pointer"
-                    />
-                    <span>Include 1-Click Opt-Out / Unsubscribe disclaimer in journal footer</span>
-                  </label>
-                </div>
+                )}
               </div>
 
-              <DialogFooter className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+              <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
                 <Button
                   type="button"
                   variant="outline"
@@ -11066,35 +11206,347 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 >
                   Cancel
                 </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setReviewerDispatchTab(reviewerDispatchTab === "edit" ? "preview" : "edit")}
+                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer"
+                  >
+                    {reviewerDispatchTab === "edit" ? "Preview Live Email" : "Back to Edit"}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleSendReviewerDispatchModal}
+                    disabled={reviewerDispatchModal.isSending}
+                    className={`h-8 text-xs font-bold px-4 rounded-lg cursor-pointer ${
+                      reviewerDispatchModal.mode === "rescind"
+                        ? "bg-rose-600 hover:bg-rose-700 text-white"
+                        : "bg-[#0b99ff] hover:bg-[#0088e0] text-white"
+                    }`}
+                  >
+                    {reviewerDispatchModal.isSending ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                        Dispatching Notice...
+                      </span>
+                    ) : reviewerDispatchModal.mode === "rescind" ? (
+                      <span className="flex items-center gap-1.5">
+                        <X className="h-3.5 w-3.5" />
+                        Rescind Invitation &amp; Notify
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5">
+                        <Bell className="h-3.5 w-3.5" />
+                        Dispatch Follow-Up Reminder
+                      </span>
+                    )}
+                  </Button>
+                </div>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 6C: IN-SYSTEM INTERACTIVE MANUSCRIPT READER & SIDE-BY-SIDE EVALUATION */}
+      {/* ========================================================================= */}
+      <Dialog open={Boolean(readingManuscript)} onOpenChange={(open) => !open && setReadingManuscript(null)}>
+        <DialogContent className="max-w-5xl w-full max-h-[92vh] flex flex-col p-0 bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans overflow-hidden shadow-2xl rounded-2xl">
+          {readingManuscript && (
+            <>
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4 shrink-0 bg-slate-50/70 dark:bg-slate-900/60 pr-12">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-9 w-9 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff] flex items-center justify-center font-bold shrink-0 border border-[#0b99ff]/20">
+                    <BookOpen className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                        {readingManuscript.id}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                        {readingManuscript.journal}
+                      </span>
+                      <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/70">
+                        Original Research
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate mt-0.5" title={readingManuscript.title}>
+                      {readingManuscript.title}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setForensicsManuscript(readingManuscript)
+                      setForensicActionStatus(null)
+                      setIsForensicsModalOpen(true)
+                    }}
+                    className="h-8 text-xs font-bold text-[#0b99ff] border-[#0b99ff]/30 bg-[#0b99ff]/10 hover:bg-[#0b99ff]/20 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Split className="h-3.5 w-3.5" />
+                    <span>Side-by-Side Forensics</span>
+                  </Button>
+                  <a
+                    href={readingManuscript.fileUrl || (readingManuscript.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : readingManuscript.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                    download={readingManuscript.fileName || `${readingManuscript.id}_Manuscript.docx`}
+                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer shadow-2xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Download .docx</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Two-Column Reader Body */}
+              <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-0">
+                {/* Left Panel: In-System Formatted Manuscript (8 cols) */}
+                <div className="md:col-span-8 overflow-y-auto p-6 md:p-8 space-y-6 text-slate-800 dark:text-slate-200 border-r border-slate-100 dark:border-slate-800 [scrollbar-width:thin]">
+                  {/* Article Metadata Bar */}
+                  <div className="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight">
+                      {readingManuscript.title}
+                    </h1>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                      <div>
+                        <strong>Author:</strong> {readingManuscript.authorName || readingManuscript.author || "Sam Lee"} (Corresponding Author)
+                      </div>
+                      <div>
+                        <strong>Affiliation:</strong> Applied EBM Institute &bull; <strong>Country:</strong> United States &bull; <strong>DOI:</strong> 10.62883/somed.2026.01.001
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        Received: {readingManuscript.date || "2026-08-14"} &bull; Stage: Peer Review Tracking &bull; License: Open Access (CC BY 4.0)
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Abstract Highlight Box */}
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 space-y-2">
+                    <span className="text-[10px] font-black tracking-wider text-[#0b99ff] uppercase block">
+                      STRUCTURED ABSTRACT
+                    </span>
+                    <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                      {readingManuscript.abstract || "Acute aortic dissection (AAD) represents one of the most lethal cardiovascular emergencies, with mortality increasing by 1–2% per hour from symptom onset. This study proposes a comprehensive healthcare operations paradigm—'Prevent Earlier, Recognize Sooner, Treat Faster'—synthesizing multi-center observational data with multidisciplinary clinical pathways to dramatically compress door-to-treatment intervals. We evaluate systematic operational bottlenecks across emergency triage, rapid-sequence computed tomography angiography (CTA), and immediate cardiothoracic surgical mobilization."}
+                    </p>
+                    <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-200/60 dark:border-slate-800">
+                      <strong>Keywords:</strong> Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Quality Improvement; Cardiovascular Surgery; Emergency Triage
+                    </div>
+                  </div>
+
+                  {/* Section 1: Introduction */}
+                  <div className="space-y-2">
+                    <h2 className="text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-1">
+                      1. Introduction &amp; Clinical Background
+                    </h2>
+                    <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                      Despite transformative advances in endovascular and open surgical repair, acute aortic dissection continues to carry catastrophic mortality rates exceeding 20–30% in high-volume tertiary centers worldwide. Diagnostic latency remains the paramount predictor of preventable in-hospital demise, predominantly driven by atypical presentations mimicking acute coronary syndromes or pulmonary embolism.
+                    </p>
+                    <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                      In contemporary emergency medicine and cardiovascular triage, early risk stratification significantly correlates with reduced 30-day inpatient mortality rates. Conventional siloed workflows between emergency physicians, diagnostic radiologists, and on-call cardiothoracic surgeons introduce cumulative delays that frequently undermine timely therapeutic interventions.
+                    </p>
+                  </div>
+
+                  {/* Section 2: Healthcare Operations Methodology */}
+                  <div className="space-y-2">
+                    <h2 className="text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-1">
+                      2. Methodology &amp; Operational Systems Architecture
+                    </h2>
+                    <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                      Observational cohorts and patient diagnostic evaluations were structured in adherence to the STROBE reporting guidelines, with continuous variables assessed via two-sided Mann-Whitney U tests at p &lt; 0.05. We established an integrated high-fidelity operations pipeline spanning three core phases:
+                    </p>
+                    <ul className="list-disc pl-5 text-xs space-y-1.5 text-slate-700 dark:text-slate-300">
+                      <li><strong>Phase I: Prevent Earlier</strong> — Standardized ambulatory screening for refractory hypertension and connective tissue disorders.</li>
+                      <li><strong>Phase II: Recognize Sooner</strong> — Clinical decision-support protocol integrated into triage EHR triggering immediate non-contrast + arterial phase CTA without waiting for renal panel results.</li>
+                      <li><strong>Phase III: Treat Faster</strong> — Direct-to-OR mobilization code bypassing intermediate ICU transfers for confirmed Stanford Type A dissections.</li>
+                    </ul>
+                  </div>
+
+                  {/* Figure Panel Component */}
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-900 dark:text-white">Figure 1: Healthcare Operations Decision Pipeline &amp; Triage Compression</span>
+                      <span className="text-[10px] font-mono text-slate-400">Resolution: 300 DPI Vector</span>
+                    </div>
+                    <div className="h-36 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center p-4">
+                      <div className="grid grid-cols-3 gap-3 w-full text-center text-xs">
+                        <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800">
+                          <div className="font-bold text-[#0b99ff]">Triage Entry</div>
+                          <div className="text-[10px] text-slate-500 mt-1">Door-to-CTA: &lt; 28 min</div>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                          <div className="font-bold text-emerald-600">Multidisciplinary Call</div>
+                          <div className="text-[10px] text-slate-500 mt-1">Dual-surgeon activation</div>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
+                          <div className="font-bold text-purple-600">Direct-to-OR</div>
+                          <div className="text-[10px] text-slate-500 mt-1">Incision within 64 min</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-slate-500 italic">
+                      Note: Schematic representation of the multidisciplinary fast-track protocol evaluated across the primary 12-month cohort study.
+                    </p>
+                  </div>
+
+                  {/* Section 3: Ethics & Data Compliance */}
+                  <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-4">
+                    <h2 className="text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white">
+                      3. Declarations, Ethics &amp; Data Availability
+                    </h2>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                      All investigative procedures involving clinical registry data conformed with institutional review board ethical standards and the 1964 Declaration of Helsinki. De-identified analytical matrices and statistical code are preserved in an open repository under DOI 10.5281/zenodo.10842910.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Panel: Side-by-Side Reviewer Tracker & Scorecard (4 cols) */}
+                <div className="md:col-span-4 overflow-y-auto p-5 bg-slate-50/50 dark:bg-slate-900/30 space-y-5 [scrollbar-width:thin]">
+                  {/* Integrity Audit Card */}
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Integrity Audit</span>
+                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200">
+                        Passed ✓
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-2 rounded bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
+                        <span className="text-[10px] text-slate-400 block">Similarity</span>
+                        <span className="font-bold text-slate-900 dark:text-white">3.4%</span>
+                      </div>
+                      <div className="p-2 rounded bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
+                        <span className="text-[10px] text-slate-400 block">AI Synthesis</span>
+                        <span className="font-bold text-slate-900 dark:text-white">1.2%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Handling Editor Section */}
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Handling Editor</span>
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                        WG
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                          {readingManuscript.assignedEditorName || "Weihua Gong, M.D., Ph.D."}
+                        </div>
+                        <div className="text-[10px] text-slate-400">Shanghai Jiao Tong University</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Side-by-Side Reviewer Tracker */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Referee Evaluations ({readingManuscript.reviewers?.length || 3})
+                      </span>
+                      <span className="text-[10px] text-emerald-600 font-semibold">Active Round</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {/* Reviewer 1 */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">Dr. Praveen Nagula</span>
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200">
+                            Minor Revision
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                          &ldquo;Rigorous systems approach to a catastrophic emergency. Methodology is sound. Recommend elaborating door-to-OR transport protocols in §2.2.&rdquo;
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <span>Report Logged</span>
+                          <span>Score: 8.5/10</span>
+                        </div>
+                      </div>
+
+                      {/* Reviewer 2 */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">Dr. Ragab Aziza</span>
+                          <span className="text-[10px] font-semibold text-sky-700 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-200">
+                            Evaluating
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                          Invitation accepted. Detailed surgical assessment in progress. Due in 5 days.
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <span>Vascular Surgery</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReviewerDispatchModal({
+                                isOpen: true,
+                                mode: "reminder",
+                                manuscriptId: readingManuscript.id,
+                                manuscriptTitle: readingManuscript.title,
+                                journal: readingManuscript.journal,
+                                reviewerName: "Dr. Ragab Aziza",
+                                reviewerEmail: "ragab.aziza@alexmed.edu.eg",
+                                subject: `[Scholarly Open] Reminder: Review Evaluation Pending for ${readingManuscript.id} - ${readingManuscript.journal}`,
+                                body: `Dear Dr. Ragab Aziza,\n\nWe recently invited you to evaluate manuscript "${readingManuscript.title}" (${readingManuscript.id}) for ${readingManuscript.journal}.\n\nWhenever your report is ready, please submit your feedback through your secure reviewer portal.\n\nWarm regards,\nEditorial Management Office`,
+                                includeCc: true,
+                                includeOptOut: true,
+                                isSending: false
+                              })
+                            }}
+                            className="text-[#0b99ff] hover:underline cursor-pointer font-semibold"
+                          >
+                            Send Reminder
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Reviewer 3 */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">Dr. Evelyn Vane</span>
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200">
+                            Accept
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                          &ldquo;High operational relevance with compelling clinical implementation metrics. Exemplary quality improvement demonstration.&rdquo;
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <span>Report Logged</span>
+                          <span>Score: 9.0/10</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reader Footer */}
+              <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0 bg-slate-50/70 dark:bg-slate-900/60 text-xs">
+                <span className="text-slate-500 dark:text-slate-400">
+                  Interactive Academic Reader &bull; editorial360 Unified Editorial Management
+                </span>
                 <Button
                   type="button"
                   size="sm"
-                  onClick={handleSendReviewerDispatchModal}
-                  disabled={reviewerDispatchModal.isSending}
-                  className={`h-8 text-xs font-bold px-4 rounded-lg cursor-pointer ${
-                    reviewerDispatchModal.mode === "rescind"
-                      ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : "bg-[#0b99ff] hover:bg-[#0088e0] text-white"
-                  }`}
+                  onClick={() => setReadingManuscript(null)}
+                  className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 h-8 px-4 rounded-lg font-semibold cursor-pointer"
                 >
-                  {reviewerDispatchModal.isSending ? (
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                      Dispatching Notice...
-                    </span>
-                  ) : reviewerDispatchModal.mode === "rescind" ? (
-                    <span className="flex items-center gap-1.5">
-                      <X className="h-3.5 w-3.5" />
-                      Rescind Invitation &amp; Notify
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1.5">
-                      <Bell className="h-3.5 w-3.5" />
-                      Dispatch Follow-Up Reminder
-                    </span>
-                  )}
+                  Close Reader
                 </Button>
-              </DialogFooter>
+              </div>
             </>
           )}
         </DialogContent>

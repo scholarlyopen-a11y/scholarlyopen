@@ -1444,6 +1444,14 @@ export default function Editorial360Page() {
             if (pj.photoUrl && role === "jm") setProfPhotoUrl(pj.photoUrl)
           } catch (e) {}
         }
+
+        // Restore author ORCID and verification status
+        try {
+          const savedAuthorOrcid = localStorage.getItem("editorial360_author_orcid")
+          const isVerifiedStored = localStorage.getItem("editorial360_author_orcid_verified") === "true"
+          if (savedAuthorOrcid) setProfOrcid(savedAuthorOrcid)
+          if (isVerifiedStored) setIsOrcidVerified(true)
+        } catch (e) {}
       } catch (e) {
         console.error("Failed to parse editorial360_session", e)
       }
@@ -3030,6 +3038,7 @@ export default function Editorial360Page() {
   const [orcidInput, setOrcidInput] = useState<string>("")
   const [orcidAuthLoading, setOrcidAuthLoading] = useState<boolean>(false)
   const [orcidAuthSuccessMsg, setOrcidAuthSuccessMsg] = useState<string | null>(null)
+  const [orcidInputError, setOrcidInputError] = useState<string | null>(null)
 
   // Interactive Author Modals & Search States
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState<boolean>(false)
@@ -8460,39 +8469,39 @@ export default function Editorial360Page() {
                                 </div>
                               </Card>
 
-                              {/* 2. Publication Credits & Waiver */}
+                              {/* 2. Author Publishing Standing & Launch Privileges */}
                               <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 shadow-xs flex flex-col justify-between">
                                 <div className="space-y-3">
                                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#272832] pb-2.5">
                                     <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                                      {isDe ? "Publikations-Credits" : "Publication Credits"}
+                                      {isDe ? "Publikations-Standing" : "Author Publishing Standing"}
                                     </h3>
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200/70 dark:border-emerald-800/60">
                                       <Check className="h-3.5 w-3.5 text-emerald-600" />
-                                      Tier 2 Active
+                                      {isDe ? "Gründungs-Autor Aktiv" : "Inaugural Author Active"}
                                     </span>
                                   </div>
 
                                   <div className="space-y-2 text-xs">
                                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                       <span className="font-normal text-slate-600 dark:text-slate-400">
-                                        {isDe ? "APC-Rabatt (Waiver)" : "APC Waiver Grant"}
+                                        {isDe ? "APC-Rabatt (Waiver Code)" : "APC Launch Grant"}
                                       </span>
-                                      <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums text-sm">50% (Inaugural Issue)</span>
+                                      <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums text-sm">50% Off (INAUGURAL-50)</span>
                                     </div>
 
                                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                       <span className="font-normal text-slate-600 dark:text-slate-400">
-                                        {isDe ? "Abgeschlossene Gutachten" : "Reviews Completed"}
+                                        {isDe ? "Aktive Einreichungen" : "Active Submissions"}
                                       </span>
-                                      <span className="font-bold text-slate-900 dark:text-white tabular-nums text-sm">12</span>
+                                      <span className="font-bold text-slate-900 dark:text-white tabular-nums text-sm">{uniqueManuscripts.length || 1}</span>
                                     </div>
 
                                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                       <span className="font-normal text-slate-600 dark:text-slate-400">
-                                        {isDe ? "Ø Bearbeitungszeit" : "Avg. Turnaround"}
+                                        {isDe ? "Ziel-Erstentscheidung" : "Editorial Decision Target"}
                                       </span>
-                                      <span className="font-bold text-slate-900 dark:text-white tabular-nums text-sm">4.5 {isDe ? "Tage" : "Days"}</span>
+                                      <span className="font-bold text-slate-900 dark:text-white tabular-nums text-sm">&lt; 21 {isDe ? "Tage" : "Days"}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -8502,7 +8511,7 @@ export default function Editorial360Page() {
                                     onClick={() => setIsBadgeModalOpen(true)}
                                     className="w-full text-center text-xs font-semibold text-[#0b99ff] hover:underline cursor-pointer py-1 flex items-center justify-center gap-1"
                                   >
-                                    <span>{isDe ? "Erlass-Richtlinien & Stufen" : "View Waiver Policy & Tiers"}</span>
+                                    <span>{isDe ? "Erlass-Richtlinien & Autorenvorteile" : "View Waiver Policy & Author Benefits"}</span>
                                     <ArrowRight className="h-3.5 w-3.5" />
                                   </button>
                                 </div>
@@ -8516,8 +8525,9 @@ export default function Editorial360Page() {
                                       <CheckSquare className="h-4 w-4 text-[#0b99ff]" />
                                       <span>{isDe ? "Einreichungs-Bereitschaft" : "Submission Readiness"}</span>
                                     </h3>
-                                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200/70 dark:border-emerald-800/60 tabular-nums">
-                                      80% Ready
+                                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200/70 dark:border-emerald-800/60 tabular-nums flex items-center gap-1">
+                                      <Check className="h-3 w-3 text-emerald-600" />
+                                      100% Ready
                                     </span>
                                   </div>
 
@@ -8536,11 +8546,14 @@ export default function Editorial360Page() {
                                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                                     </div>
 
-                                    <div className="p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/40 flex items-center justify-between">
-                                      <span className="font-medium text-amber-900 dark:text-amber-200">
-                                        {isDe ? "Grafiken (300 DPI Vektor)" : "Figures (300 DPI Vector)"}
+                                    <div className="p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center justify-between">
+                                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                                        {isDe ? "Grafiken (300 DPI Vektor & TIFF)" : "Figures & Media (300 DPI Vector)"}
                                       </span>
-                                      <span className="h-4 w-4 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-bold text-[10px] flex items-center justify-center">!</span>
+                                      <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                        <span>Verified</span>
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
@@ -9300,106 +9313,147 @@ export default function Editorial360Page() {
                                   onClick={() => setShowAnnotatedText(v => !v)}
                                   className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
                                 >
-                                  {showAnnotatedText ? (isDe ? "Ausblenden" : "Collapse") : (isDe ? "Anzeigen" : "Expand Segments (5)")}
+                                  {showAnnotatedText ? (isDe ? "Ausblenden" : "Collapse") : (isDe ? "Anzeigen (3)" : "Expand Segments (3)")}
                                 </button>
                               </div>
 
-                              {showAnnotatedText && (
-                                <div className="rounded-xl border border-slate-200/80 dark:border-[#272832] divide-y divide-slate-100 dark:divide-[#272832] overflow-hidden bg-white dark:bg-[#18191e]">
-                                  {[
-                                    {
-                                      id: "s1",
-                                      type: "AI Synthesis",
-                                      text: "The integration of large language model architectures has demonstrated significant capacity to autonomously generate contextually coherent scientific text across various disciplinary domains.",
-                                      context: "Introduction · Para 2",
-                                    },
-                                    {
-                                      id: "s2",
-                                      type: "Text Overlap",
-                                      text: "Decentralized ledger technology provides immutable, tamper-evident record-keeping that eliminates dependency on central trusted authorities for transaction verification.",
-                                      context: "Background · Para 1",
-                                    },
-                                    {
-                                      id: "s3",
-                                      type: "Text Overlap",
-                                      text: "Smart contracts executed on Ethereum-compatible blockchains automate agreement enforcement without requiring third-party intermediaries.",
-                                      context: "Methods · Para 4",
-                                    },
-                                  ].map((seg) => {
-                                    const res = segmentResolutions[seg.id]
-                                    return (
-                                      <div key={seg.id} className="p-3.5 sm:p-4 space-y-2">
-                                        <div className="flex items-center justify-between gap-2">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-[#131418] px-2 py-0.5 rounded border border-slate-200/80 dark:border-[#272832]">
-                                              {seg.type}
-                                            </span>
-                                            <span className="text-[11px] text-slate-400">{seg.context}</span>
-                                          </div>
-                                          {res && (
-                                            <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                                              <span>✓</span>
-                                              <span>
-                                                {res === "marked-own" 
-                                                  ? (isDe ? "Als eigenes Originalwerk deklariert" : "Declared as own original writing") 
-                                                  : res === "accepted" 
-                                                  ? (isDe ? "Als Fachstandard-Formulierung bestätigt" : "Confirmed standard field phrasing")
-                                                  : (isDe ? "Wird in Revision umformuliert" : "Will rephrase in revision")}
-                                              </span>
-                                            </span>
-                                          )}
-                                        </div>
-
-                                        <p className={`text-xs italic pl-3 border-l-2 py-0.5 transition-colors ${
-                                          res === "will-rephrase"
-                                            ? "border-amber-400 text-amber-900 dark:text-amber-200 bg-amber-50/40 dark:bg-amber-950/20 rounded-r-md"
-                                            : res === "marked-own"
-                                            ? "border-sky-400 text-slate-800 dark:text-slate-200"
-                                            : res === "accepted"
-                                            ? "border-slate-400 text-slate-700 dark:text-slate-300"
-                                            : "border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300"
-                                        }`}>
-                                          &ldquo;{seg.text}&rdquo;
-                                        </p>
-
-                                        {!res ? (
-                                          <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                                            <button
-                                              type="button"
-                                              onClick={() => handleResolveSegment(seg.id, "marked-own")}
-                                              className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0b99ff] dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/60 transition-colors cursor-pointer"
-                                            >
-                                              {isDe ? "Eigenes Werk" : "Declare Own Writing"}
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={() => handleResolveSegment(seg.id, "accepted")}
-                                              className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#1e2027] hover:bg-slate-200 dark:hover:bg-[#272832] text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-[#272832] transition-colors cursor-pointer"
-                                            >
-                                              {isDe ? "Standard-Formulierung" : "Standard Field Phrasing"}
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={() => handleResolveSegment(seg.id, "will-rephrase")}
-                                              className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 transition-colors cursor-pointer"
-                                            >
-                                              {isDe ? "Wird umformuliert" : "Will Rephrase in Revision"}
-                                            </button>
-                                          </div>
-                                        ) : (
-                                          <button
-                                            type="button"
-                                            onClick={() => handleResolveSegment(seg.id, res)}
-                                            className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline cursor-pointer"
-                                          >
-                                            {isDe ? "Erklärung zurücksetzen" : "Reset declaration"}
-                                          </button>
-                                        )}
-                                      </div>
-                                    )
-                                  })}
+                              {/* Clean Screening Verification Alert Banner */}
+                              {isClean && (
+                                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 flex items-start gap-3">
+                                  <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                                  <div className="space-y-0.5">
+                                    <div className="text-xs font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+                                      <span>{isDe ? "Integritätsprüfung bestanden: Hohe Originalität verifiziert" : "Originality Screening Passed: Verified Clean (≤ 15% Overlap)"}</span>
+                                      <span className="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded-full">
+                                        COPE Compliant
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                                      {isDe
+                                        ? `Für „${selectedPaper.title}“ wurden keine kritischen Textähnlichkeiten oder unzulässigen KI-Cluster festgestellt. Nachfolgend finden Sie verifizierte Standard-Formulierungen aus Ihrem Fachgebiet zur Einsichtnahme.`
+                                        : `No unauthorized synthesis or high-risk plagiarism clusters detected for "${selectedPaper.title}". Below are domain-standard phrasing passages identified for author review.`}
+                                    </p>
+                                  </div>
                                 </div>
                               )}
+
+                              {showAnnotatedText && (() => {
+                                const paperTitle = (selectedPaper.title || "").toLowerCase()
+                                const paperJournal = (selectedPaper.journal || "").toLowerCase()
+                                const isMedical = paperJournal.includes("med") || paperTitle.includes("aortic") || paperTitle.includes("health") || paperTitle.includes("cardio") || paperTitle.includes("clinical")
+                                const isBio = paperJournal.includes("bio") || paperTitle.includes("protein") || paperTitle.includes("cell")
+                                
+                                const domainSegments = [
+                                  {
+                                    id: "s1",
+                                    type: "Methods Baseline Phrasing",
+                                    text: isMedical
+                                      ? "Observational cohorts and patient diagnostic evaluations were structured in adherence to the STROBE reporting guidelines, with continuous variables assessed via two-sided Mann-Whitney U tests at p < 0.05."
+                                      : isBio
+                                      ? "Sample isolation and protein expression quantification were performed following established biological protocols across three independent biological replicates."
+                                      : "Algorithmic validation and computational throughput benchmarking were conducted using stratified k-fold cross-validation with standardized loss convergence metrics.",
+                                    context: "Methods · Statistical Rigor",
+                                  },
+                                  {
+                                    id: "s2",
+                                    type: "Literature Review Context",
+                                    text: isMedical
+                                      ? "Timely clinical risk stratification and rapid operational decision pathways remain critical determinants of survival in acute cardiovascular presentations."
+                                      : isBio
+                                      ? "Targeted macromolecular interactions and catalytic domain behaviors provide fundamental insights into therapeutic pathway regulation."
+                                      : "Empirical evaluations on open-access benchmark repositories demonstrate significant improvements in reproducibility and error bounds.",
+                                    context: "Introduction · Background",
+                                  },
+                                  {
+                                    id: "s3",
+                                    type: "Ethics & Compliance Phrasing",
+                                    text: isMedical
+                                      ? "All investigative procedures involving clinical registry data conformed with institutional review board ethical standards and the 1964 Declaration of Helsinki."
+                                      : isBio
+                                      ? "All recombinant DNA experiments and biomolecular containment protocols complied with institutional biosafety committee standards."
+                                      : "All analytical routines and secondary datasets were sourced under permissive open-access licenses with full attribution.",
+                                    context: "Declarations · Ethics & COI",
+                                  },
+                                ]
+
+                                return (
+                                  <div className="rounded-xl border border-slate-200/80 dark:border-[#272832] divide-y divide-slate-100 dark:divide-[#272832] overflow-hidden bg-white dark:bg-[#18191e]">
+                                    {domainSegments.map((seg) => {
+                                      const res = segmentResolutions[seg.id]
+                                      return (
+                                        <div key={seg.id} className="p-3.5 sm:p-4 space-y-2">
+                                          <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-[#131418] px-2 py-0.5 rounded border border-slate-200/80 dark:border-[#272832]">
+                                                {seg.type}
+                                              </span>
+                                              <span className="text-[11px] text-slate-400">{seg.context}</span>
+                                            </div>
+                                            {res && (
+                                              <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                                <span>✓</span>
+                                                <span>
+                                                  {res === "marked-own" 
+                                                    ? (isDe ? "Als eigenes Originalwerk deklariert" : "Declared as own original writing") 
+                                                    : res === "accepted" 
+                                                    ? (isDe ? "Als Fachstandard-Formulierung bestätigt" : "Confirmed standard field phrasing")
+                                                    : (isDe ? "Wird in Revision umformuliert" : "Will rephrase in revision")}
+                                                </span>
+                                              </span>
+                                            )}
+                                          </div>
+
+                                          <p className={`text-xs italic pl-3 border-l-2 py-0.5 transition-colors ${
+                                            res === "will-rephrase"
+                                              ? "border-amber-400 text-amber-900 dark:text-amber-200 bg-amber-50/40 dark:bg-amber-950/20 rounded-r-md"
+                                              : res === "marked-own"
+                                              ? "border-sky-400 text-slate-800 dark:text-slate-200"
+                                              : res === "accepted"
+                                              ? "border-slate-400 text-slate-700 dark:text-slate-300"
+                                              : "border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300"
+                                          }`}>
+                                            &ldquo;{seg.text}&rdquo;
+                                          </p>
+
+                                          {!res ? (
+                                            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                                              <button
+                                                type="button"
+                                                onClick={() => handleResolveSegment(seg.id, "marked-own")}
+                                                className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0b99ff] dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/60 transition-colors cursor-pointer"
+                                              >
+                                                {isDe ? "Eigenes Werk" : "Declare Own Writing"}
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={() => handleResolveSegment(seg.id, "accepted")}
+                                                className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#1e2027] hover:bg-slate-200 dark:hover:bg-[#272832] text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-[#272832] transition-colors cursor-pointer"
+                                              >
+                                                {isDe ? "Standard-Formulierung" : "Standard Field Phrasing"}
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={() => handleResolveSegment(seg.id, "will-rephrase")}
+                                                className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 transition-colors cursor-pointer"
+                                              >
+                                                {isDe ? "Wird umformuliert" : "Will Rephrase in Revision"}
+                                              </button>
+                                            </div>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => handleResolveSegment(seg.id, res)}
+                                              className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline cursor-pointer"
+                                            >
+                                              {isDe ? "Erklärung zurücksetzen" : "Reset declaration"}
+                                            </button>
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )
+                              })()}
                             </div>
 
                             {/* Footer Action */}
@@ -14777,7 +14831,7 @@ export default function Editorial360Page() {
                       <a 
                         href="https://orcid.org/register" 
                         target="_blank" 
-                        rel="noreferrer" 
+                        rel="noopener noreferrer" 
                         className="text-[11px] text-[#0b99ff] hover:underline font-normal"
                       >
                         {language === "de" ? "Keine ORCID? Jetzt registrieren" : "Don't have an ORCID? Register"}
@@ -14790,11 +14844,20 @@ export default function Editorial360Page() {
                       <input
                         type="text"
                         value={orcidInput}
-                        onChange={(e) => setOrcidInput(e.target.value)}
+                        onChange={(e) => {
+                          setOrcidInput(e.target.value)
+                          if (orcidInputError) setOrcidInputError(null)
+                        }}
                         placeholder="0000-0002-1825-0097"
                         className="w-full pl-[135px] pr-3 py-2 bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] rounded-xl text-xs font-mono font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A6CE39]/50"
                       />
                     </div>
+                    {orcidInputError && (
+                      <p className="text-[11px] text-rose-500 font-medium flex items-center gap-1 pt-0.5">
+                        <AlertCircle className="h-3 w-3 shrink-0" />
+                        <span>{orcidInputError}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] space-y-2 text-xs">
@@ -14817,7 +14880,10 @@ export default function Editorial360Page() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setIsOrcidAuthModalOpen(false)}
+                      onClick={() => {
+                        setOrcidInputError(null)
+                        setIsOrcidAuthModalOpen(false)
+                      }}
                       className="text-xs cursor-pointer"
                     >
                       {language === "de" ? "Abbrechen" : "Cancel"}
@@ -14825,23 +14891,34 @@ export default function Editorial360Page() {
                     <Button
                       type="button"
                       disabled={orcidAuthLoading}
-                      onClick={() => {
-                        const cleanVal = orcidInput.replace(/^https?:\/\/orcid\.org\//i, "").trim()
-                        if (!cleanVal) {
-                          alert(language === "de" ? "Bitte geben Sie eine gültige ORCID iD ein." : "Please enter a valid ORCID iD.")
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        let cleanVal = orcidInput.replace(/^https?:\/\/orcid\.org\//i, "").trim()
+                        const rawChars = cleanVal.replace(/[^0-9X]/gi, "")
+                        if (rawChars.length === 16 && !cleanVal.includes("-")) {
+                          cleanVal = `${rawChars.slice(0, 4)}-${rawChars.slice(4, 8)}-${rawChars.slice(8, 12)}-${rawChars.slice(12, 16)}`
+                        }
+                        if (!cleanVal || cleanVal.length < 15) {
+                          setOrcidInputError(language === "de" ? "Bitte geben Sie eine gültige 16-stellige ORCID iD ein (z. B. 0000-0002-1825-0097)." : "Please enter a valid 16-digit ORCID iD (e.g. 0000-0002-1825-0097).")
                           return
                         }
+                        setOrcidInputError(null)
                         setOrcidAuthLoading(true)
                         setTimeout(() => {
                           setOrcidAuthLoading(false)
                           setProfOrcid(cleanVal)
                           setIsOrcidVerified(true)
+                          try {
+                            localStorage.setItem("editorial360_author_orcid", cleanVal)
+                            localStorage.setItem("editorial360_author_orcid_verified", "true")
+                          } catch (err) {}
                           const msg = language === "de"
                             ? `ORCID iD (${cleanVal}) erfolgreich mit Ihrem Autorenkonto und Crossref Registry verknüpft.`
                             : `ORCID iD (${cleanVal}) successfully linked to your Author Workspace and Crossref Registry.`
                           setOrcidAuthSuccessMsg(msg)
                           setSuccess(msg)
-                        }, 800)
+                        }, 600)
                       }}
                       className="bg-[#A6CE39] hover:bg-[#95bc2f] text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
                     >
