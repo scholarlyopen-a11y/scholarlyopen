@@ -62,6 +62,7 @@ import {
   GraduationCap,
   Activity,
   CheckCircle2,
+  CheckCircle,
   Globe,
   Building2,
   MapPin,

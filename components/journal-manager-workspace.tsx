@@ -52,6 +52,8 @@ import {
   Zap,
   Building2,
   Edit3,
+  Edit,
+  Split,
   ExternalLink,
   History,
   Server,
