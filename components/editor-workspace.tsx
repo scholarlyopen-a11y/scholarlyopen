@@ -525,7 +525,7 @@ export function EditorWorkspace({
 
   // Live Reviewer Progress Popup Modal State
   const [selectedPaperForReviewTracking, setSelectedPaperForReviewTracking] = useState<JmManuscript | null>(null)
-  const [isTrackerScorecardExpanded, setIsTrackerScorecardExpanded] = useState(false)
+  const [expandedTrackerScorecards, setExpandedTrackerScorecards] = useState<Record<string, boolean>>({})
 
   // Revision Evaluation Studio State
   const [selectedRevisionForEvaluation, setSelectedRevisionForEvaluation] = useState<JmManuscript | null>(null)
@@ -2626,20 +2626,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
       {/* ================= MODAL: LIVE REVIEWER TRACKER POPUP ================= */}
       <Dialog open={!!selectedPaperForReviewTracking} onOpenChange={(open) => !open && setSelectedPaperForReviewTracking(null)}>
-        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-xl rounded-2xl p-6 shadow-2xl">
-          <DialogHeader>
+        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-xl max-h-[88vh] flex flex-col p-0 overflow-hidden rounded-2xl shadow-2xl">
+          <DialogHeader className="p-5 pb-3 border-b border-slate-100 dark:border-[#272832] shrink-0 pr-12">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
-              <span>Review Progress</span>
+              <span>Review Progress &amp; Scorecards</span>
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
                 {selectedPaperForReviewTracking?.id}
               </span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 line-clamp-1">
+            <DialogDescription className="text-xs text-slate-500 line-clamp-1 mt-1">
               {selectedPaperForReviewTracking?.title}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2 text-xs">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs [scrollbar-width:thin]">
             {/* Summary Progress Bar */}
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2">
               <div className="flex items-center justify-between font-semibold">
@@ -2661,7 +2661,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {/* Reviewers List */}
             <div className="space-y-2">
               <span className="font-bold text-slate-700 dark:text-slate-300 block text-xs">
-                Assigned Reviewers & Scorecards:
+                Assigned Reviewers &amp; Scorecards:
               </span>
 
               {(() => {
@@ -2676,7 +2676,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     {/* Render all reviews that have been completed */}
                     {trackingPaperReviews.map((rev, idx) => {
                       const revKey = `track-rev-${rev.id || idx}`
-                      const isExpanded = isTrackerScorecardExpanded || expandedReviewerScorecard === revKey
+                      const isExpanded = Boolean(expandedTrackerScorecards[revKey])
 
                       return (
                         <div 
@@ -2690,7 +2690,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <div className="flex items-center justify-between gap-3 flex-wrap">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-bold text-slate-900 dark:text-white">
-                                Reviewer: {rev.reviewerName || "Peer Reviewer"}
+                                Reviewer #{idx + 1}: {rev.reviewerName || `Referee ${idx + 1}`}
+                              </span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                                Double-Blind (Hidden from Author)
                               </span>
                               {rev.status === "Released" ? (
                                 <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
@@ -2699,7 +2702,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               ) : (
                                 <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
                                   <Lock className="h-3 w-3" />
-                                  Awaiting JM Sanitization & Dispatch
+                                  Awaiting JM Sanitization &amp; Dispatch
                                 </span>
                               )}
                               <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
@@ -2708,8 +2711,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </div>
                             <Button
                               onClick={() => {
-                                setIsTrackerScorecardExpanded(!isTrackerScorecardExpanded)
-                                setExpandedReviewerScorecard(isExpanded ? null : (revKey as any))
+                                setExpandedTrackerScorecards(prev => ({
+                                  ...prev,
+                                  [revKey]: !prev[revKey]
+                                }))
                               }}
                               variant="outline"
                               className={`text-xs h-7.5 px-3 shrink-0 cursor-pointer font-semibold ${
@@ -2815,7 +2820,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </div>
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-[#272832] pt-3 flex flex-row items-center justify-between sm:justify-between w-full">
+          <DialogFooter className="p-4 border-t border-slate-100 dark:border-[#272832] shrink-0 bg-slate-50/60 dark:bg-[#131418]/60 flex flex-row items-center justify-between sm:justify-between w-full">
             <Button
               onClick={() => {
                 const paper = selectedPaperForReviewTracking

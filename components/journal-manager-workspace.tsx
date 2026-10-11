@@ -2350,6 +2350,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
   const [nudgedReviewers, setNudgedReviewers] = useState<Record<string, boolean>>({})
   const [rescindedReviewers, setRescindedReviewers] = useState<Record<string, boolean>>({})
   const [extendedDays, setExtendedDays] = useState<Record<string, number>>({})
+  const [expandedJmScorecards, setExpandedJmScorecards] = useState<Record<string, boolean>>({})
 
   // Template Pop-up Modal for Reviewer Reminder and Rescind Invitation
   const [reviewerDispatchModal, setReviewerDispatchModal] = useState<{
@@ -10762,6 +10763,25 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           )
                         ) : (
                           <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
+                            {/* View Scorecard Toggle Dropdown */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setExpandedJmScorecards(prev => ({
+                                  ...prev,
+                                  [revName]: !prev[revName]
+                                }))
+                              }}
+                              className={`h-8 text-xs font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 cursor-pointer transition-all ${
+                                expandedJmScorecards[revName] 
+                                  ? "bg-sky-50 dark:bg-sky-950/40 text-[#0b99ff] border-[#0b99ff]/30 font-bold" 
+                                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                              }`}
+                            >
+                              {expandedJmScorecards[revName] ? "Hide Scorecard ▲" : "View Scorecard ▼"}
+                            </Button>
+
                             {/* View Full RAF button available for any submitted reviewer */}
                             {(isNagula || isChaud || Boolean(matchedReview)) && (
                               <Button
@@ -10783,73 +10803,75 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </Button>
                             )}
 
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                const revObj: JmReviewFeedback = isNagula ? {
-                                  id: "REV-FB-PN01",
-                                  paperId: trackingManuscript?.id || "SOMED-26-RW01",
-                                  reviewerName: "Dr. Praveen Nagula",
-                                  originality: 3,
-                                  commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
-                                  sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
-                                  commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
-                                  recommendation: "Re-write and Re-submit",
-                                  status: "Pending Moderation"
-                                } : isChaud ? {
-                                  id: matchedReview?.id || "REV-FB-1791559472514-816",
-                                  paperId: trackingManuscript?.id || "SOMED-26-RW01",
-                                  reviewerName: "Dr. Chaud GJ",
-                                  originality: 4,
-                                  commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                                  sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                                  commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
-                                  recommendation: CHAUD_GJ_RAF.recommendation,
-                                  status: "Pending Moderation"
-                                } : (matchedReview ? {
-                                  id: matchedReview.id,
-                                  paperId: trackingManuscript?.id || matchedReview.paperId,
-                                  reviewerName: matchedReview.reviewerName || revName,
-                                  originalComments: matchedReview.originalComments || matchedReview.commentsAuthor || "",
-                                  sanitizedCommentsAuthor: matchedReview.sanitizedCommentsAuthor || matchedReview.commentsAuthor || "",
-                                  commentsAuthor: matchedReview.commentsAuthor || "",
-                                  commentsEditor: matchedReview.commentsEditor || "",
-                                  recommendation: matchedReview.recommendation || "Minor Revision",
-                                  originality: (matchedReview as any).originality || 5,
-                                  status: (matchedReview.status as any) || "Pending Moderation"
-                                } : {
-                                  id: `REV-FB-${revName.replace(/\s+/g, '')}`,
-                                  paperId: trackingManuscript?.id || "SOEAS-26-RS102",
-                                  reviewerName: revName,
-                                  originalComments: "Review evaluation logged.",
-                                  sanitizedCommentsAuthor: "Review evaluation logged.",
-                                  commentsAuthor: "Review evaluation logged.",
-                                  commentsEditor: "Solid paper. Recommendation recorded.",
-                                  recommendation: "Minor Revision",
-                                  originality: 5,
-                                  status: "Pending Moderation"
-                                })
-                                handleOpenModeration(revObj)
-                              }}
-                              className={`h-8 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap ${
-                                isRemarksApproved
-                                  ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
-                                  : "text-[#0b99ff] border-[#0b99ff]/30 hover:bg-sky-50 dark:hover:bg-sky-950/30"
-                              }`}
-                            >
-                              {isRemarksApproved ? (
-                                <>
-                                  <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                                  Edit Sanitized Remarks
-                                </>
-                              ) : (
-                                <>
-                                  <ShieldCheck className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Sanitize & Dispatch
-                                </>
-                              )}
-                            </Button>
+                            {(() => {
+                              const revObj: JmReviewFeedback = isNagula ? {
+                                id: "REV-FB-PN01",
+                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                reviewerName: "Dr. Praveen Nagula",
+                                originality: 3,
+                                commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+                                sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+                                commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+                                recommendation: "Re-write and Re-submit",
+                                status: "Pending Moderation"
+                              } : isChaud ? {
+                                id: matchedReview?.id || "REV-FB-1791559472514-816",
+                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                reviewerName: "Dr. Chaud GJ",
+                                originality: 4,
+                                commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                                sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                                commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
+                                recommendation: CHAUD_GJ_RAF.recommendation,
+                                status: "Pending Moderation"
+                              } : (matchedReview ? {
+                                id: matchedReview.id,
+                                paperId: trackingManuscript?.id || matchedReview.paperId,
+                                reviewerName: matchedReview.reviewerName || revName,
+                                originalComments: matchedReview.originalComments || matchedReview.commentsAuthor || "",
+                                sanitizedCommentsAuthor: matchedReview.sanitizedCommentsAuthor || matchedReview.commentsAuthor || "",
+                                commentsAuthor: matchedReview.commentsAuthor || "",
+                                commentsEditor: matchedReview.commentsEditor || "",
+                                recommendation: matchedReview.recommendation || "Minor Revision",
+                                originality: (matchedReview as any).originality || 5,
+                                status: (matchedReview.status as any) || "Pending Moderation"
+                              } : {
+                                id: `REV-FB-${revName.replace(/\s+/g, '')}`,
+                                paperId: trackingManuscript?.id || "SOEAS-26-RS102",
+                                reviewerName: revName,
+                                originalComments: "Review evaluation logged.",
+                                sanitizedCommentsAuthor: "Review evaluation logged.",
+                                commentsAuthor: "Review evaluation logged.",
+                                commentsEditor: "Solid paper. Recommendation recorded.",
+                                recommendation: "Minor Revision",
+                                originality: 5,
+                                status: "Pending Moderation"
+                              })
+
+                              return (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleOpenModeration(revObj)}
+                                  className={`h-8 text-xs font-bold px-3 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap shadow-xs flex items-center gap-1.5 ${
+                                    isRemarksApproved
+                                      ? "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-200"
+                                      : "bg-[#0b99ff] hover:bg-[#0088e0] text-white"
+                                  }`}
+                                >
+                                  {isRemarksApproved ? (
+                                    <>
+                                      <MessageSquare className="h-3.5 w-3.5 text-slate-500" />
+                                      <span>Edit Sanitized Remarks</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ShieldCheck className="h-3.5 w-3.5" />
+                                      <span>Sanitize & Dispatch to Editor</span>
+                                    </>
+                                  )}
+                                </Button>
+                              )
+                            })()}
                           </div>
                         )}
                       </div>
@@ -10881,6 +10903,115 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <span>Invitation accepted • Target report due: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{targetDeadlineDate}</strong></span>
                         )}
                       </div>
+
+                      {/* Inline Dropdown Scorecard Panel for JM */}
+                      {isSubmitted && expandedJmScorecards[revName] && (
+                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3 animate-in fade-in text-xs">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                              <span className="text-[10px] text-slate-400 block font-medium">Priority Rating</span>
+                              <strong className="text-slate-900 dark:text-white text-xs">{isNagula ? "6 / 10" : isChaud ? "4 / 10" : `${displayScore} / 5.0`}</strong>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                              <span className="text-[10px] text-slate-400 block font-medium">Verdict</span>
+                              <strong className="text-slate-900 dark:text-white text-xs">{displayRecommendation}</strong>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                              <span className="text-[10px] text-slate-400 block font-medium">Review Protocol</span>
+                              <strong className="text-slate-900 dark:text-white text-xs">Double-Blinded</strong>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
+                              <span className="text-[10px] text-slate-400 block font-medium">Handling Editor Access</span>
+                              <strong className={isRemarksApproved ? "text-emerald-600 font-bold text-xs" : "text-amber-600 font-bold text-xs"}>
+                                {isRemarksApproved ? "✓ Dispatched" : "🔒 Restricted (Locked)"}
+                              </strong>
+                            </div>
+                          </div>
+
+                          <div className="p-3 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 space-y-1.5">
+                            <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+                              Author-Facing Feedback {isRemarksApproved ? "(Sanitized & Dispatched)" : "(Raw / Pending JM Moderation)"}:
+                            </span>
+                            <p className="text-[11px] text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed italic bg-slate-50 dark:bg-slate-900 p-2.5 rounded border border-slate-100 dark:border-slate-800">
+                              &ldquo;{isNagula ? "The review article to be concised. Tables to be provided. Specific comments: 1. too low references for a review article; 2. what has been changed over the years in the management to be mentioned; 3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic; 4. no figures were provided; 5. atleast tables to be there." : (matchedReview?.commentsAuthor || "Evaluation report logged.")}&rdquo;
+                            </p>
+                          </div>
+
+                          {/* Action CTA Bar */}
+                          <div className="p-3 rounded-lg bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                              {isRemarksApproved ? (
+                                <span className="text-emerald-700 dark:text-emerald-300 font-semibold flex items-center gap-1.5">
+                                  <Check className="h-3.5 w-3.5" />
+                                  Comments have been sanitized &amp; formally released to the Handling Editor.
+                                </span>
+                              ) : (
+                                <span className="text-amber-800 dark:text-amber-300 font-medium flex items-center gap-1.5">
+                                  <Lock className="h-3.5 w-3.5" />
+                                  Comments remain locked from the Handling Editor until you formally sanitize &amp; dispatch.
+                                </span>
+                              )}
+                            </div>
+
+                            {(() => {
+                              const revObj: JmReviewFeedback = isNagula ? {
+                                id: "REV-FB-PN01",
+                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                reviewerName: "Dr. Praveen Nagula",
+                                originality: 3,
+                                commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+                                sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+                                commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+                                recommendation: "Re-write and Re-submit",
+                                status: "Pending Moderation"
+                              } : isChaud ? {
+                                id: matchedReview?.id || "REV-FB-1791559472514-816",
+                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                reviewerName: "Dr. Chaud GJ",
+                                originality: 4,
+                                commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                                sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
+                                commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
+                                recommendation: CHAUD_GJ_RAF.recommendation,
+                                status: "Pending Moderation"
+                              } : (matchedReview ? {
+                                id: matchedReview.id,
+                                paperId: trackingManuscript?.id || matchedReview.paperId,
+                                reviewerName: matchedReview.reviewerName || revName,
+                                originalComments: matchedReview.originalComments || matchedReview.commentsAuthor || "",
+                                sanitizedCommentsAuthor: matchedReview.sanitizedCommentsAuthor || matchedReview.commentsAuthor || "",
+                                commentsAuthor: matchedReview.commentsAuthor || "",
+                                commentsEditor: matchedReview.commentsEditor || "",
+                                recommendation: matchedReview.recommendation || "Minor Revision",
+                                originality: (matchedReview as any).originality || 5,
+                                status: (matchedReview.status as any) || "Pending Moderation"
+                              } : {
+                                id: `REV-FB-${revName.replace(/\s+/g, '')}`,
+                                paperId: trackingManuscript?.id || "SOEAS-26-RS102",
+                                reviewerName: revName,
+                                originalComments: "Review evaluation logged.",
+                                sanitizedCommentsAuthor: "Review evaluation logged.",
+                                commentsAuthor: "Review evaluation logged.",
+                                commentsEditor: "Solid paper. Recommendation recorded.",
+                                recommendation: "Minor Revision",
+                                originality: 5,
+                                status: "Pending Moderation"
+                              })
+
+                              return (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleOpenModeration(revObj)}
+                                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-xs whitespace-nowrap shrink-0"
+                                >
+                                  <ShieldCheck className="h-3.5 w-3.5" />
+                                  <span>{isRemarksApproved ? "Edit & Re-Dispatch to Editor" : "Sanitize & Dispatch to Handling Editor"}</span>
+                                </Button>
+                              )
+                            })()}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })
