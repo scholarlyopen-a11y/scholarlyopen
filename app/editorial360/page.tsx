@@ -2999,6 +2999,21 @@ export default function Editorial360Page() {
           clearInterval(timer)
           setIsScanningPlagiarism(false)
           setScanCompletedSuccess(true)
+          setManuscripts((prevM) =>
+            prevM.map((m) => {
+              const targetId = selectedScanPaperId || authorScopedManuscripts[0]?.id
+              if (m.id === targetId) {
+                return {
+                  ...m,
+                  plagiarismScore: 3.4,
+                  aiScore: 1.2,
+                  integrityStatus: "Clean",
+                  lastActivity: new Date().toISOString()
+                }
+              }
+              return m
+            })
+          )
           return 100
         }
         return prev + 25
@@ -3010,7 +3025,11 @@ export default function Editorial360Page() {
   const [scorecardFileName, setScorecardFileName] = useState<string>("")
   const [isAuditingScorecard, setIsAuditingScorecard] = useState<boolean>(false)
   const [scorecardAuditProgress, setScorecardAuditProgress] = useState<number>(0)
-  const [isFigureFixed, setIsFigureFixed] = useState<boolean>(false)
+  const [isFigureFixed, setIsFigureFixed] = useState<boolean>(true)
+  const [isOrcidAuthModalOpen, setIsOrcidAuthModalOpen] = useState<boolean>(false)
+  const [orcidInput, setOrcidInput] = useState<string>("")
+  const [orcidAuthLoading, setOrcidAuthLoading] = useState<boolean>(false)
+  const [orcidAuthSuccessMsg, setOrcidAuthSuccessMsg] = useState<string | null>(null)
 
   // Interactive Author Modals & Search States
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState<boolean>(false)
@@ -3042,12 +3061,15 @@ export default function Editorial360Page() {
 
   const handleDownloadAcademicRecordPdf = () => {
     if (typeof window === "undefined") return
-    const authorName = profFullName ? (profFullName.startsWith("Dr.") ? profFullName : `Dr. ${profFullName}`) : "Dr. Evelyn Vane"
-    const rank = profRank || (language === "de" ? "Senior-Forscher & Fakultätsleiter" : "Senior Researcher & Faculty Lead")
-    const institution = profInstitution || "Institute of Advanced Medical Sciences"
-    const country = profCountry || "United States"
-    const orcid = isOrcidVerified ? "0009-0004-7721-9982" : "Unverified"
+    const authorName = profFullName ? (profFullName.startsWith("Dr.") || profFullName.startsWith("Prof.") ? profFullName : `Dr. ${profFullName}`) : (regName || (email ? email.split('@')[0] : "Author"))
+    const rank = profRank || "Corresponding Author"
+    const institution = profInstitution || "Scholarly Research Institute"
+    const country = profCountry || ""
+    const orcid = isOrcidVerified ? (profOrcid || "0000-0002-9842-1102") : "Pending Verification"
     const dateStr = new Date().toISOString().split("T")[0]
+
+    const publishedMss = authorScopedManuscripts.filter(m => m.status === "Published" || m.status === "Accepted")
+    const activeSubmissionsCount = authorScopedManuscripts.length
 
     const origin = typeof window !== "undefined" ? window.location.origin : ""
 
@@ -3069,8 +3091,6 @@ export default function Editorial360Page() {
           .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0b99ff; padding-bottom: 14px; margin-bottom: 18px; }
           .logo-box { display: flex; align-items: center; gap: 10px; }
           .logo-img { height: 38px; width: auto; }
-          .logo { font-size: 20px; font-weight: 800; color: #0b99ff; letter-spacing: -0.5px; }
-          .logo span { color: #0f172a; }
           .doc-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; }
           .doc-id { font-size: 11px; font-weight: 600; color: #0f172a; margin-top: 2px; }
           .profile-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; }
@@ -3101,7 +3121,7 @@ export default function Editorial360Page() {
           </div>
           <div>
             <div class="doc-title">Official Academic Transcript</div>
-            <div class="doc-id">DOC-ID: SO-REC-2026-98741</div>
+            <div class="doc-id">DOC-ID: SO-REC-${dateStr.replace(/-/g, '')}-${authorScopedManuscripts[0]?.id || 'VOL1'}</div>
             <div style="font-size: 10px; color: #64748b;">Issued: ${dateStr}</div>
           </div>
         </div>
@@ -3109,113 +3129,70 @@ export default function Editorial360Page() {
         <div class="profile-card">
           <div>
             <div class="name">${authorName}</div>
-            <div class="affil">${rank} · ${institution}, ${country}</div>
-            <div class="orcid">✓ ORCID iD: ${orcid} (Verified)</div>
+            <div class="affil">${rank}${institution ? ` · ${institution}` : ''}${country ? `, ${country}` : ''}</div>
+            <div class="orcid">✓ ORCID iD: ${orcid}</div>
           </div>
           <div style="text-align: right; font-size: 10px; color: #64748b;">
             <div><b>Publisher:</b> Scholarly Open</div>
             <div><b>Indexing:</b> Crossref · DOAJ · Scopus</div>
-            <div><b>Integrity Status:</b> Verified / Good Standing</div>
+            <div><b>Integrity Standing:</b> COPE Compliant ✓</div>
           </div>
         </div>
 
-        <div class="section-title">Key Academic Impact Metrics</div>
+        <div class="section-title">Key Academic Lifecycle Metrics</div>
         <div class="stats-grid">
           <div class="stat-box">
-            <div class="stat-val">5</div>
+            <div class="stat-val">${activeSubmissionsCount}</div>
+            <div class="stat-lbl">Active Submissions</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">${publishedMss.length}</div>
             <div class="stat-lbl">Published Articles</div>
           </div>
           <div class="stat-box">
-            <div class="stat-val">120</div>
-            <div class="stat-lbl">Total Citations</div>
+            <div class="stat-val">50% Off</div>
+            <div class="stat-lbl">Inaugural APC Waiver</div>
           </div>
           <div class="stat-box">
-            <div class="stat-val">4 · 3</div>
-            <div class="stat-lbl">h-index · i10-index</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val">12</div>
-            <div class="stat-lbl">Peer Reviews (Tier 2)</div>
+            <div class="stat-val">100%</div>
+            <div class="stat-lbl">CC-BY 4.0 Open Access</div>
           </div>
         </div>
 
-        <div class="section-title">Verified Published Articles & Indexing</div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 55%;">Publication Title & DOI</th>
-              <th style="width: 25%;">Journal</th>
-              <th style="width: 10%; text-align: center;">Year</th>
-              <th style="width: 10%; text-align: right;">Citations</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <div class="pub-title">A Security Framework for Decentralized Ledgers in Public Records</div>
-                <div class="pub-meta">DOI: 10.5555/so.2026.102 · <span class="badge">Open Access</span></div>
-              </td>
-              <td>Engineering & Applied Sciences</td>
-              <td style="text-align: center;">2026</td>
-              <td style="text-align: right; font-weight: bold; color: #0b99ff;">42</td>
-            </tr>
-            <tr>
-              <td>
-                <div class="pub-title">Machine Learning Approaches in Renewable Energy Forecasting</div>
-                <div class="pub-meta">DOI: 10.5555/so.2026.081 · <span class="badge">Open Access</span></div>
-              </td>
-              <td>Engineering & Applied Sciences</td>
-              <td style="text-align: center;">2026</td>
-              <td style="text-align: right; font-weight: bold; color: #0b99ff;">38</td>
-            </tr>
-            <tr>
-              <td>
-                <div class="pub-title">Ethical Dimensions of AI-Assisted Clinical Decision Support</div>
-                <div class="pub-meta">DOI: 10.5555/so.2025.047 · <span class="badge">Open Access</span></div>
-              </td>
-              <td>Medicine & Health Sciences</td>
-              <td style="text-align: center;">2025</td>
-              <td style="text-align: right; font-weight: bold; color: #0b99ff;">27</td>
-            </tr>
-            <tr>
-              <td>
-                <div class="pub-title">Federated Learning Privacy Guarantees Under Byzantine Faults</div>
-                <div class="pub-meta">DOI: 10.5555/so.2025.039 · <span class="badge">Open Access</span></div>
-              </td>
-              <td>Engineering & Applied Sciences</td>
-              <td style="text-align: center;">2025</td>
-              <td style="text-align: right; font-weight: bold; color: #0b99ff;">13</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="section-title">Annual Citation Breakdown</div>
-        <table>
-          <thead>
-            <tr>
-              <th style="text-align: center;">2019</th>
-              <th style="text-align: center;">2020</th>
-              <th style="text-align: center;">2021</th>
-              <th style="text-align: center;">2022</th>
-              <th style="text-align: center;">2023</th>
-              <th style="text-align: right;">Total Verified</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="text-align: center;">12</td>
-              <td style="text-align: center;">22</td>
-              <td style="text-align: center;">35</td>
-              <td style="text-align: center;">30</td>
-              <td style="text-align: center;">45</td>
-              <td style="text-align: right; font-weight: 800; color: #0b99ff;">120 Citations</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="section-title">Author Submissions & Lifecycle Record</div>
+        ${publishedMss.length === 0 && authorScopedManuscripts.length === 0 ? `
+          <div style="padding: 16px; text-align: center; color: #64748b; font-size: 11px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px;">
+            No manuscripts currently recorded for this author.
+          </div>
+        ` : `
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50%;">Manuscript Title & ID</th>
+                <th style="width: 25%;">Journal</th>
+                <th style="width: 15%; text-align: center;">Status</th>
+                <th style="width: 10%; text-align: right;">Integrity</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${authorScopedManuscripts.map(m => `
+                <tr>
+                  <td>
+                    <div class="pub-title">${m.title}</div>
+                    <div class="pub-meta">ID: ${m.id} · <span class="badge">Open Access (CC-BY 4.0)</span></div>
+                  </td>
+                  <td>${m.journal}</td>
+                  <td style="text-align: center; font-weight: 600;">${m.status}</td>
+                  <td style="text-align: right; font-weight: bold; color: #0b99ff;">Passed ✓</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `}
 
         <div class="footer">
-          <div>Certified by Scholarly Open Editorial Board · Crossref Member #10.5555</div>
-          <div>Verification Hash: SHA256:7f8a9e4b1c2d0f3e · Valid for Grants & Tenure Filing</div>
+          <div>Certified by Scholarly Open Editorial Office · Crossref Live Integration</div>
+          <div>Verification Valid for Grants, Institutional Filing & Tenure Review</div>
         </div>
       </body>
       </html>
@@ -3365,19 +3342,33 @@ export default function Editorial360Page() {
     })
   }, [crossDeskNotifications, role, editorName, editorEmail, editorRank, editorJournal, editorScopedManuscripts])
 
+  // Dynamically scoped manuscripts for currently logged-in author
+  const authorScopedManuscripts = useMemo(() => {
+    if (role !== "author") return manuscripts
+    const isDemoAuthor = email === "author@scholarlyopen.org"
+    const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
+    const activeUrlMsId = urlParams ? urlParams.get("manuscriptId") : null
+
+    const authorFiltered = isDemoAuthor 
+      ? manuscripts 
+      : manuscripts.filter((m: any) => 
+          (activeUrlMsId && m.id && m.id.toLowerCase() === activeUrlMsId.toLowerCase()) ||
+          (m.authorEmail && email && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
+          (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase()))
+        )
+    return Array.from(
+      new Map(authorFiltered.map((m: any) => [m.id ? m.id : m.title, m])).values()
+    ).sort((a: any, b: any) => {
+      const timeA = new Date(a.updatedAt || a.lastActivity || a.revisionDate || a.date || 0).getTime()
+      const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()
+      return timeB - timeA
+    })
+  }, [manuscripts, role, email, profFullName])
+
   // Author-specific notifications: strictly isolate author notifications from internal reviewer/JM/board chatter
   const authorScopedNotifications = useMemo(() => {
     if (role !== "author") return []
-    const urlMsId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("manuscriptId") : null
-    const authorMsIds = new Set(
-      manuscripts
-        .filter(m => 
-          (urlMsId && m.id && m.id.toLowerCase() === urlMsId.toLowerCase()) ||
-          (email && m.authorEmail && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
-          (profFullName && m.authorName && m.authorName.toLowerCase().includes(profFullName.toLowerCase()))
-        )
-        .map(m => m.id)
-    )
+    const authorMsIds = new Set(authorScopedManuscripts.map((m: any) => m.id))
 
     return crossDeskNotifications.filter(n => {
       // Suppress board appointments, reviewer outreach, candidate approvals, and internal triage notes
@@ -3393,7 +3384,7 @@ export default function Editorial360Page() {
 
       return false
     })
-  }, [crossDeskNotifications, role, manuscripts, email, profFullName])
+  }, [crossDeskNotifications, role, authorScopedManuscripts, email, profFullName])
 
   const activeDisplayNotifications = 
     role === "editor" 
@@ -6915,7 +6906,7 @@ export default function Editorial360Page() {
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-[#0b99ff]" />
                     </span>
                     <span className="font-bold text-slate-900 dark:text-white tabular-nums">
-                      {manuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Required").length}
+                      {authorScopedManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Required").length}
                     </span>
                     <span className="font-medium text-slate-600 dark:text-slate-300">
                       {language === "de" ? "Aktive Einreichungen" : "Active Submissions"}
@@ -8204,25 +8195,7 @@ export default function Editorial360Page() {
                 {/* ================= 4. AUTHOR WORKSPACE ================= */}
                 {role === "author" && (() => {
                   const isDe = language === "de"
-                  const isDemoAuthor = email === "author@scholarlyopen.org"
-                  const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
-                  const activeUrlMsId = urlParams ? urlParams.get("manuscriptId") : null
-
-                  const authorFiltered = isDemoAuthor 
-                    ? manuscripts 
-                    : manuscripts.filter(m => 
-                        (activeUrlMsId && m.id && m.id.toLowerCase() === activeUrlMsId.toLowerCase()) ||
-                        (m.authorEmail && email && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
-                        (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase()))
-                      )
-                  // Deduplicate manuscripts array by ID and Title and sort by newest status update / activity first
-                  const uniqueManuscripts = Array.from(
-                    new Map(authorFiltered.map(m => [m.id ? m.id : m.title, m])).values()
-                  ).sort((a, b) => {
-                    const timeA = new Date(a.updatedAt || a.lastActivity || a.revisionDate || a.date || 0).getTime()
-                    const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()
-                    return timeB - timeA
-                  })
+                  const uniqueManuscripts = authorScopedManuscripts
 
                   const isSamLee = Boolean(
                     (email && (email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("sam") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me"))) ||
@@ -8265,8 +8238,9 @@ export default function Editorial360Page() {
                           </div>
                           <Button
                             onClick={() => {
-                              setIsOrcidVerified(true)
-                              setSuccess(isDe ? "ORCID authentifiziert! Verifizierte Anmeldedaten mit Crossref Registry verknüpft." : "ORCID authenticated! Verified credentials linked with Crossref Registry.")
+                              setOrcidInput(profOrcid || "0000-0002-9842-1102")
+                              setOrcidAuthSuccessMsg(null)
+                              setIsOrcidAuthModalOpen(true)
                             }}
                             className="bg-[#A6CE39] hover:bg-[#95bc2f] text-white font-bold text-xs px-3.5 py-1.5 h-auto rounded-lg shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5"
                           >
@@ -9108,6 +9082,11 @@ export default function Editorial360Page() {
                           title: "Clinical Evaluation of AI-Driven Diagnostic Imaging in Cardiovascular Medicine",
                           journal: "Scholarly Open Medicine",
                         }
+                        const textScore = typeof (selectedPaper as any).plagiarismScore === "number" ? Number((selectedPaper as any).plagiarismScore) : (uniqueManuscripts.length > 0 ? 3.4 : 0)
+                        const aiScoreVal = typeof (selectedPaper as any).aiScore === "number" ? Number((selectedPaper as any).aiScore) : (uniqueManuscripts.length > 0 ? 1.2 : 0)
+                        const isClean = textScore <= 15
+                        const textArc = Math.min(94, Math.max(2, Math.round(textScore * 2.5)))
+                        const aiArc = Math.min(94, Math.max(2, Math.round(aiScoreVal * 2.5)))
 
                         return (
                           <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 sm:p-6 space-y-6 shadow-xs">
@@ -9174,22 +9153,22 @@ export default function Editorial360Page() {
                                 <div className="relative h-28 w-28 flex items-center justify-center">
                                   <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
                                     <circle cx="18" cy="18" r="13.5" fill="none" className="stroke-slate-200 dark:stroke-[#20222a]" strokeWidth="3.5" />
-                                    {/* Text match arc (5.4%) */}
-                                    <circle cx="18" cy="18" r="13.5" fill="none" className="stroke-[#0b99ff]" strokeWidth="3.5" strokeDasharray="6 94" strokeLinecap="round" />
-                                    {/* AI Content arc (3.1%) */}
-                                    <circle cx="18" cy="18" r="13.5" fill="none" className="stroke-sky-400" strokeWidth="3.5" strokeDasharray="4 96" strokeDashoffset="-8" strokeLinecap="round" />
+                                    {/* Text match arc */}
+                                    <circle cx="18" cy="18" r="13.5" fill="none" className="stroke-[#0b99ff]" strokeWidth="3.5" strokeDasharray={`${textArc} ${100 - textArc}`} strokeLinecap="round" />
+                                    {/* AI Content arc */}
+                                    <circle cx="18" cy="18" r="13.5" fill="none" className="stroke-sky-400" strokeWidth="3.5" strokeDasharray={`${aiArc} ${100 - aiArc}`} strokeDashoffset="-8" strokeLinecap="round" />
                                   </svg>
                                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                    <span className="text-xl font-bold text-slate-900 dark:text-white tabular-nums">5.4%</span>
+                                    <span className="text-xl font-bold text-slate-900 dark:text-white tabular-nums">{textScore.toFixed(1)}%</span>
                                     <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Overlap</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500 dark:text-slate-400">
                                   <span className="flex items-center gap-1.5 font-medium">
-                                    <span className="h-2 w-2 rounded-full bg-[#0b99ff]" /> {isDe ? "Text: 5.4%" : "Text Overlap (5.4%)"}
+                                    <span className="h-2 w-2 rounded-full bg-[#0b99ff]" /> {isDe ? `Text: ${textScore.toFixed(1)}%` : `Text Overlap (${textScore.toFixed(1)}%)`}
                                   </span>
                                   <span className="flex items-center gap-1.5 font-medium">
-                                    <span className="h-2 w-2 rounded-full bg-sky-400" /> {isDe ? "KI: 3.1%" : "AI Synthesized (3.1%)"}
+                                    <span className="h-2 w-2 rounded-full bg-sky-400" /> {isDe ? `KI: ${aiScoreVal.toFixed(1)}%` : `AI Synthesized (${aiScoreVal.toFixed(1)}%)`}
                                   </span>
                                 </div>
                               </div>
@@ -9200,9 +9179,9 @@ export default function Editorial360Page() {
                                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                                     {isDe ? "Ähnlichkeitsindex" : "Similarity Score"}
                                   </span>
-                                  <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums">5.4%</div>
-                                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block">
-                                    {isDe ? "Unter Schwellenwert (<15%)" : "Passed (<15% threshold)"}
+                                  <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums">{textScore.toFixed(1)}%</div>
+                                  <span className={`text-[11px] font-medium block ${isClean ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600"}`}>
+                                    {isClean ? (isDe ? "Unter Schwellenwert (<15%)" : "Passed (<15% threshold)") : (isDe ? "Prüfung empfohlen" : "Review Recommended")}
                                   </span>
                                 </div>
 
@@ -9210,7 +9189,7 @@ export default function Editorial360Page() {
                                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                                     {isDe ? "KI-Synthese" : "AI Content"}
                                   </span>
-                                  <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums">3.1%</div>
+                                  <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums">{aiScoreVal.toFixed(1)}%</div>
                                   <span className="text-[11px] text-slate-500 font-medium block">
                                     {isDe ? "Standard-Methodenwert" : "Typical methods baseline"}
                                   </span>
@@ -9220,9 +9199,9 @@ export default function Editorial360Page() {
                                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                                     {isDe ? "Quellenabgleich" : "Matched Sources"}
                                   </span>
-                                  <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums">3 Repositories</div>
+                                  <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tabular-nums">{textScore > 0 ? "3 Repositories" : "0 Repositories"}</div>
                                   <span className="text-[11px] text-slate-500 font-medium block">
-                                    PubMed, IEEE, arXiv
+                                    {textScore > 0 ? "PubMed, IEEE, arXiv" : (isDe ? "Keine Quellenüberschneidung" : "No match detected")}
                                   </span>
                                 </div>
 
@@ -9230,7 +9209,9 @@ export default function Editorial360Page() {
                                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                                     {isDe ? "Integritätsstatus" : "Integrity Status"}
                                   </span>
-                                  <div className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400">Clean ✓</div>
+                                  <div className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400">
+                                    {isClean ? "Clean ✓" : "Flagged ⚠"}
+                                  </div>
                                   <span className="text-[11px] text-slate-400 font-medium block">
                                     COPE Guidelines Compliant
                                   </span>
@@ -9256,36 +9237,46 @@ export default function Editorial360Page() {
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-slate-100 dark:divide-[#272832] text-slate-700 dark:text-slate-300">
-                                    <tr>
-                                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">PubMed Central Open Access Repository</td>
-                                      <td className="px-4 py-3 text-slate-500">Journal Article</td>
-                                      <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">2.1%</td>
-                                      <td className="px-4 py-3 text-right">
-                                        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                          Permitted Reference
-                                        </span>
-                                      </td>
-                                    </tr>
-                                    <tr>
-                                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">IEEE Xplore Digital Library Database</td>
-                                      <td className="px-4 py-3 text-slate-500">Conference Proceeding</td>
-                                      <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">1.4%</td>
-                                      <td className="px-4 py-3 text-right">
-                                        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                          Citation Cited
-                                        </span>
-                                      </td>
-                                    </tr>
-                                    <tr>
-                                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">arXiv Preprints Server</td>
-                                      <td className="px-4 py-3 text-slate-500">Author Preprint</td>
-                                      <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">0.9%</td>
-                                      <td className="px-4 py-3 text-right">
-                                        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                          Author Self-Preprint
-                                        </span>
-                                      </td>
-                                    </tr>
+                                    {textScore === 0 ? (
+                                      <tr>
+                                        <td colSpan={4} className="px-4 py-6 text-center text-slate-400 text-xs italic">
+                                          {isDe ? "Keine signifikanten Textübereinstimmungen gefunden. Das Manuskript erfüllt alle Originalitätskriterien." : "No significant text overlaps detected. Manuscript passes originality screening."}
+                                        </td>
+                                      </tr>
+                                    ) : (
+                                      <>
+                                        <tr>
+                                          <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">PubMed Central Open Access Repository</td>
+                                          <td className="px-4 py-3 text-slate-500">Journal Article</td>
+                                          <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">{(textScore * 0.48).toFixed(1)}%</td>
+                                          <td className="px-4 py-3 text-right">
+                                            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
+                                              Permitted Reference
+                                            </span>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">IEEE Xplore Digital Library Database</td>
+                                          <td className="px-4 py-3 text-slate-500">Conference Proceeding</td>
+                                          <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">{(textScore * 0.32).toFixed(1)}%</td>
+                                          <td className="px-4 py-3 text-right">
+                                            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
+                                              Citation Cited
+                                            </span>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">arXiv Preprints Server</td>
+                                          <td className="px-4 py-3 text-slate-500">Author Preprint</td>
+                                          <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">{(textScore * 0.20).toFixed(1)}%</td>
+                                          <td className="px-4 py-3 text-right">
+                                            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
+                                              Author Self-Preprint
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      </>
+                                    )}
                                   </tbody>
                                 </table>
                               </div>
@@ -9458,74 +9449,70 @@ export default function Editorial360Page() {
                             </Button>
                           </div>
 
-                          {/* ── 1. APC WAIVER VOUCHER & CLAIM CTA ── */}
+                          {/* ── 1. APC INAUGURAL DISCOUNT VOUCHER & CONFIRMATION ── */}
                           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] space-y-4">
                             
                             {/* Summary Strip */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                               <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] space-y-0.5">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                                  {isDe ? "Erlass-Stufe" : "Waiver Standing"}
+                                  {isDe ? "Inaugural-Rabatt (APC)" : "Inaugural APC Discount"}
                                 </span>
-                                <div className="text-sm font-bold text-slate-900 dark:text-white">
-                                  {isSamLee ? (isDe ? "Stufe 0 · 0% APC-Erlass" : "Tier 0 · 0% APC Waiver") : (isDe ? "Stufe 2 · 25% APC-Erlass" : "Tier 2 · 25% APC Waiver")}
+                                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                  {isDe ? "50% Erlass auf Standard-APC" : "50% Off Principle APC"}
                                 </div>
-                                <span className={`text-[11px] font-medium block ${isSamLee ? "text-slate-400" : "text-emerald-600 dark:text-emerald-400"}`}>
-                                  {isSamLee ? (isDe ? "0 Gutachten verifiziert" : "0 peer reviews verified") : (isDe ? "12 Gutachten verifiziert" : "12 peer reviews verified")}
+                                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block">
+                                  {isDe ? "Gilt für alle Einreichungen zu Band 1" : "Universal for Volume 1 submissions"}
                                 </span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] space-y-0.5">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                                  {isDe ? "Verfügbarer Erlassbetrag" : "Available Discount"}
+                                  {isDe ? "Abrechnungsstatus" : "Discount Status"}
                                 </span>
                                 <div className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
-                                  {isSamLee ? "€0.00 EUR" : "€650.00 EUR"}
+                                  {isDe ? "Vorab hinterlegt ✓" : "Pre-Applied ✓"}
                                 </div>
                                 <span className="text-[11px] text-slate-500 font-medium block">
-                                  {isDe ? "Wird von Haupt-APC abgezogen" : "Subtracted from principle APC"}
+                                  {isDe ? "Wird bei formaler Annahme abgezogen" : "Subtracted from final invoice"}
                                 </span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] space-y-0.5">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                                  {isDe ? "Gutschein-Code" : "Voucher Code"}
+                                  {isDe ? "Inaugural-Code" : "Launch Promo Code"}
                                 </span>
                                 <div className="flex items-center justify-between gap-1 pt-0.5">
-                                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    {isSamLee ? "None Available" : "SO-WAIVER-2026-98X"}
+                                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-mono">
+                                    INAUGURAL-50
                                   </span>
-                                  {!isSamLee && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        if (typeof navigator !== "undefined") {
-                                          navigator.clipboard.writeText("SO-WAIVER-2026-98X")
-                                          setCopiedVoucher(true)
-                                          setTimeout(() => setCopiedVoucher(false), 1500)
-                                        }
-                                      }}
-                                      className="text-[10px] font-bold text-[#0b99ff] hover:text-[#0077cc] bg-sky-50 dark:bg-sky-950/60 px-2 py-1 rounded border border-sky-200/80 dark:border-sky-800/60 transition-colors cursor-pointer"
-                                    >
-                                      {copiedVoucher ? (isDe ? "Kopiert!" : "Copied!") : (isDe ? "Kopieren" : "Copy")}
-                                    </button>
-                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (typeof navigator !== "undefined") {
+                                        navigator.clipboard.writeText("INAUGURAL-50")
+                                        setCopiedVoucher(true)
+                                        setTimeout(() => setCopiedVoucher(false), 1500)
+                                      }
+                                    }}
+                                    className="text-[10px] font-bold text-[#0b99ff] hover:text-[#0077cc] bg-sky-50 dark:bg-sky-950/60 px-2 py-1 rounded border border-sky-200/80 dark:border-sky-800/60 transition-colors cursor-pointer"
+                                  >
+                                    {copiedVoucher ? (isDe ? "Kopiert!" : "Copied!") : (isDe ? "Kopieren" : "Copy")}
+                                  </button>
                                 </div>
                               </div>
                             </div>
 
-                            {/* ── Claim & Deduct from Principle APC ── */}
+                            {/* ── Confirm Discount for Manuscript ── */}
                             <div className="p-4 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] space-y-3">
                               <div>
                                 <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                                  {isDe ? "Gutschein auf Manuskript anwenden" : "Apply Voucher to Manuscript Invoice"}
+                                  {isDe ? "50% Inaugural-Rabatt für Manuskript bestätigen" : "Confirm 50% Inaugural Discount on Manuscript"}
                                 </h4>
                                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                  {isSamLee
-                                    ? (isDe ? "Keine aktiven Gutscheine verfügbar. Führen Sie Begutachtungen durch, um APC-Guthaben zu erwerben." : "No active vouchers available. Complete verified peer reviews to earn institutional APC waivers.")
-                                    : (isDe 
-                                        ? "Wählen Sie Ihr Manuskript aus. Der Erlass von 650 € (oder 25%) wird während der Zahlungsabwicklung direkt von der Haupt-APC abgezogen." 
-                                        : "Select your manuscript. The €650 discount (or 25% waiver) will be subtracted directly from the principle APC during checkout.")}
+                                  {isDe 
+                                    ? "Wählen Sie Ihr Manuskript aus. Der 50% Gründungsrabatt (Code: INAUGURAL-50) ist automatisch hinterlegt und wird während der Rechnungsstellung nach Annahme von der Standard-APC abgezogen." 
+                                    : "Select your manuscript. The 50% Inaugural Issue Launch Discount (Code: INAUGURAL-50) is automatically pre-applied and will be subtracted from the standard journal APC during post-acceptance invoicing."}
                                 </p>
                               </div>
 
@@ -9533,8 +9520,8 @@ export default function Editorial360Page() {
                                 <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between animate-in fade-in">
                                   <span>
                                     {isDe 
-                                      ? `✓ 25% APC-Erlass (650 €) erfolgreich auf ${selectedWaiverPaperId} verbucht. Betrag wird bei Zahlung abgezogen.` 
-                                      : `✓ 25% APC Waiver (€650 discount) logged for ${selectedWaiverPaperId}. Amount will be subtracted during APC payment.`}
+                                      ? `✓ 50% Inaugural-Rabatt (Code: INAUGURAL-50) erfolgreich für ${selectedWaiverPaperId} bestätigt. Betrag wird bei Zahlungsabwicklung nach Annahme abgezogen.` 
+                                      : `✓ 50% Inaugural Discount (Code: INAUGURAL-50) verified for ${selectedWaiverPaperId}. Net payable APC upon editorial acceptance is reduced by 50%.`}
                                   </span>
                                 </div>
                               )}
@@ -9557,46 +9544,33 @@ export default function Editorial360Page() {
 
                                 <Button
                                   onClick={() => {
-                                    if (isSamLee) return
                                     setIsClaimingWaiver(true)
                                     setTimeout(() => {
                                       setIsClaimingWaiver(false)
                                       setWaiverClaimSuccess(true)
-                                    }, 600)
+                                    }, 400)
                                   }}
-                                  disabled={isSamLee || isClaimingWaiver}
-                                  className={`${isSamLee ? "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed" : "bg-[#0b99ff] hover:bg-[#0077cc] text-white cursor-pointer"} text-xs font-bold px-4 py-2 h-auto rounded-lg whitespace-nowrap shrink-0 shadow-2xs transition-all`}
+                                  disabled={isClaimingWaiver}
+                                  className="bg-[#0b99ff] hover:bg-[#0077cc] text-white cursor-pointer text-xs font-bold px-4 py-2 h-auto rounded-lg whitespace-nowrap shrink-0 shadow-2xs transition-all"
                                 >
-                                  {isSamLee 
-                                    ? (isDe ? "Kein Gutschein verfügbar" : "No Voucher Available")
-                                    : (isClaimingWaiver 
-                                        ? (isDe ? "Buche Erlass..." : "Applying Voucher...") 
-                                        : (isDe ? "650 € Erlass anwenden" : "Apply €650 Voucher"))}
+                                  {isClaimingWaiver 
+                                    ? (isDe ? "Prüfe Rabatt..." : "Verifying...") 
+                                    : (isDe ? "50% Inaugural-Rabatt bestätigen" : "Confirm 50% Discount")}
                                 </Button>
                               </div>
 
                               <div className="pt-2 border-t border-slate-100 dark:border-[#272832] flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (isSamLee) {
-                                      alert(isDe ? "Noch keine Erlass-Zertifikate für dieses Konto ausgestellt." : "No waiver certificates issued yet for this account.")
-                                      return
-                                    }
-                                    alert(isDe ? `Lade APC-Erlasszertifikat PDF für Code SO-WAIVER-2026-98X herunter...` : `Downloading APC Waiver Certificate PDF for SO-WAIVER-2026-98X...`)
-                                  }}
-                                  className="text-[#0b99ff] hover:underline font-semibold cursor-pointer inline-flex items-center gap-1"
-                                >
-                                  <Download className="h-3 w-3" />
-                                  <span>{isDe ? "Erlass-Zertifikat herunterladen (PDF)" : "Download Waiver Certificate (PDF)"}</span>
-                                </button>
+                                <span className="text-slate-500 font-medium inline-flex items-center gap-1.5">
+                                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                                  <span>{isDe ? "50% Gründungsrabatt garantiert für alle Einreichungen zu Band 1" : "50% founding discount guaranteed for all Volume 1 submissions"}</span>
+                                </span>
                                 
                                 <button
                                   type="button"
-                                  onClick={() => alert(isDe ? "Härtefallantrag für institutionellen Erlass geöffnet." : "Institutional hardship waiver application form initiated.")}
+                                  onClick={() => alert(isDe ? "Research4Life (Gruppe A) Richtlinie: Autoren aus anspruchsberechtigten Ländern erhalten auf Anfrage 100% Gebührenbefreiung (editorial@scholarlyopen.org)." : "Research4Life (Group A) Policy: Authors from eligible low-income countries receive 100% waiver upon editorial request (editorial@scholarlyopen.org).")}
                                   className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 underline cursor-pointer"
                                 >
-                                  {isDe ? "LMIC / Härtefall-Erlass beantragen" : "Request LMIC / Hardship Waiver"}
+                                  {isDe ? "Research4Life (Gruppe A) / Härtefall-Erlass" : "Research4Life (Group A) 100% Waiver Policy"}
                                 </button>
                               </div>
                             </div>
@@ -9611,16 +9585,14 @@ export default function Editorial360Page() {
                                   {isDe ? "Verifizierte wissenschaftliche Abzeichen" : "Verified Contributor Badges"}
                                 </h4>
                                 <p className="text-[11px] text-slate-400 mt-0.5">
-                                  {isSamLee 
-                                    ? (isDe ? "0 aktive Abzeichen für Gutachten und Open-Science-Standards." : "0 active badges for peer review rigor and open science compliance.")
-                                    : (isDe ? "4 aktive Abzeichen für Gutachten und Open-Science-Standards." : "4 active badges for peer review rigor and open science compliance.")}
+                                  {isDe ? "Offizielle wissenschaftliche Abzeichen für Autoren des Gründungsjahrgangs 2026." : "Official badges for active authors and open science contributors."}
                                 </p>
                               </div>
 
                               {/* Single Clean Social Share Group */}
                               <div className="flex items-center gap-1.5 self-start sm:self-auto">
                                 <a
-                                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(isSamLee ? "https://scholarlyopen.org/author/sam-lee" : "https://scholarlyopen.org/author/evelyn-vane")}`}
+                                  href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fscholarlyopen.org"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#131418] dark:hover:bg-[#20222a] text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-[#272832] text-[11px] font-medium transition-colors cursor-pointer"
@@ -9631,7 +9603,7 @@ export default function Editorial360Page() {
                                 </a>
 
                                 <a
-                                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(isSamLee ? "Check out my researcher profile on Scholarly Open! https://scholarlyopen.org/author/sam-lee" : "Check out my verified researcher badges on Scholarly Open! https://scholarlyopen.org/author/evelyn-vane")}`}
+                                  href="https://twitter.com/intent/tweet?text=Publishing%20with%20Scholarly%20Open%20inaugural%20volume%202026!%20https%3A%2F%2Fscholarlyopen.org"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#131418] dark:hover:bg-[#20222a] text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-[#272832] text-[11px] font-medium transition-colors cursor-pointer"
@@ -9640,112 +9612,85 @@ export default function Editorial360Page() {
                                   <Share2 className="h-3 w-3 text-slate-700 dark:text-slate-300" />
                                   <span>X</span>
                                 </a>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (typeof navigator !== "undefined") {
-                                      navigator.clipboard.writeText(isSamLee ? "https://scholarlyopen.org/author/sam-lee" : "https://scholarlyopen.org/author/evelyn-vane")
-                                      alert(isDe ? "Profil-Link kopiert!" : "Badge profile link copied!")
-                                    }
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#131418] dark:hover:bg-[#20222a] text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-[#272832] text-[11px] font-medium transition-colors cursor-pointer"
-                                  title="Copy Link"
-                                >
-                                  <Link2 className="h-3 w-3 text-slate-500" />
-                                  <span>Link</span>
-                                </button>
                               </div>
                             </div>
 
-                            {/* Clean 2x2 Badge Grid or Empty State */}
-                            {isSamLee ? (
-                              <div className="p-8 text-center rounded-xl bg-white dark:bg-[#18191e] border border-dashed border-slate-200 dark:border-[#272832] space-y-2">
-                                <Award className="h-8 w-8 mx-auto text-slate-300 dark:text-slate-600" />
-                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                  {isDe ? "Noch keine Abzeichen erworben" : "No Badges Earned Yet"}
-                                </p>
-                                <p className="text-[11px] text-slate-500 max-w-md mx-auto">
-                                  {isDe 
-                                    ? "Verifizierte Beitragsabzeichen werden nach Durchführung gründlicher Gutachten oder Bereitstellung offener Datensätze freigeschaltet." 
-                                    : "Verified contributor badges are unlocked after conducting rigorous peer review evaluations or depositing open datasets."}
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                {/* 1. Top Reviewer */}
-                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                  <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <Star className="h-4 w-4 text-amber-500 fill-amber-500/20" />
-                                  </div>
-                                  <div className="min-w-0 flex-1 space-y-0.5">
-                                    <div className="flex items-center justify-between gap-1">
-                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Top Reviewer 2026</h5>
-                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                        ✓ Verified
-                                      </span>
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                      {isDe ? "12 Begutachtungen in den besten 10% Antwortzeit." : "12 peer reviews completed in top 10% turnaround bracket."}
-                                    </p>
-                                  </div>
+                            {/* Clean 2x2 Badge Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                              {/* 1. Founding Author 2026 */}
+                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                  <Award className="h-4 w-4 text-amber-500" />
                                 </div>
-
-                                {/* 2. Ethics & Rigor */}
-                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                  <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Founding Author 2026</h5>
+                                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
+                                      ✓ Verified
+                                    </span>
                                   </div>
-                                  <div className="min-w-0 flex-1 space-y-0.5">
-                                    <div className="flex items-center justify-between gap-1">
-                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Ethics & Rigor Verified</h5>
-                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                        ✓ Verified
-                                      </span>
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                      {isDe ? "Volle COPE-Konformität und null Beanstandungen." : "Full COPE compliance and zero retraction or integrity flags."}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* 3. Open Data Champion */}
-                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                  <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <BookOpen className="h-4 w-4 text-indigo-500" />
-                                  </div>
-                                  <div className="min-w-0 flex-1 space-y-0.5">
-                                    <div className="flex items-center justify-between gap-1">
-                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Open Data Champion</h5>
-                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                        ✓ Verified
-                                      </span>
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                      {isDe ? "Hinterlegte offene Datensätze mit öffentlichen DOIs." : "Deposited open research datasets with verified public DOIs."}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* 4. Rapid Revision Responder */}
-                                <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
-                                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <Clock className="h-4 w-4 text-emerald-600" />
-                                  </div>
-                                  <div className="min-w-0 flex-1 space-y-0.5">
-                                    <div className="flex items-center justify-between gap-1">
-                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Rapid Revision Responder</h5>
-                                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
-                                        ✓ Verified
-                                      </span>
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                      {isDe ? "Einreichung überarbeiteter Manuskripte in <5 Tagen." : "Submitting author revisions within an average of 4.5 days."}
-                                    </p>
-                                  </div>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                    {isDe ? "Registrierter Autor im Gründungsband 2026 von Scholarly Open." : "Registered author with active submissions in inaugural Volume 1."}
+                                  </p>
                                 </div>
                               </div>
-                            )}
+
+                              {/* 2. Ethics & Rigor */}
+                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                  <ShieldCheck className="h-4 w-4 text-[#0b99ff]" />
+                                </div>
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Ethics & Rigor Verified</h5>
+                                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
+                                      ✓ Verified
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                    {isDe ? "Bestätigte Einhaltung der COPE-Publikationsethik und Originalitätskriterien." : "Affirmed adherence to COPE publication ethics and originality criteria."}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* 3. Open Access Champion */}
+                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                  <BookOpen className="h-4 w-4 text-indigo-500" />
+                                </div>
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">Open Access Champion</h5>
+                                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/60 shrink-0">
+                                      ✓ Verified
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                    {isDe ? "Förderung von freiem Wissen unter CC-BY 4.0 Open-Access-Lizenz." : "Committed to unrestricted research dissemination under CC-BY 4.0."}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* 4. ORCID Verified Identity */}
+                              <div className="p-3.5 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-[#272832] flex items-start gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-[#A6CE39]/15 flex items-center justify-center shrink-0 mt-0.5 text-[#A6CE39] font-bold text-xs">
+                                  iD
+                                </div>
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">ORCID® Verified</h5>
+                                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border shrink-0 ${isOrcidVerified ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200/80 dark:border-emerald-800/60" : "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border-amber-200/80 dark:border-amber-800/60"}`}>
+                                      {isOrcidVerified ? "✓ Verified" : (isDe ? "Ausstehend" : "Pending")}
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                                    {isOrcidVerified 
+                                      ? (isDe ? `Verknüpft mit ORCID ${profOrcid || "0000-0002-9842-1102"}.` : `Linked with ORCID ${profOrcid || "0000-0002-9842-1102"}.`)
+                                      : (isDe ? "ORCID authentifizieren für 1-Klick Crossref DOI-Indexierung." : "Authenticate ORCID for 1-click Crossref DOI indexing.")}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
 
                             {/* Clean Milestone Progress Strip */}
                             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/70 dark:border-[#272832] space-y-1.5">
@@ -9787,45 +9732,27 @@ export default function Editorial360Page() {
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-[#272832] text-slate-700 dark:text-slate-300">
-                                  {isSamLee ? (
+                                  <tr>
+                                    <td className="px-4 py-3 text-slate-500">2026-01-01</td>
+                                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Inaugural Volume 1 Launch Submission (Universal)</td>
+                                    <td className="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400">50% Off Principle APC</td>
+                                    <td className="px-4 py-3 text-right">
+                                      <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                                        Applied ✓
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  {waiverClaimSuccess && (
                                     <tr>
-                                      <td colSpan={4} className="px-4 py-8 text-center text-slate-400 italic text-xs">
-                                        {isDe ? "Noch keine Beitrags- oder Erlassguthaben verzeichnet." : "No contribution or waiver credits recorded yet."}
+                                      <td className="px-4 py-3 text-slate-500">{new Date().toISOString().split("T")[0]}</td>
+                                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Author Confirmed Launch Promo ({selectedWaiverPaperId})</td>
+                                      <td className="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400">Code: INAUGURAL-50</td>
+                                      <td className="px-4 py-3 text-right">
+                                        <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                                          Pre-Applied ✓
+                                        </span>
                                       </td>
                                     </tr>
-                                  ) : (
-                                    <>
-                                      <tr>
-                                        <td className="px-4 py-3 text-slate-500">2026-08-15</td>
-                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Peer Review Completed (SOMED-26-094)</td>
-                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€150 EUR (+10% Waiver)</td>
-                                        <td className="px-4 py-3 text-right">
-                                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                            Applied
-                                          </span>
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td className="px-4 py-3 text-slate-500">2026-06-20</td>
-                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Early-Bird Revision Submission (&lt;5 Days)</td>
-                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€200 EUR</td>
-                                        <td className="px-4 py-3 text-right">
-                                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                            Applied
-                                          </span>
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td className="px-4 py-3 text-slate-500">2026-04-10</td>
-                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">Guest Editor for Special Issue (SI-2026-AI)</td>
-                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">+€300 EUR</td>
-                                        <td className="px-4 py-3 text-right">
-                                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131418] px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-[#272832]">
-                                            Applied
-                                          </span>
-                                        </td>
-                                      </tr>
-                                    </>
                                   )}
                                 </tbody>
                               </table>
@@ -9889,7 +9816,7 @@ export default function Editorial360Page() {
                                   type="button"
                                   onClick={() => {
                                     if (typeof navigator !== "undefined") {
-                                      navigator.clipboard.writeText(isSamLee ? "https://scholarlyopen.org/author/sam-lee" : "https://scholarlyopen.org/author/evelyn-vane")
+                                      navigator.clipboard.writeText(typeof window !== "undefined" ? window.location.href : "https://scholarlyopen.org")
                                       alert(isDe ? "Profil-Link kopiert!" : "Researcher profile link copied!")
                                     }
                                   }}
@@ -9906,163 +9833,182 @@ export default function Editorial360Page() {
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-5 mt-5 border-t border-slate-100 dark:border-[#272832]">
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{isDe ? "Artikel" : "Articles Published"}</span>
-                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{isSamLee ? 0 : 5}</div>
-                                <span className="text-[10px] text-emerald-600 font-medium">{isSamLee ? "Pending Publications" : "100% Open Access"}</span>
+                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{uniqueManuscripts.filter(m => m.status === "Published" || m.status === "Accepted").length}</div>
+                                <span className="text-[10px] text-emerald-600 font-medium">{uniqueManuscripts.filter(m => m.status === "Published" || m.status === "Accepted").length > 0 ? "100% Open Access" : (isDe ? "In Gründungsphase" : "In Inaugural Pipeline")}</span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{isDe ? "Gesamtzitate" : "Total Citations"}</span>
-                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{isSamLee ? 0 : 120}</div>
-                                <span className="text-[10px] text-slate-500 font-medium">Crossref Indexed</span>
+                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">0</div>
+                                <span className="text-[10px] text-slate-500 font-medium">Crossref Live Index</span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">h-index / i10-index</span>
-                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{isSamLee ? "0 · 0" : "4 · 3"}</div>
-                                <span className="text-[10px] text-slate-500 font-medium">Verified Metric</span>
+                                <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">0 · 0</div>
+                                <span className="text-[10px] text-slate-500 font-medium">{isDe ? "Echtzeit-Tracking" : "Real-Time Tracking"}</span>
                               </div>
 
                               <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{isDe ? "Gutachter-Stufe" : "Reviewer Tier"}</span>
-                                <div className="text-base font-bold text-[#0b99ff] mt-0.5">{isSamLee ? (isDe ? "Stufe 0 · 0% Erlass" : "Tier 0 (0% Waiver)") : (isDe ? "Stufe 2 · 25% Erlass" : "Tier 2 (25% Waiver)")}</div>
-                                <span className={`text-[10px] font-medium ${isSamLee ? "text-slate-400" : "text-emerald-600"}`}>{isSamLee ? "0 Reviews Completed" : "12 Reviews Completed"}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{isDe ? "Autoren-Status" : "Author Standing"}</span>
+                                <div className="text-base font-bold text-[#0b99ff] mt-0.5">{isDe ? "Gründungsautor (50% Rabatt)" : "Inaugural Author (50% Off)"}</div>
+                                <span className="text-[10px] font-medium text-emerald-600">{uniqueManuscripts.length} {isDe ? "Aktive Einreichung(en)" : "Active Submission(s)"}</span>
                               </div>
                             </div>
                           </Card>
 
                           {/* ── 2-Column Balanced Workspace ── */}
-                          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                            
-                            {/* Left Column (5 Cols): Citation Trends & Metrics */}
-                            <div className="lg:col-span-5 space-y-5">
-                              
-                              {/* Citations by Year Card */}
-                              <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 space-y-4 shadow-xs">
-                                <div className="flex items-center justify-between">
-                                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                                    {isDe ? "Zitate nach Jahr" : "Citations by Year"}
-                                  </h4>
-                                  <span className="text-[10px] text-slate-400">2019–2023 · Crossref</span>
-                                </div>
+                          {(() => {
+                            const publishedArticles = uniqueManuscripts.filter(m => m.status === "Published" || m.status === "Accepted")
+                            const inReviewCount = uniqueManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check").length
+                            const revisionCount = uniqueManuscripts.filter(m => m.status === "Revision Required").length
 
-                                {/* Compact Bar Chart */}
-                                <div className="h-36 flex items-end justify-between gap-2.5 pt-4 pb-1 border-b border-slate-100 dark:border-[#272832]">
-                                  {[
-                                    { year: "2019", count: isSamLee ? 0 : 12, pct: isSamLee ? 2 : 28 },
-                                    { year: "2020", count: isSamLee ? 0 : 22, pct: isSamLee ? 2 : 48 },
-                                    { year: "2021", count: isSamLee ? 0 : 35, pct: isSamLee ? 2 : 75 },
-                                    { year: "2022", count: isSamLee ? 0 : 30, pct: isSamLee ? 2 : 65 },
-                                    { year: "2023", count: isSamLee ? 0 : 45, pct: isSamLee ? 2 : 96 },
-                                  ].map((bar) => (
-                                    <div key={bar.year} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
-                                        {bar.count}
-                                      </span>
-                                      <div
-                                        className={`w-full max-w-[32px] ${isSamLee ? "bg-slate-200 dark:bg-slate-800" : "bg-[#0b99ff] hover:bg-[#0077cc]"} rounded-t-md transition-all duration-200 cursor-pointer`}
-                                        style={{ height: `${bar.pct}%` }}
-                                        title={`${bar.year}: ${bar.count} Citations`}
-                                      />
-                                      <span className="text-[10px] font-medium text-slate-400 pt-1">
-                                        {bar.year}
-                                      </span>
+                            return (
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                                
+                                {/* Left Column (5 Cols): Real-Time Pipeline Tracker */}
+                                <div className="lg:col-span-5 space-y-5">
+                                  
+                                  {/* Manuscript Lifecycle Tracker Card */}
+                                  <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 space-y-4 shadow-xs">
+                                    <div className="flex items-center justify-between">
+                                      <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                                        {isDe ? "Gründungsband-Meilensteine" : "Inaugural Volume Milestones"}
+                                      </h4>
+                                      <span className="text-[10px] text-slate-400">Volume 1 · 2026</span>
                                     </div>
-                                  ))}
-                                </div>
 
-                                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                                  <span>{isDe ? "Wachstumstrend:" : "Growth Trajectory:"}</span>
-                                  <span className={`font-semibold ${isSamLee ? "text-slate-400" : "text-emerald-600 dark:text-emerald-400"}`}>
-                                    {isSamLee ? "0% Baseline" : "+275% (2019–2023)"}
-                                  </span>
-                                </div>
-                              </Card>
-
-                              {/* Research Discipline & Impact Summary */}
-                              <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 space-y-3 shadow-xs">
-                                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                                  {isDe ? "Wissenschaftlicher Einfluss" : "Research Impact Summary"}
-                                </h4>
-                                <div className="space-y-2 text-xs">
-                                  <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-[#272832]">
-                                    <span className="text-slate-500">{isDe ? "Feld-Perzentil" : "Discipline Field Rank"}</span>
-                                    <span className="font-semibold text-slate-900 dark:text-white">
-                                      {isSamLee ? "New Author · Baseline" : "Top 8% in Medical AI"}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-[#272832]">
-                                    <span className="text-slate-500">{isDe ? "Ø Zitate pro Artikel" : "Avg. Citations / Article"}</span>
-                                    <span className="font-semibold text-slate-900 dark:text-white">
-                                      {isSamLee ? "0.0 Citations" : "24.0 Citations"}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center justify-between py-1">
-                                    <span className="text-slate-500">{isDe ? "Daten-Hinterlegungsrate" : "Data Sharing Compliance"}</span>
-                                    <span className={`font-semibold ${isSamLee ? "text-slate-500" : "text-emerald-600 dark:text-emerald-400"}`}>
-                                      {isSamLee ? "Pending Submissions" : "100% FAIR Compliant"}
-                                    </span>
-                                  </div>
-                                </div>
-                              </Card>
-
-                            </div>
-
-                            {/* Right Column (7 Cols): Verified Publications */}
-                            <div className="lg:col-span-7">
-                              <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 space-y-4 shadow-xs">
-                                <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#272832] pb-3">
-                                  <div>
-                                    <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                                      {isDe ? "Verifizierte Publikationen" : "Verified Published Articles"}
-                                    </h4>
-                                    <p className="text-[11px] text-slate-400">
-                                      {isDe ? "Vollständig indexiert in DOAJ, Scopus & Crossref." : "Indexed in DOAJ, Scopus, Crossref & Web of Science."}
-                                    </p>
-                                  </div>
-                                  <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 dark:bg-[#131418] px-2 py-0.5 rounded border border-slate-200 dark:border-[#272832]">
-                                    {isSamLee ? 0 : 4} {isDe ? "Artikel" : "Articles"}
-                                  </span>
-                                </div>
-
-                                {isSamLee ? (
-                                  <div className="p-8 text-center text-slate-400 italic text-xs">
-                                    {isDe ? "Noch keine veröffentlichten Artikel verzeichnet." : "No published articles on record yet. Accepted submissions will be cataloged here automatically."}
-                                  </div>
-                                ) : (
-                                  <div className="divide-y divide-slate-100 dark:divide-[#272832]">
-                                    {[
-                                      { title: "A Security Framework for Decentralized Ledgers in Public Records", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2026.102", citations: 42, year: "2026" },
-                                      { title: "Machine Learning Approaches in Renewable Energy Forecasting", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2026.081", citations: 38, year: "2026" },
-                                      { title: "Ethical Dimensions of AI-Assisted Clinical Decision Support", journal: "Medicine & Health Sciences", doi: "10.5555/so.2025.047", citations: 27, year: "2025" },
-                                      { title: "Federated Learning Privacy Guarantees Under Byzantine Faults", journal: "Engineering & Applied Sciences", doi: "10.5555/so.2025.039", citations: 13, year: "2025" },
-                                    ].map((pub, i) => (
-                                      <div key={i} className="py-3.5 space-y-1.5 first:pt-0 last:pb-0 group">
-                                        <div className="flex items-start justify-between gap-3">
-                                          <h5 className="text-xs font-bold text-slate-900 dark:text-white leading-snug group-hover:text-[#0b99ff] transition-colors">
-                                            {pub.title}
-                                          </h5>
-                                          <span className="text-[11px] font-semibold text-[#0b99ff] bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-200/70 dark:border-sky-800/60 shrink-0 whitespace-nowrap">
-                                            {pub.citations} {isDe ? "Zitate" : "Citations"}
-                                          </span>
+                                    {/* Stage Breakdown Bars */}
+                                    <div className="space-y-3 pt-1 border-b border-slate-100 dark:border-[#272832] pb-4">
+                                      <div className="space-y-1">
+                                        <div className="flex items-center justify-between text-xs">
+                                          <span className="text-slate-600 dark:text-slate-400">{isDe ? "In Begutachtung / Erstprüfung" : "Under Peer Review"}</span>
+                                          <span className="font-bold text-slate-900 dark:text-white">{inReviewCount}</span>
                                         </div>
-
-                                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                                          <span className="font-medium text-slate-700 dark:text-slate-300">Scholarly Open: {pub.journal}</span>
-                                          <span>·</span>
-                                          <span>{pub.year}</span>
-                                          <span>·</span>
-                                          <span className="text-[#0b99ff]">DOI: {pub.doi}</span>
-                                          <span>·</span>
-                                          <span className="text-emerald-600 font-medium">Open Access</span>
+                                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                          <div className="bg-[#0b99ff] h-full rounded-full" style={{ width: `${uniqueManuscripts.length > 0 ? (inReviewCount / uniqueManuscripts.length) * 100 : 0}%` }} />
                                         </div>
                                       </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </Card>
-                            </div>
 
-                          </div>
+                                      <div className="space-y-1">
+                                        <div className="flex items-center justify-between text-xs">
+                                          <span className="text-slate-600 dark:text-slate-400">{isDe ? "In Autorenüberarbeitung" : "In Author Revision"}</span>
+                                          <span className="font-bold text-slate-900 dark:text-white">{revisionCount}</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                          <div className="bg-amber-500 h-full rounded-full" style={{ width: `${uniqueManuscripts.length > 0 ? (revisionCount / uniqueManuscripts.length) * 100 : 0}%` }} />
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-1">
+                                        <div className="flex items-center justify-between text-xs">
+                                          <span className="text-slate-600 dark:text-slate-400">{isDe ? "Angenommen / Im Satz" : "Accepted / In Production"}</span>
+                                          <span className="font-bold text-slate-900 dark:text-white">{publishedArticles.length}</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                          <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${uniqueManuscripts.length > 0 ? (publishedArticles.length / uniqueManuscripts.length) * 100 : 0}%` }} />
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                                      <span>{isDe ? "Zitierungsindex:" : "Citation Indexing:"}</span>
+                                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                        {isDe ? "Aktiviert bei Veröffentlichung" : "Activates Upon Publication"}
+                                      </span>
+                                    </div>
+                                  </Card>
+
+                                  {/* Research Discipline & Impact Summary */}
+                                  <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 space-y-3 shadow-xs">
+                                    <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                                      {isDe ? "Wissenschaftlicher Rahmen" : "Research Framework & Compliance"}
+                                    </h4>
+                                    <div className="space-y-2 text-xs">
+                                      <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-[#272832]">
+                                        <span className="text-slate-500">{isDe ? "Autorenkohorte" : "Author Cohort"}</span>
+                                        <span className="font-semibold text-slate-900 dark:text-white">
+                                          {isDe ? "Gründungsjahrgang (Band 1)" : "Inaugural Cohort (Volume 1)"}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-[#272832]">
+                                        <span className="text-slate-500">{isDe ? "Ziel-Erstbegutachtung" : "Target First Decision"}</span>
+                                        <span className="font-semibold text-slate-900 dark:text-white">
+                                          &lt; 21 Days
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between py-1">
+                                        <span className="text-slate-500">{isDe ? "Daten-Hinterlegungsrate" : "Data Sharing Standard"}</span>
+                                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                          100% FAIR Compliant
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </Card>
+
+                                </div>
+
+                                {/* Right Column (7 Cols): Verified Published Articles */}
+                                <div className="lg:col-span-7">
+                                  <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] p-5 space-y-4 shadow-xs">
+                                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#272832] pb-3">
+                                      <div>
+                                        <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                                          {isDe ? "Verifizierte Publikationen" : "Verified Published Articles"}
+                                        </h4>
+                                        <p className="text-[11px] text-slate-400">
+                                          {isDe ? "Indexierung in Crossref, DOAJ & persistenten Repositorien." : "Cataloged with persistent Crossref DOIs & open access metadata."}
+                                        </p>
+                                      </div>
+                                      <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 dark:bg-[#131418] px-2 py-0.5 rounded border border-slate-200 dark:border-[#272832]">
+                                        {publishedArticles.length} {isDe ? "Artikel" : "Articles"}
+                                      </span>
+                                    </div>
+
+                                    {publishedArticles.length === 0 ? (
+                                      <div className="p-8 text-center rounded-xl bg-slate-50/50 dark:bg-[#131418] border border-dashed border-slate-200 dark:border-[#272832] space-y-2">
+                                        <FileText className="h-8 w-8 mx-auto text-slate-300 dark:text-slate-600" />
+                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                          {isDe ? "Noch keine formal veröffentlichten Artikel verzeichnet" : "No Published Articles on Record Yet"}
+                                        </p>
+                                        <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                                          {isDe 
+                                            ? `${uniqueManuscripts.length} Manuskript(e) befinden sich derzeit im Begutachtungsprozess. Sobald eine Arbeit angenommen wird, wird sie hier mit citablem Crossref-DOI aufgeführt.`
+                                            : `${uniqueManuscripts.length} manuscript(s) currently progressing through peer review. Once accepted, articles will be cataloged here with persistent Crossref DOIs.`}
+                                        </p>
+                                      </div>
+                                    ) : (
+                                      <div className="divide-y divide-slate-100 dark:divide-[#272832]">
+                                        {publishedArticles.map((pub, i) => (
+                                          <div key={i} className="py-3.5 space-y-1.5 first:pt-0 last:pb-0 group">
+                                            <div className="flex items-start justify-between gap-3">
+                                              <h5 className="text-xs font-bold text-slate-900 dark:text-white leading-snug group-hover:text-[#0b99ff] transition-colors">
+                                                {pub.title}
+                                              </h5>
+                                              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/70 dark:border-emerald-800/60 shrink-0 whitespace-nowrap">
+                                                Published
+                                              </span>
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                                              <span className="font-medium text-slate-700 dark:text-slate-300">Scholarly Open: {pub.journal}</span>
+                                              <span>·</span>
+                                              <span>ID: {pub.id}</span>
+                                              <span>·</span>
+                                              <span className="text-[#0b99ff]">DOI: 10.5555/so.2026.{pub.id?.replace(/\D/g, '') || '01'}</span>
+                                              <span>·</span>
+                                              <span className="text-emerald-600 font-medium">CC-BY 4.0 Open Access</span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </Card>
+                                </div>
+
+                              </div>
+                            )
+                          })()}
 
                         </div>
                       )}
@@ -14781,6 +14727,139 @@ export default function Editorial360Page() {
                   </Button>
                 </DialogFooter>
               </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* ORCID AUTHENTICATION & CROSSREF REGISTRY LINK DIALOG */}
+          <Dialog open={isOrcidAuthModalOpen} onOpenChange={setIsOrcidAuthModalOpen}>
+            <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-md transition-colors p-6">
+              <DialogHeader className="pb-2">
+                <div className="flex items-center gap-2.5 mb-1">
+                  <div className="h-9 w-9 rounded-xl bg-[#A6CE39]/15 flex items-center justify-center text-[#A6CE39] shrink-0 font-bold">
+                    <span className="font-mono text-sm bg-[#A6CE39] text-white px-1.5 py-0.5 rounded font-black">iD</span>
+                  </div>
+                  <div>
+                    <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+                      {language === "de" ? "ORCID®-Identität authentifizieren" : "Authenticate ORCID® iD Record"}
+                    </DialogTitle>
+                    <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                      {language === "de" 
+                        ? "Verbinden Sie Ihre 16-stellige ORCID iD für die automatische Crossref DOI-Indexierung." 
+                        : "Connect your 16-digit ORCID iD to enable automatic Crossref DOI metadata indexing upon publication."}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              {orcidAuthSuccessMsg ? (
+                <div className="space-y-4 py-3">
+                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-center space-y-2">
+                    <CheckCircle className="h-8 w-8 text-emerald-500 mx-auto" />
+                    <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-300">
+                      {language === "de" ? "ORCID erfolgreich authentifiziert!" : "ORCID Authenticated & Verified!"}
+                    </h4>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                      {orcidAuthSuccessMsg}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => setIsOrcidAuthModalOpen(false)}
+                    className="w-full bg-[#A6CE39] hover:bg-[#95bc2f] text-white font-bold text-xs py-2.5 rounded-xl cursor-pointer"
+                  >
+                    {language === "de" ? "Fertig" : "Continue to Workspace"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4 py-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                      <span>{language === "de" ? "16-stellige ORCID iD" : "16-Digit ORCID iD"}</span>
+                      <a 
+                        href="https://orcid.org/register" 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="text-[11px] text-[#0b99ff] hover:underline font-normal"
+                      >
+                        {language === "de" ? "Keine ORCID? Jetzt registrieren" : "Don't have an ORCID? Register"}
+                      </a>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-xs text-slate-400 font-mono">
+                        https://orcid.org/
+                      </div>
+                      <input
+                        type="text"
+                        value={orcidInput}
+                        onChange={(e) => setOrcidInput(e.target.value)}
+                        placeholder="0000-0002-1825-0097"
+                        className="w-full pl-[135px] pr-3 py-2 bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] rounded-xl text-xs font-mono font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A6CE39]/50"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] space-y-2 text-xs">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      {language === "de" ? "Autorisierungsrechte" : "Permissions Requested"}
+                    </div>
+                    <div className="space-y-1 text-slate-600 dark:text-slate-300 text-[11px]">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        <span>{language === "de" ? "Lesen begrenzter Daten aus Ihrem ORCID-Datensatz" : "Read limited information from your ORCID record"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        <span>{language === "de" ? "Crossref DOI-Veröffentlichungen automatisch registrieren" : "Auto-sync Crossref DOIs to your works upon publication"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DialogFooter className="gap-2 sm:gap-0 pt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsOrcidAuthModalOpen(false)}
+                      className="text-xs cursor-pointer"
+                    >
+                      {language === "de" ? "Abbrechen" : "Cancel"}
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={orcidAuthLoading}
+                      onClick={() => {
+                        const cleanVal = orcidInput.replace(/^https?:\/\/orcid\.org\//i, "").trim()
+                        if (!cleanVal) {
+                          alert(language === "de" ? "Bitte geben Sie eine gültige ORCID iD ein." : "Please enter a valid ORCID iD.")
+                          return
+                        }
+                        setOrcidAuthLoading(true)
+                        setTimeout(() => {
+                          setOrcidAuthLoading(false)
+                          setProfOrcid(cleanVal)
+                          setIsOrcidVerified(true)
+                          const msg = language === "de"
+                            ? `ORCID iD (${cleanVal}) erfolgreich mit Ihrem Autorenkonto und Crossref Registry verknüpft.`
+                            : `ORCID iD (${cleanVal}) successfully linked to your Author Workspace and Crossref Registry.`
+                          setOrcidAuthSuccessMsg(msg)
+                          setSuccess(msg)
+                        }, 800)
+                      }}
+                      className="bg-[#A6CE39] hover:bg-[#95bc2f] text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-xs flex items-center gap-1.5"
+                    >
+                      {orcidAuthLoading ? (
+                        <>
+                          <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          <span>{language === "de" ? "Verifiziere..." : "Connecting..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-mono text-[10px] bg-black/20 px-1 rounded">iD</span>
+                          <span>{language === "de" ? "ORCID verifizieren & verknüpfen" : "Verify & Connect ORCID"}</span>
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
 

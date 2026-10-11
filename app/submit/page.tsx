@@ -265,6 +265,7 @@ export default function SubmitPage() {
 
                   <Button
                     type="button"
+                    variant="outline"
                     size="lg"
                     onClick={() => {
                       setStatus("idle")
@@ -272,7 +273,7 @@ export default function SubmitPage() {
                       setSelectedFileName(null)
                       setAgreed(false)
                     }}
-                    className="bg-[#F6BB14] hover:bg-[#e2aa10] active:bg-[#c99508] text-slate-900 font-bold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-200 cursor-pointer"
+                    className="cursor-pointer font-medium text-foreground hover:bg-muted/80 transition-colors"
                   >
                     Submit Another Manuscript
                   </Button>
