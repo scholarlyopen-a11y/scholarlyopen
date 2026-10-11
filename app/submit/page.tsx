@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers, Printer, Copy, Check, ExternalLink } from "lucide-react"
+import { ArrowRight, Upload, FileText, CheckCircle, AlertCircle, User, Mail, Building, Globe, BookOpen, Layers, Printer, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -241,21 +241,11 @@ export default function SubmitPage() {
                 <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <Button
-                      asChild
-                      size="lg"
-                      className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 cursor-pointer shadow-sm"
-                    >
-                      <a href={`/editorial360?manuscriptId=${encodeURIComponent(submissionReceipt.trackingId)}&email=${encodeURIComponent(submissionReceipt.authorEmail)}`}>
-                        <ExternalLink className="h-4 w-4" />
-                        Track in editorial360 Workspace
-                      </a>
-                    </Button>
-                    <Button
                       type="button"
                       variant="outline"
                       size="lg"
                       onClick={() => window.print()}
-                      className="gap-2 cursor-pointer"
+                      className="gap-2 cursor-pointer hover:bg-muted/80 transition-colors"
                     >
                       <Printer className="h-4 w-4" />
                       Print / Save Receipt
@@ -264,7 +254,7 @@ export default function SubmitPage() {
                       asChild
                       variant="outline"
                       size="lg"
-                      className="gap-2 cursor-pointer"
+                      className="gap-2 cursor-pointer hover:bg-muted/80 transition-colors"
                     >
                       <a href={`mailto:info@scholarlyopen.org?subject=Manuscript%20Inquiry:%20[${encodeURIComponent(submissionReceipt.trackingId)}]%20${encodeURIComponent(submissionReceipt.title)}`}>
                         <Mail className="h-4 w-4" />
@@ -274,7 +264,7 @@ export default function SubmitPage() {
                   </div>
 
                   <Button
-                    variant="ghost"
+                    type="button"
                     size="lg"
                     onClick={() => {
                       setStatus("idle")
@@ -282,7 +272,7 @@ export default function SubmitPage() {
                       setSelectedFileName(null)
                       setAgreed(false)
                     }}
-                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="bg-[#F6BB14] hover:bg-[#e2aa10] active:bg-[#c99508] text-slate-900 font-bold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-200 cursor-pointer"
                   >
                     Submit Another Manuscript
                   </Button>

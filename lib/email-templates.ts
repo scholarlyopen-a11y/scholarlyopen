@@ -963,9 +963,9 @@ export function generateBrandedEmailHtml(options: {
     <div style="background-color: #ffffff; padding: 18px 24px; border-bottom: 2px solid #0b99ff;">
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; width: 100%;">
         <tr>
-          <td valign="middle" align="left" style="text-align: left; vertical-align: middle;">
+          <td valign="middle" align="left" style="text-align: left; vertical-align: middle; min-width: 120px;">
             <a href="${baseUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
-              <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" height="34" style="height: 34px; max-height: 36px; width: auto; display: block; border: 0;" />
+              <img src="${baseUrl}/logo-full-color.svg" alt="Scholarly Open" width="112" height="35" style="width: 112px; height: 35px; max-height: 36px; display: block; border: 0;" />
             </a>
           </td>
           <td valign="middle" align="right" style="text-align: right; vertical-align: middle;">
