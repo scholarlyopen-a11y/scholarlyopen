@@ -10212,43 +10212,30 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    if (trackingManuscript) {
-                      setReadingManuscript(trackingManuscript)
-                    }
-                  }}
-                  className="h-8 px-3 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold shadow-xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
-                  title="Open Manuscript in In-System Interactive Reader"
-                >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  <span>Interactive Manuscript Reader</span>
-                </Button>
                 <a
                   href={trackingManuscript?.fileUrl || (trackingManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : trackingManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
                   download={trackingManuscript?.fileName || (trackingManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${trackingManuscript?.id || "Manuscript"}_Main_Document.docx`)}
-                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
                   title="Download Manuscript (.docx)"
                 >
-                  <Download className="h-3.5 w-3.5 text-slate-400" />
-                  <span>Download .docx</span>
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download Manuscript (.docx)</span>
                 </a>
                 <Button
                   type="button"
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => {
                     if (trackingManuscript) {
                       setSelectedManuscript(trackingManuscript)
                       setIsPreQualityModalOpen(true)
                     }
                   }}
-                  className="h-8 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer whitespace-nowrap"
+                  className="h-8 text-xs font-semibold border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap"
+                  title="View Submission Dossier & Metadata"
                 >
-                  <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                  Dossier
+                  <Eye className="h-3.5 w-3.5 mr-1 text-slate-500" />
+                  View Dossier
                 </Button>
               </div>
             </div>
@@ -11420,7 +11407,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        Referee Evaluations ({readingManuscript.reviewers?.length || 3})
+                        Referee Evaluations ({readingManuscript.reviewers?.length || 2})
                       </span>
                       <span className="text-[10px] text-emerald-600 font-semibold">Active Round</span>
                     </div>
@@ -11478,23 +11465,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           >
                             Send Reminder
                           </button>
-                        </div>
-                      </div>
-
-                      {/* Reviewer 3 */}
-                      <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-slate-900 dark:text-white">Dr. Evelyn Vane</span>
-                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200">
-                            Accept
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                          &ldquo;High operational relevance with compelling clinical implementation metrics. Exemplary quality improvement demonstration.&rdquo;
-                        </p>
-                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-                          <span>Report Logged</span>
-                          <span>Score: 9.0/10</span>
                         </div>
                       </div>
                     </div>
