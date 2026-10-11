@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import {
   ShieldAlert,
   ShieldCheck,
@@ -71,6 +71,7 @@ export function ForensicsInvestigationSuite({
 }: ForensicsSuiteProps) {
   const isDe = language === "de"
   const [activeTab, setActiveTab] = useState<"summary" | "figure_compare" | "text_compare" | "papermill" | "open_data">("summary")
+  const [viewMode, setViewMode] = useState<"tabbed" | "all_sections">("tabbed")
   
   // Figure Comparator States
   const [figureZoom, setFigureZoom] = useState<number>(1)
@@ -86,9 +87,26 @@ export function ForensicsInvestigationSuite({
 
   if (!manuscript) return null
 
-  const plag = manuscript.plagiarismScore || 34
-  const ai = manuscript.aiScore || 15
-  const isFlagged = Boolean(manuscript.integrityStatus === "Flagged" || plag > 20 || ai > 35)
+  const plag = typeof manuscript.plagiarismScore === "number" ? manuscript.plagiarismScore : (manuscript.id === "SOMED-26-RW01" ? 3.4 : 12)
+  const ai = typeof manuscript.aiScore === "number" ? manuscript.aiScore : (manuscript.id === "SOMED-26-RW01" ? 1.2 : 8)
+  const isFlagged = Boolean(manuscript.integrityStatus === "Flagged" || (typeof manuscript.plagiarismScore === "number" && manuscript.plagiarismScore > 15) || (typeof manuscript.aiScore === "number" && manuscript.aiScore > 30))
+
+  // Dynamically configure tabs:
+  // For clean / non-flagged articles, Side-by-Side comparator is invalid and omitted to avoid crowding.
+  const availableTabs = useMemo(() => {
+    const list = [
+      { id: "summary", label: isDe ? "Übersicht & Radar" : "Overview & Radar", icon: Layers },
+      { id: "papermill", label: isDe ? "Papermill-Alarm" : "Papermill Alarm", icon: AlertTriangle },
+      { id: "open_data", label: isDe ? "Open Data & FAIR" : "Open Data & FAIR Code", icon: Database },
+    ]
+    if (isFlagged) {
+      list.splice(1, 0, 
+        { id: "figure_compare", label: isDe ? "Bild-Prüfung" : "Figure Inspection", icon: Split },
+        { id: "text_compare", label: isDe ? "Text-Abgleich" : "Text Match", icon: FileText }
+      )
+    }
+    return list
+  }, [isDe, isFlagged])
 
   // Demo figure forensic data based on manuscript ID
   const isMicroscopyIssue = manuscript.id.includes("BIO") || manuscript.id.includes("MED")
@@ -154,41 +172,74 @@ export function ForensicsInvestigationSuite({
           </div>
         )}
 
-        {/* Tab Switcher */}
-        <div className="pt-3 pb-1 border-b border-slate-100 dark:border-slate-800 flex items-center gap-1 overflow-x-auto [scrollbar-width:none] shrink-0">
-          {[
-            { id: "summary", label: isDe ? "Übersicht & Radar" : "Overview & Radar", icon: Layers },
-            { id: "figure_compare", label: isDe ? "Bild-Vergleich (Side-by-Side)" : "Side-by-Side Figure Comparator", icon: Split },
-            { id: "text_compare", label: isDe ? "Text-Ähnlichkeit (Side-by-Side)" : "Side-by-Side Text Match", icon: FileText },
-            { id: "papermill", label: isDe ? "Papermill & Autoren-Netzwerk" : "Papermill & Network Alarm", icon: AlertTriangle },
-            { id: "open_data", label: isDe ? "Open Data & Code (FAIR)" : "Open Data & FAIR Code", icon: Database }
-          ].map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-[#0b99ff] text-white shadow-xs"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                <span>{tab.label}</span>
-              </button>
-            )
-          })}
+        {/* Tab & View Mode Switcher */}
+        <div className="pt-3 pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {availableTabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = (activeTab === tab.id || (!isFlagged && (activeTab === "figure_compare" || activeTab === "text_compare") && tab.id === "summary")) && viewMode === "tabbed"
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab.id as any)
+                    setViewMode("tabbed")
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-[#0b99ff] text-white shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* View Mode Switcher: Tabbed vs All Sections */}
+          <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs shrink-0">
+            <button
+              type="button"
+              onClick={() => setViewMode("tabbed")}
+              className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                viewMode === "tabbed"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <Layers className="h-3 w-3" />
+              <span>Tabs</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("all_sections")}
+              className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                viewMode === "all_sections"
+                  ? "bg-white dark:bg-slate-800 text-[#0b99ff] shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <FileCheck2 className="h-3 w-3" />
+              <span>All Sections (Full Report)</span>
+            </button>
+          </div>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto py-3 pr-1 space-y-4 text-xs [scrollbar-width:thin]">
           
-          {/* ================= TAB 1: SUMMARY & RADAR ================= */}
-          {activeTab === "summary" && (
+          {/* ================= TAB 1 / SECTION 1: SUMMARY & RADAR ================= */}
+          {(viewMode === "all_sections" || activeTab === "summary" || (!isFlagged && (activeTab === "figure_compare" || activeTab === "text_compare"))) && (
             <div className="space-y-4">
+              {viewMode === "all_sections" && (
+                <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="font-bold text-xs uppercase tracking-wider text-[#0b99ff]">Section 1</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">• Overview &amp; 5-Segment Integrity Radar</span>
+                </div>
+              )}
               {/* Manuscript Quick Brief */}
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/90 dark:border-slate-800 space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Title & Attribution</span>
@@ -267,9 +318,15 @@ export function ForensicsInvestigationSuite({
             </div>
           )}
 
-          {/* ================= TAB 2: SIDE-BY-SIDE FIGURE COMPARATOR ================= */}
-          {activeTab === "figure_compare" && (
-            <div className="space-y-4">
+          {/* ================= TAB 2: SIDE-BY-SIDE FIGURE COMPARATOR (FLAGGED ONLY) ================= */}
+          {Boolean(isFlagged && (viewMode === "all_sections" || activeTab === "figure_compare")) && (
+            <div className="space-y-4 pt-2">
+              {viewMode === "all_sections" && (
+                <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="font-bold text-xs uppercase tracking-wider text-rose-500">Section 4A</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">• Target Figure Forensic Comparator</span>
+                </div>
+              )}
               {/* Comparator Controls Toolbar */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
@@ -476,9 +533,15 @@ export function ForensicsInvestigationSuite({
             </div>
           )}
 
-          {/* ================= TAB 3: SIDE-BY-SIDE TEXT MATCH ================= */}
-          {activeTab === "text_compare" && (
-            <div className="space-y-4">
+          {/* ================= TAB 3: SIDE-BY-SIDE TEXT MATCH (FLAGGED ONLY) ================= */}
+          {Boolean(isFlagged && (viewMode === "all_sections" || activeTab === "text_compare")) && (
+            <div className="space-y-4 pt-2">
+              {viewMode === "all_sections" && (
+                <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="font-bold text-xs uppercase tracking-wider text-rose-500">Section 4B</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">• Text Duplication &amp; Overlap Engine</span>
+                </div>
+              )}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Text Overlap Engine</span>
@@ -528,9 +591,15 @@ export function ForensicsInvestigationSuite({
             </div>
           )}
 
-          {/* ================= TAB 4: PAPERMILL & AUTHOR NETWORK ================= */}
-          {activeTab === "papermill" && (
-            <div className="space-y-4">
+          {/* ================= TAB 4 / SECTION 2: PAPERMILL & AUTHOR NETWORK ================= */}
+          {(viewMode === "all_sections" || activeTab === "papermill") && (
+            <div className="space-y-4 pt-2">
+              {viewMode === "all_sections" && (
+                <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="font-bold text-xs uppercase tracking-wider text-[#0b99ff]">Section 2</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">• Papermill Alarm &amp; Fabricated Network Detector</span>
+                </div>
+              )}
               {/* Papermill Risk Meter */}
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
@@ -604,9 +673,15 @@ export function ForensicsInvestigationSuite({
             </div>
           )}
 
-          {/* ================= TAB 5: OPEN DATA & FAIR CODE ================= */}
-          {activeTab === "open_data" && (
-            <div className="space-y-4">
+          {/* ================= TAB 5 / SECTION 3: OPEN DATA & FAIR CODE ================= */}
+          {(viewMode === "all_sections" || activeTab === "open_data") && (
+            <div className="space-y-4 pt-2">
+              {viewMode === "all_sections" && (
+                <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="font-bold text-xs uppercase tracking-wider text-[#0b99ff]">Section 3</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">• FAIR Data &amp; Reproducible Code Audit</span>
+                </div>
+              )}
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -657,6 +732,26 @@ export function ForensicsInvestigationSuite({
                 </div>
                 <span className="text-xs font-bold text-[#0b99ff]">Reproducible ✓</span>
               </div>
+            </div>
+          )}
+
+          {/* ================= ALL SECTIONS VERIFICATION BADGE (FOR CLEAN ARTICLES) ================= */}
+          {viewMode === "all_sections" && !isFlagged && (
+            <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 flex items-center justify-between gap-3 pt-3">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0" />
+                <div>
+                  <div className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
+                    {isDe ? "Integritätsprüfung zertifiziert: Alle Abschnitte mängelfrei" : "Research Integrity Certified Clean: All Sections Passed"}
+                  </div>
+                  <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                    {isDe ? "COPE Core Practices Standard erfüllt. Keine Beanstandungen bei Figuren, Daten oder Autorenschaft." : "COPE Core Practices standards fulfilled. Zero figure duplications, verified raw datasets, and authentic author network."}
+                  </div>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900 px-2.5 py-1 rounded-md border border-emerald-300 dark:border-emerald-800 shrink-0">
+                100% Compliant ✓
+              </span>
             </div>
           )}
 
