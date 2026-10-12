@@ -11009,7 +11009,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 reviewerName: "Dr. Praveen Nagula",
                                 originality: 3,
                                 commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
-                                sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+                                sanitizedCommentsAuthor: `General comments to the Author(s):
+“The review article to be concised. Tables to be provided.”
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
                                 commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
                                 recommendation: "Re-write and Re-submit",
                                 status: "Pending Moderation"
@@ -11159,7 +11167,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 reviewerName: "Dr. Praveen Nagula",
                                 originality: 3,
                                 commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
-                                sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+                                sanitizedCommentsAuthor: `General comments to the Author(s):
+“The review article to be concised. Tables to be provided.”
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
                                 commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
                                 recommendation: "Re-write and Re-submit",
                                 status: "Pending Moderation"
@@ -12479,7 +12495,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   reviewerName: "Dr. Praveen Nagula",
                   originality: 3,
                   commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
-                  sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+                  sanitizedCommentsAuthor: `General comments to the Author(s):
+“The review article to be concised. Tables to be provided.”
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
                   commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
                   recommendation: "Re-write and Re-submit",
                   status: "Pending Moderation"

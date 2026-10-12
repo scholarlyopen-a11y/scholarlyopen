@@ -1646,6 +1646,10 @@ export default function Editorial360Page() {
               .filter(r => !FAKE_REVIEW_IDS.has(r.id))
               .map(r => {
                 if (r.paperId === "SOMED-26-RW01" || r.id === "REV-FB-SAM-01" || r.id === "REV-FB-1791559472514-816") {
+                  const fullMatch = DEFAULT_INITIAL_REVIEWS.find(def => def.id === r.id || (r.reviewerName && def.reviewerName?.toLowerCase().includes(r.reviewerName.toLowerCase().split(' ').pop() || '')))
+                  if (fullMatch && (!r.commentsAuthor?.includes("Specific comments") || !r.sanitizedCommentsAuthor?.includes("Specific comments"))) {
+                    return { ...fullMatch, status: "Released" as const }
+                  }
                   return { ...r, status: "Released" as const }
                 }
                 return r

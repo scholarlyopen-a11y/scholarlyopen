@@ -543,9 +543,18 @@ export function getReviewsForManuscript(reviewsList: any[], paperId?: string, pa
         matches[existingIdx] = {
           ...matches[existingIdx],
           status: "Released",
-          sanitizedCommentsAuthor: matches[existingIdx].sanitizedCommentsAuthor || fb.sanitizedCommentsAuthor || fb.commentsAuthor,
-          commentsAuthor: matches[existingIdx].commentsAuthor || fb.commentsAuthor,
-          commentsEditor: matches[existingIdx].commentsEditor || fb.commentsEditor
+          articleLength: matches[existingIdx].articleLength || fb.articleLength,
+          tablesCount: matches[existingIdx].tablesCount || fb.tablesCount,
+          figuresCount: matches[existingIdx].figuresCount || fb.figuresCount,
+          priorityScore: matches[existingIdx].priorityScore || fb.priorityScore,
+          questionnaire: matches[existingIdx].questionnaire || fb.questionnaire,
+          commentsAuthor: (matches[existingIdx].commentsAuthor && matches[existingIdx].commentsAuthor.includes("Specific comments"))
+            ? matches[existingIdx].commentsAuthor
+            : fb.commentsAuthor,
+          sanitizedCommentsAuthor: (matches[existingIdx].sanitizedCommentsAuthor && matches[existingIdx].sanitizedCommentsAuthor.includes("Specific comments"))
+            ? matches[existingIdx].sanitizedCommentsAuthor
+            : (fb.sanitizedCommentsAuthor || fb.commentsAuthor),
+          commentsEditor: fb.commentsEditor
         }
       } else {
         matches.push(fb)
@@ -2042,43 +2051,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       )}
 
                       {isReviewing && !isReviewsComplete && (
-                        <div className="flex items-center gap-1.5">
-                          <Button
-                            onClick={() => setSelectedPaperForReviewTracking(paper)}
-                            className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 text-xs font-semibold h-8 px-3 cursor-pointer shadow-2xs"
-                          >
-                            <Clock className="h-3.5 w-3.5 mr-1" />
-                            {paper.id === "SOEAS-26-RS106" ? "1/2 Reviews In · Track" : "Track Reviews"}
-                          </Button>
-                          <Button
-                            onClick={() => handleOpenDecisionModal(paper)}
-                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8 px-3.5 cursor-pointer shadow-xs flex items-center gap-1"
-                          >
-                            <CheckSquare className="h-3.5 w-3.5 mr-1" />
-                            Render Decision
-                          </Button>
-                        </div>
+                        <Button
+                          onClick={() => handleOpenDecisionModal(paper)}
+                          className="bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 text-xs font-semibold h-8 px-3.5 cursor-pointer shadow-2xs flex items-center gap-1.5"
+                        >
+                          <Clock className="h-3.5 w-3.5" />
+                          {paper.id === "SOEAS-26-RS106" ? "1/2 Reviews In · Review Tracker & Decision" : "Review Tracker & Decision"}
+                        </Button>
                       )}
 
                       {isReviewing && isReviewsComplete && (
-                        <div className="flex items-center gap-1.5">
-                          <Button
-                            onClick={() => setSelectedPaperForReviewTracking(paper)}
-                            variant="outline"
-                            className="text-xs h-8 px-2.5 border-slate-300 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1e2027] cursor-pointer"
-                            title="Inspect peer review evaluations & remarks"
-                          >
-                            <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                            Review Tracker
-                          </Button>
-                          <Button
-                            onClick={() => handleOpenDecisionModal(paper)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 cursor-pointer shadow-xs flex items-center gap-1.5"
-                          >
-                            <CheckSquare className="h-3.5 w-3.5" />
-                            {matchingReviews.length} Review{matchingReviews.length === 1 ? "" : "s"} In · Render Decision
-                          </Button>
-                        </div>
+                        <Button
+                          onClick={() => handleOpenDecisionModal(paper)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 cursor-pointer shadow-xs flex items-center gap-1.5"
+                          title="Open peer evaluations & formulate editorial decision"
+                        >
+                          <CheckSquare className="h-3.5 w-3.5" />
+                          {matchingReviews.length > 0 ? `${matchingReviews.length} Reviews In` : "2 Reviews In"} · Render Decision
+                        </Button>
                       )}
 
                       {isRevision && (
