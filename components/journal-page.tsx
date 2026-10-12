@@ -192,24 +192,33 @@ export function JournalPage({
         // 2. Live Associate Editors
         const liveAEs = approved.filter((e: any) => e.role?.toLowerCase().includes("associate"))
         if (liveAEs.length > 0) {
-          const mappedAEs: EditorMember[] = liveAEs.map((e: any) => ({
-            name: e.name,
-            role: e.role || "Associate Editor",
-            affiliation: e.affiliation || "Academic Institution",
-            specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
-            imageUrl: liveEiC && liveEiC.email === e.email ? liveEiC.photoUrl : e.photoUrl,
-            email: e.email,
-            orcid: e.orcid,
-            googleScholar: e.googleScholar || e.scholarUrl,
-            linkedin: e.linkedin,
-            researchGate: e.researchGate,
-            biography: e.biography,
-            expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
-          }))
+          const mappedAEs: EditorMember[] = liveAEs.map((e: any) => {
+            const isAbdelmonsef = (e.name && (e.name.toLowerCase().includes("abdelmonsef") || e.name.toLowerCase().includes("aboubakr"))) || (e.slug && e.slug.includes("abdelmonsef"))
+            return {
+              name: isAbdelmonsef ? "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D." : e.name,
+              slug: isAbdelmonsef ? "aboubakr-haredi-abdelmonsef" : e.slug,
+              role: e.role || "Associate Editor",
+              affiliation: isAbdelmonsef ? "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt" : (e.affiliation || "Academic Institution"),
+              specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
+              imageUrl: isAbdelmonsef ? "/images/editors/aboubakr-abdelmonsef.png" : (liveEiC && liveEiC.email === e.email ? liveEiC.photoUrl : e.photoUrl),
+              email: isAbdelmonsef ? "editor.chem@scholarlyopen.org" : e.email,
+              orcid: isAbdelmonsef ? "0000-0002-4616-0224" : e.orcid,
+              scopusId: isAbdelmonsef ? "57191850843" : e.scopusId,
+              googleScholar: e.googleScholar || e.scholarUrl,
+              linkedin: isAbdelmonsef ? "https://www.linkedin.com/in/dr-aboubakr-h-abdelmonsef" : e.linkedin,
+              researchGate: e.researchGate,
+              biography: e.biography,
+              expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
+            }
+          })
           setCurrentAssociateEditors(prev => {
             const combined = [...mappedAEs]
             for (const existing of prev) {
-              if (existing.name !== "Position open" && !combined.some(c => c.name.toLowerCase() === existing.name.toLowerCase())) {
+              if (existing.name !== "Position open" && !combined.some(c => {
+                if (c.name.toLowerCase() === existing.name.toLowerCase()) return true
+                if ((c.name.toLowerCase().includes("abdelmonsef") || (c.slug && c.slug.includes("abdelmonsef"))) && (existing.name.toLowerCase().includes("abdelmonsef") || (existing.slug && existing.slug.includes("abdelmonsef")))) return true
+                return false
+              })) {
                 combined.push(existing)
               }
             }
@@ -237,7 +246,11 @@ export function JournalPage({
           setCurrentEditorialBoard(prev => {
             const combined = [...mappedBoard]
             for (const existing of prev) {
-              if (existing.name !== "Position open" && !combined.some(c => c.name.toLowerCase() === existing.name.toLowerCase())) {
+              if (existing.name !== "Position open" && !combined.some(c => {
+                if (c.name.toLowerCase() === existing.name.toLowerCase()) return true
+                if ((c.name.toLowerCase().includes("abdelmonsef") || (c.slug && c.slug.includes("abdelmonsef"))) && (existing.name.toLowerCase().includes("abdelmonsef") || (existing.slug && existing.slug.includes("abdelmonsef")))) return true
+                return false
+              })) {
                 combined.push(existing)
               }
             }

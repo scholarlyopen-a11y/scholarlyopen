@@ -462,13 +462,56 @@ export function JournalEditorialBoard({
   ]
 
   const deduplicateList = (list: EditorMember[]) => {
-    const seen = new Set<string>()
-    return list.filter(item => {
-      const key = (item.slug || item.name).toLowerCase().replace(/[^a-z0-9]/g, "")
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
+    const canonicalMap = new Map<string, EditorMember>()
+
+    for (const item of list) {
+      const normName = item.name.toLowerCase()
+      const normSlug = (item.slug || "").toLowerCase()
+      const normEmail = (item.email || "").toLowerCase()
+      const normOrcid = (item.orcid || "").toLowerCase()
+
+      let key = (item.slug || item.name).toLowerCase().replace(/[^a-z0-9]/g, "")
+
+      if (
+        normSlug.includes("abdelmonsef") || 
+        normName.includes("abdelmonsef") || 
+        normName.includes("aboubakr") || 
+        normEmail.includes("aboubakr.ahmed") || 
+        normOrcid === "0000-0002-4616-0224"
+      ) {
+        key = "aboubakr-haredi-abdelmonsef"
+        canonicalMap.set(key, {
+          ...item,
+          slug: "aboubakr-haredi-abdelmonsef",
+          name: "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D.",
+          role: "Associate Editor",
+          affiliation: "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt",
+          imageUrl: "/images/editors/aboubakr-abdelmonsef.png",
+          orcid: "0000-0002-4616-0224",
+          scopusId: "57191850843",
+          linkedin: "https://www.linkedin.com/in/dr-aboubakr-h-abdelmonsef",
+          email: item.email || "editor.chem@scholarlyopen.org"
+        })
+        continue
+      }
+
+      if (normSlug.includes("cacciola") || normName.includes("cacciola") || normEmail.includes("cacciolaf")) {
+        key = "francesco-cacciola"
+      } else if (normSlug.includes("verpoort") || normName.includes("verpoort") || normEmail.includes("francis@whut")) {
+        key = "francis-verpoort"
+      }
+
+      if (!canonicalMap.has(key)) {
+        canonicalMap.set(key, item)
+      } else {
+        const existing = canonicalMap.get(key)!
+        if (!existing.imageUrl && item.imageUrl) {
+          canonicalMap.set(key, { ...existing, imageUrl: item.imageUrl })
+        }
+      }
+    }
+
+    return Array.from(canonicalMap.values())
   }
 
   const displayAssociateEditors = associateEditors && associateEditors.length > 0 

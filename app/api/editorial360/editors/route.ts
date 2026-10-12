@@ -7,6 +7,7 @@ import path from "path"
 
 export interface OnboardedEditorRecord {
   id: string
+  slug?: string
   name: string
   email: string
   role: string
@@ -22,6 +23,7 @@ export interface OnboardedEditorRecord {
   cvFileName?: string
   cvFileSize?: string
   orcid?: string
+  scopusId?: string
   googleScholar?: string
   researchGate?: string
   linkedin?: string
@@ -40,6 +42,49 @@ const FILE_PATH = "editorial-board-onboarding.json"
 
 const DATA_FILE_PATH = path.join(process.cwd(), "lib", "data", "editorial-board-onboarding.json")
 
+function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEditorRecord[] {
+  const seenKeys = new Set<string>()
+  const result: OnboardedEditorRecord[] = []
+
+  for (const ed of rawList) {
+    // Drop old duplicate ID EBM-2274
+    if (ed.id === "EBM-2274") continue
+
+    const normName = (ed.name || "").toLowerCase()
+    const normSlug = (ed.id || ed.name || "").toLowerCase()
+    const isAbdelmonsef = normName.includes("abdelmonsef") || normName.includes("aboubakr") || normSlug.includes("abdelmonsef")
+
+    if (isAbdelmonsef) {
+      if (seenKeys.has("aboubakr-haredi-abdelmonsef")) continue
+      seenKeys.add("aboubakr-haredi-abdelmonsef")
+      result.push({
+        ...ed,
+        id: "EBM-ABDELMONSEF",
+        name: "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D.",
+        role: "Associate Editor",
+        journal: "Scholarly Open: Chemistry",
+        journalSlug: "chemistry",
+        affiliation: "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt",
+        photoUrl: "/images/editors/aboubakr-abdelmonsef.png",
+        orcid: "0000-0002-4616-0224",
+        scopusId: "57191850843",
+        linkedin: "https://www.linkedin.com/in/dr-aboubakr-h-abdelmonsef",
+        email: "aboubakr.ahmed@sci.svu.edu.eg",
+        status: "Active Handling Editor",
+        jmApproved: true
+      })
+      continue
+    }
+
+    const key = (ed.id || ed.email || ed.name).toLowerCase()
+    if (seenKeys.has(key)) continue
+    seenKeys.add(key)
+    result.push(ed)
+  }
+
+  return result
+}
+
 async function getStoredEditors(): Promise<OnboardedEditorRecord[]> {
   // 1. Try Supabase Cloud Storage
   try {
@@ -49,7 +94,7 @@ async function getStoredEditors(): Promise<OnboardedEditorRecord[]> {
     if (res.ok) {
       const parsed = await res.json()
       if (parsed && Array.isArray(parsed.onboardedEditors)) {
-        return parsed.onboardedEditors
+        return sanitizeEditorRecords(parsed.onboardedEditors)
       }
     }
   } catch (e) {
@@ -62,7 +107,7 @@ async function getStoredEditors(): Promise<OnboardedEditorRecord[]> {
       const raw = fs.readFileSync(DATA_FILE_PATH, "utf-8")
       const parsed = JSON.parse(raw)
       if (parsed && Array.isArray(parsed.onboardedEditors)) {
-        return parsed.onboardedEditors
+        return sanitizeEditorRecords(parsed.onboardedEditors)
       }
     }
   } catch (e) {
