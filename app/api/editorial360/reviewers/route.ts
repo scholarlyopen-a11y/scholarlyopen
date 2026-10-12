@@ -12,7 +12,7 @@ export interface ReviewerHistoryItem {
   reviewerName: string
   reviewerEmail: string
   invitedDate: string
-  status: "Invited" | "Accepted" | "Declined" | "Completed"
+  status: "Invited" | "Accepted" | "Declined" | "Completed" | "Rescinded"
   deadline?: string
   declineReason?: string
   declineReferral?: string
@@ -85,7 +85,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Guo B",
     reviewerEmail: "guo.baolei@zs-hospital.sh.cn",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -96,7 +96,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Bokhari S",
     reviewerEmail: "bokharsa@rwjms.rutgers.edu",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -107,7 +107,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Quéro L",
     reviewerEmail: "laurent.quero@aphp.fr",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -118,7 +118,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Pezzi L",
     reviewerEmail: "reviewer@scholarlyopen.org",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -129,7 +129,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Wang X",
     reviewerEmail: "wxiaozeng@163.com",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -140,7 +140,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Wang B",
     reviewerEmail: "wangbindl@hotmail.com",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -151,7 +151,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Zhong W",
     reviewerEmail: "wuzhong71@scu.edu.cn",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -162,7 +162,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Yidan Sun",
     reviewerEmail: "yidan.sun@wustl.edu",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -173,7 +173,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "P. de Leeuw",
     reviewerEmail: "p.deleeuw@mumc.nl",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   },
   {
@@ -184,7 +184,7 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     reviewerName: "Claire Dupond",
     reviewerEmail: "claire.dupond@sorbonne-universite.fr",
     invitedDate: "2026-10-01",
-    status: "Invited",
+    status: "Rescinded",
     deadline: "2026-10-15"
   }
 ]

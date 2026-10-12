@@ -1812,10 +1812,26 @@ export default function Editorial360Page() {
       methodology: 3,
       clarity: 3,
       significance: 3,
-      commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+      commentsAuthor: `General comments to the Author(s):
+“The review article to be concised. Tables to be provided.”
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
       commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
       recommendation: "Re-write and Re-submit",
-      sanitizedCommentsAuthor: "The review article to be concised. Tables to be provided. Expand references, address management changes over the years, and provide structured tables.",
+      sanitizedCommentsAuthor: `General comments to the Author(s):
+“The review article to be concised. Tables to be provided.”
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
       status: "Released"
     },
     {
@@ -1826,10 +1842,55 @@ export default function Editorial360Page() {
       methodology: 4,
       clarity: 4,
       significance: 4,
-      commentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication:\n1. Clarification of manuscript type and narrative methodology.\n2. Resolution of inconsistencies in supplementary datasets.\n3. Detailed verification of regional aortic network pathways.",
-      commentsEditor: "Dear Editor-in-Chief & Handling Editor,\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nSincerely,\nDr. Chaud GJ",
+      commentsAuthor: `General comments to the Author(s):
+“This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.
+
+The proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.
+
+The manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.
+
+However, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.”
+
+Specific comments to the Author(s):
+1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.
+2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.
+3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.
+4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).
+5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).
+6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.
+7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.
+8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`,
+      commentsEditor: `Dear Editor-in-Chief,
+
+Thank you for the opportunity to review this manuscript.
+
+The authors address an important topic: the organization of healthcare systems for the prevention, recognition, and timely treatment of acute aortic dissection.
+
+I recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.
+
+If these discrepancies cannot be adequately resolved, the manuscript's scientific and ethical suitability for publication should be reconsidered.
+
+Sincerely,
+Dr. Chaud GJ`,
       recommendation: "Re-review and Accept with Major Changes",
-      sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.",
+      sanitizedCommentsAuthor: `General comments to the Author(s):
+“This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.
+
+The proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.
+
+The manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.
+
+However, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.”
+
+Specific comments to the Author(s):
+1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.
+2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.
+3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.
+4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).
+5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).
+6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.
+7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.
+8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`,
       status: "Released"
     }
   ]
@@ -1862,9 +1923,9 @@ export default function Editorial360Page() {
       journal: "Scholarly Open: Medicine",
       type: "review_complete",
       severity: "normal",
-      actorName: "Dr. Praveen Nagula",
+      actorName: "Reviewer #1",
       actorRole: "Peer Review Desk",
-      headline: "Peer Review Completed by Dr. Praveen Nagula",
+      headline: "Peer Review Completed by Reviewer #1",
       summary: "Evaluation report submitted for SOMED-26-RW01. Recommendation: Re-write and Re-submit. Priority score: 6/10.",
       recipient: "Weihua Gong, M.D., Ph.D.",
       isRead: false
@@ -1877,10 +1938,10 @@ export default function Editorial360Page() {
       journal: "Scholarly Open: Medicine",
       type: "jm_assignment",
       severity: "info",
-      actorName: "Dr. Ragab Aziza",
+      actorName: "Reviewer #2",
       actorRole: "Peer Review Desk",
-      headline: "Review Invitation Accepted: Dr. Ragab Aziza",
-      summary: "Dr. Ragab Aziza confirmed acceptance to evaluate SOMED-26-RW01. Electronic review form active.",
+      headline: "Review Invitation Accepted: Reviewer #2",
+      summary: "Reviewer #2 confirmed acceptance to evaluate SOMED-26-RW01. Electronic review form active.",
       recipient: "Journal Manager Desk",
       isRead: false
     },
@@ -3368,26 +3429,42 @@ export default function Editorial360Page() {
 
     const scopedPaperIds = new Set(editorScopedManuscripts.map(m => m.id))
 
-    return crossDeskNotifications.filter(n => {
-      // Gong's medical paper SOMED-26-RW01 is strictly restricted to Gong and Aris Thorne (Chief)
-      if (n.paperId === "SOMED-26-RW01") {
-        return isGong || isChief
-      }
-      if (n.paperId && !scopedPaperIds.has(n.paperId) && !isChief) {
-        return false
-      }
-      if (n.journal && editorJournal && editorJournal !== "Scholarly Open" && !isChief) {
-        const jNorm = editorJournal.toLowerCase()
-        const nNorm = n.journal.toLowerCase()
-        if (!nNorm.includes(jNorm) && !jNorm.includes(nNorm)) return false
-      }
-      if (n.recipient && n.recipient !== "Editorial Desk" && !isChief) {
-        const uNorm = editorName ? editorName.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim() : ""
-        const rNorm = n.recipient.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim()
-        if (!rNorm.includes(uNorm) && !uNorm.includes(rNorm)) return false
-      }
-      return true
-    })
+    const blindReviewerText = (text?: string): string => {
+      if (!text) return ""
+      return text
+        .replace(/Dr\.\s*Praveen\s*Nagula|Praveen\s*Nagula|Nagula/gi, "Reviewer #1")
+        .replace(/Dr\.\s*Ragab\s*Aziza|Ragab\s*Aziza|Aziza/gi, "Reviewer #2")
+        .replace(/Dr\.\s*Chaud\s*GJ|Chaud\s*GJ|German\s*Chaud|Chaud/gi, "Reviewer #3")
+        .replace(/Ikeda\s*N|Dr\.\s*Ikeda\s*N|Ikeda/gi, "Reviewer #4")
+    }
+
+    return crossDeskNotifications
+      .filter(n => {
+        // Gong's medical paper SOMED-26-RW01 is strictly restricted to Gong and Aris Thorne (Chief)
+        if (n.paperId === "SOMED-26-RW01") {
+          return isGong || isChief
+        }
+        if (n.paperId && !scopedPaperIds.has(n.paperId) && !isChief) {
+          return false
+        }
+        if (n.journal && editorJournal && editorJournal !== "Scholarly Open" && !isChief) {
+          const jNorm = editorJournal.toLowerCase()
+          const nNorm = n.journal.toLowerCase()
+          if (!nNorm.includes(jNorm) && !jNorm.includes(nNorm)) return false
+        }
+        if (n.recipient && n.recipient !== "Editorial Desk" && !isChief) {
+          const uNorm = editorName ? editorName.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim() : ""
+          const rNorm = n.recipient.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim()
+          if (!rNorm.includes(uNorm) && !uNorm.includes(rNorm)) return false
+        }
+        return true
+      })
+      .map(n => ({
+        ...n,
+        headline: blindReviewerText(n.headline),
+        summary: blindReviewerText(n.summary),
+        actorName: (n.actorRole?.includes("Review") || n.type?.includes("review")) ? blindReviewerText(n.actorName) : n.actorName
+      }))
   }, [crossDeskNotifications, role, editorName, editorEmail, editorRank, editorJournal, editorScopedManuscripts])
 
   // Dynamically scoped manuscripts for currently logged-in author

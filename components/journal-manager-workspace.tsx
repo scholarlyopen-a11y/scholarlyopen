@@ -131,7 +131,7 @@ export interface ReviewerHistoryItem {
   reviewerName: string
   reviewerEmail: string
   invitedDate: string
-  status: "Invited" | "Accepted" | "Declined" | "Completed"
+  status: "Invited" | "Accepted" | "Declined" | "Completed" | "Rescinded"
   deadline?: string
   declineReason?: string
   declineReferral?: string
@@ -2996,7 +2996,7 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
       name: string
       email: string
       invitedDate: string
-      status: "Invited" | "Accepted" | "Declined" | "Completed"
+      status: "Invited" | "Accepted" | "Declined" | "Completed" | "Rescinded"
       deadline?: string
       declineReason?: string
       declineReferral?: string
@@ -3121,28 +3121,42 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     })
 
     const seenKeys = new Set<string>()
+    const seenNames = new Set<string>()
+    const seenEmails = new Set<string>()
+
     const getStatusPriority = (item: typeof rawList[0]) => {
       if (item.status === "Completed") return 1
       if (item.status === "Accepted") return 2
       if (item.status === "Invited") return 3
       if (item.status === "Declined") return 4
-      return 5
+      if (item.status === "Rescinded") return 5
+      return 6
     }
 
     return rawList
       .filter(item => {
-        const key = String(item.email || item.name || "").toLowerCase().trim()
-        if (!key || seenKeys.has(key)) return false
+        const normName = String(item.name || "").toLowerCase().trim()
+        const normEmail = String(item.email || "").toLowerCase().trim()
+        const key = normEmail || normName
+        if (!key) return false
 
-        // Any reviewer whose invitation has been rescinded disappears from the review tracker
-        const isRescinded = Boolean(
-          rescindedReviewers[item.name] || 
-          (item.email && rescindedReviewers[item.email]) ||
-          rescindedReviewers[key]
-        )
-        if (isRescinded) return false
+        // Deduplicate Ikeda N strictly so Reviewer 4 appears only once
+        const isIkeda = normName.includes("ikeda") || normEmail.includes("ikeda")
+        if (isIkeda) {
+          if (seenNames.has("ikeda")) return false
+          seenNames.add("ikeda")
+        }
+
+        // Deduplicate by name if name matches someone already seen
+        const simpleName = normName.replace(/^(?:prof(?:essor)?\.?\s*(?:dr\.?|m\.?d\.?)?|dr\.?)\s+/i, "").trim()
+        if (simpleName && seenNames.has(simpleName)) return false
+        if (normEmail && seenEmails.has(normEmail)) return false
+        if (seenKeys.has(key)) return false
 
         seenKeys.add(key)
+        if (simpleName) seenNames.add(simpleName)
+        if (normEmail) seenEmails.add(normEmail)
+
         return true
       })
       .map(item => {
@@ -10684,9 +10698,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     )
                   }
 
-                  if (isInvitedOnly) {
-                    const isRescinded = Boolean(rescindedReviewers[revName] || (rev.email && rescindedReviewers[rev.email]))
-                    if (isRescinded) return null
+                  if (isInvitedOnly || rev.status === "Rescinded") {
+                    const isRescinded = rev.status === "Rescinded" || Boolean(rescindedReviewers[revName] || (rev.email && rescindedReviewers[rev.email]))
 
                     return (
                       <div 
@@ -10862,13 +10875,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
-                                  window.location.href = `mailto:${rev.email}?subject=${encodeURIComponent(`Peer Review Follow-Up: ${trackingManuscript?.id} - ${trackingManuscript?.title}`)}&body=${encodeURIComponent(`Dear Dr. Ragab Aziza,\n\nFollowing up on our email correspondence regarding your evaluation of ${trackingManuscript?.id} (${trackingManuscript?.title}).\n\nWhenever your report is ready, please reply directly with your evaluation comments.\n\nWarm regards,\nEditorial Management Office\nScholarly Open: Medicine`)}`
-                                }}
-                                className="h-8 text-xs font-semibold px-2.5 rounded-lg border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap flex items-center gap-1"
+                                onClick={() => handleOpenReviewerEmailModal(revName, "rescind", rev.email)}
+                                className="h-8 text-xs font-semibold px-2.5 rounded-lg border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer whitespace-nowrap flex items-center gap-1"
+                                title="Rescind review invitation gracefully"
                               >
-                                <Mail className="h-3.5 w-3.5 text-[#0b99ff]" />
-                                Email Follow-Up
+                                <X className="h-3.5 w-3.5 text-rose-500" />
+                                Rescind Invitation
                               </Button>
 
                               <Button
@@ -10882,6 +10894,18 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </div>
                           ) : (
                             <div className="flex flex-wrap items-center gap-2 shrink-0 mt-1 md:mt-0">
+                              {isIkeda ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleOpenReviewerEmailModal(revName, "rescind", rev.email)}
+                                  className="h-8 text-xs font-semibold px-3 rounded-lg border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer whitespace-nowrap flex items-center gap-1"
+                                  title="Rescind review invitation gracefully"
+                                >
+                                  <X className="h-3.5 w-3.5 mr-1 text-rose-500" />
+                                  Rescind Invitation
+                                </Button>
+                              ) : (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -10912,6 +10936,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   </>
                                 )}
                               </Button>
+                              )}
 
                               <Button
                                 size="sm"
@@ -11751,25 +11776,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <button
                             type="button"
                             onClick={() => {
-                              setReviewerDispatchModal({
-                                isOpen: true,
-                                mode: "reminder",
-                                manuscriptId: readingManuscript.id,
-                                manuscriptTitle: readingManuscript.title,
-                                journal: readingManuscript.journal,
-                                reviewerName: "Dr. Ragab Aziza",
-                                reviewerEmail: "ragab.aziza@alexmed.edu.eg",
-                                subject: `[Scholarly Open] Reminder: Review Evaluation Pending for ${readingManuscript.id} - ${readingManuscript.journal}`,
-                                body: `Dear Dr. Ragab Aziza,\n\nWe recently invited you to evaluate manuscript "${readingManuscript.title}" (${readingManuscript.id}) for ${readingManuscript.journal}.\n\nWhenever your report is ready, please submit your feedback through your secure reviewer portal.\n\nWarm regards,\nEditorial Management Office`,
-                                ccEmail: "scholarlyopen@gmail.com",
-                                includeCc: true,
-                                includeOptOut: true,
-                                isSending: false
-                              })
+                              handleOpenReviewerEmailModal("Dr. Ragab Aziza", "rescind", "ragabaziza61@gmail.com")
                             }}
-                            className="text-[#0b99ff] hover:underline cursor-pointer font-semibold"
+                            className="text-rose-600 hover:underline cursor-pointer font-semibold flex items-center gap-1"
                           >
-                            Send Reminder
+                            <X className="h-3 w-3" />
+                            Rescind Invitation
                           </button>
                         </div>
                       </div>
@@ -11807,25 +11819,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           <button
                             type="button"
                             onClick={() => {
-                              setReviewerDispatchModal({
-                                isOpen: true,
-                                mode: "reminder",
-                                manuscriptId: readingManuscript.id,
-                                manuscriptTitle: readingManuscript.title,
-                                journal: readingManuscript.journal,
-                                reviewerName: "Ikeda N",
-                                reviewerEmail: "ikeda.n@med.nagoya-u.ac.jp",
-                                subject: `[Scholarly Open] Reminder: Review Evaluation Pending for ${readingManuscript.id} - ${readingManuscript.journal}`,
-                                body: `Dear Ikeda N,\n\nWe recently invited you to evaluate manuscript "${readingManuscript.title}" (${readingManuscript.id}) for ${readingManuscript.journal}.\n\nWhenever your report is ready, please submit your feedback through your secure reviewer portal.\n\nWarm regards,\nEditorial Management Office`,
-                                ccEmail: "scholarlyopen@gmail.com",
-                                includeCc: true,
-                                includeOptOut: true,
-                                isSending: false
-                              })
+                              handleOpenReviewerEmailModal("Ikeda N", "rescind", "ikeda.n@hosp.u-tokyo.ac.jp")
                             }}
-                            className="text-[#0b99ff] hover:underline cursor-pointer font-semibold"
+                            className="text-rose-600 hover:underline cursor-pointer font-semibold flex items-center gap-1"
                           >
-                            Send Reminder
+                            <X className="h-3 w-3" />
+                            Rescind Invitation
                           </button>
                         </div>
                       </div>

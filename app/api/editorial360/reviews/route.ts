@@ -38,10 +38,26 @@ const DEFAULT_REVIEWS: StoredReview[] = [
     methodology: 3,
     clarity: 3,
     significance: 3,
-    commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+    commentsAuthor: `General comments to the Author(s):
+The review article to be concised. Tables to be provided.
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
     commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
     recommendation: "Re-write and Re-submit",
-    sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+    sanitizedCommentsAuthor: `General comments to the Author(s):
+The review article to be concised. Tables to be provided.
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
     createdAt: "2026-08-28T14:20:00Z"
   },
   {
@@ -54,10 +70,55 @@ const DEFAULT_REVIEWS: StoredReview[] = [
     methodology: 4,
     clarity: 4,
     significance: 4,
-    commentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.\n\nSpecific Line Critiques:\nMajor Comments\n\n1. Clarification of manuscript type and methodology\n\nThe manuscript is presented as a scholarly perspective and describes an evidence-based synthesis of clinical guidelines, observational studies, and healthcare operations literature.\n\nHowever, no structured methodology for identifying, selecting, or evaluating the literature is provided.\n\nThe authors should clearly define the manuscript as a narrative perspective or conceptual framework and distinguish established scientific evidence from proposed operational interventions requiring prospective validation.\n\n2. Inconsistencies between the manuscript and supplementary materials\n\nThe manuscript explicitly states that no original patient-level data were analyzed. Nevertheless, the supplementary materials describe a receiver operating characteristic curve, propensity-score matching, and an anonymized research dataset. Clarify or withdraw.\n\n3. Ethics approval and informed consent\n\nClarify the approved research and role of participants.\n\n4. Greater emphasis on regional aortic networks and interhospital transfer\n\nClearly define the regional transfer pathway: Early recognition → definitive imaging → specialist consultation → immediate referral and image sharing → coordinated transfer → receiving-center activation → definitive treatment.\n\n5. Prioritization of clinically relevant interventions\n\nSeparate essential clinical pathways from optional organizational proposals.\n\n6. Hospital leadership and executive escalation\n\nTiered escalation system based on predefined operational barriers.\n\n7. Public awareness and reference to Senator Lindsey Graham\n\nShorten Author's Note and present as contextual motivation for examining systemic improvements without speculating on individual clinical care.\n\n8. Framework validation and measurable outcomes\n\nDefine explicit implementation and evaluation strategy with measurable performance indicators.",
-    commentsEditor: "Dear Editor-in-Chief,\n\nThank you for the opportunity to review this manuscript.\n\nThe authors address an important topic: the organization of healthcare systems for the prevention, recognition, and timely treatment of acute aortic dissection.\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nIf these discrepancies cannot be adequately resolved, the manuscript's scientific and ethical suitability for publication should be reconsidered.\n\nSincerely,\nDr. Chaud GJ",
+    commentsAuthor: `General comments to the Author(s):
+This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.
+
+The proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.
+
+The manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.
+
+However, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.
+
+Specific comments to the Author(s):
+1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.
+2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.
+3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.
+4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).
+5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).
+6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.
+7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.
+8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`,
+    commentsEditor: `Dear Editor-in-Chief,
+
+Thank you for the opportunity to review this manuscript.
+
+The authors address an important topic: the organization of healthcare systems for the prevention, recognition, and timely treatment of acute aortic dissection.
+
+I recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.
+
+If these discrepancies cannot be adequately resolved, the manuscript's scientific and ethical suitability for publication should be reconsidered.
+
+Sincerely,
+Dr. Chaud GJ`,
     recommendation: "Re-review and Accept with Major Changes",
-    sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.",
+    sanitizedCommentsAuthor: `General comments to the Author(s):
+This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.
+
+The proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.
+
+The manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.
+
+However, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.
+
+Specific comments to the Author(s):
+1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.
+2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.
+3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.
+4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).
+5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).
+6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.
+7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.
+8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`,
     createdAt: "2026-10-09T15:24:33.340Z"
   }
 ]

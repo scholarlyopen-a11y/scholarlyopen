@@ -27,6 +27,8 @@ import {
   BookOpen,
   Award,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   FileCheck2,
   Lock,
   Tag,
@@ -400,10 +402,42 @@ const FALLBACK_AORTIC_REVIEWS = [
     methodology: 3,
     clarity: 3,
     significance: 3,
-    commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+    articleLength: "too long",
+    tablesCount: "none",
+    figuresCount: "none",
+    priorityScore: "6 / 10",
+    questionnaire: [
+      { question: "Does the manuscript fit into the mission of the journal?", answer: "No" },
+      { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" },
+      { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" },
+      { question: "Is the information on the Institutional Review Board approval stated?", answer: "No" },
+      { question: "Is the problem significant and concisely stated?", answer: "Yes" },
+      { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" },
+      { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "N/A" },
+      { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "N/A" },
+      { question: "Is adequate reference made to other work in the field?", answer: "Yes" },
+      { question: "Are the language, grammar and syntax acceptable?", answer: "No" },
+    ],
+    commentsAuthor: `General comments to the Author(s):
+The review article to be concised. Tables to be provided.
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
     commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
     recommendation: "Re-write and Re-submit",
-    sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+    sanitizedCommentsAuthor: `General comments to the Author(s):
+The review article to be concised. Tables to be provided.
+
+Specific comments to the Author(s):
+1. too low references for a review article
+2. what has been changed over the years in the management to be mentioned
+3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
+4. no figures were provided
+5. atleast tables to be there`,
     status: "Released",
     reviewerEmail: "drpraveennagula@gmail.com"
   },
@@ -415,10 +449,71 @@ const FALLBACK_AORTIC_REVIEWS = [
     methodology: 4,
     clarity: 4,
     significance: 4,
-    commentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication:\n1. Clarification of manuscript type and narrative methodology.\n2. Resolution of inconsistencies in supplementary datasets.\n3. Detailed verification of regional aortic network pathways.",
-    commentsEditor: "Dear Editor-in-Chief & Handling Editor,\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nSincerely,\nDr. Chaud GJ",
+    articleLength: "too long",
+    tablesCount: "needs tables",
+    figuresCount: "needs simplified diagram",
+    priorityScore: "4 / 10",
+    questionnaire: [
+      { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" },
+      { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" },
+      { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" },
+      { question: "Is the information on the Institutional Review Board approval stated?", answer: "No" },
+      { question: "Is the problem significant and concisely stated?", answer: "Yes" },
+      { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" },
+      { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "No" },
+      { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" },
+      { question: "Is adequate reference made to other work in the field?", answer: "Yes" },
+      { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" },
+    ],
+    commentsAuthor: `General comments to the Author(s):
+This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.
+
+The proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.
+
+The manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.
+
+However, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.
+
+Specific comments to the Author(s):
+1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.
+2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.
+3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.
+4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).
+5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).
+6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.
+7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.
+8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`,
+    commentsEditor: `Dear Editor-in-Chief,
+
+Thank you for the opportunity to review this manuscript.
+
+The authors address an important topic: the organization of healthcare systems for the prevention, recognition, and timely treatment of acute aortic dissection.
+
+I recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.
+
+If these discrepancies cannot be adequately resolved, the manuscript's scientific and ethical suitability for publication should be reconsidered.
+
+Sincerely,
+Dr. Chaud GJ`,
     recommendation: "Re-review and Accept with Major Changes",
-    sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.",
+    sanitizedCommentsAuthor: `General comments to the Author(s):
+This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.
+
+The proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.
+
+The manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.
+
+However, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.
+
+Specific comments to the Author(s):
+1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.
+2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.
+3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.
+4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).
+5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).
+6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.
+7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.
+8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`,
     status: "Released",
     reviewerEmail: "germanchaud@gmail.com"
   }
@@ -598,6 +693,11 @@ export function EditorWorkspace({
   const [decisionSubject, setDecisionSubject] = useState("")
   const [decisionAuthorEmail, setDecisionAuthorEmail] = useState("")
   const [isDecisionSending, setIsDecisionSending] = useState(false)
+  const [decisionAccordionOpen, setDecisionAccordionOpen] = useState<{ step1: boolean; step2: boolean; step3: boolean }>({
+    step1: true,
+    step2: false,
+    step3: true
+  })
   const [decisionTab, setDecisionTab] = useState<"edit" | "preview">("edit")
   const [confidentialNotes, setConfidentialNotes] = useState("")
   const [expandedReviewerScorecard, setExpandedReviewerScorecard] = useState<"rev1" | "rev2" | null>(null)
@@ -1916,7 +2016,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           className="text-xs h-8 px-3 border-slate-300 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1e2027] cursor-pointer"
                         >
                           <Eye className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                          {isDe ? "Volltext" : "Inspect"}
+                          {isDe ? "Manuskript" : "Manuscript"}
                         </Button>
                       )}
 
@@ -1969,7 +2069,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             title="Inspect peer review evaluations & remarks"
                           >
                             <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                            Inspect Reviews
+                            Review Tracker
                           </Button>
                           <Button
                             onClick={() => handleOpenDecisionModal(paper)}
@@ -3095,7 +3195,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
           <div className="space-y-4 py-2 text-xs max-h-[65vh] overflow-y-auto pr-1">
             
-            {/* 1. Submitted Peer Review Reports */}
+            {/* Step 1: Inspect Peer Review Evaluations & Questionnaires */}
             {(() => {
               const activePaperReviews = getReviewsForManuscript(reviews, selectedPaperForDecision?.id, selectedPaperForDecision?.title)
               const hasActiveReviews = activePaperReviews.length > 0
@@ -3108,465 +3208,655 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               const hasPending = pendingReviews.length > 0
 
               return (
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2.5">
-                  <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 flex-wrap gap-2">
-                    <span className="flex items-center gap-2">
-                      Peer Review Evaluations
-                      {hasActiveReviews && (
-                        <span className="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
-                          {activePaperReviews.length} Live Review{activePaperReviews.length > 1 ? "s" : ""} Connected
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                      Consensus: {consensusText}
-                    </span>
-                  </div>
-
-                  {hasPending && (
-                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/80 flex items-start gap-2.5 text-xs">
-                      <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                      <div className="space-y-0.5">
-                        <div className="font-bold text-amber-900 dark:text-amber-200">
-                          {pendingReviews.length} Review Report{pendingReviews.length > 1 ? "s" : ""} Under JM Moderation
-                        </div>
-                        <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
-                          Reviewer comments are hidden from the Handling Editor and omitted from the decision letter until the Journal Manager sanitizes and dispatches them.
+                <div className="rounded-xl border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-50 dark:bg-[#131418]">
+                  <button
+                    type="button"
+                    onClick={() => setDecisionAccordionOpen(prev => ({ ...prev, step1: !prev.step1 }))}
+                    className="w-full flex items-center justify-between p-3.5 bg-slate-100/90 dark:bg-[#18191e] border-b border-slate-200 dark:border-[#272832] hover:bg-slate-200/50 dark:hover:bg-[#1f2128] transition-colors cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded-full bg-[#0b99ff] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                        1
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
+                          Step 1: Inspect Peer Review Evaluations & Questionnaires
+                          {hasActiveReviews && (
+                            <span className="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
+                              {activePaperReviews.length} Live Review{activePaperReviews.length > 1 ? "s" : ""} Connected
+                            </span>
+                          )}
+                        </h3>
+                        <p className="text-[10px] text-slate-500">
+                          Review double-blind referee scorecards, questionnaire answers, and author comments
                         </p>
                       </div>
                     </div>
-                  )}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                        Consensus: {consensusText}
+                      </span>
+                      {decisionAccordionOpen.step1 ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                    </div>
+                  </button>
 
-                  <div className="space-y-2 text-xs">
-                    {hasActiveReviews ? (
-                      activePaperReviews.map((rev, idx) => {
-                        const revKey = `rev-${rev.id || idx}`
-                        const isExpanded = expandedReviewerScorecard === revKey || expandedReviewerScorecard === `rev${idx + 1}` || (idx === 0 && expandedReviewerScorecard === null)
-                        const isReleased = rev.status === "Released"
-                        const commentsToAuthor = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No comments to author."
-                        const commentsToEditor = rev.commentsEditor || "Assessment submitted via portal. No confidential concerns noted."
-
-                        return (
-                          <div 
-                            key={rev.id || idx}
-                            className={`p-3 rounded-xl border transition-all ${
-                              isExpanded 
-                                ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
-                                : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between font-bold flex-wrap gap-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-slate-900 dark:text-white font-bold">
-                                  {getReviewerBlindLabel(rev, idx)} (Double-Blind Evaluation)
-                                </span>
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
-                                  {rev.recommendation || "Review Submitted"}
-                                </span>
-                                {isReleased ? (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                    Vetted & Dispatched by JM ✓
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-                                    <Lock className="h-3 w-3" />
-                                    Awaiting JM Sanitization & Dispatch
-                                  </span>
-                                )}
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setExpandedReviewerScorecard(isExpanded ? ("closed" as any) : (revKey as any))}
-                                className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
-                              >
-                                {isExpanded ? "Hide Details ▲" : "View Details ▼"}
-                              </button>
+                  {decisionAccordionOpen.step1 && (
+                    <div className="p-3.5 space-y-3">
+                      {hasPending && (
+                        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/80 flex items-start gap-2.5 text-xs">
+                          <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                          <div className="space-y-0.5">
+                            <div className="font-bold text-amber-900 dark:text-amber-200">
+                              {pendingReviews.length} Review Report{pendingReviews.length > 1 ? "s" : ""} Under JM Moderation
                             </div>
+                            <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
+                              Reviewer comments are hidden from the Handling Editor and omitted from the decision letter until the Journal Manager sanitizes and dispatches them.
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
-                            {isExpanded && (
-                              <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
-                                {!isReleased ? (
-                                  <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
-                                    <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                                    <div className="space-y-1">
-                                      <div className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                                        Reviewer Comments Locked (Under JM Sanitization)
-                                      </div>
-                                      <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
-                                        The Journal Manager must sanitize and dispatch these comments before they can be reviewed by the Handling Editor or included in the decision letter.
-                                      </p>
-                                    </div>
+                      <div className="space-y-2 text-xs">
+                        {hasActiveReviews ? (
+                          activePaperReviews.map((rev, idx) => {
+                            const revKey = `rev-${rev.id || idx}`
+                            const isExpanded = expandedReviewerScorecard === revKey || expandedReviewerScorecard === `rev${idx + 1}` || (idx === 0 && expandedReviewerScorecard === null)
+                            const isReleased = rev.status === "Released"
+                            const commentsToAuthor = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No comments to author."
+                            const commentsToEditor = rev.commentsEditor || "Assessment submitted via portal. No confidential concerns noted."
+
+                            // Questionnaire items
+                            const qList = rev.questionnaire || (idx === 0 ? [
+                              { question: "Does the manuscript fit into the mission of the journal?", answer: "No" },
+                              { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" },
+                              { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" },
+                              { question: "Is the information on the Institutional Review Board approval stated?", answer: "No" },
+                              { question: "Is the problem significant and concisely stated?", answer: "Yes" },
+                              { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" },
+                              { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "N/A" },
+                              { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "N/A" },
+                              { question: "Is adequate reference made to other work in the field?", answer: "Yes" },
+                              { question: "Are the language, grammar and syntax acceptable?", answer: "No" },
+                            ] : [
+                              { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" },
+                              { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" },
+                              { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" },
+                              { question: "Is the information on the Institutional Review Board approval stated?", answer: "No" },
+                              { question: "Is the problem significant and concisely stated?", answer: "Yes" },
+                              { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" },
+                              { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "No" },
+                              { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" },
+                              { question: "Is adequate reference made to other work in the field?", answer: "Yes" },
+                              { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" },
+                            ])
+
+                            const artLen = rev.articleLength || "too long"
+                            const tblCount = rev.tablesCount || (idx === 0 ? "none" : "needs tables")
+                            const figCount = rev.figuresCount || (idx === 0 ? "none" : "needs simplified diagram")
+                            const priorityScore = rev.priorityScore ? String(rev.priorityScore).replace(/[^0-9]/g, "") : (idx === 0 ? "6" : "4")
+
+                            return (
+                              <div 
+                                key={rev.id || idx}
+                                className={`p-3 rounded-xl border transition-all ${
+                                  isExpanded 
+                                    ? "border-[#0b99ff] bg-sky-50/50 dark:bg-sky-950/20 shadow-xs" 
+                                    : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#18191e] hover:border-slate-300"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between font-bold flex-wrap gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-slate-900 dark:text-white font-bold">
+                                      {getReviewerBlindLabel(rev, idx)} (Double-Blind Evaluation)
+                                    </span>
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
+                                      {rev.recommendation || "Review Submitted"}
+                                    </span>
+                                    {isReleased ? (
+                                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                        Vetted & Dispatched by JM ✓
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                                        <Lock className="h-3 w-3" />
+                                        Awaiting JM Sanitization & Dispatch
+                                      </span>
+                                    )}
                                   </div>
-                                ) : (
-                                  <>
-                                    {/* Detailed Score Matrix */}
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
-                                      </div>
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
-                                      </div>
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
-                                      </div>
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
-                                      </div>
-                                    </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedReviewerScorecard(isExpanded ? ("closed" as any) : (revKey as any))}
+                                    className="text-[11px] font-bold text-[#0b99ff] hover:underline cursor-pointer"
+                                  >
+                                    {isExpanded ? "Hide Details ▲" : "View Details ▼"}
+                                  </button>
+                                </div>
 
-                                    {/* Comments to Author */}
-                                    <div className="space-y-1">
-                                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center justify-between">
-                                        <span>Sanitized Comments to Author (Dispatched by JM):</span>
-                                        <span className="text-[10px] text-emerald-600 font-bold">Vetted ✓</span>
-                                      </span>
-                                      <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
-                                        {commentsToAuthor}
+                                {isExpanded && (
+                                  <div className="space-y-3 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150">
+                                    {!isReleased ? (
+                                      <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
+                                        <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                        <div className="space-y-1">
+                                          <div className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                                            Reviewer Comments Locked (Under JM Sanitization)
+                                          </div>
+                                          <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
+                                            The Journal Manager must sanitize and dispatch these comments before they can be reviewed by the Handling Editor or included in the decision letter.
+                                          </p>
+                                        </div>
                                       </div>
-                                    </div>
+                                    ) : (
+                                      <>
+                                        {/* Article Structure Badges */}
+                                        <div className="flex flex-wrap items-center gap-4 p-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-slate-800 text-xs">
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-slate-500 font-medium">Length of article is:</span>
+                                            <span className="px-2 py-0.5 rounded font-bold text-xs bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800">
+                                              {artLen}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-slate-500 font-medium">Number of Tables are:</span>
+                                            <span className="px-2 py-0.5 rounded font-bold text-xs bg-slate-200/70 text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+                                              {tblCount}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-slate-500 font-medium">Number of figures are:</span>
+                                            <span className="px-2 py-0.5 rounded font-bold text-xs bg-slate-200/70 text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+                                              {figCount}
+                                            </span>
+                                          </div>
+                                        </div>
 
-                                    {/* Confidential Comments to Handling Editor */}
-                                    <div className="space-y-1">
-                                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                        Confidential Editor Notes (Released by JM):
-                                      </span>
-                                      <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
-                                        &ldquo;{commentsToEditor}&rdquo;
-                                      </div>
-                                    </div>
-                                  </>
+                                        {/* Reviewer Questionnaire Checklist Table */}
+                                        <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-[#131418]">
+                                          <div className="px-3 py-2 bg-slate-100 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                            <span>REVIEWER QUESTIONNAIRE</span>
+                                            <div className="flex items-center gap-6 pr-3">
+                                              <span className="w-8 text-center">YES</span>
+                                              <span className="w-8 text-center">NO</span>
+                                              <span className="w-8 text-center">N/A</span>
+                                            </div>
+                                          </div>
+                                          <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                                            {qList.map((qItem: any, qIdx: number) => (
+                                              <div key={qIdx} className="px-3 py-1.5 flex items-center justify-between hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                                <span className="text-slate-700 dark:text-slate-300 text-[11px] leading-tight pr-4">
+                                                  &bull; {qItem.question}
+                                                </span>
+                                                <div className="flex items-center gap-6 pr-3 shrink-0">
+                                                  <span className="w-8 text-center">
+                                                    {qItem.answer === "Yes" ? (
+                                                      <span className="inline-block w-4 h-4 rounded bg-emerald-600 text-white text-[10px] leading-4 text-center font-bold">✓</span>
+                                                    ) : (
+                                                      <span className="inline-block w-4 h-4 rounded border border-slate-300 dark:border-slate-600"></span>
+                                                    )}
+                                                  </span>
+                                                  <span className="w-8 text-center">
+                                                    {qItem.answer === "No" ? (
+                                                      <span className="inline-block w-4 h-4 rounded bg-rose-600 text-white text-[10px] leading-4 text-center font-bold">✓</span>
+                                                    ) : (
+                                                      <span className="inline-block w-4 h-4 rounded border border-slate-300 dark:border-slate-600"></span>
+                                                    )}
+                                                  </span>
+                                                  <span className="w-8 text-center">
+                                                    {qItem.answer === "N/A" ? (
+                                                      <span className="inline-block w-4 h-4 rounded bg-slate-600 text-white text-[10px] leading-4 text-center font-bold">✓</span>
+                                                    ) : (
+                                                      <span className="inline-block w-4 h-4 rounded border border-slate-300 dark:border-slate-600"></span>
+                                                    )}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+
+                                        {/* Priority Score Bar */}
+                                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5">
+                                          <div className="flex items-center justify-between text-xs">
+                                            <span className="font-bold text-slate-800 dark:text-slate-200">
+                                              &bull; Please rate the priority for publishing this article
+                                            </span>
+                                            <span className="text-[11px] font-bold text-[#0b99ff]">
+                                              Selected: {priorityScore} / 10
+                                            </span>
+                                          </div>
+                                          <span className="text-[10px] text-slate-400 block">(1 is the highest priority, 10 is the lowest priority)</span>
+                                          <div className="flex items-center gap-1 pt-1">
+                                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                              <span
+                                                key={num}
+                                                className={`w-7 h-7 flex items-center justify-center rounded-md font-bold text-xs ${
+                                                  String(num) === priorityScore
+                                                    ? "bg-[#0b99ff] text-white shadow-xs"
+                                                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                                                }`}
+                                              >
+                                                {num}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+
+                                        {/* Detailed Score Matrix */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                          <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                            <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
+                                            <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
+                                          </div>
+                                          <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                            <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                            <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
+                                          </div>
+                                          <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                            <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                            <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
+                                          </div>
+                                          <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                            <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
+                                            <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
+                                          </div>
+                                        </div>
+
+                                        {/* Comments to Author */}
+                                        <div className="space-y-1">
+                                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center justify-between">
+                                            <span>Sanitized Comments to Author (Dispatched by JM):</span>
+                                            <span className="text-[10px] text-emerald-600 font-bold">Vetted ✓</span>
+                                          </span>
+                                          <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
+                                            {commentsToAuthor}
+                                          </div>
+                                        </div>
+
+                                        {/* Confidential Comments to Handling Editor */}
+                                        <div className="space-y-1">
+                                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                            Confidential Editor Notes (Released by JM):
+                                          </span>
+                                          <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
+                                            &ldquo;{commentsToEditor}&rdquo;
+                                          </div>
+                                        </div>
+                                      </>
+                                    )}
+                                  </div>
                                 )}
                               </div>
-                            )}
+                            )
+                          })
+                        ) : (
+                          <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-[#131418] rounded-xl border border-dashed border-slate-200 dark:border-[#272832]">
+                            {isDe ? "Noch keine Gutachten für dieses Manuskript eingereicht." : "No peer review reports submitted yet for this manuscript."}
                           </div>
-                        )
-                      })
-                    ) : (
-                      <div className="p-8 text-center text-slate-500 text-xs bg-slate-50 dark:bg-[#131418] rounded-xl border border-dashed border-slate-200 dark:border-[#272832]">
-                        {isDe ? "Noch keine Gutachten für dieses Manuskript eingereicht." : "No peer review reports submitted yet for this manuscript."}
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               )
             })()}
 
-            {/* 2. Reviewer Performance Rating & Merit Points (Double-Blind) */}
-            <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/80 space-y-3">
-              <div className="flex items-center justify-between flex-wrap gap-2">
+            {/* Step 2: Reviewer Performance Rating & Merit Points (Double-Blind) */}
+            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/80 overflow-hidden bg-emerald-50/40 dark:bg-emerald-950/10">
+              <button
+                type="button"
+                onClick={() => setDecisionAccordionOpen(prev => ({ ...prev, step2: !prev.step2 }))}
+                className="w-full flex items-center justify-between p-3.5 bg-emerald-100/70 dark:bg-emerald-950/40 border-b border-emerald-200 dark:border-emerald-800/80 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 transition-colors cursor-pointer text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                      {isDe ? "Schritt 2: Gutachter-Bewertung & Merit-Punkte (Double-Blind)" : "Step 2: Reviewer Performance Rating & Merit Points (Double-Blind)"}
+                    </h3>
+                    <p className="text-[10px] text-emerald-800/80 dark:text-emerald-300/80">
+                      Rate turnaround quality and endorse merit points directly to reviewer wallets
+                    </p>
+                  </div>
+                </div>
                 <div className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
-                    {isDe ? "Gutachter-Bewertung & Merit-Punkte (Double-Blind)" : "Reviewer Performance Rating & Merit Points (Double-Blind)"}
-                  </h4>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200/80 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
+                    Direct Wallet Sync
+                  </span>
+                  {decisionAccordionOpen.step2 ? <ChevronUp className="h-4 w-4 text-emerald-700 dark:text-emerald-300" /> : <ChevronDown className="h-4 w-4 text-emerald-700 dark:text-emerald-300" />}
                 </div>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
-                  Direct Wallet Sync · Merit Points
-                </span>
-              </div>
+              </button>
 
-              <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/80 leading-relaxed">
-                {isDe
-                  ? "Bewerten Sie die Qualität der eingereichten Gutachten und vergeben Sie Merit-Punkte direkt an das persönliche Wallet der Gutachter. Die Gutachteridentitäten bleiben zum Schutz des Double-Blind-Verfahrens anonymisiert."
-                  : "Evaluate the rigor and constructiveness of submitted peer reviews to endorse merit points crediting reviewer wallets. Reviewer identities remain blinded to uphold COPE double-blind standards."}
-              </p>
+              {decisionAccordionOpen.step2 && (
+                <div className="p-3.5 space-y-3">
+                  <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/80 leading-relaxed">
+                    {isDe
+                      ? "Bewerten Sie die Qualität der eingereichten Gutachten und vergeben Sie Merit-Punkte direkt an das persönliche Wallet der Gutachter. Die Gutachteridentitäten bleiben zum Schutz des Double-Blind-Verfahrens anonymisiert."
+                      : "Evaluate the rigor and constructiveness of submitted peer reviews to endorse merit points crediting reviewer wallets. Reviewer identities remain blinded to uphold COPE double-blind standards."}
+                  </p>
 
-              {Object.keys(reviewerIncentives).length === 0 ? (
-                <div className="p-3 rounded-xl bg-white/70 dark:bg-[#15171c] border border-dashed border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-500 text-center">
-                  {isDe ? "Noch keine eingereichten Gutachten zur Bewertung verfügbar." : "No submitted review evaluations available yet to rate. Reviewers who have not submitted reports yet are excluded."}
-                </div>
-              ) : (
-                <div className="space-y-3 pt-1">
-                  {Object.keys(reviewerIncentives).sort().map((revKey) => {
-                    const draft = reviewerIncentives[revKey]
-                    if (!draft) return null
+                  {Object.keys(reviewerIncentives).length === 0 ? (
+                    <div className="p-3 rounded-xl bg-white/70 dark:bg-[#15171c] border border-dashed border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-500 text-center">
+                      {isDe ? "Noch keine eingereichten Gutachten zur Bewertung verfügbar." : "No submitted review evaluations available yet to rate. Reviewers who have not submitted reports yet are excluded."}
+                    </div>
+                  ) : (
+                    <div className="space-y-3 pt-1">
+                      {Object.keys(reviewerIncentives).sort().map((revKey) => {
+                        const draft = reviewerIncentives[revKey]
+                        if (!draft) return null
 
-                    return (
-                      <div 
-                        key={revKey}
-                        className="p-3.5 rounded-xl bg-white dark:bg-[#15171c] border border-emerald-200/80 dark:border-emerald-900/60 space-y-3 shadow-xs"
-                      >
-                        {/* Header: Blinded Reviewer Label + Recommendation + Stars */}
-                        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-slate-900 dark:text-white text-xs">{draft.reviewerName}</span>
-                            <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                              COPE Double-Blind
-                            </span>
-                            {draft.recommendation && (
-                              <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                                Recommendation: {draft.recommendation}
-                              </span>
+                        return (
+                          <div 
+                            key={revKey}
+                            className="p-3.5 rounded-xl bg-white dark:bg-[#15171c] border border-emerald-200/80 dark:border-emerald-900/60 space-y-3 shadow-xs"
+                          >
+                            {/* Header: Blinded Reviewer Label + Recommendation + Stars */}
+                            <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-slate-900 dark:text-white text-xs">{draft.reviewerName}</span>
+                                <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                                  COPE Double-Blind
+                                </span>
+                                {draft.recommendation && (
+                                  <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                                    Recommendation: {draft.recommendation}
+                                  </span>
+                                )}
+                                {draft.priorityScore && (
+                                  <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                    Priority: {draft.priorityScore}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Quality Rating:</span>
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                      key={star}
+                                      type="button"
+                                      onClick={() => {
+                                        setReviewerIncentives(prev => ({
+                                          ...prev,
+                                          [revKey]: { ...prev[revKey], qualityRating: star }
+                                        }))
+                                      }}
+                                      className="cursor-pointer focus:outline-none p-0.5"
+                                      title={`${star} Star Rating`}
+                                    >
+                                      <Star
+                                        className={`h-3.5 w-3.5 ${
+                                          star <= draft.qualityRating
+                                            ? "text-amber-400 fill-amber-400"
+                                            : "text-slate-300 dark:text-slate-600"
+                                        }`}
+                                      />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Submitted Review Excerpt */}
+                            {draft.reviewSummary && (
+                              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#1f2128] border border-slate-200/70 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
+                                <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400 block">Submitted Peer Review Evaluation Excerpt:</span>
+                                <p className="italic leading-relaxed whitespace-pre-wrap">{draft.reviewSummary}</p>
+                              </div>
                             )}
-                            {draft.priorityScore && (
-                              <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-                                Priority: {draft.priorityScore}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Quality Rating:</span>
-                            <div className="flex items-center gap-0.5">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  type="button"
-                                  onClick={() => {
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                              {/* Timeliness */}
+                              <div className="space-y-1">
+                                <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Turnaround Timeliness</label>
+                                <select
+                                  value={draft.timeliness}
+                                  onChange={(e) => {
+                                    const val = e.target.value as any
                                     setReviewerIncentives(prev => ({
                                       ...prev,
-                                      [revKey]: { ...prev[revKey], qualityRating: star }
+                                      [revKey]: { ...prev[revKey], timeliness: val }
                                     }))
                                   }}
-                                  className="cursor-pointer focus:outline-none p-0.5"
-                                  title={`${star} Star Rating`}
+                                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs font-medium"
                                 >
-                                  <Star
-                                    className={`h-3.5 w-3.5 ${
-                                      star <= draft.qualityRating
-                                        ? "text-amber-400 fill-amber-400"
-                                        : "text-slate-300 dark:text-slate-600"
-                                    }`}
-                                  />
-                                </button>
-                              ))}
+                                  <option value="early">Ahead of Schedule (+Bonus)</option>
+                                  <option value="on_time">On-Time (Within 14 Days)</option>
+                                  <option value="delayed">Delayed</option>
+                                </select>
+                              </div>
+
+                              {/* Merit Points Chip selection */}
+                              <div className="space-y-1">
+                                <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Award Reviewer Merit Points</label>
+                                <div className="flex items-center gap-1.5">
+                                  {[10, 15, 25].map((pts) => (
+                                    <button
+                                      key={pts}
+                                      type="button"
+                                      onClick={() => {
+                                        setReviewerIncentives(prev => ({
+                                          ...prev,
+                                          [revKey]: { ...prev[revKey], meritPoints: pts }
+                                        }))
+                                      }}
+                                      className={`flex-1 py-1.5 text-center font-bold text-xs rounded-lg border transition-all cursor-pointer ${
+                                        draft.meritPoints === pts
+                                          ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                                          : "bg-slate-50 dark:bg-[#1f2128] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300"
+                                      }`}
+                                    >
+                                      +{pts} Pts
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Submitted Review Excerpt (So Editor Rates Based on Substance) */}
-                        {draft.reviewSummary && (
-                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#1f2128] border border-slate-200/70 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
-                            <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400 block">Submitted Peer Review Evaluation Excerpt:</span>
-                            <p className="italic leading-relaxed whitespace-pre-wrap">{draft.reviewSummary}</p>
-                          </div>
-                        )}
+                            {/* Editor Commendation Note */}
+                            <div className="space-y-1 text-xs">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Editor Commendation Note for Reviewer Dossier</label>
+                              <input
+                                type="text"
+                                value={draft.commendationNote}
+                                onChange={(e) => {
+                                  const val = e.target.value
+                                  setReviewerIncentives(prev => ({
+                                    ...prev,
+                                    [revKey]: { ...prev[revKey], commendationNote: val }
+                                  }))
+                                }}
+                                placeholder="Commendation note acknowledging thorough critique..."
+                                className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs"
+                              />
+                            </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                          {/* Timeliness */}
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Turnaround Timeliness</label>
-                            <select
-                              value={draft.timeliness}
-                              onChange={(e) => {
-                                const val = e.target.value as any
-                                setReviewerIncentives(prev => ({
-                                  ...prev,
-                                  [revKey]: { ...prev[revKey], timeliness: val }
-                                }))
-                              }}
-                              className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs font-medium"
-                            >
-                              <option value="early">Ahead of Schedule (+Bonus)</option>
-                              <option value="on_time">On-Time (Within 14 Days)</option>
-                              <option value="delayed">Delayed</option>
-                            </select>
-                          </div>
-
-                          {/* Merit Points Chip selection */}
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Award Reviewer Merit Points</label>
-                            <div className="flex items-center gap-1.5">
-                              {[10, 15, 25].map((pts) => (
-                                <button
-                                  key={pts}
-                                  type="button"
-                                  onClick={() => {
+                            {/* Notification Toggle */}
+                            <div className="flex items-center justify-between pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={draft.notifyReviewer}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked
                                     setReviewerIncentives(prev => ({
                                       ...prev,
-                                      [revKey]: { ...prev[revKey], meritPoints: pts }
+                                      [revKey]: { ...prev[revKey], notifyReviewer: checked }
                                     }))
                                   }}
-                                  className={`flex-1 py-1.5 text-center font-bold text-xs rounded-lg border transition-all cursor-pointer ${
-                                    draft.meritPoints === pts
-                                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                                      : "bg-slate-50 dark:bg-[#1f2128] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300"
-                                  }`}
-                                >
-                                  +{pts} Pts
-                                </button>
-                              ))}
+                                  className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 cursor-pointer"
+                                />
+                                <span>{isDe ? "Gutachter per E-Mail benachrichtigen & Merit-Punkte gutschreiben" : "Notify Reviewer via Email & Credit Merit Points to Wallet"}</span>
+                              </label>
+                              <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                                +{draft.meritPoints} Pts → Wallet
+                              </span>
                             </div>
                           </div>
-                        </div>
-
-                        {/* Editor Commendation Note */}
-                        <div className="space-y-1 text-xs">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Editor Commendation Note for Reviewer Dossier</label>
-                          <input
-                            type="text"
-                            value={draft.commendationNote}
-                            onChange={(e) => {
-                              const val = e.target.value
-                              setReviewerIncentives(prev => ({
-                                ...prev,
-                                [revKey]: { ...prev[revKey], commendationNote: val }
-                              }))
-                            }}
-                            placeholder="Commendation note acknowledging thorough critique..."
-                            className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs"
-                          />
-                        </div>
-
-                        {/* Notification Toggle */}
-                        <div className="flex items-center justify-between pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={draft.notifyReviewer}
-                              onChange={(e) => {
-                                const checked = e.target.checked
-                                setReviewerIncentives(prev => ({
-                                  ...prev,
-                                  [revKey]: { ...prev[revKey], notifyReviewer: checked }
-                                }))
-                              }}
-                              className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 cursor-pointer"
-                            />
-                            <span>{isDe ? "Gutachter per E-Mail benachrichtigen & Merit-Punkte gutschreiben" : "Notify Reviewer via Email & Credit Merit Points to Wallet"}</span>
-                          </label>
-                          <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                            +{draft.meritPoints} Pts → Wallet
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  })}
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* 3. Verdict Selection */}
-            <div className="space-y-1.5">
-              <label className="font-bold text-slate-700 dark:text-slate-300">
-                {isDe ? "Entscheidungs-Verdikt:" : "Decision Verdict:"}
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  { key: "Accept", label: "Accept", color: "text-emerald-600 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40" },
-                  { key: "Minor Revision", label: "Minor Revision", color: "text-[#0b99ff] border-sky-300 bg-sky-50 dark:bg-sky-950/40" },
-                  { key: "Major Revision", label: "Major Revision", color: "text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/40" },
-                  { key: "Reject", label: "Reject", color: "text-rose-600 border-rose-300 bg-rose-50 dark:bg-rose-950/40" }
-                ].map((v) => (
-                  <button
-                    key={v.key}
-                    type="button"
-                    onClick={() => handleVerdictChange(v.key as any)}
-                    className={`p-2.5 rounded-xl border text-center font-bold text-xs transition-all cursor-pointer ${
-                      decisionVerdict === v.key ? `${v.color} ring-2 ring-[#0b99ff]/50` : "border-slate-200 dark:border-[#272832] bg-slate-50 dark:bg-[#131418] text-slate-600 dark:text-slate-400"
-                    }`}
-                  >
-                    {v.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. Official Decision Letter */}
-            <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-[#272832]">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div>
-                  <h4 className="font-semibold text-xs text-slate-900 dark:text-white">
-                    {isDe ? "Entscheidungsschreiben" : "Editorial Decision Letter"}
-                  </h4>
+            {/* Step 3: Verdict Selection & Decision Letter */}
+            <div className="rounded-xl border border-sky-200 dark:border-sky-900/60 overflow-hidden bg-white dark:bg-[#131418]">
+              <button
+                type="button"
+                onClick={() => setDecisionAccordionOpen(prev => ({ ...prev, step3: !prev.step3 }))}
+                className="w-full flex items-center justify-between p-3.5 bg-sky-50 dark:bg-[#18191e] border-b border-sky-200 dark:border-[#272832] hover:bg-sky-100/60 dark:hover:bg-[#1f2128] transition-colors cursor-pointer text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-[#0b99ff] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    3
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
+                      {isDe ? "Schritt 3: Verdikt-Auswahl & Entscheidungsschreiben" : "Step 3: Verdict Selection & Official Decision Letter"}
+                    </h3>
+                    <p className="text-[10px] text-slate-500">
+                      Formulate editorial verdict, customize decision letter, and dispatch to corresponding author
+                    </p>
+                  </div>
                 </div>
-
-                {/* Sub-Tabs: Edit Letter / Preview */}
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-0.5 rounded-lg border border-slate-200/80 dark:border-[#272832]">
-                  <button
-                    type="button"
-                    onClick={() => setDecisionTab("edit")}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                      decisionTab === "edit"
-                        ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    {isDe ? "Bearbeiten" : "Edit Letter"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDecisionTab("preview")}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                      decisionTab === "preview"
-                        ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    {isDe ? "Vorschau" : "Preview"}
-                  </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                    Verdict: {decisionVerdict}
+                  </span>
+                  {decisionAccordionOpen.step3 ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
                 </div>
-              </div>
+              </button>
 
-              {/* Recipient & Subject Line Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Empfänger (Autor):" : "Author Email (To):"}
+              {decisionAccordionOpen.step3 && (
+                <div className="p-3.5 space-y-4">
+                  {/* Verdict Selection */}
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700 dark:text-slate-300">
+                      {isDe ? "Entscheidungs-Verdikt:" : "Decision Verdict:"}
                     </label>
-                    <span className="text-[10px] text-slate-400">CC: scholarlyopen@gmail.com</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { key: "Accept", label: "Accept", color: "text-emerald-600 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40" },
+                        { key: "Minor Revision", label: "Minor Revision", color: "text-[#0b99ff] border-sky-300 bg-sky-50 dark:bg-sky-950/40" },
+                        { key: "Major Revision", label: "Major Revision", color: "text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/40" },
+                        { key: "Reject", label: "Reject", color: "text-rose-600 border-rose-300 bg-rose-50 dark:bg-rose-950/40" }
+                      ].map((v) => (
+                        <button
+                          key={v.key}
+                          type="button"
+                          onClick={() => handleVerdictChange(v.key as any)}
+                          className={`p-2.5 rounded-xl border text-center font-bold text-xs transition-all cursor-pointer ${
+                            decisionVerdict === v.key ? `${v.color} ring-2 ring-[#0b99ff]/50` : "border-slate-200 dark:border-[#272832] bg-slate-50 dark:bg-[#131418] text-slate-600 dark:text-slate-400"
+                          }`}
+                        >
+                          {v.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <input
-                    type="email"
-                    value={decisionAuthorEmail}
-                    onChange={(e) => setDecisionAuthorEmail(e.target.value)}
-                    placeholder="author@university.edu"
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-                  />
-                </div>
 
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Betreff:" : "Subject:"}
-                  </label>
-                  <input
-                    type="text"
-                    value={decisionSubject}
-                    onChange={(e) => setDecisionSubject(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Body: Edit Mode OR Live Branded Preview Mode */}
-              {decisionTab === "edit" ? (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Schreiben:" : "Letter Body:"}
-                  </label>
-                  <textarea
-                    rows={12}
-                    value={decisionLetter}
-                    onChange={(e) => setDecisionLetter(e.target.value)}
-                    className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Vorschau:" : "Email Preview:"}
-                  </label>
-                  <div className="rounded-lg border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-50 dark:bg-slate-950 p-2">
-                    <iframe
-                      title="Decision Email Preview"
-                      srcDoc={generateBrandedEmailHtml({
-                        subject: decisionSubject,
-                        bodyText: decisionLetter,
-                        actionLabel: decisionVerdict === "Accept" ? "View Publication Dossier" : "Submit Revised Manuscript",
-                        actionUrl: "https://www.scholarlyopen.org/editorial360",
-                        journal: selectedPaperForDecision?.journal || user.journal,
-                        paperId: selectedPaperForDecision?.id,
-                        paperTitle: selectedPaperForDecision?.title,
-                        recipientName: selectedPaperForDecision?.authorName || "Author"
-                      })}
-                      className="w-full h-[360px] bg-white rounded border border-slate-200 dark:border-slate-800"
-                    />
+                  {/* Sub-Tabs: Edit Letter / Preview */}
+                  <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-[#272832]">
+                    <h4 className="font-semibold text-xs text-slate-900 dark:text-white">
+                      {isDe ? "Entscheidungsschreiben" : "Editorial Decision Letter"}
+                    </h4>
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-0.5 rounded-lg border border-slate-200/80 dark:border-[#272832]">
+                      <button
+                        type="button"
+                        onClick={() => setDecisionTab("edit")}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                          decisionTab === "edit"
+                            ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        }`}
+                      >
+                        {isDe ? "Bearbeiten" : "Edit Letter"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDecisionTab("preview")}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                          decisionTab === "preview"
+                            ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        }`}
+                      >
+                        {isDe ? "Vorschau" : "Preview"}
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Recipient & Subject Line Inputs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                          {isDe ? "Empfänger (Autor):" : "Author Email (To):"}
+                        </label>
+                        <span className="text-[10px] text-slate-400">CC: scholarlyopen@gmail.com</span>
+                      </div>
+                      <input
+                        type="email"
+                        value={decisionAuthorEmail}
+                        onChange={(e) => setDecisionAuthorEmail(e.target.value)}
+                        placeholder="author@university.edu"
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {isDe ? "Betreff:" : "Subject:"}
+                      </label>
+                      <input
+                        type="text"
+                        value={decisionSubject}
+                        onChange={(e) => setDecisionSubject(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Body: Edit Mode OR Live Branded Preview Mode */}
+                  {decisionTab === "edit" ? (
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {isDe ? "Schreiben:" : "Letter Body:"}
+                      </label>
+                      <textarea
+                        rows={12}
+                        value={decisionLetter}
+                        onChange={(e) => setDecisionLetter(e.target.value)}
+                        className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        {isDe ? "Vorschau:" : "Email Preview:"}
+                      </label>
+                      <div className="rounded-lg border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-50 dark:bg-slate-950 p-2">
+                        <iframe
+                          title="Decision Email Preview"
+                          srcDoc={generateBrandedEmailHtml({
+                            subject: decisionSubject || `Editorial Decision: ${decisionVerdict}`,
+                            bodyText: decisionLetter,
+                            actionLabel: decisionVerdict.includes("Revision") ? "Submit Revision & Response" : "View Decision in Portal",
+                            actionUrl: "https://www.scholarlyopen.org/author-portal",
+                            journal: selectedPaperForDecision?.journal || "Scholarly Open",
+                            paperId: selectedPaperForDecision?.id || "",
+                            paperTitle: selectedPaperForDecision?.title || "",
+                            recipientName: selectedPaperForDecision?.author || "Author",
+                            includeEditorial360Logo: false
+                          })}
+                          className="w-full h-80 border-0 rounded"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
