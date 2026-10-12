@@ -19,6 +19,8 @@ interface EditorPageProps {
   }>
 }
 
+export const dynamicParams = true
+
 function findEditorBySlug(rawSlug: string) {
   if (!rawSlug) return undefined
   const slug = decodeURIComponent(rawSlug).toLowerCase().trim()
@@ -27,8 +29,15 @@ function findEditorBySlug(rawSlug: string) {
   let found = editors.find((e) => e.slug.toLowerCase() === slug)
   if (found) return found
 
-  // 2. Strip post-nominal credentials from slug (e.g. francis-verpoort-ph-d -> francis-verpoort, or -phd, -md, -m-d, -dsc)
+  // Aliases for Dr. Aboubakr Haredi Abdelmonsef Ahmed
+  if (slug.includes("abdelmonsef") || slug.includes("aboubakr")) {
+    found = editors.find(e => e.slug.includes("abdelmonsef") || e.name.toLowerCase().includes("abdelmonsef"))
+    if (found) return found
+  }
+
+  // 2. Strip post-nominal credentials and common prefixes
   const normalizedSlug = slug
+    .replace(/^assoc-prof-|^asst-prof-|^prof-|^dr-/i, "")
     .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d)$/i, "")
     .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d)-/i, "-")
   found = editors.find((e) => e.slug.toLowerCase() === normalizedSlug)
@@ -38,11 +47,12 @@ function findEditorBySlug(rawSlug: string) {
   found = editors.find((e) => {
     const rawNameSlug = e.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
     const cleanNameSlug = e.name.toLowerCase()
-      .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
-      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+      .replace(/\b(assoc\.\s*prof\.|asst\.\s*prof\.|assoc\s*prof|prof\.|dr\.|dr|mr\.|ms\.)\b/gi, "")
+      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?|msc|bsc)/gi, "")
+      .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
-    return rawNameSlug === slug || cleanNameSlug === slug || cleanNameSlug === normalizedSlug
+    return rawNameSlug === slug || cleanNameSlug === slug || cleanNameSlug === normalizedSlug || rawNameSlug === normalizedSlug
   })
   if (found) return found
 
@@ -62,14 +72,21 @@ export async function generateStaticParams() {
     const rawNameSlug = editor.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
     if (rawNameSlug) allSlugs.add(rawNameSlug)
     const cleanNameSlug = editor.name.toLowerCase()
-      .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
-      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+      .replace(/\b(assoc\.\s*prof\.|asst\.\s*prof\.|assoc\s*prof|prof\.|dr\.|dr|mr\.|ms\.)\b/gi, "")
+      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?|msc|bsc)/gi, "")
+      .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
     if (cleanNameSlug) allSlugs.add(cleanNameSlug)
     if (editor.slug === "francis-verpoort") {
       allSlugs.add("francis-verpoort-ph-d")
       allSlugs.add("francis-verpoort-phd")
+    }
+    if (editor.slug.includes("abdelmonsef")) {
+      allSlugs.add("aboubakr-haredi-abdelmonsef-ahmed")
+      allSlugs.add("aboubakr-haredi-abdelmonsef")
+      allSlugs.add("aboubakr-abdelmonsef")
+      allSlugs.add("abdelmonsef")
     }
   })
   return Array.from(allSlugs).map((slug) => ({ slug }))

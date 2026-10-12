@@ -52,6 +52,19 @@ interface JournalEditorialBoardProps {
   editorialBoard: EditorMember[]
 }
 
+function getEditorProfileSlug(editor: EditorMember): string | undefined {
+  if (editor.slug) return editor.slug
+  if (editor.name.toLowerCase().includes("position open")) return undefined
+
+  return editor.name
+    .toLowerCase()
+    .replace(/\b(assoc\.\s*prof\.|asst\.\s*prof\.|assoc\s*prof|prof\.|dr\.|dr|mr\.|ms\.)\b/gi, "")
+    .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?|msc|bsc)/gi, "")
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
 function EditorCard({ editor, featured = false }: { editor: EditorMember; featured?: boolean }) {
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   const isOpen = editor.name.toLowerCase() === "position open"
@@ -63,17 +76,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
     ? "editor.chem@scholarlyopen.org"
     : (editor.journalSlug ? `editor.${editor.journalSlug.replace(/[^a-z0-9]/g, "")}@scholarlyopen.org` : "info@scholarlyopen.org")
 
-  const editorSlug = editor.slug || (
-    !isOpen 
-      ? editor.name
-          .toLowerCase()
-          .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
-          .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
-          .trim()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "")
-      : undefined
-  )
+  const editorSlug = !isOpen ? getEditorProfileSlug(editor) : undefined
   
   return (
     <Card className={`border-none shadow-none bg-transparent relative flex flex-col items-center text-center p-2 ${
@@ -398,10 +401,10 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
             </div>
           </div>
 
-          {editor.slug && (
+          {getEditorProfileSlug(editor) && (
             <div className="border-t border-border pt-4 mt-4 w-full">
               <Button size="sm" className="w-full text-xs font-semibold" asChild>
-                <Link href={`/editors/${editor.slug}`}>
+                <Link href={`/editors/${getEditorProfileSlug(editor)}`}>
                   View Full Profile Page
                   <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
                 </Link>

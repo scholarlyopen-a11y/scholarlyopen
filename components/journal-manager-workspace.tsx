@@ -2404,7 +2404,8 @@ ${journalEmail} | https://www.scholarlyopen.org`
       if (edEmail && (!customEditorEmail || editorInviteMode === "board")) {
         setCustomEditorEmail(edEmail)
       }
-      const directAccessUrl = `https://scholarlyopen.org/editorial360?action=handling_editor&id=${encodeURIComponent(msId)}&email=${encodeURIComponent(edEmail || "editor.med@scholarlyopen.org")}&name=${encodeURIComponent(edName)}&journal=${encodeURIComponent(journalName)}`
+      const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
+      const directAccessUrl = `${baseUrl}/editorial360?action=handling_editor&id=${encodeURIComponent(msId)}&email=${encodeURIComponent(edEmail || "editor.med@scholarlyopen.org")}&name=${encodeURIComponent(edName)}&journal=${encodeURIComponent(journalName)}`
       setCustomEditorSubject(`[${journalName}] Handling Editor Appointment & Review Oversight: ${msId}`)
       setCustomEditorBody(
 `Dear ${edName},

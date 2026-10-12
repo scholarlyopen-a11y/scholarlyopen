@@ -467,6 +467,171 @@ const baseEditors: EditorMember[] = [
     ]
   },
   {
+    slug: "aboubakr-haredi-abdelmonsef",
+    name: "Assoc. Prof. Dr. Aboubakr Haredi Abdelmonsef Ahmed",
+    role: "Associate Editor",
+    affiliation: "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt",
+    specialization: "Organic & heterocyclic chemistry, computer-aided drug design (CADD), molecular docking & dynamics, bioinformatics, and biologically active compounds.",
+    email: "editor.chem@scholarlyopen.org",
+    orcid: "0000-0002-4616-0224",
+    scopusId: "57191850843",
+    linkedin: "https://www.linkedin.com/in/dr-aboubakr-h-abdelmonsef",
+    imageUrl: "/images/editors/aboubakr-abdelmonsef.png",
+    journalSlug: "chemistry",
+    assignedSections: [
+      "Organic Chemistry",
+      "Computational Chemistry & Drug Design",
+      "Heterocyclic & Bioactive Scaffolds",
+      "Bioinformatics & Molecular Modeling",
+      "Medicinal Chemistry & Drug Discovery"
+    ],
+    expertise: [
+      "Organic Chemistry",
+      "Drug Design",
+      "Bioinformatics",
+      "Heterocyclic Chemistry",
+      "Molecular Modeling",
+      "Computer-Aided Drug Design (CADD)",
+      "Molecular Docking & Dynamics",
+      "In Silico Studies & Virtual Screening",
+      "Anticancer & Antimicrobial Research",
+      "ADMET & DFT Calculations"
+    ],
+    badges: [
+      "Associate Editor",
+      "Verified Scholar",
+      "h-index: 26",
+      "75+ Publications"
+    ],
+    welcomeMessage: "As an Associate Editor for Scholarly Open: Chemistry, my commitment is to advance groundbreaking chemical research across organic synthesis, medicinal chemistry, and computational drug discovery through constructive, rigorous, and timely peer review. I warmly invite authors to contribute high-impact papers shaping molecular innovations.",
+    stats: [
+      { label: "H-Index", value: "26", description: "Scopus Citation Index" },
+      { label: "Publications", value: "75+", description: "Peer-reviewed international research articles" },
+      { label: "Experience", value: "20+ Yrs", description: "Academic instruction & postgraduate supervision" },
+      { label: "Theses Supervised", value: "15+", description: "Awarded and ongoing Ph.D. and M.Sc. theses" }
+    ],
+    timeline: [
+      {
+        year: "2004",
+        title: "B.Sc. in Chemistry with Honors",
+        description: "South Valley University – Faculty of Science – Chemistry Department, Qena, Egypt. Graduated Very Good with Honors.",
+        type: "education"
+      },
+      {
+        year: "2010",
+        title: "M.Sc. in Chemistry (Organic Chemistry)",
+        description: "South Valley University, Qena, Egypt. Thesis: An Efficient Synthesis of Biologically Active Tetrachloroquinazolinedione Derivatives via Lossen Rearrangement.",
+        type: "education"
+      },
+      {
+        year: "2012",
+        title: "Scientific Fellowship at Jacobs University",
+        description: "Affiliation and Partnership Initiative Grant, School of Science and Engineering, Jacobs University, Bremen, Germany.",
+        type: "milestone"
+      },
+      {
+        year: "2017",
+        title: "Ph.D. in Science (Chemistry)",
+        description: "Osmania University – College of Science, Hyderabad, India. Doctoral thesis on molecular modeling and novel lead inhibitors for Rab family proteins.",
+        type: "education"
+      },
+      {
+        year: "2022",
+        title: "Promoted to Associate Professor",
+        description: "Chemistry Department, Faculty of Science, Qena University (formerly South Valley University), Qena, Egypt.",
+        type: "career"
+      },
+      {
+        year: "2025",
+        title: "University Incentive Award & ASRT Grant",
+        description: "Awarded University Incentive Award in Basic and Engineering Sciences; secured ASRT Research Grant under Nawah Scientific Center Alliance.",
+        type: "milestone"
+      },
+      {
+        year: "2026",
+        title: "Appointed Associate Editor",
+        description: "Scholarly Open: Chemistry. Overseeing submissions in Organic Chemistry, Medicinal Chemistry, Heterocyclic Scaffolds, and CADD.",
+        type: "career"
+      }
+    ],
+    biography: `Assoc. Prof. Dr. Aboubakr Haredi Abdelmonsef Ahmed is an Associate Professor of Organic Chemistry in the Chemistry Department, Faculty of Science, Qena University (formerly South Valley University), Qena, Egypt. With over 20 years of academic teaching, scientific research, and postgraduate mentoring, he has established an internationally recognized profile in rational drug design, heterocyclic chemistry, and computational chemical biology.
+
+Dr. Abdelmonsef earned his Bachelor of Science in Chemistry with honors from South Valley University in 2004 and his Master of Science in Organic Chemistry in 2010, focusing on the synthesis of biologically active quinazolinedione derivatives via Lossen rearrangement. In 2017, he received his Ph.D. in Science (Chemistry) from Osmania University (Hyderabad, India), where his research applied advanced molecular modeling and virtual screening to identify novel inhibitors for Rab family proteins. He also conducted international collaborative research at Jacobs University in Bremen, Germany, under a prestigious partnership initiative grant.
+
+His research specializations include Organic and Heterocyclic Chemistry, Computer-Aided Drug Design (CADD), Bioinformatics, Molecular Docking, Molecular Dynamics simulations, In Silico virtual screening, ADMET profiling, and Density Functional Theory (DFT) calculations. His group focuses on the rational design, green synthesis, and pharmacological evaluation of novel quinazoline, pyrazole, thiazole, triazole, chromene, and azepine derivatives as targeted therapeutic agents against aggressive human cancers (targeting EGFR, VEGFR-2, c-Met, AKT, and Aurora B kinase), multidrug-resistant pathogens (MSSA, MRSA, VRSA), and inflammatory disorders.
+
+Dr. Abdelmonsef has authored over 75 peer-reviewed scientific publications in top-tier journals (including IJMS, Journal of Computer-Aided Molecular Design, Scientific Reports, Molecules, RSC Advances, and Future Medicinal Chemistry) and authored an academic book published by Lambert Academic Publishing (Germany, 2012). He has supervised and refereed over 15 Ph.D. and M.Sc. theses and has served as a dedicated peer reviewer for more than 20 prestigious international journals. In 2025, he was awarded the University Incentive Award in Basic and Engineering Sciences and received a research grant from Egypt’s Academy of Scientific Research and Technology (ASRT) under the Nawah Scientific Center Alliance. As an Associate Editor of Scholarly Open: Chemistry, he is committed to upholding rigorous peer review and advancing open-access scientific excellence in chemical and medicinal research.`,
+    personalPublications: [
+      {
+        title: "Aucubin Ameliorates Alloxan-Induced Diabetic Liver Injury in Association with Modulation of the Nrf2/HO-1 Antioxidant Axis and NF-κB-Associated Inflammatory and Apoptotic Signaling",
+        journal: "International Journal of Molecular Sciences (IJMS)",
+        year: "2026",
+        doi: "10.3390/ijms27188184",
+        link: "https://doi.org/10.3390/ijms27188184"
+      },
+      {
+        title: "Urea and Carbamate-Functionalized Quinazolin-2,4-dione Derivatives as EGFR Tyrosine Kinase Inhibitors: Synthesis, Anticancer Evaluation, Molecular Docking and Molecular Dynamics Studies",
+        journal: "Journal of Computer-Aided Molecular Design",
+        year: "2026",
+        doi: "10.1007/s10822-026-00909-z",
+        link: "https://doi.org/10.1007/s10822-026-00909-z"
+      },
+      {
+        title: "Five, six and/or seven-membered rings endowed with isoxazole moiety: synthesis, antimicrobial assessment and in silico molecular docking studies",
+        journal: "Future Medicinal Chemistry",
+        year: "2026",
+        doi: "10.1080/17568919.2026.2628560",
+        link: "https://doi.org/10.1080/17568919.2026.2628560"
+      },
+      {
+        title: "Vanillin-tethered quinazolin-2,4-dione analogues through five- and/or six-membered nitrogen-containing heterocycles as antibacterial agents: synthesis, biological evaluation and molecular docking study",
+        journal: "RSC Advances",
+        year: "2026",
+        doi: "10.1039/D5RA08138F",
+        link: "https://doi.org/10.1039/D5RA08138F"
+      },
+      {
+        title: "Antimicrobial Potential of Novel Quinazolin-2,4-dione Derivatives Bearing One and/or Two Amide Moieties: In Vitro Evaluation, Molecular Docking, and Semiempirical Calculations",
+        journal: "ChemistrySelect",
+        year: "2025",
+        doi: "10.1002/slct.202504022",
+        link: "https://doi.org/10.1002/slct.202504022"
+      },
+      {
+        title: "Synthesis, In Silico and In Vivo Evaluation of New Pyrazole-based thiosemicarbazones containing thiazole and thiazolone moieties as potential Anti-Inflammatory Agents",
+        journal: "Journal of Molecular Structure",
+        year: "2025",
+        doi: "10.1016/j.molstruc.2025.143990",
+        link: "https://doi.org/10.1016/j.molstruc.2025.143990"
+      },
+      {
+        title: "Synthesis, Anti-inflammatory, Molecular Docking Studies of New Heterocyclic Derivatives Comprising Pyrazole, Pyridine and/or Pyran Moieties",
+        journal: "Pharmaceuticals",
+        year: "2025",
+        doi: "10.3390/ph18030335",
+        link: "https://doi.org/10.3390/ph18030335"
+      },
+      {
+        title: "Novel 3-phenylquinazolin-2,4(1H,3H)-diones as dual VEGFR-2/c-Met-TK inhibitors: design, synthesis, and biological evaluation",
+        journal: "Scientific Reports",
+        year: "2023",
+        doi: "10.1038/s41598-023-45687-y",
+        link: "https://doi.org/10.1038/s41598-023-45687-y"
+      }
+    ],
+    honors: [
+      "University Incentive Award in Basic and Engineering Sciences (2025)",
+      "South Valley University Scientific Publishing Award (2011–Present)",
+      "Research Grant from the Academy of Scientific Research and Technology (ASRT) – Nawah Scientific Center Alliance (2025)",
+      "Affiliation and Partnership Initiative Grant – Jacobs University, Bremen, Germany (2012)"
+    ],
+    editorialRoles: [
+      "Associate Editor, Scholarly Open: Chemistry",
+      "Editorial Board Member, SVU-International Journal of Basic Sciences",
+      "Peer Reviewer for Scientific Reports, Biomolecules, J Comput Aided Mol Des, Future Med Chem, RSC Advances, Molecules"
+    ]
+  },
+  {
     slug: "mohamed-eletmany",
     name: "Mohamed R. Eletmany, Ph.D.",
     role: "Associate Editor",

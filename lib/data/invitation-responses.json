@@ -39,6 +39,26 @@
       "jmApproved": true,
       "hasAcceptedTerms": true,
       "consentProfileUpload": true
+    },
+    {
+      "id": "RESP-ABDELMONSEF",
+      "slug": "aboubakr-haredi-abdelmonsef",
+      "type": "ae",
+      "candidateName": "Assoc. Prof. Dr. Aboubakr Haredi Abdelmonsef Ahmed",
+      "candidateEmail": "aboubakr.ahmed@sci.svu.edu.eg",
+      "journal": "Scholarly Open: Chemistry",
+      "decision": "yes",
+      "credentialId": "EBM-ABDELMONSEF",
+      "timestamp": "2026-10-12T08:00:00.000Z",
+      "notes": "Associate Editor appointment accepted via verified portal",
+      "affiliation": "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt",
+      "department": "Chemistry Department, Faculty of Science",
+      "country": "Egypt",
+      "orcid": "0000-0002-4616-0224",
+      "status": "Live on Masthead",
+      "jmApproved": true,
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true
     }
   ]
 }

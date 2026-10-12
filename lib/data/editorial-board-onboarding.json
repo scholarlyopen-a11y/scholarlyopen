@@ -62,7 +62,40 @@
       "hasAcceptedTerms": true,
       "consentProfileUpload": true,
       "acceptedAt": "2026-10-05T10:13:00.000Z"
+    },
+    {
+      "id": "EBM-ABDELMONSEF",
+      "slug": "aboubakr-haredi-abdelmonsef",
+      "name": "Assoc. Prof. Dr. Aboubakr Haredi Abdelmonsef Ahmed",
+      "email": "aboubakr.ahmed@sci.svu.edu.eg",
+      "role": "Associate Editor",
+      "journal": "Scholarly Open: Chemistry",
+      "journalSlug": "chemistry",
+      "affiliation": "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt",
+      "department": "Chemistry Department, Faculty of Science",
+      "country": "Egypt",
+      "specialization": "Organic Chemistry, Heterocyclic Chemistry, Drug Design, Bioinformatics, Molecular Modeling, CADD, In Silico Studies",
+      "researchInterests": [
+        "Organic Chemistry",
+        "Heterocyclic Chemistry",
+        "Drug Design & Discovery",
+        "Bioinformatics",
+        "Molecular Modeling & Docking",
+        "Molecular Dynamics Simulations",
+        "Computer-Aided Drug Design (CADD)",
+        "In Silico Studies & Virtual Screening",
+        "Anticancer, Antimicrobial & Anti-inflammatory Agents"
+      ],
+      "biography": "Assoc. Prof. Dr. Aboubakr Haredi Abdelmonsef Ahmed is an Associate Professor of Organic Chemistry in the Chemistry Department, Faculty of Science, Qena University (formerly South Valley University), Qena, Egypt. With over 20 years of academic teaching, scientific leadership, and research mentorship, he has established an internationally recognized research portfolio at the intersection of organic synthetic chemistry, computational chemistry, and rational drug discovery.\n\nHe earned his Bachelor of Science in Chemistry with top honors from South Valley University in 2004, followed by a Master of Science in Organic Chemistry in 2010 focusing on the synthesis of biologically active quinazolinedione derivatives via Lossen rearrangement. In 2017, he received his Doctor of Philosophy in Chemistry from Osmania University (Hyderabad, India), where his doctoral investigations pioneered molecular modeling methodologies to identify novel lead inhibitors targeting Rab family GTPases. He has also undertaken distinguished international scientific missions, including research fellowship appointments at Jacobs University in Bremen, Germany.\n\nDr. Abdelmonsef's core research specializations encompass Organic and Heterocyclic Chemistry, Computer-Aided Drug Design (CADD), Bioinformatics, Molecular Docking, Molecular Dynamics simulations, and In Silico Virtual Screening. His laboratory focuses on the rational design, green synthesis, and biological evaluation of novel nitrogen- and sulfur-heterocyclic scaffolds—notably quinazolin-2,4-diones, pyrazoles, thiazoles, triazoles, and fused heterocycles—as potent candidates against cancer targets (EGFR, VEGFR-2, c-Met, PI3K/Akt/mTOR, Aurora B kinase), multidrug-resistant bacterial pathogens (MSSA, MRSA, VRSA), viral proteases, and inflammatory pathways.\n\nHis academic achievements include authoring over 75 peer-reviewed publications in prestigious international journals, publishing a dedicated academic monograph on heterocyclic synthesis, and securing competitive national grants such as the Academy of Scientific Research and Technology (ASRT) grant under the Nawah Scientific Center Alliance (2025). He is the recipient of the University Incentive Award in Basic and Engineering Sciences (2025) and multiple Scientific Publishing Awards. He has supervised and refereed more than 15 Ph.D. and M.Sc. theses and actively serves as an editorial board member and peer reviewer for numerous leading journals across the chemical, medicinal, and pharmacological sciences.",
+      "orcid": "0000-0002-4616-0224",
+      "scopusId": "57191850843",
+      "linkedin": "https://www.linkedin.com/in/dr-aboubakr-h-abdelmonsef",
+      "status": "Active Handling Editor",
+      "jmApproved": true,
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "acceptedAt": "2026-10-12T08:00:00.000Z"
     }
   ],
-  "lastUpdated": "2026-10-06T17:10:00.000Z"
+  "lastUpdated": "2026-10-12T10:30:00.000Z"
 }
