@@ -461,12 +461,22 @@ export function JournalEditorialBoard({
     }
   ]
 
+  const deduplicateList = (list: EditorMember[]) => {
+    const seen = new Set<string>()
+    return list.filter(item => {
+      const key = (item.slug || item.name).toLowerCase().replace(/[^a-z0-9]/g, "")
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }
+
   const displayAssociateEditors = associateEditors && associateEditors.length > 0 
-    ? associateEditors 
+    ? deduplicateList(associateEditors) 
     : defaultOpenAssociateEditors
 
   const displayEditorialBoard = editorialBoard && editorialBoard.length > 0 
-    ? editorialBoard 
+    ? deduplicateList(editorialBoard) 
     : defaultOpenEditorialBoard
 
   return (

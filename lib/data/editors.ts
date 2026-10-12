@@ -468,7 +468,7 @@ const baseEditors: EditorMember[] = [
   },
   {
     slug: "aboubakr-haredi-abdelmonsef",
-    name: "Assoc. Prof. Dr. Aboubakr Haredi Abdelmonsef Ahmed",
+    name: "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D.",
     role: "Associate Editor",
     affiliation: "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt",
     specialization: "Organic & heterocyclic chemistry, computer-aided drug design (CADD), molecular docking & dynamics, bioinformatics, and biologically active compounds.",
@@ -1748,7 +1748,10 @@ const onboardedList: EditorMember[] = (
 export const editors: EditorMember[] = [
   ...onboardedList,
   ...baseEditors.filter(be => !onboardedList.some(ol => {
+    if (ol.slug === be.slug) return true
     if (ol.name.toLowerCase() === be.name.toLowerCase()) return true
+    if (ol.slug.includes("abdelmonsef") && be.slug.includes("abdelmonsef")) return true
+    if (ol.name.toLowerCase().includes("abdelmonsef") && be.name.toLowerCase().includes("abdelmonsef")) return true
     if (ol.journalSlug === be.journalSlug && be.name === "Position Open") {
       const isOlEic = ol.role?.toLowerCase().includes("chief")
       const isBeEic = be.role?.toLowerCase().includes("chief")

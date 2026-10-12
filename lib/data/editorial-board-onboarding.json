@@ -66,13 +66,14 @@
     {
       "id": "EBM-ABDELMONSEF",
       "slug": "aboubakr-haredi-abdelmonsef",
-      "name": "Assoc. Prof. Dr. Aboubakr Haredi Abdelmonsef Ahmed",
+      "name": "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D.",
       "email": "aboubakr.ahmed@sci.svu.edu.eg",
       "role": "Associate Editor",
       "journal": "Scholarly Open: Chemistry",
       "journalSlug": "chemistry",
       "affiliation": "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt",
       "department": "Chemistry Department, Faculty of Science",
+      "photoUrl": "/images/editors/aboubakr-abdelmonsef.png",
       "country": "Egypt",
       "specialization": "Organic Chemistry, Heterocyclic Chemistry, Drug Design, Bioinformatics, Molecular Modeling, CADD, In Silico Studies",
       "researchInterests": [

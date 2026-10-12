@@ -119,13 +119,17 @@ interface EditorialDecisionDraft {
 }
 
 export interface ReviewerIncentiveDraft {
-  reviewerName: string
+  reviewerName: string // e.g. "Reviewer #1"
+  reviewerRealName?: string
   reviewerEmail: string
   qualityRating: number // 1 to 5 stars
   timeliness: "on_time" | "early" | "delayed"
   meritPoints: number // 10, 15, 25
-  incentiveType: "apc_waiver_25" | "apc_waiver_50" | "certificate" | "honorarium"
-  voucherCode: string
+  recommendation?: string
+  priorityScore?: string | number
+  reviewSummary?: string
+  incentiveType?: "apc_waiver_25" | "apc_waiver_50" | "certificate" | "honorarium"
+  voucherCode?: string
   commendationNote: string
   notifyReviewer: boolean
 }
@@ -351,12 +355,14 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
   date: "2026-09-14",
   assignedEditorName: undefined,
   editorAssigned: false,
-  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ"],
+  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Ikeda N"],
   fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
   fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
   fileSize: "38.6 KB",
   wordCount: 4820,
-  keywords: "Aortic Dissection; Emergency Medicine; Clinical Operations; Cardiovascular Surgery; Evidence-Based Medicine",
+  articleType: "Review Article",
+  abstract: "Acute aortic dissection (AAD) is a catastrophic cardiovascular emergency with mortality escalating by 1–2% per hour from symptom onset. Traditional care models often suffer from delayed symptom recognition, fragmented emergency triage, inter-hospital transport delays, and unstandardized handoffs. This review proposes the Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF), bridging clinical emergency medicine, operations management, and systems thinking. We synthesize operational benchmarks including door-to-CT imaging times (<30 min), inter-facility transfer protocols, and standardized clinical decision support algorithms to minimize diagnostic and therapeutic bottlenecks. Multidisciplinary institutional coordination, simulated high-reliability team training, and real-time electronic tracking systems are presented to improve survival outcomes in acute aortic dissection.",
+  keywords: "Acute Aortic Dissection; Emergency Medicine; Healthcare Operations; Quality Improvement; Cardiovascular Surgery; Evidence-Based Medicine",
   integrityStatus: "Clear",
   plagiarismScore: 4,
   aiScore: 2
@@ -364,32 +370,19 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
 
 const FALLBACK_AORTIC_REVIEWS = [
   {
-    id: "REV-FB-1791559472514-816",
-    paperId: "SOMED-26-RW01",
-    reviewerName: "Dr. Chaud GJ",
-    originality: 4,
-    methodology: 4,
-    clarity: 4,
-    significance: 4,
-    commentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication:\n1. Clarification of manuscript type and narrative methodology.\n2. Resolution of inconsistencies in supplementary datasets.\n3. Detailed verification of regional aortic network pathways.",
-    commentsEditor: "Dear Editor-in-Chief & Handling Editor,\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nSincerely,\nDr. Chaud GJ",
-    recommendation: "Major Revision",
-    sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.",
-    status: "Released"
-  },
-  {
     id: "REV-FB-SAM-01",
     paperId: "SOMED-26-RW01",
-    reviewerName: "Dr. Praveen Nagula",
+    reviewerName: "Reviewer #1",
     originality: 3,
     methodology: 3,
     clarity: 3,
     significance: 3,
     commentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided.\n\nSpecific comments:\n1. Expand reference citations for a comprehensive review article.\n2. Detail recent clinical developments and changes in acute management.\n3. Include synthesized summary tables and clinical decision flowcharts.",
     commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
-    recommendation: "Minor Revision",
+    recommendation: "Re-write and Re-submit",
     sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
-    status: "Released"
+    status: "Released",
+    reviewerEmail: "drpraveennagula@gmail.com"
   }
 ]
 
@@ -405,13 +398,10 @@ export function getReviewsForManuscript(reviewsList: any[], paperId?: string, pa
     return false
   })
 
-  // For Dr. Gong's manuscript SOMED-26-RW01, guarantee both peer reviews if not already populated
-  if ((normId === "somed-26-rw01" || normTitle.includes("acute aortic") || normTitle.includes("prevent earlier")) && matches.length < 2) {
-    const existingNames = new Set(matches.map(m => (m.reviewerName || "").toLowerCase()))
+  // For Dr. Gong's manuscript SOMED-26-RW01, guarantee the real submitted peer review is populated
+  if ((normId === "somed-26-rw01" || normTitle.includes("acute aortic") || normTitle.includes("prevent earlier")) && matches.length === 0) {
     FALLBACK_AORTIC_REVIEWS.forEach(fb => {
-      if (!existingNames.has(fb.reviewerName.toLowerCase())) {
-        matches.push(fb)
-      }
+      matches.push(fb)
     })
   }
 
@@ -860,15 +850,10 @@ export function EditorWorkspace({
     setDecisionTab("edit")
 
     // Populate Reviewer Recognition & Incentives
+    // STRICT RULE: ONLY populate reviewers who actually submitted an evaluation report (paperReviews)!
+    // Reviewers who haven't submitted yet (e.g. Ikeda N, Dr. Ragab Aziza) must NEVER be included.
+    // Reviewer identities remain blinded (Reviewer #1, Reviewer #2) with report excerpts shown to rate substance.
     const initialIncentives: Record<string, ReviewerIncentiveDraft> = {}
-    const reviewerNames = new Set<string>()
-    paperReviews.forEach(r => {
-      if (r.reviewerName) reviewerNames.add(r.reviewerName)
-    })
-    if (paper.reviewers && Array.isArray(paper.reviewers)) {
-      paper.reviewers.forEach(name => reviewerNames.add(name))
-    }
-
     const emailMap: Record<string, string> = {
       "Dr. Evelyn Vane": "e.vane@university-medical.edu",
       "Dr. Marcus Vance": "m.vance@university-charite.de",
@@ -881,17 +866,24 @@ export function EditorWorkspace({
       "Dr. Ragab Aziza": "ragab.aziza@alexmed.edu.eg"
     }
 
-    const cleanPaperId = paper.id ? paper.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) : "APC"
-    reviewerNames.forEach(name => {
-      const email = emailMap[name] || `${name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@scholarlyopen.org`
-      initialIncentives[name] = {
-        reviewerName: name,
-        reviewerEmail: email,
+    paperReviews.forEach((r, idx) => {
+      const anonKey = `Reviewer #${idx + 1}`
+      const realName = r.reviewerName || `Referee ${idx + 1}`
+      const realEmail = r.reviewerEmail || emailMap[realName] || `reviewer${idx + 1}@scholarlyopen.org`
+      const priority = r.commentsEditor?.match(/Priority rating:\s*([^\n\.]+)/i)?.[1]?.trim() || 
+                       (r.originality ? `${Math.round(((r.originality || 3) + (r.methodology || 3) + (r.clarity || 3) + (r.significance || 3)) / 4 * 2)}/10` : "6/10")
+      const summaryText = r.sanitizedCommentsAuthor || r.commentsAuthor || "Comprehensive peer review evaluation submitted."
+
+      initialIncentives[anonKey] = {
+        reviewerName: anonKey,
+        reviewerRealName: realName,
+        reviewerEmail: realEmail,
         qualityRating: 5,
         timeliness: "on_time",
         meritPoints: 15,
-        incentiveType: "apc_waiver_25",
-        voucherCode: `REV-WAV25-${cleanPaperId}-${Math.floor(1000 + Math.random() * 9000)}`,
+        recommendation: r.recommendation || "Evaluation Submitted",
+        priorityScore: priority,
+        reviewSummary: summaryText,
         commendationNote: `Rigorous, constructive peer evaluation rendered for manuscript ${paper.id}.`,
         notifyReviewer: true
       }
@@ -972,50 +964,38 @@ export function EditorWorkspace({
       })
     }).catch(e => console.error("Decision email dispatch error:", e))
 
-    // Process Reviewer Incentives & Merit Points
+    // Process Reviewer Performance Merit Points (Points only, no vouchers)
     const awardsToStore: any[] = []
-    for (const name of Object.keys(reviewerIncentives)) {
-      const inc = reviewerIncentives[name]
+    for (const key of Object.keys(reviewerIncentives)) {
+      const inc = reviewerIncentives[key]
       if (!inc) continue
 
-      const discountLabel = inc.incentiveType === "apc_waiver_50" 
-        ? "50% APC Waiver" 
-        : inc.incentiveType === "apc_waiver_25" 
-        ? "25% APC Waiver" 
-        : inc.incentiveType === "certificate" 
-        ? "Verified Review Certificate" 
-        : "Academic Honorarium"
+      const targetEmail = inc.reviewerEmail
+      const targetRealName = inc.reviewerRealName || inc.reviewerName
 
       const awardRecord = {
         id: `AWD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        code: inc.voucherCode,
-        discount: discountLabel,
         pointsAwarded: inc.meritPoints,
         qualityRating: inc.qualityRating,
         timeliness: inc.timeliness,
         paperId,
         paperTitle: selectedPaperForDecision.title,
-        reviewerName: inc.reviewerName,
-        reviewerEmail: inc.reviewerEmail,
+        reviewerName: targetRealName,
+        reviewerEmail: targetEmail,
         awardedBy: `${user.name} (Handling Editor)`,
         awardedAt: new Date().toISOString().split("T")[0],
         status: "Active"
       }
       awardsToStore.push(awardRecord)
 
-      // Update reviewer points and vouchers in localStorage
+      // Update reviewer points in localStorage
       try {
-        const ptKey = `editorial360_reviewer_points_${inc.reviewerEmail}`
+        const ptKey = `editorial360_reviewer_points_${targetEmail}`
         const currentPts = parseInt(localStorage.getItem(ptKey) || "35", 10)
         localStorage.setItem(ptKey, (currentPts + inc.meritPoints).toString())
-
-        const vKey = `editorial360_reviewer_vouchers_${inc.reviewerEmail}`
-        const existingVouchers = JSON.parse(localStorage.getItem(vKey) || "[]")
-        existingVouchers.unshift(awardRecord)
-        localStorage.setItem(vKey, JSON.stringify(existingVouchers))
       } catch (e) {}
 
-      // Dispatch to Reviewer History API
+      // Dispatch to Reviewer History API (merit points and rating only)
       fetch("/api/editorial360/reviewers", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -1024,29 +1004,27 @@ export function EditorWorkspace({
           paperId,
           paperTitle: selectedPaperForDecision.title,
           journal: journalName,
-          reviewerName: inc.reviewerName,
-          reviewerEmail: inc.reviewerEmail,
+          reviewerName: targetRealName,
+          reviewerEmail: targetEmail,
           pointsAwarded: inc.meritPoints,
           qualityRating: inc.qualityRating,
           timeliness: inc.timeliness,
-          incentiveType: inc.incentiveType,
-          voucherCode: inc.voucherCode,
           editorCommendation: inc.commendationNote,
           awardedBy: `${user.name} (Handling Editor)`
         })
-      }).catch(e => console.warn("Reviewer incentive API error:", e))
+      }).catch(e => console.warn("Reviewer merit points API error:", e))
 
-      // If notifyReviewer is checked, send official award notice email
+      // If notifyReviewer is checked, send official award notice email (Points only!)
       if (inc.notifyReviewer) {
-        const voucherEmailHtml = generateBrandedEmailHtml({
+        const awardEmailHtml = generateBrandedEmailHtml({
           subject: `Peer Review Recognition & Merit Award: ${paperId}`,
-          bodyText: `Dear ${inc.reviewerName},\n\nThe Handling Editor (${user.name}) and Editorial Board of ${journalName} have officially reviewed and endorsed your expert peer review evaluation for manuscript ${paperId} ("${selectedPaperForDecision.title}").\n\nIn recognition of your academic service, rigorous critiques, and prompt turnaround, the journal has credited +${inc.meritPoints} Reviewer Merit Points to your editorial360 Wallet.\n\nYou have also been awarded a ${discountLabel} voucher for your upcoming submissions:\n\nVoucher Code: ${inc.voucherCode}\n\nEditor Commendation: "${inc.commendationNote}"\n\nThank you for championing scientific integrity and excellence in open-access scholarship.`,
-          actionLabel: "Access Reviewer Wallet & Vouchers",
+          bodyText: `Dear Reviewer,\n\nThe Handling Editor (${user.name}) and Editorial Board of ${journalName} have officially evaluated and endorsed your expert peer review evaluation for manuscript ${paperId} ("${selectedPaperForDecision.title}").\n\nIn recognition of your academic service, analytical rigor, and prompt turnaround, the journal has credited +${inc.meritPoints} Reviewer Merit Points to your editorial360 Wallet.\n\nEditor Commendation: "${inc.commendationNote}"\n\nThank you for championing scientific integrity and excellence in open-access scholarship.`,
+          actionLabel: "Access Reviewer Wallet & Badges",
           actionUrl: "https://www.scholarlyopen.org/editorial360?role=reviewer&tab=wallet",
           journal: journalName,
           paperId,
           paperTitle: selectedPaperForDecision.title,
-          recipientName: inc.reviewerName,
+          recipientName: targetRealName,
           includeEditorial360Logo: false
         })
 
@@ -1054,13 +1032,13 @@ export function EditorWorkspace({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: inc.reviewerEmail,
+            to: targetEmail,
             customSubject: `Peer Review Recognition & Merit Award: ${paperId}`,
-            customHtml: voucherEmailHtml,
+            customHtml: awardEmailHtml,
             journal: journalName,
             paperId,
             paperTitle: selectedPaperForDecision.title,
-            recipientName: inc.reviewerName
+            recipientName: targetRealName
           })
         }).catch(e => console.warn("Reviewer reward email dispatch error:", e))
       }
@@ -1763,6 +1741,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               const isAccepted = paper.status === "Accepted"
               const isRejected = paper.status === "Rejected"
               const isReviewsComplete = isManuscriptReviewsReady(paper, reviews)
+              const matchingReviews = getReviewsForManuscript(reviews, paper.id, paper.title)
 
               return (
                 <Card key={paper.id} className="p-4 sm:p-5 bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl space-y-3.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
@@ -1798,15 +1777,28 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">{paper.title}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Author: <strong className="text-slate-700 dark:text-slate-300">{paper.authorName || "Author"}</strong>{paper.authorAffiliation ? ` · ${paper.authorAffiliation}` : ""}
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
+                      <span>Author: <strong className="text-slate-700 dark:text-slate-300">{isChiefEditor ? (paper.authorName || "Author") : "[Blinded for Double-Blind Review]"}</strong>{isChiefEditor && paper.authorAffiliation ? ` · ${paper.authorAffiliation}` : ""}</span>
+                      <span className="text-slate-300 dark:text-slate-700">•</span>
+                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                        COPE Double-Blind Standard
+                      </span>
                     </p>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
                     <div className="space-y-1">
-                      <div className="text-slate-600 dark:text-slate-400">
-                        Assigned Reviewers: <span className="font-semibold text-slate-800 dark:text-slate-200">{paper.reviewers && paper.reviewers.length > 0 ? paper.reviewers.join(", ") : "None assigned yet"}</span>
+                      <div className="text-slate-600 dark:text-slate-400 flex items-center gap-2 flex-wrap">
+                        <span>Peer Reviews: <span className="font-semibold text-slate-800 dark:text-slate-200">Double-Blind ({matchingReviews.length} Submitted · {paper.reviewers?.length || 3} Assigned)</span></span>
+                        <a
+                          href={paper.fileUrl || (paper.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                          download={paper.fileName || (paper.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${paper.id}_Manuscript.docx`)}
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] border border-sky-200 dark:border-sky-800 font-bold hover:bg-sky-100 dark:hover:bg-sky-900/60 transition-colors cursor-pointer ml-1"
+                          title="Download actual submitted manuscript (.docx)"
+                        >
+                          <Download className="h-3 w-3" />
+                          <span>Manuscript (.docx, {paper.id === "SOMED-26-RW01" ? "38.6 KB" : (paper.fileSize || "Main")})</span>
+                        </a>
                       </div>
                       {(() => {
                         const matchingEscalation = (integrityAlerts || []).find(a => a.paperId === paper.id && a.status === "Escalated")
@@ -1915,17 +1907,17 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             onClick={() => setSelectedPaperForReviewTracking(paper)}
                             variant="outline"
                             className="text-xs h-8 px-2.5 border-slate-300 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1e2027] cursor-pointer"
-                            title="Inspect reviewer scorecards & remarks"
+                            title="Inspect peer review evaluations & remarks"
                           >
                             <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                            View Scorecards
+                            Inspect Reviews
                           </Button>
                           <Button
                             onClick={() => handleOpenDecisionModal(paper)}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 cursor-pointer shadow-xs flex items-center gap-1.5"
                           >
                             <CheckSquare className="h-3.5 w-3.5" />
-                            2/2 In · Render Decision
+                            {matchingReviews.length} Review{matchingReviews.length === 1 ? "" : "s"} In · Render Decision
                           </Button>
                         </div>
                       )}
@@ -2033,7 +2025,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       {hasAllReviews ? (
                         <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-800 flex items-center gap-1.5 shadow-2xs">
                           <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
-                          Scorecards Complete ({matchingReviews.length}/{Math.max(assignedReviewers.length, 2)})
+                          Reviews Submitted ({matchingReviews.length}/{Math.max(assignedReviewers.length, 2)})
                         </span>
                       ) : (
                         <span className="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 px-2.5 py-1 rounded-full border border-sky-200 dark:border-sky-800">
@@ -2076,21 +2068,21 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               key={`${m.id}-rev-${entry.name}`}
                               className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                                 hasSubmitted 
-                                  ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10"
+                                   ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10"
                                   : "border-amber-200 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/10"
                               }`}
                             >
                               <div className="space-y-0.5">
                                 <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
-                                  <span>Reviewer {entry.index}: {entry.name}</span>
+                                  <span>Reviewer #{entry.index} (Double-Blind)</span>
                                   {hasSubmitted && (
-                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">Verified</span>
+                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">Verified Report</span>
                                   )}
                                 </div>
                                 {hasSubmitted ? (
                                   <>
                                     <div className="text-[11px] text-emerald-600 font-semibold">
-                                      Scorecard Complete · Recommendation: {entry.review?.recommendation || "Submitted"}
+                                      Evaluation Complete · Recommendation: {entry.review?.recommendation || "Submitted"}
                                     </div>
                                     <div className="text-[10px] text-slate-400">
                                       {entry.review?.submittedAt ? `Evaluated on ${new Date(entry.review.submittedAt).toLocaleDateString()}` : "Evaluation submitted"}
@@ -2741,7 +2733,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-xl max-h-[88vh] flex flex-col p-0 overflow-hidden rounded-2xl shadow-2xl">
           <DialogHeader className="p-5 pb-3 border-b border-slate-100 dark:border-[#272832] shrink-0 pr-12">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
-              <span>Review Progress &amp; Scorecards</span>
+              <span>Review Progress &amp; Peer Evaluations</span>
               <span className="text-xs font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded border border-[#0b99ff]/20">
                 {selectedPaperForReviewTracking?.id}
               </span>
@@ -2811,7 +2803,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   {/* Reviewers List */}
                   <div className="space-y-2">
                     <span className="font-bold text-slate-700 dark:text-slate-300 block text-xs">
-                      Assigned Reviewers &amp; Scorecards:
+                      Assigned Peer Reviews &amp; Evaluations:
                     </span>
 
                     <div className="space-y-2">
@@ -2863,7 +2855,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   isExpanded ? "border-[#0b99ff] text-[#0b99ff] bg-sky-50 dark:bg-sky-950/50" : ""
                                 }`}
                               >
-                                {isExpanded ? "Hide Scorecard ▲" : "View Scorecard ▼"}
+                                {isExpanded ? "Hide Review Report ▲" : "View Review Report ▼"}
                               </Button>
                             </div>
 
@@ -3086,7 +3078,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             <div className="flex items-center justify-between font-bold flex-wrap gap-2">
                               <div className="flex items-center gap-2">
                                 <span className="text-slate-900 dark:text-white font-bold">
-                                  Reviewer {idx + 1}: {rev.reviewerName || "Peer Reviewer"}
+                                  Reviewer #{idx + 1} (Double-Blind Evaluation)
                                 </span>
                                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
                                   {rev.recommendation || "Review Submitted"}
@@ -3184,157 +3176,147 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               )
             })()}
 
-            {/* 2. Reviewer Recognition & Merit Points Incentive Flow */}
+            {/* 2. Reviewer Performance Rating & Merit Points (Double-Blind) */}
             <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/80 space-y-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
-                    {isDe ? "Gutachter-Würdigung & Leistungs-Incentives" : "Reviewer Recognition & Incentive Flow"}
+                    {isDe ? "Gutachter-Bewertung & Merit-Punkte (Double-Blind)" : "Reviewer Performance Rating & Merit Points (Double-Blind)"}
                   </h4>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
-                  Direct Wallet Sync · APC Waivers
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                  Direct Wallet Sync · Merit Points
                 </span>
               </div>
 
               <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/80 leading-relaxed">
                 {isDe
-                  ? "Bewerten Sie die Qualität der Gutachten und vergeben Sie Merit-Punkte sowie APC-Waiver-Codes (25% / 50%) direkt an das persönliche Wallet der Gutachter."
-                  : "Evaluate reviewer rigor, endorse merit points, and grant APC waiver vouchers (25% / 50%) directly crediting the reviewer's personal wallet upon decision dispatch."}
+                  ? "Bewerten Sie die Qualität der eingereichten Gutachten und vergeben Sie Merit-Punkte direkt an das persönliche Wallet der Gutachter. Die Gutachteridentitäten bleiben zum Schutz des Double-Blind-Verfahrens anonymisiert."
+                  : "Evaluate the rigor and constructiveness of submitted peer reviews to endorse merit points crediting reviewer wallets. Reviewer identities remain blinded to uphold COPE double-blind standards."}
               </p>
 
-              <div className="space-y-3 pt-1">
-                {Object.keys(reviewerIncentives).map((revName) => {
-                  const draft = reviewerIncentives[revName]
-                  if (!draft) return null
+              {Object.keys(reviewerIncentives).length === 0 ? (
+                <div className="p-3 rounded-xl bg-white/70 dark:bg-[#15171c] border border-dashed border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-500 text-center">
+                  {isDe ? "Noch keine eingereichten Gutachten zur Bewertung verfügbar." : "No submitted review evaluations available yet to rate. Reviewers who have not submitted reports yet are excluded."}
+                </div>
+              ) : (
+                <div className="space-y-3 pt-1">
+                  {Object.keys(reviewerIncentives).map((revKey) => {
+                    const draft = reviewerIncentives[revKey]
+                    if (!draft) return null
 
-                  return (
-                    <div 
-                      key={revName}
-                      className="p-3.5 rounded-xl bg-white dark:bg-[#15171c] border border-emerald-200/80 dark:border-emerald-900/60 space-y-3 shadow-xs"
-                    >
-                      <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-                        <div>
-                          <span className="font-bold text-slate-900 dark:text-white text-xs">{draft.reviewerName}</span>
-                          <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono ml-2">({draft.reviewerEmail})</span>
+                    return (
+                      <div 
+                        key={revKey}
+                        className="p-3.5 rounded-xl bg-white dark:bg-[#15171c] border border-emerald-200/80 dark:border-emerald-900/60 space-y-3 shadow-xs"
+                      >
+                        {/* Header: Blinded Reviewer Label + Recommendation + Stars */}
+                        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-slate-900 dark:text-white text-xs">{draft.reviewerName}</span>
+                            <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                              COPE Double-Blind
+                            </span>
+                            {draft.recommendation && (
+                              <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                                Recommendation: {draft.recommendation}
+                              </span>
+                            )}
+                            {draft.priorityScore && (
+                              <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                                Priority: {draft.priorityScore}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Quality Rating:</span>
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => {
+                                    setReviewerIncentives(prev => ({
+                                      ...prev,
+                                      [revKey]: { ...prev[revKey], qualityRating: star }
+                                    }))
+                                  }}
+                                  className="cursor-pointer focus:outline-none p-0.5"
+                                  title={`${star} Star Rating`}
+                                >
+                                  <Star
+                                    className={`h-3.5 w-3.5 ${
+                                      star <= draft.qualityRating
+                                        ? "text-amber-400 fill-amber-400"
+                                        : "text-slate-300 dark:text-slate-600"
+                                    }`}
+                                  />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Quality Rating:</span>
-                          <div className="flex items-center gap-0.5">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                onClick={() => {
-                                  setReviewerIncentives(prev => ({
-                                    ...prev,
-                                    [revName]: { ...prev[revName], qualityRating: star }
-                                  }))
-                                }}
-                                className="cursor-pointer focus:outline-none p-0.5"
-                              >
-                                <Star
-                                  className={`h-3.5 w-3.5 ${
-                                    star <= draft.qualityRating
-                                      ? "text-amber-400 fill-amber-400"
-                                      : "text-slate-300 dark:text-slate-600"
+
+                        {/* Submitted Review Excerpt (So Editor Rates Based on Substance) */}
+                        {draft.reviewSummary && (
+                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#1f2128] border border-slate-200/70 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
+                            <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400 block">Submitted Peer Review Evaluation Excerpt:</span>
+                            <p className="italic leading-relaxed whitespace-pre-wrap">{draft.reviewSummary}</p>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                          {/* Timeliness */}
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Turnaround Timeliness</label>
+                            <select
+                              value={draft.timeliness}
+                              onChange={(e) => {
+                                const val = e.target.value as any
+                                setReviewerIncentives(prev => ({
+                                  ...prev,
+                                  [revKey]: { ...prev[revKey], timeliness: val }
+                                }))
+                              }}
+                              className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs font-medium"
+                            >
+                              <option value="early">Ahead of Schedule (+Bonus)</option>
+                              <option value="on_time">On-Time (Within 14 Days)</option>
+                              <option value="delayed">Delayed</option>
+                            </select>
+                          </div>
+
+                          {/* Merit Points Chip selection */}
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Award Reviewer Merit Points</label>
+                            <div className="flex items-center gap-1.5">
+                              {[10, 15, 25].map((pts) => (
+                                <button
+                                  key={pts}
+                                  type="button"
+                                  onClick={() => {
+                                    setReviewerIncentives(prev => ({
+                                      ...prev,
+                                      [revKey]: { ...prev[revKey], meritPoints: pts }
+                                    }))
+                                  }}
+                                  className={`flex-1 py-1.5 text-center font-bold text-xs rounded-lg border transition-all cursor-pointer ${
+                                    draft.meritPoints === pts
+                                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                                      : "bg-slate-50 dark:bg-[#1f2128] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300"
                                   }`}
-                                />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                        {/* Timeliness */}
-                        <div className="space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Timeliness</label>
-                          <select
-                            value={draft.timeliness}
-                            onChange={(e) => {
-                              const val = e.target.value as any
-                              setReviewerIncentives(prev => ({
-                                ...prev,
-                                [revName]: { ...prev[revName], timeliness: val }
-                              }))
-                            }}
-                            className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs"
-                          >
-                            <option value="early">Ahead of Schedule (+Bonus)</option>
-                            <option value="on_time">On-Time (Within 14 Days)</option>
-                            <option value="delayed">Delayed</option>
-                          </select>
-                        </div>
-
-                        {/* Merit Points Chip selection */}
-                        <div className="space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Merit Points</label>
-                          <div className="flex items-center gap-1">
-                            {[10, 15, 25].map((pts) => (
-                              <button
-                                key={pts}
-                                type="button"
-                                onClick={() => {
-                                  setReviewerIncentives(prev => ({
-                                    ...prev,
-                                    [revName]: { ...prev[revName], meritPoints: pts }
-                                  }))
-                                }}
-                                className={`flex-1 py-1 text-center font-bold text-xs rounded-md border transition-all cursor-pointer ${
-                                  draft.meritPoints === pts
-                                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                                    : "bg-slate-50 dark:bg-[#1f2128] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300"
-                                }`}
-                              >
-                                +{pts}
-                              </button>
-                            ))}
+                                >
+                                  +{pts} Pts
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         </div>
 
-                        {/* Incentive Voucher Type */}
-                        <div className="space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Incentive Voucher</label>
-                          <select
-                            value={draft.incentiveType}
-                            onChange={(e) => {
-                              const val = e.target.value as any
-                              setReviewerIncentives(prev => ({
-                                ...prev,
-                                [revName]: { ...prev[revName], incentiveType: val }
-                              }))
-                            }}
-                            className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs font-medium"
-                          >
-                            <option value="apc_waiver_25">25% APC Waiver Code</option>
-                            <option value="apc_waiver_50">50% APC Waiver Code</option>
-                            <option value="certificate">Verified Certificate</option>
-                            <option value="honorarium">Honorarium Commendation</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Generated Voucher Code & Commendation */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Auto-Generated Voucher Code</label>
-                          <input
-                            type="text"
-                            value={draft.voucherCode}
-                            onChange={(e) => {
-                              const val = e.target.value
-                              setReviewerIncentives(prev => ({
-                                ...prev,
-                                [revName]: { ...prev[revName], voucherCode: val }
-                              }))
-                            }}
-                            className="w-full px-2.5 py-1.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 rounded-lg text-emerald-900 dark:text-emerald-200 font-mono font-bold text-xs"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Editor Commendation Note</label>
+                        {/* Editor Commendation Note */}
+                        <div className="space-y-1 text-xs">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Editor Commendation Note for Reviewer Dossier</label>
                           <input
                             type="text"
                             value={draft.commendationNote}
@@ -3342,40 +3324,40 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               const val = e.target.value
                               setReviewerIncentives(prev => ({
                                 ...prev,
-                                [revName]: { ...prev[revName], commendationNote: val }
+                                [revKey]: { ...prev[revKey], commendationNote: val }
                               }))
                             }}
-                            placeholder="Commendation note for reviewer dossier..."
+                            placeholder="Commendation note acknowledging thorough critique..."
                             className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#1f2128] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs"
                           />
                         </div>
-                      </div>
 
-                      {/* Notification Toggle */}
-                      <div className="flex items-center justify-between pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={draft.notifyReviewer}
-                            onChange={(e) => {
-                              const checked = e.target.checked
-                              setReviewerIncentives(prev => ({
-                                ...prev,
-                                [revName]: { ...prev[revName], notifyReviewer: checked }
-                              }))
-                            }}
-                            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 cursor-pointer"
-                          />
-                          <span>{isDe ? "Gutachter per E-Mail benachrichtigen & Gutschein ins Wallet laden" : "Notify Reviewer via Email & Credit Voucher to Wallet upon Dispatch"}</span>
-                        </label>
-                        <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                          +{draft.meritPoints} Pts → Wallet
-                        </span>
+                        {/* Notification Toggle */}
+                        <div className="flex items-center justify-between pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={draft.notifyReviewer}
+                              onChange={(e) => {
+                                const checked = e.target.checked
+                                setReviewerIncentives(prev => ({
+                                  ...prev,
+                                  [revKey]: { ...prev[revKey], notifyReviewer: checked }
+                                }))
+                              }}
+                              className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 cursor-pointer"
+                            />
+                            <span>{isDe ? "Gutachter per E-Mail benachrichtigen & Merit-Punkte gutschreiben" : "Notify Reviewer via Email & Credit Merit Points to Wallet"}</span>
+                          </label>
+                          <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                            +{draft.meritPoints} Pts → Wallet
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
             {/* 3. Verdict Selection */}
@@ -4646,49 +4628,89 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </div>
 
                       {/* Structured Full Manuscript Reading Sections */}
-                      <div className="space-y-5">
-                        <div className="space-y-1.5">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
-                            <span>1. Introduction & Scientific Background</span>
-                          </h4>
-                          <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
-                            Early identification of progressive microvascular complications in metabolic cohorts remains one of the preeminent clinical challenges in preventative endocrinology and precision diagnostics. Contemporary guidelines mandate annual examinations, yet patient compliance in distributed and community settings frequently drops below 40% due to geographic constraints and limited subspecialist capacity.
-                          </p>
-                          <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
-                            This study proposes and benchmarks an asynchronous, high-throughput tele-screening pipeline utilizing multi-field non-mydriatic digital fundus photography paired with a calibrated deep convolutional neural network architecture validated across multi-center cohorts.
-                          </p>
-                        </div>
+                      {selectedPaperForDetail?.id === "SOMED-26-RW01" || selectedPaperForDetail?.title?.toLowerCase().includes("aortic") ? (
+                        <div className="space-y-5">
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>1. Introduction &amp; The Operational Dilemma of Acute Aortic Dissection</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              Acute aortic dissection (AAD) is a catastrophic cardiovascular emergency with mortality escalating by 1–2% per hour from symptom onset if left unmanaged. While advances in open surgical repair and thoracic endovascular aortic repair (TEVAR) have lowered operative mortality in specialized high-volume centers, population-level survival remains throttled by pervasive pre-procedural delays.
+                            </p>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              Traditional care delivery frequently suffers from misdiagnosis at emergency presentation (up to 30–40% initially misdiagnosed as acute coronary syndrome or pulmonary embolism), fragmented handoffs across non-integrated departments, inter-hospital transfer lags, and lack of real-time clinical tracking.
+                            </p>
+                          </div>
 
-                        <div className="space-y-1.5">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
-                            <span>2. Materials, Study Design & Methodology</span>
-                          </h4>
-                          <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
-                            A prospective observational cohort of patients aged 8 to 22 years diagnosed with Type 1 Diabetes (minimum disease duration ≥ 3 years) was recruited across seven regional healthcare hubs between January 2024 and March 2026. High-resolution 45-degree macula- and disc-centered images were acquired using standardized non-mydriatic tabletop cameras operated by certified allied health personnel.
-                          </p>
-                          <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                            Primary Model Architecture: DenseNet-121 ensemble with attention-gated feature pyramids trained with cosine-annealed cross-entropy loss and test-time augmentation.
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>2. Healthcare Operations Framework &amp; Integrated Response (EB-IRARF)</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              To bridge clinical emergency medicine, health systems engineering, and operational management, this review establishes the Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF). By deploying lean healthcare operations principles, parallel processing replaces serialized step-by-step triage.
+                            </p>
+                            <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                              Core Benchmark Standard: Door-to-Computed Tomography Angiography (CTA) target &lt; 30 minutes; simultaneous one-call activation of vascular surgery, perfusion, and cardiovascular intensive care teams.
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>3. Decision Algorithms, Inter-Facility Transport &amp; Systemic Outcomes</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              Standardized high-risk aortic pain scoring algorithms coupled with direct CT ordering privileges for emergency triage physicians significantly reduce diagnostic lag. Inter-facility transfer protocols utilizing specialized critical care transport teams and pre-arrival operating theater mobilization demonstrate reductions in transfer delay from 160 minutes down to 68 minutes.
+                            </p>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>4. Synthesis, Limitations &amp; Recommendations for Practice</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              Multidisciplinary institutional coordination, simulated high-reliability crisis team training, and real-time electronic dashboard tracking represent mandatory cornerstones for modern cardiovascular centers. The review concludes with itemized practice guidelines and clinical pathways for emergency departments and cardiovascular centers.
+                            </p>
                           </div>
                         </div>
+                      ) : (
+                        <div className="space-y-5">
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>1. Introduction &amp; Scientific Background</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              Early identification of progressive microvascular complications in metabolic cohorts remains one of the preeminent clinical challenges in preventative endocrinology and precision diagnostics. Contemporary guidelines mandate annual examinations, yet patient compliance in distributed and community settings frequently drops below 40% due to geographic constraints and limited subspecialist capacity.
+                            </p>
+                          </div>
 
-                        <div className="space-y-1.5">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
-                            <span>3. Results & Empirical Evaluation</span>
-                          </h4>
-                          <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
-                            Across 2,418 evaluable patient encounters, the automated tele-screening algorithm achieved an area under the receiver operating characteristic curve (AUROC) of 0.982 (95% CI: 0.974–0.989) for referable disease, with 94.7% sensitivity and 96.1% specificity when benchmarked against panel consensus adjudicated by three independent fellowship-trained retina specialists.
-                          </p>
-                        </div>
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>2. Materials, Study Design &amp; Methodology</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              A prospective observational cohort of patients was recruited across seven regional healthcare hubs between January 2024 and March 2026. Standardized clinical workflows and protocols were applied across all participating study centers.
+                            </p>
+                          </div>
 
-                        <div className="space-y-1.5">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
-                            <span>4. Discussion & Editorial Conclusion</span>
-                          </h4>
-                          <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
-                            The findings illustrate that automated, tele-enabled triage platforms can dramatically increase screening compliance without sacrificing diagnostic accuracy. Future iterations will integrate longitudinal biomarker telemetry and edge-computing inference directly on handheld capture devices.
-                          </p>
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>3. Results &amp; Empirical Evaluation</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              Across evaluable patient encounters, the benchmarked workflow achieved robust diagnostic and operational efficacy when evaluated against consensus adjudication.
+                            </p>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-[#272832] pb-1">
+                              <span>4. Discussion &amp; Editorial Conclusion</span>
+                            </h4>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                              The findings illustrate that automated, tele-enabled triage platforms can dramatically increase screening compliance without sacrificing diagnostic accuracy.
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                     </div>
                   )}
@@ -4698,9 +4720,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-slate-900 dark:text-white text-xs">
-                          Submitted Files & Primary Assets:
+                          Submitted Files &amp; Primary Assets:
                         </span>
-                        <span className="text-slate-400 text-[11px]">All files virus-checked & certified</span>
+                        <span className="text-slate-400 text-[11px]">All files virus-checked &amp; certified</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -4708,23 +4730,23 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         {/* Main Manuscript File */}
                         <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] flex items-center justify-between hover:border-[#0b99ff] transition-all">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center font-bold text-xs shrink-0">
-                              PDF
+                            <div className="h-10 w-10 rounded-lg bg-blue-500/10 text-[#0b99ff] flex items-center justify-center font-bold text-xs shrink-0">
+                              DOCX
                             </div>
                             <div className="space-y-0.5 overflow-hidden">
                               <h5 className="font-bold text-slate-900 dark:text-white truncate text-xs">
-                                {selectedPaperForDetail?.fileName || `${selectedPaperForDetail?.id}_Manuscript.pdf`}
+                                {selectedPaperForDetail?.fileName || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedPaperForDetail?.id}_Manuscript.docx`)}
                               </h5>
                               <p className="text-[11px] text-slate-400">
-                                {selectedPaperForDetail?.fileSize || "3.4 MB"} · Main Manuscript Document
+                                {selectedPaperForDetail?.fileSize || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "38.6 KB" : "3.4 MB")} &bull; Original Submission
                               </p>
                             </div>
                           </div>
                           <a
-                            href="/downloads/Scholarly_Open_Manuscript_Template.txt"
-                            download={`${selectedPaperForDetail?.id || "Manuscript"}_Main_Document.pdf`}
+                            href={selectedPaperForDetail?.fileUrl || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                            download={selectedPaperForDetail?.fileName || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedPaperForDetail?.id || "Manuscript"}_Main_Document.docx`)}
                             className="p-2 rounded-lg bg-white dark:bg-[#1e2027] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] transition-colors"
-                            title="Download Main Document"
+                            title="Download Main Manuscript (.docx)"
                           >
                             <Download className="h-4 w-4" />
                           </a>
@@ -4738,10 +4760,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </div>
                             <div className="space-y-0.5 overflow-hidden">
                               <h5 className="font-bold text-slate-900 dark:text-white truncate text-xs">
-                                Supplementary_Cohort_Metrics.xlsx
+                                Supplementary_Clinical_Pathways.xlsx
                               </h5>
                               <p className="text-[11px] text-slate-400">
-                                1.2 MB · Raw Baseline Tables
+                                1.2 MB &bull; Raw Data Tables &amp; Benchmarks
                               </p>
                             </div>
                           </div>

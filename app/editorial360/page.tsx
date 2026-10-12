@@ -7621,7 +7621,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" />
-                        {language === "de" ? "Einreichungs-Pipeline" : "Submissions Pipeline"}
+                        {language === "de" ? "Pipeline" : "Pipeline"}
                       </button>
 
                       <button 
@@ -7647,7 +7647,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <Users className="h-4 w-4" />
-                        {language === "de" ? "Gutachter-Register & Gateway" : "Reviewer Registry & Gateway"}
+                        {language === "de" ? "Gutachter" : "Reviewers"}
                       </button>
 
                       <button 
@@ -7660,7 +7660,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <CheckSquare className="h-4 w-4" />
-                        {language === "de" ? "Produktion & DOIs" : "Production & DOIs"}
+                        {language === "de" ? "Produktion" : "Production"}
                       </button>
 
                       <button 
@@ -7673,7 +7673,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <BarChart3 className="h-4 w-4" />
-                        {language === "de" ? "Analysen & Berichte" : "Analytics & Reports"}
+                        {language === "de" ? "Analysen" : "Analytics"}
                       </button>
 
                       <button 
@@ -7686,7 +7686,7 @@ export default function Editorial360Page() {
                         }`}
                       >
                         <Archive className="h-4 w-4" />
-                        {language === "de" ? "Archivierte Einreichungen" : "Archived Submissions"}
+                        {language === "de" ? "Archiv" : "Archive"}
                       </button>
                     </>
                   )}

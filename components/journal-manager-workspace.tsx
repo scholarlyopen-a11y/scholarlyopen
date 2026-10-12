@@ -67,11 +67,19 @@ import {
   Copy,
   UserCheck,
   Printer,
-  RefreshCw
+  RefreshCw,
+  MoreHorizontal
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { CrossDeskNotification } from "./cross-desk-activity-feed"
 import { generateBrandedEmailHtml, getJournalBranding } from "@/lib/email-templates"
 import { EmailDispatchDialog, EmailDispatchConfig } from "./email-dispatch-dialog"
@@ -4739,75 +4747,71 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             )}
                           </td>
 
-                          {/* 5. Actions (Centered) */}
-                          <td className="px-4 py-4 align-top text-center min-w-[220px]">
-                            <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                          {/* 5. Streamlined Actions Cell */}
+                          <td className="px-4 py-3.5 align-middle text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1.5">
+                              {/* Primary Stage Action Button */}
                               {isTriage ? (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedManuscript(ms)
-                                      setIsPreQualityModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
-                                    title="Pre-Check Quality Assessment and file integrity"
-                                  >
-                                    <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                    Pre-Check
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleOpenAssign(ms)}
-                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer"
-                                  >
-                                    Assign
-                                  </Button>
-                                </>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleOpenAssign(ms)}
+                                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer shadow-2xs"
+                                >
+                                  Assign
+                                </Button>
                               ) : isUnderReview ? (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      setTrackingManuscript(ms)
-                                      setEditorInviteSuccessMsg(null)
-                                      setIsInviteEditorModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 rounded-lg cursor-pointer flex items-center gap-1 shadow-2xs whitespace-nowrap"
-                                    title="Dispatch appointment invitation and review oversight to Handling Editor"
-                                  >
-                                    <UserCheck className="h-3.5 w-3.5" />
-                                    <span>{ms.assignedEditorName ? "Dispatch to Editor" : "Dispatch to Handling Editor"}</span>
-                                  </Button>
-
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      setTrackingManuscript(ms)
-                                      setIsTrackModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-2.5 rounded-lg cursor-pointer flex items-center gap-1 shadow-xs whitespace-nowrap"
-                                    title="Sanitize reviewer feedback & dispatch remarks to Handling Editor"
-                                  >
-                                    <ShieldCheck className="h-3.5 w-3.5" />
-                                    <span>Sanitize & Dispatch</span>
-                                  </Button>
-
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setTrackingManuscript(ms)
-                                      setIsTrackModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2 rounded-lg cursor-pointer"
-                                    title="Track Review progress"
-                                  >
-                                    <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                    Track
-                                  </Button>
-                                </>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setTrackingManuscript(ms)
+                                    setIsTrackModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer flex items-center gap-1 shadow-2xs"
+                                  title="Sanitize reviewer feedback & dispatch remarks to Handling Editor"
+                                >
+                                  <ShieldCheck className="h-3.5 w-3.5" />
+                                  <span>Sanitize &amp; Dispatch</span>
+                                </Button>
+                              ) : ms.status === "Revision Under Evaluation" ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedRevisionManuscript(ms)
+                                    setSelectedRound2Reviewers(ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers : ["Prof. Aris Thorne", "Dr. Evelyn Vane"])
+                                    setEditorRoutingNote(`Revised version of ${ms.id} has been submitted by ${ms.authorName || 'Author'}. File completeness verified. Routed to Handling Editor for final evaluation.`)
+                                    setRevisionActionSuccess(null)
+                                    setIsRevisionModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer shadow-2xs"
+                                >
+                                  <Sliders className="h-3.5 w-3.5 mr-1" />
+                                  Manage Revision
+                                </Button>
+                              ) : isAccepted ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setGalleyManuscript(ms)
+                                    setIsGalleyModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer shadow-2xs"
+                                >
+                                  <FileText className="h-3.5 w-3.5 mr-1" />
+                                  Galley Proof
+                                </Button>
+                              ) : isDecided ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setViewingDecisionManuscript(ms)
+                                    setIsDecisionLetterModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
+                                >
+                                  <FileCheck2 className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Decision Letter
+                                </Button>
                               ) : (
                                 <Button
                                   variant="outline"
@@ -4817,41 +4821,49 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     setIsPreQualityModalOpen(true)
                                   }}
                                   className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
-                                  title="View submitted files, download manuscript & inspect dossier"
                                 >
-                                  <FileText className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Dossier / Files
+                                  <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Pre-Check
                                 </Button>
                               )}
 
-                              {Boolean(ms.integrityStatus === "Flagged" || (Number(ms.plagiarismScore) > 15)) && (
+                              {/* Secondary Stage Action Button */}
+                              {isTriage ? (
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => {
-                                    setForensicsManuscript(ms)
-                                    setForensicActionStatus(null)
-                                    setIsForensicsModalOpen(true)
+                                    setSelectedManuscript(ms)
+                                    setIsPreQualityModalOpen(true)
                                   }}
-                                  className="h-8 text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 border-red-200 dark:border-red-800 px-2.5 rounded-lg cursor-pointer"
-                                  title="Audit Flagged Manuscript"
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
+                                  title="Pre-Check Quality Assessment and file integrity"
                                 >
-                                  <ShieldAlert className="h-3.5 w-3.5 mr-1 text-red-600" />
-                                  Audit Flag
+                                  <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                  Pre-Check
                                 </Button>
-                              )}
-
-                              {ms.status === "Revision Required" && (
+                              ) : isUnderReview ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setTrackingManuscript(ms)
+                                    setEditorInviteSuccessMsg(null)
+                                    setIsInviteEditorModalOpen(true)
+                                  }}
+                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer flex items-center gap-1 whitespace-nowrap"
+                                  title="Dispatch appointment invitation to Handling Editor"
+                                >
+                                  <UserCheck className="h-3.5 w-3.5 text-emerald-600" />
+                                  <span>{ms.assignedEditorName ? "Editor Dispatched" : "Dispatch Editor"}</span>
+                                </Button>
+                              ) : ms.status === "Revision Required" ? (
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleNudgeAuthor(ms)}
                                   disabled={!!authorNudged[ms.id]}
-                                  className={`h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs ${
-                                    authorNudged[ms.id]
-                                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
-                                  }`}
+                                  className="h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
                                 >
                                   {authorNudged[ms.id] ? (
                                     <>
@@ -4865,101 +4877,90 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     </>
                                   )}
                                 </Button>
-                              )}
+                              ) : null}
 
-                              {ms.status === "Revision Under Evaluation" && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedRevisionManuscript(ms)
-                                    setSelectedRound2Reviewers(ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers : ["Prof. Aris Thorne", "Dr. Evelyn Vane"])
-                                    setEditorRoutingNote(`Revised version of ${ms.id} has been submitted by ${ms.authorName || 'Author'}. File completeness verified. Routed to Handling Editor for final evaluation.`)
-                                    setRevisionActionSuccess(null)
-                                    setIsRevisionModalOpen(true)
-                                  }}
-                                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-4 rounded-lg cursor-pointer shadow-2xs"
-                                >
-                                  <Sliders className="h-3.5 w-3.5 mr-1.5" />
-                                  Manage Revision
-                                </Button>
-                              )}
-
-                              {/* Decision Letter Button for Decided Manuscripts */}
-                              {isDecided && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setViewingDecisionManuscript(ms)
-                                    setIsDecisionLetterModalOpen(true)
-                                  }}
-                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
-                                >
-                                  <FileCheck2 className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Decision Letter
-                                </Button>
-                              )}
-
-                              {isAccepted && (
-                                <>
+                              {/* Clean Dropdown Menu (···) for Secondary Utilities */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
                                   <Button
+                                    variant="outline"
                                     size="sm"
-                                    onClick={() => {
-                                      setGalleyManuscript(ms)
-                                      setIsGalleyModalOpen(true)
-                                    }}
-                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3.5 rounded-lg cursor-pointer shadow-2xs"
+                                    className="h-8 w-8 p-0 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg cursor-pointer"
+                                    title="More Options"
                                   >
-                                    <FileText className="h-3.5 w-3.5 mr-1" />
-                                    Galley Proof
+                                    <MoreHorizontal className="h-4 w-4" />
                                   </Button>
-                                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-900/30">
-                                    Published
-                                  </span>
-                                </>
-                              )}
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-52 p-1 text-xs bg-white dark:bg-[#18191e] border-slate-200 dark:border-[#272832]">
+                                  {Boolean(ms.authorEmail || ms.id.includes("MS201") || ms.id.includes("SOMED")) && (
+                                    <DropdownMenuItem
+                                      onClick={() => handleOpenClaimPreview({
+                                        msId: ms.id,
+                                        title: ms.title,
+                                        journal: ms.journal,
+                                        authorName: ms.authorName || (ms.id === "SOMED-26-RW01" ? "Dr. Sam Lee" : "Author"),
+                                        authorEmail: (ms.authorEmail && !ms.authorEmail.includes("vane")) 
+                                          ? ms.authorEmail 
+                                          : (ms.id === "SOMED-26-RW01" ? "Applied.EBM.Institute@proton.me" : (ms.id.includes("MS201") ? "dr.sam.lee@acei-health.org" : "author@scholarlyopen.org")),
+                                        authorAffiliation: ms.authorAffiliation || "",
+                                        status: ms.status
+                                      })}
+                                      className="cursor-pointer text-sky-700 dark:text-sky-300 font-medium"
+                                    >
+                                      <Mail className="h-3.5 w-3.5 mr-2 text-[#0b99ff]" />
+                                      Send Author Claim Link
+                                    </DropdownMenuItem>
+                                  )}
 
-                              {isDeclined && (
-                                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
-                                  Archived
-                                </span>
-                              )}
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedManuscript(ms)
+                                      setIsPreQualityModalOpen(true)
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    <FileText className="h-3.5 w-3.5 mr-2 text-slate-500" />
+                                    Inspect Dossier &amp; Files
+                                  </DropdownMenuItem>
 
-                              {/* 1-Click Send Portal Claim Invitation to Author (Preview & CC: scholarlyopen@gmail.com) */}
-                              {Boolean(ms.authorEmail || ms.id.includes("MS201") || ms.id.includes("SOMED")) && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleOpenClaimPreview({
-                                    msId: ms.id,
-                                    title: ms.title,
-                                    journal: ms.journal,
-                                    authorName: ms.authorName || (ms.id === "SOMED-26-RW01" ? "Dr. Sam Lee" : "Author"),
-                                    authorEmail: (ms.authorEmail && !ms.authorEmail.includes("vane")) 
-                                      ? ms.authorEmail 
-                                      : (ms.id === "SOMED-26-RW01" ? "Applied.EBM.Institute@proton.me" : (ms.id.includes("MS201") ? "dr.sam.lee@acei-health.org" : "author@scholarlyopen.org")),
-                                    authorAffiliation: ms.authorAffiliation || "",
-                                    status: ms.status
-                                  })}
-                                  className="h-8 text-xs font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 border-sky-200 dark:border-sky-800 px-2.5 rounded-lg cursor-pointer"
-                                  title="Preview & Send Portal Claim Invitation to Author (CC: scholarlyopen@gmail.com)"
-                                >
-                                  <Mail className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  <span>Claim Invite</span>
-                                </Button>
-                              )}
+                                  {isUnderReview && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setTrackingManuscript(ms)
+                                        setIsTrackModalOpen(true)
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      <Clock className="h-3.5 w-3.5 mr-2 text-[#0b99ff]" />
+                                      Track Review Progress
+                                    </DropdownMenuItem>
+                                  )}
 
-                              {/* Delete Manuscript Option (if ingested manually or recorded wrong) */}
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDeleteManuscript(ms)}
-                                className="h-8 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 px-2 rounded-lg cursor-pointer transition-colors"
-                                title="Delete / Discard Manuscript Record"
-                              >
-                                <Trash2 className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
-                                <span className="hidden xl:inline ml-1">Delete</span>
-                              </Button>
+                                  {Boolean(ms.integrityStatus === "Flagged" || (Number(ms.plagiarismScore) > 15)) && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setForensicsManuscript(ms)
+                                        setForensicActionStatus(null)
+                                        setIsForensicsModalOpen(true)
+                                      }}
+                                      className="cursor-pointer text-red-600 dark:text-red-400 font-semibold"
+                                    >
+                                      <ShieldAlert className="h-3.5 w-3.5 mr-2 text-red-600" />
+                                      Audit Integrity Flag
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  <DropdownMenuSeparator />
+
+                                  <DropdownMenuItem
+                                    onClick={() => handleDeleteManuscript(ms)}
+                                    className="cursor-pointer text-rose-600 dark:text-rose-400 font-medium focus:text-rose-700 focus:bg-rose-50 dark:focus:bg-rose-950/40"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5 mr-2 text-rose-600" />
+                                    Delete Manuscript
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </td>
 
