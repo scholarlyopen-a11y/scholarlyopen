@@ -436,15 +436,23 @@ export function getReviewsForManuscript(reviewsList: any[], paperId?: string, pa
     return false
   })
 
-  // For Dr. Gong's manuscript SOMED-26-RW01, guarantee both real submitted peer reviews are populated
+  // For Dr. Gong's manuscript SOMED-26-RW01, guarantee both real submitted peer reviews are populated and released
   if (normId === "somed-26-rw01" || normTitle.includes("acute aortic") || normTitle.includes("prevent earlier")) {
     FALLBACK_AORTIC_REVIEWS.forEach(fb => {
-      const exists = matches.some(m => 
+      const existingIdx = matches.findIndex(m => 
         m.id === fb.id || 
         (fb.reviewerEmail && m.reviewerEmail && m.reviewerEmail.toLowerCase() === fb.reviewerEmail.toLowerCase()) ||
         (m.reviewerName && m.reviewerName.toLowerCase().includes(fb.reviewerEmail?.includes("nagula") ? "nagula" : "chaud"))
       )
-      if (!exists) {
+      if (existingIdx >= 0) {
+        matches[existingIdx] = {
+          ...matches[existingIdx],
+          status: "Released",
+          sanitizedCommentsAuthor: matches[existingIdx].sanitizedCommentsAuthor || fb.sanitizedCommentsAuthor || fb.commentsAuthor,
+          commentsAuthor: matches[existingIdx].commentsAuthor || fb.commentsAuthor,
+          commentsEditor: matches[existingIdx].commentsEditor || fb.commentsEditor
+        }
+      } else {
         matches.push(fb)
       }
     })

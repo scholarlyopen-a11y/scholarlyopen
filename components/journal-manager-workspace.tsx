@@ -2668,7 +2668,12 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   const [editorRoutingNote, setEditorRoutingNote] = useState("")
   const [revisionActionSuccess, setRevisionActionSuccess] = useState<string | null>(null)
   const [editorPromptSuccess, setEditorPromptSuccess] = useState<string | null>(null)
-  const [approvedReviewRemarks, setApprovedReviewRemarks] = useState<Record<string, boolean>>({})
+  const [approvedReviewRemarks, setApprovedReviewRemarks] = useState<Record<string, boolean>>({
+    "Dr. Praveen Nagula": true,
+    "Dr. Chaud GJ": true,
+    "REV-FB-SAM-01": true,
+    "REV-FB-1791559472514-816": true
+  })
   const [promptedEditors, setPromptedEditors] = useState<Record<string, boolean>>({})
   const [authorNudged, setAuthorNudged] = useState<Record<string, boolean>>({})
   const [authorExtendedDays, setAuthorExtendedDays] = useState<Record<string, number>>({})
@@ -3029,16 +3034,6 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         { id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" },
         { id: "REV-HIST-CG-13", name: "Dr. Chaud GJ", email: "germanchaud@gmail.com", invitedDate: "2026-10-01", status: "Completed" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-IN-04", name: "Ikeda N", email: "ikeda.n@hosp.u-tokyo.ac.jp", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" },
-        { id: "REV-HIST-GB-03", name: "Guo B", email: "guo.baolei@zs-hospital.sh.cn", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-BS-04", name: "Bokhari S", email: "bokharsa@rwjms.rutgers.edu", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-QL-05", name: "Quéro L", email: "laurent.quero@aphp.fr", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-PL-06", name: "Pezzi L", email: "pezzi-l@placeholder.local", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-WX-07", name: "Wang X", email: "wxiaozeng@163.com", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-WB-08", name: "Wang B", email: "wangbindl@hotmail.com", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-ZW-09", name: "Zhong W", email: "wuzhong71@scu.edu.cn", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-YS-10", name: "Yidan Sun", email: "yidan.sun@wustl.edu", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-PDL-11", name: "P. de Leeuw", email: "p.deleeuw@mumc.nl", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
-        { id: "REV-HIST-CD-12", name: "Claire Dupond", email: "claire.dupond@sorbonne-universite.fr", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
       ]
       knownCohort.forEach(k => {
         if (!rawList.some(r => r.email.toLowerCase() === k.email.toLowerCase() || r.name.toLowerCase() === k.name.toLowerCase())) {
@@ -3138,6 +3133,15 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
       .filter(item => {
         const key = String(item.email || item.name || "").toLowerCase().trim()
         if (!key || seenKeys.has(key)) return false
+
+        // Any reviewer whose invitation has been rescinded disappears from the review tracker
+        const isRescinded = Boolean(
+          rescindedReviewers[item.name] || 
+          (item.email && rescindedReviewers[item.email]) ||
+          rescindedReviewers[key]
+        )
+        if (isRescinded) return false
+
         seenKeys.add(key)
         return true
       })
@@ -3789,8 +3793,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       }
 
       if (reviewerDispatchModal.mode === "rescind") {
-        setRescindedReviewers(prev => ({ ...prev, [reviewerDispatchModal.reviewerName]: true }))
-        setEditorPromptSuccess(`✓ Invitation rescinded for ${reviewerDispatchModal.reviewerName}. Courtesy notification dispatched and review token closed.`)
+        setRescindedReviewers(prev => ({
+          ...prev,
+          [reviewerDispatchModal.reviewerName]: true,
+          ...(reviewerDispatchModal.reviewerEmail ? { [reviewerDispatchModal.reviewerEmail]: true } : {})
+        }))
+        setEditorPromptSuccess(`✓ Invitation rescinded for ${reviewerDispatchModal.reviewerName}. Courtesy notification dispatched and referee removed from active tracker.`)
       } else {
         setNudgedReviewers(prev => ({ ...prev, [reviewerDispatchModal.reviewerName]: true }))
         setEditorPromptSuccess(`✓ Reminder dispatched to ${reviewerDispatchModal.reviewerName} (CC: ${reviewerDispatchModal.includeCc ? reviewerDispatchModal.ccEmail : "None"}).`)
@@ -4772,18 +4780,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   Assign
                                 </Button>
                               ) : isUnderReview ? (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    setTrackingManuscript(ms)
-                                    setIsTrackModalOpen(true)
-                                  }}
-                                  className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer flex items-center gap-1 shadow-2xs"
-                                  title="Sanitize reviewer feedback & dispatch remarks to Handling Editor"
-                                >
-                                  <ShieldCheck className="h-3.5 w-3.5" />
-                                  <span>Sanitize &amp; Dispatch</span>
-                                </Button>
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedManuscript(ms)
+                                      setIsPreQualityModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-3 rounded-lg cursor-pointer flex items-center gap-1.5"
+                                    title="View Submission Dossier, Quality Checks & Files"
+                                  >
+                                    <FileText className="h-3.5 w-3.5 text-slate-500" />
+                                    <span>Dossier</span>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setTrackingManuscript(ms)
+                                      setIsTrackModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                    title="Open Review Tracker & Dispatch Comments to Handling Editor"
+                                  >
+                                    <Clock className="h-3.5 w-3.5" />
+                                    <span>Review Tracker</span>
+                                  </Button>
+                                </>
                               ) : ms.status === "Revision Under Evaluation" ? (
                                 <Button
                                   size="sm"
@@ -4854,22 +4877,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
                                   Pre-Check
                                 </Button>
-                              ) : isUnderReview ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setTrackingManuscript(ms)
-                                    setEditorInviteSuccessMsg(null)
-                                    setIsInviteEditorModalOpen(true)
-                                  }}
-                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer flex items-center gap-1 whitespace-nowrap"
-                                  title="Dispatch appointment invitation to Handling Editor"
-                                >
-                                  <UserCheck className="h-3.5 w-3.5 text-emerald-600" />
-                                  <span>{ms.assignedEditorName ? "Editor Dispatched" : "Dispatch Editor"}</span>
-                                </Button>
-                              ) : ms.status === "Revision Required" ? (
+                              ) : isUnderReview ? null : ms.status === "Revision Required" ? (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -4903,7 +4911,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-52 p-1 text-xs bg-white dark:bg-[#18191e] border-slate-200 dark:border-[#272832]">
+                                <DropdownMenuContent align="end" className="w-56 p-1 text-xs bg-white dark:bg-[#18191e] border-slate-200 dark:border-[#272832]">
+                                  {isUnderReview && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setTrackingManuscript(ms)
+                                        setEditorInviteSuccessMsg(null)
+                                        setIsInviteEditorModalOpen(true)
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      <UserCheck className="h-3.5 w-3.5 mr-2 text-emerald-600" />
+                                      {ms.assignedEditorName ? "Handling Editor Dispatched" : "Dispatch Handling Editor"}
+                                    </DropdownMenuItem>
+                                  )}
                                   {Boolean(ms.authorEmail || ms.id.includes("MS201") || ms.id.includes("SOMED")) && (
                                     <DropdownMenuItem
                                       onClick={() => handleOpenClaimPreview({
@@ -10366,63 +10387,145 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             )}
 
-            {/* 2/2 Complete Banner with Prompt Editor Action */}
-            {((trackingManuscript?.id === "SOEAS-26-RS102" || (trackingManuscript?.reviewers && trackingManuscript.reviewers.length > 0 && trackingManuscript.reviewers.every(r => r === "Dr. Evelyn Vane" || r === "Dr. Marcus Vance"))) && trackingManuscript?.id !== "SOMED-26-RW01") && (
-              <div className="p-3.5 sm:p-4 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border animate-in fade-in">
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-slate-900 dark:text-white text-xs">
-                      All Assigned Reviews Completed (2/2)
+            {/* 2 Reviews Submitted: Dedicated Dispatch Option to Handling Editor */}
+            {(() => {
+              const isMedAortic = trackingManuscript?.id === "SOMED-26-RW01" || Boolean(trackingManuscript?.title?.includes("Prevent Earlier"))
+              const submittedCount = modalReviewerDisplayList.filter(r => {
+                const rName = (r.name || "").toLowerCase()
+                const rEmail = (r.email || "").toLowerCase()
+                if (rName.includes("nagula") || rEmail.includes("nagula")) return true
+                if (rName.includes("chaud") || rEmail.includes("chaud")) return true
+                if (r.status === "Completed") return true
+                return (initialReviews || []).some(ir => {
+                  const irPaper = String(ir.paperId || (ir as any).manuscriptId || "").toLowerCase().trim()
+                  const irName = (ir.reviewerName || "").toLowerCase()
+                  return irPaper === trackingManuscript?.id?.toLowerCase() && irName.includes(rName.split(" ").pop() || "")
+                })
+              }).length
+
+              const hasTwoSubmittedReviews = isMedAortic || submittedCount >= 2 || trackingManuscript?.id === "SOEAS-26-RS102"
+              if (!hasTwoSubmittedReviews) return null
+
+              const areBothDispatched = Boolean(
+                (approvedReviewRemarks["Dr. Praveen Nagula"] || approvedReviewRemarks["REV-FB-SAM-01"]) &&
+                (approvedReviewRemarks["Dr. Chaud GJ"] || approvedReviewRemarks["REV-FB-1791559472514-816"])
+              )
+              const editorDisplayName = trackingManuscript?.assignedEditorName || "Weihua Gong, M.D., Ph.D."
+
+              return (
+                <div className="p-3.5 sm:p-4 rounded-xl border bg-gradient-to-r from-sky-50/80 via-emerald-50/40 to-white dark:from-sky-950/40 dark:via-emerald-950/20 dark:to-[#18191e] border-sky-200 dark:border-sky-800/60 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border animate-in fade-in">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                      areBothDispatched 
+                        ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800" 
+                        : "bg-[#0b99ff]/10 text-[#0b99ff] border-[#0b99ff]/30"
+                    }`}>
+                      <Send className="h-5 w-5" />
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                      Peer review reports logged and ready for {trackingManuscript?.assignedEditorName || "Handling Editor"}&apos;s official verdict.
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          2 Peer Review Evaluations Logged
+                        </span>
+                        <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                          {isMedAortic ? "Dr. Praveen Nagula (#1) & Dr. Chaud GJ (#3)" : "2 Reviewers Completed"}
+                        </span>
+                        {areBothDispatched && (
+                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-700">
+                            Dispatched to Handling Editor ✓
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                        {areBothDispatched
+                          ? `Comments from both reviewers have been vetted and released to Handling Editor (${editorDisplayName}). Full remarks are unlocked on his desk.`
+                          : `Both reviewers have submitted evaluation reports. Dispatch sanitized comments directly to Handling Editor (${editorDisplayName}) to unlock them on his desk for formulating the editorial verdict.`}
+                      </p>
                     </div>
                   </div>
-                </div>
 
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    if (!trackingManuscript?.assignedEditorName) {
-                      setIsInviteEditorModalOpen(true)
-                      return
-                    }
-                    triggerConfirm({
-                      title: "Prompt Handling Editor for Decision?",
-                      message: `Are you sure you want to notify Handling Editor (${trackingManuscript.assignedEditorName}) that all reviewer evaluations are in and prompt for the official verdict?`,
-                      confirmButtonLabel: "Yes, Prompt Editor",
-                      confirmColorClass: "bg-purple-600 hover:bg-purple-700",
-                      onConfirm: () => {
-                        if (trackingManuscript) {
-                          setPromptedEditors(prev => ({ ...prev, [trackingManuscript.id]: true }))
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        // 1. Release Dr. Praveen Nagula's comments
+                        if (onReleaseComments) {
+                          onReleaseComments("REV-FB-SAM-01", "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.")
+                          onReleaseComments("REV-FB-1791559472514-816", "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.")
                         }
-                        setEditorPromptSuccess(`✓ Automated alert dispatched to Handling Editor (${trackingManuscript.assignedEditorName}). Pipeline status updated to 'Editor Prompted'.`)
+
+                        // 2. Mark in approvedReviewRemarks
+                        setApprovedReviewRemarks(prev => ({
+                          ...prev,
+                          "Dr. Praveen Nagula": true,
+                          "Dr. Chaud GJ": true,
+                          "REV-FB-SAM-01": true,
+                          "REV-FB-1791559472514-816": true
+                        }))
+
+                        // 3. Sync to Supabase
+                        fetch("/api/editorial360/reviews", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            id: "REV-FB-SAM-01",
+                            status: "Released",
+                            sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references."
+                          })
+                        }).catch(e => console.error(e))
+
+                        fetch("/api/editorial360/reviews", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            id: "REV-FB-1791559472514-816",
+                            status: "Released",
+                            sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols."
+                          })
+                        }).catch(e => console.error(e))
+
+                        // 4. Send notification to Dr. Gong
+                        if (onAddNotification) {
+                          onAddNotification({
+                            id: `NOTIF-${Date.now()}`,
+                            timestamp: "Just now",
+                            paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                            paperTitle: trackingManuscript?.title || "Prevent Earlier, Recognize Sooner, Treat Faster",
+                            journal: trackingManuscript?.journal || "Scholarly Open: Medicine",
+                            sender: "JM Noor",
+                            type: "review_complete",
+                            title: `Review Comments Released for ${trackingManuscript?.id || "SOMED-26-RW01"}`,
+                            message: `JM Noor has vetted and released the peer evaluations from Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. Chaud GJ) to Handling Editor (${editorDisplayName}). Remarks are unlocked on your desk for formulating the official decision.`,
+                            priority: "high"
+                          })
+                        }
+
+                        setEditorPromptSuccess(`✓ Peer evaluations from Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. Chaud GJ) sanitized & released to Handling Editor (${editorDisplayName}). Comments are now unlocked on his desk.`)
                         setTimeout(() => setEditorPromptSuccess(null), 6000)
-                      }
-                    })
-                  }}
-                  className={`text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 transition-all whitespace-nowrap mt-1 md:mt-0 ${
-                    promptedEditors[trackingManuscript?.id || ""]
-                      ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700 hover:bg-indigo-100"
-                      : "bg-purple-600 hover:bg-purple-700 text-white shadow-xs"
-                  }`}
-                >
-                  {promptedEditors[trackingManuscript?.id || ""] ? (
-                    <>
-                      <Check className="h-3.5 w-3.5 mr-1 text-indigo-600" />
-                      Editor Prompted ✓
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-3.5 w-3.5 mr-1" />
-                      Prompt Editor for Decision
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+                      }}
+                      className={`h-8.5 px-3.5 text-xs font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-xs transition-all whitespace-nowrap ${
+                        areBothDispatched
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          : "bg-[#0b99ff] hover:bg-[#0088e0] text-white"
+                      }`}
+                    >
+                      {areBothDispatched ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 mr-1" />
+                          <span>Comments Dispatched to {isMedAortic ? "Dr. Gong" : "Editor"} ✓</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-3.5 w-3.5 mr-1" />
+                          <span>Dispatch Comments to {isMedAortic ? "Dr. Gong" : "Handling Editor"}</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )
+            })()}
 
             {editorPromptSuccess && (
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-2xs">
@@ -10583,6 +10686,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                   if (isInvitedOnly) {
                     const isRescinded = Boolean(rescindedReviewers[revName] || (rev.email && rescindedReviewers[rev.email]))
+                    if (isRescinded) return null
 
                     return (
                       <div 

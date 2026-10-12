@@ -1642,7 +1642,14 @@ export default function Editorial360Page() {
         if (storedReviews) {
           const parsedRev = JSON.parse(storedReviews) as ReviewFeedback[]
           if (Array.isArray(parsedRev)) {
-            const cleanReviews = parsedRev.filter(r => !FAKE_REVIEW_IDS.has(r.id))
+            const cleanReviews = parsedRev
+              .filter(r => !FAKE_REVIEW_IDS.has(r.id))
+              .map(r => {
+                if (r.paperId === "SOMED-26-RW01" || r.id === "REV-FB-SAM-01" || r.id === "REV-FB-1791559472514-816") {
+                  return { ...r, status: "Released" as const }
+                }
+                return r
+              })
             localStorage.setItem("editorial360_reviews", JSON.stringify(cleanReviews))
             setReviews(cleanReviews)
           }
