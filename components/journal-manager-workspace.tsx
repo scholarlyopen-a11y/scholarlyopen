@@ -4699,13 +4699,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 <div>
                                   <span className="text-slate-400 font-medium">Editor:</span>{" "}
                                   {ms.assignedEditorName ? (
-                                    <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                      {ms.assignedEditorName}
-                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setTrackingManuscript(ms)
+                                        setEditorInviteSuccessMsg(null)
+                                        setIsInviteEditorModalOpen(true)
+                                      }}
+                                      className="font-semibold text-slate-800 dark:text-slate-200 hover:text-[#0b99ff] hover:underline cursor-pointer inline-flex items-center gap-1"
+                                      title="Click to view or re-dispatch appointment letter to Handling Editor"
+                                    >
+                                      <span>{ms.assignedEditorName}</span>
+                                      <Send className="h-2.5 w-2.5 text-slate-400" />
+                                    </button>
                                   ) : (
-                                    <span className="text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 text-[10px]">
-                                      Unassigned (Action Req.)
-                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setTrackingManuscript(ms)
+                                        setEditorInviteSuccessMsg(null)
+                                        setIsInviteEditorModalOpen(true)
+                                      }}
+                                      className="text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 text-[10px] hover:bg-amber-100 cursor-pointer inline-flex items-center gap-1"
+                                      title="Assign and dispatch appointment to Handling Editor"
+                                    >
+                                      <UserPlus className="h-3 w-3" />
+                                      <span>Dispatch to Handling Editor</span>
+                                    </button>
                                   )}
                                 </div>
                                 <div>
@@ -4745,18 +4765,48 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   </Button>
                                 </>
                               ) : isUnderReview ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setTrackingManuscript(ms)
-                                    setIsTrackModalOpen(true)
-                                  }}
-                                  className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer"
-                                >
-                                  <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                  Track Review
-                                </Button>
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setTrackingManuscript(ms)
+                                      setEditorInviteSuccessMsg(null)
+                                      setIsInviteEditorModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 rounded-lg cursor-pointer flex items-center gap-1 shadow-2xs whitespace-nowrap"
+                                    title="Dispatch appointment invitation and review oversight to Handling Editor"
+                                  >
+                                    <UserCheck className="h-3.5 w-3.5" />
+                                    <span>{ms.assignedEditorName ? "Dispatch to Editor" : "Dispatch to Handling Editor"}</span>
+                                  </Button>
+
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setTrackingManuscript(ms)
+                                      setIsTrackModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-2.5 rounded-lg cursor-pointer flex items-center gap-1 shadow-xs whitespace-nowrap"
+                                    title="Sanitize reviewer feedback & dispatch remarks to Handling Editor"
+                                  >
+                                    <ShieldCheck className="h-3.5 w-3.5" />
+                                    <span>Sanitize & Dispatch</span>
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setTrackingManuscript(ms)
+                                      setIsTrackModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2 rounded-lg cursor-pointer"
+                                    title="Track Review progress"
+                                  >
+                                    <Clock className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                    Track
+                                  </Button>
+                                </>
                               ) : (
                                 <Button
                                   variant="outline"
@@ -11587,6 +11637,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 reviewerEmail: "ragab.aziza@alexmed.edu.eg",
                                 subject: `[Scholarly Open] Reminder: Review Evaluation Pending for ${readingManuscript.id} - ${readingManuscript.journal}`,
                                 body: `Dear Dr. Ragab Aziza,\n\nWe recently invited you to evaluate manuscript "${readingManuscript.title}" (${readingManuscript.id}) for ${readingManuscript.journal}.\n\nWhenever your report is ready, please submit your feedback through your secure reviewer portal.\n\nWarm regards,\nEditorial Management Office`,
+                                ccEmail: "scholarlyopen@gmail.com",
                                 includeCc: true,
                                 includeOptOut: true,
                                 isSending: false

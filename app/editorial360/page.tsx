@@ -1796,7 +1796,38 @@ export default function Editorial360Page() {
 
   const [activeReviews, setActiveReviews] = useState<ActiveReview[]>([])
 
-  const [reviews, setReviews] = useState<ReviewFeedback[]>([])
+  const DEFAULT_INITIAL_REVIEWS: ReviewFeedback[] = [
+    {
+      id: "REV-FB-1791559472514-816",
+      paperId: "SOMED-26-RW01",
+      reviewerName: "Dr. Chaud GJ",
+      originality: 4,
+      methodology: 4,
+      clarity: 4,
+      significance: 4,
+      commentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication:\n1. Clarification of manuscript type and narrative methodology.\n2. Resolution of inconsistencies in supplementary datasets.\n3. Detailed verification of regional aortic network pathways.",
+      commentsEditor: "Dear Editor-in-Chief & Handling Editor,\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nSincerely,\nDr. Chaud GJ",
+      recommendation: "Major Revision",
+      sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.",
+      status: "Released"
+    },
+    {
+      id: "REV-FB-SAM-01",
+      paperId: "SOMED-26-RW01",
+      reviewerName: "Dr. Praveen Nagula",
+      originality: 3,
+      methodology: 3,
+      clarity: 3,
+      significance: 3,
+      commentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided.\n\nSpecific comments:\n1. Expand reference citations for a comprehensive review article.\n2. Detail recent clinical developments and changes in acute management.\n3. Include synthesized summary tables and clinical decision flowcharts.",
+      commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+      recommendation: "Minor Revision",
+      sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
+      status: "Released"
+    }
+  ]
+
+  const [reviews, setReviews] = useState<ReviewFeedback[]>(DEFAULT_INITIAL_REVIEWS)
 
   const [integrityAlerts, setIntegrityAlerts] = useState<IntegrityAlert[]>([])
 
@@ -7696,6 +7727,24 @@ export default function Editorial360Page() {
                         </div>
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#0b99ff]/20 text-[#0b99ff]">
                           {editorScopedManuscripts.filter(m => m.status === "Under Review").length} Live
+                        </span>
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveEditorTab("decision")}
+                        className={`flex items-center justify-between gap-2 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeEditorTab === "decision"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <CheckSquare className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          <span>{language === "de" ? "Entscheidungs-Zentrale" : "Decisions Central"}</span>
+                        </div>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                          {editorScopedManuscripts.filter(m => m.status === "Under Review" || m.id === "SOMED-26-RW01").length} Ready
                         </span>
                       </button>
 
