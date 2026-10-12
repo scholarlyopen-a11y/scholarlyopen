@@ -87,7 +87,6 @@ export default function Editorial360PricingPage() {
   const [qrModalOpen, setQrModalOpen] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const pricingUrl = "https://www.scholarlyopen.org/editorial360/pricing"
-  const auditUrl = "https://www.scholarlyopen.org/editorial360/pricing?action=diagnostic"
 
   const handleCopyLink = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -302,7 +301,6 @@ export default function Editorial360PricingPage() {
         "Standard Operational Support (24h SLA)"
       ],
       ctaText: "Select Foundation Pilot",
-      accent: "border-slate-800 bg-[#0c1224]/80",
       isPopular: false
     },
     {
@@ -330,7 +328,6 @@ export default function Editorial360PricingPage() {
         "Priority Editorial Support (4h SLA) & Assisted Migration"
       ],
       ctaText: "Select Elevate Tier",
-      accent: "border-[#0b99ff] bg-[#0c1633] ring-1 ring-[#0b99ff]/50 shadow-2xl shadow-blue-950/60",
       isPopular: true
     },
     {
@@ -358,25 +355,9 @@ export default function Editorial360PricingPage() {
         "99.9% Uptime SLA with Custom DPA & On-Prem Options"
       ],
       ctaText: "Select Consortium",
-      accent: "border-indigo-500/40 bg-[#0e142c]/90",
       isPopular: false
     }
   ]
-
-  // Add-ons calculations
-  const addOnPrices = {
-    reviewerWallet: { monthlyEur: 250, annualEur: 199 },
-    papermillDefense: { monthlyEur: 300, annualEur: 249 },
-    whiteLabel: { monthlyEur: 120, annualEur: 99 }
-  }
-
-  const selectedAddonsTotalMonthly = useMemo(() => {
-    let sum = 0
-    if (addOnReviewerWallet) sum += addOnPrices.reviewerWallet[billingCycle === "annual" ? "annualEur" : "monthlyEur"]
-    if (addOnPapermillDefense) sum += addOnPrices.papermillDefense[billingCycle === "annual" ? "annualEur" : "monthlyEur"]
-    if (addOnWhiteLabel) sum += addOnPrices.whiteLabel[billingCycle === "annual" ? "annualEur" : "monthlyEur"]
-    return sum
-  }, [addOnReviewerWallet, addOnPapermillDefense, addOnWhiteLabel, billingCycle])
 
   // ROI Calculations vs Legacy Systems (ScholarOne / Editorial Manager at €14,000/yr per journal)
   const roiMetrics = useMemo(() => {
@@ -404,45 +385,17 @@ export default function Editorial360PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b19] text-slate-100 font-sans relative overflow-x-hidden selection:bg-[#0b99ff]/30 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 font-sans relative overflow-x-hidden selection:bg-[#0b99ff]/20 selection:text-[#0b99ff]">
       
-      {/* Hexagonal Lattice Background (Inspired by Dimensions Frankfurt flyer) */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <svg className="w-full h-full opacity-15" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="hex-grid-pattern" width="56" height="96.994" patternUnits="userSpaceOnUse">
-              <path 
-                d="M 56 0 L 28 16.165 L 0 0 L 0 32.331 L 28 48.497 L 56 32.331 Z M 0 48.497 L 28 64.662 L 56 48.497 L 56 80.828 L 28 96.994 L 0 80.828 Z" 
-                fill="none" 
-                stroke="#00C0F0" 
-                strokeWidth="0.8" 
-                strokeOpacity="0.35" 
-              />
-            </pattern>
-            <radialGradient id="sky-glow" cx="50%" cy="0%" r="60%">
-              <stop offset="0%" stopColor="#0b99ff" stopOpacity="0.22" />
-              <stop offset="50%" stopColor="#070b19" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient id="purple-glow" cx="80%" cy="20%" r="40%">
-              <stop offset="0%" stopColor="#7928ca" stopOpacity="0.14" />
-              <stop offset="60%" stopColor="#070b19" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#hex-grid-pattern)" />
-          <rect width="100%" height="100%" fill="url(#sky-glow)" />
-          <rect width="100%" height="100%" fill="url(#purple-glow)" />
-        </svg>
-      </div>
-
-      {/* Top International Announcement Bar */}
-      <div className="relative z-10 border-b border-slate-800/80 bg-[#090f24]/90 backdrop-blur-md px-4 py-2.5 text-xs text-slate-300">
+      {/* Top Professional Announcement Bar */}
+      <div className="border-b border-slate-200/80 bg-slate-50/80 px-4 py-2 text-xs text-slate-600">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
-          <div className="flex items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#00C0F0]/10 text-[#00C0F0] border border-[#00C0F0]/30 shadow-xs">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#00C0F0] animate-pulse" />
-              Frankfurt Book Fair 2026 Delegation
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-[#0b99ff] border border-sky-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#0b99ff]" />
+              Frankfurt Book Fair 2026
             </span>
-            <span className="text-xs text-slate-300 hidden md:inline">
+            <span className="text-xs text-slate-600 hidden md:inline">
               Next-Gen Editorial &amp; Peer Review Infrastructure for Global Publishers
             </span>
           </div>
@@ -450,21 +403,21 @@ export default function Editorial360PricingPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setAuditModalOpen(true)}
-              className="inline-flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold px-3 py-1 rounded-full text-xs border border-amber-500/30 transition-all cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-md text-xs border border-slate-200 transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
             >
-              <ClipboardList className="w-3.5 h-3.5" />
-              <span>30-Sec Publisher Diagnostic</span>
+              <ClipboardList className="w-3.5 h-3.5 text-[#0b99ff]" />
+              <span>30-Sec Diagnostic</span>
             </button>
             <button
               onClick={() => setQrModalOpen(true)}
-              className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-750 text-slate-200 font-semibold px-3 py-1 rounded-full text-xs border border-slate-700 transition-all cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-md text-xs border border-slate-200 transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
             >
-              <QrCode className="w-3.5 h-3.5 text-[#00C0F0]" />
-              <span>Digital QR Flyer</span>
+              <QrCode className="w-3.5 h-3.5 text-[#0b99ff]" />
+              <span>Digital Flyer QR</span>
             </button>
             <button
               onClick={() => handleOpenMeetingModal("Executive Online Demo")}
-              className="inline-flex items-center gap-1.5 bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold px-3 py-1 rounded-full text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 bg-[#0b99ff] hover:bg-[#0088e0] text-white font-semibold px-3 py-1 rounded-md text-xs shadow-xs transition-colors cursor-pointer whitespace-nowrap"
             >
               <Video className="w-3.5 h-3.5" />
               <span>Schedule 1-on-1 Briefing</span>
@@ -474,33 +427,33 @@ export default function Editorial360PricingPage() {
       </div>
 
       {/* Main Navigation Header */}
-      <header className="relative z-10 sticky top-0 border-b border-slate-800/80 bg-[#070b19]/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
               <img 
                 src="/editorial360.svg" 
                 alt="editorial360" 
-                className="h-7 w-auto object-contain brightness-110" 
+                className="h-7 w-auto object-contain" 
               />
             </Link>
-            <div className="h-4 w-[1px] bg-slate-800 hidden sm:block" />
-            <span className="text-[11px] font-bold tracking-widest uppercase text-slate-400 hidden sm:inline-block">
+            <div className="h-4 w-[1px] bg-slate-200 hidden sm:block" />
+            <span className="text-[11px] font-bold tracking-widest uppercase text-slate-500 hidden sm:inline-block">
               Institutional Solutions &amp; Pricing
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Currency Selector */}
-            <div className="flex items-center bg-[#0d142d] p-0.5 rounded-lg border border-slate-800 text-xs">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
               {(["EUR", "USD", "GBP"] as Currency[]).map((curr) => (
                 <button
                   key={curr}
                   onClick={() => setCurrency(curr)}
                   className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                     currency === curr
-                      ? "bg-[#0b99ff] text-white shadow-xs"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-white text-[#0b99ff] shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   {curr}
@@ -510,7 +463,7 @@ export default function Editorial360PricingPage() {
 
             <button
               onClick={() => handleOpenMeetingModal("Consortium Executive Consultation")}
-              className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-[#0b99ff] to-[#00b4d8] hover:opacity-95 px-3.5 py-1.5 rounded-lg shadow-md cursor-pointer transition-all"
+              className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#0b99ff] hover:bg-[#0088e0] px-3.5 py-1.5 rounded-lg shadow-sm cursor-pointer transition-colors"
             >
               <span>Book Consultation</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -520,46 +473,46 @@ export default function Editorial360PricingPage() {
       </header>
 
       {/* ========================================================================= */}
-      {/* HERO SECTION: CONSENSUS / DIMENSIONS INTERACTIVE PRODUCT TOUR WALKTHROUGH */}
+      {/* HERO SECTION: CONSENSUS-STYLE INTERACTIVE PRODUCT TOUR (CLEAN WHITE & BLUE) */}
       {/* ========================================================================= */}
-      <section className="relative z-10 pt-10 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="pt-10 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
-        {/* Top Badging & Headline */}
+        {/* Top Headline & Subtitle */}
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-[#00C0F0]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0b99ff] text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-[#0b99ff]" />
             <span>Dimensions &amp; Frankfurt 2026 Executive Showcase</span>
           </div>
           
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            See <span className="bg-gradient-to-r from-white via-sky-200 to-[#00C0F0] bg-clip-text text-transparent">editorial360™</span> in action
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            See <span className="text-[#0b99ff]">editorial360™</span> in action
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            The next-generation AI-augmented peer review and editorial desk engineered for university presses, societies, and academic publishers. Experience the interactive platform tour below.
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            The next-generation AI-augmented peer review and editorial desk engineered for university presses, learned societies, and academic publishers. Experience the interactive tour below.
           </p>
         </div>
 
-        {/* The Consensus-Style Interactive Walkthrough Player Frame + Instant Lead Sidebar */}
+        {/* Interactive Tour Player Frame + Direct Lead Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Main Interactive Demo Player (8 Cols) */}
-          <div className="lg:col-span-8 bg-[#0b1226]/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-5">
+          <div className="lg:col-span-8 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-lg shadow-slate-100 space-y-5">
             
             {/* Player Header with Chapter Navigation */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-[#0b99ff]/20 text-[#00C0F0] border border-[#00C0F0]/30 flex items-center justify-center font-bold text-xs">
+                <div className="h-8 w-8 rounded-lg bg-sky-50 text-[#0b99ff] border border-sky-200 flex items-center justify-center font-bold text-xs">
                   360
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <span>Interactive Product Walkthrough</span>
-                    <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.2 rounded-full">
+                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.2 rounded-full">
                       5-Min Guided Tour
                     </span>
                   </h3>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-500">
                     Click chapters below to inspect live platform modules in real-time
                   </p>
                 </div>
@@ -570,8 +523,8 @@ export default function Editorial360PricingPage() {
                   onClick={() => setIsPlayingTour(!isPlayingTour)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     isPlayingTour
-                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                      : "bg-[#0b99ff]/20 text-sky-300 border border-sky-500/30 hover:bg-[#0b99ff]/30"
+                      ? "bg-amber-50 text-amber-800 border border-amber-200"
+                      : "bg-sky-50 text-[#0b99ff] border border-sky-200 hover:bg-sky-100"
                   }`}
                 >
                   {isPlayingTour ? <RotateCcw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
@@ -580,8 +533,8 @@ export default function Editorial360PricingPage() {
               </div>
             </div>
 
-            {/* Chapter Selection Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 bg-[#070b18] p-1.5 rounded-xl border border-slate-800/80">
+            {/* Chapter Selection Tabs */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
               {[
                 { id: "scholar_scout", label: "1. Scholar Scout", icon: Search },
                 { id: "papermill", label: "2. Forensic Audit", icon: Fingerprint },
@@ -598,10 +551,10 @@ export default function Editorial360PricingPage() {
                       setActiveChapter(chap.id as TourChapter)
                       setIsPlayingTour(false)
                     }}
-                    className={`flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-semibold rounded-lg transition-all cursor-pointer truncate ${
+                    className={`flex items-center justify-center gap-1.5 py-2 px-2 text-xs rounded-lg transition-all cursor-pointer truncate ${
                       isActive
-                        ? "bg-[#0b99ff] text-white shadow-md font-bold"
-                        : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                        ? "bg-[#0b99ff] text-white font-bold shadow-xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white"
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -612,21 +565,21 @@ export default function Editorial360PricingPage() {
             </div>
 
             {/* Live Interactive Simulation Window */}
-            <div className="rounded-2xl border border-slate-800/90 bg-[#060a17] overflow-hidden min-h-[340px] flex flex-col justify-between shadow-inner">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/50 overflow-hidden min-h-[340px] flex flex-col justify-between">
               
-              {/* Simulation Header */}
-              <div className="px-4 py-2.5 bg-[#090f24] border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
+              {/* Simulation Top Bar */}
+              <div className="px-4 py-2.5 bg-white border-b border-slate-200 flex items-center justify-between text-xs text-slate-600">
                 <div className="flex items-center gap-2">
                   <div className="flex gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                   </div>
-                  <span className="font-mono text-[11px] text-slate-400 ml-2">
+                  <span className="font-mono text-[11px] text-slate-500 ml-2">
                     editorial360://console/{activeChapter}
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-[#00C0F0] uppercase tracking-wider">
+                <span className="text-[10px] font-mono text-[#0b99ff] font-semibold uppercase tracking-wider">
                   Live Software Simulation
                 </span>
               </div>
@@ -639,42 +592,42 @@ export default function Editorial360PricingPage() {
                   <div className="space-y-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-1">
+                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider mb-1">
                           <Search className="w-3.5 h-3.5" />
                           <span>AI Referee Discovery &amp; Citation Graph Matching</span>
                         </div>
-                        <h4 className="text-base font-bold text-white">
+                        <h4 className="text-base font-bold text-slate-900">
                           Automated Referee Discovery Across 240M+ Academic Records
                         </h4>
-                        <p className="text-xs text-slate-400 mt-1 max-w-xl">
-                          ScholarScout™ indexes PubMed, Crossref, ORCID, and OpenAlex to automatically propose vetted, conflict-free referees in seconds with zero manual googling.
+                        <p className="text-xs text-slate-600 mt-1 max-w-xl">
+                          ScholarScout™ indexes PubMed, Crossref, ORCID, and OpenAlex to automatically propose vetted, conflict-free referees in seconds with zero manual searching.
                         </p>
                       </div>
-                      <span className="text-xs font-mono px-2 py-1 bg-sky-950/80 text-sky-300 rounded border border-sky-800 shrink-0">
+                      <span className="text-xs font-mono px-2 py-1 bg-sky-50 text-[#0b99ff] font-bold rounded border border-sky-200 shrink-0">
                         Match Score: 98.4%
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                      <div className="p-3 bg-[#0d1530] border border-slate-800 rounded-xl space-y-2">
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2 shadow-2xs">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-white">Dr. Sarah Jenkins</span>
-                          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-1.5 py-0.5 rounded">COI Free (0%)</span>
+                          <span className="font-bold text-xs text-slate-900">Dr. Sarah Jenkins</span>
+                          <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">COI Free (0%)</span>
                         </div>
-                        <p className="text-[11px] text-slate-400">Cardiovascular Biomechanics · Oxford Institute</p>
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-800/80">
+                        <p className="text-[11px] text-slate-600">Cardiovascular Biomechanics · Oxford Institute</p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-100">
                           <span>h-index: 28</span>
                           <span>Avg. Turnaround: 9.4 Days</span>
                         </div>
                       </div>
 
-                      <div className="p-3 bg-[#0d1530] border border-slate-800 rounded-xl space-y-2">
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2 shadow-2xs">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-white">Prof. Marcus Vance</span>
-                          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-1.5 py-0.5 rounded">COI Free (0%)</span>
+                          <span className="font-bold text-xs text-slate-900">Prof. Marcus Vance</span>
+                          <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">COI Free (0%)</span>
                         </div>
-                        <p className="text-[11px] text-slate-400">Thoracic Endovascular Surgery · Charité Berlin</p>
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-800/80">
+                        <p className="text-[11px] text-slate-600">Thoracic Endovascular Surgery · Charité Berlin</p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-100">
                           <span>h-index: 41</span>
                           <span>Avg. Turnaround: 11.2 Days</span>
                         </div>
@@ -688,37 +641,37 @@ export default function Editorial360PricingPage() {
                   <div className="space-y-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">
+                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider mb-1">
                           <Fingerprint className="w-3.5 h-3.5" />
                           <span>Pre-Review Dual-Layer Papermill &amp; Image Integrity Screening</span>
                         </div>
-                        <h4 className="text-base font-bold text-white">
+                        <h4 className="text-base font-bold text-slate-900">
                           Pre-Screening Forensic Defense Engine
                         </h4>
-                        <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                        <p className="text-xs text-slate-600 mt-1 max-w-xl">
                           Instantly scans submissions for synthetic AI text generation, Western Blot / image duplication, citation cartel rings, and suspicious author email patterns.
                         </p>
                       </div>
-                      <span className="text-xs font-mono px-2 py-1 bg-purple-950/80 text-purple-300 rounded border border-purple-800 shrink-0">
+                      <span className="text-xs font-mono px-2 py-1 bg-emerald-50 text-emerald-700 font-bold rounded border border-emerald-200 shrink-0">
                         Integrity: Clean (Verified)
                       </span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2.5 pt-2">
-                      <div className="p-3 bg-[#0d1530] border border-slate-800 rounded-xl text-center">
-                        <span className="text-[10px] text-slate-400 block">AI Linguistic Index</span>
-                        <span className="text-sm font-bold text-emerald-400 font-mono">1.2% (Passed)</span>
-                        <span className="text-[9px] text-slate-500 block mt-0.5">Human Authored</span>
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl text-center shadow-2xs">
+                        <span className="text-[10px] text-slate-500 block">AI Linguistic Index</span>
+                        <span className="text-sm font-bold text-emerald-600 font-mono">1.2% (Passed)</span>
+                        <span className="text-[9px] text-slate-400 block mt-0.5">Human Authored</span>
                       </div>
-                      <div className="p-3 bg-[#0d1530] border border-slate-800 rounded-xl text-center">
-                        <span className="text-[10px] text-slate-400 block">Image Forensics</span>
-                        <span className="text-sm font-bold text-emerald-400 font-mono">0 Manipulation</span>
-                        <span className="text-[9px] text-slate-500 block mt-0.5">Gel/Western Blots Clean</span>
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl text-center shadow-2xs">
+                        <span className="text-[10px] text-slate-500 block">Image Forensics</span>
+                        <span className="text-sm font-bold text-emerald-600 font-mono">0 Manipulation</span>
+                        <span className="text-[9px] text-slate-400 block mt-0.5">Gel Blots Clean</span>
                       </div>
-                      <div className="p-3 bg-[#0d1530] border border-slate-800 rounded-xl text-center">
-                        <span className="text-[10px] text-slate-400 block">Citation Cartel Graph</span>
-                        <span className="text-sm font-bold text-emerald-400 font-mono">Normal Variance</span>
-                        <span className="text-[9px] text-slate-500 block mt-0.5">No Reciprocal Rings</span>
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl text-center shadow-2xs">
+                        <span className="text-[10px] text-slate-500 block">Citation Cartel Graph</span>
+                        <span className="text-sm font-bold text-emerald-600 font-mono">Normal Variance</span>
+                        <span className="text-[9px] text-slate-400 block mt-0.5">No Reciprocal Rings</span>
                       </div>
                     </div>
                   </div>
@@ -729,32 +682,32 @@ export default function Editorial360PricingPage() {
                   <div className="space-y-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">
+                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider mb-1">
                           <Zap className="w-3.5 h-3.5" />
                           <span>Parallel Multi-Referee Dispatch &amp; Auto-Reminders</span>
                         </div>
-                        <h4 className="text-base font-bold text-white">
+                        <h4 className="text-base font-bold text-slate-900">
                           Zero-Stall Parallel Referee Engagement Pipeline
                         </h4>
-                        <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                        <p className="text-xs text-slate-600 mt-1 max-w-xl">
                           Eliminates the sequential 14-day waiting delays. Invites 4 vetted referees simultaneously, auto-secures the first two agreements, and manages deadlines autonomously.
                         </p>
                       </div>
-                      <span className="text-xs font-mono px-2 py-1 bg-amber-950/80 text-amber-300 rounded border border-amber-800 shrink-0">
+                      <span className="text-xs font-mono px-2 py-1 bg-sky-50 text-[#0b99ff] font-bold rounded border border-sky-200 shrink-0">
                         Turnaround: 21 Days Target
                       </span>
                     </div>
 
                     <div className="space-y-2 pt-2">
-                      <div className="p-2.5 bg-[#0d1530] border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                        <span className="text-slate-300 font-medium">Reviewer #1 (Nagula P.)</span>
-                        <span className="text-emerald-400 font-mono text-[11px] font-bold">Review Submitted (Day 8)</span>
+                      <div className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs shadow-2xs">
+                        <span className="text-slate-800 font-medium">Reviewer #1 (Nagula P.)</span>
+                        <span className="text-emerald-600 font-mono text-[11px] font-bold">Review Submitted (Day 8)</span>
                       </div>
-                      <div className="p-2.5 bg-[#0d1530] border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                        <span className="text-slate-300 font-medium">Reviewer #2 (Chaud G.)</span>
-                        <span className="text-emerald-400 font-mono text-[11px] font-bold">Review Submitted (Day 11)</span>
+                      <div className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs shadow-2xs">
+                        <span className="text-slate-800 font-medium">Reviewer #2 (Chaud G.)</span>
+                        <span className="text-emerald-600 font-mono text-[11px] font-bold">Review Submitted (Day 11)</span>
                       </div>
-                      <div className="p-2.5 bg-[#0d1530] border border-slate-800 rounded-xl flex items-center justify-between text-xs text-slate-500">
+                      <div className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs text-slate-500 shadow-2xs">
                         <span>Reviewer #3 &amp; #4 (Parallel Standby)</span>
                         <span className="font-mono text-[11px]">Rescinded Automatically (Quorum Met)</span>
                       </div>
@@ -767,33 +720,33 @@ export default function Editorial360PricingPage() {
                   <div className="space-y-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider mb-1">
                           <Award className="w-3.5 h-3.5" />
                           <span>Incentivized Peer Review Economy &amp; APC Credits</span>
                         </div>
-                        <h4 className="text-base font-bold text-white">
+                        <h4 className="text-base font-bold text-slate-900">
                           Tokenized Reviewer Merit Wallet (Solve Reviewer Decline)
                         </h4>
-                        <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                        <p className="text-xs text-slate-600 mt-1 max-w-xl">
                           Referees earn verifiable Merit Points redeemable for Open Access APC publication discounts, society memberships, and certified annual reviewing awards.
                         </p>
                       </div>
-                      <span className="text-xs font-mono px-2 py-1 bg-emerald-950/80 text-emerald-300 rounded border border-emerald-800 shrink-0">
+                      <span className="text-xs font-mono px-2 py-1 bg-emerald-50 text-emerald-700 font-bold rounded border border-emerald-200 shrink-0">
                         Acceptance: +72% Higher
                       </span>
                     </div>
 
-                    <div className="p-4 bg-[#0d1530] border border-slate-800 rounded-xl flex items-center justify-between gap-4">
+                    <div className="p-4 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-4 shadow-2xs">
                       <div>
-                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Referee Earned Balance</span>
-                        <span className="text-2xl font-black text-white font-mono">1,250 <span className="text-sm font-normal text-emerald-400">Merit Pts</span></span>
-                        <span className="text-[11px] text-slate-400 block mt-0.5">Verified across 5 peer reviews this calendar year</span>
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Referee Earned Balance</span>
+                        <span className="text-2xl font-black text-slate-900 font-mono">1,250 <span className="text-sm font-normal text-[#0b99ff]">Merit Pts</span></span>
+                        <span className="text-[11px] text-slate-500 block mt-0.5">Verified across 5 peer reviews this calendar year</span>
                       </div>
                       <div className="space-y-1 text-right">
-                        <span className="px-2.5 py-1 bg-[#0b99ff]/20 text-[#00C0F0] text-xs font-bold rounded-lg border border-[#00C0F0]/30 inline-block">
+                        <span className="px-2.5 py-1 bg-sky-50 text-[#0b99ff] text-xs font-bold rounded-lg border border-sky-200 inline-block">
                           €250 APC Waiver Voucher
                         </span>
-                        <span className="text-[10px] text-slate-400 block">Redeemable in any consortium journal</span>
+                        <span className="text-[10px] text-slate-500 block">Redeemable in any consortium journal</span>
                       </div>
                     </div>
                   </div>
@@ -804,28 +757,28 @@ export default function Editorial360PricingPage() {
                   <div className="space-y-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-1">
+                        <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider mb-1">
                           <FileCheck2 className="w-3.5 h-3.5" />
                           <span>Handling Editor Decision Desk &amp; Instant Synthesis</span>
                         </div>
-                        <h4 className="text-base font-bold text-white">
+                        <h4 className="text-base font-bold text-slate-900">
                           One-Click Editorial Adjudication &amp; Letter Synthesis
                         </h4>
-                        <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                        <p className="text-xs text-slate-600 mt-1 max-w-xl">
                           The Handling Editor evaluates blinded scorecards and releases synthesized decisions (Minor Revision, Accept, Major Revision) with automatic DOI registration.
                         </p>
                       </div>
-                      <span className="text-xs font-mono px-2 py-1 bg-sky-950/80 text-sky-300 rounded border border-sky-800 shrink-0">
+                      <span className="text-xs font-mono px-2 py-1 bg-sky-50 text-[#0b99ff] font-bold rounded border border-sky-200 shrink-0">
                         Step 3: Verdict Ready
                       </span>
                     </div>
 
-                    <div className="p-3.5 bg-[#0d1530] border border-slate-800 rounded-xl flex items-center justify-between text-xs">
+                    <div className="p-3.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs shadow-2xs">
                       <div className="space-y-0.5">
-                        <span className="font-bold text-white">SOMED-26-RW01: Acute Aortic Dissection</span>
-                        <span className="text-[11px] text-slate-400 block">2 Referees Completed · Minor Revision Consensus (82/100)</span>
+                        <span className="font-bold text-slate-900">SOMED-26-RW01: Acute Aortic Dissection</span>
+                        <span className="text-[11px] text-slate-500 block">2 Referees Completed · Minor Revision Consensus (82/100)</span>
                       </div>
-                      <span className="px-3 py-1 bg-amber-500/20 text-amber-300 font-bold rounded-lg border border-amber-500/30 text-xs">
+                      <span className="px-3 py-1 bg-amber-50 text-amber-800 font-bold rounded-lg border border-amber-200 text-xs">
                         Minor Revision Decision
                       </span>
                     </div>
@@ -835,11 +788,11 @@ export default function Editorial360PricingPage() {
               </div>
 
               {/* Simulation Footer bar */}
-              <div className="px-4 py-2 bg-[#090f24] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+              <div className="px-4 py-2 bg-white border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
                 <span>Frankfurt Fair 2026 Interactive Demonstration Profile</span>
                 <button
                   onClick={() => handleOpenMeetingModal("Live Platform Demonstration")}
-                  className="font-bold text-[#00C0F0] hover:underline flex items-center gap-1 cursor-pointer"
+                  className="font-bold text-[#0b99ff] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>Request Full Live Walkthrough</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -851,34 +804,34 @@ export default function Editorial360PricingPage() {
           </div>
 
           {/* Right Lead Capture Sidebar (4 Cols) - Consensus / Dimensions Pamphlet Flow */}
-          <div className="lg:col-span-4 bg-[#0b1226]/95 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-5">
+          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-lg shadow-slate-100 space-y-5">
             
-            <div className="space-y-1.5 border-b border-slate-800/80 pb-4">
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#00C0F0] uppercase tracking-wider">
+            <div className="space-y-1.5 border-b border-slate-100 pb-4">
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider">
                 <Mail className="w-3 h-3" />
                 <span>Executive Lead Channel</span>
               </div>
-              <h3 className="text-base font-bold text-white">
+              <h3 className="text-base font-bold text-slate-900">
                 Get a demo &amp; institutional dossier sent to your inbox
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Enter your work details to immediately receive our Frankfurt 2026 migration whitepaper, pricing schedules, and personalized software demo link.
               </p>
             </div>
 
             {inboxSuccess ? (
-              <div className="p-5 rounded-2xl bg-emerald-950/40 border border-emerald-800/60 text-center space-y-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+              <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                   <CheckCheck className="w-5 h-5" />
                 </div>
-                <h4 className="text-sm font-bold text-white">Dossier Dispatched!</h4>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <h4 className="text-sm font-bold text-slate-900">Dossier Dispatched!</h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
                   We have dispatched the editorial360 package to <strong>{inboxLeadEmail}</strong>. Our Frankfurt delegation has received your inquiry.
                 </p>
                 <Button
                   size="sm"
                   onClick={() => setInboxSuccess(false)}
-                  className="mt-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 cursor-pointer"
+                  className="mt-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
                 >
                   Send to another email
                 </Button>
@@ -886,7 +839,7 @@ export default function Editorial360PricingPage() {
             ) : (
               <form onSubmit={handleInboxLeadSubmit} className="space-y-3.5">
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
                     Your Full Name
                   </label>
                   <input
@@ -895,12 +848,12 @@ export default function Editorial360PricingPage() {
                     placeholder="e.g. Dr. Jennifer Weber"
                     value={inboxLeadName}
                     onChange={(e) => setInboxLeadName(e.target.value)}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
                     Institutional / Work Email
                   </label>
                   <input
@@ -909,13 +862,13 @@ export default function Editorial360PricingPage() {
                     placeholder="j.weber@universitypress.org"
                     value={inboxLeadEmail}
                     onChange={(e) => setInboxLeadEmail(e.target.value)}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">
                       Organization / Press
                     </label>
                     <input
@@ -924,18 +877,18 @@ export default function Editorial360PricingPage() {
                       placeholder="e.g. European Society"
                       value={inboxLeadOrg}
                       onChange={(e) => setInboxLeadOrg(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">
                       Role / Title
                     </label>
                     <select
                       value={inboxLeadRole}
                       onChange={(e) => setInboxLeadRole(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/60 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                     >
                       <option value="Publisher / Director">Publisher / Director</option>
                       <option value="Editor-in-Chief">Editor-in-Chief</option>
@@ -947,13 +900,13 @@ export default function Editorial360PricingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
                     Portfolio Size
                   </label>
                   <select
                     value={inboxLeadJournals}
                     onChange={(e) => setInboxLeadJournals(e.target.value)}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/60 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   >
                     <option value="1 Journal">Single Journal</option>
                     <option value="2–5 Journals">2–5 Journals (Small Portfolio)</option>
@@ -963,13 +916,13 @@ export default function Editorial360PricingPage() {
                 </div>
 
                 {inboxError && (
-                  <p className="text-[11px] text-rose-400 font-medium">{inboxError}</p>
+                  <p className="text-[11px] text-rose-500 font-medium">{inboxError}</p>
                 )}
 
                 <Button
                   type="submit"
                   disabled={inboxSubmitting}
-                  className="w-full py-4 text-xs font-bold rounded-xl bg-gradient-to-r from-[#0b99ff] to-[#00b4d8] hover:opacity-95 text-white shadow-md cursor-pointer transition-all"
+                  className="w-full py-4 text-xs font-bold rounded-xl bg-[#0b99ff] hover:bg-[#0088e0] text-white shadow-sm cursor-pointer transition-colors"
                 >
                   {inboxSubmitting ? "Dispatching..." : "Send Demo Link & Dossier to My Inbox"}
                 </Button>
@@ -977,29 +930,29 @@ export default function Editorial360PricingPage() {
             )}
 
             {/* Quick Digital Flyer QR & 30-sec Diagnostic Links */}
-            <div className="pt-3 border-t border-slate-800/80 space-y-2">
+            <div className="pt-3 border-t border-slate-100 space-y-2">
               <button
                 type="button"
                 onClick={() => setAuditModalOpen(true)}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
               >
                 <span className="flex items-center gap-2">
-                  <ClipboardList className="w-3.5 h-3.5" />
+                  <ClipboardList className="w-3.5 h-3.5 text-[#0b99ff]" />
                   <span>30-Sec Workflow Diagnostic</span>
                 </span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               <button
                 type="button"
                 onClick={() => setQrModalOpen(true)}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
               >
                 <span className="flex items-center gap-2">
-                  <QrCode className="w-3.5 h-3.5 text-[#00C0F0]" />
+                  <QrCode className="w-3.5 h-3.5 text-[#0b99ff]" />
                   <span>Display Mobile QR Code</span>
                 </span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
             </div>
 
@@ -1012,28 +965,28 @@ export default function Editorial360PricingPage() {
       {/* ========================================================================= */}
       {/* SECTION 2: TRANSPARENT INSTITUTIONAL PRICING SCHEDULE & TIERS */}
       {/* ========================================================================= */}
-      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/80">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
         
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-semibold">
-            <Building2 className="w-3.5 h-3.5 text-[#00C0F0]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0b99ff] text-xs font-semibold">
+            <Building2 className="w-3.5 h-3.5 text-[#0b99ff]" />
             <span>Fair, Transparent Academic Publishing Tiers</span>
           </div>
           
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Institutional Licensing &amp; Deployment Plans
           </h2>
 
-          <p className="text-sm text-slate-300 max-w-xl mx-auto">
+          <p className="text-sm text-slate-600 max-w-xl mx-auto">
             Predictable flat-fee pricing without punishing per-submission overage penalties. Fully hosted in the European Union (Frankfurt AWS &amp; Hetzner ISO 27001).
           </p>
 
           {/* Billing Interval Toggle (Annual vs Monthly) */}
-          <div className="inline-flex items-center gap-3 p-1 rounded-xl bg-[#0b1226] border border-slate-800 text-xs font-semibold mt-4">
+          <div className="inline-flex items-center gap-2 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold mt-4">
             <button
               onClick={() => setBillingCycle("monthly")}
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                billingCycle === "monthly" ? "bg-white text-slate-950 font-bold shadow-xs" : "text-slate-400 hover:text-white"
+                billingCycle === "monthly" ? "bg-white text-slate-900 font-bold shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Monthly Billing
@@ -1041,11 +994,11 @@ export default function Editorial360PricingPage() {
             <button
               onClick={() => setBillingCycle("annual")}
               className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                billingCycle === "annual" ? "bg-[#0b99ff] text-white font-bold shadow-xs" : "text-slate-400 hover:text-white"
+                billingCycle === "annual" ? "bg-[#0b99ff] text-white font-bold shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <span>Annual Contract</span>
-              <span className="text-[10px] bg-emerald-400 text-slate-950 font-extrabold px-1.5 py-0.2 rounded-full">
+              <span className="text-[10px] bg-white text-[#0b99ff] font-extrabold px-1.5 py-0.2 rounded-full">
                 Save 20%
               </span>
             </button>
@@ -1059,59 +1012,63 @@ export default function Editorial360PricingPage() {
             return (
               <div
                 key={plan.id}
-                className={`rounded-3xl p-6 sm:p-7 flex flex-col justify-between border backdrop-blur-xl relative transition-all ${plan.accent}`}
+                className={`rounded-3xl p-6 sm:p-7 flex flex-col justify-between border bg-white relative transition-all ${
+                  plan.isPopular 
+                    ? "border-2 border-[#0b99ff] shadow-xl shadow-sky-500/10 ring-4 ring-[#0b99ff]/10" 
+                    : "border-slate-200 hover:border-slate-300 shadow-sm"
+                }`}
               >
                 {plan.isPopular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-[#0b99ff] to-[#00b4d8] text-white text-[10px] font-black uppercase tracking-wider shadow-md">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#0b99ff] text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
                     Most Popular for University Presses
                   </div>
                 )}
 
                 <div className="space-y-4">
                   <div>
-                    <span className="text-[11px] font-bold text-[#00C0F0] uppercase tracking-wider block">
+                    <span className="text-[11px] font-bold text-[#0b99ff] uppercase tracking-wider block">
                       {plan.badge}
                     </span>
-                    <h3 className="text-xl font-black text-white mt-0.5">
+                    <h3 className="text-xl font-black text-slate-900 mt-0.5">
                       {plan.name}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed min-h-[36px]">
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed min-h-[36px]">
                       {plan.tagline}
                     </p>
                   </div>
 
                   {/* Price Block */}
-                  <div className="pt-2 border-t border-slate-800/80">
+                  <div className="pt-2 border-t border-slate-100">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-3xl sm:text-4xl font-black text-white font-mono">
+                      <span className="text-3xl sm:text-4xl font-black text-slate-900 font-mono">
                         {formatPrice(priceMonthly)}
                       </span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-500">
                         / {plan.priceLabel}
                       </span>
                     </div>
                     {billingCycle === "annual" && (
-                      <p className="text-[11px] text-emerald-400 font-mono mt-0.5">
+                      <p className="text-[11px] text-emerald-600 font-mono mt-0.5">
                         Billed annually ({formatPrice(plan.annualTotalEur)}/yr)
                       </p>
                     )}
                   </div>
 
                   {/* Limits */}
-                  <div className="p-3 bg-[#060a17] rounded-xl border border-slate-800/80 space-y-1 text-[11px]">
-                    <div className="text-slate-300 font-medium">Capacity: <span className="text-white font-bold">{plan.limits.submissions}</span></div>
-                    <div className="text-slate-300 font-medium">Governance: <span className="text-white font-bold">{plan.limits.editors}</span></div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1 text-[11px]">
+                    <div className="text-slate-700 font-medium">Capacity: <span className="text-slate-900 font-bold">{plan.limits.submissions}</span></div>
+                    <div className="text-slate-700 font-medium">Governance: <span className="text-slate-900 font-bold">{plan.limits.editors}</span></div>
                   </div>
 
                   {/* Features List */}
                   <div className="space-y-2 pt-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                       Included Capabilities:
                     </span>
-                    <ul className="space-y-2 text-xs text-slate-300">
+                    <ul className="space-y-2 text-xs text-slate-700">
                       {plan.features.map((feat, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <Check className="w-3.5 h-3.5 text-[#00C0F0] shrink-0 mt-0.5" />
+                          <Check className="w-3.5 h-3.5 text-[#0b99ff] shrink-0 mt-0.5" />
                           <span>{feat}</span>
                         </li>
                       ))}
@@ -1119,13 +1076,13 @@ export default function Editorial360PricingPage() {
                   </div>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-slate-800/80">
+                <div className="pt-6 mt-6 border-t border-slate-100">
                   <Button
                     onClick={() => handleOpenMeetingModal(`${plan.name} Tier`)}
                     className={`w-full py-4 rounded-xl text-xs font-bold cursor-pointer transition-all ${
                       plan.isPopular
-                        ? "bg-gradient-to-r from-[#0b99ff] to-[#00b4d8] hover:opacity-95 text-white shadow-lg shadow-sky-950"
-                        : "bg-slate-800 hover:bg-slate-700 text-white"
+                        ? "bg-[#0b99ff] hover:bg-[#0088e0] text-white shadow-sm"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-800"
                     }`}
                   >
                     <span>{plan.ctaText}</span>
@@ -1140,33 +1097,33 @@ export default function Editorial360PricingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* SECTION 3: ROI CALCULATOR VS LEGACY SYSTEMS (SCHOLARONE / EDITORIAL MGR) */}
+      {/* SECTION 3: ROI CALCULATOR VS LEGACY SYSTEMS (CLEAN WHITE & BLUE) */}
       {/* ========================================================================= */}
-      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/80">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
         
-        <div className="bg-[#0b1226]/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             <div className="lg:col-span-5 space-y-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-xs font-semibold">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-[#0b99ff] border border-sky-200 text-xs font-semibold">
                 <Calculator className="w-3.5 h-3.5" />
                 <span>Financial Impact Model</span>
               </div>
               
-              <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Calculate your operational savings vs legacy editorial suites
               </h3>
 
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Legacy systems charge up to <strong>€14,000/yr per journal</strong> with slow serialized turnarounds. See your direct annual budget savings and reclaimed editorial hours with editorial360.
               </p>
 
               {/* Slider 1: Journals */}
               <div className="space-y-1.5 pt-2">
-                <div className="flex justify-between text-xs font-bold text-slate-300">
+                <div className="flex justify-between text-xs font-bold text-slate-700">
                   <span>Number of Journals in Portfolio:</span>
-                  <span className="text-[#00C0F0] font-mono text-sm">{roiJournals} Journals</span>
+                  <span className="text-[#0b99ff] font-mono text-sm">{roiJournals} Journals</span>
                 </div>
                 <input
                   type="range"
@@ -1174,15 +1131,15 @@ export default function Editorial360PricingPage() {
                   max="15"
                   value={roiJournals}
                   onChange={(e) => setRoiJournals(Number(e.target.value))}
-                  className="w-full accent-[#0b99ff] bg-slate-800 cursor-pointer"
+                  className="w-full accent-[#0b99ff] bg-slate-200 cursor-pointer"
                 />
               </div>
 
               {/* Slider 2: Submissions */}
               <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-bold text-slate-300">
+                <div className="flex justify-between text-xs font-bold text-slate-700">
                   <span>Annual Submissions / Journal:</span>
-                  <span className="text-[#00C0F0] font-mono text-sm">{roiSubmissionsPerYear} Submissions</span>
+                  <span className="text-[#0b99ff] font-mono text-sm">{roiSubmissionsPerYear} Submissions</span>
                 </div>
                 <input
                   type="range"
@@ -1191,68 +1148,68 @@ export default function Editorial360PricingPage() {
                   step="50"
                   value={roiSubmissionsPerYear}
                   onChange={(e) => setRoiSubmissionsPerYear(Number(e.target.value))}
-                  className="w-full accent-[#0b99ff] bg-slate-800 cursor-pointer"
+                  className="w-full accent-[#0b99ff] bg-slate-200 cursor-pointer"
                 />
               </div>
             </div>
 
             {/* Savings Metrics Display */}
-            <div className="lg:col-span-7 bg-[#060a17] p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-6">
+            <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-6 shadow-sm">
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
-                <div className="p-4 rounded-xl bg-[#0b1226] border border-slate-800">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Estimated Legacy Cost</span>
-                  <span className="text-xl sm:text-2xl font-black text-rose-400 font-mono mt-1 block">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Estimated Legacy Cost</span>
+                  <span className="text-xl sm:text-2xl font-black text-rose-600 font-mono mt-1 block">
                     {formatPrice(roiMetrics.legacyAnnualTotal)}/yr
                   </span>
                   <span className="text-[10px] text-slate-500 block mt-1">ScholarOne / Aries EM average</span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#0b1226] border border-emerald-500/30">
-                  <span className="text-[10px] text-emerald-400 uppercase tracking-wider block font-bold">editorial360 Investment</span>
-                  <span className="text-xl sm:text-2xl font-black text-white font-mono mt-1 block">
+                <div className="p-4 rounded-xl bg-sky-50/50 border border-sky-200">
+                  <span className="text-[10px] text-[#0b99ff] uppercase tracking-wider block font-bold">editorial360 Investment</span>
+                  <span className="text-xl sm:text-2xl font-black text-slate-900 font-mono mt-1 block">
                     {formatPrice(roiMetrics.editorial360AnnualTotal)}/yr
                   </span>
-                  <span className="text-[10px] text-emerald-400/80 block mt-1">Flat Elevate annual license</span>
+                  <span className="text-[10px] text-[#0b99ff] block mt-1">Flat Elevate annual license</span>
                 </div>
 
               </div>
 
               {/* Highlight Net Annual Savings */}
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-[#0b1226] to-sky-950/40 border border-emerald-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-5 rounded-2xl bg-sky-50 border border-sky-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+                  <span className="text-xs font-bold text-[#0b99ff] uppercase tracking-wider block">
                     Net Annual Budget Savings
                   </span>
-                  <span className="text-3xl font-black text-white font-mono mt-0.5 block">
+                  <span className="text-3xl font-black text-slate-900 font-mono mt-0.5 block">
                     {formatPrice(roiMetrics.netAnnualSavings)} / year
                   </span>
-                  <span className="text-xs text-slate-300">
+                  <span className="text-xs text-slate-600">
                     Saves approximately <strong>{roiMetrics.savingsPercent}%</strong> on operational publishing software
                   </span>
                 </div>
 
-                <div className="text-right sm:border-l sm:border-slate-800 sm:pl-6">
-                  <span className="text-xs font-bold text-sky-400 uppercase tracking-wider block">
+                <div className="text-right sm:border-l sm:border-sky-200 sm:pl-6">
+                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                     Reclaimed Editorial Labor
                   </span>
-                  <span className="text-2xl font-black text-white font-mono mt-0.5 block">
+                  <span className="text-2xl font-black text-[#0b99ff] font-mono mt-0.5 block">
                     {Math.round(roiMetrics.hoursSavedPerYear).toLocaleString()} hrs
                   </span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-slate-500">
                     Saved from reviewer hunting &amp; chase emails
                   </span>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-600">
                   Need an official migration proposal for your board or society trustees?
                 </p>
                 <button
                   onClick={() => handleOpenMeetingModal("Board Migration Proposal")}
-                  className="px-4 py-2 bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer whitespace-nowrap transition-all"
+                  className="px-4 py-2 bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer whitespace-nowrap transition-colors"
                 >
                   Request Formal Migration Proposal
                 </button>
@@ -1269,39 +1226,39 @@ export default function Editorial360PricingPage() {
       {/* ========================================================================= */}
       {/* SECTION 4: 30-SEC WORKFLOW AUDIT CTA */}
       {/* ========================================================================= */}
-      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/80">
-        <div className="bg-gradient-to-r from-[#0d1530] via-[#091024] to-[#0d1530] border border-amber-500/30 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
+        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-sky-50 text-[#0b99ff] border border-sky-200 text-xs font-bold">
               <ClipboardList className="w-3.5 h-3.5" />
               <span>30-Second Publisher Workflow Diagnostic</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-white">
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900">
               Suffering from reviewer decline rates or legacy turnaround lag?
             </h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               Take our 4-question assessment to receive an itemized bottleneck audit showing how your current review cycle compares to international benchmarks.
             </p>
           </div>
 
           <button
             onClick={() => setAuditModalOpen(true)}
-            className="px-5 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-lg transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2"
+            className="px-5 py-3.5 rounded-xl bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs shadow-sm transition-colors cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2"
           >
-            <ClipboardList className="w-4 h-4 text-slate-950" />
+            <ClipboardList className="w-4 h-4 text-white" />
             <span>Launch 30-Sec Diagnostic Questionnaire</span>
           </button>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-slate-800/80 py-8 px-4 text-center text-xs text-slate-500 space-y-2">
-        <div className="flex items-center justify-center gap-4 text-slate-400">
-          <Link href="/terms" className="hover:text-white">Terms of Service</Link>
+      {/* Clean Light Footer */}
+      <footer className="border-t border-slate-200 py-8 px-4 text-center text-xs text-slate-500 space-y-2">
+        <div className="flex items-center justify-center gap-4 text-slate-600">
+          <Link href="/terms" className="hover:text-slate-900">Terms of Service</Link>
           <span>&bull;</span>
-          <Link href="/privacy" className="hover:text-white">GDPR &amp; Privacy Policy</Link>
+          <Link href="/privacy" className="hover:text-slate-900">GDPR &amp; Privacy Policy</Link>
           <span>&bull;</span>
-          <a href="mailto:info@scholarlyopen.org" className="hover:text-white">info@scholarlyopen.org</a>
+          <a href="mailto:info@scholarlyopen.org" className="hover:text-slate-900">info@scholarlyopen.org</a>
         </div>
         <p>
           &copy; {new Date().getFullYear()} Scholarly Open Inc. · editorial360™ Enterprise Editorial Solutions · Frankfurt Book Fair 2026.
@@ -1309,25 +1266,25 @@ export default function Editorial360PricingPage() {
       </footer>
 
       {/* ========================================================================= */}
-      {/* MODAL 1: 30-SEC PUBLISHER DIAGNOSTIC QUESTIONNAIRE */}
+      {/* MODAL 1: 30-SEC PUBLISHER DIAGNOSTIC QUESTIONNAIRE (LIGHT THEME) */}
       {/* ========================================================================= */}
       {auditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#0b1226] border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-900">
             <button
               onClick={() => setAuditModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
 
             {auditSubmitted ? (
               <div className="text-center py-6 space-y-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
                   <CheckCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Diagnostic Received!</h3>
-                <p className="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
+                <h3 className="text-lg font-bold text-slate-900">Diagnostic Received!</h3>
+                <p className="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
                   Thank you, {auditData.name}. Our editorial systems advisory desk will evaluate your answers against industry benchmarks and dispatch your migration report to <strong>{auditData.email}</strong>.
                 </p>
                 <Button
@@ -1343,62 +1300,62 @@ export default function Editorial360PricingPage() {
             ) : (
               <form onSubmit={handleSubmitAudit} className="space-y-4">
                 <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-300 uppercase">
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase">
                     <ClipboardList className="w-3.5 h-3.5" />
                     <span>30-Sec Publisher Diagnostic</span>
                   </div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-slate-900">
                     Editorial Workflow &amp; Bottleneck Assessment
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Quickly identify the operational obstacles currently capping your journal velocity.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Your Name</label>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">Your Name</label>
                     <input
                       type="text"
                       required
                       placeholder="Dr. Alex Schmidt"
                       value={auditData.name}
                       onChange={(e) => setAuditData({ ...auditData, name: e.target.value })}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Work Email</label>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">Work Email</label>
                     <input
                       type="email"
                       required
                       placeholder="a.schmidt@press.org"
                       value={auditData.email}
                       onChange={(e) => setAuditData({ ...auditData, email: e.target.value })}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Organization / Press Name</label>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">Organization / Press Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Cambridge Scholarly Society"
                     value={auditData.organization}
                     onChange={(e) => setAuditData({ ...auditData, organization: e.target.value })}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Current Editorial System</label>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">Current Editorial System</label>
                     <select
                       value={auditData.currentSystem}
                       onChange={(e) => setAuditData({ ...auditData, currentSystem: e.target.value })}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                     >
                       <option value="Clarivate ScholarOne">Clarivate ScholarOne</option>
                       <option value="Aries Editorial Manager">Aries Editorial Manager</option>
@@ -1409,11 +1366,11 @@ export default function Editorial360PricingPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Current Average Turnaround</label>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">Current Average Turnaround</label>
                     <select
                       value={auditData.turnaroundTime}
                       onChange={(e) => setAuditData({ ...auditData, turnaroundTime: e.target.value })}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                     >
                       <option value="Under 30 Days">Under 30 Days (Fast)</option>
                       <option value="30 to 60 Days">30 to 60 Days (Standard)</option>
@@ -1424,7 +1381,7 @@ export default function Editorial360PricingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1.5">
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1.5">
                     What are your biggest pain points? (Select all that apply)
                   </label>
                   <div className="space-y-1.5 text-xs">
@@ -1443,12 +1400,12 @@ export default function Editorial360PricingPage() {
                           onClick={() => handleToggleDifficulty(item)}
                           className={`w-full text-left p-2 rounded-lg border text-[11px] transition-colors cursor-pointer flex items-center justify-between ${
                             isSelected
-                              ? "bg-[#0b99ff]/20 border-[#0b99ff] text-white font-medium"
-                              : "bg-[#070b18] border-slate-800 text-slate-400 hover:text-slate-200"
+                              ? "bg-sky-50 border-[#0b99ff] text-slate-900 font-semibold"
+                              : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                           }`}
                         >
                           <span>{item}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#00C0F0]" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#0b99ff]" />}
                         </button>
                       )
                     })}
@@ -1456,13 +1413,13 @@ export default function Editorial360PricingPage() {
                 </div>
 
                 {auditError && (
-                  <p className="text-[11px] text-rose-400 font-medium">{auditError}</p>
+                  <p className="text-[11px] text-rose-500 font-medium">{auditError}</p>
                 )}
 
                 <Button
                   type="submit"
                   disabled={submittingAudit}
-                  className="w-full py-4 text-xs font-bold rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 cursor-pointer"
+                  className="w-full py-4 text-xs font-bold rounded-xl bg-[#0b99ff] hover:bg-[#0088e0] text-white cursor-pointer"
                 >
                   {submittingAudit ? "Analyzing..." : "Submit Diagnostic & Get Free Migration Report"}
                 </Button>
@@ -1473,25 +1430,25 @@ export default function Editorial360PricingPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: 1-ON-1 EXECUTIVE SESSION SCHEDULER */}
+      {/* MODAL 2: 1-ON-1 EXECUTIVE SESSION SCHEDULER (LIGHT THEME) */}
       {/* ========================================================================= */}
       {meetingModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#0b1226] border border-slate-700 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-slate-900">
             <button
               onClick={() => setMeetingModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
 
             {formSubmitted ? (
               <div className="text-center py-6 space-y-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
                   <CheckCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Consultation Request Confirmed</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <h3 className="text-lg font-bold text-slate-900">Consultation Request Confirmed</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
                   Thank you, {formData.name}. Our editorial director has received your request regarding the <strong>{selectedPlanForModal}</strong>. We will email your calendar invite and video link to <strong>{formData.email}</strong> within 2 hours.
                 </p>
                 <Button
@@ -1507,60 +1464,60 @@ export default function Editorial360PricingPage() {
             ) : (
               <form onSubmit={handleSubmitMeeting} className="space-y-3.5">
                 <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#00C0F0] uppercase">
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#0b99ff] uppercase">
                     <Video className="w-3.5 h-3.5" />
                     <span>Executive Briefing ({selectedPlanForModal})</span>
                   </div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-slate-900">
                     Book a 1-on-1 Editorial Consultation
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Discuss your journal portfolio, custom SLA requirements, and system migration with our senior publishing delegation.
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Your Full Name</label>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">Your Full Name</label>
                   <input
                     type="text"
                     required
                     placeholder="Prof. David Miller"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Work Email</label>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">Work Email</label>
                   <input
                     type="email"
                     required
                     placeholder="d.miller@press.ox.ac.uk"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Publishing House / Society</label>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">Publishing House / Society</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Oxford Academic Society"
                     value={formData.organization}
                     onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Preferred Meeting Platform</label>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">Preferred Meeting Platform</label>
                   <select
                     value={formData.meetingSlot}
                     onChange={(e) => setFormData({ ...formData, meetingSlot: e.target.value })}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   >
                     <option value="Online Zoom Video Briefing">Online Zoom Video Briefing</option>
                     <option value="Google Meet Executive Session">Google Meet Executive Session</option>
@@ -1569,18 +1526,18 @@ export default function Editorial360PricingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">Special Requirements / Notes (Optional)</label>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">Special Requirements / Notes (Optional)</label>
                   <textarea
                     rows={2}
                     placeholder="e.g. Migrating 4 journals from ScholarOne by Q3 2026..."
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-800 bg-[#070b18] text-white placeholder-slate-500"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0b99ff]"
                   />
                 </div>
 
                 {meetingError && (
-                  <p className="text-[11px] text-rose-400 font-medium">{meetingError}</p>
+                  <p className="text-[11px] text-rose-500 font-medium">{meetingError}</p>
                 )}
 
                 <Button
@@ -1597,29 +1554,29 @@ export default function Editorial360PricingPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 3: DIGITAL QR FLYER MODAL (FRANKFURT BOOK FAIR COMPANION) */}
+      {/* MODAL 3: DIGITAL QR FLYER MODAL (LIGHT THEME) */}
       {/* ========================================================================= */}
       {qrModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#0b1226] border border-slate-700 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 relative shadow-2xl text-slate-900">
             <button
               onClick={() => setQrModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-[#00C0F0] uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-[#0b99ff] uppercase tracking-wider block">
                 Frankfurt Book Fair Digital Flyer
               </span>
-              <h3 className="text-base font-bold text-white">
+              <h3 className="text-base font-bold text-slate-900">
                 Scan to Open on Mobile
               </h3>
             </div>
 
             {/* QR Code Graphic Frame */}
-            <div className="p-4 bg-white rounded-2xl inline-block shadow-xl">
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl inline-block shadow-sm">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pricingUrl)}`}
                 alt="editorial360 Pricing QR Code"
@@ -1627,15 +1584,15 @@ export default function Editorial360PricingPage() {
               />
             </div>
 
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Scan with your smartphone camera to access the live demo and pricing on mobile.
             </p>
 
             <button
               onClick={handleCopyLink}
-              className="w-full py-2.5 bg-slate-800 hover:bg-slate-750 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="w-full py-2.5 bg-[#0b99ff] hover:bg-[#0088e0] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Copy className="w-3.5 h-3.5 text-[#00C0F0]" />
+              <Copy className="w-3.5 h-3.5" />
               <span>{linkCopied ? "Link Copied to Clipboard!" : "Copy Pricing URL"}</span>
             </button>
           </div>
