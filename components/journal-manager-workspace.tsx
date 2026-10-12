@@ -9437,9 +9437,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             {/* Download Files List for JM */}
             <div className="space-y-1.5">
               <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
-                Submitted Manuscript Files:
+                Submitted Manuscript Files (1):
               </span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 <a
                   href={selectedManuscript?.fileUrl || (selectedManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : selectedManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
                   download={selectedManuscript?.fileName || (selectedManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscript?.id || "Manuscript"}_Main_Document.docx`)}
@@ -9448,53 +9448,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="flex items-center gap-2 truncate">
                     <FileText className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
                     <div className="truncate">
-                      <span className="truncate block">
+                      <span className="truncate block font-semibold">
                         {selectedManuscript?.fileName || (selectedManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Main Manuscript (.docx)")}
                       </span>
                       <span className="text-[10px] text-slate-400 block font-mono">
-                        {selectedManuscript?.fileSize || (selectedManuscript?.id === "SOMED-26-RW01" ? "38.6 KB" : "2.4 MB")}
+                        {selectedManuscript?.fileSize || (selectedManuscript?.id === "SOMED-26-RW01" ? "38.6 KB" : "2.4 MB")} &bull; Original Author Word Submission
                       </span>
                     </div>
                   </div>
-                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
-                </a>
-
-                <a
-                  href="/downloads/Scholarly_Open_Author_Checklist.txt"
-                  download={`${selectedManuscript?.id || "Manuscript"}_Figures_Tables.zip`}
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <Download className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
-                    <span className="truncate">Figures & Tables (ZIP)</span>
-                  </div>
-                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
-                </a>
-
-                <a
-                  href="/downloads/Scholarly_Open_Author_Checklist.txt"
-                  download={`${selectedManuscript?.id || "Manuscript"}_Supplementary.pdf`}
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <FileText className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
-                    <span className="truncate">Supplementary File</span>
-                  </div>
-                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
-                </a>
-
-                <a
-                  href="/downloads/Scholarly_Open_Author_Checklist.txt"
-                  download={`${selectedManuscript?.id || "Manuscript"}_Ethics_Declaration.pdf`}
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <CheckSquare className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <span className="truncate">Ethics & COI Form</span>
-                  </div>
-                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1" />
+                  <Download className="h-3 w-3 text-slate-400 shrink-0 ml-1 hover:text-[#0b99ff]" />
                 </a>
               </div>
+              <p className="text-[11px] text-slate-400 italic">
+                * Author did not provide supplementary figures, raw data tables, or external archives with this submission.
+              </p>
 
               {/* Upload or replace manuscript Word document option */}
               <div className="pt-1.5">

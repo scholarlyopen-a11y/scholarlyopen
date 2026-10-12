@@ -4408,51 +4408,65 @@ COPE & Plan S Certified Archive
                     )
                   })()}
 
-                  <div className="p-2.5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <div>
-                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Supplementary_Tables_Figures.txt</div>
-                        <div className="text-[10px] text-slate-400">High-res vector figures (300 DPI) & Extended Datasets</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-mono text-slate-400">8.1 MB</span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
-                        className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        {isDe ? "Laden" : "Download"}
-                      </Button>
-                    </div>
-                  </div>
+                  {(() => {
+                    const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
+                    if (isAortic) {
+                      return (
+                        <div className="p-3 text-[11px] text-slate-500 dark:text-slate-400 italic bg-slate-50/50 dark:bg-slate-900/30">
+                          * Author submitted only the primary manuscript document. No supplementary figures, tables, or external archives were provided.
+                        </div>
+                      )
+                    }
+                    return (
+                      <>
+                        <div className="p-2.5 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
+                            <div>
+                              <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Supplementary_Tables_Figures.txt</div>
+                              <div className="text-[10px] text-slate-400">High-res vector figures (300 DPI) & Extended Datasets</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono text-slate-400">8.1 MB</span>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
+                              className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              {isDe ? "Laden" : "Download"}
+                            </Button>
+                          </div>
+                        </div>
 
-                  <div className="p-2.5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                      <div>
-                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">IRB_Ethics_Statement_Redacted.txt</div>
-                        <div className="text-[10px] text-slate-400">Institutional Review Board protocol clearance certification</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-mono text-slate-400">410 KB</span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadSpecificFile("irb", selectedPackageRev)}
-                        className="h-7 px-2.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 border-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        {isDe ? "Laden" : "Download"}
-                      </Button>
-                    </div>
-                  </div>
+                        <div className="p-2.5 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                            <div>
+                              <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">IRB_Ethics_Statement_Redacted.txt</div>
+                              <div className="text-[10px] text-slate-400">Institutional Review Board protocol clearance certification</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono text-slate-400">410 KB</span>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDownloadSpecificFile("irb", selectedPackageRev)}
+                              className="h-7 px-2.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 border-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              {isDe ? "Laden" : "Download"}
+                            </Button>
+                          </div>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
               </div>
 

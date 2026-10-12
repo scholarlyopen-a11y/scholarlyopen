@@ -4050,12 +4050,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     type: "Marked-Up Redline Diff", 
                     size: "2.8 MB", 
                     url: "/downloads/Scholarly_Open_Manuscript_Template.txt" 
-                  },
-                  { 
-                    name: "Supplementary_Table_S2_Stratification.xlsx", 
-                    type: "Supplemental Dataset", 
-                    size: "420 KB", 
-                    url: "/downloads/Scholarly_Open_Author_Checklist.txt" 
                   }
                 ].map((file, i) => (
                   <div key={i} className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] flex items-center justify-between gap-3">
@@ -4920,7 +4914,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-100 dark:bg-[#131418] rounded-xl border border-slate-200/80 dark:border-[#272832]">
                     {[
                       { id: "article", label: isDe ? "Manuskript & Text" : "Manuscript & Text", icon: BookOpen },
-                      { id: "files", label: isDe ? "Dateien & Assets" : "Files & Assets (4)", icon: FileText },
+                      { id: "files", label: isDe ? "Dateien & Assets (1)" : "Files & Assets (1)", icon: FileText },
                       { id: "cover_letter", label: isDe ? "Begleitschreiben" : "Cover Letter", icon: Mail },
                       { 
                         id: "compliance", 
@@ -5080,13 +5074,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-slate-900 dark:text-white text-xs">
-                          Submitted Files &amp; Primary Assets:
+                          Submitted Files &amp; Primary Assets (1):
                         </span>
                         <span className="text-slate-400 text-[11px]">All files virus-checked &amp; certified</span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        
+                      <div className="grid grid-cols-1 gap-3">
                         {/* Main Manuscript File */}
                         <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] flex items-center justify-between hover:border-[#0b99ff] transition-all">
                           <div className="flex items-center gap-3">
@@ -5098,7 +5091,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 {selectedPaperForDetail?.fileName || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedPaperForDetail?.id}_Manuscript.docx`)}
                               </h5>
                               <p className="text-[11px] text-slate-400">
-                                {selectedPaperForDetail?.fileSize || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "38.6 KB" : "3.4 MB")} &bull; Original Submission
+                                {selectedPaperForDetail?.fileSize || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "38.6 KB" : "3.4 MB")} &bull; Original Author Word Submission
                               </p>
                             </div>
                           </div>
@@ -5111,97 +5104,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             <Download className="h-4 w-4" />
                           </a>
                         </div>
-
-                        {/* Supplementary Datasets */}
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] flex items-center justify-between hover:border-[#0b99ff] transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
-                              XLSX
-                            </div>
-                            <div className="space-y-0.5 overflow-hidden">
-                              <h5 className="font-bold text-slate-900 dark:text-white truncate text-xs">
-                                Supplementary_Clinical_Pathways.xlsx
-                              </h5>
-                              <p className="text-[11px] text-slate-400">
-                                1.2 MB &bull; Raw Data Tables &amp; Benchmarks
-                              </p>
-                            </div>
-                          </div>
-                          <a
-                            href="/downloads/Scholarly_Open_Author_Checklist.txt"
-                            download={`${selectedPaperForDetail?.id || "Manuscript"}_Supplementary_Data.xlsx`}
-                            className="p-2 rounded-lg bg-white dark:bg-[#1e2027] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] transition-colors"
-                            title="Download Supplementary Data"
-                          >
-                            <Download className="h-4 w-4" />
-                          </a>
-                        </div>
-
-                        {/* High-Res Figures Archive */}
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] flex items-center justify-between hover:border-[#0b99ff] transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-xs shrink-0">
-                              ZIP
-                            </div>
-                            <div className="space-y-0.5 overflow-hidden">
-                              <h5 className="font-bold text-slate-900 dark:text-white truncate text-xs">
-                                Figures_Plates_300DPI.zip
-                              </h5>
-                              <p className="text-[11px] text-slate-400">
-                                14.8 MB · 6 Vector Figures
-                              </p>
-                            </div>
-                          </div>
-                          <a
-                            href="/downloads/Rights_Retention_Cover_Letter_Template.txt"
-                            download={`${selectedPaperForDetail?.id || "Manuscript"}_Figures_Archive.zip`}
-                            className="p-2 rounded-lg bg-white dark:bg-[#1e2027] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] transition-colors"
-                            title="Download Figures Archive"
-                          >
-                            <Download className="h-4 w-4" />
-                          </a>
-                        </div>
-
-                        {/* Zenodo Open Data Repository */}
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] flex items-center justify-between hover:border-[#0b99ff] transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-sky-500/10 text-[#0b99ff] flex items-center justify-center font-bold text-xs shrink-0">
-                              DOI
-                            </div>
-                            <div className="space-y-0.5 overflow-hidden">
-                              <h5 className="font-bold text-slate-900 dark:text-white truncate text-xs">
-                                Zenodo Open Science Data Repository
-                              </h5>
-                              <p className="text-[11px] text-[#0b99ff]">
-                                {selectedPaperForDetail?.dataDoi || "doi.org/10.5281/zenodo.882910"}
-                              </p>
-                            </div>
-                          </div>
-                          <a
-                            href={`https://${selectedPaperForDetail?.dataDoi || "doi.org/10.5281/zenodo.882910"}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-2 rounded-lg bg-white dark:bg-[#1e2027] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] transition-colors"
-                            title="Open Zenodo Data"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </div>
-
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 text-blue-900 dark:text-blue-300 text-xs flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Download className="h-4 w-4 text-[#0b99ff]" />
-                          <span>Download complete submission archive (.ZIP package with all raw documents & figures)</span>
-                        </div>
-                        <a
-                          href="/downloads/Scholarly_Open_Manuscript_Template.txt"
-                          download={`${selectedPaperForDetail?.id || "Manuscript"}_Complete_Dossier.zip`}
-                          className="font-bold text-xs text-white bg-[#0b99ff] hover:bg-[#0088e0] px-3 py-1.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
-                        >
-                          Download Dossier (.ZIP)
-                        </a>
+                      {/* Explicit Notice: No Fake Assets */}
+                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131418] border border-dashed border-slate-200 dark:border-[#272832] text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2.5">
+                        <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
+                        <span>No supplementary data tables, figure archives, or external repository links were provided with this submission (verified by peer review evaluation).</span>
                       </div>
                     </div>
                   )}
