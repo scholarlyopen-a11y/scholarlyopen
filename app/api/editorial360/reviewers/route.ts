@@ -55,6 +55,29 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     respondedAt: "2026-08-16"
   },
   {
+    id: "REV-HIST-CG-13",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Dr. Chaud GJ",
+    reviewerEmail: "germanchaud@gmail.com",
+    invitedDate: "2026-10-01",
+    status: "Completed",
+    deadline: "2026-10-15",
+    respondedAt: "2026-10-09"
+  },
+  {
+    id: "REV-HIST-IN-04",
+    paperId: "SOMED-26-RW01",
+    paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+    journal: "Scholarly Open: Medicine",
+    reviewerName: "Ikeda N",
+    reviewerEmail: "ikeda.n@hosp.u-tokyo.ac.jp",
+    invitedDate: "2026-08-15",
+    status: "Accepted",
+    deadline: "2026-08-29"
+  },
+  {
     id: "REV-HIST-GB-03",
     paperId: "SOMED-26-RW01",
     paperTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",

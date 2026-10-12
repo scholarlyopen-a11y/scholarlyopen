@@ -174,6 +174,28 @@ Comments to Author:
   }
 }
 
+export function getReviewerBlindLabel(rev: any, fallbackIdx?: number): string {
+  const name = String(rev?.reviewerName || "").toLowerCase().trim()
+  const email = String(rev?.reviewerEmail || "").toLowerCase().trim()
+  if (name.startsWith("reviewer #") || name.startsWith("reviewer ")) {
+    const num = name.replace(/[^0-9]/g, "")
+    return num ? `Reviewer #${num}` : rev.reviewerName
+  }
+  if (name.includes("nagula") || name.includes("praveen") || email.includes("nagula") || rev?.id === "REV-FB-SAM-01" || rev?.id === "REV-HIST-PN-01") {
+    return "Reviewer #1"
+  }
+  if (name.includes("ragab") || name.includes("aziza") || email.includes("aziza") || rev?.id === "REV-HIST-RA-02") {
+    return "Reviewer #2"
+  }
+  if (name.includes("chaud") || email.includes("chaud") || rev?.id === "REV-FB-1791559472514-816" || rev?.id === "REV-HIST-CG-13") {
+    return "Reviewer #3"
+  }
+  if (name.includes("ikeda") || email.includes("ikeda") || rev?.id === "REV-HIST-IN-04") {
+    return "Reviewer #4"
+  }
+  return typeof fallbackIdx === "number" ? `Reviewer #${fallbackIdx + 1}` : "Reviewer"
+}
+
 function getDecisionLetterTemplate(verdict: string, editorName: string, journalName: string, paperReviews?: EditorReviewFeedback[]) {
   const isEicVerdict = verdict === "Accept" || verdict === "Reject"
   const roleTitle = isEicVerdict ? "Editor-in-Chief" : "Handling Editor"
@@ -188,7 +210,8 @@ function getDecisionLetterTemplate(verdict: string, editorName: string, journalN
     ? releasedReviews.map((rev, idx) => {
         const revReco = rev.recommendation || "Evaluation Provided"
         const comments = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No detailed comments provided."
-        return `[Reviewer ${idx + 1}]
+        const label = getReviewerBlindLabel(rev, idx)
+        return `[${label}]
 Recommendation: ${revReco}
 Status: Sanitized & Dispatched by Journal Office ✓
 Comments to Author:
@@ -355,7 +378,7 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
   date: "2026-09-14",
   assignedEditorName: undefined,
   editorAssigned: false,
-  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Ikeda N"],
+  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
   fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
   fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
   fileSize: "38.6 KB",
@@ -377,12 +400,27 @@ const FALLBACK_AORTIC_REVIEWS = [
     methodology: 3,
     clarity: 3,
     significance: 3,
-    commentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided.\n\nSpecific comments:\n1. Expand reference citations for a comprehensive review article.\n2. Detail recent clinical developments and changes in acute management.\n3. Include synthesized summary tables and clinical decision flowcharts.",
+    commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
     commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
     recommendation: "Re-write and Re-submit",
     sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
     status: "Released",
     reviewerEmail: "drpraveennagula@gmail.com"
+  },
+  {
+    id: "REV-FB-1791559472514-816",
+    paperId: "SOMED-26-RW01",
+    reviewerName: "Reviewer #3",
+    originality: 4,
+    methodology: 4,
+    clarity: 4,
+    significance: 4,
+    commentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication:\n1. Clarification of manuscript type and narrative methodology.\n2. Resolution of inconsistencies in supplementary datasets.\n3. Detailed verification of regional aortic network pathways.",
+    commentsEditor: "Dear Editor-in-Chief & Handling Editor,\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nSincerely,\nDr. Chaud GJ",
+    recommendation: "Re-review and Accept with Major Changes",
+    sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.",
+    status: "Released",
+    reviewerEmail: "germanchaud@gmail.com"
   }
 ]
 
@@ -398,10 +436,23 @@ export function getReviewsForManuscript(reviewsList: any[], paperId?: string, pa
     return false
   })
 
-  // For Dr. Gong's manuscript SOMED-26-RW01, guarantee the real submitted peer review is populated
-  if ((normId === "somed-26-rw01" || normTitle.includes("acute aortic") || normTitle.includes("prevent earlier")) && matches.length === 0) {
+  // For Dr. Gong's manuscript SOMED-26-RW01, guarantee both real submitted peer reviews are populated
+  if (normId === "somed-26-rw01" || normTitle.includes("acute aortic") || normTitle.includes("prevent earlier")) {
     FALLBACK_AORTIC_REVIEWS.forEach(fb => {
-      matches.push(fb)
+      const exists = matches.some(m => 
+        m.id === fb.id || 
+        (fb.reviewerEmail && m.reviewerEmail && m.reviewerEmail.toLowerCase() === fb.reviewerEmail.toLowerCase()) ||
+        (m.reviewerName && m.reviewerName.toLowerCase().includes(fb.reviewerEmail?.includes("nagula") ? "nagula" : "chaud"))
+      )
+      if (!exists) {
+        matches.push(fb)
+      }
+    })
+    // Ensure canonical ordering: Reviewer #1 (Nagula) first, Reviewer #3 (Chaud GJ) second
+    matches.sort((a, b) => {
+      const aLabel = getReviewerBlindLabel(a)
+      const bLabel = getReviewerBlindLabel(b)
+      return aLabel.localeCompare(bLabel)
     })
   }
 
@@ -867,11 +918,11 @@ export function EditorWorkspace({
     }
 
     paperReviews.forEach((r, idx) => {
-      const anonKey = `Reviewer #${idx + 1}`
+      const anonKey = getReviewerBlindLabel(r, idx)
       const realName = r.reviewerName || `Referee ${idx + 1}`
       const realEmail = r.reviewerEmail || emailMap[realName] || `reviewer${idx + 1}@scholarlyopen.org`
       const priority = r.commentsEditor?.match(/Priority rating:\s*([^\n\.]+)/i)?.[1]?.trim() || 
-                       (r.originality ? `${Math.round(((r.originality || 3) + (r.methodology || 3) + (r.clarity || 3) + (r.significance || 3)) / 4 * 2)}/10` : "6/10")
+                       (r.originality ? `${Math.round(((r.originality || 3) + (r.methodology || 3) + (r.clarity || 3) + (r.significance || 3)) / 4 * 2)}/10` : (anonKey === "Reviewer #3" ? "4/10" : "6/10"))
       const summaryText = r.sanitizedCommentsAuthor || r.commentsAuthor || "Comprehensive peer review evaluation submitted."
 
       initialIncentives[anonKey] = {
@@ -2745,14 +2796,20 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
           <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs [scrollbar-width:thin]">
             {(() => {
-              const trackingPaperReviews = (reviews || []).filter(r => 
-                (r.paperId && selectedPaperForReviewTracking?.id && r.paperId.toLowerCase() === selectedPaperForReviewTracking.id.toLowerCase()) ||
-                (r.paperTitle && selectedPaperForReviewTracking?.title && r.paperTitle.toLowerCase() === selectedPaperForReviewTracking.title.toLowerCase())
-              )
-              const assignedList = selectedPaperForReviewTracking?.reviewers || []
-              const inProgressReviewers = assignedList.filter(name => !trackingPaperReviews.some(r => r.reviewerName?.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(r.reviewerName?.toLowerCase() || "")))
-              const totalReviewers = Math.max(1, trackingPaperReviews.length + inProgressReviewers.length)
-              const progressPct = Math.round((trackingPaperReviews.length / totalReviewers) * 100)
+              const trackingPaperReviews = getReviewsForManuscript(reviews, selectedPaperForReviewTracking?.id, selectedPaperForReviewTracking?.title)
+              const isMedAortic = selectedPaperForReviewTracking?.id === "SOMED-26-RW01" || 
+                selectedPaperForReviewTracking?.title?.toLowerCase().includes("acute aortic") ||
+                selectedPaperForReviewTracking?.title?.toLowerCase().includes("prevent earlier")
+              
+              const assignedCohort = isMedAortic
+                ? ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"]
+                : (selectedPaperForReviewTracking?.reviewers && selectedPaperForReviewTracking.reviewers.length > 0)
+                ? selectedPaperForReviewTracking.reviewers
+                : ["Reviewer 1", "Reviewer 2"]
+
+              const totalReviewers = assignedCohort.length
+              const completedCount = trackingPaperReviews.length
+              const progressPct = Math.round((completedCount / Math.max(1, totalReviewers)) * 100)
 
               return (
                 <>
@@ -2760,7 +2817,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200 dark:border-[#272832] space-y-2">
                     <div className="flex items-center justify-between font-semibold">
                       <span className="text-slate-700 dark:text-slate-300">
-                        {trackingPaperReviews.length} of {totalReviewers} Reviews Complete
+                        {completedCount} of {totalReviewers} Reviews Complete
                       </span>
                       <span className="text-[#0b99ff]">
                         {progressPct}%
@@ -2775,12 +2832,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
 
                   {/* Editorial Decision Quick Action Banner */}
-                  {trackingPaperReviews.length > 0 && (
+                  {completedCount > 0 && (
                     <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 rounded-xl flex items-center justify-between gap-3 flex-wrap">
                       <div className="flex items-center gap-2">
                         <CheckSquare className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                         <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
-                          {trackingPaperReviews.length} Review Report(s) Logged &bull; Ready for Editorial Verdict
+                          {completedCount} Review Report(s) Logged &bull; Ready for Editorial Verdict
                         </span>
                       </div>
                       <Button
@@ -2807,126 +2864,141 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </span>
 
                     <div className="space-y-2">
-                      {/* Render all reviews that have been completed */}
-                      {trackingPaperReviews.map((rev, idx) => {
-                        const revKey = `track-rev-${rev.id || idx}`
+                      {assignedCohort.map((cohortName, slotIdx) => {
+                        const slotNum = slotIdx + 1
+                        const blindLabel = `Reviewer ${slotNum}`
+                        const revKey = `track-slot-${slotNum}`
                         const isExpanded = Boolean(expandedTrackerScorecards[revKey])
 
-                        return (
-                          <div 
-                            key={rev.id || idx}
-                            className={`p-3 rounded-xl border transition-all ${
-                              isExpanded
-                                ? "border-[#0b99ff] bg-sky-50/40 dark:bg-sky-950/20 shadow-2xs"
-                                : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418]"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-3 flex-wrap">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-bold text-slate-900 dark:text-white">
-                                  Reviewer {idx + 1}
-                                </span>
-                                <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                                  COPE Double-Blind
-                                </span>
-                                {rev.status === "Released" ? (
-                                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
-                                    ✓ Dispatched by JM (Sanitized)
+                        // Determine if this assigned reviewer has a submitted review
+                        const matchedRev = isMedAortic
+                          ? (slotNum === 1
+                              ? trackingPaperReviews.find(r => getReviewerBlindLabel(r) === "Reviewer #1" || (r.reviewerName || "").toLowerCase().includes("nagula") || r.id === "REV-FB-SAM-01")
+                              : slotNum === 3
+                              ? trackingPaperReviews.find(r => getReviewerBlindLabel(r) === "Reviewer #3" || (r.reviewerName || "").toLowerCase().includes("chaud") || r.id === "REV-FB-1791559472514-816")
+                              : undefined)
+                          : trackingPaperReviews.find(r => {
+                              const blind = getReviewerBlindLabel(r)
+                              if (blind === `Reviewer #${slotNum}`) return true
+                              const rName = (r.reviewerName || "").toLowerCase()
+                              const cLow = cohortName.toLowerCase()
+                              return rName.includes(cLow) || cLow.includes(rName)
+                            })
+
+                        if (matchedRev) {
+                          return (
+                            <div 
+                              key={revKey}
+                              className={`p-3 rounded-xl border transition-all ${
+                                isExpanded
+                                  ? "border-[#0b99ff] bg-sky-50/40 dark:bg-sky-950/20 shadow-2xs"
+                                  : "border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418]"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-3 flex-wrap">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-slate-900 dark:text-white">
+                                    {blindLabel}
                                   </span>
-                                ) : (
-                                  <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-                                    <Lock className="h-3 w-3" />
-                                    Awaiting JM Sanitization &amp; Dispatch
+                                  <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                                    COPE Double-Blind
                                   </span>
-                                )}
-                                <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
-                                  Verdict: {rev.recommendation || "Completed"}
-                                </span>
+                                  {matchedRev.status === "Released" ? (
+                                    <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
+                                      ✓ Dispatched by JM (Sanitized)
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                                      <Lock className="h-3 w-3" />
+                                      Awaiting JM Sanitization &amp; Dispatch
+                                    </span>
+                                  )}
+                                  <span className="text-[10px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2 py-0.5 rounded border border-[#0b99ff]/20">
+                                    Verdict: {matchedRev.recommendation || "Completed"}
+                                  </span>
+                                </div>
+                                <Button
+                                  onClick={() => {
+                                    setExpandedTrackerScorecards(prev => ({
+                                      ...prev,
+                                      [revKey]: !prev[revKey]
+                                    }))
+                                  }}
+                                  variant="outline"
+                                  className={`text-xs h-7.5 px-3 shrink-0 cursor-pointer font-semibold ${
+                                    isExpanded ? "border-[#0b99ff] text-[#0b99ff] bg-sky-50 dark:bg-sky-950/50" : ""
+                                  }`}
+                                >
+                                  {isExpanded ? "Hide Review Report ▲" : "View Review Report ▼"}
+                                </Button>
                               </div>
-                              <Button
-                                onClick={() => {
-                                  setExpandedTrackerScorecards(prev => ({
-                                    ...prev,
-                                    [revKey]: !prev[revKey]
-                                  }))
-                                }}
-                                variant="outline"
-                                className={`text-xs h-7.5 px-3 shrink-0 cursor-pointer font-semibold ${
-                                  isExpanded ? "border-[#0b99ff] text-[#0b99ff] bg-sky-50 dark:bg-sky-950/50" : ""
-                                }`}
-                              >
-                                {isExpanded ? "Hide Review Report ▲" : "View Review Report ▼"}
-                              </Button>
+
+                              {isExpanded && (
+                                <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150 text-xs">
+                                  {matchedRev.status !== "Released" ? (
+                                    <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
+                                      <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                      <div className="space-y-1">
+                                        <h5 className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                                          Reviewer Comments Locked (Under JM Sanitization)
+                                        </h5>
+                                        <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
+                                          The Journal Manager is currently reviewing and sanitizing this report. In accordance with publication protocols, reviewer comments remain restricted and cannot be viewed by the Handling Editor until formally dispatched by the Journal Manager.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
+                                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{matchedRev.originality || (slotNum === 1 ? 3 : 4)}.0 / 5.0</strong>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
+                                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{matchedRev.methodology || (slotNum === 1 ? 3 : 4)}.0 / 5.0</strong>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
+                                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{matchedRev.clarity || (slotNum === 1 ? 3 : 4)}.0 / 5.0</strong>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                                          <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
+                                          <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{matchedRev.significance || (slotNum === 1 ? 3 : 4)}.0 / 5.0</strong>
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-1">
+                                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center justify-between">
+                                          <span>Sanitized Comments to Author:</span>
+                                          <span className="text-[10px] text-emerald-600 font-bold">Dispatched by JM ✓</span>
+                                        </span>
+                                        <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
+                                          {matchedRev.sanitizedCommentsAuthor || matchedRev.commentsAuthor || "No specific comments."}
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-1">
+                                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                          Confidential Comments to Handling Editor:
+                                        </span>
+                                        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
+                                          &ldquo;{matchedRev.commentsEditor || "Evaluation submitted via portal."}&rdquo;
+                                        </div>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                             </div>
+                          )
+                        }
 
-                            {isExpanded && (
-                              <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150 text-xs">
-                                {rev.status !== "Released" ? (
-                                  <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
-                                    <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                                    <div className="space-y-1">
-                                      <h5 className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                                        Reviewer Comments Locked (Under JM Sanitization)
-                                      </h5>
-                                      <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
-                                        The Journal Manager is currently reviewing and sanitizing this report. In accordance with publication protocols, reviewer comments remain restricted and cannot be viewed by the Handling Editor until formally dispatched by the Journal Manager.
-                                      </p>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.originality || 4}.0 / 5.0</strong>
-                                      </div>
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Methodology</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.methodology || 4}.0 / 5.0</strong>
-                                      </div>
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Data Quality</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.clarity || 4}.5 / 5.0</strong>
-                                      </div>
-                                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
-                                        <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Significance</span>
-                                        <strong className="text-slate-900 dark:text-white text-xs font-bold mt-0.5 block">{rev.significance || 4}.0 / 5.0</strong>
-                                      </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center justify-between">
-                                        <span>Sanitized Comments to Author:</span>
-                                        <span className="text-[10px] text-emerald-600 font-bold">Dispatched by JM ✓</span>
-                                      </span>
-                                      <div className="p-3 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800 space-y-1.5 text-slate-700 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
-                                        {rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No specific comments."}
-                                      </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                        Confidential Comments to Handling Editor:
-                                      </span>
-                                      <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap">
-                                        &ldquo;{rev.commentsEditor || "Evaluation submitted via portal."}&rdquo;
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-
-                      {/* Render other assigned reviewers who are still in progress */}
-                      {inProgressReviewers.map((name, idx) => {
-                        const revNumber = trackingPaperReviews.length + idx + 1
+                        // In-progress reviewer slot (Slot 2 = Dr. Ragab Aziza, Slot 4 = Ikeda N)
                         return (
-                          <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] flex items-center justify-between gap-3">
+                          <div key={revKey} className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-bold text-slate-900 dark:text-white">Reviewer {revNumber}</span>
+                              <span className="font-bold text-slate-900 dark:text-white">{blindLabel}</span>
                               <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
                                 COPE Double-Blind
                               </span>
@@ -2937,11 +3009,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             <Button
                               onClick={() => {
                                 triggerConfirm({
-                                  title: `Send Reminder to Reviewer ${revNumber}?`,
-                                  message: `Send an automated peer review deadline reminder to Reviewer ${revNumber}?`,
+                                  title: `Send Reminder to ${blindLabel}?`,
+                                  message: `Send an automated peer review deadline reminder to ${blindLabel}?`,
                                   confirmButtonLabel: "Send Reminder",
                                   confirmColorClass: "bg-amber-500 hover:bg-amber-600",
-                                  onConfirm: () => triggerToast(`✓ Progress reminder dispatched to Reviewer ${revNumber}.`)
+                                  onConfirm: () => triggerToast(`✓ Progress reminder dispatched to ${blindLabel}.`)
                                 })
                               }}
                               variant="outline"
@@ -3078,7 +3150,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             <div className="flex items-center justify-between font-bold flex-wrap gap-2">
                               <div className="flex items-center gap-2">
                                 <span className="text-slate-900 dark:text-white font-bold">
-                                  Reviewer #{idx + 1} (Double-Blind Evaluation)
+                                  {getReviewerBlindLabel(rev, idx)} (Double-Blind Evaluation)
                                 </span>
                                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
                                   {rev.recommendation || "Review Submitted"}
@@ -3202,7 +3274,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               ) : (
                 <div className="space-y-3 pt-1">
-                  {Object.keys(reviewerIncentives).map((revKey) => {
+                  {Object.keys(reviewerIncentives).sort().map((revKey) => {
                     const draft = reviewerIncentives[revKey]
                     if (!draft) return null
 

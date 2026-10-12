@@ -1772,7 +1772,7 @@ export default function Editorial360Page() {
     journal: "Scholarly Open: Medicine",
     status: "Under Review",
     date: "2026-09-14",
-    reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Dr. Ikeda N"],
+    reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
     integrityStatus: "Clean",
     plagiarismScore: 4,
     aiScore: 2,
@@ -1798,6 +1798,20 @@ export default function Editorial360Page() {
 
   const DEFAULT_INITIAL_REVIEWS: ReviewFeedback[] = [
     {
+      id: "REV-FB-SAM-01",
+      paperId: "SOMED-26-RW01",
+      reviewerName: "Dr. Praveen Nagula",
+      originality: 3,
+      methodology: 3,
+      clarity: 3,
+      significance: 3,
+      commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+      commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+      recommendation: "Re-write and Re-submit",
+      sanitizedCommentsAuthor: "The review article to be concised. Tables to be provided. Expand references, address management changes over the years, and provide structured tables.",
+      status: "Released"
+    },
+    {
       id: "REV-FB-1791559472514-816",
       paperId: "SOMED-26-RW01",
       reviewerName: "Dr. Chaud GJ",
@@ -1807,22 +1821,8 @@ export default function Editorial360Page() {
       significance: 4,
       commentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication:\n1. Clarification of manuscript type and narrative methodology.\n2. Resolution of inconsistencies in supplementary datasets.\n3. Detailed verification of regional aortic network pathways.",
       commentsEditor: "Dear Editor-in-Chief & Handling Editor,\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nSincerely,\nDr. Chaud GJ",
-      recommendation: "Major Revision",
+      recommendation: "Re-review and Accept with Major Changes",
       sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.",
-      status: "Released"
-    },
-    {
-      id: "REV-FB-SAM-01",
-      paperId: "SOMED-26-RW01",
-      reviewerName: "Dr. Praveen Nagula",
-      originality: 3,
-      methodology: 3,
-      clarity: 3,
-      significance: 3,
-      commentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided.\n\nSpecific comments:\n1. Expand reference citations for a comprehensive review article.\n2. Detail recent clinical developments and changes in acute management.\n3. Include synthesized summary tables and clinical decision flowcharts.",
-      commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
-      recommendation: "Minor Revision",
-      sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.",
       status: "Released"
     }
   ]

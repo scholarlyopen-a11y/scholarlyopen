@@ -2427,7 +2427,9 @@ Current Stage: Under Peer Review (Double-Blind)
 
 Peer Review Status:
 • Reviewer #1: Dr. Praveen Nagula has completed evaluation and submitted an Electronic Reviewer's Assessment Form (Recommendation: Re-write and Re-submit, Priority Rating: 6/10).
-• Reviewer #2: Dr. Ragab Aziza is currently conducting their review (target completion on or before 29th August, 2026).
+• Reviewer #2: Dr. Ragab Aziza is actively conducting review (evaluation in progress, report pending).
+• Reviewer #3: Dr. Chaud GJ has completed evaluation and submitted an Electronic Reviewer's Assessment Form (Recommendation: Re-review and Accept with Major Changes, Priority Rating: 4/10).
+• Reviewer #4: Ikeda N is actively conducting review (evaluation in progress, report pending).
 
 As Handling Editor, you will oversee this peer review round, synthesize reviewer remarks, and issue the official editorial decision (Accept, Minor Revision, Major Revision, Re-write & Re-submit, or Reject) with guidance for the authors.
 
@@ -2441,7 +2443,7 @@ ${directAccessUrl}
 
 Within your workspace, you will have immediate access to:
 1. Complete manuscript documents (.docx / Word & PDF).
-2. Submitted peer evaluation forms from Dr. Praveen Nagula and Dr. Ragab Aziza.
+2. Submitted peer evaluation forms from Dr. Praveen Nagula and Dr. Chaud GJ.
 3. Editorial decision synthesis tools (Accept, Revise, Reject) and confidential communication channels.
 
 Thank you for your academic leadership and dedicated service to our scientific community.
@@ -2744,7 +2746,7 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
         editorAssigned: false,
         assignedEditorName: undefined,
-        reviewers: ["Dr. Praveen Nagula", "Dr. Chaud GJ", "Dr. Ragab Aziza"],
+        reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
         keywords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking"
       })
     }
@@ -2752,12 +2754,7 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     return list.map(m => {
       // Ensure SOMED-26-RW01 has active reviewers and keeps assignedEditorName if appointed
       if (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier")) {
-        const cleanRev = (m.reviewers && m.reviewers.length > 0)
-          ? m.reviewers.map(r => r.toLowerCase().includes("aziza") ? "Dr. Ragab Aziza" : (r.toLowerCase().includes("chaud") ? "Dr. Chaud GJ" : r))
-          : ["Dr. Praveen Nagula", "Dr. Chaud GJ", "Dr. Ragab Aziza"]
-        if (!cleanRev.some(r => r.toLowerCase().includes("chaud"))) {
-          cleanRev.splice(1, 0, "Dr. Chaud GJ")
-        }
+        const cleanRev = ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"]
         return {
           ...m,
           id: "SOMED-26-RW01",
@@ -3029,8 +3026,9 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     if (isMedAortic) {
       const knownCohort = [
         { id: "REV-HIST-PN-01", name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", invitedDate: "2026-08-15", status: "Completed" as const, deadline: "2026-08-29" },
-        { id: "REV-HIST-CG-13", name: "Dr. Chaud GJ", email: "germanchaud@gmail.com", invitedDate: "2026-10-01", status: "Completed" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-RA-02", name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" },
+        { id: "REV-HIST-CG-13", name: "Dr. Chaud GJ", email: "germanchaud@gmail.com", invitedDate: "2026-10-01", status: "Completed" as const, deadline: "2026-10-15" },
+        { id: "REV-HIST-IN-04", name: "Ikeda N", email: "ikeda.n@hosp.u-tokyo.ac.jp", invitedDate: "2026-08-15", status: "Accepted" as const, deadline: "2026-08-29" },
         { id: "REV-HIST-GB-03", name: "Guo B", email: "guo.baolei@zs-hospital.sh.cn", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-BS-04", name: "Bokhari S", email: "bokharsa@rwjms.rutgers.edu", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
         { id: "REV-HIST-QL-05", name: "Quéro L", email: "laurent.quero@aphp.fr", invitedDate: "2026-10-01", status: "Invited" as const, deadline: "2026-10-15" },
@@ -3158,7 +3156,21 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         }
         return item
       })
-      .sort((a, b) => getStatusPriority(a) - getStatusPriority(b))
+      .sort((a, b) => {
+        if (isMedAortic) {
+          const getAorticOrder = (item: typeof a) => {
+            const n = (item.name || "").toLowerCase()
+            const e = (item.email || "").toLowerCase()
+            if (n.includes("nagula") || e.includes("nagula")) return 1
+            if (n.includes("aziza") || e.includes("aziza") || n.includes("ragab")) return 2
+            if (n.includes("chaud") || e.includes("chaud")) return 3
+            if (n.includes("ikeda") || e.includes("ikeda")) return 4
+            return 10 + getStatusPriority(item)
+          }
+          return getAorticOrder(a) - getAorticOrder(b)
+        }
+        return getStatusPriority(a) - getStatusPriority(b)
+      })
   }, [trackingManuscript, paperReviewerHistory, sentEmailsHistory, initialReviews])
 
   // Handle open Assign Modal
@@ -10473,8 +10485,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   const isDeclined = rev?.status === "Declined"
                   const isInvitedOnly = rev?.status === "Invited"
                   const isNagula = revName.toLowerCase().includes("nagula") || revEmail.toLowerCase().includes("nagula")
-                  const isAziza = revName.toLowerCase().includes("aziza") || revEmail.toLowerCase().includes("aziza")
+                  const isAziza = revName.toLowerCase().includes("aziza") || revEmail.toLowerCase().includes("aziza") || revName.toLowerCase().includes("ragab")
                   const isChaud = revName.toLowerCase().includes("chaud") || revEmail.toLowerCase().includes("chaud")
+                  const isIkeda = revName.toLowerCase().includes("ikeda") || revEmail.toLowerCase().includes("ikeda")
 
                   // Match any real submitted review from initialReviews (strict name/email match)
                   const trackMsId = String(trackingManuscript?.id || "").toLowerCase().trim()
@@ -10493,8 +10506,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     return Boolean(matchesPaper && (matchesName || matchesEmail))
                   })
 
-                  // Reviewer status: Dr. Nagula & Dr. Chaud GJ submitted RAF, Dr. Aziza is still actively reviewing
-                  const isSubmitted = !isAziza && (isNagula || isChaud || (!!matchedReview && !!matchedReview.reviewerName) || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane")))
+                  // Reviewer status: Dr. Nagula (Reviewer #1) & Dr. Chaud GJ (Reviewer #3) submitted RAF, Dr. Aziza (Reviewer #2) & Ikeda N (Reviewer #4) are still actively reviewing
+                  const isSubmitted = !isAziza && !isIkeda && (isNagula || isChaud || (!!matchedReview && !!matchedReview.reviewerName) || rev.status === "Completed" || revName === "Dr. Evelyn Vane" || (trackingManuscript?.id === "SOEAS-26-RS102" && (revName === "Dr. Marcus Vance" || revName === "Dr. Evelyn Vane")))
                   const isOverdue = !isDeclined && !isInvitedOnly && (trackingManuscript?.id === "SOSSH-26-SRW107" || revName === "Prof. Hiroshi Tanaka")
                   const isRemarksApproved = !!approvedReviewRemarks[revName] || !!(matchedReview && (matchedReview.status === ("Approved" as any) || matchedReview.status === "Released" || approvedReviewRemarks[matchedReview.id]))
                   const isNudged = !!nudgedReviewers[revName]
@@ -10677,6 +10690,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               {isChaud && (
                                 <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 shrink-0">
                                   Reviewer #3
+                                </span>
+                              )}
+                              {isIkeda && (
+                                <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800 shrink-0">
+                                  Reviewer #4
                                 </span>
                               )}
                             </h4>
@@ -11590,7 +11608,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        Referee Evaluations ({readingManuscript.reviewers?.length || 2})
+                        Referee Evaluations ({readingManuscript.reviewers?.length || 4})
                       </span>
                       <span className="text-[10px] text-emerald-600 font-semibold">Active Round</span>
                     </div>
@@ -11599,30 +11617,30 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       {/* Reviewer 1 */}
                       <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-slate-900 dark:text-white">Dr. Praveen Nagula</span>
-                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200">
-                            Minor Revision
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">Reviewer #1: Dr. Praveen Nagula</span>
+                          <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded border border-purple-200">
+                            Re-write & Re-submit
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                          &ldquo;Rigorous systems approach to a catastrophic emergency. Methodology is sound. Recommend elaborating door-to-OR transport protocols in §2.2.&rdquo;
+                          &ldquo;The review article to be concised. Tables to be provided.&rdquo; Priority score 6/10. 5 specific points raised.
                         </p>
                         <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-                          <span>Report Logged</span>
-                          <span>Score: 8.5/10</span>
+                          <span className="text-emerald-600 font-semibold">Report Logged ✓</span>
+                          <span>RAF Priority: 6/10</span>
                         </div>
                       </div>
 
                       {/* Reviewer 2 */}
                       <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-slate-900 dark:text-white">Dr. Ragab Aziza</span>
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">Reviewer #2: Dr. Ragab Aziza</span>
                           <span className="text-[10px] font-semibold text-sky-700 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-200">
                             Evaluating
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                          Invitation accepted. Detailed surgical assessment in progress. Due in 5 days.
+                          Invitation accepted. Detailed vascular surgical assessment in progress. Awaiting evaluation report.
                         </p>
                         <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
                           <span>Vascular Surgery</span>
@@ -11639,6 +11657,62 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 reviewerEmail: "ragab.aziza@alexmed.edu.eg",
                                 subject: `[Scholarly Open] Reminder: Review Evaluation Pending for ${readingManuscript.id} - ${readingManuscript.journal}`,
                                 body: `Dear Dr. Ragab Aziza,\n\nWe recently invited you to evaluate manuscript "${readingManuscript.title}" (${readingManuscript.id}) for ${readingManuscript.journal}.\n\nWhenever your report is ready, please submit your feedback through your secure reviewer portal.\n\nWarm regards,\nEditorial Management Office`,
+                                ccEmail: "scholarlyopen@gmail.com",
+                                includeCc: true,
+                                includeOptOut: true,
+                                isSending: false
+                              })
+                            }}
+                            className="text-[#0b99ff] hover:underline cursor-pointer font-semibold"
+                          >
+                            Send Reminder
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Reviewer 3 */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">Reviewer #3: Dr. Chaud GJ</span>
+                          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200">
+                            Major Revision
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                          &ldquo;Re-review and Accept with Major Changes.&rdquo; 8 itemized revisions with confidential letter to EiC/HE. Priority score 4/10.
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <span className="text-emerald-600 font-semibold">Report Logged ✓</span>
+                          <span>RAF Priority: 4/10</span>
+                        </div>
+                      </div>
+
+                      {/* Reviewer 4 */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">Reviewer #4: Ikeda N</span>
+                          <span className="text-[10px] font-semibold text-sky-700 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-200">
+                            Evaluating
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                          Invitation accepted. Cardiovascular surgery evaluation in progress. Awaiting evaluation report.
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <span>Cardiovascular Surgery</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReviewerDispatchModal({
+                                isOpen: true,
+                                mode: "reminder",
+                                manuscriptId: readingManuscript.id,
+                                manuscriptTitle: readingManuscript.title,
+                                journal: readingManuscript.journal,
+                                reviewerName: "Ikeda N",
+                                reviewerEmail: "ikeda.n@med.nagoya-u.ac.jp",
+                                subject: `[Scholarly Open] Reminder: Review Evaluation Pending for ${readingManuscript.id} - ${readingManuscript.journal}`,
+                                body: `Dear Ikeda N,\n\nWe recently invited you to evaluate manuscript "${readingManuscript.title}" (${readingManuscript.id}) for ${readingManuscript.journal}.\n\nWhenever your report is ready, please submit your feedback through your secure reviewer portal.\n\nWarm regards,\nEditorial Management Office`,
                                 ccEmail: "scholarlyopen@gmail.com",
                                 includeCc: true,
                                 includeOptOut: true,
@@ -11707,7 +11781,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <span className="text-[11px] font-semibold text-[#0b99ff]">{trackingManuscript?.journal}</span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                2 reviewers are conducting the peer review. <strong>Dr. Praveen Nagula</strong> has submitted comments (Re-write and Re-submit), and <strong>Dr. Ragab Aziza</strong> is actively reviewing. Appointing a Handling Editor will allow them to synthesize evaluations and render the editorial verdict.
+                4 reviewers assigned to peer review. <strong>Dr. Praveen Nagula</strong> (Reviewer #1) and <strong>Dr. Chaud GJ</strong> (Reviewer #3) have submitted evaluation reports. <strong>Dr. Ragab Aziza</strong> (Reviewer #2) and <strong>Ikeda N</strong> (Reviewer #4) are in progress. Appointing a Handling Editor will allow them to synthesize evaluations and render the editorial verdict.
               </p>
             </div>
 
