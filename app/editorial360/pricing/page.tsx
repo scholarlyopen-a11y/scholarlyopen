@@ -484,7 +484,7 @@ export default function Editorial360PricingPage() {
             <span>Dimensions &amp; Frankfurt 2026 Executive Showcase</span>
           </div>
           
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.12]">
             See <span className="text-[#0b99ff]">editorial360™</span> in action
           </h1>
 
@@ -660,17 +660,17 @@ export default function Editorial360PricingPage() {
                     <div className="grid grid-cols-3 gap-2.5 pt-2">
                       <div className="p-3 bg-white border border-slate-200 rounded-xl text-center shadow-2xs">
                         <span className="text-[10px] text-slate-500 block">AI Linguistic Index</span>
-                        <span className="text-sm font-bold text-emerald-600 font-mono">1.2% (Passed)</span>
+                        <span className="text-sm font-semibold text-emerald-600">1.2% (Passed)</span>
                         <span className="text-[9px] text-slate-400 block mt-0.5">Human Authored</span>
                       </div>
                       <div className="p-3 bg-white border border-slate-200 rounded-xl text-center shadow-2xs">
                         <span className="text-[10px] text-slate-500 block">Image Forensics</span>
-                        <span className="text-sm font-bold text-emerald-600 font-mono">0 Manipulation</span>
+                        <span className="text-sm font-semibold text-emerald-600">0 Manipulation</span>
                         <span className="text-[9px] text-slate-400 block mt-0.5">Gel Blots Clean</span>
                       </div>
                       <div className="p-3 bg-white border border-slate-200 rounded-xl text-center shadow-2xs">
                         <span className="text-[10px] text-slate-500 block">Citation Cartel Graph</span>
-                        <span className="text-sm font-bold text-emerald-600 font-mono">Normal Variance</span>
+                        <span className="text-sm font-semibold text-emerald-600">Normal Variance</span>
                         <span className="text-[9px] text-slate-400 block mt-0.5">No Reciprocal Rings</span>
                       </div>
                     </div>
@@ -701,11 +701,11 @@ export default function Editorial360PricingPage() {
                     <div className="space-y-2 pt-2">
                       <div className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs shadow-2xs">
                         <span className="text-slate-800 font-medium">Reviewer #1 (Nagula P.)</span>
-                        <span className="text-emerald-600 font-mono text-[11px] font-bold">Review Submitted (Day 8)</span>
+                        <span className="text-emerald-700 text-xs font-semibold">Review Submitted (Day 8)</span>
                       </div>
                       <div className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs shadow-2xs">
                         <span className="text-slate-800 font-medium">Reviewer #2 (Chaud G.)</span>
-                        <span className="text-emerald-600 font-mono text-[11px] font-bold">Review Submitted (Day 11)</span>
+                        <span className="text-emerald-700 text-xs font-semibold">Review Submitted (Day 11)</span>
                       </div>
                       <div className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs text-slate-500 shadow-2xs">
                         <span>Reviewer #3 &amp; #4 (Parallel Standby)</span>
@@ -739,7 +739,7 @@ export default function Editorial360PricingPage() {
                     <div className="p-4 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-4 shadow-2xs">
                       <div>
                         <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Referee Earned Balance</span>
-                        <span className="text-2xl font-black text-slate-900 font-mono">1,250 <span className="text-sm font-normal text-[#0b99ff]">Merit Pts</span></span>
+                        <span className="text-2xl font-bold tracking-tight text-slate-900">1,250 <span className="text-sm font-normal text-[#0b99ff]">Merit Pts</span></span>
                         <span className="text-[11px] text-slate-500 block mt-0.5">Verified across 5 peer reviews this calendar year</span>
                       </div>
                       <div className="space-y-1 text-right">
@@ -1019,7 +1019,7 @@ export default function Editorial360PricingPage() {
                 }`}
               >
                 {plan.isPopular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#0b99ff] text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#0b99ff] text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
                     Most Popular for University Presses
                   </div>
                 )}
@@ -1029,7 +1029,7 @@ export default function Editorial360PricingPage() {
                     <span className="text-[11px] font-bold text-[#0b99ff] uppercase tracking-wider block">
                       {plan.badge}
                     </span>
-                    <h3 className="text-xl font-black text-slate-900 mt-0.5">
+                    <h3 className="text-xl font-bold text-slate-900 mt-0.5">
                       {plan.name}
                     </h3>
                     <p className="text-xs text-slate-600 mt-1 leading-relaxed min-h-[36px]">
@@ -1040,7 +1040,7 @@ export default function Editorial360PricingPage() {
                   {/* Price Block */}
                   <div className="pt-2 border-t border-slate-100">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-3xl sm:text-4xl font-black text-slate-900 font-mono">
+                      <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
                         {formatPrice(priceMonthly)}
                       </span>
                       <span className="text-xs text-slate-500">
@@ -1048,7 +1048,7 @@ export default function Editorial360PricingPage() {
                       </span>
                     </div>
                     {billingCycle === "annual" && (
-                      <p className="text-[11px] text-emerald-600 font-mono mt-0.5">
+                      <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
                         Billed annually ({formatPrice(plan.annualTotalEur)}/yr)
                       </p>
                     )}
@@ -1111,7 +1111,7 @@ export default function Editorial360PricingPage() {
                 <span>Financial Impact Model</span>
               </div>
               
-              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 Calculate your operational savings vs legacy editorial suites
               </h3>
 
@@ -1123,7 +1123,7 @@ export default function Editorial360PricingPage() {
               <div className="space-y-1.5 pt-2">
                 <div className="flex justify-between text-xs font-bold text-slate-700">
                   <span>Number of Journals in Portfolio:</span>
-                  <span className="text-[#0b99ff] font-mono text-sm">{roiJournals} Journals</span>
+                  <span className="text-[#0b99ff] font-bold text-sm">{roiJournals} Journals</span>
                 </div>
                 <input
                   type="range"
@@ -1139,7 +1139,7 @@ export default function Editorial360PricingPage() {
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs font-bold text-slate-700">
                   <span>Annual Submissions / Journal:</span>
-                  <span className="text-[#0b99ff] font-mono text-sm">{roiSubmissionsPerYear} Submissions</span>
+                  <span className="text-[#0b99ff] font-bold text-sm">{roiSubmissionsPerYear} Submissions</span>
                 </div>
                 <input
                   type="range"
@@ -1160,7 +1160,7 @@ export default function Editorial360PricingPage() {
                 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                   <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Estimated Legacy Cost</span>
-                  <span className="text-xl sm:text-2xl font-black text-rose-600 font-mono mt-1 block">
+                  <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-rose-600 mt-1 block">
                     {formatPrice(roiMetrics.legacyAnnualTotal)}/yr
                   </span>
                   <span className="text-[10px] text-slate-500 block mt-1">ScholarOne / Aries EM average</span>
@@ -1168,7 +1168,7 @@ export default function Editorial360PricingPage() {
 
                 <div className="p-4 rounded-xl bg-sky-50/50 border border-sky-200">
                   <span className="text-[10px] text-[#0b99ff] uppercase tracking-wider block font-bold">editorial360 Investment</span>
-                  <span className="text-xl sm:text-2xl font-black text-slate-900 font-mono mt-1 block">
+                  <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mt-1 block">
                     {formatPrice(roiMetrics.editorial360AnnualTotal)}/yr
                   </span>
                   <span className="text-[10px] text-[#0b99ff] block mt-1">Flat Elevate annual license</span>
@@ -1182,7 +1182,7 @@ export default function Editorial360PricingPage() {
                   <span className="text-xs font-bold text-[#0b99ff] uppercase tracking-wider block">
                     Net Annual Budget Savings
                   </span>
-                  <span className="text-3xl font-black text-slate-900 font-mono mt-0.5 block">
+                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 mt-0.5 block">
                     {formatPrice(roiMetrics.netAnnualSavings)} / year
                   </span>
                   <span className="text-xs text-slate-600">
@@ -1194,7 +1194,7 @@ export default function Editorial360PricingPage() {
                   <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                     Reclaimed Editorial Labor
                   </span>
-                  <span className="text-2xl font-black text-[#0b99ff] font-mono mt-0.5 block">
+                  <span className="text-2xl font-extrabold tracking-tight text-[#0b99ff] mt-0.5 block">
                     {Math.round(roiMetrics.hoursSavedPerYear).toLocaleString()} hrs
                   </span>
                   <span className="text-xs text-slate-500">
@@ -1233,7 +1233,7 @@ export default function Editorial360PricingPage() {
               <ClipboardList className="w-3.5 h-3.5" />
               <span>30-Second Publisher Workflow Diagnostic</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
               Suffering from reviewer decline rates or legacy turnaround lag?
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">

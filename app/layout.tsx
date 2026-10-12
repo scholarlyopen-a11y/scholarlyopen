@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Source_Serif_4 } from 'next/font/google'
+import { Inter, Source_Serif_4, Plus_Jakarta_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { LanguageProvider } from '@/lib/language-context'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -8,6 +8,11 @@ import './globals.css'
 const inter = Inter({ 
   subsets: ["latin"],
   variable: '--font-inter'
+});
+
+const plusJakarta = Plus_Jakarta_Sans({ 
+  subsets: ["latin"],
+  variable: '--font-jakarta'
 });
 
 const sourceSerif = Source_Serif_4({ 
@@ -71,7 +76,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background" suppressHydrationWarning>
-      <body className={`${inter.variable} ${sourceSerif.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${sourceSerif.variable} ${plusJakarta.variable} font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <LanguageProvider>
             {children}
