@@ -1350,6 +1350,27 @@ export default function Editorial360Page() {
           })
         }).catch(() => {})
 
+        try {
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("editorial360_session", JSON.stringify({
+              isLoggedIn: true,
+              role: "editor",
+              email: targetEditorEmail,
+              activeEditorTab: "desk",
+              editorName: targetEditorName,
+              editorRank: "Associate Editor & Handling Editor",
+              editorJournal: "Scholarly Open: Medicine",
+              editorInstitution: "Shanghai Jiao Tong University School of Medicine, China",
+              editorCountry: "China",
+              editorOrcid: "0000-0002-0213-7313",
+              editorPhotoUrl: "/images/editors/weihua-gong.jpg",
+              timestamp: Date.now()
+            }))
+            localStorage.setItem("editorial360_permanent_editor_" + targetEditorEmail.toLowerCase(), JSON.stringify({ password: "Gong2026!" }))
+            localStorage.setItem("editorial360_permanent_user_" + targetEditorEmail.toLowerCase(), JSON.stringify({ password: "Gong2026!" }))
+          }
+        } catch (e) {}
+
         setSuccess(`Welcome, ${targetEditorName}! You are securely authenticated as Handling Editor for ${edPaperId}. Reviewer evaluation reports and editorial decision tools are active below.`)
       }
 
@@ -6502,7 +6523,7 @@ Specific comments to the Author(s):
                               if (role !== "admin") setRole("admin")
                             } else if (lower.startsWith("im@") || lower.includes("integrity")) {
                               if (role !== "im") setRole("im")
-                            } else if (lower.startsWith("editor@") || lower.includes("gong") || lower.includes("boakye") || lower.includes("kumar") || lower.includes("thorne") || lower.includes("cacciola") || lower.includes("verpoort") || lower.includes("unime.it")) {
+                            } else if (lower.startsWith("editor@") || lower.includes("gong") || lower.includes("126010") || lower.includes("sh9hospital") || lower.includes("boakye") || lower.includes("kumar") || lower.includes("thorne") || lower.includes("cacciola") || lower.includes("verpoort") || lower.includes("unime.it")) {
                               if (role !== "editor") setRole("editor")
                             } else if (lower.startsWith("reviewer@") || lower.includes("olofinjana") || lower.includes("sun")) {
                               if (role !== "reviewer") setRole("reviewer")
