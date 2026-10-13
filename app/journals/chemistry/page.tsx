@@ -34,7 +34,7 @@ export default function ChemistryPage() {
         "Computational Chemistry",
         "Green Chemistry",
         "Catalysis",
-        "Conservation Biology",
+        "Environmental & Sustainable Chemistry",
       ]}
       mainHighlights={[
         { title: "Sustainable Innovation", description: "Highlighting chemistry solutions for energy, climate and materials." },

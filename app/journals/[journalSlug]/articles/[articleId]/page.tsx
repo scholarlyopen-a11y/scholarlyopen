@@ -162,15 +162,26 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                   <div className="space-y-1">
                     <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Digital Object Identifier</span>
                     <div className="flex items-center gap-2">
-                      <a 
-                        href={`https://doi.org/${article.doi}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline font-mono text-sm sm:text-base font-semibold flex items-center gap-1"
-                      >
-                        https://doi.org/{article.doi}
-                        <ExternalLink className="h-3.5 w-3.5 inline" />
-                      </a>
+                      {article.doi.startsWith("10.12345") ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-sm sm:text-base font-semibold text-foreground">
+                            https://doi.org/{article.doi}
+                          </span>
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            Inaugural Volume · Deposit Active
+                          </span>
+                        </div>
+                      ) : (
+                        <a 
+                          href={`https://doi.org/${article.doi}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-mono text-sm sm:text-base font-semibold flex items-center gap-1"
+                        >
+                          https://doi.org/{article.doi}
+                          <ExternalLink className="h-3.5 w-3.5 inline" />
+                        </a>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2">

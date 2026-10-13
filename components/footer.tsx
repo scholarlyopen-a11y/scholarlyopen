@@ -156,10 +156,10 @@ export function Footer() {
   }
 
   const complianceBadges = [
-    { name: t("compliance.doaj"), abbr: "DOAJ", description: "Directory of Open Access Journals - We follow DOAJ best practices for open access publishing" },
-    { name: t("compliance.cope"), abbr: "COPE", description: "Committee on Publication Ethics - We adhere to COPE guidelines for publication ethics" },
-    { name: t("compliance.crossref"), abbr: "DOI", description: "CrossRef Member - All articles receive DOI for permanent identification" },
-    { name: t("compliance.ccby"), abbr: "CC", description: "Creative Commons CC BY 4.0 - Open licensing for maximum accessibility" },
+    { name: t("compliance.doaj"), abbr: "DOAJ", description: "Open Access Transparency - Aligned with DOAJ best practice principles" },
+    { name: t("compliance.cope"), abbr: "COPE", description: "Publication Ethics - Adhering to COPE core publication ethics standards" },
+    { name: t("compliance.crossref"), abbr: "DOI", description: "Persistent Identifiers - Crossref DOI metadata integration for all publications" },
+    { name: t("compliance.ccby"), abbr: "CC", description: "Creative Commons CC BY 4.0 - Gold Open Access licensing for maximum accessibility" },
   ]
 
   return (

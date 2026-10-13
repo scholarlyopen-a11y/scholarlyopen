@@ -75,16 +75,23 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
         </div>
         
         <div className="flex items-center justify-between pt-3 border-t border-border">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="font-medium">DOI:</span>
-            <a 
-              href={`https://doi.org/${article.doi}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              {article.doi}
-            </a>
+            {article.doi.startsWith("10.12345") ? (
+              <span className="font-mono text-[11px] text-foreground/80 flex items-center gap-1" title="Official Crossref DOI assignment upon inaugural volume publication">
+                {article.doi}
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-sans font-medium">Inaugural</span>
+              </span>
+            ) : (
+              <a 
+                href={`https://doi.org/${article.doi}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-mono text-[11px]"
+              >
+                {article.doi}
+              </a>
+            )}
           </div>
           <div className="flex gap-2">
             {article.pdfUrl && (

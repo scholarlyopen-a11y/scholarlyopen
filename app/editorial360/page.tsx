@@ -1722,10 +1722,13 @@ export default function Editorial360Page() {
     }
   }, [role, email])
 
-  // Auto-sync polling every 12 seconds so Noor and Abbas see each other's live changes across different computers
+  // Auto-sync polling: only poll when tab is actively visible to save Supabase storage bandwidth
   useEffect(() => {
     if (!isLoggedIn) return
-    const timer = setInterval(() => {
+
+    const doSync = () => {
+      if (typeof document !== "undefined" && document.hidden) return
+
       fetch("/api/editorial360/manuscripts")
         .then(res => res.json())
         .then(data => {
@@ -1771,10 +1774,15 @@ export default function Editorial360Page() {
         })
         .catch(() => {})
 
-      // Also sync live cross-desk notifications in real-time
       syncServerLiveNotifications()
-    }, 12000)
-    return () => clearInterval(timer)
+    }
+
+    const timer = setInterval(doSync, 60000)
+    window.addEventListener("focus", doSync)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener("focus", doSync)
+    }
   }, [isLoggedIn])
 
   const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
@@ -3726,6 +3734,8 @@ Specific comments to the Author(s):
       lowerEmail === "editor@scholarlyopen.org" ||
       lowerEmail.startsWith("editor.") ||
       lowerEmail.includes("gong") ||
+      lowerEmail.includes("126010") ||
+      lowerEmail.includes("sh9hospital") ||
       lowerEmail.includes("boakye") ||
       lowerEmail.includes("kumar") ||
       lowerEmail.includes("thorne") ||
@@ -3791,6 +3801,9 @@ Specific comments to the Author(s):
     const isAppointedEditor = 
       lowerEmail.includes("cacciola") || 
       lowerEmail.includes("verpoort") || 
+      lowerEmail.includes("gong") || 
+      lowerEmail.includes("126010") || 
+      lowerEmail.includes("sh9hospital") || 
       lowerEmail === "cacciolaf@unime.it" || 
       lowerEmail === "francis@whut.edu.cn"
 
@@ -3813,6 +3826,10 @@ Specific comments to the Author(s):
         enteredPwd === "cacciola2026" || 
         enteredPwd === "cacciola" || 
         enteredPwd === "Ciccio81!" ||
+        enteredPwd === "Gong2026!" ||
+        enteredPwd === "gong2026" ||
+        enteredPwd === "Gong2026" ||
+        enteredPwd.toLowerCase().includes("gong") ||
         enteredPwd.toLowerCase().includes("verpoort") ||
         enteredPwd.toLowerCase().includes("cacciola") ||
         enteredPwd.toLowerCase().includes("editor") ||

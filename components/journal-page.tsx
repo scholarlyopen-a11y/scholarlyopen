@@ -409,10 +409,10 @@ export function JournalPage({
   const currentBrandTheme = pistaTheme
 
   const stats = [
-    { label: "Average Review Time", value: "4-8 weeks" },
-    { label: "Acceptance Rate", value: "~30%" },
+    { label: "Peer Review", value: "Double-Blind" },
+    { label: "First Decision Target", value: "3-4 weeks" },
     { label: "Publishing Model", value: "Gold OA" },
-    { label: "License", value: "CC BY 4.0" },
+    { label: "Open Access License", value: "CC BY 4.0" },
   ]
 
   // Parse title to extract prefix and actual journal name for cleaner rendering

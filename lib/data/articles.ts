@@ -160,7 +160,7 @@ export const articles: Article[] = [
       "Sustainability",
       "Modeling"
     ],
-    "doi": "10.12345/chem.2025.002",
+    "doi": "10.12345/chem.2025.003",
     "publishedDate": "2025-03-12",
     "articleType": "review",
     "journalSlug": "chemistry"
@@ -370,7 +370,7 @@ export const articles: Article[] = [
       "Manufacturing",
       "Sustainability"
     ],
-    "doi": "10.12345/eng.2025.002",
+    "doi": "10.12345/eng.2025.003",
     "publishedDate": "2025-03-16",
     "articleType": "review",
     "journalSlug": "engineering"
