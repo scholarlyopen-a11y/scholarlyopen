@@ -1108,9 +1108,9 @@ export function EditorWorkspace({
 
     // Direct action URL that takes the author straight to their revision submission
     const actionUrl = nextStatus === "Revision Required"
-      ? `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(paperId)}&status=Revision+Required`
+      ? `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(paperId)}&status=Revision+Required&email=${encodeURIComponent(authorEmail)}&name=${encodeURIComponent(authorName)}`
       : nextStatus === "Accepted"
-      ? `https://www.scholarlyopen.org/editorial360?role=author&id=${encodeURIComponent(paperId)}&status=Accepted`
+      ? `https://www.scholarlyopen.org/editorial360?role=author&id=${encodeURIComponent(paperId)}&status=Accepted&email=${encodeURIComponent(authorEmail)}&name=${encodeURIComponent(authorName)}`
       : "https://www.scholarlyopen.org/editorial360?role=author"
 
     // Generate branded HTML for the edited decision letter
@@ -1248,7 +1248,7 @@ export function EditorWorkspace({
     const authorEmail = paper.authorEmail || (paper.id === "SOMED-26-RW01" ? "Applied.EBM.Institute@proton.me" : "author@university.edu")
     const authorName = paper.authorName || paper.author || (paper.id === "SOMED-26-RW01" ? "Dr. Sam Lee" : "Author")
     const journalName = paper.journal || user.journal
-    const actionUrl = `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(paper.id)}&status=Revision+Required`
+    const actionUrl = `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(paper.id)}&status=Revision+Required&email=${encodeURIComponent(authorEmail)}&name=${encodeURIComponent(authorName)}`
 
     setReminderModalPaper(paper)
     setReminderRecipientEmail(authorEmail)
@@ -1276,7 +1276,7 @@ Scholarly Open`)
     if (!reminderModalPaper) return
     setIsSendingReminder(true)
     try {
-      const actionUrl = `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(reminderModalPaper.id)}&status=Revision+Required`
+      const actionUrl = `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(reminderModalPaper.id)}&status=Revision+Required&email=${encodeURIComponent(reminderRecipientEmail)}&name=${encodeURIComponent(reminderRecipientName)}`
       const journalName = reminderModalPaper.journal || user.journal
 
       const renderedHtml = generateBrandedEmailHtml({
@@ -6558,7 +6558,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       subject: reminderSubject,
                       bodyText: reminderBody,
                       actionLabel: "Submit Revised Manuscript",
-                      actionUrl: `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(reminderModalPaper?.id || "")}&status=Revision+Required`,
+                      actionUrl: `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(reminderModalPaper?.id || "")}&status=Revision+Required&email=${encodeURIComponent(reminderRecipientEmail || "")}&name=${encodeURIComponent(reminderRecipientName || "")}`,
                       journal: reminderModalPaper?.journal || user.journal,
                       paperId: reminderModalPaper?.id || "",
                       paperTitle: reminderModalPaper?.title || "",

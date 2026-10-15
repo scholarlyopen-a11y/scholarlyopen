@@ -3854,7 +3854,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       paperTitle: ms.title,
       journal: ms.journal,
       actionLabel: "Upload Revised Manuscript",
-      actionUrl: `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(ms.id)}&status=Revision+Required`,
+      actionUrl: `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(ms.id)}&status=Revision+Required&email=${encodeURIComponent(authorEmail)}&name=${encodeURIComponent(authorName)}`,
       defaultSubject: `Reminder: Revision & Rebuttal Due for ${ms.id}`,
       defaultBody: `Dear ${authorName},\n\nThis is a friendly reminder that the revision and rebuttal for your manuscript ${ms.id} (${ms.title}) submitted to ${ms.journal} are currently pending.\n\nPlease upload your revised manuscript, tracked-changes version, and point-by-point rebuttal letter through the Author Portal.\n\nIf you require an extension to complete additional data analysis, please reply to this notice.`,
       onConfirmSend: async (data: any) => {
@@ -10470,10 +10470,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       type="button"
                       size="sm"
                       onClick={() => {
-                        // 1. Release Dr. Praveen Nagula's comments
+                        // 1. Release full itemized comments
+                        const rev1Comments = `General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there`
+
+                        const rev3Comments = `General comments to the Author(s):\nThis manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.\n\nSpecific comments to the Author(s):\n1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.\n2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.\n3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.\n4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).\n5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).\n6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.\n7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.\n8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`
+
                         if (onReleaseComments) {
-                          onReleaseComments("REV-FB-SAM-01", "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references.")
-                          onReleaseComments("REV-FB-1791559472514-816", "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols.")
+                          onReleaseComments("REV-FB-SAM-01", rev1Comments)
+                          onReleaseComments("REV-FB-1791559472514-816", rev3Comments)
                         }
 
                         // 2. Mark in approvedReviewRemarks
@@ -10492,7 +10496,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           body: JSON.stringify({
                             id: "REV-FB-SAM-01",
                             status: "Released",
-                            sanitizedCommentsAuthor: "The review article should be concise and neatly structured with orientation tables and figures provided. Please address changes in clinical management over recent years and expand references."
+                            sanitizedCommentsAuthor: rev1Comments
                           })
                         }).catch(e => console.error(e))
 
@@ -10502,7 +10506,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           body: JSON.stringify({
                             id: "REV-FB-1791559472514-816",
                             status: "Released",
-                            sanitizedCommentsAuthor: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nHowever, several methodological and conceptual issues require clarification before publication, particularly regarding methodology definition, supplementary dataset consistency, and regional network transfer protocols."
+                            sanitizedCommentsAuthor: rev3Comments
                           })
                         }).catch(e => console.error(e))
 
