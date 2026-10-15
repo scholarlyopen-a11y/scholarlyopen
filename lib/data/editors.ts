@@ -632,6 +632,232 @@ Dr. Abdelmonsef has authored over 75 peer-reviewed scientific publications in to
     ]
   },
   {
+    slug: "ahmed-magdy-rabea",
+    name: "Ahmed Magdy Rabea, M.D., Ph.D.",
+    role: "Editorial Board Member & Handling Editor",
+    affiliation: "Medical Oncology & Hematology, National Cancer Institute, Cairo University, Cairo, Egypt",
+    specialization: "Academic Medical Oncology & Hematology, Thoracic Oncology (NSCLC/SCLC), Breast & Prostate Cancers, Malignant Hematology (Multiple Myeloma & Lymphomas)",
+    email: "ahmed.rabea@live.com",
+    orcid: "0000-0001-9060-6492",
+    googleScholar: "https://scholar.google.com/citations?hl=en&user=MyAK29kAAAAJ",
+    imageUrl: "/images/editors/ahmed-magdy-rabea.jpg",
+    journalSlug: "medicine",
+    assignedSections: [
+      "Oncology",
+      "Translational Research",
+      "Clinical Trials & Precision Medicine",
+      "Organ Transplantation"
+    ],
+    expertise: [
+      "Medical Oncology & Hematology",
+      "Thoracic Oncology & Lung Cancer",
+      "Breast Cancer & Endocrine Therapy",
+      "Multiple Myeloma & Stem Cell Transplantation",
+      "Prostate & Urologic Cancers",
+      "Precision Oncology & Genomic Profiling",
+      "Clinical Trials (Phase I-III) & GCP Protocols",
+      "Cancer Health Equity & Global Oncology"
+    ],
+    badges: [
+      "Verified Board Member",
+      "COPE Ethics Verified",
+      "ESMO Certified Oncologist",
+      "FORTTUNA Best Oncologist (2024)"
+    ],
+    stats: [
+      {
+        label: "Clinical & Academic Practice",
+        value: "20+",
+        description: "Years of specialized experience in oncology and hematology across Egypt and Canada."
+      },
+      {
+        label: "Peer-Reviewed Publications",
+        value: "30+",
+        description: "Articles in leading high-impact clinical oncology journals and international proceedings."
+      },
+      {
+        label: "Clinical Trials & Protocols",
+        value: "10+",
+        description: "Multinational clinical trials led as Principal Investigator and Co-Investigator."
+      }
+    ],
+    timeline: [
+      {
+        year: "2004",
+        title: "MBBCh — Excellent with Honors",
+        description: "Kasr El Ainy Faculty of Medicine, Cairo University, Egypt.",
+        type: "education"
+      },
+      {
+        year: "2006–2015",
+        title: "Resident & Assistant Lecturer in Medical Oncology",
+        description: "National Cancer Institute, Cairo University, Egypt.",
+        type: "career"
+      },
+      {
+        year: "2009",
+        title: "Master of Medical Oncology (MSc)",
+        description: "National Cancer Institute, Cairo University, Egypt.",
+        type: "education"
+      },
+      {
+        year: "2010",
+        title: "Clinical Fellowship in Malignant Hematology & HSCT",
+        description: "Princess Margaret Cancer Centre, University of Toronto, Canada. Multiple Myeloma and Autologous Stem Cell Transplant Program.",
+        type: "education"
+      },
+      {
+        year: "2012",
+        title: "Master of Advanced Oncology (MSc) & ESMO Certification",
+        description: "Ulm University, Ulm, Germany; European Society for Medical Oncology (ESMO) Board Certification.",
+        type: "milestone"
+      },
+      {
+        year: "2013–Present",
+        title: "ESMO Examination Coordinator (Cairo Session)",
+        description: "National Cancer Institute, Cairo University, overseeing European oncology certification examination in Egypt.",
+        type: "milestone"
+      },
+      {
+        year: "2015",
+        title: "Doctorate (PhD) in Medical Oncology",
+        description: "National Cancer Institute, Cairo University, Egypt.",
+        type: "education"
+      },
+      {
+        year: "2016–2021",
+        title: "Consultant & Director, Department of Medical Oncology",
+        description: "Shefaa Al Orman Hospital (NGO), Luxor, Egypt.",
+        type: "career"
+      },
+      {
+        year: "2020–2021",
+        title: "Deputy Chair, Career Development Committee",
+        description: "International Association for the Study of Lung Cancer (IASLC).",
+        type: "milestone"
+      },
+      {
+        year: "2021–2023",
+        title: "Chair, Career Development & Fellowships Committee",
+        description: "International Association for the Study of Lung Cancer (IASLC).",
+        type: "milestone"
+      },
+      {
+        year: "2021–2025",
+        title: "Vice Chair, Department of Medical Oncology",
+        description: "Baheya Foundation for Early Detection & Treatment of Breast Cancer, Egypt.",
+        type: "career"
+      },
+      {
+        year: "2022–Present",
+        title: "Assistant Professor of Medical Oncology & Hematology",
+        description: "National Cancer Institute, Cairo University, Cairo, Egypt.",
+        type: "career"
+      },
+      {
+        year: "2023–Present",
+        title: "Consultant & Head, Department of Medical Oncology",
+        description: "Shifa Hospital, New Cairo, Egypt.",
+        type: "career"
+      },
+      {
+        year: "2024",
+        title: "Best Oncologist in Egypt Award & Presidential Initiative",
+        description: "Awarded Best Oncologist in Egypt by FORTTUNA Awards; appointed Coordinator of the Presidential Initiative for Lung Cancer Screening and Early Detection.",
+        type: "milestone"
+      },
+      {
+        year: "2026",
+        title: "Appointed Editorial Board Member & Handling Editor",
+        description: "Scholarly Open: Medicine. Guiding peer review in medical oncology, hematology, thoracic malignancies, and clinical trials.",
+        type: "career"
+      }
+    ],
+    biography: `Dr. Ahmed Magdy Rabea, M.D., Ph.D., is an Assistant Professor of Medical Oncology & Hematology at the National Cancer Institute (NCI), Cairo University, and Consultant & Head of the Department of Medical Oncology at Shifa Hospital, New Cairo, Egypt. With over 20 years of clinical, translational research, and academic teaching experience across premier cancer centers in Egypt and Canada, Dr. Rabea provides comprehensive multidisciplinary care and clinical leadership with specialized expertise in thoracic oncology, breast cancer, prostate malignancies, and malignant hematology.
+
+Dr. Rabea completed his Doctorate (Ph.D.) in Medical Oncology (2015) and Master of Science in Medical Oncology (2009) at the National Cancer Institute, Cairo University, following his MBBCh with Excellent with Honors from Kasr El Ainy Faculty of Medicine, Cairo University (2004). He subsequently completed advanced international training, including a Clinical Fellowship in Malignant Hematology and the Multiple Myeloma & Autologous Stem Cell Transplant Program at the Princess Margaret Cancer Centre, University of Toronto, Canada (2010), a Master of Advanced Oncology (M.Sc.) at Ulm University, Germany (2012), and European Society for Medical Oncology (ESMO) Board Certification (2012).
+
+A dedicated clinical trialist and researcher, Dr. Rabea has served as Principal Investigator and Co-Investigator on numerous multinational Phase II–III clinical trials, including the KINDLE trial in stage III non-small cell lung cancer, the PARACHUTE study in renal cell carcinoma, and the FATIMA trial in HR+/HER2− metastatic breast cancer, as well as landmark studies in multiple myeloma, CML, and Castleman's disease. He has authored more than 30 peer-reviewed articles in leading oncology journals including Annals of Oncology, Journal of Cancer Education, Clinical Lymphoma Myeloma and Leukemia, JTO Clinical and Research Reports, and Blood.
+
+Dr. Rabea actively serves in international oncology leadership, having served as Chair (2021–2023) and Deputy Chair (2020–2021) of the Career Development & Fellowships Committee for the International Association for the Study of Lung Cancer (IASLC), Abstract Reviewer for the World Lung Conference (WLC), and Coordinator for the Cairo ESMO Examination Session. He serves as Coordinator for the Egyptian Presidential Initiative for the Screening and Early Detection of Lung Cancer and actively drives cancer health-equity and guideline harmonization initiatives across the Middle East and Africa. In 2024, he was honored with the Best Oncologist in Egypt award by the FORTTUNA Awards.`,
+    personalPublications: [
+      {
+        title: "Programmed cell death protein 1 (PD-1)/programmed cell death ligand 1 (PD-L1) in multiple myeloma",
+        journal: "Journal of the Egyptian National Cancer Institute",
+        year: "2026",
+        doi: "10.1186/s43046-026-00000-0"
+      },
+      {
+        title: "Outcomes of comprehensive genomic profiling (CGP) for advanced cancers in a low-middle-income country (Abstract 2289P)",
+        journal: "Annals of Oncology (ESMO Congress 2025)",
+        year: "2025",
+        doi: "10.1016/j.annonc.2025.08.2289"
+      },
+      {
+        title: "The CAIRO Journal Club: A Decade of Impact",
+        journal: "Journal of Cancer Education",
+        year: "2025",
+        doi: "10.1007/s13187-025-02739-3"
+      },
+      {
+        title: "Guiding principles for health equity in oncology: insights from patient organizations from the Middle East and Africa",
+        journal: "Frontiers in Health Services",
+        year: "2025",
+        doi: "10.3389/frhs.2025.1560116"
+      },
+      {
+        title: "Practical guidance on the clinical management of belantamab mafodotin for patients with relapsed/refractory multiple myeloma: recommendations from the Middle East and North Africa expert panel",
+        journal: "Clinical Lymphoma Myeloma and Leukemia",
+        year: "2025",
+        doi: "10.1016/j.clml.2025.04.012"
+      },
+      {
+        title: "State of lung cancer in Egypt: moving towards improved guidelines for prevention, screening, treatment, and clinical care programs",
+        journal: "JTO Clinical and Research Reports",
+        year: "2024",
+        doi: "10.1016/j.jtocrr.2024.100776"
+      },
+      {
+        title: "Impact of COVID-19 on management and outcomes of oncology patients: results of the MENA COVID-19 and Cancer Registry (MCCR)",
+        journal: "Journal of Immunotherapy and Precision Oncology",
+        year: "2024",
+        doi: "10.36401/JIPO-24-1"
+      },
+      {
+        title: "Real-world treatment patterns and clinical outcomes in patients with stage III non-small cell lung cancer: results of the KINDLE-Egypt cohort",
+        journal: "Therapeutic Advances in Medical Oncology",
+        year: "2023",
+        doi: "10.1177/17588359231185432"
+      },
+      {
+        title: "Central nervous system involvement with multiple myeloma: long-term survival can be achieved with radiation, intrathecal chemotherapy, and immunomodulatory agents",
+        journal: "British Journal of Haematology",
+        year: "2013",
+        doi: "10.1111/bjh.12356"
+      },
+      {
+        title: "Cyclophosphamide and prednisone induction effectively decreased the incidence of engraftment syndrome in patients with POEMS syndrome who undergo stem cell transplantation",
+        journal: "American Journal of Hematology",
+        year: "2011",
+        doi: "10.1002/ajh.22123"
+      }
+    ],
+    honors: [
+      "Best Oncologist in Egypt Award (FORTTUNA Awards, 2024)",
+      "Coordinator, Presidential Initiative for the Screening & Early Detection of Lung Cancer",
+      "Chair, Career Development & Fellowships Committee, IASLC (2021–2023)",
+      "European Society for Medical Oncology (ESMO) Board Certification (2012)",
+      "Clinical Fellow, Princess Margaret Cancer Centre, University of Toronto (2010)"
+    ],
+    editorialRoles: [
+      "Editorial Board Member & Handling Editor, Scholarly Open: Medicine",
+      "Chair, Career Development & Fellowships Committee, IASLC (2021–2023)",
+      "Abstract Reviewer, World Lung Conference (WLC 2022–2023)",
+      "Board Member & Speaker, C.A.I.R.O. Educational Group (2014–Present)",
+      "Coordinator, ESMO Examination (Cairo Session, 2013–Present)"
+    ]
+  },
+  {
     slug: "mohamed-eletmany",
     name: "Mohamed R. Eletmany, Ph.D.",
     role: "Associate Editor",
@@ -1702,10 +1928,10 @@ const onboardedList: EditorMember[] = (
     ? (onboardedData as any).onboardedEditors
         .filter((o: any) => o.jmApproved === true)
         .map((o: any) => {
-        const cleanSlug = (o.name || "editor")
+        const cleanSlug = o.slug || (o.name || "editor")
           .toLowerCase()
           .replace(/^prof\.\s*|^dr\.\s*|^assoc\.\s*prof\.\s*/i, "")
-          .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/i, "")
+          .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?)/gi, "")
           .trim()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-+|-+$/g, "")
