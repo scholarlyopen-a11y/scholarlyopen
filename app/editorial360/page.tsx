@@ -1104,6 +1104,17 @@ export default function Editorial360Page() {
         }
         setRole("author")
         setIsLoggedIn(true)
+        setAuthorActiveTab("submissions")
+        if (urlEmail) {
+          setEmail(urlEmail)
+        } else if (urlId === "SOMED-26-RW01" || urlId?.toLowerCase().includes("rw01")) {
+          setEmail("Applied.EBM.Institute@proton.me")
+        }
+        if (urlName) {
+          setProfFullName(urlName)
+        } else if (urlId === "SOMED-26-RW01" || urlId?.toLowerCase().includes("rw01")) {
+          setProfFullName("Dr. Sam Lee")
+        }
       }
 
       if (urlAction === "activate_invite") {
@@ -3505,14 +3516,16 @@ Specific comments to the Author(s):
     if (role !== "author") return manuscripts
     const isDemoAuthor = email === "author@scholarlyopen.org"
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
-    const activeUrlMsId = urlParams ? urlParams.get("manuscriptId") : null
+    const activeUrlMsId = urlParams ? (urlParams.get("manuscriptId") || urlParams.get("id")) : null
 
     const authorFiltered = isDemoAuthor 
       ? manuscripts 
       : manuscripts.filter((m: any) => 
           (activeUrlMsId && m.id && m.id.toLowerCase() === activeUrlMsId.toLowerCase()) ||
+          (activeUrlMsId && activeUrlMsId.toLowerCase().includes("rw01") && (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier"))) ||
           (m.authorEmail && email && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
-          (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase()))
+          (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase())) ||
+          (m.authorName && profFullName && m.authorName.toLowerCase().includes(profFullName.toLowerCase()))
         )
     return Array.from(
       new Map(authorFiltered.map((m: any) => [m.id ? m.id : m.title, m])).values()

@@ -3854,7 +3854,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       paperTitle: ms.title,
       journal: ms.journal,
       actionLabel: "Upload Revised Manuscript",
-      actionUrl: "https://www.scholarlyopen.org/editorial360",
+      actionUrl: `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(ms.id)}&status=Revision+Required`,
       defaultSubject: `Reminder: Revision & Rebuttal Due for ${ms.id}`,
       defaultBody: `Dear ${authorName},\n\nThis is a friendly reminder that the revision and rebuttal for your manuscript ${ms.id} (${ms.title}) submitted to ${ms.journal} are currently pending.\n\nPlease upload your revised manuscript, tracked-changes version, and point-by-point rebuttal letter through the Author Portal.\n\nIf you require an extension to complete additional data analysis, please reply to this notice.`,
       onConfirmSend: async (data: any) => {
@@ -4821,6 +4821,34 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <span>Review Tracker</span>
                                   </Button>
                                 </>
+                              ) : ms.status === "Revision Required" ? (
+                                <div className="flex items-center gap-1.5 justify-center">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setTrackingManuscript(ms)
+                                      setIsTrackModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-bold bg-[#0b99ff] hover:bg-[#0088e0] text-white px-3 rounded-lg cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                    title="Open Review Tracker, Reviewer Evaluations & Remarks"
+                                  >
+                                    <Clock className="h-3.5 w-3.5" />
+                                    <span>Review Tracker</span>
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setViewingDecisionManuscript(ms)
+                                      setIsDecisionLetterModalOpen(true)
+                                    }}
+                                    className="h-8 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 border-slate-200 dark:border-slate-800 px-2.5 rounded-lg cursor-pointer flex items-center gap-1"
+                                    title="View Editorial Decision Letter"
+                                  >
+                                    <FileCheck2 className="h-3.5 w-3.5 text-[#0b99ff]" />
+                                    <span>Decision Letter</span>
+                                  </Button>
+                                </div>
                               ) : ms.status === "Revision Under Evaluation" ? (
                                 <Button
                                   size="sm"
@@ -4970,7 +4998,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     Inspect Dossier &amp; Files
                                   </DropdownMenuItem>
 
-                                  {isUnderReview && (
+                                  {(isUnderReview || ms.status === "Revision Required" || isRevision) && (
                                     <DropdownMenuItem
                                       onClick={() => {
                                         setTrackingManuscript(ms)
@@ -4979,7 +5007,19 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                       className="cursor-pointer"
                                     >
                                       <Clock className="h-3.5 w-3.5 mr-2 text-[#0b99ff]" />
-                                      Track Review Progress
+                                      Review Tracker &amp; Comments
+                                    </DropdownMenuItem>
+                                  )}
+                                  {(isDecided || ms.status === "Revision Required" || isRevision) && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setViewingDecisionManuscript(ms)
+                                        setIsDecisionLetterModalOpen(true)
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      <FileCheck2 className="h-3.5 w-3.5 mr-2 text-emerald-600" />
+                                      View Editorial Decision Letter
                                     </DropdownMenuItem>
                                   )}
 

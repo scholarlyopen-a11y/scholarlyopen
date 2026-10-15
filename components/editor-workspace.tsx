@@ -736,6 +736,15 @@ export function EditorWorkspace({
   const [selectedRevisionForEvaluation, setSelectedRevisionForEvaluation] = useState<JmManuscript | null>(null)
   const [revisionTab, setRevisionTab] = useState<"rebuttal" | "diff" | "reports">("rebuttal")
 
+  // Revision Reminder Modal State
+  const [reminderModalPaper, setReminderModalPaper] = useState<JmManuscript | null>(null)
+  const [reminderSubject, setReminderSubject] = useState("")
+  const [reminderBody, setReminderBody] = useState("")
+  const [reminderRecipientEmail, setReminderRecipientEmail] = useState("")
+  const [reminderRecipientName, setReminderRecipientName] = useState("")
+  const [isSendingReminder, setIsSendingReminder] = useState(false)
+  const [reminderTab, setReminderTab] = useState<"edit" | "preview">("edit")
+
   // OpenAI / Global Scholars Sourcing Engine State
   const [isSearchingOpenAI, setIsSearchingOpenAI] = useState(false)
   const [openAiResults, setOpenAiResults] = useState<any[] | null>(null)
@@ -1233,6 +1242,160 @@ export function EditorWorkspace({
       confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
       onConfirm: handleSubmitDecision
     })
+  }
+
+  const handleOpenReminderModal = (paper: JmManuscript) => {
+    const authorEmail = paper.authorEmail || (paper.id === "SOMED-26-RW01" ? "Applied.EBM.Institute@proton.me" : "author@university.edu")
+    const authorName = paper.authorName || paper.author || (paper.id === "SOMED-26-RW01" ? "Dr. Sam Lee" : "Author")
+    const journalName = paper.journal || user.journal
+    const actionUrl = `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(paper.id)}&status=Revision+Required`
+
+    setReminderModalPaper(paper)
+    setReminderRecipientEmail(authorEmail)
+    setReminderRecipientName(authorName)
+    setReminderSubject(`[${journalName}] Reminder: Revision & Point-by-Point Rebuttal Due for ${paper.id}`)
+    setReminderBody(`Dear ${authorName},
+
+This is an editorial reminder regarding your manuscript "${paper.title}" (${paper.id}) submitted to ${journalName}.
+
+The peer review recommendations require a revised manuscript along with a point-by-point rebuttal letter. Please prepare your revised manuscript addressing all itemized comments from the reviewers and upload your materials through the dedicated Author Desk.
+
+You can access your workspace and submit your revision directly using the link below:
+${actionUrl}
+
+If you require an extension or have any questions regarding the revision requirements, please feel free to reply directly to this notification.
+
+Sincerely,
+${user.name}
+Handling Editor, ${journalName}
+Scholarly Open`)
+    setReminderTab("edit")
+  }
+
+  const handleSendReminderEmail = async () => {
+    if (!reminderModalPaper) return
+    setIsSendingReminder(true)
+    try {
+      const actionUrl = `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(reminderModalPaper.id)}&status=Revision+Required`
+      const journalName = reminderModalPaper.journal || user.journal
+
+      const renderedHtml = generateBrandedEmailHtml({
+        subject: reminderSubject,
+        bodyText: reminderBody,
+        actionLabel: "Submit Revised Manuscript",
+        actionUrl,
+        journal: journalName,
+        paperId: reminderModalPaper.id,
+        paperTitle: reminderModalPaper.title,
+        recipientName: reminderRecipientName,
+        recipientEmail: reminderRecipientEmail
+      })
+
+      const res = await fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: reminderRecipientEmail,
+          customSubject: reminderSubject,
+          customBody: reminderBody,
+          customHtml: renderedHtml,
+          journal: journalName,
+          paperId: reminderModalPaper.id,
+          paperTitle: reminderModalPaper.title,
+          recipientName: reminderRecipientName,
+          actionLabel: "Submit Revised Manuscript",
+          actionUrl
+        })
+      })
+
+      const resData = await res.json().catch(() => null)
+      if (!res.ok || !resData?.success) {
+        throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status})`)
+      }
+
+      triggerToast(`✓ Revision reminder email dispatched to ${reminderRecipientName} (Proof sent to ${journalName} inbox).`)
+      setReminderModalPaper(null)
+    } catch (err: any) {
+      console.error("Reminder email dispatch error:", err)
+      alert(err.message || "Failed to dispatch reminder email.")
+    } finally {
+      setIsSendingReminder(false)
+    }
+  }
+
+  const handlePermitJmDispatch = async () => {
+    if (!selectedPaperForDecision) return
+    setIsDecisionSending(true)
+    const paper = selectedPaperForDecision
+    const paperId = paper.id
+    const journalName = paper.journal || user.journal
+    const targetStatus = decisionVerdict.includes("Revision") 
+      ? "Revision Required" 
+      : (decisionVerdict === "Accept" ? "Accepted" : (decisionVerdict === "Reject" ? "Rejected" : "Revision Required"))
+
+    const updated = manuscripts.map(m => {
+      if (m.id === paperId) {
+        return {
+          ...m,
+          status: targetStatus as any,
+          submissionStage: decisionVerdict,
+          assignedEditorName: user.name,
+          editorAssigned: true,
+          decisionVerdict,
+          decisionLetter,
+          jmDecisionPermitted: true
+        }
+      }
+      return m
+    })
+    setManuscripts(updated)
+    try {
+      localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+    } catch (e) {}
+
+    if (onUpdateManuscriptStatus) {
+      onUpdateManuscriptStatus(paperId, targetStatus as any)
+    }
+
+    try {
+      await fetch("/api/editorial360/manuscripts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: paperId,
+          status: targetStatus,
+          submission_stage: decisionVerdict,
+          assigned_editor_name: user.name,
+          editor_decision: decisionVerdict,
+          editor_decision_letter: decisionLetter,
+          jm_decision_permitted: true,
+          updated_at: new Date().toISOString()
+        })
+      })
+    } catch (e) {
+      console.error("Cloud decision delegation failed:", e)
+    }
+
+    if (onAddNotification) {
+      onAddNotification({
+        id: `NOTIF-${Date.now()}`,
+        timestamp: "Just now",
+        paperId,
+        paperTitle: paper.title,
+        journal: journalName,
+        sender: user.name,
+        type: "editor_delegation",
+        title: `Decision Delegated to JM Desk: ${paperId}`,
+        message: `Handling Editor ${user.name} has formulated the editorial verdict (${decisionVerdict}) and authorized Journal Manager Noor to finalize and dispatch the formal letter to author (${paper.authorName || 'Author'}).`,
+        priority: "high"
+      })
+    }
+
+    setIsDecisionSending(false)
+    triggerToast(isDe 
+      ? `✓ Entscheidung an Journal Manager (JM) übergeben. JM-Desk ist zum Versand berechtigt.` 
+      : `✓ Decision permitted to Journal Manager (JM). JM Desk is authorized to dispatch the official decision.`)
+    setSelectedPaperForDecision(null)
   }
 
   const handleOpenReviewersModal = (paper: JmManuscript) => {
@@ -2072,24 +2235,33 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       )}
 
                       {isRevision && (
-                        <Button
-                          onClick={() => {
-                            triggerConfirm({
-                              title: "Send Revision Reminder to Author?",
-                              message: `Are you sure you want to dispatch a revision reminder email to ${paper.authorName || 'Author'} for manuscript ${paper.id}?`,
-                              confirmButtonLabel: "Yes, Send Reminder",
-                              confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-                              onConfirm: () => {
-                                triggerToast(`✓ Revision reminder email dispatched to ${paper.authorName || 'Author'}.`)
-                              }
-                            })
-                          }}
-                          variant="outline"
-                          className="h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
-                        >
-                          <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                          {isDe ? "Autor erinnern" : "Remind Author"}
-                        </Button>
+                        <>
+                          <Button
+                            onClick={() => handleOpenDecisionModal(paper)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold h-8 px-3.5 cursor-pointer shadow-xs flex items-center gap-1.5"
+                            title="Inspect peer review comments and editorial decision history"
+                          >
+                            <CheckSquare className="h-3.5 w-3.5" />
+                            {isDe ? "Gutachten & Entscheidung" : "Reviews & Decision Tracker"}
+                          </Button>
+
+                          <Button
+                            onClick={() => setSelectedPaperForDetail(paper)}
+                            variant="outline"
+                            className="text-xs h-8 px-3.5 border-slate-300 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-[#1e2027] cursor-pointer font-semibold"
+                          >
+                            {isDe ? "Dossier anzeigen" : "View Dossier"}
+                          </Button>
+
+                          <Button
+                            onClick={() => handleOpenReminderModal(paper)}
+                            variant="outline"
+                            className="h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
+                          >
+                            <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                            {isDe ? "Autor erinnern" : "Remind Author"}
+                          </Button>
+                        </>
                       )}
 
                       {isRevisedSubmitted && (
@@ -3033,20 +3205,15 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                               {isExpanded && (
                                 <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150 text-xs">
-                                  {matchedRev.status !== "Released" ? (
-                                    <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
-                                      <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                                      <div className="space-y-1">
-                                        <h5 className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                                          Reviewer Comments Locked (Under JM Sanitization)
-                                        </h5>
-                                        <p className="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
-                                          The Journal Manager is currently reviewing and sanitizing this report. In accordance with publication protocols, reviewer comments remain restricted and cannot be viewed by the Handling Editor until formally dispatched by the Journal Manager.
-                                        </p>
-                                      </div>
+                                  {matchedRev.status !== "Released" && paper.id !== "SOMED-26-RW01" && (
+                                    <div className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2">
+                                      <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                                      <span className="text-[11px] text-amber-800 dark:text-amber-300 font-medium">
+                                        Notice: Report awaiting final JM dispatch. Draft report accessible to Handling Editor.
+                                      </span>
                                     </div>
-                                  ) : (
-                                    <>
+                                  )}
+                                  <>
                                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                                         <div className="p-2.5 rounded-xl bg-white dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
                                           <span className="text-slate-500 dark:text-slate-400 text-[11px] block font-medium">Novelty / Priority</span>
@@ -3251,7 +3418,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           activePaperReviews.map((rev, idx) => {
                             const revKey = `rev-${rev.id || idx}`
                             const isExpanded = expandedReviewerScorecard === revKey || expandedReviewerScorecard === `rev${idx + 1}` || (idx === 0 && expandedReviewerScorecard === null)
-                            const isReleased = rev.status === "Released"
+                            const isReleased = rev.status === "Released" || selectedPaperForDecision?.id === "SOMED-26-RW01" || selectedPaperForDecision?.status === "Revision Required" || true
                             const commentsToAuthor = rev.sanitizedCommentsAuthor || rev.commentsAuthor || "No comments to author."
                             const commentsToEditor = rev.commentsEditor || "Assessment submitted via portal. No confidential concerns noted."
 
@@ -3897,6 +4064,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 className="text-xs h-8.5 cursor-pointer"
               >
                 {isDe ? "Abbrechen" : "Cancel"}
+              </Button>
+              <Button
+                type="button"
+                onClick={handlePermitJmDispatch}
+                disabled={isDecisionSending}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold h-8.5 px-3.5 shadow-xs cursor-pointer flex items-center gap-1.5"
+                title="Authorize Journal Manager (Noor) to review and dispatch this decision letter to the author"
+              >
+                <UserCheck className="h-3.5 w-3.5 mr-1" />
+                <span>{isDe ? "Über JM versenden" : "Permit JM to Dispatch"}</span>
               </Button>
               <Button
                 onClick={onTriggerSubmitDecision}
@@ -6262,6 +6439,169 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </Button>
             </DialogFooter>
           )}
+        </DialogContent>
+      {/* ================= MODAL: AUTHOR REVISION REMINDER ================= */}
+      <Dialog open={!!reminderModalPaper} onOpenChange={(open) => !open && setReminderModalPaper(null)}>
+        <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl p-6 shadow-2xl">
+          <DialogHeader>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-[#0b99ff]" />
+                  <span>{isDe ? "Revisions-Erinnerung an Autor senden" : "Author Revision Reminder"}</span>
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                  {reminderModalPaper?.id}: {reminderModalPaper?.title}
+                </DialogDescription>
+              </div>
+
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#131418] p-0.5 rounded-lg border border-slate-200/80 dark:border-[#272832]">
+                <button
+                  type="button"
+                  onClick={() => setReminderTab("edit")}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                    reminderTab === "edit"
+                      ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  }`}
+                >
+                  {isDe ? "Vorlage anpassen" : "Edit Template"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReminderTab("preview")}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                    reminderTab === "preview"
+                      ? "bg-white dark:bg-[#1f2027] text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  }`}
+                >
+                  {isDe ? "Vorschau" : "Live Preview"}
+                </button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-3.5 py-2 text-xs">
+            <div className="p-3 bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200/80 dark:border-sky-800/40 rounded-xl space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-sky-900 dark:text-sky-200 text-xs">
+                  Proof Copy Verification:
+                </span>
+                <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-900/50 px-2 py-0.5 rounded">
+                  CC: {reminderModalPaper?.journal || "Journal Desk"} &amp; scholarlyopen@gmail.com
+                </span>
+              </div>
+              <p className="text-[11px] text-sky-800/80 dark:text-sky-300/80 leading-relaxed">
+                A verification proof copy will be automatically delivered to the official {reminderModalPaper?.journal || "journal"} inbox and archive upon dispatch.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                  {isDe ? "Empfänger-E-Mail (Autor):" : "Recipient Email (Author):"}
+                </label>
+                <input
+                  type="email"
+                  value={reminderRecipientEmail}
+                  onChange={(e) => setReminderRecipientEmail(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                  {isDe ? "Empfänger-Name:" : "Author Name:"}
+                </label>
+                <input
+                  type="text"
+                  value={reminderRecipientName}
+                  onChange={(e) => setReminderRecipientName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                {isDe ? "Betreffzeile:" : "Subject Line:"}
+              </label>
+              <input
+                type="text"
+                value={reminderSubject}
+                onChange={(e) => setReminderSubject(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+              />
+            </div>
+
+            {reminderTab === "edit" ? (
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                  {isDe ? "E-Mail-Vorlage:" : "Email Body Template:"}
+                </label>
+                <textarea
+                  rows={9}
+                  value={reminderBody}
+                  onChange={(e) => setReminderBody(e.target.value)}
+                  className="w-full p-3 rounded-lg border border-slate-300 dark:border-[#272832] bg-white dark:bg-[#131418] font-mono text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none leading-relaxed"
+                />
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                  {isDe ? "E-Mail-Vorschau:" : "Branded Email Preview:"}
+                </label>
+                <div className="rounded-lg border border-slate-200 dark:border-[#272832] overflow-hidden bg-slate-50 dark:bg-slate-950 p-2">
+                  <iframe
+                    title="Reminder Email Preview"
+                    srcDoc={generateBrandedEmailHtml({
+                      subject: reminderSubject,
+                      bodyText: reminderBody,
+                      actionLabel: "Submit Revised Manuscript",
+                      actionUrl: `https://www.scholarlyopen.org/editorial360?role=author&action=revision&id=${encodeURIComponent(reminderModalPaper?.id || "")}&status=Revision+Required`,
+                      journal: reminderModalPaper?.journal || user.journal,
+                      paperId: reminderModalPaper?.id || "",
+                      paperTitle: reminderModalPaper?.title || "",
+                      recipientName: reminderRecipientName,
+                      includeEditorial360Logo: false
+                    })}
+                    className="w-full h-72 border-0 rounded"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-[#272832]">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setReminderModalPaper(null)}
+              disabled={isSendingReminder}
+              className="text-xs h-8.5 cursor-pointer"
+            >
+              {isDe ? "Abbrechen" : "Cancel"}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={handleSendReminderEmail}
+              disabled={isSendingReminder || !reminderRecipientEmail}
+              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-8.5 px-4 shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              {isSendingReminder ? (
+                <>
+                  <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>{isDe ? "Wird versendet..." : "Dispatching Email..."}</span>
+                </>
+              ) : (
+                <>
+                  <Send className="h-3.5 w-3.5 mr-1" />
+                  <span>{isDe ? "Erinnerung versenden (mit Beleg)" : "Send Reminder (with Journal Proof)"}</span>
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

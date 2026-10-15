@@ -179,10 +179,20 @@ export async function POST(req: Request) {
 
     const normalizedTo = body.to.trim().toLowerCase()
     const defaultCc = "scholarlyopen@gmail.com"
-    const ccRecipient = body.cc ? body.cc.trim() : (normalizedTo !== defaultCc ? defaultCc : undefined)
-    const ccList = ccRecipient
-      ? ccRecipient.split(",").map((c: string) => c.trim()).filter((c: string) => Boolean(c) && c.toLowerCase() !== normalizedTo)
-      : []
+    const journalProofEmail = getJournalReplyTo(journal)
+
+    // Build proof CC list including scholarlyopen@gmail.com AND the respective journal's official inbox
+    const proofRecipients = [defaultCc]
+    if (journalProofEmail && !proofRecipients.map(e => e.toLowerCase()).includes(journalProofEmail.toLowerCase())) {
+      proofRecipients.push(journalProofEmail)
+    }
+
+    const requestedCc = body.cc ? body.cc.split(",").map((c: string) => c.trim()).filter(Boolean) : []
+    const combinedCc = Array.from(new Set([...requestedCc, ...proofRecipients]))
+      .filter(c => c && c.toLowerCase() !== normalizedTo)
+
+    const ccRecipient = combinedCc.length > 0 ? combinedCc.join(", ") : undefined
+    const ccList = combinedCc
 
     if (smtpHost && smtpUser && smtpPass && body.to) {
       const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true"
