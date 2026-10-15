@@ -194,6 +194,26 @@ export async function POST(request: Request) {
   const formTimestamp = safeText(formData.get("_form_ts"), 50)
   const verificationToken = safeText(formData.get("human_verification_token"), 500)
 
+  // Anti-Spam & Automated Bot Defense
+  const spamCheck = validateSubmissionAntiSpam({
+    honeypot,
+    formTimestamp,
+    email: authorEmail,
+    name: `${firstName} ${lastName}`.trim(),
+    messageOrTitle: `${title} ${abstract}`.trim(),
+    affiliation,
+    ip,
+    verificationToken,
+    requireVerification: false,
+  })
+
+  if (spamCheck.isSpam) {
+    console.warn(`[Submit Anti-Spam] Bot submission dropped (${spamCheck.reason}) from IP ${ip}`)
+    // Silent drop: Return success so bots do not retry or mutate payloads,
+    // but DO NOT send any notification emails and DO NOT write to database!
+    return Response.json({ ok: true, trackingId: "SO-BOT-FILTERED" })
+  }
+
   // Anti-Spam Rate Limit Check
   if (ip && ip !== "unknown") {
     const rateCheck = checkRateLimit(ip, 12, 10 * 60 * 1000)

@@ -93,7 +93,7 @@ const BLOCKED_DOMAINS = [
 ]
 
 /**
- * Detects whether an email is a disposable domain, SMS gateway, or structurally invalid
+ * Detects whether an email is a disposable domain, SMS gateway, dot-trick spam, or structurally invalid
  */
 export function isSuspiciousEmail(email: string): boolean {
   if (!email || typeof email !== "string") return true
@@ -105,7 +105,13 @@ export function isSuspiciousEmail(email: string): boolean {
 
   const parts = cleanEmail.split("@")
   if (parts.length !== 2) return true
-  const domain = parts[1]
+  const [localPart, domain] = parts
+
+  // Detect Gmail / mail provider dot-abuse (e.g. j.o.t.exa.xe.k.o.7.83@gmail.com)
+  const dotCount = (localPart.match(/\./g) || []).length
+  if (dotCount >= 4) {
+    return true
+  }
 
   if (BLOCKED_DOMAINS.some((blocked) => domain === blocked || domain.endsWith("." + blocked))) {
     return true
@@ -116,7 +122,7 @@ export function isSuspiciousEmail(email: string): boolean {
 
 /**
  * Checks if a string looks like typical machine-generated bot gibberish
- * (e.g. "KotqjnWXNBDKxQhQ", "pkzlVnqmdeuTiXwFzWkRfHy", "wnztwdfuaSJAGYmunJh")
+ * (e.g. "KotqjnWXNBDKxQhQ", "gUulkHRikzUCmQzheJVjcqYc", "BqaeRnUbzMqQvrFV")
  */
 export function isGibberish(text: string): boolean {
   if (!text || typeof text !== "string") return false
@@ -124,24 +130,46 @@ export function isGibberish(text: string): boolean {
   if (trimmed.length < 8) return false
 
   // If a single long token has >= 10 characters with zero spaces
-  if (!trimmed.includes(" ") && trimmed.length >= 12) {
+  if (!trimmed.includes(" ")) {
+    // Scientific titles and abstracts never consist of a single word >= 15 characters without spaces
+    if (trimmed.length >= 15 && !trimmed.startsWith("http") && !trimmed.startsWith("doi:")) {
+      return true
+    }
+
     // Check for high consonant density (e.g. "KotqjnWXNBDKxQhQ", "wnztwdfuaSJAGYmunJh")
     const consonants = trimmed.match(/[^aeiouAEIOU0-9\s]/g)?.length || 0
     const ratio = consonants / trimmed.length
-    if (ratio > 0.82) return true
+    if (ratio > 0.80) return true
 
-    // Check for weird high frequency uppercase/lowercase interspersing
+    // Check for weird high frequency uppercase/lowercase interspersing (e.g. "gUulkHRikzUCmQzheJVjcqYc")
     const upperCount = (trimmed.match(/[A-Z]/g) || []).length
     const lowerCount = (trimmed.match(/[a-z]/g) || []).length
-    if (upperCount >= 4 && lowerCount >= 4 && upperCount / trimmed.length > 0.3) {
-      // Rapid transitions between lower and upper case (camelCase/random case jitter)
+    if (upperCount >= 3 && lowerCount >= 3) {
       let caseTransitions = 0
       for (let i = 1; i < trimmed.length; i++) {
         const isPrevUpper = trimmed[i - 1] === trimmed[i - 1].toUpperCase() && /[A-Z]/.test(trimmed[i - 1])
         const isCurrUpper = trimmed[i] === trimmed[i].toUpperCase() && /[A-Z]/.test(trimmed[i])
         if (isPrevUpper !== isCurrUpper) caseTransitions++
       }
-      if (caseTransitions >= 5) return true
+      if (caseTransitions >= 4) return true
+    }
+  }
+
+  // Also check individual words inside multi-word strings
+  const words = trimmed.split(/\s+/)
+  for (const word of words) {
+    if (word.length >= 14 && !word.startsWith("http") && !word.startsWith("doi:")) {
+      const upper = (word.match(/[A-Z]/g) || []).length
+      const lower = (word.match(/[a-z]/g) || []).length
+      if (upper >= 3 && lower >= 3) {
+        let caseTransitions = 0
+        for (let i = 1; i < word.length; i++) {
+          const isPrevUpper = word[i - 1] === word[i - 1].toUpperCase() && /[A-Z]/.test(word[i - 1])
+          const isCurrUpper = word[i] === word[i].toUpperCase() && /[A-Z]/.test(word[i])
+          if (isPrevUpper !== isCurrUpper) caseTransitions++
+        }
+        if (caseTransitions >= 4) return true
+      }
     }
   }
 
@@ -185,6 +213,7 @@ export function validateSubmissionAntiSpam({
   email,
   name,
   messageOrTitle,
+  affiliation,
   ip,
   verificationToken,
   requireVerification = false,
@@ -194,6 +223,7 @@ export function validateSubmissionAntiSpam({
   email?: string | null
   name?: string | null
   messageOrTitle?: string | null
+  affiliation?: string | null
   ip?: string
   verificationToken?: string | null
   requireVerification?: boolean
@@ -246,6 +276,11 @@ export function validateSubmissionAntiSpam({
   if (messageOrTitle && isGibberish(messageOrTitle)) {
     console.warn(`[AntiSpam] Bot gibberish detected in content: ${messageOrTitle.slice(0, 30)} from IP ${ip}`)
     return { isSpam: true, reason: "Gibberish pattern in message/title", action: "silent_drop" }
+  }
+
+  if (affiliation && isGibberish(affiliation)) {
+    console.warn(`[AntiSpam] Bot gibberish detected in affiliation: ${affiliation} from IP ${ip}`)
+    return { isSpam: true, reason: "Gibberish pattern in affiliation", action: "silent_drop" }
   }
 
   // 6. Rate limiting
