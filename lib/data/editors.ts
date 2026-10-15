@@ -785,61 +785,71 @@ Dr. Rabea actively serves in international oncology leadership, having served as
         title: "Programmed cell death protein 1 (PD-1)/programmed cell death ligand 1 (PD-L1) in multiple myeloma",
         journal: "Journal of the Egyptian National Cancer Institute",
         year: "2026",
-        doi: "10.1186/s43046-026-00000-0"
+        doi: "10.1186/s43046-026-00379-2",
+        link: "https://doi.org/10.1186/s43046-026-00379-2"
       },
       {
         title: "Outcomes of comprehensive genomic profiling (CGP) for advanced cancers in a low-middle-income country (Abstract 2289P)",
         journal: "Annals of Oncology (ESMO Congress 2025)",
         year: "2025",
-        doi: "10.1016/j.annonc.2025.08.2289"
+        doi: "10.1016/j.annonc.2025.08.2905",
+        link: "https://doi.org/10.1016/j.annonc.2025.08.2905"
       },
       {
         title: "The CAIRO Journal Club: A Decade of Impact",
         journal: "Journal of Cancer Education",
         year: "2025",
-        doi: "10.1007/s13187-025-02739-3"
+        doi: "10.1007/s13187-025-02739-3",
+        link: "https://doi.org/10.1007/s13187-025-02739-3"
       },
       {
         title: "Guiding principles for health equity in oncology: insights from patient organizations from the Middle East and Africa",
         journal: "Frontiers in Health Services",
         year: "2025",
-        doi: "10.3389/frhs.2025.1560116"
+        doi: "10.3389/frhs.2025.1560116",
+        link: "https://doi.org/10.3389/frhs.2025.1560116"
       },
       {
         title: "Practical guidance on the clinical management of belantamab mafodotin for patients with relapsed/refractory multiple myeloma: recommendations from the Middle East and North Africa expert panel",
         journal: "Clinical Lymphoma Myeloma and Leukemia",
         year: "2025",
-        doi: "10.1016/j.clml.2025.04.012"
+        doi: "10.1016/j.clml.2025.05.019",
+        link: "https://doi.org/10.1016/j.clml.2025.05.019"
       },
       {
         title: "State of lung cancer in Egypt: moving towards improved guidelines for prevention, screening, treatment, and clinical care programs",
         journal: "JTO Clinical and Research Reports",
         year: "2024",
-        doi: "10.1016/j.jtocrr.2024.100776"
+        doi: "10.1016/j.jtocrr.2024.100776",
+        link: "https://doi.org/10.1016/j.jtocrr.2024.100776"
       },
       {
         title: "Impact of COVID-19 on management and outcomes of oncology patients: results of the MENA COVID-19 and Cancer Registry (MCCR)",
         journal: "Journal of Immunotherapy and Precision Oncology",
         year: "2024",
-        doi: "10.36401/JIPO-24-1"
+        doi: "10.36401/jipo-23-38",
+        link: "https://doi.org/10.36401/jipo-23-38"
       },
       {
         title: "Real-world treatment patterns and clinical outcomes in patients with stage III non-small cell lung cancer: results of the KINDLE-Egypt cohort",
         journal: "Therapeutic Advances in Medical Oncology",
         year: "2023",
-        doi: "10.1177/17588359231185432"
+        doi: "10.1177/17588359231212182",
+        link: "https://doi.org/10.1177/17588359231212182"
       },
       {
         title: "Central nervous system involvement with multiple myeloma: long-term survival can be achieved with radiation, intrathecal chemotherapy, and immunomodulatory agents",
         journal: "British Journal of Haematology",
         year: "2013",
-        doi: "10.1111/bjh.12356"
+        doi: "10.1111/bjh.12414",
+        link: "https://doi.org/10.1111/bjh.12414"
       },
       {
-        title: "Cyclophosphamide and prednisone induction effectively decreased the incidence of engraftment syndrome in patients with POEMS syndrome who undergo stem cell transplantation",
+        title: "Cyclophosphamide and prednisone induction followed by cyclophosphamide mobilization effectively decreases the incidence of engraftment syndrome in patients with POEMS syndrome who undergo stem cell transplantation",
         journal: "American Journal of Hematology",
         year: "2011",
-        doi: "10.1002/ajh.22123"
+        doi: "10.1002/ajh.22115",
+        link: "https://doi.org/10.1002/ajh.22115"
       }
     ],
     honors: [

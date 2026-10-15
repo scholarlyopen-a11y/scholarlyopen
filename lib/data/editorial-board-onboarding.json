@@ -150,7 +150,7 @@
         "Cancer Health Equity & Global Oncology"
       ],
       "biography": "Dr. Ahmed Magdy Rabea, M.D., Ph.D., is an Assistant Professor of Medical Oncology & Hematology at the National Cancer Institute (NCI), Cairo University, and Consultant & Head of the Department of Medical Oncology at Shifa Hospital, New Cairo, Egypt. With over 20 years of clinical, translational research, and academic teaching experience across premier cancer centers in Egypt and Canada, Dr. Rabea provides comprehensive multidisciplinary care and clinical leadership with specialized expertise in thoracic oncology, breast cancer, prostate malignancies, and malignant hematology.\n\nDr. Rabea completed his Doctorate (Ph.D.) in Medical Oncology (2015) and Master of Science in Medical Oncology (2009) at the National Cancer Institute, Cairo University, following his MBBCh with Excellent with Honors from Kasr El Ainy Faculty of Medicine, Cairo University (2004). He subsequently completed advanced international training, including a Clinical Fellowship in Malignant Hematology and the Multiple Myeloma & Autologous Stem Cell Transplant Program at the Princess Margaret Cancer Centre, University of Toronto, Canada (2010), a Master of Advanced Oncology (M.Sc.) at Ulm University, Germany (2012), and European Society for Medical Oncology (ESMO) Board Certification (2012).\n\nA dedicated clinical trialist and researcher, Dr. Rabea has served as Principal Investigator and Co-Investigator on numerous multinational Phase II–III clinical trials, including the KINDLE trial in stage III non-small cell lung cancer, the PARACHUTE study in renal cell carcinoma, and the FATIMA trial in HR+/HER2− metastatic breast cancer, as well as landmark studies in multiple myeloma, CML, and Castleman's disease. He has authored more than 30 peer-reviewed articles in leading oncology journals including Annals of Oncology, Journal of Cancer Education, Clinical Lymphoma Myeloma and Leukemia, JTO Clinical and Research Reports, and Blood.\n\nDr. Rabea actively serves in international oncology leadership, having served as Chair (2021–2023) and Deputy Chair (2020–2021) of the Career Development & Fellowships Committee for the International Association for the Study of Lung Cancer (IASLC), Abstract Reviewer for the World Lung Conference (WLC), and Coordinator for the Cairo ESMO Examination Session. He serves as Coordinator for the Egyptian Presidential Initiative for the Screening and Early Detection of Lung Cancer and actively drives cancer health-equity and guideline harmonization initiatives across the Middle East and Africa. In 2024, he was honored with the Best Oncologist in Egypt award by the FORTTUNA Awards.",
-      "photoUrl": "/images/editors/ahmed-magdy-rabea.jpg",
+      "photoUrl": "https://wrccglyypgxtuikrupkh.supabase.co/storage/v1/object/public/editorial360_data/editors/ahmed-magdy-rabea.jpg",
       "cvFileName": "Ahmed_Rabea_CV_2026_updated.pdf",
       "cvFileSize": "180 KB",
       "orcid": "0000-0001-9060-6492",
@@ -162,13 +162,13 @@
           "title": "Programmed cell death protein 1 (PD-1)/programmed cell death ligand 1 (PD-L1) in multiple myeloma",
           "journal": "Journal of the Egyptian National Cancer Institute",
           "year": "2026",
-          "doi": "10.1186/s43046-026-00000-0"
+          "doi": "10.1186/s43046-026-00379-2"
         },
         {
           "title": "Outcomes of comprehensive genomic profiling (CGP) for advanced cancers in a low-middle-income country (Abstract 2289P)",
           "journal": "Annals of Oncology (ESMO Congress 2025)",
           "year": "2025",
-          "doi": "10.1016/j.annonc.2025.08.2289"
+          "doi": "10.1016/j.annonc.2025.08.2905"
         },
         {
           "title": "The CAIRO Journal Club: A Decade of Impact",
@@ -186,7 +186,7 @@
           "title": "Practical guidance on the clinical management of belantamab mafodotin for patients with relapsed/refractory multiple myeloma: recommendations from the Middle East and North Africa expert panel",
           "journal": "Clinical Lymphoma Myeloma and Leukemia",
           "year": "2025",
-          "doi": "10.1016/j.clml.2025.04.012"
+          "doi": "10.1016/j.clml.2025.05.019"
         },
         {
           "title": "State of lung cancer in Egypt: moving towards improved guidelines for prevention, screening, treatment, and clinical care programs",
@@ -198,25 +198,25 @@
           "title": "Impact of COVID-19 on management and outcomes of oncology patients: results of the MENA COVID-19 and Cancer Registry (MCCR)",
           "journal": "Journal of Immunotherapy and Precision Oncology",
           "year": "2024",
-          "doi": "10.36401/JIPO-24-1"
+          "doi": "10.36401/jipo-23-38"
         },
         {
           "title": "Real-world treatment patterns and clinical outcomes in patients with stage III non-small cell lung cancer: results of the KINDLE-Egypt cohort",
           "journal": "Therapeutic Advances in Medical Oncology",
           "year": "2023",
-          "doi": "10.1177/17588359231185432"
+          "doi": "10.1177/17588359231212182"
         },
         {
           "title": "Central nervous system involvement with multiple myeloma: long-term survival can be achieved with radiation, intrathecal chemotherapy, and immunomodulatory agents",
           "journal": "British Journal of Haematology",
           "year": "2013",
-          "doi": "10.1111/bjh.12356"
+          "doi": "10.1111/bjh.12414"
         },
         {
-          "title": "Cyclophosphamide and prednisone induction effectively decreased the incidence of engraftment syndrome in patients with POEMS syndrome who undergo stem cell transplantation",
+          "title": "Cyclophosphamide and prednisone induction followed by cyclophosphamide mobilization effectively decreases the incidence of engraftment syndrome in patients with POEMS syndrome who undergo stem cell transplantation",
           "journal": "American Journal of Hematology",
           "year": "2011",
-          "doi": "10.1002/ajh.22123"
+          "doi": "10.1002/ajh.22115"
         }
       ],
       "hasAcceptedTerms": true,
