@@ -69,6 +69,27 @@ export const metadata: Metadata = {
   },
 }
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Scholarly Open",
+  "alternateName": "Scholarly Open Publishing",
+  "url": "https://www.scholarlyopen.org",
+  "logo": "https://www.scholarlyopen.org/icon.svg",
+  "description": "Scholarly Open is an independent Gold Open Access academic publishing and research training platform adhering to the Principles of Transparency and Best Practice in Scholarly Publishing.",
+  "sameAs": [
+    "https://de.linkedin.com/company/scholarlyopen"
+  ],
+  "publishingPrinciples": "https://www.scholarlyopen.org/publication-ethics",
+  "knowsAbout": [
+    "Open Access Publishing",
+    "Peer Review",
+    "Scientific Integrity",
+    "FAIR Data Principles",
+    "Academic Research Training"
+  ]
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -76,6 +97,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
       <body className={`${inter.variable} ${sourceSerif.variable} ${plusJakarta.variable} font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <LanguageProvider>

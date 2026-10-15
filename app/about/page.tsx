@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect } from "react"
-import { ArrowRight, Target, Eye, Award, Globe } from "lucide-react"
+import { ArrowRight, Target, Eye, Award, Globe, ShieldCheck, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -200,6 +200,47 @@ export default function AboutPage() {
                   </div>
                   <p className="mt-4 text-sm text-muted-foreground">{t("oaModels.fromMainz")}</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Academic Integrity & Brand Disambiguation */}
+        <section className="py-16 lg:py-20 border-t border-border">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <div className="max-w-3xl mb-12">
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">Academic Integrity & Governance</span>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                Brand Identity & Ethical Standards
+              </h2>
+              <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+                Scholarly Open is built upon fundamental principles of research transparency, editorial independence, and international publishing ethics.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold">Independent German Academic Initiative</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Scholarly Open is an independent Gold Open Access publishing and scientific training initiative operating in its founding phase (<em>in Gründung / i.G.</em>) in Germany. The platform is committed to FAIR data principles, community-led peer review, and transparent APC structures with comprehensive fee waivers for inaugural authors.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold">Brand Disambiguation</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Scholarly Open (<strong className="text-foreground">scholarlyopen.org</strong>) is an independent scholarly publishing platform and has <strong>no connection or affiliation</strong> with the historical third-party blog or blacklist previously operated under the phrase "Scholarly Open Access" between 2012 and 2017. Our sole mission is publishing high-integrity, peer-reviewed open-access science.
+                </p>
               </div>
             </div>
           </div>

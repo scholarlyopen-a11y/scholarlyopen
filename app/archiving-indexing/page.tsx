@@ -160,6 +160,61 @@ export default function ArchivingIndexingPage() {
           </div>
         </section>
 
+        {/* Transparency & Indexing Eligibility Roadmap */}
+        <section className="py-12 bg-background border-t border-border">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 sm:p-8 lg:p-10 space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary">Standards & Best Practices</span>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mt-1">
+                    Principles of Transparency & Indexing Roadmap
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/25">
+                    COPE · DOAJ · OASPA Aligned
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm sm:text-base text-foreground/90 leading-relaxed max-w-4xl">
+                Scholarly Open strictly adheres to the <strong>Principles of Transparency and Best Practice in Scholarly Publishing</strong> jointly developed by the Committee on Publication Ethics (<strong>COPE</strong>), the Directory of Open Access Journals (<strong>DOAJ</strong>), the Open Access Scholarly Publishing Association (<strong>OASPA</strong>), and the World Association of Medical Editors (<strong>WAME</strong>).
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-3 pt-2">
+                <div className="bg-card rounded-xl p-5 border border-border space-y-2">
+                  <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-primary" />
+                    1. Rigorous Editorial Baseline
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    All journals maintain independent editorial boards, double-blind peer review, and transparent APC fee structures with comprehensive waivers for inaugural authors.
+                  </p>
+                </div>
+                <div className="bg-card rounded-xl p-5 border border-border space-y-2">
+                  <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-primary" />
+                    2. Volume 1 Publishing History
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Under DOAJ and OASPA evaluation criteria, newly launched journals must publish their inaugural volume before formal application and review.
+                  </p>
+                </div>
+                <div className="bg-card rounded-xl p-5 border border-border space-y-2">
+                  <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-primary" />
+                    3. Permanent Digital Deposit
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Articles are registered with official Crossref DOIs upon formal publication, permanently archived under CC BY 4.0 licenses, and deposited into preservation networks.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Indexing */}
         <section className="py-16 lg:py-24 bg-muted/30">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
