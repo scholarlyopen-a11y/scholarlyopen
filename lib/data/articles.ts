@@ -12,6 +12,25 @@ export interface Article {
   pdfUrl?: string
 }
 
+export function isSampleArticle(article: { doi?: string; id?: string }): boolean {
+  if (!article) return false
+  const doi = article.doi || ""
+  const id = article.id || ""
+  return (
+    !doi ||
+    doi.startsWith("10.12345") ||
+    id.includes("-2025-00") ||
+    id.includes("-2026-00") ||
+    id.startsWith("med-") ||
+    id.startsWith("chem-") ||
+    id.startsWith("bio-") ||
+    id.startsWith("env-") ||
+    id.startsWith("eng-") ||
+    id.startsWith("ais-") ||
+    id.startsWith("soc-")
+  )
+}
+
 export const articles: Article[] = [
   {
     "id": "ais-2026-001",

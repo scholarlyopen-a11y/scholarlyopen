@@ -2,11 +2,12 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { 
   Calendar, FileText, Users, ExternalLink, ArrowLeft, 
-  Quote, Tag, BookOpen, Share2, Download, Check
+  Quote, Tag, BookOpen, Download, Check, Sparkles, Send, 
+  AlertCircle, ShieldCheck
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { articles } from "@/lib/data/articles"
+import { articles, isSampleArticle } from "@/lib/data/articles"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -31,12 +32,22 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   const article = articles.find((a) => a.id === articleId && a.journalSlug === journalSlug)
   if (!article) return {}
 
-  const titleText = `${article.title} | Scholarly Open`
+  const isSample = isSampleArticle(article)
+  const titleText = isSample 
+    ? `[Format Preview] ${article.title} | Scholarly Open` 
+    : `${article.title} | Scholarly Open`
   const descText = article.abstract.slice(0, 160) + (article.abstract.length > 160 ? "..." : "")
 
   return {
     title: titleText,
     description: descText,
+    robots: isSample ? {
+      index: false,
+      follow: true,
+    } : {
+      index: true,
+      follow: true,
+    },
     openGraph: {
       title: titleText,
       description: descText,
@@ -64,6 +75,8 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     notFound()
   }
 
+  const isSample = isSampleArticle(article)
+
   const articleTypeLabels: Record<string, string> = {
     research: "Research Article",
     review: "Review Article",
@@ -78,10 +91,12 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     .join(" ")
     .replace("And", "&")
 
-  const citationString = `${article.authors.join(", ")} (${article.publishedDate.split("-")[0]}). ${article.title}. Journal of ${journalName}, DOI: ${article.doi}.`
+  const citationString = isSample
+    ? `${article.authors.join(", ")} (${article.publishedDate.split("-")[0]}). ${article.title}. Scholarly Open: ${journalName} [Demonstration Layout Preview · Inaugural Volume in Formation].`
+    : `${article.authors.join(", ")} (${article.publishedDate.split("-")[0]}). ${article.title}. Scholarly Open: ${journalName}, DOI: ${article.doi}.`
 
-  // ScholarlyArticle JSON-LD for Google Scholar & Search Engine indexing
-  const jsonLd = {
+  // Only emit ScholarlyArticle JSON-LD for real publications to prevent Google Scholar indexing mock entries
+  const jsonLd = !isSample ? {
     "@context": "https://schema.org",
     "@type": "ScholarlyArticle",
     "headline": article.title,
@@ -105,28 +120,77 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     ],
     "keywords": article.keywords.join(", "),
     "mainEntityOfPage": `https://www.scholarlyopen.org/journals/${journalSlug}/articles/${article.id}`,
-  }
+  } : null
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
 
-      <main className="flex-1 py-12 md:py-16">
+      <main className="flex-1 py-10 md:py-14">
         <div className="container max-w-5xl mx-auto px-4">
           {/* Navigation link back to Journal */}
-          <div className="mb-8">
+          <div className="mb-6 flex items-center justify-between">
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary pl-0">
               <Link href={`/journals/${journalSlug}`}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to {journalName} Journal
               </Link>
             </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" asChild className="text-xs">
+                <Link href={`/submit?journal=${journalSlug}`}>
+                  <Send className="h-3.5 w-3.5 mr-1.5" />
+                  Submit to this Journal
+                </Link>
+              </Button>
+            </div>
           </div>
+
+          {/* Option A: Demonstration Layout Preview & Call for Papers Banner */}
+          {isSample && (
+            <div className="mb-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5 p-5 sm:p-6 shadow-sm">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                <div className="space-y-2 max-w-2xl">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40 text-[11px] font-bold uppercase tracking-wider">
+                      <AlertCircle className="h-3 w-3 mr-1 inline" />
+                      Demonstration Format Preview · Call for Papers
+                    </Badge>
+                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                      Inaugural Volume In Formation
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
+                    This entry is an illustrative sample showcasing the open-access publication layout, typography, and citation metadata for <strong>Scholarly Open: {journalName}</strong>. Peer-reviewed research submissions are actively invited for the inaugural issue.
+                  </p>
+                  <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 pt-0.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Inaugural APC fee waivers and priority editorial evaluation are currently active for founding submissions.</span>
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto">
+                  <Button asChild size="sm" className="w-full font-semibold shadow-sm">
+                    <Link href={`/submit?journal=${journalSlug}`}>
+                      <Send className="h-3.5 w-3.5 mr-1.5" />
+                      Submit Your Manuscript
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="w-full text-xs">
+                    <Link href="/author-guidelines">
+                      Author Guidelines
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content (Left Column) */}
@@ -137,12 +201,18 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                   <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-xs font-semibold px-3 py-1">
                     {articleTypeLabels[article.articleType] || "Research Article"}
                   </Badge>
-                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" />
-                    Published: {article.publishedDate}
-                  </span>
+                  {isSample ? (
+                    <Badge variant="outline" className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30 text-xs font-semibold">
+                      Layout Preview
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Published: {article.publishedDate}
+                    </span>
+                  )}
                   <Badge variant="secondary" className="text-xs">
-                    Open Access
+                    Open Access (CC BY 4.0)
                   </Badge>
                 </div>
 
@@ -162,13 +232,13 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                   <div className="space-y-1">
                     <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Digital Object Identifier</span>
                     <div className="flex items-center gap-2">
-                      {article.doi.startsWith("10.12345") ? (
+                      {isSample ? (
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-sm sm:text-base font-semibold text-foreground">
-                            https://doi.org/{article.doi}
+                          <span className="font-mono text-xs sm:text-sm text-muted-foreground font-medium">
+                            DOI: Assigned via Crossref upon acceptance
                           </span>
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            Inaugural Volume · Deposit Active
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            Crossref Deposit Active Upon Publication
                           </span>
                         </div>
                       ) : (
@@ -193,9 +263,11 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                         </a>
                       </Button>
                     ) : (
-                      <Button variant="outline" size="sm" disabled title="PDF available upon publication">
-                        <FileText className="h-4 w-4 mr-2" />
-                        PDF Preview
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/submit?journal=${journalSlug}`}>
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit to Volume 1
+                        </Link>
                       </Button>
                     )}
                   </div>
@@ -238,19 +310,65 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base font-bold flex items-center gap-2">
                     <Quote className="h-4 w-4 text-primary" />
-                    How to Cite
+                    How to Cite {isSample ? "(Demonstration Format)" : ""}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <div className="p-4 bg-muted/50 rounded-xl font-mono text-xs text-foreground select-all break-words leading-relaxed border border-border">
                     {citationString}
                   </div>
+                  {isSample && (
+                    <p className="text-[11px] text-muted-foreground">
+                      *Illustrative citation format demonstrating how accepted articles in this journal are attributed and archived.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
             {/* Sidebar (Right Column) */}
             <div className="space-y-6">
+              {/* Call for Papers Card */}
+              {isSample && (
+                <Card className="border-primary/20 bg-primary/5 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-bold text-foreground">Call for Papers: Volume 1</CardTitle>
+                    </div>
+                    <CardDescription className="text-xs">
+                      Scholarly Open: {journalName} is currently accepting submissions for its inaugural volume.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-xs text-muted-foreground">
+                    <ul className="space-y-1.5 text-[11px]">
+                      <li className="flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>Rigorous double-blind peer review</span>
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>Official Crossref DOI assignment</span>
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>Inaugural APC fee waivers available</span>
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>Global open-access distribution (CC BY 4.0)</span>
+                      </li>
+                    </ul>
+                    <Button asChild size="sm" className="w-full text-xs font-semibold mt-2">
+                      <Link href={`/submit?journal=${journalSlug}`}>
+                        <Send className="h-3.5 w-3.5 mr-1.5" />
+                        Submit to this Journal
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Journal Info Card */}
               <Card className="border-border">
                 <CardHeader>

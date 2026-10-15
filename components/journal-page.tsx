@@ -574,12 +574,8 @@ export function JournalPage({
             </div>
           </section>
 
-          {/* Section 3: Latest Articles */}
-          <section className="pt-16 border-t border-border space-y-10 animate-in fade-in duration-300">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">{t("articles.title")}</h2>
-              <p className="text-muted-foreground">Explore the latest high-impact peer-reviewed research articles published open-access in this journal.</p>
-            </div>
+          {/* Section 3: Articles & Publication Previews */}
+          <section className="pt-16 border-t border-border space-y-6 animate-in fade-in duration-300">
             <ArticleList articles={sampleArticles} journalSlug={journalSlug} />
           </section>
 

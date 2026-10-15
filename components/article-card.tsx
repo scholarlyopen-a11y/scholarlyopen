@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/language-context"
 import { slugify } from "@/lib/utils"
 
+import { isSampleArticle } from "@/lib/data/articles"
+
 export interface Article {
   id: string
   title: string
@@ -22,6 +24,8 @@ export interface Article {
   isOpenAccess?: boolean
 }
 
+export { isSampleArticle }
+
 interface ArticleCardProps {
   article: Article
   journalSlug: string
@@ -29,6 +33,7 @@ interface ArticleCardProps {
 
 export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
   const { t } = useLanguage()
+  const isSample = isSampleArticle(article)
   
   const articleTypeLabels: Record<string, string> = {
     research: "Research Article",
@@ -41,12 +46,19 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
     <Card className="border-border hover:border-primary/30 transition-colors">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
-          <Badge variant="outline" className="shrink-0">
-            {articleTypeLabels[article.articleType]}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="shrink-0">
+              {articleTypeLabels[article.articleType] || "Research Article"}
+            </Badge>
+            {isSample && (
+              <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30 text-[10px] font-semibold">
+                Format Preview
+              </Badge>
+            )}
+          </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
-            {article.publishedDate}
+            {isSample ? "Inaugural Volume" : article.publishedDate}
           </div>
         </div>
         <CardTitle className="text-lg leading-tight mt-2 hover:text-primary transition-colors">
@@ -77,10 +89,9 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
         <div className="flex items-center justify-between pt-3 border-t border-border">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="font-medium">DOI:</span>
-            {article.doi.startsWith("10.12345") ? (
-              <span className="font-mono text-[11px] text-foreground/80 flex items-center gap-1" title="Official Crossref DOI assignment upon inaugural volume publication">
-                {article.doi}
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-sans font-medium">Inaugural</span>
+            {isSample ? (
+              <span className="font-mono text-[11px] text-muted-foreground/80 flex items-center gap-1" title="Official Crossref DOI assignment upon inaugural volume publication">
+                Deposit Pending (Inaugural Issue)
               </span>
             ) : (
               <a 
@@ -94,17 +105,23 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
             )}
           </div>
           <div className="flex gap-2">
-            {article.pdfUrl && (
+            {article.pdfUrl ? (
               <Button variant="ghost" size="sm" asChild>
                 <a href={article.pdfUrl} target="_blank" rel="noopener noreferrer">
                   <FileText className="h-4 w-4 mr-1" />
                   PDF
                 </a>
               </Button>
+            ) : (
+              <Button variant="ghost" size="sm" asChild className="text-xs text-primary font-semibold">
+                <Link href={`/submit?journal=${journalSlug}`}>
+                  Submit Manuscript
+                </Link>
+              </Button>
             )}
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/journals/${journalSlug}/articles/${article.id}`}>
-                {t("articles.readMore")}
+                {isSample ? "View Preview" : (t("articles.readMore") || "Read Article")}
                 <ExternalLink className="h-3.5 w-3.5 ml-1" />
               </Link>
             </Button>
@@ -116,21 +133,50 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
 }
 
 export function ArticleList({ articles, journalSlug }: { articles: Article[]; journalSlug: string }) {
-  const { t } = useLanguage()
+  const hasOnlySamples = articles.length > 0 && articles.every(isSampleArticle)
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t("articles.sampleTitle")}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{t("articles.sampleNote")}</p>
+          {hasOnlySamples ? (
+            <>
+              <div className="flex items-center gap-2 mb-1.5">
+                <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25 text-xs font-semibold">
+                  Call for Papers · Inaugural Issue
+                </Badge>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                Inaugural Volume · Layout Previews & Submissions
+              </h3>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                Illustrative publication samples showcasing manuscript presentation and citation styles. Peer-reviewed research submissions are actively invited for the founding issue.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                Articles
+              </h3>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                Peer-reviewed research published in this journal.
+              </p>
+            </>
+          )}
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/journals/${journalSlug}/articles`}>
-            {t("articles.viewAll")}
-            <ExternalLink className="h-3.5 w-3.5 ml-1" />
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="default" size="sm" asChild className="font-semibold text-xs">
+            <Link href={`/submit?journal=${journalSlug}`}>
+              Submit Paper
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild className="text-xs">
+            <Link href={`/journals/${journalSlug}/articles`}>
+              All Articles
+              <ExternalLink className="h-3.5 w-3.5 ml-1" />
+            </Link>
+          </Button>
+        </div>
       </div>
       <div className="grid gap-6">
         {articles.map((article) => (
