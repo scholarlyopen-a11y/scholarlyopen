@@ -2553,6 +2553,7 @@ Specific comments to the Author(s):
   const [activeAdminTab, setActiveAdminTab] = useState<string>("overview")
   const [activeAuthorTab, setActiveAuthorTab] = useState<"dashboard" | "submissions" | "scorecard" | "plagiarism" | "feedback" | "recognition" | "career">("dashboard")
   const [activeReviewerTab, setActiveReviewerTab] = useState<"overview" | "portfolio" | "forensics" | "wallet" | "certificate">("overview")
+  const [revisionCommentsTab, setRevisionCommentsTab] = useState<"all" | "rev1" | "rev3">("all")
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [userStatus, setUserStatus] = useState<"online" | "offline">("online")
   const [isTranslationMenuOpen, setIsTranslationMenuOpen] = useState(false)
@@ -13133,176 +13134,266 @@ Specific comments to the Author(s):
 
           {/* 3. AUTHOR: REVISION VIEW & SUBMIT MODAL */}
           <Dialog open={isRevisionDialogOpen} onOpenChange={setIsRevisionDialogOpen}>
-            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-2xl max-h-[88vh] overflow-y-auto transition-colors">
-              <DialogHeader>
-                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Upload Revised Manuscript</DialogTitle>
-                <DialogDescription className="text-slate-500 dark:text-slate-400">
-                  Review moderated feedback and upload corrected files.
-                </DialogDescription>
+            <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 w-[96vw] sm:max-w-4xl lg:max-w-5xl max-h-[92vh] flex flex-col p-6 rounded-2xl shadow-2xl transition-all">
+              <DialogHeader className="pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
+                  <div>
+                    <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-[#0b99ff]" />
+                      Upload Revised Manuscript & Response Letter
+                    </DialogTitle>
+                    <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Manuscript Tracking ID: <strong className="text-slate-800 dark:text-slate-200 font-mono">{revisionPaperId || "SOMED-26-RW01"}</strong> · Review itemized referee evaluations below and upload corrected manuscript with point-by-point rebuttal.
+                    </DialogDescription>
+                  </div>
+                </div>
               </DialogHeader>
               
-              <div className="space-y-4 py-2 text-xs font-semibold">
+              {/* Responsive 2-Column Broad Body */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 py-3.5 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pr-0.5">
                 
-                {/* Secure moderated reviewer feedback section */}
-                <div className="space-y-3 p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/80 dark:border-slate-800/80">
-                    <span className="text-[11px] text-[#0b99ff] uppercase font-bold tracking-wider block">Released Reviewer Comments</span>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/60">
-                      Sanitized & Dispatched by Journal Office ✓
-                    </span>
+                {/* LEFT COLUMN: RELEASED REVIEWER COMMENTS WITH INDEPENDENT SCROLLBAR */}
+                <div className="lg:col-span-7 flex flex-col min-h-0 space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-[#0b99ff] uppercase font-bold tracking-wider">
+                        Released Referee Comments
+                      </span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/60">
+                        Sanitized & Dispatched ✓
+                      </span>
+                    </div>
+
+                    {/* Filter buttons to view All or Jump to specific reviewer */}
+                    <div className="inline-flex rounded-lg p-0.5 bg-slate-200/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setRevisionCommentsTab("all")}
+                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                          revisionCommentsTab === "all"
+                            ? "bg-[#0b99ff] text-white shadow-xs"
+                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        All (2)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRevisionCommentsTab("rev1")}
+                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                          revisionCommentsTab === "rev1"
+                            ? "bg-[#0b99ff] text-white shadow-xs"
+                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        Reviewer #1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRevisionCommentsTab("rev3")}
+                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                          revisionCommentsTab === "rev3"
+                            ? "bg-[#0b99ff] text-white shadow-xs"
+                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        Reviewer #3
+                      </button>
+                    </div>
                   </div>
 
-                  {(() => {
-                    const isAortic = revisionPaperId === "SOMED-26-RW01" || revisionPaperId?.toLowerCase().includes("rw01")
-                    const aorticRev1 = `General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there`
+                  {/* Scrollable Container with explicit max-height and visible scrollbar */}
+                  <div 
+                    className="overflow-y-auto space-y-3 pr-2.5 max-h-[380px] lg:max-h-[460px] rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/60 dark:bg-slate-950/50"
+                    style={{ scrollbarWidth: "thin", scrollbarColor: "#0b99ff #e2e8f0" }}
+                  >
+                    {(() => {
+                      const isAortic = revisionPaperId === "SOMED-26-RW01" || revisionPaperId?.toLowerCase().includes("rw01")
+                      const aorticRev1 = `General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there`
 
-                    const aorticRev3 = `General comments to the Author(s):\nThis manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.\n\nSpecific comments to the Author(s):\n1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.\n2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.\n3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.\n4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).\n5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).\n6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.\n7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.\n8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`
+                      const aorticRev3 = `General comments to the Author(s):\nThis manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.\n\nSpecific comments to the Author(s):\n1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.\n2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.\n3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.\n4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).\n5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).\n6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.\n7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.\n8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`
 
-                    let matched = reviews.filter(r => r.paperId === revisionPaperId && (r.status === "Released" || isAortic))
+                      let matched = reviews.filter(r => r.paperId === revisionPaperId && (r.status === "Released" || isAortic))
 
-                    if (matched.length === 0 && isAortic) {
-                      matched = [
-                        {
-                          id: "REV-FB-SAM-01",
-                          paperId: "SOMED-26-RW01",
-                          reviewerName: "Reviewer #1",
-                          recommendation: "Re-write and Re-submit",
-                          sanitizedCommentsAuthor: aorticRev1,
-                          commentsAuthor: aorticRev1,
-                          status: "Released",
-                          originality: 3,
-                          methodology: 3,
-                          clarity: 3,
-                          significance: 3
-                        },
-                        {
-                          id: "REV-FB-1791559472514-816",
-                          paperId: "SOMED-26-RW01",
-                          reviewerName: "Reviewer #3",
-                          recommendation: "Re-review and Accept with Major Changes",
-                          sanitizedCommentsAuthor: aorticRev3,
-                          commentsAuthor: aorticRev3,
-                          status: "Released",
-                          originality: 4,
-                          methodology: 4,
-                          clarity: 4,
-                          significance: 4
-                        }
-                      ]
-                    }
-
-                    if (matched.length === 0) {
-                      return (
-                        <p className="text-slate-500 dark:text-slate-400 italic font-medium leading-normal py-2">
-                          Review comments are currently undergoing editorial moderation and will be released shortly.
-                        </p>
-                      )
-                    }
-
-                    return matched.map((rev, idx) => {
-                      const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
-                      const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
-
-                      let commentText = rev.sanitizedCommentsAuthor || rev.commentsAuthor || ""
-                      if (isAortic) {
-                        if (isRev1 && commentText.length < 250) commentText = aorticRev1
-                        if (isRev3 && commentText.length < 250) commentText = aorticRev3
+                      if (matched.length === 0 && isAortic) {
+                        matched = [
+                          {
+                            id: "REV-FB-SAM-01",
+                            paperId: "SOMED-26-RW01",
+                            reviewerName: "Reviewer #1",
+                            recommendation: "Re-write and Re-submit",
+                            sanitizedCommentsAuthor: aorticRev1,
+                            commentsAuthor: aorticRev1,
+                            status: "Released",
+                            originality: 3,
+                            methodology: 3,
+                            clarity: 3,
+                            significance: 3
+                          },
+                          {
+                            id: "REV-FB-1791559472514-816",
+                            paperId: "SOMED-26-RW01",
+                            reviewerName: "Reviewer #3",
+                            recommendation: "Re-review and Accept with Major Changes",
+                            sanitizedCommentsAuthor: aorticRev3,
+                            commentsAuthor: aorticRev3,
+                            status: "Released",
+                            originality: 4,
+                            methodology: 4,
+                            clarity: 4,
+                            significance: 4
+                          }
+                        ]
                       }
 
-                      const reviewerTag = isRev3 ? "Reviewer #3" : (isRev1 ? "Reviewer #1" : `Reviewer #${idx + 1}`)
+                      if (matched.length === 0) {
+                        return (
+                          <p className="text-slate-500 dark:text-slate-400 italic font-medium leading-normal py-4 text-center">
+                            Review comments are currently undergoing editorial moderation and will be released shortly.
+                          </p>
+                        )
+                      }
 
-                      return (
-                        <div key={rev.id || idx} className="space-y-2 p-3 bg-white dark:bg-[#131418] border border-slate-200/90 dark:border-slate-800 rounded-lg shadow-2xs">
-                          <div className="flex flex-wrap items-center justify-between gap-1.5">
-                            <span className="text-xs font-bold text-slate-900 dark:text-white">
-                              [{reviewerTag}]
-                            </span>
-                            <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/60">
-                              Recommendation: {rev.recommendation}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed pt-1 border-t border-slate-100 dark:border-slate-850">
-                            {commentText}
-                          </div>
-                        </div>
-                      )
-                    })
-                  })()}
+                      return matched
+                        .filter((rev, idx) => {
+                          const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                          const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+                          if (revisionCommentsTab === "rev1") return isRev1
+                          if (revisionCommentsTab === "rev3") return isRev3
+                          return true
+                        })
+                        .map((rev, idx) => {
+                          const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                          const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+
+                          let commentText = rev.sanitizedCommentsAuthor || rev.commentsAuthor || ""
+                          if (isAortic) {
+                            if (isRev1 && commentText.length < 250) commentText = aorticRev1
+                            if (isRev3 && commentText.length < 250) commentText = aorticRev3
+                          }
+
+                          const reviewerTag = isRev3 ? "Reviewer #3" : (isRev1 ? "Reviewer #1" : `Reviewer #${idx + 1}`)
+
+                          return (
+                            <div key={rev.id || idx} className="space-y-2 p-3.5 bg-white dark:bg-[#131418] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs">
+                              <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+                                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                  [{reviewerTag}]
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/60">
+                                    {rev.recommendation}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const templateHeader = `--- Response to [${reviewerTag}] (${rev.recommendation}) ---\n`
+                                      setRevisionRebuttal(prev => prev ? `${prev}\n\n${templateHeader}` : templateHeader)
+                                    }}
+                                    className="text-[10px] text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                                  >
+                                    + Add to Rebuttal
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="text-[11.5px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed pt-1">
+                                {commentText}
+                              </div>
+                            </div>
+                          )
+                        })
+                    })()}
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Point-by-point Response Letter</label>
-                  <textarea
-                    rows={4}
-                    value={revisionRebuttal}
-                    onChange={(e) => setRevisionRebuttal(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-none"
-                    placeholder="Briefly state modifications made in response to reviewers..."
+                {/* RIGHT COLUMN: POINT-BY-POINT REBUTTAL & FILE UPLOAD */}
+                <div className="lg:col-span-5 flex flex-col space-y-3.5">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        Point-by-point Response Letter
+                      </label>
+                      <span className="text-[10px] text-[#0b99ff] font-semibold">Required</span>
+                    </div>
+                    <textarea
+                      rows={6}
+                      value={revisionRebuttal}
+                      onChange={(e) => setRevisionRebuttal(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-none leading-relaxed shadow-2xs"
+                      placeholder="Enter your detailed itemized response to reviewer feedback (or click '+ Add to Rebuttal' from comments)..."
+                    />
+                  </div>
+                  
+                  {/* Hidden File Input for Revision Upload */}
+                  <input
+                    type="file"
+                    ref={revisionFileInputRef}
+                    accept=".pdf,.docx,.doc"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        setRevisionFile(file)
+                        setRevisionFileName(file.name)
+                        setRevisionFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
+                      }
+                    }}
                   />
-                </div>
-                
-                {/* Hidden File Input for Revision Upload */}
-                <input
-                  type="file"
-                  ref={revisionFileInputRef}
-                  accept=".pdf,.docx,.doc"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      setRevisionFile(file)
-                      setRevisionFileName(file.name)
-                      setRevisionFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
-                    }
-                  }}
-                />
 
-                <div 
-                  onClick={() => revisionFileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all ${
-                    revisionFile 
-                      ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
-                      : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-[#0b99ff] hover:bg-sky-50/30"
-                  }`}
-                >
-                  {revisionFile ? (
-                    <>
-                      <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400 mb-1.5 animate-in zoom-in-50" />
-                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                        {revisionFileName}
-                      </span>
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
-                        {revisionFileSize} · Ready for Submission (Click to replace)
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="h-8 w-8 text-[#0b99ff] mb-1.5" />
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                        Select revised PDF manuscript
-                      </span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                        PDF, DOCX up to 25MB (Click to browse file)
-                      </span>
-                    </>
-                  )}
+                  <div 
+                    onClick={() => revisionFileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                      revisionFile 
+                        ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
+                        : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-[#0b99ff] hover:bg-sky-50/30"
+                    }`}
+                  >
+                    {revisionFile ? (
+                      <>
+                        <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400 mb-1.5 animate-in zoom-in-50" />
+                        <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 text-center break-all">
+                          {revisionFileName}
+                        </span>
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                          {revisionFileSize} · Ready for Submission (Click to replace)
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-8 w-8 text-[#0b99ff] mb-1.5" />
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                          Select revised manuscript file
+                        </span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          PDF, DOCX up to 25MB (Click to browse file)
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
+
               </div>
 
-              <DialogFooter>
-                <Button 
-                  onClick={() => setIsRevisionDialogOpen(false)}
-                  variant="ghost"
-                  className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={onTriggerUploadRevision}
-                  className="bg-[#0b99ff] hover:bg-[#0b8ceb] text-white font-bold cursor-pointer"
-                >
-                  Submit Revision File
-                </Button>
+              {/* Anchored Modal Footer */}
+              <DialogFooter className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
+                  Automated notification will be sent to Handling Editor & JM Desk upon submission.
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    onClick={() => setIsRevisionDialogOpen(false)}
+                    variant="ghost"
+                    className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer text-xs"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={onTriggerUploadRevision}
+                    className="bg-[#0b99ff] hover:bg-[#0077cc] text-white font-bold cursor-pointer text-xs px-5 shadow-xs"
+                  >
+                    Submit Revision Package
+                  </Button>
+                </div>
               </DialogFooter>
             </DialogContent>
           </Dialog>
