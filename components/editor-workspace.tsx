@@ -3252,7 +3252,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                         </div>
                                       </div>
                                     </>
-                                  )}
                                 </div>
                               )}
                             </div>

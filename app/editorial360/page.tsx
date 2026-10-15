@@ -13134,7 +13134,17 @@ Specific comments to the Author(s):
 
           {/* 3. AUTHOR: REVISION VIEW & SUBMIT MODAL */}
           <Dialog open={isRevisionDialogOpen} onOpenChange={setIsRevisionDialogOpen}>
-            <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 w-[96vw] sm:max-w-4xl lg:max-w-5xl max-h-[92vh] flex flex-col p-6 rounded-2xl shadow-2xl transition-all">
+            <DialogContent 
+              className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 !w-[96vw] !max-w-[1050px] !max-h-[88vh] !h-[88vh] !flex !flex-col p-5 sm:p-6 rounded-2xl shadow-2xl overflow-hidden transition-all"
+              style={{
+                maxWidth: "1050px",
+                width: "96vw",
+                maxHeight: "88vh",
+                height: "88vh",
+                display: "flex",
+                flexDirection: "column"
+              }}
+            >
               <DialogHeader className="pb-3 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
                   <div>
@@ -13204,8 +13214,13 @@ Specific comments to the Author(s):
 
                   {/* Scrollable Container with explicit max-height and visible scrollbar */}
                   <div 
-                    className="overflow-y-auto space-y-3 pr-2.5 max-h-[380px] lg:max-h-[460px] rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/60 dark:bg-slate-950/50"
-                    style={{ scrollbarWidth: "thin", scrollbarColor: "#0b99ff #e2e8f0" }}
+                    className="flex-1 min-h-[220px] overflow-y-auto space-y-3 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/60 dark:bg-slate-950/50 shadow-inner"
+                    style={{ 
+                      scrollbarWidth: "thin", 
+                      scrollbarColor: "#0b99ff #e2e8f0",
+                      maxHeight: "calc(88vh - 240px)",
+                      overflowY: "auto"
+                    }}
                   >
                     {(() => {
                       const isAortic = revisionPaperId === "SOMED-26-RW01" || revisionPaperId?.toLowerCase().includes("rw01")
