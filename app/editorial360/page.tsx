@@ -1499,8 +1499,17 @@ export default function Editorial360Page() {
         try {
           const savedAuthorOrcid = localStorage.getItem("editorial360_author_orcid")
           const isVerifiedStored = localStorage.getItem("editorial360_author_orcid_verified") === "true"
-          if (savedAuthorOrcid) setProfOrcid(savedAuthorOrcid)
-          if (isVerifiedStored) setIsOrcidVerified(true)
+          if (savedAuthorOrcid === "0000-0002-9842-1102") {
+            localStorage.removeItem("editorial360_author_orcid")
+            localStorage.removeItem("editorial360_author_orcid_verified")
+            setProfOrcid("")
+            setIsOrcidVerified(false)
+          } else if (savedAuthorOrcid) {
+            setProfOrcid(savedAuthorOrcid)
+            if (isVerifiedStored) {
+              setIsOrcidVerified(true)
+            }
+          }
         } catch (e) {}
       } catch (e) {
         console.error("Failed to parse editorial360_session", e)
@@ -3252,7 +3261,7 @@ Specific comments to the Author(s):
     const rank = profRank || "Corresponding Author"
     const institution = profInstitution || "Scholarly Research Institute"
     const country = profCountry || ""
-    const orcid = isOrcidVerified ? (profOrcid || "0000-0002-9842-1102") : "Pending Verification"
+    const orcid = profOrcid ? profOrcid : (isOrcidVerified ? "Verified" : "Pending Verification")
     const dateStr = new Date().toISOString().split("T")[0]
 
     const publishedMss = authorScopedManuscripts.filter(m => m.status === "Published" || m.status === "Accepted")
@@ -3439,6 +3448,13 @@ Specific comments to the Author(s):
   const [isOrcidVerified, setIsOrcidVerified] = useState(false)
   const [isSyncingOrcid, setIsSyncingOrcid] = useState(false)
   const [orcidSyncMessage, setOrcidSyncMessage] = useState("")
+
+  // Auto-fill wizard author ORCID if profile already has an ORCID linked
+  useEffect(() => {
+    if (isSubmitWizardOpen && profOrcid && !newAuthorOrcid) {
+      setNewAuthorOrcid(profOrcid)
+    }
+  }, [isSubmitWizardOpen, profOrcid, newAuthorOrcid])
 
   // Journal Manager in-house staff profile states
   const [jmFullName, setJmFullName] = useState("Noor F.")
@@ -4674,10 +4690,22 @@ Specific comments to the Author(s):
       })
     }).catch(err => console.error("Cloud submission sync failed:", err))
 
+    // Sync ORCID to active author profile if provided in submission
+    const finalAuthorOrcid = (newAuthorOrcid || profOrcid || "").trim()
+    if (newAuthorOrcid && newAuthorOrcid.trim()) {
+      setProfOrcid(newAuthorOrcid.trim())
+      setIsOrcidVerified(true)
+      try {
+        localStorage.setItem("editorial360_author_orcid", newAuthorOrcid.trim())
+        localStorage.setItem("editorial360_author_orcid_verified", "true")
+      } catch (e) {}
+    }
+
     setIsSubmitWizardOpen(false)
     setNewTitle("")
     setNewAbstract("")
     setNewKeywords("")
+    setNewAuthorOrcid("")
     setNewCoAuthors("")
     setNewEthicsIrb("")
     setNewFundingGrant("")
@@ -7128,21 +7156,41 @@ Specific comments to the Author(s):
                   </button>
 
                   {/* Official ORCID Identity Badge */}
-                  <a
-                    href={`https://orcid.org/${profOrcid}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
-                    title={language === "de" ? "Verifiziertes ORCID-Profil aufrufen" : "View Verified ORCID Record"}
-                  >
-                    <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
-                      iD
-                    </span>
-                    <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
-                      {profOrcid}
-                    </span>
-                    <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
-                  </a>
+                  {profOrcid ? (
+                    <a
+                      href={`https://orcid.org/${profOrcid}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
+                      title={language === "de" ? "Verifiziertes ORCID-Profil aufrufen" : "View Verified ORCID Record"}
+                    >
+                      <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
+                        iD
+                      </span>
+                      <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
+                        {profOrcid}
+                      </span>
+                      <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOrcidInput("")
+                        setOrcidAuthSuccessMsg(null)
+                        setIsOrcidAuthModalOpen(true)
+                      }}
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs bg-white dark:bg-[#1c1e26] hover:bg-slate-50 dark:hover:bg-[#252834] text-slate-600 dark:text-slate-300 border border-dashed border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs group"
+                      title={language === "de" ? "ORCID iD verknüpfen" : "Connect ORCID iD"}
+                    >
+                      <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0">
+                        iD
+                      </span>
+                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                        {language === "de" ? "ORCID verknüpfen" : "Link ORCID"}
+                      </span>
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -8470,7 +8518,7 @@ Specific comments to the Author(s):
                           </div>
                           <Button
                             onClick={() => {
-                              setOrcidInput(profOrcid || "0000-0002-9842-1102")
+                              setOrcidInput(profOrcid || "")
                               setOrcidAuthSuccessMsg(null)
                               setIsOrcidAuthModalOpen(true)
                             }}
@@ -9962,7 +10010,7 @@ Specific comments to the Author(s):
                                   </div>
                                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
                                     {isOrcidVerified 
-                                      ? (isDe ? `Verknüpft mit ORCID ${profOrcid || "0000-0002-9842-1102"}.` : `Linked with ORCID ${profOrcid || "0000-0002-9842-1102"}.`)
+                                      ? (isDe ? (profOrcid ? `Verknüpft mit ORCID ${profOrcid}.` : "ORCID verifiziert.") : (profOrcid ? `Linked with ORCID ${profOrcid}.` : "ORCID verified."))
                                       : (isDe ? "ORCID authentifizieren für 1-Klick Crossref DOI-Indexierung." : "Authenticate ORCID for 1-click Crossref DOI indexing.")}
                                   </p>
                                 </div>
@@ -12665,6 +12713,45 @@ Specific comments to the Author(s):
                     />
                   </div>
 
+                  {/* Corresponding Author ORCID iD */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <span className="h-3.5 w-3.5 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[8px] tracking-tighter">iD</span>
+                        <span>{language === "de" ? "ORCID® iD des korrespondierenden Autors" : "Corresponding Author ORCID® iD"}</span>
+                        <span className="text-[10px] text-slate-400 font-normal">({language === "de" ? "Optional / Empfohlen" : "Optional / Recommended"})</span>
+                      </label>
+                      <a 
+                        href="https://orcid.org/register" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-[10px] text-[#0b99ff] hover:underline"
+                      >
+                        {language === "de" ? "Keine ORCID? Registrieren" : "Don't have an ORCID? Register"}
+                      </a>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-[11px] text-slate-400 font-mono">
+                        https://orcid.org/
+                      </div>
+                      <input
+                        type="text"
+                        value={newAuthorOrcid}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/^https?:\/\/orcid\.org\//i, "").trim()
+                          setNewAuthorOrcid(val)
+                        }}
+                        placeholder="0000-0002-XXXX-XXXX"
+                        className="w-full pl-[118px] pr-3 py-2 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#A6CE39]/30 focus:border-[#A6CE39] transition-all"
+                      />
+                    </div>
+                    <span className="text-[10.5px] text-slate-400 dark:text-slate-500 block">
+                      {language === "de" 
+                        ? "Verknüpft die Einreichung mit Ihrem offiziellen Autorenkonto und ermöglicht 1-Klick Crossref DOI-Indexierung."
+                        : "Connects this manuscript to your official research record and enables 1-click Crossref DOI indexing upon publication."}
+                    </span>
+                  </div>
+
                   {/* Target Journal */}
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
@@ -13064,6 +13151,19 @@ Specific comments to the Author(s):
                         </p>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Summary of Metadata with ORCID */}
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                    <div className="truncate">
+                      <span>{language === "de" ? "Autor: " : "Author: "}<strong>{newFirstName} {newLastName}</strong> ({newAuthorEmail})</span>
+                    </div>
+                    {newAuthorOrcid && (
+                      <div className="inline-flex items-center gap-1 shrink-0 font-mono text-emerald-600 dark:text-emerald-400">
+                        <span className="h-3.5 w-3.5 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[8px]">iD</span>
+                        <span>{newAuthorOrcid}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Required Agreement Checkboxes */}
