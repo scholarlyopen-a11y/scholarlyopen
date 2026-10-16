@@ -34,6 +34,7 @@ import {
   ChevronLeft,
   ChevronRight, 
   ChevronDown, 
+  ChevronUp,
   FileCheck, 
   ThumbsUp, 
   UserPlus,
@@ -2388,6 +2389,21 @@ Specific comments to the Author(s):
   const [revisionFileSize, setRevisionFileSize] = useState<string>("")
   const [revisionRebuttal, setRevisionRebuttal] = useState<string>("")
   const revisionFileInputRef = useRef<HTMLInputElement>(null)
+  const revisionCommentsScrollRef = useRef<HTMLDivElement>(null)
+
+  const handleScrollRevisionComments = (direction: "up" | "down" | "top" | "bottom") => {
+    if (!revisionCommentsScrollRef.current) return
+    const el = revisionCommentsScrollRef.current
+    if (direction === "top") {
+      el.scrollTo({ top: 0, behavior: "smooth" })
+    } else if (direction === "bottom") {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
+    } else if (direction === "up") {
+      el.scrollBy({ top: -260, behavior: "smooth" })
+    } else if (direction === "down") {
+      el.scrollBy({ top: 260, behavior: "smooth" })
+    }
+  }
   
   const [isInviteUserOpen, setIsInviteUserOpen] = useState(false)
   const [inviteName, setInviteName] = useState("")
@@ -13135,12 +13151,12 @@ Specific comments to the Author(s):
           {/* 3. AUTHOR: REVISION VIEW & SUBMIT MODAL */}
           <Dialog open={isRevisionDialogOpen} onOpenChange={setIsRevisionDialogOpen}>
             <DialogContent 
-              className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 !w-[96vw] !max-w-[1050px] !max-h-[88vh] !h-[88vh] !flex !flex-col p-5 sm:p-6 rounded-2xl shadow-2xl overflow-hidden transition-all"
+              className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 !w-[96vw] !max-w-[1240px] !max-h-[90vh] !h-[90vh] !flex !flex-col p-5 sm:p-6 rounded-2xl shadow-2xl overflow-hidden transition-all"
               style={{
-                maxWidth: "1050px",
+                maxWidth: "1240px",
                 width: "96vw",
-                maxHeight: "88vh",
-                height: "88vh",
+                maxHeight: "90vh",
+                height: "90vh",
                 display: "flex",
                 flexDirection: "column"
               }}
@@ -13150,10 +13166,10 @@ Specific comments to the Author(s):
                   <div>
                     <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                       <FileText className="h-5 w-5 text-[#0b99ff]" />
-                      Upload Revised Manuscript & Response Letter
+                      Upload Revised Manuscript
                     </DialogTitle>
                     <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Manuscript Tracking ID: <strong className="text-slate-800 dark:text-slate-200 font-mono">{revisionPaperId || "SOMED-26-RW01"}</strong> · Review itemized referee evaluations below and upload corrected manuscript with point-by-point rebuttal.
+                      Review moderated feedback and upload corrected files. Manuscript ID: <strong className="text-slate-800 dark:text-slate-200 font-mono">{revisionPaperId || "SOMED-26-RW01"}</strong> · Itemized referee evaluations and point-by-point rebuttal response.
                     </DialogDescription>
                   </div>
                 </div>
@@ -13162,162 +13178,237 @@ Specific comments to the Author(s):
               {/* Responsive 2-Column Broad Body */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 py-3.5 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pr-0.5">
                 
-                {/* LEFT COLUMN: RELEASED REVIEWER COMMENTS WITH INDEPENDENT SCROLLBAR */}
-                <div className="lg:col-span-7 flex flex-col min-h-0 space-y-2.5">
+                {/* LEFT COLUMN: RELEASED REVIEWER COMMENTS WITH INDEPENDENT SCROLLBAR & SCROLL BUTTONS */}
+                <div className="lg:col-span-7 flex flex-col min-h-0 space-y-2.5 relative">
                   <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-[#0b99ff] uppercase font-bold tracking-wider">
-                        Released Referee Comments
+                        Released Reviewer Comments
                       </span>
                       <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/60">
-                        Sanitized & Dispatched ✓
+                        Sanitized &amp; Dispatched ✓
                       </span>
                     </div>
 
-                    {/* Filter buttons to view All or Jump to specific reviewer */}
-                    <div className="inline-flex rounded-lg p-0.5 bg-slate-200/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold">
-                      <button
-                        type="button"
-                        onClick={() => setRevisionCommentsTab("all")}
-                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                          revisionCommentsTab === "all"
-                            ? "bg-[#0b99ff] text-white shadow-xs"
-                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                      >
-                        All (2)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRevisionCommentsTab("rev1")}
-                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                          revisionCommentsTab === "rev1"
-                            ? "bg-[#0b99ff] text-white shadow-xs"
-                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                      >
-                        Reviewer #1
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRevisionCommentsTab("rev3")}
-                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                          revisionCommentsTab === "rev3"
-                            ? "bg-[#0b99ff] text-white shadow-xs"
-                            : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                      >
-                        Reviewer #3
-                      </button>
+                    <div className="flex items-center gap-2">
+                      {/* Filter buttons to view All or Jump to specific reviewer */}
+                      <div className="inline-flex rounded-lg p-0.5 bg-slate-200/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold">
+                        <button
+                          type="button"
+                          onClick={() => setRevisionCommentsTab("all")}
+                          className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                            revisionCommentsTab === "all"
+                              ? "bg-[#0b99ff] text-white shadow-xs"
+                              : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          All (2)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRevisionCommentsTab("rev1")}
+                          className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                            revisionCommentsTab === "rev1"
+                              ? "bg-[#0b99ff] text-white shadow-xs"
+                              : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          Reviewer #1
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRevisionCommentsTab("rev3")}
+                          className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                            revisionCommentsTab === "rev3"
+                              ? "bg-[#0b99ff] text-white shadow-xs"
+                              : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          Reviewer #3
+                        </button>
+                      </div>
+
+                      {/* Header quick scroll actions */}
+                      <div className="hidden sm:inline-flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => handleScrollRevisionComments("up")}
+                          title="Scroll Comments Up"
+                          className="p-1 rounded text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleScrollRevisionComments("down")}
+                          title="Scroll Comments Down"
+                          className="p-1 rounded text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleScrollRevisionComments("bottom")}
+                          title="Jump to Bottom of Comments"
+                          className="px-1.5 py-0.5 text-[9px] font-bold text-slate-500 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 rounded cursor-pointer transition-colors"
+                        >
+                          Bottom ↓
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Scrollable Container with explicit max-height and visible scrollbar */}
-                  <div 
-                    className="flex-1 min-h-[220px] overflow-y-auto space-y-3 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/60 dark:bg-slate-950/50 shadow-inner"
-                    style={{ 
-                      scrollbarWidth: "thin", 
-                      scrollbarColor: "#0b99ff #e2e8f0",
-                      maxHeight: "calc(88vh - 240px)",
-                      overflowY: "auto"
-                    }}
-                  >
-                    {(() => {
-                      const isAortic = revisionPaperId === "SOMED-26-RW01" || revisionPaperId?.toLowerCase().includes("rw01")
-                      const aorticRev1 = `General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there`
+                  {/* Relative container for scroll area + right floating scroll buttons */}
+                  <div className="relative flex-1 min-h-[240px] flex flex-col">
+                    {/* Scrollable Container with persistent scrollbar and generous right padding */}
+                    <div 
+                      ref={revisionCommentsScrollRef}
+                      className="flex-1 overflow-y-scroll space-y-3 pr-12 pl-3.5 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50 shadow-inner"
+                      style={{ 
+                        scrollbarWidth: "auto", 
+                        scrollbarColor: "#0b99ff #e2e8f0",
+                        maxHeight: "calc(90vh - 240px)"
+                      }}
+                    >
+                      {(() => {
+                        const isAortic = revisionPaperId === "SOMED-26-RW01" || revisionPaperId?.toLowerCase().includes("rw01")
+                        const aorticRev1 = `General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there`
 
-                      const aorticRev3 = `General comments to the Author(s):\nThis manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.\n\nSpecific comments to the Author(s):\n1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.\n2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.\n3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.\n4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).\n5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).\n6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.\n7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.\n8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`
+                        const aorticRev3 = `General comments to the Author(s):\nThis manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.\n\nSpecific comments to the Author(s):\n1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.\n2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.\n3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.\n4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).\n5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).\n6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.\n7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.\n8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`
 
-                      let matched = reviews.filter(r => r.paperId === revisionPaperId && (r.status === "Released" || isAortic))
+                        let matched = reviews.filter(r => r.paperId === revisionPaperId && (r.status === "Released" || isAortic))
 
-                      if (matched.length === 0 && isAortic) {
-                        matched = [
-                          {
-                            id: "REV-FB-SAM-01",
-                            paperId: "SOMED-26-RW01",
-                            reviewerName: "Reviewer #1",
-                            recommendation: "Re-write and Re-submit",
-                            sanitizedCommentsAuthor: aorticRev1,
-                            commentsAuthor: aorticRev1,
-                            status: "Released",
-                            originality: 3,
-                            methodology: 3,
-                            clarity: 3,
-                            significance: 3
-                          },
-                          {
-                            id: "REV-FB-1791559472514-816",
-                            paperId: "SOMED-26-RW01",
-                            reviewerName: "Reviewer #3",
-                            recommendation: "Re-review and Accept with Major Changes",
-                            sanitizedCommentsAuthor: aorticRev3,
-                            commentsAuthor: aorticRev3,
-                            status: "Released",
-                            originality: 4,
-                            methodology: 4,
-                            clarity: 4,
-                            significance: 4
-                          }
-                        ]
-                      }
+                        if (matched.length === 0 && isAortic) {
+                          matched = [
+                            {
+                              id: "REV-FB-SAM-01",
+                              paperId: "SOMED-26-RW01",
+                              reviewerName: "Reviewer #1",
+                              recommendation: "Re-write and Re-submit",
+                              commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+                              sanitizedCommentsAuthor: aorticRev1,
+                              commentsAuthor: aorticRev1,
+                              status: "Released",
+                              originality: 3,
+                              methodology: 3,
+                              clarity: 3,
+                              significance: 3
+                            },
+                            {
+                              id: "REV-FB-1791559472514-816",
+                              paperId: "SOMED-26-RW01",
+                              reviewerName: "Reviewer #3",
+                              recommendation: "Re-review and Accept with Major Changes",
+                              commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 8/10. Recommendation: Re-review and Accept with Major Changes.",
+                              sanitizedCommentsAuthor: aorticRev3,
+                              commentsAuthor: aorticRev3,
+                              status: "Released",
+                              originality: 4,
+                              methodology: 4,
+                              clarity: 4,
+                              significance: 4
+                            }
+                          ]
+                        }
 
-                      if (matched.length === 0) {
-                        return (
-                          <p className="text-slate-500 dark:text-slate-400 italic font-medium leading-normal py-4 text-center">
-                            Review comments are currently undergoing editorial moderation and will be released shortly.
-                          </p>
-                        )
-                      }
-
-                      return matched
-                        .filter((rev, idx) => {
-                          const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
-                          const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
-                          if (revisionCommentsTab === "rev1") return isRev1
-                          if (revisionCommentsTab === "rev3") return isRev3
-                          return true
-                        })
-                        .map((rev, idx) => {
-                          const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
-                          const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
-
-                          let commentText = rev.sanitizedCommentsAuthor || rev.commentsAuthor || ""
-                          if (isAortic) {
-                            if (isRev1 && commentText.length < 250) commentText = aorticRev1
-                            if (isRev3 && commentText.length < 250) commentText = aorticRev3
-                          }
-
-                          const reviewerTag = isRev3 ? "Reviewer #3" : (isRev1 ? "Reviewer #1" : `Reviewer #${idx + 1}`)
-
+                        if (matched.length === 0) {
                           return (
-                            <div key={rev.id || idx} className="space-y-2 p-3.5 bg-white dark:bg-[#131418] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs">
-                              <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-slate-100 dark:border-slate-800">
-                                <span className="text-xs font-bold text-slate-900 dark:text-white">
-                                  [{reviewerTag}]
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/60">
-                                    {rev.recommendation}
+                            <p className="text-slate-500 dark:text-slate-400 italic font-medium leading-normal py-4 text-center">
+                              Review comments are currently undergoing editorial moderation and will be released shortly.
+                            </p>
+                          )
+                        }
+
+                        return matched
+                          .filter((rev, idx) => {
+                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+                            if (revisionCommentsTab === "rev1") return isRev1
+                            if (revisionCommentsTab === "rev3") return isRev3
+                            return true
+                          })
+                          .map((rev, idx) => {
+                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+
+                            let commentText = rev.sanitizedCommentsAuthor || rev.commentsAuthor || ""
+                            if (isAortic) {
+                              if (isRev1 && commentText.length < 250) commentText = aorticRev1
+                              if (isRev3 && commentText.length < 250) commentText = aorticRev3
+                            }
+
+                            const reviewerTag = isRev3 ? "Reviewer #3" : (isRev1 ? "Reviewer #1" : `Reviewer #${idx + 1}`)
+
+                            return (
+                              <div key={rev.id || idx} className="space-y-2 p-3.5 bg-white dark:bg-[#131418] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs">
+                                <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+                                  <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                    [{reviewerTag}]
                                   </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const templateHeader = `--- Response to [${reviewerTag}] (${rev.recommendation}) ---\n`
-                                      setRevisionRebuttal(prev => prev ? `${prev}\n\n${templateHeader}` : templateHeader)
-                                    }}
-                                    className="text-[10px] text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                                  >
-                                    + Add to Rebuttal
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/60">
+                                      {rev.recommendation}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const templateHeader = `--- Response to [${reviewerTag}] (${rev.recommendation}) ---\n`
+                                        setRevisionRebuttal(prev => prev ? `${prev}\n\n${templateHeader}` : templateHeader)
+                                      }}
+                                      className="text-[10px] text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                                    >
+                                      + Add to Rebuttal
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="text-[11.5px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed pt-1">
+                                  {commentText}
                                 </div>
                               </div>
-                              <div className="text-[11.5px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed pt-1">
-                                {commentText}
-                              </div>
-                            </div>
-                          )
-                        })
-                    })()}
+                            )
+                          })
+                      })()}
+                    </div>
+
+                    {/* DEDICATED SCROLL BUTTON DOCK ON THE RIGHT FOR THE EASE OF THE READER */}
+                    <div 
+                      className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md z-10"
+                      aria-label="Scroll comments navigation controls"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleScrollRevisionComments("top")}
+                        title="Scroll to Top"
+                        className="h-6 w-6 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#0b99ff] transition-all cursor-pointer"
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleScrollRevisionComments("up")}
+                        title="Scroll Up"
+                        className="h-5 w-5 rounded-md flex items-center justify-center text-slate-500 hover:text-[#0b99ff] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer text-[10px] font-bold"
+                      >
+                        ▲
+                      </button>
+                      <span className="w-3 h-px bg-slate-200 dark:bg-slate-700 my-0.5" />
+                      <button
+                        type="button"
+                        onClick={() => handleScrollRevisionComments("down")}
+                        title="Scroll Down"
+                        className="h-5 w-5 rounded-md flex items-center justify-center text-slate-500 hover:text-[#0b99ff] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer text-[10px] font-bold"
+                      >
+                        ▼
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleScrollRevisionComments("bottom")}
+                        title="Scroll to Bottom"
+                        className="h-6 w-6 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#0b99ff] transition-all cursor-pointer"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -13392,7 +13483,7 @@ Specific comments to the Author(s):
               {/* Anchored Modal Footer */}
               <DialogFooter className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
                 <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
-                  Automated notification will be sent to Handling Editor & JM Desk upon submission.
+                  Automated notification will be sent to Handling Editor &amp; JM Desk upon submission.
                 </span>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -13406,7 +13497,7 @@ Specific comments to the Author(s):
                     onClick={onTriggerUploadRevision}
                     className="bg-[#0b99ff] hover:bg-[#0077cc] text-white font-bold cursor-pointer text-xs px-5 shadow-xs"
                   >
-                    Submit Revision Package
+                    Submit Revision File
                   </Button>
                 </div>
               </DialogFooter>

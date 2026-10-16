@@ -3205,7 +3205,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                               {isExpanded && (
                                 <div className="space-y-2.5 mt-3 pt-2.5 border-t border-sky-200/60 dark:border-sky-800/40 animate-in fade-in duration-150 text-xs">
-                                  {matchedRev.status !== "Released" && paper.id !== "SOMED-26-RW01" && (
+                                  {matchedRev.status !== "Released" && selectedPaperForReviewTracking?.id !== "SOMED-26-RW01" && (
                                     <div className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2">
                                       <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                                       <span className="text-[11px] text-amber-800 dark:text-amber-300 font-medium">
@@ -6439,6 +6439,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             </DialogFooter>
           )}
         </DialogContent>
+      </Dialog>
       {/* ================= MODAL: AUTHOR REVISION REMINDER ================= */}
       <Dialog open={!!reminderModalPaper} onOpenChange={(open) => !open && setReminderModalPaper(null)}>
         <DialogContent className="bg-white dark:bg-[#18191e] border border-slate-200 dark:border-[#272832] text-slate-900 dark:text-slate-100 sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl p-6 shadow-2xl">
