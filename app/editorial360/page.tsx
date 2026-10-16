@@ -84,6 +84,7 @@ import {
   CreditCard,
   Landmark,
   Printer,
+  Save,
   Info
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -2413,6 +2414,52 @@ Specific comments to the Author(s):
       el.scrollBy({ top: 260, behavior: "smooth" })
     }
   }
+
+  const [rebuttalSavedMsg, setRebuttalSavedMsg] = useState<string | null>(null)
+
+  // Restore saved rebuttal draft from localStorage when revision dialog opens
+  useEffect(() => {
+    if (isRevisionDialogOpen && typeof window !== "undefined") {
+      const targetId = revisionPaperId || "SOMED-26-RW01"
+      try {
+        const savedDraft = localStorage.getItem(`editorial360_rebuttal_draft_${targetId}`)
+        if (savedDraft && !revisionRebuttal) {
+          setRevisionRebuttal(savedDraft)
+          setRebuttalSavedMsg(language === "de" ? "Entwurf wiederhergestellt" : "Draft restored")
+          setTimeout(() => setRebuttalSavedMsg(null), 3000)
+        }
+      } catch (e) {}
+    }
+  }, [isRevisionDialogOpen, revisionPaperId])
+
+  // Save rebuttal draft to localStorage
+  const handleSaveRebuttalDraft = () => {
+    if (typeof window === "undefined") return
+    const targetId = revisionPaperId || "SOMED-26-RW01"
+    try {
+      localStorage.setItem(`editorial360_rebuttal_draft_${targetId}`, revisionRebuttal || "")
+      const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      setRebuttalSavedMsg(language === "de" ? `Entwurf gespeichert (${timeStr})` : `Draft saved (${timeStr})`)
+      setTimeout(() => setRebuttalSavedMsg(null), 3500)
+    } catch (e) {
+      console.error("Failed to save draft:", e)
+    }
+  }
+
+  // Auto-save debounce effect for rebuttal
+  useEffect(() => {
+    if (!isRevisionDialogOpen || !revisionRebuttal || typeof window === "undefined") return
+    const targetId = revisionPaperId || "SOMED-26-RW01"
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(`editorial360_rebuttal_draft_${targetId}`, revisionRebuttal)
+        const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        setRebuttalSavedMsg(language === "de" ? `Auto-gespeichert (${timeStr})` : `Auto-saved (${timeStr})`)
+        setTimeout(() => setRebuttalSavedMsg(null), 3000)
+      } catch (e) {}
+    }, 2500)
+    return () => clearTimeout(timer)
+  }, [revisionRebuttal, isRevisionDialogOpen, revisionPaperId])
   
   const [isInviteUserOpen, setIsInviteUserOpen] = useState(false)
   const [inviteName, setInviteName] = useState("")
@@ -4818,6 +4865,10 @@ Specific comments to the Author(s):
     setIsRevisionDialogOpen(false)
     setRevisionFile(null)
     setRevisionRebuttal("")
+    try {
+      const targetId = revisionPaperId || "SOMED-26-RW01"
+      localStorage.removeItem(`editorial360_rebuttal_draft_${targetId}`)
+    } catch (e) {}
   }
 
   const onTriggerUploadRevision = () => {
@@ -13276,11 +13327,11 @@ Specific comments to the Author(s):
               </DialogHeader>
               
               {/* Responsive 2-Column Broad Body */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 py-3.5 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pr-0.5">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 py-3 flex-1 min-h-0 overflow-hidden">
                 
-                {/* LEFT COLUMN: RELEASED REVIEWER COMMENTS WITH INDEPENDENT SCROLLBAR & SCROLL BUTTONS */}
-                <div className="lg:col-span-7 flex flex-col min-h-0 space-y-2.5 relative">
-                  <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                {/* LEFT COLUMN: RELEASED REVIEWER COMMENTS WITH SINGLE SLEEK SCROLLBAR */}
+                <div className="lg:col-span-7 flex flex-col h-full min-h-0 space-y-2 relative overflow-hidden">
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shrink-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-[#0b99ff] uppercase font-bold tracking-wider">
                         Released Reviewer Comments
@@ -13329,46 +13380,50 @@ Specific comments to the Author(s):
                       </div>
 
                       {/* Header quick scroll actions */}
-                      <div className="hidden sm:inline-flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                      <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => handleScrollRevisionComments("top")}
+                          title="Scroll to Top of Comments"
+                          className="px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 rounded cursor-pointer transition-colors flex items-center gap-0.5"
+                        >
+                          <ChevronUp className="h-3 w-3" />
+                          <span>Top</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleScrollRevisionComments("up")}
                           title="Scroll Comments Up"
-                          className="p-1 rounded text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                          className="px-1.5 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 rounded cursor-pointer transition-colors"
                         >
-                          <ChevronUp className="h-3.5 w-3.5" />
+                          ▲
                         </button>
                         <button
                           type="button"
                           onClick={() => handleScrollRevisionComments("down")}
                           title="Scroll Comments Down"
-                          className="p-1 rounded text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                          className="px-1.5 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 rounded cursor-pointer transition-colors"
                         >
-                          <ChevronDown className="h-3.5 w-3.5" />
+                          ▼
                         </button>
                         <button
                           type="button"
                           onClick={() => handleScrollRevisionComments("bottom")}
                           title="Jump to Bottom of Comments"
-                          className="px-1.5 py-0.5 text-[9px] font-bold text-slate-500 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 rounded cursor-pointer transition-colors"
+                          className="px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-slate-700 rounded cursor-pointer transition-colors flex items-center gap-0.5"
                         >
-                          Bottom ↓
+                          <span>Bottom</span>
+                          <ChevronDown className="h-3 w-3" />
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Relative container for scroll area + right floating scroll buttons */}
-                  <div className="relative flex-1 min-h-[240px] flex flex-col">
-                    {/* Scrollable Container with persistent scrollbar and generous right padding */}
+                  {/* Comments scroll container with single clean scrollbar */}
+                  <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden">
                     <div 
                       ref={revisionCommentsScrollRef}
-                      className="flex-1 overflow-y-scroll space-y-3 pr-12 pl-3.5 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50 shadow-inner"
-                      style={{ 
-                        scrollbarWidth: "auto", 
-                        scrollbarColor: "#0b99ff #e2e8f0",
-                        maxHeight: "calc(90vh - 240px)"
-                      }}
+                      className="flex-1 min-h-0 overflow-y-auto space-y-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50 shadow-inner [scrollbar-width:thin]"
                     >
                       {(() => {
                         const isAortic = revisionPaperId === "SOMED-26-RW01" || revisionPaperId?.toLowerCase().includes("rw01")
@@ -13469,64 +13524,49 @@ Specific comments to the Author(s):
                           })
                       })()}
                     </div>
-
-                    {/* DEDICATED SCROLL BUTTON DOCK ON THE RIGHT FOR THE EASE OF THE READER */}
-                    <div 
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md z-10"
-                      aria-label="Scroll comments navigation controls"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleScrollRevisionComments("top")}
-                        title="Scroll to Top"
-                        className="h-6 w-6 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#0b99ff] transition-all cursor-pointer"
-                      >
-                        <ChevronUp className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleScrollRevisionComments("up")}
-                        title="Scroll Up"
-                        className="h-5 w-5 rounded-md flex items-center justify-center text-slate-500 hover:text-[#0b99ff] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer text-[10px] font-bold"
-                      >
-                        ▲
-                      </button>
-                      <span className="w-3 h-px bg-slate-200 dark:bg-slate-700 my-0.5" />
-                      <button
-                        type="button"
-                        onClick={() => handleScrollRevisionComments("down")}
-                        title="Scroll Down"
-                        className="h-5 w-5 rounded-md flex items-center justify-center text-slate-500 hover:text-[#0b99ff] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer text-[10px] font-bold"
-                      >
-                        ▼
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleScrollRevisionComments("bottom")}
-                        title="Scroll to Bottom"
-                        className="h-6 w-6 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#0b99ff] transition-all cursor-pointer"
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </button>
-                    </div>
                   </div>
                 </div>
 
                 {/* RIGHT COLUMN: POINT-BY-POINT REBUTTAL & FILE UPLOAD */}
-                <div className="lg:col-span-5 flex flex-col space-y-3.5">
-                  <div className="space-y-1.5">
+                <div className="lg:col-span-5 flex flex-col h-full min-h-0 justify-between space-y-3 overflow-hidden">
+                  <div className="flex-1 min-h-0 flex flex-col space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                        Point-by-point Response Letter
-                      </label>
-                      <span className="text-[10px] text-[#0b99ff] font-semibold">Required</span>
+                      <div className="flex items-center gap-1.5">
+                        <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                          {language === "de" ? "Punkt-für-Punkt Stellungnahme" : "Point-by-point Response Letter"}
+                        </label>
+                        <span className="text-[10px] text-[#0b99ff] font-semibold bg-sky-50 dark:bg-sky-950/60 border border-sky-200/60 dark:border-sky-800/60 px-1.5 py-0.5 rounded">
+                          {language === "de" ? "Erforderlich" : "Required"}
+                        </span>
+                      </div>
+
+                      {/* Save Draft Action & Live Status */}
+                      <div className="flex items-center gap-2">
+                        {rebuttalSavedMsg && (
+                          <span className="text-[10.5px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1 animate-in fade-in">
+                            <CheckCircle2 className="h-3 w-3" />
+                            {rebuttalSavedMsg}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleSaveRebuttalDraft}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-700 transition-all cursor-pointer shadow-2xs group"
+                          title={language === "de" ? "Entwurf im Browser speichern" : "Save draft response letter"}
+                        >
+                          <Save className="h-3.5 w-3.5 text-[#0b99ff] group-hover:scale-110 transition-transform" />
+                          <span>{language === "de" ? "Entwurf speichern" : "Save Draft"}</span>
+                        </button>
+                      </div>
                     </div>
+
                     <textarea
-                      rows={6}
                       value={revisionRebuttal}
                       onChange={(e) => setRevisionRebuttal(e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-none leading-relaxed shadow-2xs"
-                      placeholder="Enter your detailed itemized response to reviewer feedback (or click '+ Add to Rebuttal' from comments)..."
+                      className="w-full flex-1 min-h-[140px] px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-none leading-relaxed shadow-2xs font-sans"
+                      placeholder={language === "de" 
+                        ? "Geben Sie hier Ihre detaillierte Stellungnahme ein (oder klicken Sie auf '+ Add to Rebuttal' bei den Gutachterkommentaren)..."
+                        : "Enter your detailed itemized response to reviewer feedback (or click '+ Add to Rebuttal' from comments)..."}
                     />
                   </div>
                   
@@ -13548,7 +13588,7 @@ Specific comments to the Author(s):
 
                   <div 
                     onClick={() => revisionFileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                    className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all shrink-0 ${
                       revisionFile 
                         ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
                         : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-[#0b99ff] hover:bg-sky-50/30"
@@ -13556,7 +13596,7 @@ Specific comments to the Author(s):
                   >
                     {revisionFile ? (
                       <>
-                        <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400 mb-1.5 animate-in zoom-in-50" />
+                        <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400 mb-1 animate-in zoom-in-50" />
                         <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 text-center break-all">
                           {revisionFileName}
                         </span>
@@ -13566,9 +13606,9 @@ Specific comments to the Author(s):
                       </>
                     ) : (
                       <>
-                        <FileText className="h-8 w-8 text-[#0b99ff] mb-1.5" />
+                        <FileText className="h-7 w-7 text-[#0b99ff] mb-1" />
                         <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                          Select revised manuscript file
+                          {language === "de" ? "Überarbeitete Datei auswählen" : "Select revised manuscript file"}
                         </span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                           PDF, DOCX up to 25MB (Click to browse file)
@@ -13583,21 +13623,35 @@ Specific comments to the Author(s):
               {/* Anchored Modal Footer */}
               <DialogFooter className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
                 <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
-                  Automated notification will be sent to Handling Editor &amp; JM Desk upon submission.
+                  {language === "de"
+                    ? "Automatische Benachrichtigung wird nach dem Einreichen an das Handling Editor & JM Desk gesendet."
+                    : "Automated notification will be sent to Handling Editor & JM Desk upon submission."}
                 </span>
                 <div className="flex items-center gap-2">
                   <Button 
-                    onClick={() => setIsRevisionDialogOpen(false)}
-                    variant="ghost"
-                    className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer text-xs"
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSaveRebuttalDraft}
+                    className="text-xs text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-1.5"
                   >
-                    Cancel
+                    <Save className="h-3.5 w-3.5 text-[#0b99ff]" />
+                    <span>{language === "de" ? "Entwurf speichern" : "Save Draft"}</span>
                   </Button>
                   <Button 
+                    onClick={() => setIsRevisionDialogOpen(false)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer text-xs"
+                  >
+                    {language === "de" ? "Abbrechen" : "Cancel"}
+                  </Button>
+                  <Button 
+                    size="sm"
                     onClick={onTriggerUploadRevision}
                     className="bg-[#0b99ff] hover:bg-[#0077cc] text-white font-bold cursor-pointer text-xs px-5 shadow-xs"
                   >
-                    Submit Revision File
+                    {language === "de" ? "Revision einreichen" : "Submit Revision File"}
                   </Button>
                 </div>
               </DialogFooter>
