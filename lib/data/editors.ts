@@ -1565,7 +1565,7 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     slug: "furqan-tahir",
     name: "Furqan Tahir, Ph.D.",
     role: "Associate Editor",
-    affiliation: "King Abdullah University of Science and Technology (KAUST), Environmental Science and Engineering, Saudi Arabia",
+    affiliation: "King Abdullah University of Science and Technology (KAUST),\nEnvironmental Science and Engineering, Saudi Arabia",
     specialization: "Life cycle assessment (LCA), desalination environmental impacts, water-energy nexus, sustainable energy systems, and decarbonization.",
     email: "editor.environsci@scholarlyopen.org",
     orcid: "0000-0002-8728-5218",

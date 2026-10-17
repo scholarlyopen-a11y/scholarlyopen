@@ -4822,7 +4822,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   </Button>
                                 </>
                               ) : ms.status === "Revision Required" ? (
-                                <div className="flex items-center gap-1.5 justify-center">
+                                <>
                                   <Button
                                     size="sm"
                                     onClick={() => {
@@ -4848,7 +4848,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <FileCheck2 className="h-3.5 w-3.5 text-[#0b99ff]" />
                                     <span>Decision Letter</span>
                                   </Button>
-                                </div>
+                                </>
                               ) : ms.status === "Revision Under Evaluation" ? (
                                 <Button
                                   size="sm"
@@ -4904,8 +4904,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 </Button>
                               )}
 
-                              {/* Secondary Stage Action Button */}
-                              {isTriage ? (
+                              {/* Secondary Stage Action Button (Triage only, maximum 2 buttons visible) */}
+                              {isTriage && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -4919,27 +4919,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   <Eye className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
                                   Pre-Check
                                 </Button>
-                              ) : isUnderReview ? null : ms.status === "Revision Required" ? (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleNudgeAuthor(ms)}
-                                  disabled={!!authorNudged[ms.id]}
-                                  className="h-8 text-xs font-semibold px-2.5 rounded-lg cursor-pointer whitespace-nowrap transition-all shadow-2xs border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
-                                >
-                                  {authorNudged[ms.id] ? (
-                                    <>
-                                      <Check className="h-3.5 w-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
-                                      {isDe ? "Erinnert" : "Reminded"}
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Bell className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                      {isDe ? "Autor erinnern" : "Remind Author"}
-                                    </>
-                                  )}
-                                </Button>
-                              ) : null}
+                              )}
 
                               {/* Clean Dropdown Menu (···) for Secondary Utilities */}
                               <DropdownMenu>
@@ -4954,6 +4934,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-56 p-1 text-xs bg-white dark:bg-[#18191e] border-slate-200 dark:border-[#272832]">
+                                  {/* Author Reminder (Available under 3-dots when manuscript requires revision) */}
+                                  {ms.status === "Revision Required" && (
+                                    <DropdownMenuItem
+                                      onClick={() => handleNudgeAuthor(ms)}
+                                      disabled={!!authorNudged[ms.id]}
+                                      className="cursor-pointer font-medium"
+                                    >
+                                      {authorNudged[ms.id] ? (
+                                        <>
+                                          <Check className="h-3.5 w-3.5 mr-2 text-emerald-600 dark:text-emerald-400" />
+                                          <span>{isDe ? "Erinnert (Autor)" : "Author Reminded"}</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Bell className="h-3.5 w-3.5 mr-2 text-[#0b99ff]" />
+                                          <span>{isDe ? "Autor erinnern" : "Remind Author"}</span>
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                  )}
                                   {isUnderReview && (
                                     <DropdownMenuItem
                                       onClick={() => {
