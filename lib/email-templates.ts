@@ -535,13 +535,14 @@ On behalf of the editorial office of {{journal}}, we have followed your influent
 
 {{journal}} is currently assembling high-impact original research articles, reviews, and rapid communications for our Founding Inaugural Volume. This foundational issue is pivotal in securing international ISSN registration and establishing our baseline citation record for upcoming indexing applications (DOAJ, Crossref, and major bibliographic registries).
 
-In alignment with our official APC & Waiver Policy:
+Key Volume Details & APC Policy:
+• Submission Deadline: November 30, 2026 (Rolling review: manuscripts are evaluated and published immediately upon acceptance).
 • Inaugural 50% Launch Discount: All accepted manuscripts in 2026 automatically receive a 50% fee discount across our entire portfolio.
 • Equitable Waivers: Authors from World Bank-classified low-income countries receive a 100% full fee waiver; discretionary hardship waivers are available for unfunded researchers.
 • Rigorous Double-Blind Peer Review: Expedited initial decision target within 14 days.
 • Immediate Gold Open Access: Published under Creative Commons CC BY 4.0 with Crossref DOI registration upon acceptance.
 
-Given your distinguished track record, we cordially invite you and your research team to contribute your latest findings to this founding milestone volume.
+Given your distinguished track record, we cordially invite you and your research team to contribute your latest findings to this founding milestone volume by November 30, 2026. If your research team requires a brief timeline extension, please feel free to reply directly to this invitation.
 
 Please use the button below to submit your manuscript to our editorial desk.
 
@@ -567,7 +568,7 @@ im Namen der Redaktion von {{journal}} (Scholarly Open, Mainz) verfolgen wir Ihr
 📌 Wichtiger Hinweis zur Publikationssprache:
 Bitte beachten Sie, dass alle Manuskripte, der gesamte Begutachtungsprozess sowie die finalen Open-Access-Publikationen (CC BY 4.0) auf Englisch verfasst sein müssen (Working language & publications: English).
 
-Für den Gründungsband 2026 bieten wir einen 50%igen Erlass der Publikationsgebühren (APC) sowie ein zügiges Double-Blind Peer Review mit einer Ersteinschätzung innerhalb von 14 Tagen. Nachfolgend finden Sie alle Details und Einreichungsrichtlinien auf Englisch:
+Für den Gründungsband 2026 (Einreichungsfrist: 30. November 2026) bieten wir einen 50%igen Erlass der Publikationsgebühren (APC) sowie ein zügiges Double-Blind Peer Review mit einer Ersteinschätzung innerhalb von 14 Tagen. Nachfolgend finden Sie alle Details und Einreichungsrichtlinien auf Englisch:
 ────────────────────────────────────────────────────
 Dear {{recipientName}},
 
@@ -575,13 +576,14 @@ On behalf of the editorial office of {{journal}}, we have followed your influent
 
 {{journal}} is currently assembling high-impact original research articles and reviews for our Founding Inaugural Volume.
 
-Key Features & APC Policy:
+Key Features & Timeline:
+• Submission Deadline: November 30, 2026 (Rolling review: manuscripts are evaluated upon receipt).
 • Inaugural 50% Launch Discount: All accepted manuscripts in 2026 receive an automatic 50% discount; full waivers available for unfunded researchers.
 • Rigorous Double-Blind Peer Review: Expedited initial decision within 14 days.
 • Immediate Gold Open Access: Published under CC BY 4.0 with Crossref DOI upon acceptance.
 • Author Retention of Rights: You retain 100% copyright over your work and raw datasets.
 
-We cordially invite you and your research team to submit your manuscript for consideration.
+We cordially invite you and your research team to submit your manuscript for consideration by November 30, 2026. If you require a brief extension, simply reply to this email.
 
 Mit freundlichen Grüßen / Sincerely,
 Noor F.
