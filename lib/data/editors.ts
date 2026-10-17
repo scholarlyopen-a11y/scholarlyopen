@@ -1606,6 +1606,12 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     timeline: [
       {
         year: "2026–Present",
+        title: "Associate Editor — Scholarly Open",
+        description: "Appointed Associate Editor for Scholarly Open: Environmental Science, overseeing peer-review, editorial triage, and open science excellence.",
+        type: "milestone"
+      },
+      {
+        year: "2026–Present",
         title: "Research Scientist / Instructor",
         description: "King Abdullah University of Science and Technology (KAUST), Saudi Arabia. Developing national sustainability frameworks for Oil and Sustainability Program (OSP), Ministry of Energy.",
         type: "career"
@@ -1671,10 +1677,15 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
         doi: "10.1016/j.rser.2025.116488"
       },
       {
-        title: "A cloud-based Geo-AI framework for automated high-resolution flood mapping with explainable machine learning",
+        title: "Life cycle assessment of high value activated carbon production based on mass and functional performance metrics",
         journal: "Scientific Reports",
-        year: "2026",
-        doi: "10.1038/s41598-026-00000-0"
+        year: "2025",
+        doi: "10.1038/s41598-025-16300-1"
+      },
+      {
+        title: "A cloud-based Geo-AI framework for automated high-resolution flood mapping with explainable machine learning",
+        journal: "Scientific Reports (Accepted / In Press)",
+        year: "2026"
       },
       {
         title: "Plastic Waste Recycling in Arid Regions: Technology Selection and Sustainability Trade-offs in Qatar",
