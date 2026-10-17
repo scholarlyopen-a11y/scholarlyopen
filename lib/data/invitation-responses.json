@@ -1,6 +1,42 @@
 {
   "responses": [
     {
+      "id": "RESP-TAHIR",
+      "type": "ae",
+      "candidateName": "Furqan Tahir, Ph.D.",
+      "candidateEmail": "furqan061@gmail.com",
+      "journal": "Scholarly Open: Environmental Science",
+      "decision": "yes",
+      "credentialId": "",
+      "timestamp": "2026-10-16T14:13:21.000Z",
+      "notes": "Action logged via editorial360 invitation link (ae: yes)",
+      "affiliation": "King Abdullah University of Science and Technology (KAUST)",
+      "department": "Environmental Science and Engineering",
+      "country": "Saudi Arabia",
+      "biography": "Dr. Furqan Tahir is an environmental engineer and researcher at King Abdullah University of Science and Technology (KAUST) in the Environmental Science and Engineering program. He earned his Ph.D. in Sustainable Energy from Hamad Bin Khalifa University (HBKU), Qatar. His research expertise spans Life Cycle Assessment (LCA), environmental sustainability of desalination processes, the water-energy nexus, and systems-level decarbonization strategies.",
+      "photoUrl": "/images/editors/furqan-tahir.jpg",
+      "cvFileName": "CV Furqan Tahir.pdf",
+      "cvFileSize": "639 KB",
+      "researchInterests": [
+        "Life Cycle Assessment",
+        "Water",
+        "Desalination",
+        "Energy",
+        "Sustainability",
+        "Environment"
+      ],
+      "orcid": "0000-0002-8728-5218",
+      "googleScholar": "https://scholar.google.com/citations?user=8PDFElIAAAAJ&hl=en",
+      "researchGate": "",
+      "linkedin": "",
+      "publications": [],
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "status": "Approved",
+      "jmApproved": true,
+      "watchlistFlagged": false
+    },
+    {
       "id": "RESP-2254",
       "type": "board",
       "candidateName": "Celeste Chamberland, Ph.D.",
@@ -29,8 +65,8 @@
       "publications": [],
       "hasAcceptedTerms": true,
       "consentProfileUpload": true,
-      "status": "Pending JM Approval",
-      "jmApproved": false,
+      "status": "Approved",
+      "jmApproved": true,
       "watchlistFlagged": false
     },
     {

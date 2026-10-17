@@ -1,6 +1,41 @@
 {
   "onboardedEditors": [
     {
+      "id": "EBM-TAHIR",
+      "slug": "furqan-tahir",
+      "name": "Furqan Tahir, Ph.D.",
+      "email": "furqan061@gmail.com",
+      "role": "Associate Editor",
+      "journal": "Scholarly Open: Environmental Science",
+      "journalSlug": "environmental-science",
+      "affiliation": "King Abdullah University of Science and Technology (KAUST)",
+      "department": "Environmental Science and Engineering",
+      "country": "Saudi Arabia",
+      "specialization": "Life cycle assessment (LCA), desalination environmental impacts, water-energy nexus, sustainable energy systems, and decarbonization.",
+      "researchInterests": [
+        "Life Cycle Assessment",
+        "Water",
+        "Desalination",
+        "Energy",
+        "Sustainability",
+        "Environment"
+      ],
+      "biography": "Dr. Furqan Tahir is an environmental engineer and researcher at King Abdullah University of Science and Technology (KAUST) in the Environmental Science and Engineering program. He earned his Ph.D. in Sustainable Energy from Hamad Bin Khalifa University (HBKU), Qatar. His research expertise spans Life Cycle Assessment (LCA), environmental sustainability of desalination processes, the water-energy nexus, and systems-level decarbonization strategies.",
+      "photoUrl": "/images/editors/furqan-tahir.jpg",
+      "cvFileName": "CV Furqan Tahir.pdf",
+      "cvFileSize": "639 KB",
+      "orcid": "0000-0002-8728-5218",
+      "googleScholar": "https://scholar.google.com/citations?user=8PDFElIAAAAJ&hl=en",
+      "researchGate": "",
+      "linkedin": "",
+      "publications": [],
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "status": "Approved",
+      "jmApproved": true,
+      "acceptedAt": "2026-10-16T14:13:21.000Z"
+    },
+    {
       "id": "EBM-3796",
       "name": "Celeste Chamberland, Ph.D.",
       "email": "cchamberland@roosevelt.edu",
@@ -27,8 +62,8 @@
       "publications": [],
       "hasAcceptedTerms": true,
       "consentProfileUpload": true,
-      "status": "Pending JM Approval",
-      "jmApproved": false,
+      "status": "Approved",
+      "jmApproved": true,
       "acceptedAt": "2026-10-14T22:23:30.485Z"
     },
     {

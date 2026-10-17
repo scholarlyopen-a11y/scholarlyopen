@@ -4506,8 +4506,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs">
         <div className="flex items-center gap-3.5">
           <div className="relative h-11 w-11 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0077cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-[#272832]">
-            {user?.photoUrl ? (
-              <img src={user.photoUrl} alt={user.name || "JM"} className="h-full w-full object-cover" />
+            {(user?.photoUrl || "/images/editors/noor.jpeg") ? (
+              <img src={user?.photoUrl || "/images/editors/noor.jpeg"} alt={user?.name || "Noor F."} className="h-full w-full object-cover" />
             ) : (
               <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF"}</span>
             )}
@@ -13157,9 +13157,12 @@ Specific comments to the Author(s):
 
           {viewingDecisionManuscript && (() => {
             const isAccepted = viewingDecisionManuscript.status === "Accepted"
+            const isRevision = viewingDecisionManuscript.status === "Revision Required" || (viewingDecisionManuscript.status as string)?.includes("Revision")
             const isDeclined = viewingDecisionManuscript.status === "Rejected" || (viewingDecisionManuscript.status as string) === "Declined"
 
             const defaultAcceptLetter = `Dear ${viewingDecisionManuscript.authorName || "Author"},\n\nWe are pleased to inform you that following comprehensive peer evaluation, your manuscript titled "${viewingDecisionManuscript.title}" has been formally ACCEPTED for publication in ${viewingDecisionManuscript.journal}.\n\nNext Steps:\n1. Our production office will prepare the galley proofs and JATS XML.\n2. A formal Crossref DOI (10.59236/${viewingDecisionManuscript.journal.toLowerCase().includes("medicine") ? "somed" : "soeas"}.2026.${viewingDecisionManuscript.id.slice(-3)}) has been reserved.\n\nCongratulations on the publication of your valuable scholarly work.\n\nSincerely,\n${viewingDecisionManuscript.assignedEditorName || "Prof. Clara Zhang"}\nEditor-in-Chief, ${viewingDecisionManuscript.journal}`
+
+            const defaultRevisionLetter = `Dear ${viewingDecisionManuscript.authorName || "Author"},\n\nThank you for submitting your manuscript titled "${viewingDecisionManuscript.title}" to ${viewingDecisionManuscript.journal}.\n\nFollowing comprehensive peer evaluation and handling editor review, the editorial board recommends MINOR REVISIONS before a final publication decision can be rendered.\n\nRecommendation Summary:\n- Deciding Editor: ${viewingDecisionManuscript.assignedEditorName || "Weihua Gong, M.D., Ph.D."}\n- Editorial Verdict: Minor Revision Required\n- Deadline for Resubmission: 14 calendar days\n\nPlease address the referee evaluations point-by-point in your response letter and upload your revised manuscript track-changes document to your author workspace.\n\nSincerely,\n${viewingDecisionManuscript.assignedEditorName || "Weihua Gong, M.D., Ph.D."}\nHandling Editor, ${viewingDecisionManuscript.journal}`
 
             const defaultDeclineLetter = `Dear ${viewingDecisionManuscript.authorName || "Author"},\n\nThank you for giving us the opportunity to consider your manuscript titled "${viewingDecisionManuscript.title}" for publication in ${viewingDecisionManuscript.journal}.\n\nFollowing detailed editorial assessment and peer evaluation, the editorial board has determined that the submission falls outside our current thematic scope and methodological prioritization requirements. We are therefore unable to accept the paper for publication in this journal.\n\nWe thank you for considering ${viewingDecisionManuscript.journal} and wish you every success in placing this work with a more specialized venue.\n\nSincerely,\n${viewingDecisionManuscript.assignedEditorName || "Prof. Clara Zhang"}\nHandling Editor, ${viewingDecisionManuscript.journal}`
 
@@ -13168,7 +13171,7 @@ Specific comments to the Author(s):
                 {/* Manuscript Meta Box */}
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 space-y-1.5">
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {viewingDecisionManuscript.journal} • Final Decision Archive
+                    {viewingDecisionManuscript.journal} • {isRevision ? "Active Revision Workflow" : "Final Decision Archive"}
                   </div>
                   <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
                     {viewingDecisionManuscript.title}
@@ -13176,7 +13179,7 @@ Specific comments to the Author(s):
                   <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap pt-0.5">
                     <span>Author: <strong className="text-slate-700 dark:text-slate-300">{viewingDecisionManuscript.authorName || "Principal Author"}</strong></span>
                     <span>•</span>
-                    <span>Deciding Editor: <strong className="text-slate-700 dark:text-slate-300">{viewingDecisionManuscript.assignedEditorName || "Prof. Clara Zhang"}</strong></span>
+                    <span>Deciding Editor: <strong className="text-slate-700 dark:text-slate-300">{viewingDecisionManuscript.assignedEditorName || "Weihua Gong, M.D., Ph.D."}</strong></span>
                   </div>
                 </div>
 
@@ -13184,22 +13187,28 @@ Specific comments to the Author(s):
                 <div className={`p-3 rounded-xl border flex items-center justify-between gap-2 ${
                   isAccepted
                     ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200"
+                    : isRevision
+                    ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200"
                     : "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 text-rose-800 dark:text-rose-200"
                 }`}>
                   <div className="flex items-center gap-2">
                     {isAccepted ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    ) : isRevision ? (
+                      <RotateCcw className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     ) : (
                       <XCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
                     )}
                     <span className="font-bold text-xs">
                       {isAccepted
                         ? "Editorial Verdict: ACCEPTED FOR PUBLICATION (Galley Proofs & DOI Assigned)"
+                        : isRevision
+                        ? "Editorial Verdict: REVISION REQUIRED (Minor Revisions Dispatched)"
                         : "Editorial Verdict: DECLINED / OUT OF SCOPE (Rejection Notice Dispatched)"}
                     </span>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white dark:bg-slate-900 border border-current">
-                    {isAccepted ? "Published" : "Archived"}
+                    {isAccepted ? "Published" : isRevision ? "In Revision" : "Archived"}
                   </span>
                 </div>
 
@@ -13207,14 +13216,14 @@ Specific comments to the Author(s):
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">
-                      Official Dispatched Decision Letter
+                      {isRevision ? "Official Dispatched Revision Request Letter" : "Official Dispatched Decision Letter"}
                     </span>
                     <span className="text-[10px] text-slate-400 font-medium">
-                      Signed by {viewingDecisionManuscript.assignedEditorName || "Editor"}
+                      Signed by {viewingDecisionManuscript.assignedEditorName || "Weihua Gong, M.D., Ph.D."}
                     </span>
                   </div>
                   <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 font-mono text-[11px] leading-relaxed text-slate-800 dark:text-slate-200 whitespace-pre-wrap select-all">
-                    {isAccepted ? defaultAcceptLetter : defaultDeclineLetter}
+                    {isAccepted ? defaultAcceptLetter : isRevision ? defaultRevisionLetter : defaultDeclineLetter}
                   </div>
                 </div>
 
@@ -13228,13 +13237,13 @@ Specific comments to the Author(s):
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold text-slate-400 uppercase">Reviewer 1</span>
                         <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
-                          isAccepted ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+                          isAccepted ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : isRevision ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
                         }`}>
-                          {isAccepted ? "Accept" : "Decline"}
+                          {isAccepted ? "Accept" : isRevision ? "Minor Revision" : "Decline"}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
-                        {isAccepted ? "\"Methodological rigor verified. Clear contribution to literature.\"" : "\"Insufficient empirical validation against out-of-sample data.\""}
+                        {isAccepted ? "\"Methodological rigor verified. Clear contribution to literature.\"" : isRevision ? "\"Methodology is sound; recommend clarifying clinical triage algorithms and protocol benchmarks.\"" : "\"Insufficient empirical validation against out-of-sample data.\""}
                       </p>
                     </div>
 
@@ -13242,13 +13251,13 @@ Specific comments to the Author(s):
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold text-slate-400 uppercase">Reviewer 2</span>
                         <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
-                          isAccepted ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                          isAccepted ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : isRevision ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
                         }`}>
-                          {isAccepted ? "Accept" : "Major Issues"}
+                          {isAccepted ? "Accept" : isRevision ? "Minor Revision" : "Major Issues"}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
-                        {isAccepted ? "\"Well written with sound technical analysis.\"" : "\"The core premise has limited novelty in present formulation.\""}
+                        {isAccepted ? "\"Well written with sound technical analysis.\"" : isRevision ? "\"Valuable healthcare operations analysis; please expand Section 3 discussion on institutional resource constraints.\"" : "\"The core premise has limited novelty in present formulation.\""}
                       </p>
                     </div>
                   </div>

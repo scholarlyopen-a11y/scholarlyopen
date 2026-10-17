@@ -1562,12 +1562,37 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     journalSlug: "engineering",
   },
   {
-    slug: "position-open-environmental-science-ae-1",
-    name: "Position Open",
+    slug: "furqan-tahir",
+    name: "Furqan Tahir, Ph.D.",
     role: "Associate Editor",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
+    affiliation: "King Abdullah University of Science and Technology (KAUST), Environmental Science and Engineering, Saudi Arabia",
+    specialization: "Life cycle assessment (LCA), desalination environmental impacts, water-energy nexus, sustainable energy systems, and decarbonization.",
+    email: "editor.environsci@scholarlyopen.org",
+    orcid: "0000-0002-8728-5218",
+    googleScholar: "https://scholar.google.com/citations?user=8PDFElIAAAAJ&hl=en",
+    imageUrl: "/images/editors/furqan-tahir.jpg",
     journalSlug: "environmental-science",
+    assignedSections: [
+      "Sustainability and circular economy",
+      "Water and air quality",
+      "Natural resource management"
+    ],
+    expertise: [
+      "Life Cycle Assessment (LCA)",
+      "Water & Desalination",
+      "Sustainable Energy Systems",
+      "Decarbonization",
+      "Environmental Impact Analysis",
+      "Circular Economy"
+    ],
+    badges: ["Associate Editor", "COPE Ethics Verified", "KAUST Postdoctoral Fellow"],
+    welcomeMessage: "As Associate Editor for Scholarly Open: Environmental Science, I am dedicated to championing high-impact, transparent, and reproducible research in sustainability, environmental engineering, and decarbonization.",
+    stats: [
+      { label: "Status", value: "Accepting Submissions", description: "Handling editor ready for peer evaluation" },
+      { label: "Role", value: "Associate Editor", description: "Environmental Science & Engineering" },
+      { label: "Standard", value: "COPE Compliant", description: "Rigorous peer evaluation & editorial integrity" }
+    ],
+    biography: `Dr. Furqan Tahir is an environmental engineer and researcher at King Abdullah University of Science and Technology (KAUST) in the Environmental Science and Engineering program. He earned his Ph.D. in Sustainable Energy from Hamad Bin Khalifa University (HBKU), Qatar. His research expertise spans Life Cycle Assessment (LCA), environmental sustainability of desalination processes, the water-energy nexus, and systems-level decarbonization strategies. He serves as Associate Editor for Scholarly Open: Environmental Science.`
   },
   {
     slug: "position-open-environmental-science-ae-2",

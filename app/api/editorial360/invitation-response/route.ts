@@ -756,7 +756,15 @@ export async function POST(req: Request) {
       const port = Number(process.env.SMTP_PORT) || 587
       const user = process.env.SMTP_USER
       const pass = process.env.SMTP_PASS
-      const from = process.env.SMTP_FROM || user
+      const rawFrom = process.env.SMTP_FROM || user
+
+      // Clean up From email to strictly prevent malformed headers like:
+      // "editorial360 Notifications" <"Scholarly Open Editorial Office <info@scholarlyopen.org>">
+      let cleanFromEmail = user || "info@scholarlyopen.org"
+      if (rawFrom) {
+        const emailMatch = rawFrom.match(/<([^>]+)>/)
+        cleanFromEmail = emailMatch ? emailMatch[1] : rawFrom.replace(/["\r\n]/g, "").trim()
+      }
 
       if (host && user && pass) {
         const nodemailerModule = await import("nodemailer")
@@ -779,6 +787,57 @@ export async function POST(req: Request) {
         const subject = type === "reviewer_claim"
           ? `[${journal}] [Reviewer Gateway Active] ${candidateName} (${credentialId || "Certified"})`
           : `[${journal}] Editorial Board Acceptance: ${candidateName} (${roleLabel})`
+
+        const attachments: any[] = []
+
+        // 1. Process CV attachment
+        if (cvBase64) {
+          try {
+            const rawBase64 = cvBase64.includes(";base64,") ? cvBase64.split(";base64,")[1] : cvBase64
+            attachments.push({
+              filename: cvFileName || `${candidateName.replace(/[^a-zA-Z0-9]/g, '_')}_CV.pdf`,
+              content: Buffer.from(rawBase64, "base64")
+            })
+          } catch (attErr) {
+            console.warn("Could not encode CV attachment:", attErr)
+          }
+        }
+
+        // 2. Process Photo attachment (allows direct download and inline rendering in email clients)
+        let embeddedPhotoCid = ""
+        if (photoUrl && photoUrl.startsWith("data:image/")) {
+          try {
+            const photoMatches = photoUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/)
+            if (photoMatches) {
+              const ext = photoMatches[1] === "jpeg" ? "jpg" : photoMatches[1]
+              const photoBuf = Buffer.from(photoMatches[2], "base64")
+              const safeName = candidateName.replace(/[^a-zA-Z0-9]/g, '_')
+              const photoFileName = `${safeName}_Photo.${ext}`
+
+              // Persist locally for public access
+              try {
+                const editorsDir = path.join(process.cwd(), "public", "images", "editors")
+                if (!fs.existsSync(editorsDir)) {
+                  fs.mkdirSync(editorsDir, { recursive: true })
+                }
+                const localPhotoPath = path.join(editorsDir, `${safeName.toLowerCase()}.${ext}`)
+                fs.writeFileSync(localPhotoPath, photoBuf)
+              } catch (fsErr) {
+                console.warn("Could not persist photo locally:", fsErr)
+              }
+
+              // Attach to email so Outlook/mail client shows a downloadable photo attachment
+              attachments.push({
+                filename: photoFileName,
+                content: photoBuf,
+                cid: "candidateProfilePhoto"
+              })
+              embeddedPhotoCid = "cid:candidateProfilePhoto"
+            }
+          } catch (photoErr) {
+            console.warn("Could not encode photo attachment:", photoErr)
+          }
+        }
 
         const htmlContent = `
           <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
@@ -812,7 +871,8 @@ export async function POST(req: Request) {
             ${photoUrl ? `
               <div style="margin: 16px 0; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; display: inline-block;">
                 <strong style="display: block; margin-bottom: 8px; font-size: 12px; color: #1e293b;">Candidate Profile Photo:</strong>
-                <img src="${photoUrl}" alt="${candidateName}" style="width: 130px; height: 130px; object-fit: cover; border-radius: 8px; border: 2px solid #0b99ff; display: block;" />
+                <img src="${embeddedPhotoCid || photoUrl}" alt="${candidateName}" style="width: 130px; height: 130px; object-fit: cover; border-radius: 8px; border: 2px solid #0b99ff; display: block;" />
+                <span style="display: block; margin-top: 6px; font-size: 11px; color: #64748b;">(Also attached as downloadable file)</span>
               </div>
             ` : ""}
 
@@ -829,26 +889,33 @@ export async function POST(req: Request) {
           </div>
         `
 
-        const attachments: any[] = []
-        if (cvBase64) {
-          try {
-            const rawBase64 = cvBase64.includes(";base64,") ? cvBase64.split(";base64,")[1] : cvBase64
-            attachments.push({
-              filename: cvFileName || `${candidateName.replace(/[^a-zA-Z0-9]/g, '_')}_CV.pdf`,
-              content: Buffer.from(rawBase64, "base64")
-            })
-          } catch (attErr) {
-            console.warn("Could not encode CV attachment:", attErr)
-          }
-        }
+        const plainTextContent = `
+editorial360 Notification: Appointment & Profile Acceptance
+${journal}
+Official Consent & Profile Submitted
+
+Scholar / Candidate: ${candidateName}
+Email: ${candidateEmail || "Provided during activation"}
+Role / Category: ${roleLabel}
+Journal Portfolio: ${journal}
+Affiliation: ${affiliation || "Academic Institution"}${department ? ` (${department})` : ""}${country ? `, ${country}` : ""}
+${orcid ? `ORCID iD: https://orcid.org/${orcid}\n` : ""}${googleScholar ? `Google Scholar: ${googleScholar}\n` : ""}${cvFileName ? `Uploaded CV: ${cvFileName} (${cvFileSize || "Attached"})\n` : ""}${Array.isArray(researchInterests) && researchInterests.length > 0 ? `Research Interests: ${researchInterests.join(", ")}\n` : ""}Decision / Action: ${decision.toUpperCase()}
+${credentialId ? `Credential ID: ${credentialId}\n` : ""}Website Profile Upload Consent: ${consentProfileUpload ? "Granted (GDPR Compliant)" : "Pending"}
+Terms Accepted: ${hasAcceptedTerms ? "Yes (COPE & Rigor Standards)" : "No"}
+Timestamp: ${new Date().toUTCString()}
+
+${biography ? `Academic Biography:\n${biography}\n` : ""}
+This record has been synchronized into the editorial360 Handling Editor & Reviewer registry and is ready for assignment in the Journal Manager desk.
+        `.trim()
 
         const targetJournalEmail = getJournalReplyTo(journal)
         await transporter.sendMail({
-          from: `"editorial360 Notifications" <${from}>`,
+          from: `"editorial360 Notifications" <${cleanFromEmail}>`,
           to: "info@scholarlyopen.org",
           cc: `scholarlyopen@gmail.com, ${targetJournalEmail}`,
           replyTo: candidateEmail || "info@scholarlyopen.org",
           subject,
+          text: plainTextContent,
           html: htmlContent,
           attachments
         })
