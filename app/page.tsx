@@ -28,7 +28,7 @@ export default function HomePage() {
         const approved = data.editors.filter((e: any) => e.jmApproved === true)
         const baseFounding = 5
         const onboardedApproved = approved.filter((e: any) => 
-          !["Mohamed R. Eletmany", "Weihua Gong", "Sam Lee", "Justice Kofi Boakye-Appiah", "Prashant Kumar"].some(b => (e.name || "").toLowerCase().includes(b.toLowerCase()))
+          !["Mohamed R. Eletmany", "Weihua Gong", "Sam Lee", "Justice Kofi Boakye-Appiah"].some(b => (e.name || "").toLowerCase().includes(b.toLowerCase()))
         )
         const totalCount = baseFounding + onboardedApproved.length
         if (totalCount >= 6) {

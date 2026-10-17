@@ -1566,33 +1566,166 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     name: "Furqan Tahir, Ph.D.",
     role: "Associate Editor",
     affiliation: "King Abdullah University of Science and Technology (KAUST),\nEnvironmental Science and Engineering, Saudi Arabia",
-    specialization: "Life cycle assessment (LCA), desalination environmental impacts, water-energy nexus, sustainable energy systems, and decarbonization.",
+    specialization: "Sustainable energy systems, thermo-fluids, computational fluid dynamics (CFD), heat and mass transfer, desalination, life cycle assessment (LCA), and decarbonization.",
     email: "editor.environsci@scholarlyopen.org",
     orcid: "0000-0002-8728-5218",
     googleScholar: "https://scholar.google.com/citations?user=8PDFElIAAAAJ&hl=en",
+    researchGate: "https://www.researchgate.net/profile/Furqan-Tahir-2",
     imageUrl: "/images/editors/furqan-tahir.jpg",
     journalSlug: "environmental-science",
     assignedSections: [
       "Sustainability and circular economy",
       "Water and air quality",
-      "Natural resource management"
+      "Natural resource management",
+      "Climate science and adaptation"
     ],
     expertise: [
       "Life Cycle Assessment (LCA)",
-      "Water & Desalination",
+      "Desalination & Water-Energy Nexus",
       "Sustainable Energy Systems",
-      "Decarbonization",
-      "Environmental Impact Analysis",
-      "Circular Economy"
+      "Decarbonization & Carbon Benchmarking",
+      "Computational Fluid Dynamics (CFD)",
+      "Thermo-Fluids & Heat Transfer",
+      "Techno-Economic Assessment",
+      "Climate-Resilient Systems"
     ],
-    badges: ["Associate Editor", "COPE Ethics Verified", "KAUST Postdoctoral Fellow"],
-    welcomeMessage: "As Associate Editor for Scholarly Open: Environmental Science, I am dedicated to championing high-impact, transparent, and reproducible research in sustainability, environmental engineering, and decarbonization.",
+    badges: [
+      "Associate Editor",
+      "KAUST Research Scientist",
+      "Harvard Online Certified",
+      "Gold Medalist",
+      "COPE Ethics Verified"
+    ],
+    welcomeMessage: "As Associate Editor for Scholarly Open: Environmental Science, I am dedicated to championing high-impact, transparent, and reproducible research in sustainability, environmental engineering, life-cycle decarbonization, and the water-energy nexus.",
     stats: [
-      { label: "Status", value: "Accepting Submissions", description: "Handling editor ready for peer evaluation" },
-      { label: "Role", value: "Associate Editor", description: "Environmental Science & Engineering" },
-      { label: "Standard", value: "COPE Compliant", description: "Rigorous peer evaluation & editorial integrity" }
+      { label: "Citations", value: "3,274+", description: "Google Scholar Citations" },
+      { label: "H-Index", value: "29", description: "Scholarly H-Index" },
+      { label: "Publications", value: "81", description: "56 Journal Articles & 17 Conference Papers" },
+      { label: "Research Grants", value: ">$4M", description: "Funded Research Projects Involved" }
     ],
-    biography: `Dr. Furqan Tahir is an environmental engineer and researcher at King Abdullah University of Science and Technology (KAUST) in the Environmental Science and Engineering program. He earned his Ph.D. in Sustainable Energy from Hamad Bin Khalifa University (HBKU), Qatar. His research expertise spans Life Cycle Assessment (LCA), environmental sustainability of desalination processes, the water-energy nexus, and systems-level decarbonization strategies. He serves as Associate Editor for Scholarly Open: Environmental Science.`
+    timeline: [
+      {
+        year: "2026–Present",
+        title: "Research Scientist / Instructor",
+        description: "King Abdullah University of Science and Technology (KAUST), Saudi Arabia. Developing national sustainability frameworks for Oil and Sustainability Program (OSP), Ministry of Energy.",
+        type: "career"
+      },
+      {
+        year: "2024",
+        title: "Higher Education Teaching Certificate",
+        description: "Harvard Online. Advanced pedagogy and inclusive curriculum development.",
+        type: "education"
+      },
+      {
+        year: "2023–2026",
+        title: "Postdoctoral Researcher / Instructor",
+        description: "KAUST, Saudi Arabia. CFD analysis of urban microclimates, national water emissions database development, and life cycle assessment of industrial sectors.",
+        type: "career"
+      },
+      {
+        year: "2020–2023",
+        title: "Postdoctoral Researcher / Instructor",
+        description: "Hamad Bin Khalifa University (HBKU), Qatar. $4.4M QNRF cluster project on resilient water/energy systems, Zero Liquid Discharge (ZLD), and climate change impact modeling.",
+        type: "career"
+      },
+      {
+        year: "2020",
+        title: "Ph.D. in Sustainable Energy",
+        description: "Hamad Bin Khalifa University (HBKU), Qatar (3.94 CGPA). Research on thermal desalination, multi-effect distillation, and sustainable thermodynamic cycles.",
+        type: "education"
+      },
+      {
+        year: "2014",
+        title: "M.S. in Mechanical Engineering",
+        description: "King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia (3.91 CGPA). Focus on thermo-fluid modeling and energy systems.",
+        type: "education"
+      },
+      {
+        year: "2011",
+        title: "B.E. in Mechanical Engineering (Gold Medalist)",
+        description: "NED University of Engineering & Technology, Karachi, Pakistan (4.0 CGPA, Top of Class Gold Medalist).",
+        type: "education"
+      }
+    ],
+    honors: [
+      "Developer of KAWSIM — Saudi Arabia's first integrated water sustainability model",
+      "Led development of the National Water Emissions Dashboard for Saudi Arabia",
+      "Awarded $100k Translational Research Grant (sTRG) from KAUST",
+      "Contributed to the National Sustainability Framework for the Ministry of Energy (OSP), Saudi Arabia",
+      "Best Paper Award for KAUST Water Model, Sustainability Innovation Week Symposium (COP-16, Riyadh, 2024)",
+      "Best Presenter Award, 9th Int. Conference on Power and Energy Systems Engineering (CPESE 2022, Kyoto, Japan)",
+      "Best Presenter Award, 8th Int. Conference on Power and Energy Systems Engineering (CPESE 2021, Fukuoka, Japan)",
+      "Gold Medalist, Bachelor of Engineering (Mechanical) — NED University of Engineering & Technology",
+      "Author of 56 peer-reviewed journal papers (including 41 Q1 publications in leading journals)"
+    ],
+    editorialRoles: [
+      "Associate Editor, Scholarly Open: Environmental Science",
+      "Editorial Team, Discover Water (Springer Nature)",
+      "Reviewer for Applied Thermal Engineering, Desalination, Industrial & Engineering Chemistry Research, Cleaner Water, Scientific Reports, Science of the Total Environment, and MDPI journals"
+    ],
+    personalPublications: [
+      {
+        title: "Climate change risks and resilience strategies for desalination plants in the Gulf region",
+        journal: "Renewable and Sustainable Energy Reviews",
+        year: "2026",
+        doi: "10.1016/j.rser.2025.116488"
+      },
+      {
+        title: "A cloud-based Geo-AI framework for automated high-resolution flood mapping with explainable machine learning",
+        journal: "Scientific Reports",
+        year: "2026",
+        doi: "10.1038/s41598-026-00000-0"
+      },
+      {
+        title: "Plastic Waste Recycling in Arid Regions: Technology Selection and Sustainability Trade-offs in Qatar",
+        journal: "Frontiers in Sustainability",
+        year: "2026",
+        doi: "10.3389/frsus.2026.1855504"
+      },
+      {
+        title: "Concentrated solar power (CSP) driven desalination systems: A techno-economic review",
+        journal: "Renewable and Sustainable Energy Reviews",
+        year: "2026",
+        doi: "10.1016/j.rser.2025.116311"
+      },
+      {
+        title: "Prospective environmental and economic assessment of green steel production in the Middle East",
+        journal: "Resources, Conservation and Recycling",
+        year: "2025",
+        doi: "10.1016/j.resconrec.2025.108277"
+      },
+      {
+        title: "Environmental and Economic Assessment of Mixed Plastic Waste Pelletization in the Gulf Cooperation Council Region",
+        journal: "Journal of Hazardous Materials",
+        year: "2024",
+        doi: "10.1016/j.jhazmat.2024.136349"
+      },
+      {
+        title: "Progress on green infrastructure for urban cooling: Evaluating techniques, design strategies, and benefits",
+        journal: "Urban Climate",
+        year: "2024",
+        doi: "10.1016/j.uclim.2024.102077"
+      },
+      {
+        title: "Current and Potential Materials for the Low-Carbon Cement Production: Life Cycle Assessment Perspective",
+        journal: "Journal of Building Engineering",
+        year: "2024",
+        doi: "10.1016/j.jobe.2024.110528"
+      },
+      {
+        title: "Life-cycle environmental assessment of solar-driven Multi-Effect Desalination (MED) plant",
+        journal: "Desalination",
+        year: "2022",
+        doi: "10.1016/j.desal.2021.115451"
+      },
+      {
+        title: "Climatic change impacts on the energy requirements for the built environment sector",
+        journal: "Energy Reports",
+        year: "2023",
+        doi: "10.1016/j.egyr.2022.11.033"
+      }
+    ],
+    biography: `Dr. Furqan Tahir is a mechanical engineer and renewable energy researcher specializing in sustainable energy systems, thermo-fluids, computational fluid dynamics (CFD), heat and mass transfer, desalination, life cycle assessment (LCA), and decarbonization. He serves as Research Scientist and Instructor at King Abdullah University of Science and Technology (KAUST), Saudi Arabia, where he focuses on the development of national sustainability frameworks for the Oil and Sustainability Program (OSP), Ministry of Energy. He holds a Ph.D. in Sustainable Energy from Hamad Bin Khalifa University (HBKU), Qatar, an M.S. in Mechanical Engineering from King Fahd University of Petroleum and Minerals (KFUPM), Saudi Arabia, a B.E. (Gold Medalist) from NED University of Engineering & Technology, and a Higher Education Teaching Certificate from Harvard Online. He has authored over 81 scientific publications with 3,274+ citations (h-index 29), contributed to over $4M in funded research projects, and serves on the editorial and reviewer boards for leading Springer Nature, Elsevier, and MDPI journals.`
   },
   {
     slug: "position-open-environmental-science-ae-2",
@@ -1603,52 +1736,12 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     journalSlug: "environmental-science",
   },
   {
-    slug: "prashant-kumar",
-    name: "Prashant Kumar, Ph.D.",
+    slug: "position-open-environmental-science-ebm-1",
+    name: "Position Open",
     role: "Editorial Board Member",
-    affiliation: "Global Centre for Clean Air Research (GCARE), School of Engineering, University of Surrey, UK",
-    specialization: "Air quality, aerosol science, low-cost sensing, nature-based solutions, and climate change mitigation.",
-    email: "editor.environsci@scholarlyopen.org",
-    orcid: "0000-0002-8692-7484",
-    researchGate: "https://www.researchgate.net/profile/Prashant-Kumar-4",
-    googleScholar: "https://scholar.google.com/citations?user=prashant-kumar",
-    assignedSections: [
-      "Water and air quality",
-      "Climate science and adaptation",
-      "Urban ecology"
-    ],
-    expertise: [
-      "Air Quality & Health",
-      "Aerosol Science & Nanoparticles",
-      "Low-Cost Sensing",
-      "Citizen Science",
-      "Nature-Based Solutions",
-      "Climate Change Mitigation",
-      "Environmental Engineering"
-    ],
-    badges: ["Top 1% Highly Cited Researcher", "Haagen-Smit Prize Winner"],
+    affiliation: "Seeking qualified experts in this field.",
+    specialization: "Editorial Board",
     journalSlug: "environmental-science",
-    welcomeMessage: "As an Editorial Board Member and Handling Editor for Scholarly Open: Environmental Science, I am committed to advancing rigorous, peer-reviewed open science addressing real-world environmental challenges, atmospheric health, and sustainable solutions worldwide.",
-    stats: [
-      { label: "Status", value: "Accepting Submissions", description: "Handling editor ready for peer evaluation" },
-      { label: "Citations", value: "35,000+", description: "Highly cited in Environmental Science & Technology" },
-      { label: "Review Standard", value: "COPE Compliant", description: "Transparent, rigorous peer review" }
-    ],
-    biography: `Professor Prashant Kumar is the Professor and Chair in Air Quality and Health at the University of Surrey, United Kingdom. He is the Founding Director of the Global Centre for Clean Air Research (GCARE) and Founding Co-Director of the university's pan-university Institute for Sustainability. He holds a PhD in Engineering from the University of Cambridge and has been consistently named in the top 1% of Global Highly Cited Researchers. Winner of the 2023 Haagen-Smit Prize and the Clean Air Award for his transformative contributions to environmental science and urban air quality.`,
-    personalPublications: [
-      {
-        title: "Clean air engineering for cities: Connecting science, policy and people",
-        journal: "Atmospheric Environment",
-        year: "2024",
-        doi: "10.1016/j.atmosenv.2024.120000"
-      },
-      {
-        title: "The power of low-cost sensing for urban air quality monitoring and citizen engagement",
-        journal: "Environmental Science & Technology",
-        year: "2023",
-        doi: "10.1021/acs.est.2023.001"
-      }
-    ]
   },
   {
     slug: "position-open-environmental-science-ebm-2",

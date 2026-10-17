@@ -194,11 +194,16 @@ export function JournalPage({
         if (liveAEs.length > 0) {
           const mappedAEs: EditorMember[] = liveAEs.map((e: any) => {
             const isAbdelmonsef = (e.name && (e.name.toLowerCase().includes("abdelmonsef") || e.name.toLowerCase().includes("aboubakr"))) || (e.slug && e.slug.includes("abdelmonsef"))
+            const isTahir = (e.name && e.name.toLowerCase().includes("tahir")) || (e.slug && e.slug.includes("tahir"))
             return {
               name: isAbdelmonsef ? "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D." : e.name,
-              slug: isAbdelmonsef ? "aboubakr-haredi-abdelmonsef" : e.slug,
+              slug: isAbdelmonsef ? "aboubakr-haredi-abdelmonsef" : (isTahir ? "furqan-tahir" : e.slug),
               role: e.role || "Associate Editor",
-              affiliation: isAbdelmonsef ? "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt" : (e.affiliation || "Academic Institution"),
+              affiliation: isAbdelmonsef 
+                ? "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt" 
+                : isTahir
+                ? "King Abdullah University of Science and Technology (KAUST),\nEnvironmental Science and Engineering, Saudi Arabia"
+                : (e.affiliation || "Academic Institution"),
               specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
               imageUrl: isAbdelmonsef ? "/images/editors/aboubakr-abdelmonsef.png" : (liveEiC && liveEiC.email === e.email ? liveEiC.photoUrl : e.photoUrl),
               email: isAbdelmonsef ? "editor.chem@scholarlyopen.org" : e.email,
