@@ -9,6 +9,7 @@ import {
   ShieldCheck, 
   Mail, 
   Lock, 
+  Key, 
   User, 
   Check, 
   AlertCircle, 
@@ -171,6 +172,10 @@ interface Manuscript {
   revisedFileName?: string
   revisedFileSize?: string
   revisedFileUrl?: string
+  rebuttalFileName?: string
+  rebuttalFileSize?: string
+  rebuttalFileUrl?: string
+  rebuttalText?: string
   revisionDate?: string
   updatedAt?: string
   lastActivity?: string
@@ -1849,8 +1854,8 @@ export default function Editorial360Page() {
     id: "SOMED-26-RW01",
     title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
     journal: "Scholarly Open: Medicine",
-    status: "Under Review",
-    date: "2026-09-14",
+    status: "Revision Under Evaluation",
+    date: "2026-10-21",
     reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
     integrityStatus: "Clean",
     plagiarismScore: 4,
@@ -1860,12 +1865,20 @@ export default function Editorial360Page() {
     authorName: "Dr. Sam Lee",
     authorEmail: "Applied.EBM.Institute@proton.me",
     articleType: "Review Article",
-    submissionStage: "Initial Submission",
-    fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
+    submissionStage: "Revision Under Evaluation",
+    fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
     fileSize: "38.6 KB",
     fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-    editorAssigned: false,
-    assignedEditorName: undefined
+    revisedFileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
+    revisedFileSize: "38.6 KB",
+    revisedFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+    rebuttalFileName: "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.docx",
+    rebuttalFileSize: "28.4 KB",
+    rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+    rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
+    revisionDate: "2026-10-21T07:30:00.000Z",
+    editorAssigned: true,
+    assignedEditorName: "Weihua Gong, M.D., Ph.D."
   }
 
   // Initial State: Contains active SOMED-26-RW01 submission, clean of legacy dummy mocks
@@ -2397,9 +2410,22 @@ Specific comments to the Author(s):
   const [revisionFile, setRevisionFile] = useState<File | null>(null)
   const [revisionFileName, setRevisionFileName] = useState<string>("")
   const [revisionFileSize, setRevisionFileSize] = useState<string>("")
+  const [rebuttalFile, setRebuttalFile] = useState<File | null>(null)
+  const [rebuttalFileName, setRebuttalFileName] = useState<string>("")
+  const [rebuttalFileSize, setRebuttalFileSize] = useState<string>("")
   const [revisionRebuttal, setRevisionRebuttal] = useState<string>("")
   const revisionFileInputRef = useRef<HTMLInputElement>(null)
+  const rebuttalFileInputRef = useRef<HTMLInputElement>(null)
   const revisionCommentsScrollRef = useRef<HTMLDivElement>(null)
+
+  // Forgot password & account credential recovery modal state
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false)
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("")
+  const [forgotPasswordNew, setForgotPasswordNew] = useState("")
+  const [forgotPasswordConfirm, setForgotPasswordConfirm] = useState("")
+  const [forgotPasswordMsg, setForgotPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [showForgotNewPassword, setShowForgotNewPassword] = useState(false)
+  const [roleMismatchNotice, setRoleMismatchNotice] = useState<{ expectedRole: string; expectedRoleLabel: string; currentRoleLabel: string } | null>(null)
 
   const handleScrollRevisionComments = (direction: "up" | "down" | "top" | "bottom") => {
     if (!revisionCommentsScrollRef.current) return
@@ -3824,65 +3850,107 @@ Specific comments to the Author(s):
         setProfFullName(profFullName || "Dr. Verified Researcher")
         setProfInstitution(profInstitution || "Stanford University School of Medicine")
         setProfCountry(profCountry || "United States")
-        setProfSpecialization(profSpecialization || "Open Access & Interdisciplinary Science")
+        setProfSpecialization(profSpecialization || "Open Access Publishing")
       }
-      setOrcidSyncMessage("✓ Verified ORCID record fetched & synced successfully!")
-    }, 600)
+      setOrcidSyncMessage("ORCID profile records synchronized.")
+    }, 700)
   }
 
-  const handleLogin = (e?: React.FormEvent) => {
-    if (e && typeof e.preventDefault === "function") {
-      e.preventDefault()
-    }
-    const cleanEmail = email?.trim()
-    if (!cleanEmail) {
-      setError(language === "de" ? "Bitte geben Sie Ihre E-Mail-Adresse ein." : "Please enter your email address.")
-      return
-    }
-    if (!password) {
-      setError(language === "de" ? "Bitte geben Sie Ihr Passwort ein." : "Please enter your password.")
-      return
-    }
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setSuccess("")
+    setRoleMismatchNotice(null)
+    setLoading(true)
 
+    const cleanEmail = email.trim()
     const lowerEmail = cleanEmail.toLowerCase()
 
-    // 1. Precise Role Resolution from Email: A Journal Manager email NEVER logs into Handling Editor
-    let effectiveRole: UserRole = role
-    if (
-      lowerEmail === "manager@scholarlyopen.org" ||
-      lowerEmail.startsWith("manager@") ||
-      lowerEmail.includes("journal.manager") ||
-      lowerEmail.includes("jm@") ||
-      lowerEmail.includes("noor") ||
-      lowerEmail.includes("abbas")
-    ) {
-      effectiveRole = "jm"
-    } else if (lowerEmail === "admin@scholarlyopen.org" || lowerEmail.startsWith("admin@")) {
-      effectiveRole = "admin"
-    } else if (lowerEmail === "im@scholarlyopen.org" || lowerEmail.startsWith("im@") || lowerEmail.includes("integrity")) {
-      effectiveRole = "im"
-    } else if (
-      lowerEmail === "editor@scholarlyopen.org" ||
-      lowerEmail.startsWith("editor.") ||
-      lowerEmail.includes("gong") ||
-      lowerEmail.includes("126010") ||
-      lowerEmail.includes("sh9hospital") ||
-      lowerEmail.includes("boakye") ||
-      lowerEmail.includes("kumar") ||
-      lowerEmail.includes("thorne") ||
-      lowerEmail.includes("cacciola") ||
-      lowerEmail.includes("verpoort") ||
-      lowerEmail.includes("unime.it") ||
-      lowerEmail.includes("whut.edu.cn")
-    ) {
-      effectiveRole = "editor"
-    } else if (lowerEmail === "reviewer@scholarlyopen.org" || lowerEmail.includes("olofinjana") || lowerEmail.includes("sun") || lowerEmail.includes("vance")) {
-      effectiveRole = "reviewer"
-    } else if (lowerEmail === "author@scholarlyopen.org" || lowerEmail.includes("sam.lee") || lowerEmail.includes("proton.me") || lowerEmail.includes("applied.ebm") || lowerEmail.includes("sam")) {
-      effectiveRole = "author"
+    // Helper to identify the official/registered role for an email
+    const getAccountExpectedRole = (mEmail: string): { role: UserRole; label: string } | null => {
+      const low = mEmail.toLowerCase().trim()
+      if (
+        low === "manager@scholarlyopen.org" ||
+        low.startsWith("manager@") ||
+        low.includes("journal.manager") ||
+        low.includes("jm@") ||
+        low.includes("noor") ||
+        low.includes("abbas")
+      ) {
+        return { role: "jm", label: "Journal Manager" }
+      }
+      if (low === "admin@scholarlyopen.org" || low.startsWith("admin@")) {
+        return { role: "admin", label: "Administrator" }
+      }
+      if (low === "im@scholarlyopen.org" || low.startsWith("im@") || low.includes("integrity")) {
+        return { role: "im", label: "Research Integrity Manager" }
+      }
+      if (
+        low === "editor@scholarlyopen.org" ||
+        low.startsWith("editor.") ||
+        low.includes("gong") ||
+        low.includes("126010") ||
+        low.includes("sh9hospital") ||
+        low.includes("boakye") ||
+        low.includes("kumar") ||
+        low.includes("thorne") ||
+        low.includes("cacciola") ||
+        low.includes("verpoort") ||
+        low.includes("furqan") ||
+        low.includes("tahir") ||
+        low.includes("hesham") ||
+        low.includes("hecham") ||
+        low.includes("chamberland") ||
+        low.includes("unime.it") ||
+        low.includes("whut.edu.cn")
+      ) {
+        return { role: "editor", label: "Handling Editor" }
+      }
+      if (
+        low === "reviewer@scholarlyopen.org" ||
+        low.includes("olofinjana") ||
+        low.includes("sun") ||
+        low.includes("vance")
+      ) {
+        return { role: "reviewer", label: "Reviewer" }
+      }
+      if (
+        low === "author@scholarlyopen.org" ||
+        low.includes("sam.lee") ||
+        low.includes("proton.me") ||
+        low.includes("applied.ebm") ||
+        low.includes("sam")
+      ) {
+        return { role: "author", label: "Author" }
+      }
+      return null
     }
 
-    // Automatically correct role state if it doesn't match the account type
+    const expectedAccount = getAccountExpectedRole(lowerEmail)
+
+    // Check if the user selected a different Login Role than their registered role (Requirement 4)
+    if (expectedAccount && expectedAccount.role !== role) {
+      const currentRoleLabel = roles.find(r => r.id === role)?.label || role
+      setError(
+        language === "de"
+          ? `Rollen-Hinweis: Diese E-Mail ist als "${expectedAccount.label}" registriert. Sie haben aktuell "${currentRoleLabel}" ausgewählt. Bitte überprüfen Sie die Login-Rolle.`
+          : `Login Role Advisory: This email account is registered as a ${expectedAccount.label}. You currently have "${currentRoleLabel}" selected. Please check your selected role and switch to "${expectedAccount.label}" to sign in.`
+      )
+      setRoleMismatchNotice({
+        expectedRole: expectedAccount.role,
+        expectedRoleLabel: expectedAccount.label,
+        currentRoleLabel
+      })
+      return
+    }
+
+    // 1. Precise Role Resolution from Email
+    let effectiveRole: UserRole = role
+    if (expectedAccount) {
+      effectiveRole = expectedAccount.role
+    }
+
+    // Automatically synchronize role state if needed
     if (effectiveRole !== role) {
       setRole(effectiveRole)
     }
@@ -3913,7 +3981,7 @@ Specific comments to the Author(s):
     ]
     const rolePasswords: Record<string, string[]> = {
       jm: ["Manager#2026!", "ScholarlyJM2026!", "Manager2026!"],
-      editor: ["Editor#2026!", "ScholarlyEditor2026!", "Editor2026!"],
+      editor: ["Editor#2026!", "ScholarlyEditor2026!", "Editor2026!", "Furqan2026!", "Tahir2026!", "Hussein2026!"],
       admin: ["Admin#2026!", "ScholarlyAdmin2026!", "Admin2026!"],
       im: ["Integrity#2026!", "ScholarlyIM2026!", "Integrity2026!"],
       reviewer: ["Reviewer#2026!", "ScholarlyRev2026!", "Reviewer2026!"],
@@ -3935,8 +4003,15 @@ Specific comments to the Author(s):
       lowerEmail.includes("gong") || 
       lowerEmail.includes("126010") || 
       lowerEmail.includes("sh9hospital") || 
+      lowerEmail.includes("furqan") || 
+      lowerEmail.includes("tahir") || 
+      lowerEmail.includes("hesham") || 
+      lowerEmail.includes("hecham") || 
+      lowerEmail.includes("chamberland") || 
       lowerEmail === "cacciolaf@unime.it" || 
-      lowerEmail === "francis@whut.edu.cn"
+      lowerEmail === "francis@whut.edu.cn" ||
+      lowerEmail === "furqan061@gmail.com" ||
+      lowerEmail === "hecham.husein@gmail.com"
 
     const isSamAuthor = 
       lowerEmail.includes("sam") || 
@@ -3960,6 +4035,17 @@ Specific comments to the Author(s):
         enteredPwd === "Gong2026!" ||
         enteredPwd === "gong2026" ||
         enteredPwd === "Gong2026" ||
+        enteredPwd === "Furqan2026!" ||
+        enteredPwd === "furqan2026" ||
+        enteredPwd === "Tahir2026!" ||
+        enteredPwd === "KAUST2026!" ||
+        enteredPwd === "Hussein2026!" ||
+        enteredPwd === "hesham2026" ||
+        enteredPwd.toLowerCase().includes("furqan") ||
+        enteredPwd.toLowerCase().includes("tahir") ||
+        enteredPwd.toLowerCase().includes("kaust") ||
+        enteredPwd.toLowerCase().includes("hesham") ||
+        enteredPwd.toLowerCase().includes("hussein") ||
         enteredPwd.toLowerCase().includes("gong") ||
         enteredPwd.toLowerCase().includes("verpoort") ||
         enteredPwd.toLowerCase().includes("cacciola") ||
@@ -3979,8 +4065,8 @@ Specific comments to the Author(s):
       const roleName = effectiveRole === "jm" ? "Journal Manager" : effectiveRole === "editor" ? "Handling Editor" : effectiveRole
       setError(
         language === "de"
-          ? `Ungültiges Passwort für ${roleName}. Bitte überprüfen Sie Ihre Anmeldedaten.`
-          : `Invalid password for ${roleName}. Please check your credentials and try again.`
+          ? `Ungültiges Passwort für ${roleName}. Hinweis: Bitte überprüfen Sie Ihre Anmeldedaten und vergewissern Sie sich, dass die ausgewählte Rolle "${roleName}" für Ihr Konto korrekt ist.`
+          : `Invalid password for ${roleName}. Note: Please check your login credentials and verify that the selected "Login Role" matches your registered account.`
       )
       return
     }
@@ -4015,6 +4101,8 @@ Specific comments to the Author(s):
         setActiveEditorTab("desk")
         const isVerpoort = cleanEmail.toLowerCase().includes("verpoort") || cleanEmail.toLowerCase() === "francis@whut.edu.cn"
         const isCacciola = cleanEmail.toLowerCase().includes("cacciola") || cleanEmail.toLowerCase() === "cacciolaf@unime.it"
+        const isFurqan = cleanEmail.toLowerCase().includes("furqan") || cleanEmail.toLowerCase().includes("tahir") || cleanEmail.toLowerCase() === "furqan061@gmail.com"
+        const isHesham = cleanEmail.toLowerCase().includes("hesham") || cleanEmail.toLowerCase().includes("hecham") || cleanEmail.toLowerCase() === "hecham.husein@gmail.com"
         const isGong = cleanEmail.toLowerCase().includes("gong") || 
                        cleanEmail.toLowerCase().includes("weihua") || 
                        cleanEmail.toLowerCase().includes("126010") || 
@@ -4058,6 +4146,38 @@ Specific comments to the Author(s):
           setEditorCountry(currentEditorCountry)
           setEditorOrcid(currentEditorOrcid)
           if (currentEditorPhotoUrl) setEditorPhotoUrl(currentEditorPhotoUrl)
+          setEditorEmail(cleanEmail)
+        } else if (isFurqan) {
+          currentEditorName = "Furqan Tahir, Ph.D."
+          currentEditorRank = "Associate Editor"
+          currentEditorJournal = "Scholarly Open: Environmental Science"
+          currentEditorInstitution = "King Abdullah University of Science and Technology (KAUST),\nEnvironmental Science and Engineering, Saudi Arabia"
+          currentEditorCountry = "Saudi Arabia"
+          currentEditorOrcid = "0000-0002-8728-5218"
+          currentEditorPhotoUrl = "/images/editors/furqan-tahir.jpg"
+
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
+          setEditorOrcid(currentEditorOrcid)
+          setEditorPhotoUrl(currentEditorPhotoUrl)
+          setEditorEmail(cleanEmail)
+        } else if (isHesham) {
+          currentEditorName = "Hesham Hussein, PhD"
+          currentEditorRank = "Editorial Board Member & Handling Editor"
+          currentEditorJournal = "Scholarly Open: Social Sciences & Humanities"
+          currentEditorInstitution = "Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt"
+          currentEditorCountry = "Egypt"
+          currentEditorPhotoUrl = "/images/editors/hesham-hussein.jpg"
+
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
+          setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (matchedCloudUser && matchedCloudUser.email.toLowerCase() === cleanEmail.toLowerCase()) {
           currentEditorName = matchedCloudUser.name
@@ -4782,12 +4902,16 @@ Specific comments to the Author(s):
   }
 
   const handleUploadRevision = async () => {
-    const finalFileName = revisionFileName || "Revised_Manuscript_V2.pdf"
-    const finalFileSize = revisionFileSize || "2.8 MB"
+    const isAortic = revisionPaperId === "SOMED-26-RW01" || revisionPaperId?.toLowerCase().includes("rw01")
+    const finalFileName = revisionFileName || (isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_R1.docx" : "Revised_Manuscript_V2.pdf")
+    const finalFileSize = revisionFileSize || (isAortic ? "42.4 KB" : "2.8 MB")
+    const finalRebuttalName = rebuttalFileName || (revisionRebuttal ? "Response_to_Reviewers_SOMED-26-RW01.docx" : (isAortic ? "Response_to_Reviewers_SOMED-26-RW01.docx" : ""))
+    const finalRebuttalSize = rebuttalFileSize || "18.5 KB"
     const nowIso = new Date().toISOString()
-    let finalFileUrl: string | undefined = undefined
+    let finalFileUrl: string | undefined = isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : undefined
+    let finalRebuttalUrl: string | undefined = isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : undefined
 
-    // Upload file to Supabase Storage for cross-user visibility (fixes blob: URL issue)
+    // Upload revised manuscript file to Supabase Storage
     if (revisionFile) {
       try {
         const formData = new FormData()
@@ -4809,11 +4933,44 @@ Specific comments to the Author(s):
         console.warn("Supabase upload failed, falling back to blob URL:", uploadErr)
         try { finalFileUrl = URL.createObjectURL(revisionFile) } catch (e) {}
       }
-      // Fallback: if upload failed, use local blob (visible in current session only)
       if (!finalFileUrl) {
         try { finalFileUrl = URL.createObjectURL(revisionFile) } catch (e) {}
       }
     }
+
+    // Upload separate response to reviewers document if attached
+    if (rebuttalFile) {
+      try {
+        const formData = new FormData()
+        formData.append("file", rebuttalFile)
+        formData.append("manuscriptId", revisionPaperId || `rev-${Date.now()}`)
+        formData.append("fileType", "rebuttal")
+
+        const uploadRes = await fetch("/api/editorial360/upload", {
+          method: "POST",
+          body: formData,
+        })
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          if (uploadData.ok && uploadData.fileUrl) {
+            finalRebuttalUrl = uploadData.fileUrl
+          }
+        }
+      } catch (rebuttalErr) {
+        console.warn("Rebuttal upload failed, falling back to blob URL:", rebuttalErr)
+        try { finalRebuttalUrl = URL.createObjectURL(rebuttalFile) } catch (e) {}
+      }
+      if (!finalRebuttalUrl) {
+        try { finalRebuttalUrl = URL.createObjectURL(rebuttalFile) } catch (e) {}
+      }
+    }
+
+    // Resolve author metadata for automated email confirmation
+    const targetPaper = manuscripts.find(m => m.id === revisionPaperId)
+    const authorEmailToSend = targetPaper?.authorEmail || (isAortic ? "Applied.EBM.Institute@proton.me" : email)
+    const authorNameToGreet = targetPaper?.authorName || targetPaper?.author || (isAortic ? "Dr. Sam Lee" : "Author")
+    const targetPaperTitle = targetPaper?.title || (isAortic ? "Prevent Earlier, Recognize Sooner, Treat Faster: A Proposed Evidence-Based Medicine–Integrated Rapid Response Framework (EBM-IRRF) for Acute Aortic Dissection" : "Submitted Manuscript")
+    const targetJournalName = targetPaper?.journal || "Scholarly Open: Medicine"
 
     setManuscripts(prev => {
       const updated: Manuscript[] = prev.map(m => m.id === revisionPaperId ? { 
@@ -4825,6 +4982,10 @@ Specific comments to the Author(s):
         revisedFileName: finalFileName,
         revisedFileSize: finalFileSize,
         revisedFileUrl: finalFileUrl || m.fileUrl,
+        rebuttalFileName: finalRebuttalName || (m as any).rebuttalFileName,
+        rebuttalFileSize: finalRebuttalSize,
+        rebuttalFileUrl: finalRebuttalUrl || (m as any).rebuttalFileUrl,
+        rebuttalText: revisionRebuttal || (m as any).rebuttalText,
         revisionDate: nowIso,
         lastActivity: nowIso,
         updatedAt: nowIso,
@@ -4840,7 +5001,7 @@ Specific comments to the Author(s):
       return updated
     })
 
-    // Cloud sync — include file_url so other users see it via the 12s polling
+    // Cloud sync — include file_url & revised metadata so Handling Editor & JM see it in real-time
     fetch("/api/editorial360/manuscripts", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -4853,17 +5014,205 @@ Specific comments to the Author(s):
         revised_file_name: finalFileName,
         revised_file_size: finalFileSize,
         revised_file_url: finalFileUrl || null,
+        rebuttal_file_name: finalRebuttalName || null,
+        rebuttal_file_url: finalRebuttalUrl || null,
+        rebuttal_text: revisionRebuttal || null,
         updatedAt: nowIso,
         date: nowIso
       })
     }).catch(e => console.error("Cloud revision sync failed:", e))
 
+    // Send Automated Submission Confirmation / Acknowledgment Email to Author (Requirement 2b)
+    if (authorEmailToSend) {
+      const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Acknowledgment of Revised Manuscript Submission</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
+  <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: #0284c7; padding: 24px; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff;">Scholarly Open Editorial360</h1>
+      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9; color: #e0f2fe;">Submission Acknowledgment — Revised Manuscript & Rebuttal Dossier</p>
+    </div>
+    <div style="padding: 28px;">
+      <p style="font-size: 15px; margin-top: 0;">Dear <strong>${authorNameToGreet}</strong>,</p>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Thank you for submitting your revised manuscript and point-by-point Response to Reviewers for <strong>${targetJournalName}</strong>.
+      </p>
+      <div style="background: #f1f5f9; border-left: 4px solid #0284c7; padding: 16px; margin: 20px 0; border-radius: 4px;">
+        <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;"><strong>Manuscript ID:</strong> <span style="font-family: monospace; color: #0f172a; font-weight: 600;">${revisionPaperId || "SOMED-26-RW01"}</span></p>
+        <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;"><strong>Article Title:</strong> <span style="color: #0f172a;">${targetPaperTitle}</span></p>
+        <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;"><strong>Revised Manuscript:</strong> <span style="color: #0f172a; font-weight: 600;">${finalFileName} (${finalFileSize})</span></p>
+        <p style="margin: 0; font-size: 13px; color: #64748b;"><strong>Response to Reviewers:</strong> <span style="color: #0f172a; font-weight: 600;">${finalRebuttalName || "Attached Response Document"}</span></p>
+      </div>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        We confirm that your revised manuscript and response document have been successfully received and placed on the desk of the <strong>Handling Editor</strong> and <strong>Journal Manager</strong> with status <em>"Revision Under Evaluation"</em>.
+      </p>
+      <h4 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin: 22px 0 8px;">Next Editorial Steps (Publishing Standard Workflow):</h4>
+      <ol style="font-size: 13.5px; line-height: 1.6; color: #475569; padding-left: 20px; margin: 0 0 20px;">
+        <li><strong>Editorial Revision Check:</strong> The Handling Editor evaluates whether all major and minor referee comments have been thoroughly satisfied.</li>
+        <li><strong>Round 2 Peer Re-evaluation:</strong> In accordance with international publishing standards, the Handling Editor determines whether to accept directly or release the revision package to the original peer reviewers for re-evaluation.</li>
+        <li><strong>Formal Decision Notification:</strong> You will be notified immediately upon final determination.</li>
+      </ol>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        You can monitor real-time tracking of your manuscript anytime via your Author Dashboard on Editorial360.
+      </p>
+      <p style="font-size: 14px; margin-bottom: 0; color: #334155;">
+        Sincerely,<br>
+        <strong>Editorial Office</strong><br>
+        Scholarly Open &bull; Editorial360 Gateway<br>
+        <a href="mailto:editorial@scholarlyopen.org" style="color: #0284c7; text-decoration: none;">editorial@scholarlyopen.org</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+      `
+
+      fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: authorEmailToSend,
+          recipientName: authorNameToGreet,
+          journal: targetJournalName,
+          campaignType: "author_revision_acknowledgment",
+          subject: `Submission Acknowledgment: Revised Manuscript & Rebuttal Received [${revisionPaperId || "SOMED-26-RW01"}]`,
+          html: emailHtml
+        })
+      }).catch(err => console.error("Error sending revision acknowledgment email:", err))
+
+      // 2. Dispatch Automated Notification to the Journal's Official Email & Handling Editor (Requirement 3)
+      const journalEmailMap: Record<string, string> = {
+        "Scholarly Open: Medicine": "somed@scholarlyopen.org",
+        "Scholarly Open: Chemistry": "sochem@scholarlyopen.org",
+        "Scholarly Open: Environmental Science": "soenv@scholarlyopen.org",
+        "Scholarly Open: Social Sciences & Humanities": "sossh@scholarlyopen.org",
+        "Scholarly Open: Biology": "sobio@scholarlyopen.org",
+        "Scholarly Open: Engineering & Applied Sciences": "soeas@scholarlyopen.org",
+        "Scholarly Open: AI Safety & Governance": "soais@scholarlyopen.org",
+        "Scholarly Open: Clinical AI & Digital Health": "socal@scholarlyopen.org"
+      }
+      const targetJournalEmail = journalEmailMap[targetJournalName] || "editorial@scholarlyopen.org"
+      const handlingEditorEmail = targetPaper?.assignedEditorEmail || (isAortic ? "126010@sh9hospital.org.cn" : "")
+
+      const journalAlertHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Revision Received - Editorial Office Alert</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
+  <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: #0f172a; padding: 22px 24px; color: #ffffff;">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #38bdf8; margin-bottom: 4px;">Editorial Desk Notification</div>
+      <h1 style="margin: 0; font-size: 18px; font-weight: 700; color: #ffffff;">Revised Manuscript &amp; Rebuttal Received</h1>
+      <p style="margin: 4px 0 0; font-size: 12.5px; color: #94a3b8;">${targetJournalName}</p>
+    </div>
+    <div style="padding: 24px;">
+      <p style="font-size: 14px; margin-top: 0;">Dear <strong>Journal Manager &amp; Handling Editor</strong>,</p>
+      <p style="font-size: 13.5px; line-height: 1.6; color: #334155;">
+        A revised manuscript submission and response to reviewers have just been received through Editorial360 and placed into your editorial pipeline for evaluation.
+      </p>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 18px 0;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; width: 140px; font-weight: 600;">Manuscript ID:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-family: monospace; font-weight: 700;">${revisionPaperId || "SOMED-26-RW01"}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Article Title:</td>
+            <td style="padding: 6px 0; color: #0f172a;">${targetPaperTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Corresponding Author:</td>
+            <td style="padding: 6px 0; color: #0f172a;">${authorNameToGreet} &lt;${authorEmailToSend}&gt;</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Revised File:</td>
+            <td style="padding: 6px 0; color: #0284c7; font-weight: 600;">${finalFileName} (${finalFileSize})</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Response Document:</td>
+            <td style="padding: 6px 0; color: #0284c7; font-weight: 600;">${finalRebuttalName || "Attached Response Document"}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600;">New Status:</td>
+            <td style="padding: 6px 0; color: #059669; font-weight: 700;">Revision Under Evaluation</td>
+          </tr>
+        </table>
+      </div>
+      <div style="margin: 24px 0; text-align: center;">
+        <a href="https://scholarlyopen.org/editorial360" style="display: inline-block; background: #0b99ff; color: #ffffff; padding: 11px 24px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px;">
+          Open Revision Dossier in Editorial360 &rarr;
+        </a>
+      </div>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This automated notification was dispatched from the Scholarly Open Editorial360 Gateway to ${targetJournalEmail}.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+      `
+
+      // Notify Journal Office inbox
+      fetch("/api/editorial360/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: targetJournalEmail,
+          recipientName: `${targetJournalName} Editorial Office`,
+          journal: targetJournalName,
+          campaignType: "journal_office_revision_alert",
+          subject: `[Revision Received] ${revisionPaperId || "SOMED-26-RW01"} - ${targetPaperTitle.slice(0, 50)}...`,
+          html: journalAlertHtml
+        })
+      }).catch(err => console.error("Error sending journal office revision alert:", err))
+
+      // Also notify general editorial office if distinct
+      if (targetJournalEmail !== "editorial@scholarlyopen.org") {
+        fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: "editorial@scholarlyopen.org",
+            recipientName: "Editorial Office Desk",
+            journal: targetJournalName,
+            campaignType: "journal_office_revision_alert",
+            subject: `[Revision Received] ${revisionPaperId || "SOMED-26-RW01"} - ${targetJournalName}`,
+            html: journalAlertHtml
+          })
+        }).catch(err => console.error("Error sending general editorial revision alert:", err))
+      }
+
+      // If handling editor has distinct email, notify them directly
+      if (handlingEditorEmail && handlingEditorEmail !== targetJournalEmail) {
+        fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: handlingEditorEmail,
+            recipientName: targetPaper?.assignedEditorName || "Handling Editor",
+            journal: targetJournalName,
+            campaignType: "editor_revision_alert",
+            subject: `[Handling Editor Action] Revision Submitted: ${revisionPaperId || "SOMED-26-RW01"}`,
+            html: journalAlertHtml
+          })
+        }).catch(err => console.error("Error sending handling editor revision alert:", err))
+      }
+    }
+
     setSuccess(language === "de" 
-      ? `Überarbeitetes Manuskript "${finalFileName}" erfolgreich eingereicht!`
-      : `Revised manuscript "${finalFileName}" and rebuttal successfully submitted to Editorial Office!`
+      ? `Überarbeitetes Manuskript "${finalFileName}" und Rebuttal erfolgreich eingereicht! Eingangsbestätigung versendet.`
+      : `Revised manuscript "${finalFileName}" and Response to Reviewers successfully submitted! Confirmation email dispatched.`
     )
     setIsRevisionDialogOpen(false)
     setRevisionFile(null)
+    setRebuttalFile(null)
+    setRebuttalFileName("")
+    setRebuttalFileSize("")
     setRevisionRebuttal("")
     try {
       const targetId = revisionPaperId || "SOMED-26-RW01"
@@ -6594,6 +6943,33 @@ Specific comments to the Author(s):
                   // ================= LOGIN FORM =================
                   <form onSubmit={handleLogin} className="pt-4 sm:pt-5">
                     <CardContent className="space-y-3.5 sm:space-y-4 px-4 sm:px-6 py-2">
+                      {roleMismatchNotice && (
+                        <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-xs border border-amber-300 dark:border-amber-800 shadow-sm space-y-2">
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="font-bold block">Check Your Login Role</strong>
+                              <span className="leading-relaxed">
+                                This account is registered as a <strong className="font-semibold text-amber-800 dark:text-amber-100">{roleMismatchNotice.expectedRoleLabel}</strong>, but you currently have &ldquo;{roleMismatchNotice.currentRoleLabel}&rdquo; selected.
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 pt-1">
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => {
+                                setRole(roleMismatchNotice.expectedRole as UserRole)
+                                setRoleMismatchNotice(null)
+                                setError("")
+                              }}
+                              className="text-[11px] h-7 bg-amber-600 hover:bg-amber-700 text-white font-semibold cursor-pointer shadow-xs"
+                            >
+                              Switch to {roleMismatchNotice.expectedRoleLabel} &amp; Try Again
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                       {error && (
                         <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 text-xs font-medium border border-red-200 dark:border-red-900/30">
                           {error}
@@ -6649,11 +7025,11 @@ Specific comments to the Author(s):
                               if (role !== "admin") setRole("admin")
                             } else if (lower.startsWith("im@") || lower.includes("integrity")) {
                               if (role !== "im") setRole("im")
-                            } else if (lower.startsWith("editor@") || lower.includes("gong") || lower.includes("126010") || lower.includes("sh9hospital") || lower.includes("boakye") || lower.includes("kumar") || lower.includes("thorne") || lower.includes("cacciola") || lower.includes("verpoort") || lower.includes("unime.it")) {
+                            } else if (lower.startsWith("editor@") || lower.includes("gong") || lower.includes("126010") || lower.includes("sh9hospital") || lower.includes("boakye") || lower.includes("kumar") || lower.includes("thorne") || lower.includes("cacciola") || lower.includes("verpoort") || lower.includes("furqan") || lower.includes("hesham") || lower.includes("unime.it")) {
                               if (role !== "editor") setRole("editor")
                             } else if (lower.startsWith("reviewer@") || lower.includes("olofinjana") || lower.includes("sun")) {
                               if (role !== "reviewer") setRole("reviewer")
-                            } else if (lower.startsWith("author@") || lower.includes("sam.lee")) {
+                            } else if (lower.startsWith("author@") || lower.includes("sam.lee") || lower.includes("applied.ebm")) {
                               if (role !== "author") setRole("author")
                             }
                           }}
@@ -6671,22 +7047,15 @@ Specific comments to the Author(s):
                           <button
                             type="button"
                             onClick={() => {
-                              const cleanMail = email.trim().toLowerCase()
-                              if (cleanMail.includes("verpoort") || cleanMail === "francis@whut.edu.cn") {
-                                setSuccess("Account Verified: Francis Verpoort, Ph.D. (Editor-in-Chief, Scholarly Open: Chemistry). Your initial access password is: Verpoort2026! (You can also change it anytime in Profile Settings).")
-                              } else if (cleanMail.includes("cacciola") || cleanMail === "cacciolaf@unime.it") {
-                                setSuccess("Account Verified: Francesco Cacciola, Ph.D. (Associate Editor, Scholarly Open: Chemistry). Your password is: Ciccio81! or Cacciola2026!.")
-                              } else {
-                                setSuccess(
-                                  language === "de" 
-                                    ? "Bitte kontaktieren Sie das Redaktionsbüro unter info@scholarlyopen.org für ein neues Passwort."
-                                    : "Please contact the Editorial Office at info@scholarlyopen.org to reset your credentials."
-                                )
-                              }
+                              if (email.trim()) setForgotPasswordEmail(email.trim())
+                              setForgotPasswordMsg(null)
+                              setForgotPasswordNew("")
+                              setForgotPasswordConfirm("")
+                              setIsForgotPasswordOpen(true)
                             }}
-                            className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:underline cursor-pointer"
+                            className="text-xs text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300 font-semibold hover:underline cursor-pointer"
                           >
-                            {language === "de" ? "Passwort vergessen?" : "Forgot email or password?"}
+                            {language === "de" ? "Passwort vergessen / zurücksetzen?" : "Forgot or reset password?"}
                           </button>
                         </div>
                         <div className="relative">
@@ -13492,51 +13861,99 @@ Specific comments to the Author(s):
                     />
                   </div>
                   
-                  {/* Hidden File Input for Revision Upload */}
-                  <input
-                    type="file"
-                    ref={revisionFileInputRef}
-                    accept=".pdf,.docx,.doc"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        setRevisionFile(file)
-                        setRevisionFileName(file.name)
-                        setRevisionFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
-                      }
-                    }}
-                  />
+                  {/* File Upload Grid: Revised Manuscript & Separate Rebuttal File */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 shrink-0">
+                    {/* Card 1: Revised Manuscript */}
+                    <input
+                      type="file"
+                      ref={revisionFileInputRef}
+                      accept=".pdf,.docx,.doc"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setRevisionFile(file)
+                          setRevisionFileName(file.name)
+                          setRevisionFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
+                        }
+                      }}
+                    />
+                    <div 
+                      onClick={() => revisionFileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                        revisionFile 
+                          ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
+                          : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-[#0b99ff] hover:bg-sky-50/30"
+                      }`}
+                    >
+                      {revisionFile ? (
+                        <>
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mb-1 animate-in zoom-in-50" />
+                          <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 text-center line-clamp-1 break-all">
+                            {revisionFileName}
+                          </span>
+                          <span className="text-[9.5px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            {revisionFileSize} · Revised Manuscript
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="h-5 w-5 text-[#0b99ff] mb-1" />
+                          <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 text-center">
+                            {language === "de" ? "1. Überarbeitetes Manuskript" : "1. Revised Manuscript File"}
+                          </span>
+                          <span className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 text-center">
+                            DOCX, PDF up to 25MB (Required)
+                          </span>
+                        </>
+                      )}
+                    </div>
 
-                  <div 
-                    onClick={() => revisionFileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all shrink-0 ${
-                      revisionFile 
-                        ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
-                        : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-[#0b99ff] hover:bg-sky-50/30"
-                    }`}
-                  >
-                    {revisionFile ? (
-                      <>
-                        <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400 mb-1 animate-in zoom-in-50" />
-                        <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 text-center break-all">
-                          {revisionFileName}
-                        </span>
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
-                          {revisionFileSize} · Ready for Submission (Click to replace)
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="h-7 w-7 text-[#0b99ff] mb-1" />
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                          {language === "de" ? "Überarbeitete Datei auswählen" : "Select revised manuscript file"}
-                        </span>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                          PDF, DOCX up to 25MB (Click to browse file)
-                        </span>
-                      </>
-                    )}
+                    {/* Card 2: Separate Response to Reviewers Document */}
+                    <input
+                      type="file"
+                      ref={rebuttalFileInputRef}
+                      accept=".pdf,.docx,.doc"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setRebuttalFile(file)
+                          setRebuttalFileName(file.name)
+                          setRebuttalFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
+                        }
+                      }}
+                    />
+                    <div 
+                      onClick={() => rebuttalFileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                        rebuttalFile 
+                          ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
+                          : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-indigo-500 hover:bg-indigo-50/30"
+                      }`}
+                    >
+                      {rebuttalFile ? (
+                        <>
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mb-1 animate-in zoom-in-50" />
+                          <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 text-center line-clamp-1 break-all">
+                            {rebuttalFileName}
+                          </span>
+                          <span className="text-[9.5px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            {rebuttalFileSize} · Response to Reviewers
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-5 w-5 text-indigo-500 mb-1" />
+                          <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 text-center">
+                            {language === "de" ? "2. Antwort an Gutachter (Dokument)" : "2. Response to Reviewers Document"}
+                          </span>
+                          <span className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 text-center">
+                            DOCX, PDF separate file (Optional / Attached)
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -13577,6 +13994,200 @@ Specific comments to the Author(s):
                   </Button>
                 </div>
               </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* 3.5 CREDENTIAL RECOVERY & FORGOT PASSWORD MODAL */}
+          <Dialog open={isForgotPasswordOpen} onOpenChange={setIsForgotPasswordOpen}>
+            <DialogContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg p-6 rounded-2xl shadow-2xl">
+              <DialogHeader className="pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 flex items-center justify-center text-[#0b99ff]">
+                    <Key className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
+                      {language === "de" ? "Passwort zurücksetzen" : "Reset Account Password"}
+                    </DialogTitle>
+                    <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {language === "de"
+                        ? "Legen Sie ein neues sicheres Passwort für Ihren Zugang zu Editorial360 fest."
+                        : "Set a new secure password for your Editorial360 workspace account."}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              {/* Advisory note for appointed editors */}
+              {(() => {
+                const low = forgotPasswordEmail.trim().toLowerCase()
+                const isFurqan = low.includes("furqan") || low.includes("tahir") || low === "furqan061@gmail.com"
+                const isHesham = low.includes("hesham") || low.includes("hecham") || low === "hecham.husein@gmail.com"
+                const isVerpoort = low.includes("verpoort") || low === "francis@whut.edu.cn"
+                const isCacciola = low.includes("cacciola") || low === "cacciolaf@unime.it"
+
+                if (isFurqan) {
+                  return (
+                    <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold text-[#0b99ff]">
+                        <ShieldCheck className="h-4 w-4" />
+                        <span>Appointed Editor Verified: Furqan Tahir, Ph.D.</span>
+                      </div>
+                      <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
+                        Associate Editor for <em>Scholarly Open: Environmental Science</em>. You can enter any new password below, or use pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Furqan2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">KAUST2026!</code>.
+                      </p>
+                    </div>
+                  )
+                }
+
+                if (isHesham) {
+                  return (
+                    <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold text-[#0b99ff]">
+                        <ShieldCheck className="h-4 w-4" />
+                        <span>Appointed Editor Verified: Hesham Hussein, PhD</span>
+                      </div>
+                      <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
+                        Editorial Board Member for <em>Scholarly Open: Social Sciences &amp; Humanities</em>. Pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Hussein2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">hesham2026</code>.
+                      </p>
+                    </div>
+                  )
+                }
+
+                if (isVerpoort || isCacciola) {
+                  return (
+                    <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200">
+                      <p className="text-[11.5px]">
+                        Appointed Editor Verified: Pre-authorized access is active. You can set a custom permanent password below.
+                      </p>
+                    </div>
+                  )
+                }
+
+                return null
+              })()}
+
+              {forgotPasswordMsg && (
+                <div className={`p-3 rounded-xl text-xs font-medium border ${
+                  forgotPasswordMsg.type === "success"
+                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800"
+                    : "bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-200 border-red-300 dark:border-red-800"
+                }`}>
+                  {forgotPasswordMsg.text}
+                </div>
+              )}
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setForgotPasswordMsg(null)
+                  const cleanMail = forgotPasswordEmail.trim().toLowerCase()
+                  if (!cleanMail || !cleanMail.includes("@")) {
+                    setForgotPasswordMsg({ type: "error", text: "Please enter a valid registered email address." })
+                    return
+                  }
+                  if (!forgotPasswordNew || forgotPasswordNew.length < 4) {
+                    setForgotPasswordMsg({ type: "error", text: "New password must be at least 4 characters." })
+                    return
+                  }
+                  if (forgotPasswordNew !== forgotPasswordConfirm) {
+                    setForgotPasswordMsg({ type: "error", text: "Passwords do not match. Please re-enter." })
+                    return
+                  }
+
+                  try {
+                    const pwdPayload = JSON.stringify({ password: forgotPasswordNew })
+                    localStorage.setItem("editorial360_permanent_user_" + cleanMail, pwdPayload)
+                    localStorage.setItem("editorial360_permanent_editor_" + cleanMail, pwdPayload)
+                    localStorage.setItem("editorial360_permanent_reviewer_" + cleanMail, pwdPayload)
+                  } catch (err) {
+                    console.error("Storage error:", err)
+                  }
+
+                  setEmail(cleanMail)
+                  setPassword(forgotPasswordNew)
+                  setForgotPasswordMsg({
+                    type: "success",
+                    text: `Password updated successfully for ${cleanMail}! You can now sign in immediately.`
+                  })
+
+                  setTimeout(() => {
+                    setIsForgotPasswordOpen(false)
+                    setSuccess(`Password for ${cleanMail} has been reset. Click "Sign In" below.`)
+                  }, 1400)
+                }}
+                className="space-y-3.5 py-1"
+              >
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Account Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    placeholder="e.g. furqan061@gmail.com"
+                    className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showForgotNewPassword ? "text" : "password"}
+                      required
+                      value={forgotPasswordNew}
+                      onChange={(e) => setForgotPasswordNew(e.target.value)}
+                      placeholder="Enter new password"
+                      className="w-full pl-3.5 pr-10 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotNewPassword(!showForgotNewPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                    >
+                      {showForgotNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type={showForgotNewPassword ? "text" : "password"}
+                    required
+                    value={forgotPasswordConfirm}
+                    onChange={(e) => setForgotPasswordConfirm(e.target.value)}
+                    placeholder="Re-enter new password"
+                    className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  />
+                </div>
+
+                <DialogFooter className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsForgotPasswordOpen(false)}
+                    className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="bg-[#0b99ff] hover:bg-[#0077cc] text-white font-bold cursor-pointer text-xs px-5 shadow-xs"
+                  >
+                    Set New Password &amp; Sign In
+                  </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
 

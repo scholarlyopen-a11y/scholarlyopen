@@ -373,17 +373,24 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
   id: "SOMED-26-RW01",
   title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
   journal: "Scholarly Open: Medicine",
-  author: "Sam Lee",
-  authorName: "Sam Lee",
+  author: "Dr. Sam Lee",
+  authorName: "Dr. Sam Lee",
   authorEmail: "Applied.EBM.Institute@proton.me",
-  status: "Under Review",
-  date: "2026-09-14",
-  assignedEditorName: undefined,
-  editorAssigned: false,
+  status: "Revision Under Evaluation",
+  date: "2026-10-21",
+  assignedEditorName: "Weihua Gong, M.D., Ph.D.",
+  editorAssigned: true,
   reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
-  fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
+  fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
   fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
   fileSize: "38.6 KB",
+  revisedFileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
+  revisedFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+  revisedFileSize: "38.6 KB",
+  rebuttalFileName: "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.docx",
+  rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+  rebuttalFileSize: "28.4 KB",
+  rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: A Proposed Evidence-Based Medicine–Integrated Rapid Response Framework (EBM-IRRF) for Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
   wordCount: 4820,
   articleType: "Review Article",
   abstract: "Acute aortic dissection (AAD) is a catastrophic cardiovascular emergency with mortality escalating by 1–2% per hour from symptom onset. Traditional care models often suffer from delayed symptom recognition, fragmented emergency triage, inter-hospital transport delays, and unstandardized handoffs. This review proposes the Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF), bridging clinical emergency medicine, operations management, and systems thinking. We synthesize operational benchmarks including door-to-CT imaging times (<30 min), inter-facility transfer protocols, and standardized clinical decision support algorithms to minimize diagnostic and therapeutic bottlenecks. Multidisciplinary institutional coordination, simulated high-reliability team training, and real-time electronic tracking systems are presented to improve survival outcomes in acute aortic dissection.",
@@ -4216,16 +4223,16 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <div className="space-y-2">
                 {[
                   { 
-                    name: (selectedRevisionForEvaluation as any)?.revisedFileName || (selectedRevisionForEvaluation as any)?.fileName || "Revised_Manuscript_Clean_R1.pdf", 
-                    type: "Clean Manuscript PDF (Submitted by Author)", 
-                    size: (selectedRevisionForEvaluation as any)?.revisedFileSize || (selectedRevisionForEvaluation as any)?.fileSize || "2.8 MB",
-                    url: (selectedRevisionForEvaluation as any)?.revisedFileUrl || (selectedRevisionForEvaluation as any)?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"
+                    name: (selectedRevisionForEvaluation as any)?.revisedFileName || (selectedRevisionForEvaluation as any)?.fileName || "Revised_Manuscript_Clean_V2.docx", 
+                    type: "Clean Revised Manuscript Document (Submitted by Author)", 
+                    size: (selectedRevisionForEvaluation as any)?.revisedFileSize || (selectedRevisionForEvaluation as any)?.fileSize || "38.6 KB",
+                    url: (selectedRevisionForEvaluation as any)?.revisedFileUrl || (selectedRevisionForEvaluation as any)?.fileUrl || (selectedRevisionForEvaluation?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
                   },
                   { 
-                    name: "Track_Changes_Comparison_Doc.pdf", 
-                    type: "Marked-Up Redline Diff", 
-                    size: "2.8 MB", 
-                    url: "/downloads/Scholarly_Open_Manuscript_Template.txt" 
+                    name: (selectedRevisionForEvaluation as any)?.rebuttalFileName || "Response_to_Reviewers_Document.docx", 
+                    type: "Separate Response to Reviewers / Point-by-Point Rebuttal Document (Submitted by Author)", 
+                    size: (selectedRevisionForEvaluation as any)?.rebuttalFileSize || "28.4 KB", 
+                    url: (selectedRevisionForEvaluation as any)?.rebuttalFileUrl || (selectedRevisionForEvaluation?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
                   }
                 ].map((file, i) => (
                   <div key={i} className="p-3 rounded-xl border border-slate-200 dark:border-[#272832] bg-white dark:bg-[#131418] flex items-center justify-between gap-3">

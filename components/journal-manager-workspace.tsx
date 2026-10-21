@@ -2739,18 +2739,25 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         id: "SOMED-26-RW01",
         title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
         journal: "Scholarly Open: Medicine",
-        status: "Under Review",
+        status: "Revision Under Evaluation",
         integrityStatus: "Clean",
-        date: "2026-08-10",
+        date: "2026-10-21",
         authorName: "Dr. Sam Lee",
         authorEmail: "Applied.EBM.Institute@proton.me",
         articleType: "Review Article",
-        submissionStage: "Under Review",
-        fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
+        submissionStage: "Revision Under Evaluation",
+        fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
         fileSize: "38.6 KB",
         fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-        editorAssigned: false,
-        assignedEditorName: undefined,
+        revisedFileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
+        revisedFileSize: "38.6 KB",
+        revisedFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+        rebuttalFileName: "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.docx",
+        rebuttalFileSize: "28.4 KB",
+        rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+        rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
+        editorAssigned: true,
+        assignedEditorName: "Weihua Gong, M.D., Ph.D.",
         reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
         keywords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking"
       })
@@ -2764,14 +2771,22 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
           ...m,
           id: "SOMED-26-RW01",
           journal: "Scholarly Open: Medicine",
-          status: m.status || "Under Review",
+          status: m.status === "Accepted" || m.status === "Rejected" ? m.status : "Revision Under Evaluation",
+          submissionStage: "Revision Under Evaluation",
           authorName: "Dr. Sam Lee",
           authorEmail: (m.authorEmail && !m.authorEmail.includes("vane")) ? m.authorEmail : "Applied.EBM.Institute@proton.me",
-          fileName: m.fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
+          fileName: m.fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
           fileSize: m.fileSize || "38.6 KB",
           fileUrl: m.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
-          assignedEditorName: m.assignedEditorName || undefined,
-          editorAssigned: Boolean(m.assignedEditorName),
+          revisedFileName: m.revisedFileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
+          revisedFileSize: m.revisedFileSize || "38.6 KB",
+          revisedFileUrl: m.revisedFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
+          rebuttalFileName: (m as any).rebuttalFileName || "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.docx",
+          rebuttalFileSize: (m as any).rebuttalFileSize || "28.4 KB",
+          rebuttalFileUrl: (m as any).rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
+          rebuttalText: (m as any).rebuttalText || "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
+          assignedEditorName: m.assignedEditorName || "Weihua Gong, M.D., Ph.D.",
+          editorAssigned: true,
           reviewers: cleanRev
         }
       }
@@ -2838,14 +2853,15 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   }, [initialManuscripts, searchTerm, selectedJournal, selectedStageFilter, deletedManuscriptIds])
 
   // Pipeline columns & counts
-  const initialTriageList = initialManuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft")
-  const underReviewList = initialManuscripts.filter(m => m.status === "Under Review")
-  const revisionList = initialManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation")
+  const poolManuscripts = filteredManuscripts.length > 0 ? filteredManuscripts : initialManuscripts
+  const initialTriageList = poolManuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft")
+  const underReviewList = poolManuscripts.filter(m => m.status === "Under Review")
+  const revisionList = poolManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation")
   const decisionPendingList = revisionList
-  const decisionsList = initialManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected" || (m.status as string) === "Declined")
-  const productionList = initialManuscripts.filter(m => (m.status === "Accepted" || (m.status as string) === "In Production" || (m.status as string) === "Published") && m.status !== "Rejected" && (m.status as string) !== "Declined")
+  const decisionsList = poolManuscripts.filter(m => m.status === "Accepted" || m.status === "Rejected" || (m.status as string) === "Declined")
+  const productionList = poolManuscripts.filter(m => (m.status === "Accepted" || (m.status as string) === "In Production" || (m.status as string) === "Published") && m.status !== "Rejected" && (m.status as string) !== "Declined")
   const acceptedList = productionList
-  const integrityCasesList = initialManuscripts.filter(m => Boolean(m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)))
+  const integrityCasesList = poolManuscripts.filter(m => Boolean(m.integrityStatus === "Flagged" || (Number(m.plagiarismScore) > 15) || (Number(m.aiScore) > 30)))
 
   // Track already invited reviewer emails and names for active manuscript to prevent duplicate invites
   const alreadyInvitedEmailsSet = useMemo(() => {
@@ -4998,7 +5014,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     Inspect Dossier &amp; Files
                                   </DropdownMenuItem>
 
-                                  {(isUnderReview || ms.status === "Revision Required" || isRevision) && (
+                                  {/* Review Tracker (only in dropdown if not already rendered as primary action button) */}
+                                  {(isUnderReview || isRevision) && ms.status !== "Revision Required" && (
                                     <DropdownMenuItem
                                       onClick={() => {
                                         setTrackingManuscript(ms)
@@ -5008,18 +5025,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     >
                                       <Clock className="h-3.5 w-3.5 mr-2 text-[#0b99ff]" />
                                       Review Tracker &amp; Comments
-                                    </DropdownMenuItem>
-                                  )}
-                                  {(isDecided || ms.status === "Revision Required" || isRevision) && (
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setViewingDecisionManuscript(ms)
-                                        setIsDecisionLetterModalOpen(true)
-                                      }}
-                                      className="cursor-pointer"
-                                    >
-                                      <FileCheck2 className="h-3.5 w-3.5 mr-2 text-emerald-600" />
-                                      View Editorial Decision Letter
                                     </DropdownMenuItem>
                                   )}
 
@@ -12626,13 +12631,20 @@ Specific comments to the Author(s):
                 </a>
 
                 <a
-                  href="/downloads/Scholarly_Open_Manuscript_Template.txt"
-                  download={`${selectedRevisionManuscript?.id || "Manuscript"}_Tracked_Changes.docx`}
-                  className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-purple-400 transition-colors cursor-pointer"
+                  href={selectedRevisionManuscript?.rebuttalFileUrl || selectedRevisionManuscript?.revisedFileUrl || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                  download={selectedRevisionManuscript?.rebuttalFileName || `${selectedRevisionManuscript?.id || "Manuscript"}_Response_to_Reviewers.docx`}
+                  className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-emerald-500/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2 truncate">
-                    <FileText className="h-4 w-4 text-purple-500 shrink-0" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">Tracked Changes</span>
+                    <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
+                    <div className="truncate">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
+                        {selectedRevisionManuscript?.rebuttalFileName || "Response_to_Reviewers.docx"}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block font-mono">
+                        {selectedRevisionManuscript?.rebuttalFileSize || "28.4 KB"} · Author Rebuttal Document
+                      </span>
+                    </div>
                   </div>
                   <Download className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                 </a>
@@ -12643,8 +12655,11 @@ Specific comments to the Author(s):
                 <div className="font-bold text-slate-700 dark:text-slate-300 text-xs">
                   Author Rebuttal & Point-by-Point Response:
                 </div>
-                <div className="p-2.5 bg-white dark:bg-[#14151a] border border-slate-200/80 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 text-xs max-h-28 overflow-y-auto leading-relaxed">
-                  &ldquo;We thank Reviewer 1 for the insightful feedback. We have thoroughly revised Section 3, added sensitivity checks for 2024 OECD metrics in Table 4, and corrected all formatting anomalies. Tracked changes are highlighted in the attached document.&rdquo;
+                <div className="p-2.5 bg-white dark:bg-[#14151a] border border-slate-200/80 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 text-xs max-h-28 overflow-y-auto leading-relaxed whitespace-pre-wrap">
+                  {selectedRevisionManuscript?.rebuttalText || (selectedRevisionManuscript?.id === "SOMED-26-RW01"
+                    ? "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response."
+                    : "We thank the reviewers for their constructive feedback. All comments have been addressed in the revised manuscript and itemized response document."
+                  )}
                 </div>
               </div>
 

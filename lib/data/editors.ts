@@ -1956,12 +1956,139 @@ Dr. Chamberland earned her Ph.D. in History from the University of California, D
     ]
   },
   {
-    slug: "position-open-social-sciences-humanities-ebm-2",
-    name: "Position Open",
+    slug: "hesham-hussein",
+    name: "Hesham Hussein, PhD",
     role: "Editorial Board Member",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
+    affiliation: "Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt",
+    specialization: "Archaeology, Egyptology, Frontier Fortifications, Epigraphy and Digital Heritage Documentation",
+    email: "editor.socsci@scholarlyopen.org",
+    orcid: "",
+    googleScholar: "",
+    linkedin: "https://www.linkedin.com/in/hesham-hussein",
+    imageUrl: "/images/editors/hesham-hussein.jpg",
     journalSlug: "social-sciences-humanities",
+    assignedSections: [
+      "Archaeology & Ancient History",
+      "Epigraphy & Inscription Documentation",
+      "Digital Archaeology & 3D Photogrammetry",
+      "Frontier Studies & Heritage Management"
+    ],
+    expertise: [
+      "Egyptian Frontier Archaeology",
+      "Ways of Horus & Military Fortifications",
+      "Rock Inscriptions & Petroglyphs (RIDP)",
+      "Digital Heritage & 3D Photogrammetry",
+      "Excavation & Heritage Management",
+      "Hellenistic & Roman Pelusium",
+      "Ancient Metallurgy & Mining (Wadi el-Nasab)"
+    ],
+    badges: [
+      "Editorial Board Member",
+      "Archaeology & Egyptology Specialist",
+      "Supreme Council of Antiquities",
+      "COPE Ethics Verified"
+    ],
+    welcomeMessage: "As an Editorial Board Member for Scholarly Open: Social Sciences & Humanities, I am dedicated to promoting rigorous interdisciplinary research in archaeology, historical documentation, epigraphy, and advanced digital heritage preservation methodologies across Egypt, the Mediterranean, and global ancient civilizations.",
+    stats: [
+      { label: "Status", value: "Accepting Submissions", description: "Ready to review manuscripts" },
+      { label: "Avg. Turnaround", value: "21 Days", description: "From assignment to review completion" },
+      { label: "Review Standard", value: "Rigorous Double-Blind", description: "Ensuring academic excellence" }
+    ],
+    timeline: [
+      {
+        year: "2013",
+        title: "PhD in History and Civilization",
+        description: "Suez Canal University, Egypt. Dissertation: 'The Egyptian Eastern Border from Earliest Times to the End of the Thirtieth Dynasty.'",
+        type: "education"
+      },
+      {
+        year: "2013 – 2014",
+        title: "Instructor, History and Civilization",
+        description: "Suez Canal University, Egypt. Taught Ancient Egyptian History and Civilization.",
+        type: "career"
+      },
+      {
+        year: "2018 – 2023",
+        title: "General Director of North Sinai Archaeology",
+        description: "Directed archaeological fieldwork and heritage management in North Sinai.",
+        type: "career"
+      },
+      {
+        year: "2020 – 2023",
+        title: "Supervisor of SCA Affairs in Sinai / General Director of South Sinai",
+        description: "Oversaw archaeological affairs, missions, sites, and heritage management across South Sinai.",
+        type: "career"
+      },
+      {
+        year: "2023 – 2025",
+        title: "Director General of Sinai Archaeology",
+        description: "Senior responsibility for archaeological administration, fieldwork, and heritage documentation across Sinai.",
+        type: "career"
+      },
+      {
+        year: "2023 – Present",
+        title: "Art History Instructor",
+        description: "University of the People.",
+        type: "career"
+      },
+      {
+        year: "2025 – 2026",
+        title: "Undersecretary for Lower Egypt and Sinai Archaeology",
+        description: "Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt.",
+        type: "career"
+      },
+      {
+        year: "2026",
+        title: "Joined Scholarly Open",
+        description: "Appointed as Editorial Board Member for Scholarly Open: Social Sciences & Humanities.",
+        type: "milestone"
+      }
+    ],
+    biography: `Dr. Hesham Hussein, PhD, is an archaeologist, Egyptologist, and archaeological heritage specialist with more than 25 years of professional experience in archaeological fieldwork, Egyptian frontier archaeology, excavation, rock inscriptions, archaeological documentation, heritage management, and digital archaeology. He currently serves as Undersecretary for Lower Egypt and Sinai Archaeology at the Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt.
+
+Dr. Hussein earned his PhD in History and Civilization from Suez Canal University in 2013, with a doctoral dissertation entitled “The Egyptian Eastern Border from Earliest Times to the End of the Thirtieth Dynasty.” Over his distinguished career, he has served as Director General of Sinai Archaeology (2023–2025), General Director of South Sinai and Supervisor of SCA Affairs in Sinai (2020–2023), Supervisor of the Port Said Archaeological Area (2019–2023), and General Director of North Sinai Archaeology (2018–2023).
+
+His major field projects include serving as Founder and Director of the Sinai Rock Inscription Documentation Project (RIDP, initiated 2018), documenting rock inscriptions and petroglyphs using photogrammetry and digital workflows; discovering a New Kingdom military fortress on the Ways of Horus at Tell el-Kharuba; investigating ancient copper mining and metallurgy installations at Wadi el-Nasab; excavating Hellenistic and Roman Pelusium (Tell el-Farama), including the Temple of Zeus Kasios; and researching the Canopus Decree stela at Tell Fara’un and the newly identified frontier commander tomb at Tell el-Maskhuta. In addition, Dr. Hussein has served as Scientific Advisor for the Egypt Reborn Project (Flyover Zone) and the Arab Inscriptions Portal (Abu Dhabi), and has been awarded fellowships including the Egypt Exploration Society Scholar (London, 2015), CNR-ITABC (Italy, 2014), and ARCE Conservation training (USA, 2019).`,
+    personalPublications: [
+      {
+        title: "The Lost Temple of Zeus Kasios at Pelusium: Newly Uncovered Architectural and Epigraphic Evidence",
+        journal: "Zeitschrift für Papyrologie und Epigraphik (ZPE)",
+        year: "2025",
+        link: "https://www.uni-koeln.de/phil-fak/ifa/zpe/"
+      },
+      {
+        title: "Geomorphological Hazard Assessment of Archaeological Sites in Wadi Maghara, South Sinai, Egypt",
+        journal: "Bulletin de la Société de Géographie d’Égypte",
+        year: "2025",
+        doi: "10.21608/bsge.2025.385640.1044",
+        link: "https://doi.org/10.21608/bsge.2025.385640.1044"
+      },
+      {
+        title: "The Egyptian Eastern Border during the New Kingdom: The Ways of Horus Fortresses and the Development of the Concept of National Security",
+        journal: "Heritage and Civilization",
+        year: "2024"
+      },
+      {
+        title: "The Rock Inscriptions Documentation Project: Al-Zolma/Al-Dalma Rockshelter in the North-Central Part of the Sinai Peninsula: A Preliminary Report",
+        journal: "Abgadiyat",
+        year: "2026"
+      },
+      {
+        title: "Forgotten Excavations of the Ptolemaic-Roman Cemetery at al-Qantara (Seasons 1981 and 1985)",
+        journal: "NEHET",
+        year: "2023"
+      },
+      {
+        title: "Mapping an Ancient Egyptian Highway of North Sinai: The Ways of Horus",
+        journal: "Tell el-Borg II",
+        year: "2019"
+      },
+      {
+        title: "The Lost Tomb of the Eastern Frontier Commander: A New Discovery at Tell el-Maskhuta/Rod Eskander (Part One)",
+        journal: "The Journal of Egyptian Archaeology (Accepted / Forthcoming)",
+        year: "2026"
+      }
+    ]
   },
   {
     slug: "position-open-social-sciences-open-ae-1",
