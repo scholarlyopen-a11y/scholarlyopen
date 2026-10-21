@@ -7267,11 +7267,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </td>
                           <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             {(() => {
+                              const isApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola"))
                               const displayCred = (resp.credentialId || "").trim() || (
-                                resp.candidateName?.toLowerCase().includes("verpoort") ? "EBM-VERPOORT" :
-                                resp.candidateName?.toLowerCase().includes("cacciola") ? "EBM-CACCIOLA" :
-                                resp.type === "reviewer_claim" ? (resp.id ? `SO-REV-${resp.id.replace(/[^a-zA-Z0-9]/g, "").slice(-6).toUpperCase()}` : "SO-REV-CLAIMED") :
-                                `EBM-${(resp.candidateName || "EDITOR").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().split(" ")[0].toUpperCase()}`
+                                isApproved
+                                  ? (resp.type === "reviewer_claim" 
+                                      ? (resp.id ? `SO-REV-${resp.id.replace(/[^a-zA-Z0-9]/g, "").slice(-6).toUpperCase()}` : "SO-REV-CLAIMED") 
+                                      : `EBM-${(resp.candidateName || "EDITOR").replace(/^(Prof\.|Dr\.|Associate Prof\.|Assoc\.|Mr\.|Ms\.)\s*/i, "").trim().split(" ")[0].toUpperCase()}`)
+                                  : ""
                               )
                               return displayCred ? (
                                 <span className="font-mono text-[11px] font-semibold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-1 rounded-md border border-[#0b99ff]/25">
