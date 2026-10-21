@@ -1965,7 +1965,7 @@ Dr. Chamberland earned her Ph.D. in History from the University of California, D
     orcid: "",
     googleScholar: "",
     linkedin: "https://www.linkedin.com/in/hesham-hussein",
-    imageUrl: "/images/editors/hesham-hussein.jpg",
+    imageUrl: "/images/editors/hesham-hussein.png",
     journalSlug: "social-sciences-humanities",
     assignedSections: [
       "Archaeology & Ancient History",
@@ -2050,19 +2050,6 @@ Dr. Hussein earned his PhD in History and Civilization from Suez Canal Universit
 
 His major field projects include serving as Founder and Director of the Sinai Rock Inscription Documentation Project (RIDP, initiated 2018), documenting rock inscriptions and petroglyphs using photogrammetry and digital workflows; discovering a New Kingdom military fortress on the Ways of Horus at Tell el-Kharuba; investigating ancient copper mining and metallurgy installations at Wadi el-Nasab; excavating Hellenistic and Roman Pelusium (Tell el-Farama), including the Temple of Zeus Kasios; and researching the Canopus Decree stela at Tell Fara’un and the newly identified frontier commander tomb at Tell el-Maskhuta. In addition, Dr. Hussein has served as Scientific Advisor for the Egypt Reborn Project (Flyover Zone) and the Arab Inscriptions Portal (Abu Dhabi), and has been awarded fellowships including the Egypt Exploration Society Scholar (London, 2015), CNR-ITABC (Italy, 2014), and ARCE Conservation training (USA, 2019).`,
     personalPublications: [
-      {
-        title: "The Lost Temple of Zeus Kasios at Pelusium: Newly Uncovered Architectural and Epigraphic Evidence",
-        journal: "Zeitschrift für Papyrologie und Epigraphik (ZPE)",
-        year: "2025",
-        link: "https://www.uni-koeln.de/phil-fak/ifa/zpe/"
-      },
-      {
-        title: "Geomorphological Hazard Assessment of Archaeological Sites in Wadi Maghara, South Sinai, Egypt",
-        journal: "Bulletin de la Société de Géographie d’Égypte",
-        year: "2025",
-        doi: "10.21608/bsge.2025.385640.1044",
-        link: "https://doi.org/10.21608/bsge.2025.385640.1044"
-      },
       {
         title: "The Egyptian Eastern Border during the New Kingdom: The Ways of Horus Fortresses and the Development of the Concept of National Security",
         journal: "Heritage and Civilization",

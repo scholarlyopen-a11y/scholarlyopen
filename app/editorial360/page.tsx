@@ -4170,7 +4170,7 @@ Specific comments to the Author(s):
           currentEditorJournal = "Scholarly Open: Social Sciences & Humanities"
           currentEditorInstitution = "Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt"
           currentEditorCountry = "Egypt"
-          currentEditorPhotoUrl = "/images/editors/hesham-hussein.jpg"
+          currentEditorPhotoUrl = "/images/editors/hesham-hussein.png"
 
           setEditorName(currentEditorName)
           setEditorRank(currentEditorRank)

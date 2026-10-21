@@ -15,7 +15,7 @@
       "department": "Lower Egypt and Sinai Archaeology",
       "country": "Egypt",
       "biography": "Dr. Hesham Hussein, PhD, is an archaeologist, Egyptologist, and archaeological heritage specialist with over 25 years of professional experience in archaeological fieldwork, Egyptian frontier archaeology, excavation, epigraphy, rock inscriptions, digital heritage documentation, and heritage management. He currently serves as Undersecretary for Lower Egypt and Sinai Archaeology at the Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt. He earned his PhD in History and Civilization from Suez Canal University (2013). His research spans the Ways of Horus military fortresses, ancient copper mining and metallurgy in Sinai (Wadi el-Nasab), Hellenistic and Roman Pelusium (Temple of Zeus Kasios), rock art documentation (Al-Zolma/Al-Dalma rockshelter), and 3D photogrammetric digital archaeology.",
-      "photoUrl": "/images/editors/hesham-hussein.jpg",
+      "photoUrl": "/images/editors/hesham-hussein.png",
       "cvFileName": "Hesham Hussein Academic CV.pdf",
       "cvFileSize": "412 KB",
       "researchInterests": [
@@ -34,23 +34,28 @@
       "linkedin": "https://www.linkedin.com/in/hesham-hussein",
       "publications": [
         {
-          "title": "The Lost Temple of Zeus Kasios at Pelusium: Newly Uncovered Architectural and Epigraphic Evidence",
-          "journal": "Zeitschrift für Papyrologie und Epigraphik (ZPE)",
-          "year": "2025"
-        },
-        {
-          "title": "Geomorphological Hazard Assessment of Archaeological Sites in Wadi Maghara, South Sinai, Egypt",
-          "journal": "Bulletin de la Société de Géographie d’Égypte",
-          "year": "2025"
-        },
-        {
           "title": "The Egyptian Eastern Border during the New Kingdom: The Ways of Horus Fortresses and the Development of the Concept of National Security",
           "journal": "Heritage and Civilization",
           "year": "2024"
         },
         {
-          "title": "The Rock Inscriptions Documentation Project: Al-Zolma/Al-Dalma Rockshelter in the North-Central Part of the Sinai Peninsula",
+          "title": "The Rock Inscriptions Documentation Project: Al-Zolma/Al-Dalma Rockshelter in the North-Central Part of the Sinai Peninsula: A Preliminary Report",
           "journal": "Abgadiyat",
+          "year": "2026"
+        },
+        {
+          "title": "Forgotten Excavations of the Ptolemaic-Roman Cemetery at al-Qantara (Seasons 1981 and 1985)",
+          "journal": "NEHET",
+          "year": "2023"
+        },
+        {
+          "title": "Mapping an Ancient Egyptian Highway of North Sinai: The Ways of Horus",
+          "journal": "Tell el-Borg II",
+          "year": "2019"
+        },
+        {
+          "title": "The Lost Tomb of the Eastern Frontier Commander: A New Discovery at Tell el-Maskhuta/Rod Eskander (Part One)",
+          "journal": "The Journal of Egyptian Archaeology (Accepted / Forthcoming)",
           "year": "2026"
         }
       ],
