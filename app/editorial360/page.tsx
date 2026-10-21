@@ -8842,6 +8842,7 @@ Specific comments to the Author(s):
                     switch (st) {
                       case "Accepted": return "Angenommen"
                       case "Revision Required": return "Überarbeitung erforderlich"
+                      case "Revision Under Evaluation": return "Revision in Prüfung"
                       case "Under Review": return "In Begutachtung"
                       case "Awaiting Initial Check": return "Wartet auf Erstprüfung"
                       case "With Editor": return "Beim Herausgeber"
@@ -8968,10 +8969,10 @@ Specific comments to the Author(s):
                                   <Clock className="h-4 w-4 text-[#0b99ff]" />
                                 </div>
                                 <div className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                                  {uniqueManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check").length}
+                                  {uniqueManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Under Evaluation").length}
                                 </div>
                                 <span className="text-xs font-semibold text-[#0b99ff] dark:text-sky-400 block">
-                                  {isDe ? "In Begutachtung" : "In peer evaluation"}
+                                  {isDe ? "In Begutachtung / Prüfung" : "In peer evaluation / review"}
                                 </span>
                               </div>
 
@@ -8984,10 +8985,20 @@ Specific comments to the Author(s):
                                   <AlertCircle className="h-4 w-4 text-amber-500" />
                                 </div>
                                 <div className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                                  {uniqueManuscripts.filter(m => m.status === "Revision Required").length}
+                                  {uniqueManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation").length}
                                 </div>
-                                <span className={`text-xs font-semibold block ${uniqueManuscripts.filter(m => m.status === "Revision Required").length > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-500"}`}>
-                                  {uniqueManuscripts.filter(m => m.status === "Revision Required").length > 0 ? (isDe ? "Aktion nötig" : "Action required") : (isDe ? "Keine ausstehend" : "None pending")}
+                                <span className={`text-xs font-semibold block ${
+                                  uniqueManuscripts.some(m => m.status === "Revision Required")
+                                    ? "text-amber-600 dark:text-amber-400"
+                                    : uniqueManuscripts.some(m => m.status === "Revision Under Evaluation")
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : "text-slate-500"
+                                }`}>
+                                  {uniqueManuscripts.some(m => m.status === "Revision Required")
+                                    ? (isDe ? "Aktion nötig" : "Action required")
+                                    : uniqueManuscripts.some(m => m.status === "Revision Under Evaluation")
+                                    ? (isDe ? "Eingereicht (In Prüfung)" : "Submitted · In Evaluation")
+                                    : (isDe ? "Keine ausstehend" : "None pending")}
                                 </span>
                               </div>
 
@@ -9205,8 +9216,8 @@ Specific comments to the Author(s):
                                 <div className="flex items-center gap-1.5 overflow-x-auto min-w-0 flex-1 [scrollbar-width:none]">
                                   {[
                                     { id: "all", label: isDe ? "Alle Einreichungen" : "All Submissions", count: uniqueManuscripts.length },
-                                    { id: "under_review", label: isDe ? "In Begutachtung" : "Under Review", count: uniqueManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check").length },
-                                    { id: "revision_required", label: isDe ? "Revision nötig" : "Revisions", count: uniqueManuscripts.filter(m => m.status === "Revision Required").length },
+                                    { id: "under_review", label: isDe ? "In Begutachtung" : "Under Review", count: uniqueManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Under Evaluation").length },
+                                    { id: "revision_required", label: isDe ? "Revisionen" : "Revisions", count: uniqueManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation").length },
                                     { id: "accepted", label: isDe ? "Angenommen" : "Accepted", count: uniqueManuscripts.filter(m => m.status === "Accepted").length },
                                   ].map((tab) => {
                                     const isActive = authorFilter === tab.id
@@ -9291,8 +9302,8 @@ Specific comments to the Author(s):
                               const filteredManuscripts = uniqueManuscripts.filter(m => {
                                 const matchesFilter = 
                                   authorFilter === "all" ? true :
-                                  authorFilter === "under_review" ? (m.status.includes("Review") || m.status === "Awaiting Initial Check") :
-                                  authorFilter === "revision_required" ? (m.status === "Revision Required") :
+                                  authorFilter === "under_review" ? (m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Under Evaluation") :
+                                  authorFilter === "revision_required" ? (m.status === "Revision Required" || m.status === "Revision Under Evaluation") :
                                   authorFilter === "accepted" ? (m.status === "Accepted") : true
 
                                 const matchesSearch = 
@@ -9323,8 +9334,10 @@ Specific comments to the Author(s):
                                     <div className="divide-y divide-slate-100 dark:divide-[#272832]">
                                       {paginatedManuscripts.map((m) => {
                                         const isAccepted = m.status === "Accepted"
-                                        const isRevision = m.status === "Revision Required"
-                                        const isReview = m.status.includes("Review") || m.status === "Awaiting Initial Check"
+                                        const isRevisionAction = m.status === "Revision Required"
+                                        const isRevisionUnderEval = m.status === "Revision Under Evaluation"
+                                        const isRevision = isRevisionAction
+                                        const isReview = m.status.includes("Review") || m.status === "Awaiting Initial Check" || isRevisionUnderEval
 
                                         return (
                                           <div 
@@ -9340,14 +9353,14 @@ Specific comments to the Author(s):
                                                   {m.journal} · {m.date}
                                                 </span>
                                                 <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-medium border ${
-                                                  isAccepted ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
-                                                  isRevision ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
+                                                  isAccepted || isRevisionUnderEval ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
+                                                  isRevisionAction ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
                                                   isReview ? "bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] dark:text-sky-300 border-sky-200/80 dark:border-sky-800/60" :
                                                   "bg-slate-100 dark:bg-[#15161b] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-[#272832]"
                                                 }`}>
                                                   <span className={`h-1.5 w-1.5 rounded-full ${
-                                                    isAccepted ? "bg-emerald-500" :
-                                                    isRevision ? "bg-amber-500" :
+                                                    isAccepted || isRevisionUnderEval ? "bg-emerald-500" :
+                                                    isRevisionAction ? "bg-amber-500" :
                                                     isReview ? "bg-[#0b99ff]" : "bg-slate-400"
                                                   }`} />
                                                   {translateStatus(m.status)}
@@ -9373,18 +9386,24 @@ Specific comments to the Author(s):
                                                 <Eye className="h-3.5 w-3.5" />
                                                 <span>{isDe ? "Dossier ansehen" : "View Dossier"}</span>
                                               </Button>
-                                              {isRevision && (
-                                                <Button
-                                                  onClick={() => {
-                                                    setRevisionPaperId(m.id)
-                                                    setIsRevisionDialogOpen(true)
-                                                  }}
-                                                  className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-2xs transition-colors flex items-center gap-1.5"
-                                                >
-                                                  <Upload className="h-3.5 w-3.5" />
-                                                  <span>{isDe ? "Revision einreichen" : "Submit Revision"}</span>
-                                                </Button>
-                                              )}
+                                              {isRevisionUnderEval && (
+                                                  <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 shadow-2xs">
+                                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                                                    <span>{isDe ? "Revision in Prüfung" : "Revision In Evaluation"}</span>
+                                                  </span>
+                                                )}
+                                                {isRevisionAction && (
+                                                  <Button
+                                                    onClick={() => {
+                                                      setRevisionPaperId(m.id)
+                                                      setIsRevisionDialogOpen(true)
+                                                    }}
+                                                    className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-2xs transition-colors flex items-center gap-1.5"
+                                                  >
+                                                    <Upload className="h-3.5 w-3.5" />
+                                                    <span>{isDe ? "Revision einreichen" : "Submit Revision"}</span>
+                                                  </Button>
+                                                )}
                                             </div>
                                           </div>
                                         )
@@ -9406,8 +9425,10 @@ Specific comments to the Author(s):
                                         <tbody className="divide-y divide-slate-100 dark:divide-[#272832] text-xs">
                                           {paginatedManuscripts.map((m) => {
                                             const isAccepted = m.status === "Accepted"
-                                            const isRevision = m.status === "Revision Required"
-                                            const isReview = m.status.includes("Review") || m.status === "Awaiting Initial Check"
+                                            const isRevisionAction = m.status === "Revision Required"
+                                            const isRevisionUnderEval = m.status === "Revision Under Evaluation"
+                                            const isRevision = isRevisionAction
+                                            const isReview = m.status.includes("Review") || m.status === "Awaiting Initial Check" || isRevisionUnderEval
 
                                             return (
                                               <tr 
@@ -9427,14 +9448,14 @@ Specific comments to the Author(s):
                                                 </td>
                                                 <td className="px-4 py-3.5 whitespace-nowrap">
                                                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
-                                                    isAccepted ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
-                                                    isRevision ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
+                                                    isAccepted || isRevisionUnderEval ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
+                                                    isRevisionAction ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
                                                     isReview ? "bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] dark:text-sky-300 border-sky-200/80 dark:border-sky-800/60" :
                                                     "bg-slate-100 dark:bg-[#15161b] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-[#272832]"
                                                   }`}>
                                                     <span className={`h-1.5 w-1.5 rounded-full ${
-                                                      isAccepted ? "bg-emerald-500" :
-                                                      isRevision ? "bg-amber-500" :
+                                                      isAccepted || isRevisionUnderEval ? "bg-emerald-500" :
+                                                      isRevisionAction ? "bg-amber-500" :
                                                       isReview ? "bg-[#0b99ff]" : "bg-slate-400"
                                                     }`} />
                                                     {translateStatus(m.status)}
@@ -9452,7 +9473,13 @@ Specific comments to the Author(s):
                                                     >
                                                       {isDe ? "Details" : "View"}
                                                     </button>
-                                                    {isRevision && (
+                                                    {isRevisionUnderEval && (
+                                                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 rounded-md border border-emerald-200/80 dark:border-emerald-800/60">
+                                                        <CheckCircle2 className="h-3 w-3" />
+                                                        <span>{isDe ? "In Prüfung" : "In Evaluation"}</span>
+                                                      </span>
+                                                    )}
+                                                    {isRevisionAction && (
                                                       <button
                                                         type="button"
                                                         onClick={() => {
@@ -16235,17 +16262,17 @@ Specific comments to the Author(s):
                   </div>
                   {selectedManuscriptDetails && (
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
-                      selectedManuscriptDetails.status === "Accepted"
+                      selectedManuscriptDetails.status === "Accepted" || selectedManuscriptDetails.status === "Revision Under Evaluation"
                         ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60"
                         : selectedManuscriptDetails.status === "Revision Required"
                         ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60"
                         : "bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] dark:text-sky-300 border-sky-200/80 dark:border-sky-800/60"
                     }`}>
                       <span className={`h-2 w-2 rounded-full ${
-                        selectedManuscriptDetails.status === "Accepted" ? "bg-emerald-500" :
+                        selectedManuscriptDetails.status === "Accepted" || selectedManuscriptDetails.status === "Revision Under Evaluation" ? "bg-emerald-500" :
                         selectedManuscriptDetails.status === "Revision Required" ? "bg-amber-500" : "bg-[#0b99ff]"
                       }`} />
-                      {selectedManuscriptDetails.status}
+                      {translateStatus(selectedManuscriptDetails.status)}
                     </span>
                   )}
                 </div>
@@ -16322,7 +16349,7 @@ Specific comments to the Author(s):
                       {/* Step 4: Decision */}
                       <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center gap-3">
                         <span className={`h-7 w-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                          selectedManuscriptDetails.status === "Accepted"
+                          selectedManuscriptDetails.status === "Accepted" || selectedManuscriptDetails.status === "Revision Under Evaluation"
                             ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400"
                             : selectedManuscriptDetails.status === "Revision Required"
                             ? "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400"
@@ -16331,10 +16358,20 @@ Specific comments to the Author(s):
                           4
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className="font-bold text-slate-900 dark:text-white text-xs">Decision</div>
-                          <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium leading-tight">
+                          <div className="font-bold text-slate-900 dark:text-white text-xs">
+                            {selectedManuscriptDetails.status === "Revision Under Evaluation" ? (language === "de" ? "Zweitbegutachtung (R2)" : "Round 2 Evaluation") : (language === "de" ? "Entscheidung" : "Decision")}
+                          </div>
+                          <p className={`text-[11px] font-semibold leading-tight ${
+                            selectedManuscriptDetails.status === "Accepted" || selectedManuscriptDetails.status === "Revision Under Evaluation"
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : selectedManuscriptDetails.status === "Revision Required"
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-slate-600 dark:text-slate-400"
+                          }`}>
                             {selectedManuscriptDetails.status === "Accepted"
                               ? "Accepted"
+                              : selectedManuscriptDetails.status === "Revision Under Evaluation"
+                              ? (language === "de" ? "Revision in Prüfung" : "Revision Under Evaluation")
                               : selectedManuscriptDetails.status === "Revision Required"
                               ? "Revision Required"
                               : selectedManuscriptDetails.status === "Rejected"
@@ -16347,7 +16384,111 @@ Specific comments to the Author(s):
                   </div>
 
                   {/* Real-Time Live Peer Review Status Panel for Author (COPE Double-Blind Masked) */}
-                  {selectedManuscriptDetails.status === "Revision Required" ? (
+                  {selectedManuscriptDetails.status === "Revision Under Evaluation" ? (
+                    <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/90 dark:border-emerald-900/50 space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                            {language === "de" ? "Überarbeitete Unterlagen erfolgreich eingegangen · Zweitbegutachtung aktiv" : "Revised Files Successfully Received · Round 2 Evaluation Active"}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-900/50 px-3 py-1 rounded-full border border-emerald-300/80 dark:border-emerald-700/60">
+                          {language === "de" ? "Revision in Prüfung" : "Revision Under Evaluation"}
+                        </span>
+                      </div>
+
+                      {/* Submitted Rebuttal & Revised Files Card */}
+                      <div className="p-4 rounded-xl bg-white dark:bg-[#18191e] border border-emerald-200/80 dark:border-emerald-900/40 space-y-3 shadow-2xs">
+                        <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center justify-between">
+                          <span>{language === "de" ? "Eingereichte Revisionsunterlagen:" : "Submitted Revision Package:"}</span>
+                          <span className="text-[11px] font-normal text-slate-500">
+                            {selectedManuscriptDetails.revisionDate || selectedManuscriptDetails.updatedAt || selectedManuscriptDetails.date}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                          <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">{language === "de" ? "Überarbeitetes Manuskript" : "Revised Manuscript"}</span>
+                              <p className="font-semibold text-slate-900 dark:text-white truncate" title={selectedManuscriptDetails.revisedFileName || selectedManuscriptDetails.fileName || "Revised_Manuscript.docx"}>
+                                {selectedManuscriptDetails.revisedFileName || selectedManuscriptDetails.fileName || "Revised_Manuscript.docx"}
+                              </p>
+                              {(selectedManuscriptDetails.revisedFileSize || selectedManuscriptDetails.fileSize) && (
+                                <span className="text-[10px] text-slate-500">{selectedManuscriptDetails.revisedFileSize || selectedManuscriptDetails.fileSize}</span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const dlUrl = selectedManuscriptDetails.revisedFileUrl || selectedManuscriptDetails.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                const dlName = selectedManuscriptDetails.revisedFileName || selectedManuscriptDetails.fileName || "Revised_Manuscript.docx"
+                                const link = document.createElement("a")
+                                link.href = dlUrl
+                                link.download = dlName
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                              }}
+                              className="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-[#20222a] text-[#0b99ff] shrink-0 cursor-pointer"
+                              title="Download Revised Manuscript"
+                            >
+                              <Download className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">{language === "de" ? "Punkt-für-Punkt-Stellungnahme (Rebuttal)" : "Response to Reviewers (Rebuttal)"}</span>
+                              <p className="font-semibold text-slate-900 dark:text-white truncate" title={selectedManuscriptDetails.rebuttalFileName || "Author_Response_Document.pdf"}>
+                                {selectedManuscriptDetails.rebuttalFileName || "Author_Response_Document.pdf"}
+                              </p>
+                              {selectedManuscriptDetails.rebuttalFileSize && (
+                                <span className="text-[10px] text-slate-500">{selectedManuscriptDetails.rebuttalFileSize}</span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const dlUrl = selectedManuscriptDetails.rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                const dlName = selectedManuscriptDetails.rebuttalFileName || "Author_Response_to_Reviewers.pdf"
+                                const link = document.createElement("a")
+                                link.href = dlUrl
+                                link.download = dlName
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                              }}
+                              className="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-[#20222a] text-[#0b99ff] shrink-0 cursor-pointer"
+                              title="Download Response Document"
+                            >
+                              <Download className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {selectedManuscriptDetails.rebuttalText && (
+                          <div className="pt-2 border-t border-slate-100 dark:border-[#272832]">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                              {language === "de" ? "Auszug Autorenstellungnahme:" : "Rebuttal Statement Excerpt:"}
+                            </span>
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-[#131418] p-2.5 rounded-lg whitespace-pre-line line-clamp-3">
+                              {selectedManuscriptDetails.rebuttalText}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-start gap-2 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
+                        <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>
+                          <strong>{language === "de" ? "Redaktionsbestätigung:" : "Editorial Desk Confirmation:"}</strong>{" "}
+                          {language === "de"
+                            ? "Ihre überarbeiteten Dateien und die Punkt-für-Punkt-Antwort an die Gutachter liegen der Redaktion und den Fachgutachtern vor. Sie erhalten eine automatische Benachrichtigung, sobald der finale Annahmebeschluss vorliegt."
+                            : "Your revision files and response letter are actively logged on the desk of the Handling Editor and Referees. You will receive an automated notification as soon as the final decision is issued."}
+                        </span>
+                      </div>
+                    </div>
+                  ) : selectedManuscriptDetails.status === "Revision Required" ? (
                     <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/90 dark:border-amber-900/50 space-y-4">
                       <div className="flex flex-wrap items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
@@ -16637,13 +16778,75 @@ Specific comments to the Author(s):
                           {language === "de" ? "Dateien" : "Files"}
                         </span>
                         <div className="space-y-1.5">
+                          {/* Revised Manuscript File if submitted */}
+                          {(selectedManuscriptDetails.revisedFileName || (selectedManuscriptDetails.status === "Revision Under Evaluation" && selectedManuscriptDetails.fileName)) && (
+                            <div className="p-2.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-semibold text-slate-900 dark:text-white truncate">
+                                  {selectedManuscriptDetails.revisedFileName || selectedManuscriptDetails.fileName}
+                                </p>
+                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                  {selectedManuscriptDetails.revisedFileSize || selectedManuscriptDetails.fileSize || "1.8 MB"} · Revised Manuscript (Round 2)
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const dlUrl = selectedManuscriptDetails.revisedFileUrl || selectedManuscriptDetails.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                  const dlName = selectedManuscriptDetails.revisedFileName || selectedManuscriptDetails.fileName || "Revised_Manuscript.docx"
+                                  const link = document.createElement("a")
+                                  link.href = dlUrl
+                                  link.download = dlName
+                                  document.body.appendChild(link)
+                                  link.click()
+                                  document.body.removeChild(link)
+                                }}
+                                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 hover:bg-emerald-200/80 border border-emerald-300/80 px-2.5 py-1 rounded-md transition-all cursor-pointer shrink-0"
+                              >
+                                <Download className="h-3 w-3" />
+                                <span>Download</span>
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Rebuttal File if submitted */}
+                          {selectedManuscriptDetails.rebuttalFileName && (
+                            <div className="p-2.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-semibold text-slate-900 dark:text-white truncate">
+                                  {selectedManuscriptDetails.rebuttalFileName}
+                                </p>
+                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                  {selectedManuscriptDetails.rebuttalFileSize || "640 KB"} · Author Response & Rebuttal
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const dlUrl = selectedManuscriptDetails.rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                  const dlName = selectedManuscriptDetails.rebuttalFileName || "Author_Response_to_Reviewers.pdf"
+                                  const link = document.createElement("a")
+                                  link.href = dlUrl
+                                  link.download = dlName
+                                  document.body.appendChild(link)
+                                  link.click()
+                                  document.body.removeChild(link)
+                                }}
+                                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 hover:bg-emerald-200/80 border border-emerald-300/80 px-2.5 py-1 rounded-md transition-all cursor-pointer shrink-0"
+                              >
+                                <Download className="h-3 w-3" />
+                                <span>Download</span>
+                              </button>
+                            </div>
+                          )}
+
                           <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-100 dark:border-[#272832] flex items-center justify-between gap-2">
                             <div className="min-w-0">
                               <p className="font-semibold text-slate-900 dark:text-white truncate">
                                 {selectedManuscriptDetails.fileName || "Main_Manuscript.pdf"}
                               </p>
                               <p className="text-[10px] text-slate-400 font-medium">
-                                {selectedManuscriptDetails.fileSize || "2.4 MB"} · Primary Document
+                                {selectedManuscriptDetails.fileSize || "2.4 MB"} · Primary Document (Round 1)
                               </p>
                             </div>
                             <button
