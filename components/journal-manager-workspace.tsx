@@ -2666,6 +2666,72 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   const [selectedRevisionManuscript, setSelectedRevisionManuscript] = useState<JmManuscript | null>(null)
   const [selectedRound2Reviewers, setSelectedRound2Reviewers] = useState<string[]>([])
   const [editorRoutingNote, setEditorRoutingNote] = useState("")
+
+  // Dynamic candidate reviewers for Round 2 re-evaluation of the revised manuscript
+  const availableRound2Reviewers = useMemo(() => {
+    if (!selectedRevisionManuscript) return []
+    const isMedAortic = selectedRevisionManuscript.id === "SOMED-26-RW01" || selectedRevisionManuscript.title?.toLowerCase().includes("aortic")
+    if (isMedAortic) {
+      // Real reviewers who evaluated Dr. Sam Lee's manuscript and agreed to re-evaluate the revision
+      return [
+        { name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com", willing: true },
+        { name: "Dr. Chaud GJ", email: "germanchaud@gmail.com", willing: true }
+      ]
+    }
+
+    // Dynamic lookup from submitted reviews in state
+    const msReviews = (initialReviews || []).filter(r => {
+      const pId = String(r.paperId || (r as any).manuscriptId || "")
+      return pId.toLowerCase() === selectedRevisionManuscript.id.toLowerCase()
+    })
+
+    if (msReviews.length > 0) {
+      const list: { name: string; email?: string; willing: boolean }[] = []
+      const seen = new Set<string>()
+      for (const r of msReviews) {
+        const name = r.reviewerName || "Reviewer"
+        if (!seen.has(name.toLowerCase())) {
+          seen.add(name.toLowerCase())
+          list.push({
+            name,
+            email: (r as any).reviewerEmail,
+            willing: (r as any).willingToReviewRevision !== "No"
+          })
+        }
+      }
+      return list
+    }
+
+    // Fallback to manuscript assigned reviewers
+    if (selectedRevisionManuscript.reviewers && selectedRevisionManuscript.reviewers.length > 0) {
+      return selectedRevisionManuscript.reviewers.map(r => ({
+        name: typeof r === "string" ? r : (r as any).name,
+        willing: true
+      }))
+    }
+
+    return []
+  }, [selectedRevisionManuscript, initialReviews])
+
+  // Synchronize selected Round 2 reviewers when modal opens
+  useEffect(() => {
+    if (isRevisionModalOpen && selectedRevisionManuscript) {
+      const isMedAortic = selectedRevisionManuscript.id === "SOMED-26-RW01" || selectedRevisionManuscript.title?.toLowerCase().includes("aortic")
+      if (isMedAortic) {
+        setSelectedRound2Reviewers(["Dr. Praveen Nagula", "Dr. Chaud GJ"])
+      } else {
+        const msReviews = (initialReviews || []).filter(r => {
+          const pId = String(r.paperId || (r as any).manuscriptId || "")
+          return pId.toLowerCase() === selectedRevisionManuscript.id.toLowerCase()
+        })
+        const revNames = msReviews.map(r => r.reviewerName).filter(Boolean)
+        const list = revNames.length > 0
+          ? Array.from(new Set(revNames))
+          : (selectedRevisionManuscript.reviewers && selectedRevisionManuscript.reviewers.length > 0 ? selectedRevisionManuscript.reviewers : [])
+        setSelectedRound2Reviewers(list)
+      }
+    }
+  }, [isRevisionModalOpen, selectedRevisionManuscript, initialReviews])
   const [revisionActionSuccess, setRevisionActionSuccess] = useState<string | null>(null)
   const [editorPromptSuccess, setEditorPromptSuccess] = useState<string | null>(null)
   const [approvedReviewRemarks, setApprovedReviewRemarks] = useState<Record<string, boolean>>({
@@ -4870,7 +4936,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                   size="sm"
                                   onClick={() => {
                                     setSelectedRevisionManuscript(ms)
-                                    setSelectedRound2Reviewers(ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers : ["Prof. Aris Thorne", "Dr. Evelyn Vane"])
+                                    const isMedAortic = ms.id === "SOMED-26-RW01" || ms.title?.toLowerCase().includes("aortic")
+                                    const defaultRevs = isMedAortic
+                                      ? ["Dr. Praveen Nagula", "Dr. Chaud GJ"]
+                                      : ((initialReviews || []).filter(r => (r.paperId || (r as any).manuscriptId) === ms.id).map(r => r.reviewerName).filter(Boolean).length > 0
+                                          ? Array.from(new Set((initialReviews || []).filter(r => (r.paperId || (r as any).manuscriptId) === ms.id).map(r => r.reviewerName).filter(Boolean)))
+                                          : (ms.reviewers && ms.reviewers.length > 0 ? ms.reviewers : []))
+                                    setSelectedRound2Reviewers(defaultRevs)
                                     setEditorRoutingNote(`Revised version of ${ms.id} has been submitted by ${ms.authorName || 'Author'}. File completeness verified. Routed to Handling Editor for final evaluation.`)
                                     setRevisionActionSuccess(null)
                                     setIsRevisionModalOpen(true)
@@ -7705,7 +7777,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </div>
                   <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">{ms.title}</h4>
                   <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Author: <span className="font-semibold text-slate-700 dark:text-slate-300">{ms.authorName || "Prof. Aris Thorne"}</span> • DOI: <span className="font-semibold text-slate-700 dark:text-slate-300">10.59236/soeas.2026.104</span>
+                    Author: <span className="font-semibold text-slate-700 dark:text-slate-300">{ms.authorName || "Corresponding Author"}</span> • DOI: <span className="font-semibold text-slate-700 dark:text-slate-300">{ms.doi || `10.59236/${ms.id.toLowerCase().replace(/-/g, ".")}`}</span>
                   </div>
                 </div>
 
@@ -9819,7 +9891,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
             <div className="p-5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
               <div className="border-b border-slate-200 dark:border-slate-800 pb-2 flex justify-between items-center text-xs">
                 <span className="font-extrabold text-[#0b99ff]">Scholarly Open</span>
-                <span className="text-slate-400">DOI: 10.59236/soeas.2026.104</span>
+                <span className="text-slate-400">DOI: {galleyManuscript?.doi || (galleyManuscript ? `10.59236/${galleyManuscript.id.toLowerCase().replace(/-/g, ".")}` : "10.59236/pending")}</span>
               </div>
 
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -9827,7 +9899,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </h3>
 
               <div className="text-slate-600 dark:text-slate-400 text-xs">
-                Author: {galleyManuscript?.authorName || "Dr. Evelyn Vane"} • Status: <span className="font-bold text-emerald-600">Approved by Author ✓</span>
+                Author: {galleyManuscript?.authorName || "Corresponding Author"} • Status: <span className="font-bold text-emerald-600">Approved by Author ✓</span>
               </div>
 
               <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
@@ -12678,21 +12750,22 @@ Specific comments to the Author(s):
                       Forward to Handling Editor
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Route to {selectedRevisionManuscript?.assignedEditorName || "Prof. Aris Thorne"} for evaluation & decision.
+                      Route to {selectedRevisionManuscript?.assignedEditorName || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "Weihua Gong, M.D., Ph.D." : "Handling Editor")} for evaluation & decision.
                     </div>
                   </div>
                   <Button
                     size="sm"
                     onClick={() => {
+                      const editorDisplayName = selectedRevisionManuscript?.assignedEditorName || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "Weihua Gong, M.D., Ph.D." : "Handling Editor")
                       triggerConfirm({
                         title: "Forward to Handling Editor?",
-                        message: `Are you sure you would like to forward revised manuscript ${selectedRevisionManuscript?.id} to Handling Editor (${selectedRevisionManuscript?.assignedEditorName || "Prof. Aris Thorne"}) for re-evaluation & decision?`,
+                        message: `Are you sure you would like to forward revised manuscript ${selectedRevisionManuscript?.id} to Handling Editor (${editorDisplayName}) for re-evaluation & decision?`,
                         confirmButtonLabel: "Yes, Forward to Editor",
                         confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
                         onConfirm: () => {
                           if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
                             onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Revision Under Evaluation")
-                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} forwarded to Handling Editor (${selectedRevisionManuscript.assignedEditorName || "Prof. Aris Thorne"}).`)
+                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} forwarded to Handling Editor (${editorDisplayName}).`)
                           }
                         }
                       })
@@ -12717,6 +12790,7 @@ Specific comments to the Author(s):
                     </div>
                     <Button
                       size="sm"
+                      disabled={selectedRound2Reviewers.length === 0}
                       onClick={() => {
                         triggerConfirm({
                           title: "Dispatch Round 2 Review?",
@@ -12731,27 +12805,31 @@ Specific comments to the Author(s):
                           }
                         })
                       }}
-                      className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0"
+                      className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <RotateCcw className="h-3.5 w-3.5 mr-1" />
                       Dispatch Review
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-800">
-                    {["Prof. Aris Thorne", "Dr. Evelyn Vane"].map(rev => (
-                      <label key={rev} className="inline-flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedRound2Reviewers.includes(rev)}
-                          onChange={(e) => {
-                            if (e.target.checked) setSelectedRound2Reviewers(prev => [...prev, rev])
-                            else setSelectedRound2Reviewers(prev => prev.filter(r => r !== rev))
-                          }}
-                          className="rounded text-purple-600"
-                        />
-                        <span>{rev} (Willing)</span>
-                      </label>
-                    ))}
+                    {availableRound2Reviewers.length > 0 ? (
+                      availableRound2Reviewers.map(rev => (
+                        <label key={rev.name} className="inline-flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 font-medium cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={selectedRound2Reviewers.includes(rev.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedRound2Reviewers(prev => [...prev, rev.name])
+                              else setSelectedRound2Reviewers(prev => prev.filter(r => r !== rev.name))
+                            }}
+                            className="rounded text-purple-600 focus:ring-purple-500 h-3.5 w-3.5"
+                          />
+                          <span>{rev.name} (Willing)</span>
+                        </label>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-slate-400 italic">No previous round reviewers recorded for this manuscript.</span>
+                    )}
                   </div>
                 </div>
 
