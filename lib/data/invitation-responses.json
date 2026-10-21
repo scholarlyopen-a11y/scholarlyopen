@@ -122,23 +122,44 @@
       "credentialId": "",
       "timestamp": "2026-10-14T22:23:22.254Z",
       "notes": "Action logged via editorial360 invitation link (board: yes)",
-      "affiliation": "Roosevelt University",
-      "department": "",
+      "affiliation": "College of Humanities, Education & Social Sciences\nRoosevelt University, USA",
+      "department": "Department of Humanities",
       "country": "United States",
-      "biography": "I am Professor and Director of the History Program in the Department of Humanities at Roosevelt University, where I also serve as Program Director of International Studies and as a Faculty Trustee on the Roosevelt University Board of Trustees. My research focuses on the history of early modern European medicine, with particular emphasis on the history of mental illness and the medicalization of addiction. I have held teaching fellowships at the Newberry Library and research fellowships at the Clark Memorial Library at UCLA and the University of Nevada, Las Vegas.",
+      "biography": "Dr. Celeste Chamberland, Ph.D., is a Professor of History and Program Director for the History and International Studies Programs at Roosevelt University in Chicago. She is a scholar of the history of medicine, early modern Europe, and the Atlantic world, with a specialized emphasis on gender, race, and cultural history.\n\nDr. Chamberland’s published research focuses on gender and the professionalization of surgery, as well as the history of mental illness in the sixteenth and seventeenth centuries. Her current research interests explore the relationship between masculinity, medical moralizing, and the proto-medicalization of addiction within the context of emergent global capitalism. She teaches courses spanning world history, the history of public health, medical racism, drugs in world history, epidemics, and gender and power in the Atlantic world.\n\nDr. Chamberland earned her Ph.D. in History from the University of California, Davis, her M.A. from Concordia University in Montreal, and her B.A. from the University of New Brunswick. Her research has been widely published in leading journals such as Social History of Medicine, History of Education Quarterly, Sixteenth Century Journal, and Journal of the History of Medicine and Allied Sciences.",
       "photoUrl": "/images/editors/celeste-chamberland.jpg",
       "cvFileName": "Chamberland CV 2026.docx",
       "cvFileSize": "30 KB",
       "researchInterests": [
-        "Early modern Europe",
-        "Atlantic World",
-        "History of Medicine"
+        "History of Surgery",
+        "Sixteenth-century England",
+        "Gender Studies",
+        "History of Addiction",
+        "Drugs and Pharmacy"
       ],
       "orcid": "0009-0004-3810-5163",
-      "googleScholar": "https://scholar.google.com/citations?user=IlUtNqcAAAAJ&hl=en&oi=ao",
+      "googleScholar": "https://scholar.google.com/citations?user=IlUtNqcAAAAJ&hl=en",
       "researchGate": "",
       "linkedin": "",
-      "publications": [],
+      "publications": [
+        {
+          "title": "Partners or Practitioners: Women and the Management of Surgical Households in Early Modern London",
+          "journal": "Social History of Medicine",
+          "year": "2011",
+          "link": "https://doi.org/10.1093/shm/hkq057"
+        },
+        {
+          "title": "Between the Hall and the Market: William Clowes and Surgical Self-Fashioning in Elizabethan London",
+          "journal": "Sixteenth Century Journal",
+          "year": "2010",
+          "link": "https://doi.org/10.1086/scj27867638"
+        },
+        {
+          "title": "Honor, Brotherhood, and the Corporate Ethos of the London Barber-Surgeons' Company, 1570–1640",
+          "journal": "Journal of the History of Medicine and Allied Sciences",
+          "year": "2009",
+          "link": "https://academic.oup.com/jhmas/article-abstract/64/3/300/750429"
+        }
+      ],
       "hasAcceptedTerms": true,
       "consentProfileUpload": true,
       "status": "Approved",

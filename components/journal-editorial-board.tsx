@@ -70,10 +70,18 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
   const isOpen = editor.name.toLowerCase() === "position open"
 
   // Always use official journal editorial contact email per Scholarly Open EB standard
-  const displayEmail = editor.email && editor.email.endsWith("@scholarlyopen.org")
+  const displayEmail = editor.email && editor.email.endsWith("@scholarlyopen.org") && editor.email !== "info@scholarlyopen.org"
     ? editor.email
+    : (editor.journalSlug === "social-sciences-humanities" || editor.journalSlug === "social-sciences-open" || editor.journalSlug?.includes("social"))
+    ? "editor.socsci@scholarlyopen.org"
     : (editor.journalSlug === "chemistry" || editor.role?.toLowerCase().includes("chemistry") || editor.name.includes("Verpoort") || editor.affiliation?.toLowerCase().includes("messina"))
     ? "editor.chem@scholarlyopen.org"
+    : (editor.journalSlug === "environmental-science")
+    ? "editor.environsci@scholarlyopen.org"
+    : (editor.journalSlug === "medicine")
+    ? "editor.med@scholarlyopen.org"
+    : (editor.journalSlug === "biology")
+    ? "editor.bio@scholarlyopen.org"
     : (editor.journalSlug ? `editor.${editor.journalSlug.replace(/[^a-z0-9]/g, "")}@scholarlyopen.org` : "info@scholarlyopen.org")
 
   const editorSlug = !isOpen ? getEditorProfileSlug(editor) : undefined

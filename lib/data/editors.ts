@@ -1813,6 +1813,7 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     ],
     imageUrl: "/images/editors/william-harrison.jpg",
     journalSlug: "social-sciences-humanities",
+    email: "editor.socsci@scholarlyopen.org",
     orcid: "0009-0003-5885-0112",
     linkedin: "https://www.linkedin.com/in/william-harrison-ph-d-08444117/",
     biography: "Dr. William Harrison is a Professor of Political Science at Fairmont State University. His research focuses on the disproportionate voting power in the United States, religious influence on international and American politics, in-group/out-group dichotomy, and non-governmental organizations. His dissertation explored 'Foreign Christian Influence on Developing World Domestic Social Policy', analyzing whether foreign groups are more able to influence policy in countries with lower state capacity.",
@@ -2193,31 +2194,44 @@ const onboardedList: EditorMember[] = (
           jSlug = o.journal.toLowerCase().replace("scholarly open:", "").trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
         }
 
-        const matchingBase = baseEditors.find(be => be.slug === cleanSlug || be.name.toLowerCase() === o.name.toLowerCase())
+        const matchingBase = baseEditors.find(be => be.slug === cleanSlug || be.name.toLowerCase() === o.name.toLowerCase() || (be.slug && cleanSlug && (be.slug.includes(cleanSlug) || cleanSlug.includes(be.slug))))
+
+        if (matchingBase) {
+          // Preserve curated base editor profile (biography, affiliation, expertise, timeline, publications, badges, stats)
+          return {
+            ...matchingBase,
+            orcid: matchingBase.orcid || o.orcid || undefined,
+            googleScholar: matchingBase.googleScholar || o.googleScholar || undefined,
+            scopusId: matchingBase.scopusId || o.scopusId || undefined,
+            imageUrl: matchingBase.imageUrl || o.photoUrl || undefined,
+            email: (matchingBase.email && matchingBase.email !== "info@scholarlyopen.org")
+              ? matchingBase.email
+              : (jSlug === "social-sciences-humanities" || jSlug === "social-sciences-open")
+              ? "editor.socsci@scholarlyopen.org"
+              : (jSlug === "chemistry" ? "editor.chem@scholarlyopen.org" : matchingBase.email)
+          }
+        }
+
+        const officialJournalEmail = (jSlug === "social-sciences-humanities" || jSlug === "social-sciences-open")
+          ? "editor.socsci@scholarlyopen.org"
+          : (jSlug === "chemistry" ? "editor.chem@scholarlyopen.org" : (jSlug === "environmental-science" ? "editor.environsci@scholarlyopen.org" : (jSlug === "medicine" ? "editor.med@scholarlyopen.org" : (jSlug === "biology" ? "editor.bio@scholarlyopen.org" : (jSlug ? `editor.${jSlug.replace(/[^a-z0-9]/g, "")}@scholarlyopen.org` : "info@scholarlyopen.org")))))
 
         return {
-          ...matchingBase,
           slug: cleanSlug,
           name: o.name,
-          role: o.role || matchingBase?.role || "Editorial Board Member",
-          affiliation: o.affiliation || matchingBase?.affiliation || "University / Academic Institution",
-          specialization: o.specialization || matchingBase?.specialization || (Array.isArray(o.researchInterests) ? o.researchInterests.join(", ") : "Academic Peer Review & Research"),
-          imageUrl: o.photoUrl || matchingBase?.imageUrl || undefined,
-          email: jSlug === "chemistry" ? "editor.chem@scholarlyopen.org" : (o.email && o.email.endsWith("@scholarlyopen.org") ? o.email : (jSlug ? `editor.${jSlug.replace(/[^a-z0-9]/g, "")}@scholarlyopen.org` : "info@scholarlyopen.org")),
-          orcid: o.orcid || matchingBase?.orcid || undefined,
-          scopusId: o.scopusId || matchingBase?.scopusId || undefined,
-          googleScholar: o.googleScholar || matchingBase?.googleScholar || undefined,
-          linkedin: o.linkedin || matchingBase?.linkedin || undefined,
-          biography: o.biography || matchingBase?.biography || undefined,
-          expertise: Array.isArray(o.researchInterests) && o.researchInterests.length > 0 ? o.researchInterests : matchingBase?.expertise,
-          journalSlug: jSlug || matchingBase?.journalSlug,
-          badges: matchingBase?.badges || ["Verified Board Member", "COPE Ethics Verified"],
-          timeline: matchingBase?.timeline,
-          stats: matchingBase?.stats,
-          personalPublications: matchingBase?.personalPublications,
-          editorialRoles: matchingBase?.editorialRoles,
-          honors: matchingBase?.honors,
-          welcomeMessage: matchingBase?.welcomeMessage
+          role: o.role || "Editorial Board Member",
+          affiliation: o.affiliation || "University / Academic Institution",
+          specialization: o.specialization || (Array.isArray(o.researchInterests) ? o.researchInterests.join(", ") : "Academic Peer Review & Research"),
+          imageUrl: o.photoUrl || undefined,
+          email: officialJournalEmail,
+          orcid: o.orcid || undefined,
+          scopusId: o.scopusId || undefined,
+          googleScholar: o.googleScholar || undefined,
+          linkedin: o.linkedin || undefined,
+          biography: o.biography || undefined,
+          expertise: Array.isArray(o.researchInterests) && o.researchInterests.length > 0 ? o.researchInterests : undefined,
+          journalSlug: jSlug,
+          badges: ["Verified Board Member", "COPE Ethics Verified"]
         }
       })
     : []
