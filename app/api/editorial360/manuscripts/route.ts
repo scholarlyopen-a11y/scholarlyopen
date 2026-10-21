@@ -20,11 +20,11 @@ export async function GET() {
           author_email: "Applied.EBM.Institute@proton.me",
           author_affiliation: "Applied Evidence-Based Medicine (EBM) Institute",
           author_country: "United States",
-          file_name: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
-          file_size: "38.6 KB",
-          file_url: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-          revised_file_url: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-          rebuttal_file_url: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+          file_name: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.pdf",
+          file_size: "1.5 MB",
+          file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.pdf",
+          revised_file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.pdf",
+          rebuttal_file_url: "/manuscripts/SOMED-26-RW01-rebuttal.pdf",
           assigned_editor_name: "Weihua Gong, M.D., Ph.D."
         } as any
       ]
@@ -46,11 +46,11 @@ export async function GET() {
           author_email: "Applied.EBM.Institute@proton.me",
           author_affiliation: "Applied Evidence-Based Medicine (EBM) Institute",
           author_country: "United States",
-          file_name: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
-          file_size: "38.6 KB",
-          file_url: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-          revised_file_url: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-          rebuttal_file_url: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+          file_name: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.pdf",
+          file_size: "1.5 MB",
+          file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.pdf",
+          revised_file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.pdf",
+          rebuttal_file_url: "/manuscripts/SOMED-26-RW01-rebuttal.pdf",
           assigned_editor_name: "Weihua Gong, M.D., Ph.D."
         }
       ] 

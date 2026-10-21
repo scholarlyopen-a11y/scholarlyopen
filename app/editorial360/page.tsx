@@ -207,15 +207,15 @@ export const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
   articleType: "Review Article",
   submissionStage: "Revision Under Evaluation",
   abstract: "Acute aortic dissection (AAD) represents one of the most time-critical cardiovascular emergencies, with early mortality escalating by 1% to 2% per hour from symptom onset. This paper establishes a multidisciplinary evidence-based operations framework combining automated early clinical suspicion scores, emergency point-of-care ultrasound protocols, streamlined door-to-imaging pathways (<30 minutes), and centralized aortic surgical dispatch teams to drastically mitigate diagnostic delays and optimize definitive surgical intervention.",
-  fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
-  fileSize: "38.6 KB",
-  fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-  revisedFileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
-  revisedFileSize: "38.6 KB",
-  revisedFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-  rebuttalFileName: "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.docx",
-  rebuttalFileSize: "28.4 KB",
-  rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+  fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.pdf",
+  fileSize: "1.5 MB",
+  fileUrl: "/manuscripts/SOMED-26-RW01-revised-manuscript.pdf",
+  revisedFileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.pdf",
+  revisedFileSize: "1.5 MB",
+  revisedFileUrl: "/manuscripts/SOMED-26-RW01-revised-manuscript.pdf",
+  rebuttalFileName: "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.pdf",
+  rebuttalFileSize: "357 KB",
+  rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-rebuttal.pdf",
   rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
   revisionDate: "2026-10-21T07:30:00.000Z",
   editorAssigned: true,
@@ -936,6 +936,21 @@ function UserProfileHeaderCard({ role, authorProfile, onExploreBadges }: UserPro
 export default function Editorial360Page() {
 
   const { language, setLanguage } = useLanguage()
+
+  const translateStatus = (st: string) => {
+    if (language !== "de") return st
+    switch (st) {
+      case "Accepted": return "Angenommen"
+      case "Revision Required": return "Überarbeitung erforderlich"
+      case "Revision Under Evaluation": return "Revision in Prüfung"
+      case "Under Review": return "In Begutachtung"
+      case "Awaiting Initial Check": return "Wartet auf Erstprüfung"
+      case "With Editor": return "Beim Herausgeber"
+      case "Rejected": return "Abgelehnt"
+      default: return st
+    }
+  }
+
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")
   const [role, setRole] = useState<UserRole>("editor")
@@ -8947,19 +8962,6 @@ Specific comments to the Author(s):
                     uniqueManuscripts.some(m => m.id === "SOMED-26-RW01" && (m.author?.toLowerCase().includes("sam") || m.authorName?.toLowerCase().includes("sam") || m.authorEmail?.toLowerCase().includes("applied.ebm.institute") || m.authorEmail?.toLowerCase().includes("proton.me")))
                   )
                   const displayAuthorName = isSamLee ? "Sam Lee" : (profFullName || regName || (email ? email.split('@')[0] : "Author"))
-
-                  const translateStatus = (st: string) => {
-                    if (!isDe) return st
-                    switch (st) {
-                      case "Accepted": return "Angenommen"
-                      case "Revision Required": return "Überarbeitung erforderlich"
-                      case "Revision Under Evaluation": return "Revision in Prüfung"
-                      case "Under Review": return "In Begutachtung"
-                      case "Awaiting Initial Check": return "Wartet auf Erstprüfung"
-                      case "With Editor": return "Beim Herausgeber"
-                      default: return st
-                    }
-                  }
 
                   return (
                     <div className="space-y-6">
