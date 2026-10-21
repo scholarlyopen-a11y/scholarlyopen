@@ -2778,6 +2778,60 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     })
   }
 
+  // Helper to resolve Handling Editor details with real academic contact email
+  const resolveEditorDetails = (name?: string, msId?: string) => {
+    const norm = (name || "").toLowerCase()
+    if (msId === "SOMED-26-RW01" || norm.includes("gong") || norm.includes("weihua")) {
+      return { name: "Weihua Gong, M.D., Ph.D.", email: "weihua.gong@zju.edu.cn" }
+    }
+    if (norm.includes("boakye") || norm.includes("kofi")) {
+      return { name: "Justice Kofi Boakye-Appiah, M.D., Ph.D.", email: "j.kofi-appiah@knust.edu.gh" }
+    }
+    if (norm.includes("hesham") || norm.includes("hussein")) {
+      return { name: "Hesham Hussein, Ph.D.", email: "hesham.hussein@moantiq.gov.eg" }
+    }
+    if (norm.includes("chamberland") || norm.includes("celeste")) {
+      return { name: "Celeste Chamberland, Ph.D.", email: "cchamberland@roosevelt.edu" }
+    }
+    if (norm.includes("cacciola") || norm.includes("francesco")) {
+      return { name: "Prof. Francesco Cacciola", email: "cacciolaf@unime.it" }
+    }
+    if (norm.includes("clara") || norm.includes("zhang")) {
+      return { name: "Prof. Clara Zhang", email: "c.zhang@oxford-academic.uk" }
+    }
+    const foundCandidate = EDITORIAL_BOARD_CANDIDATES.find(c => c.name.toLowerCase().includes(norm) || norm.includes(c.name.toLowerCase()))
+    if (foundCandidate) {
+      return { name: foundCandidate.name, email: foundCandidate.email }
+    }
+    return { name: name || "Handling Editor", email: "editor.medicine@scholarlyopen.org" }
+  }
+
+  // Helper to resolve Reviewer details with real referee email
+  const resolveReviewerDetails = (name: string) => {
+    const norm = name.toLowerCase()
+    if (norm.includes("nagula") || norm.includes("praveen")) {
+      return { name: "Dr. Praveen Nagula", email: "drpraveennagula@gmail.com" }
+    }
+    if (norm.includes("chaud")) {
+      return { name: "Dr. Chaud GJ", email: "germanchaud@gmail.com" }
+    }
+    if (norm.includes("aziza") || norm.includes("ragab")) {
+      return { name: "Dr. Ragab Aziza", email: "ragabaziza61@gmail.com" }
+    }
+    if (norm.includes("ikeda")) {
+      return { name: "Ikeda N", email: "naoko.ikeda@med.osaka-u.ac.jp" }
+    }
+    const foundInList = (reviewersList || []).find(r => r.name.toLowerCase().includes(norm) || norm.includes(r.name.toLowerCase()))
+    if (foundInList && foundInList.email) {
+      return { name: foundInList.name, email: foundInList.email }
+    }
+    const foundInHist = (globalReviewerHistory || []).find(r => r.reviewerName && (r.reviewerName.toLowerCase().includes(norm) || norm.includes(r.reviewerName.toLowerCase())))
+    if (foundInHist && foundInHist.reviewerEmail) {
+      return { name: foundInHist.reviewerName, email: foundInHist.reviewerEmail }
+    }
+    return { name, email: "reviewer@scholarlyopen.org" }
+  }
+
   // Email Dispatch Review & Edit Dialog State
   const [dispatchDialogConfig, setDispatchDialogConfig] = useState<EmailDispatchConfig>({
     isOpen: false,
@@ -2787,11 +2841,14 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     onCancel: () => {}
   })
 
-  const openEmailDispatch = (config: Omit<EmailDispatchConfig, "isOpen" | "onCancel">) => {
+  const openEmailDispatch = (config: Omit<EmailDispatchConfig, "isOpen" | "onCancel"> & { onCancel?: () => void }) => {
     setDispatchDialogConfig({
       ...config,
       isOpen: true,
-      onCancel: () => setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
+      onCancel: () => {
+        if (config.onCancel) config.onCancel()
+        setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
+      }
     })
   }
 
@@ -12750,23 +12807,101 @@ Specific comments to the Author(s):
                       Forward to Handling Editor
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Route to {selectedRevisionManuscript?.assignedEditorName || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "Weihua Gong, M.D., Ph.D." : "Handling Editor")} for evaluation & decision.
+                      Route to {selectedRevisionManuscript?.assignedEditorName || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "Weihua Gong, M.D., Ph.D." : "Handling Editor")} with official editorial letter (CC: Journal & Gmail).
                     </div>
                   </div>
                   <Button
                     size="sm"
                     onClick={() => {
-                      const editorDisplayName = selectedRevisionManuscript?.assignedEditorName || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "Weihua Gong, M.D., Ph.D." : "Handling Editor")
-                      triggerConfirm({
-                        title: "Forward to Handling Editor?",
-                        message: `Are you sure you would like to forward revised manuscript ${selectedRevisionManuscript?.id} to Handling Editor (${editorDisplayName}) for re-evaluation & decision?`,
-                        confirmButtonLabel: "Yes, Forward to Editor",
-                        confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-                        onConfirm: () => {
-                          if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
-                            onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Revision Under Evaluation")
-                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} forwarded to Handling Editor (${editorDisplayName}).`)
+                      if (!selectedRevisionManuscript) return
+                      const ms = selectedRevisionManuscript
+                      const editor = resolveEditorDetails(ms.assignedEditorName, ms.id)
+                      const journalName = ms.journal || "Scholarly Open: Medicine"
+                      const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
+                      const directAccessUrl = `${baseUrl}/editorial360?action=handling_editor&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(editor.email)}&name=${encodeURIComponent(editor.name)}`
+
+                      setIsRevisionModalOpen(false)
+                      openEmailDispatch({
+                        templateId: "revision_forward_to_editor",
+                        recipientEmail: editor.email,
+                        recipientName: editor.name,
+                        journal: journalName,
+                        paperId: ms.id,
+                        paperTitle: ms.title,
+                        actionLabel: "Access Handling Editor Desk",
+                        actionUrl: directAccessUrl,
+                        defaultSubject: `[${journalName}] Revised Manuscript Submitted for Editorial Evaluation: ${ms.id}`,
+                        defaultBody: `Dear ${editor.name},
+
+We are pleased to inform you that the author has submitted the revised version of manuscript ${ms.id} titled:
+"${ms.title}"
+
+Submission & Revision Files Summary:
+• Revised Manuscript: Clean Revised Manuscript (.docx / PDF)
+• Author Rebuttal: Comprehensive Point-by-Point Response to Reviewers
+
+Peer Review Re-Assessment Context:
+The author team has addressed the critiques from Round 1 peer evaluations (including reports from Dr. Praveen Nagula and Dr. Chaud GJ). The revision incorporates acute workflow benchmarks (<30 min door-to-imaging), clinical coordination protocols, and expanded operational metrics.
+
+Action Required:
+As Handling Editor, please review the revised files and author responses to issue the editorial decision (Accept, Minor Revision, or Request Additional Revisions).
+
+Click the button below to access your Handling Editor workspace directly:
+${directAccessUrl}
+
+Thank you for your academic leadership and dedication to scientific excellence.
+
+Warm regards,
+
+Journal Management Desk
+${journalName} · Scholarly Open
+scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
+                        onCancel: () => {
+                          setIsRevisionModalOpen(true)
+                        },
+                        onConfirmSend: async (data: any) => {
+                          const effectiveJournal = data.journal || journalName
+                          const res = await fetch("/api/editorial360/email", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              to: data.recipientEmail,
+                              recipientName: editor.name,
+                              customSubject: data.subject,
+                              customBody: data.bodyText,
+                              customHtml: data.renderedHtml,
+                              journal: effectiveJournal,
+                              fromEmail: getJournalReplyTo(effectiveJournal),
+                              senderName: `${effectiveJournal} Editorial Office`
+                            })
+                          })
+
+                          const resData = await res.json().catch(() => null)
+                          if (!res.ok || !resData?.success) {
+                            throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status}).`)
                           }
+
+                          if (onUpdateManuscriptStatus) {
+                            onUpdateManuscriptStatus(ms.id, "Revision Under Evaluation")
+                          }
+
+                          if (onAddNotification) {
+                            onAddNotification({
+                              paperId: ms.id,
+                              paperTitle: ms.title,
+                              journal: effectiveJournal,
+                              type: "jm_assignment",
+                              actorName: "Journal Manager",
+                              actorRole: "JM Desk",
+                              headline: `Revision Forwarded to Handling Editor: ${editor.name}`,
+                              summary: `Revised manuscript ${ms.id} routed to ${editor.name} (${data.recipientEmail}) with CC to scholarlyopen@gmail.com and ${getJournalReplyTo(effectiveJournal)}.`,
+                              recipient: data.recipientEmail
+                            })
+                          }
+
+                          setRevisionActionSuccess(`✓ Manuscript ${ms.id} forwarded to Handling Editor (${editor.name}) via official letter with CC to scholarlyopen@gmail.com and ${getJournalReplyTo(effectiveJournal)}.`)
+                          setIsRevisionModalOpen(true)
+                          setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
                         }
                       })
                     }}
@@ -12785,23 +12920,130 @@ Specific comments to the Author(s):
                         Dispatch for Round 2 Peer Review
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Send to willing reviewers for re-assessment (14-day turnaround).
+                        Customize & send re-review invitations (14-day turnaround, CC: Journal & Gmail).
                       </div>
                     </div>
                     <Button
                       size="sm"
                       disabled={selectedRound2Reviewers.length === 0}
                       onClick={() => {
-                        triggerConfirm({
-                          title: "Dispatch Round 2 Review?",
-                          message: `Are you sure you would like to dispatch Round 2 peer review invitations to ${selectedRound2Reviewers.join(" and ")}?`,
-                          confirmButtonLabel: "Yes, Dispatch Review",
-                          confirmColorClass: "bg-purple-600 hover:bg-purple-700",
-                          onConfirm: () => {
-                            if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
-                              onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Under Review")
-                              setRevisionActionSuccess(`✓ Round 2 re-review invitations dispatched to ${selectedRound2Reviewers.join(", ")}.`)
+                        if (!selectedRevisionManuscript || selectedRound2Reviewers.length === 0) return
+                        const ms = selectedRevisionManuscript
+                        const journalName = ms.journal || "Scholarly Open: Medicine"
+                        const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
+                        const reviewerDetailsList = selectedRound2Reviewers.map(rName => resolveReviewerDetails(rName))
+                        const reviewerNamesStr = reviewerDetailsList.map(r => r.name).join(" & ")
+                        const allReviewerEmails = reviewerDetailsList.map(r => r.email).join(", ")
+
+                        setIsRevisionModalOpen(false)
+                        openEmailDispatch({
+                          templateId: "round2_review_dispatch",
+                          recipientEmail: allReviewerEmails,
+                          recipientName: reviewerNamesStr,
+                          journal: journalName,
+                          paperId: ms.id,
+                          paperTitle: ms.title,
+                          actionLabel: "Access Reviewer Evaluation Desk",
+                          actionUrl: `${baseUrl}/editorial360?action=review&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}`,
+                          defaultSubject: `[${journalName}] Round 2 Peer Review Invitation: Revised Manuscript ${ms.id}`,
+                          defaultBody: `Dear Colleague,
+
+Thank you very much for your thorough and constructive peer review of manuscript ${ms.id} ("${ms.title}") during the initial evaluation round.
+
+The author team has completed their revisions in response to referee comments and submitted a comprehensive point-by-point rebuttal document alongside the updated text.
+
+We would be deeply honored if you could conduct the Round 2 re-assessment of this revised manuscript to confirm whether your recommendations have been satisfactorily met.
+
+Evaluation Summary & Resources:
+• Manuscript ID: ${ms.id}
+• Article Type: Review Article
+• Target Journal: ${journalName}
+• Re-assessment Turnaround: 14 calendar days
+• Rebuttal Document: Available on your reviewer desk
+• Clean Revised Manuscript (.docx / PDF): Available on your reviewer desk
+
+Please click the secure button below to access the evaluation form and revised files:
+${baseUrl}/editorial360?action=review&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}
+
+Thank you for your dedicated service to scholarly rigor and academic excellence.
+
+Warm regards,
+
+Editorial Office & Journal Management Desk
+${journalName} · Scholarly Open
+scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
+                          onCancel: () => {
+                            setIsRevisionModalOpen(true)
+                          },
+                          onConfirmSend: async (data: any) => {
+                            const effectiveJournal = data.journal || journalName
+                            const emailList = data.recipientEmail.split(",").map((e: string) => e.trim()).filter(Boolean)
+
+                            for (const targetEmail of emailList) {
+                              const matchingRev = reviewerDetailsList.find(r => r.email.toLowerCase() === targetEmail.toLowerCase())
+                              const targetName = matchingRev ? matchingRev.name : (data.recipientName || "Peer Reviewer")
+                              const personalizedBody = data.bodyText.replace(/Dear Colleague,/gi, `Dear ${targetName},`)
+
+                              const res = await fetch("/api/editorial360/email", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  to: targetEmail,
+                                  recipientName: targetName,
+                                  customSubject: data.subject,
+                                  customBody: personalizedBody,
+                                  customHtml: data.renderedHtml,
+                                  journal: effectiveJournal,
+                                  fromEmail: getJournalReplyTo(effectiveJournal),
+                                  senderName: `${effectiveJournal} Editorial Office`
+                                })
+                              })
+
+                              const resData = await res.json().catch(() => null)
+                              if (!res.ok || !resData?.success) {
+                                throw new Error(resData?.error || `Email dispatch to ${targetEmail} failed (HTTP ${res.status}).`)
+                              }
+
+                              const sentRecord: SentEmailRecord = {
+                                id: `SENT-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 6)}`,
+                                timestamp: new Date().toISOString(),
+                                recipientName: targetName,
+                                recipientEmail: targetEmail,
+                                journal: effectiveJournal,
+                                campaignType: "round2_review_dispatch",
+                                subject: data.subject,
+                                body: data.renderedHtml || data.bodyText || "",
+                                status: resData.sentViaSmtp ? "Delivered" : "Simulated"
+                              }
+
+                              fetch("/api/editorial360/sent-invitations", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(sentRecord)
+                              }).catch(e => console.error("Failed to persist sent record:", e))
                             }
+
+                            if (onUpdateManuscriptStatus) {
+                              onUpdateManuscriptStatus(ms.id, "Under Review")
+                            }
+
+                            if (onAddNotification) {
+                              onAddNotification({
+                                paperId: ms.id,
+                                paperTitle: ms.title,
+                                journal: effectiveJournal,
+                                type: "review_assigned",
+                                actorName: "Journal Manager",
+                                actorRole: "JM Desk",
+                                headline: `Round 2 Review Dispatched: ${reviewerNamesStr}`,
+                                summary: `Re-review invitations dispatched to ${reviewerNamesStr} (${emailList.join(", ")}) with CC to scholarlyopen@gmail.com and ${getJournalReplyTo(effectiveJournal)}.`,
+                                recipient: emailList[0]
+                              })
+                            }
+
+                            setRevisionActionSuccess(`✓ Round 2 re-review invitations dispatched to ${reviewerNamesStr} (${emailList.join(", ")}) with CC to scholarlyopen@gmail.com and ${getJournalReplyTo(effectiveJournal)}.`)
+                            setIsRevisionModalOpen(true)
+                            setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
                           }
                         })
                       }}
@@ -12840,22 +13082,99 @@ Specific comments to the Author(s):
                       Final Accept & Advance to Production
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Approve all revisions and move to galley proof typesetting.
+                      Send official Acceptance Notice to authors (CC: Journal & Gmail) and advance to galley proofing.
                     </div>
                   </div>
                   <Button
                     size="sm"
                     onClick={() => {
-                      triggerConfirm({
-                        title: "Accept Manuscript?",
-                        message: `Are you sure you would like to accept manuscript ${selectedRevisionManuscript?.id} for publication and schedule typeset galley proofing?`,
-                        confirmButtonLabel: "Yes, Accept Paper",
-                        confirmColorClass: "bg-emerald-600 hover:bg-emerald-700",
-                        onConfirm: () => {
-                          if (selectedRevisionManuscript && onUpdateManuscriptStatus) {
-                            onUpdateManuscriptStatus(selectedRevisionManuscript.id, "Accepted")
-                            setRevisionActionSuccess(`✓ Manuscript ${selectedRevisionManuscript.id} has been Accepted for publication.`)
+                      if (!selectedRevisionManuscript) return
+                      const ms = selectedRevisionManuscript
+                      const journalName = ms.journal || "Scholarly Open: Medicine"
+                      const authorName = ms.authorName || "Dr. Sam Lee"
+                      const authorEmail = ms.authorEmail || (ms.id === "SOMED-26-RW01" ? "Applied.EBM.Institute@proton.me" : "author@scholarlyopen.org")
+                      const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
+
+                      setIsRevisionModalOpen(false)
+                      openEmailDispatch({
+                        templateId: "manuscript_accepted",
+                        recipientEmail: authorEmail,
+                        recipientName: authorName,
+                        journal: journalName,
+                        paperId: ms.id,
+                        paperTitle: ms.title,
+                        actionLabel: "View Manuscript in Author Portal",
+                        actionUrl: `${baseUrl}/editorial360?action=author_portal&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}`,
+                        defaultSubject: `[${journalName}] Official Acceptance Notice: Manuscript ${ms.id}`,
+                        defaultBody: `Dear ${authorName},
+
+On behalf of the Editorial Board and Journal Management Desk of ${journalName}, we are pleased to inform you that your revised manuscript:
+
+Manuscript ID: ${ms.id}
+Title: "${ms.title}"
+
+has been officially ACCEPTED for publication following thorough editorial and peer re-evaluation.
+
+The revisions you have incorporated—including updated clinical benchmarks, itemized responses to all referee comments, and refined operational frameworks—have satisfied all requirements of scholarly excellence and editorial rigor.
+
+Next Steps for Production:
+1. Production & Typesetting: Your manuscript is now transitioning to our production department for galley proof preparation.
+2. DOI Registration: A persistent digital object identifier (Crossref DOI: 10.59236/${ms.id.toLowerCase().replace(/-/g, ".")}) will be assigned.
+3. Galley Proof Verification: You will receive the typeset PDF proofs shortly for final verification prior to official open-access publication.
+
+Congratulations to you and your co-authors on this significant achievement.
+
+Warm regards,
+
+Editorial Office & Journal Management Desk
+${journalName} · Scholarly Open
+scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
+                        onCancel: () => {
+                          setIsRevisionModalOpen(true)
+                        },
+                        onConfirmSend: async (data: any) => {
+                          const effectiveJournal = data.journal || journalName
+                          const res = await fetch("/api/editorial360/email", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              to: data.recipientEmail,
+                              recipientName: authorName,
+                              customSubject: data.subject,
+                              customBody: data.bodyText,
+                              customHtml: data.renderedHtml,
+                              journal: effectiveJournal,
+                              fromEmail: getJournalReplyTo(effectiveJournal),
+                              senderName: `${effectiveJournal} Editorial Office`
+                            })
+                          })
+
+                          const resData = await res.json().catch(() => null)
+                          if (!res.ok || !resData?.success) {
+                            throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status}).`)
                           }
+
+                          if (onUpdateManuscriptStatus) {
+                            onUpdateManuscriptStatus(ms.id, "Accepted")
+                          }
+
+                          if (onAddNotification) {
+                            onAddNotification({
+                              paperId: ms.id,
+                              paperTitle: ms.title,
+                              journal: effectiveJournal,
+                              type: "jm_decision",
+                              actorName: "Journal Manager",
+                              actorRole: "JM Desk",
+                              headline: `Manuscript Officially Accepted: ${ms.id}`,
+                              summary: `Formal acceptance letter sent to ${authorName} (${data.recipientEmail}) with CC to scholarlyopen@gmail.com and ${getJournalReplyTo(effectiveJournal)}. Advanced to production.`,
+                              recipient: data.recipientEmail
+                            })
+                          }
+
+                          setRevisionActionSuccess(`✓ Manuscript ${ms.id} has been officially Accepted! Formal acceptance notice sent to ${authorName} (${data.recipientEmail}) with CC to scholarlyopen@gmail.com and ${getJournalReplyTo(effectiveJournal)}.`)
+                          setIsRevisionModalOpen(true)
+                          setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
                         }
                       })
                     }}
