@@ -1815,7 +1815,6 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     journalSlug: "social-sciences-humanities",
     email: "editor.socsci@scholarlyopen.org",
     orcid: "0009-0003-5885-0112",
-    linkedin: "https://www.linkedin.com/in/william-harrison-ph-d-08444117/",
     biography: "Dr. William Harrison is a Professor of Political Science at Fairmont State University. His research focuses on the disproportionate voting power in the United States, religious influence on international and American politics, in-group/out-group dichotomy, and non-governmental organizations. His dissertation explored 'Foreign Christian Influence on Developing World Domestic Social Policy', analyzing whether foreign groups are more able to influence policy in countries with lower state capacity.",
     timeline: [
       { year: "1995", title: "B.A., Political Science", description: "New York University", type: "education" },
