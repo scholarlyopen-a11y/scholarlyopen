@@ -97,6 +97,13 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
             alt={editor.name} 
             className="h-24 w-24 rounded-full object-cover shrink-0" 
             style={{ objectPosition: "center 15%" }}
+            onError={(e) => {
+              if (editor.slug === "ahmed-magdy-rabea" || editor.name.toLowerCase().includes("rabea")) {
+                e.currentTarget.src = "/images/editors/ahmed-magdy-rabea.jpg"
+              } else if (editor.slug === "hesham-hussein" || editor.name.toLowerCase().includes("hussein")) {
+                e.currentTarget.src = "/images/editors/hesham-hussein.png"
+              }
+            }}
           />
         ) : (
           <div className="h-24 w-24 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">
@@ -131,6 +138,13 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                     alt={editor.name} 
                     className="h-14 w-14 rounded-full object-cover shrink-0" 
                     style={{ objectPosition: "center 15%" }}
+                    onError={(e) => {
+                      if (editor.slug === "ahmed-magdy-rabea" || editor.name.toLowerCase().includes("rabea")) {
+                        e.currentTarget.src = "/images/editors/ahmed-magdy-rabea.jpg"
+                      } else if (editor.slug === "hesham-hussein" || editor.name.toLowerCase().includes("hussein")) {
+                        e.currentTarget.src = "/images/editors/hesham-hussein.png"
+                      }
+                    }}
                   />
                 ) : (
                   <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 bg-secondary text-secondary-foreground font-bold">

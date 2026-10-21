@@ -14,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function HomePage() {
   const { t } = useLanguage()
-  const [editorCount, setEditorCount] = useState<number | string>("6")
+  const [editorCount, setEditorCount] = useState<number | string>("12")
 
   useEffect(() => {
     let isMounted = true
@@ -25,17 +25,23 @@ export default function HomePage() {
         const data = await res.json()
         if (!isMounted || !data.success || !Array.isArray(data.editors)) return
 
-        const approved = data.editors.filter((e: any) => e.jmApproved === true)
-        const baseFounding = 5
-        const onboardedApproved = approved.filter((e: any) => 
-          !["Mohamed R. Eletmany", "Weihua Gong", "Sam Lee", "Justice Kofi Boakye-Appiah"].some(b => (e.name || "").toLowerCase().includes(b.toLowerCase()))
+        const approved = data.editors.filter((e: any) => e.jmApproved === true || e.status === "Active Handling Editor")
+        const baseFounding = [
+          "mohamed r. eletmany",
+          "weihua gong",
+          "sam lee",
+          "justice kofi boakye-appiah",
+          "william h. harrison"
+        ]
+        const onboardedDistinct = approved.filter((e: any) => 
+          !baseFounding.some(b => (e.name || "").toLowerCase().includes(b))
         )
-        const totalCount = baseFounding + onboardedApproved.length
-        if (totalCount >= 6) {
+        const totalCount = baseFounding.length + onboardedDistinct.length
+        if (totalCount >= 12) {
           setEditorCount(totalCount)
         }
       } catch (e) {
-        // Fallback remains 6
+        // Fallback remains 12
       }
     }
     syncLiveEditorCount()

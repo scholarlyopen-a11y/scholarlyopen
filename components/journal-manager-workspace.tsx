@@ -13951,6 +13951,13 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                         src={selectedCandidateDossier.photoUrl} 
                         alt={selectedCandidateDossier.candidateName} 
                         className="h-full w-full object-cover" 
+                        onError={(e) => {
+                          if (selectedCandidateDossier.candidateName?.toLowerCase().includes("rabea")) {
+                            e.currentTarget.src = "/images/editors/ahmed-magdy-rabea.jpg"
+                          } else if (selectedCandidateDossier.candidateName?.toLowerCase().includes("hussein")) {
+                            e.currentTarget.src = "/images/editors/hesham-hussein.png"
+                          }
+                        }}
                       />
                     ) : (
                       <span>

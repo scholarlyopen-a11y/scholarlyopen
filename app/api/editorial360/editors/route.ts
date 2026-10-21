@@ -76,6 +76,11 @@ function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEdito
       continue
     }
 
+    const isRabea = normName.includes("rabea") || normSlug.includes("rabea")
+    if (isRabea) {
+      ed.photoUrl = "/images/editors/ahmed-magdy-rabea.jpg"
+    }
+
     const key = (ed.id || ed.email || ed.name).toLowerCase()
     if (seenKeys.has(key)) continue
     seenKeys.add(key)

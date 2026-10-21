@@ -239,7 +239,9 @@ export function JournalPage({
             role: e.role || "Editorial Board Member",
             affiliation: e.affiliation || "Academic Institution",
             specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
-            imageUrl: e.photoUrl,
+            imageUrl: (e.photoUrl && !e.photoUrl.includes("supabase.co")) 
+              ? e.photoUrl 
+              : (e.name?.toLowerCase().includes("rabea") ? "/images/editors/ahmed-magdy-rabea.jpg" : (e.name?.toLowerCase().includes("hussein") ? "/images/editors/hesham-hussein.png" : e.photoUrl)),
             email: e.email,
             orcid: e.orcid,
             googleScholar: e.googleScholar || e.scholarUrl,

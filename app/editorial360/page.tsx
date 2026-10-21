@@ -187,6 +187,41 @@ interface Manuscript {
   assignedEditorName?: string
 }
 
+export const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
+  id: "SOMED-26-RW01",
+  title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+  journal: "Scholarly Open: Medicine",
+  status: "Revision Under Evaluation",
+  date: "2026-10-21",
+  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
+  integrityStatus: "Clean",
+  plagiarismScore: 4,
+  aiScore: 2,
+  author: "Dr. Sam Lee",
+  authorFirstName: "Sam",
+  authorLastName: "Lee",
+  authorName: "Dr. Sam Lee",
+  authorEmail: "Applied.EBM.Institute@proton.me",
+  authorAffiliation: "Applied Evidence-Based Medicine (EBM) Institute",
+  authorCountry: "United States",
+  articleType: "Review Article",
+  submissionStage: "Revision Under Evaluation",
+  abstract: "Acute aortic dissection (AAD) represents one of the most time-critical cardiovascular emergencies, with early mortality escalating by 1% to 2% per hour from symptom onset. This paper establishes a multidisciplinary evidence-based operations framework combining automated early clinical suspicion scores, emergency point-of-care ultrasound protocols, streamlined door-to-imaging pathways (<30 minutes), and centralized aortic surgical dispatch teams to drastically mitigate diagnostic delays and optimize definitive surgical intervention.",
+  fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
+  fileSize: "38.6 KB",
+  fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+  revisedFileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
+  revisedFileSize: "38.6 KB",
+  revisedFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+  rebuttalFileName: "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.docx",
+  rebuttalFileSize: "28.4 KB",
+  rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
+  rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
+  revisionDate: "2026-10-21T07:30:00.000Z",
+  editorAssigned: true,
+  assignedEditorName: "Weihua Gong, M.D., Ph.D."
+}
+
 // Review Invitation mock data
 interface ReviewInvitation {
   id: string
@@ -1278,15 +1313,81 @@ export default function Editorial360Page() {
       }
 
       if (urlAction === "claim_submission") {
-        const claimId = params.get("id") || ""
-        const claimEmail = params.get("email") || ""
-        const claimName = params.get("name") || ""
+        const claimId = params.get("id") || "SOMED-26-RW01"
+        const claimEmail = params.get("email") || "Applied.EBM.Institute@proton.me"
+        const claimName = params.get("name") || "Dr. Sam Lee"
         setRole("author")
-        if (claimEmail) setEmail(claimEmail)
-        if (claimName) setProfFullName(claimName)
+        if (claimEmail) {
+          setEmail(claimEmail)
+          setRegEmail(claimEmail)
+        }
+        if (claimName) {
+          setProfFullName(claimName)
+          setRegName(claimName)
+        }
         setIsLoggedIn(true)
         setActiveAuthorTab("submissions")
-        setSuccess(`Welcome ${claimName ? claimName : "Author"}! Manuscript ${claimId} has been linked to your active Author Desk.`)
+        setAuthorFilter("all")
+
+        // Immediately link and inject the claimed manuscript with Revision Under Evaluation status
+        setManuscripts(prev => {
+          const exists = prev.some(m => m.id === claimId || (claimId === "SOMED-26-RW01" && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("aortic"))))
+          let updated: Manuscript[]
+          if (exists) {
+            updated = prev.map(m => {
+              if (m.id === claimId || (claimId === "SOMED-26-RW01" && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("aortic")))) {
+                return {
+                  ...INITIAL_MEDICINE_MANUSCRIPT,
+                  ...m,
+                  id: claimId,
+                  status: "Revision Under Evaluation",
+                  submissionStage: "Revision Under Evaluation",
+                  authorName: claimName,
+                  author: claimName,
+                  authorEmail: claimEmail,
+                  authorAffiliation: m.authorAffiliation || "Applied Evidence-Based Medicine (EBM) Institute",
+                  authorCountry: m.authorCountry || "United States",
+                  fileUrl: m.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
+                  revisedFileUrl: m.revisedFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
+                  rebuttalFileUrl: m.rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
+                  editorAssigned: true,
+                  assignedEditorName: m.assignedEditorName || "Weihua Gong, M.D., Ph.D."
+                }
+              }
+              return m
+            })
+          } else {
+            const newClaimed: Manuscript = {
+              ...INITIAL_MEDICINE_MANUSCRIPT,
+              id: claimId,
+              status: "Revision Under Evaluation",
+              submissionStage: "Revision Under Evaluation",
+              authorName: claimName,
+              author: claimName,
+              authorEmail: claimEmail,
+              authorAffiliation: "Applied Evidence-Based Medicine (EBM) Institute",
+              authorCountry: "United States"
+            }
+            updated = [newClaimed, ...prev]
+          }
+          try {
+            localStorage.setItem("editorial360_manuscripts", JSON.stringify(updated))
+          } catch (e) {}
+          return updated
+        })
+
+        try {
+          sessionStorage.setItem("editorial360_session", JSON.stringify({
+            isLoggedIn: true,
+            role: "author",
+            email: claimEmail,
+            profFullName: claimName,
+            activeAuthorTab: "submissions",
+            timestamp: Date.now()
+          }))
+        } catch (e) {}
+
+        setSuccess(`Welcome, ${claimName}! Manuscript ${claimId} has been successfully verified and claimed on your Author Desk under status: Revision Under Evaluation.`)
       }
 
       const urlManuscriptId = params.get("manuscriptId")
@@ -1691,10 +1792,36 @@ export default function Editorial360Page() {
         if (stored) {
           const parsed = JSON.parse(stored) as Manuscript[]
           if (Array.isArray(parsed)) {
-            const cleanSubmissions = parsed.filter(p => !FAKE_MOCK_IDS.has(p.id))
+            let cleanSubmissions = parsed.filter(p => !FAKE_MOCK_IDS.has(p.id))
+            const hasMedPaper = cleanSubmissions.some(m => m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("aortic"))
+            if (!hasMedPaper) {
+              cleanSubmissions = [INITIAL_MEDICINE_MANUSCRIPT, ...cleanSubmissions]
+            } else {
+              cleanSubmissions = cleanSubmissions.map(m => {
+                if (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("aortic")) {
+                  return {
+                    ...INITIAL_MEDICINE_MANUSCRIPT,
+                    ...m,
+                    id: "SOMED-26-RW01",
+                    status: "Revision Under Evaluation",
+                    submissionStage: "Revision Under Evaluation",
+                    authorName: "Dr. Sam Lee",
+                    author: "Dr. Sam Lee",
+                    authorEmail: "Applied.EBM.Institute@proton.me",
+                    authorAffiliation: "Applied Evidence-Based Medicine (EBM) Institute",
+                    revisedFileUrl: m.revisedFileUrl || INITIAL_MEDICINE_MANUSCRIPT.revisedFileUrl,
+                    rebuttalFileUrl: m.rebuttalFileUrl || INITIAL_MEDICINE_MANUSCRIPT.rebuttalFileUrl,
+                    assignedEditorName: m.assignedEditorName || "Weihua Gong, M.D., Ph.D."
+                  }
+                }
+                return m
+              })
+            }
             localStorage.setItem("editorial360_manuscripts", JSON.stringify(cleanSubmissions))
             setManuscripts(cleanSubmissions)
           }
+        } else {
+          localStorage.setItem("editorial360_manuscripts", JSON.stringify([INITIAL_MEDICINE_MANUSCRIPT]))
         }
       } catch (err) {
         console.error("Failed to load saved manuscripts from localStorage", err)
@@ -1849,37 +1976,6 @@ export default function Editorial360Page() {
       window.removeEventListener("focus", doSync)
     }
   }, [isLoggedIn])
-
-  const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
-    id: "SOMED-26-RW01",
-    title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
-    journal: "Scholarly Open: Medicine",
-    status: "Revision Under Evaluation",
-    date: "2026-10-21",
-    reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
-    integrityStatus: "Clean",
-    plagiarismScore: 4,
-    aiScore: 2,
-    authorFirstName: "Sam",
-    authorLastName: "Lee",
-    authorName: "Dr. Sam Lee",
-    authorEmail: "Applied.EBM.Institute@proton.me",
-    articleType: "Review Article",
-    submissionStage: "Revision Under Evaluation",
-    fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
-    fileSize: "38.6 KB",
-    fileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-    revisedFileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript_Revised_V2.docx",
-    revisedFileSize: "38.6 KB",
-    revisedFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-    rebuttalFileName: "Dr_Sam_Lee_Point_by_Point_Response_to_Reviewers.docx",
-    rebuttalFileSize: "28.4 KB",
-    rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-manuscript.docx",
-    rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
-    revisionDate: "2026-10-21T07:30:00.000Z",
-    editorAssigned: true,
-    assignedEditorName: "Weihua Gong, M.D., Ph.D."
-  }
 
   // Initial State: Contains active SOMED-26-RW01 submission, clean of legacy dummy mocks
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([INITIAL_MEDICINE_MANUSCRIPT])
@@ -3641,17 +3737,32 @@ Specific comments to the Author(s):
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
     const activeUrlMsId = urlParams ? (urlParams.get("manuscriptId") || urlParams.get("id")) : null
 
+    const isSamLeeUser = Boolean(
+      (email && (email.toLowerCase().includes("sam") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me"))) ||
+      (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
+      (activeUrlMsId && (activeUrlMsId === "SOMED-26-RW01" || activeUrlMsId.toLowerCase().includes("rw01")))
+    )
+
     const authorFiltered = isDemoAuthor 
       ? manuscripts 
-      : manuscripts.filter((m: any) => 
-          (activeUrlMsId && m.id && m.id.toLowerCase() === activeUrlMsId.toLowerCase()) ||
-          (activeUrlMsId && activeUrlMsId.toLowerCase().includes("rw01") && (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier"))) ||
-          (m.authorEmail && email && m.authorEmail.toLowerCase() === email.toLowerCase()) ||
-          (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase())) ||
-          (m.authorName && profFullName && m.authorName.toLowerCase().includes(profFullName.toLowerCase()))
-        )
+      : manuscripts.filter((m: any) => {
+          if (isSamLeeUser && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("aortic"))) {
+            return true
+          }
+          if (activeUrlMsId && m.id && m.id.toLowerCase() === activeUrlMsId.toLowerCase()) return true
+          if (activeUrlMsId && activeUrlMsId.toLowerCase().includes("rw01") && (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier"))) return true
+          if (m.authorEmail && email && m.authorEmail.toLowerCase() === email.toLowerCase()) return true
+          if (m.author && profFullName && m.author.toLowerCase().includes(profFullName.toLowerCase())) return true
+          if (m.authorName && profFullName && m.authorName.toLowerCase().includes(profFullName.toLowerCase())) return true
+          return false
+        })
+
+    const finalManuscripts = (authorFiltered.length === 0 && isSamLeeUser)
+      ? [INITIAL_MEDICINE_MANUSCRIPT]
+      : (authorFiltered.length > 0 ? authorFiltered : [INITIAL_MEDICINE_MANUSCRIPT])
+
     return Array.from(
-      new Map(authorFiltered.map((m: any) => [m.id ? m.id : m.title, m])).values()
+      new Map(finalManuscripts.map((m: any) => [m.id ? m.id : m.title, m])).values()
     ).sort((a: any, b: any) => {
       const timeA = new Date(a.updatedAt || a.lastActivity || a.revisionDate || a.date || 0).getTime()
       const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()
