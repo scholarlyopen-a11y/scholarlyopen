@@ -5034,8 +5034,8 @@ Specific comments to the Author(s):
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
   <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
     <div style="background: #0284c7; padding: 24px; color: #ffffff;">
-      <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff;">Scholarly Open Editorial360</h1>
-      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9; color: #e0f2fe;">Submission Acknowledgment — Revised Manuscript & Rebuttal Dossier</p>
+      <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">editorial360</h1>
+      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9; color: #e0f2fe;">Submission Acknowledgment — Revised Manuscript &amp; Rebuttal Dossier</p>
     </div>
     <div style="padding: 28px;">
       <p style="font-size: 15px; margin-top: 0;">Dear <strong>${authorNameToGreet}</strong>,</p>
@@ -5058,12 +5058,12 @@ Specific comments to the Author(s):
         <li><strong>Formal Decision Notification:</strong> You will be notified immediately upon final determination.</li>
       </ol>
       <p style="font-size: 14px; line-height: 1.6; color: #334155;">
-        You can monitor real-time tracking of your manuscript anytime via your Author Dashboard on Editorial360.
+        You can monitor real-time tracking of your manuscript anytime via your Author Dashboard on <strong>editorial360</strong>.
       </p>
       <p style="font-size: 14px; margin-bottom: 0; color: #334155;">
         Sincerely,<br>
         <strong>Editorial Office</strong><br>
-        Scholarly Open &bull; Editorial360 Gateway<br>
+        Scholarly Open &bull; editorial360<br>
         <a href="mailto:editorial@scholarlyopen.org" style="color: #0284c7; text-decoration: none;">editorial@scholarlyopen.org</a>
       </p>
     </div>
@@ -5085,18 +5085,25 @@ Specific comments to the Author(s):
         })
       }).catch(err => console.error("Error sending revision acknowledgment email:", err))
 
-      // 2. Dispatch Automated Notification to the Journal's Official Email & Handling Editor (Requirement 3)
-      const journalEmailMap: Record<string, string> = {
-        "Scholarly Open: Medicine": "somed@scholarlyopen.org",
-        "Scholarly Open: Chemistry": "sochem@scholarlyopen.org",
-        "Scholarly Open: Environmental Science": "soenv@scholarlyopen.org",
-        "Scholarly Open: Social Sciences & Humanities": "sossh@scholarlyopen.org",
-        "Scholarly Open: Biology": "sobio@scholarlyopen.org",
-        "Scholarly Open: Engineering & Applied Sciences": "soeas@scholarlyopen.org",
-        "Scholarly Open: AI Safety & Governance": "soais@scholarlyopen.org",
-        "Scholarly Open: Clinical AI & Digital Health": "socal@scholarlyopen.org"
+      // 2. Dispatch Automated Notification to the Journal's Official Emails (e.g. somed@scholarlyopen.org & editor.somed@scholarlyopen.org) & Handling Editor
+      const journalEmailsMap: Record<string, string[]> = {
+        "Scholarly Open: Medicine": ["somed@scholarlyopen.org", "editor.somed@scholarlyopen.org", "editor.med@scholarlyopen.org"],
+        "Scholarly Open: Chemistry": ["sochem@scholarlyopen.org", "editor.sochem@scholarlyopen.org", "editor.chem@scholarlyopen.org"],
+        "Scholarly Open: Environmental Science": ["soenv@scholarlyopen.org", "editor.soenv@scholarlyopen.org", "editor.environsci@scholarlyopen.org"],
+        "Scholarly Open: Social Sciences & Humanities": ["sossh@scholarlyopen.org", "editor.sossh@scholarlyopen.org", "editor.socsci@scholarlyopen.org"],
+        "Scholarly Open: Biology": ["sobio@scholarlyopen.org", "editor.sobio@scholarlyopen.org", "editor.bio@scholarlyopen.org"],
+        "Scholarly Open: Engineering": ["soengg@scholarlyopen.org", "editor.engg@scholarlyopen.org"],
+        "Scholarly Open: Engineering & Applied Sciences": ["soeas@scholarlyopen.org", "editor.engg@scholarlyopen.org"],
+        "Scholarly Open: Data Science": ["sodatasci@scholarlyopen.org", "editor.datasci@scholarlyopen.org"],
+        "Scholarly Open: AI Safety & Governance": ["soaisg@scholarlyopen.org", "editor.aisg@scholarlyopen.org"],
+        "Scholarly Open: Clinical AI & Digital Health": ["socal@scholarlyopen.org", "editor.caidh@scholarlyopen.org"],
+        "Scholarly Open: Decarbonization & Carbon Tech": ["sodcct@scholarlyopen.org", "editor.dcct@scholarlyopen.org"],
+        "Scholarly Open: Quantum Engineering": ["soqe@scholarlyopen.org", "editor.qe@scholarlyopen.org"],
+        "Scholarly Open: Synthetic Biology & Bio-Design": ["sosbbd@scholarlyopen.org", "editor.sbbd@scholarlyopen.org"],
+        "Scholarly Open: Space Resources & Orbital Economy": ["sosroe@scholarlyopen.org", "editor.sroe@scholarlyopen.org"]
       }
-      const targetJournalEmail = journalEmailMap[targetJournalName] || "editorial@scholarlyopen.org"
+
+      const targetJournalEmails = journalEmailsMap[targetJournalName] || ["editorial@scholarlyopen.org"]
       const handlingEditorEmail = targetPaper?.assignedEditorEmail || (isAortic ? "126010@sh9hospital.org.cn" : "")
 
       const journalAlertHtml = `
@@ -5106,14 +5113,14 @@ Specific comments to the Author(s):
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
   <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
     <div style="background: #0f172a; padding: 22px 24px; color: #ffffff;">
-      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #38bdf8; margin-bottom: 4px;">Editorial Desk Notification</div>
+      <div style="font-size: 11px; font-weight: 700; text-transform: lowercase; letter-spacing: 0.05em; color: #38bdf8; margin-bottom: 4px;">editorial360</div>
       <h1 style="margin: 0; font-size: 18px; font-weight: 700; color: #ffffff;">Revised Manuscript &amp; Rebuttal Received</h1>
       <p style="margin: 4px 0 0; font-size: 12.5px; color: #94a3b8;">${targetJournalName}</p>
     </div>
     <div style="padding: 24px;">
       <p style="font-size: 14px; margin-top: 0;">Dear <strong>Journal Manager &amp; Handling Editor</strong>,</p>
       <p style="font-size: 13.5px; line-height: 1.6; color: #334155;">
-        A revised manuscript submission and response to reviewers have just been received through Editorial360 and placed into your editorial pipeline for evaluation.
+        A revised manuscript submission and response to reviewers have just been received through <strong>editorial360</strong> and placed into your editorial pipeline for evaluation.
       </p>
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 18px 0;">
         <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -5145,11 +5152,11 @@ Specific comments to the Author(s):
       </div>
       <div style="margin: 24px 0; text-align: center;">
         <a href="https://scholarlyopen.org/editorial360" style="display: inline-block; background: #0b99ff; color: #ffffff; padding: 11px 24px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px;">
-          Open Revision Dossier in Editorial360 &rarr;
+          Open Revision Dossier in editorial360 &rarr;
         </a>
       </div>
       <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
-        This automated notification was dispatched from the Scholarly Open Editorial360 Gateway to ${targetJournalEmail}.
+        This automated notification was dispatched from editorial360 to ${targetJournalEmails.join(", ")}.
       </p>
     </div>
   </div>
@@ -5157,22 +5164,24 @@ Specific comments to the Author(s):
 </html>
       `
 
-      // Notify Journal Office inbox
-      fetch("/api/editorial360/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: targetJournalEmail,
-          recipientName: `${targetJournalName} Editorial Office`,
-          journal: targetJournalName,
-          campaignType: "journal_office_revision_alert",
-          subject: `[Revision Received] ${revisionPaperId || "SOMED-26-RW01"} - ${targetPaperTitle.slice(0, 50)}...`,
-          html: journalAlertHtml
-        })
-      }).catch(err => console.error("Error sending journal office revision alert:", err))
+      // Notify Journal Office inboxes (e.g. somed@scholarlyopen.org & editor.somed@scholarlyopen.org)
+      targetJournalEmails.forEach(targetEmail => {
+        fetch("/api/editorial360/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: targetEmail,
+            recipientName: `${targetJournalName} Editorial Office`,
+            journal: targetJournalName,
+            campaignType: "journal_office_revision_alert",
+            subject: `[Revision Received] ${revisionPaperId || "SOMED-26-RW01"} - ${targetPaperTitle.slice(0, 50)}...`,
+            html: journalAlertHtml
+          })
+        }).catch(err => console.error("Error sending journal office revision alert to " + targetEmail + ":", err))
+      })
 
-      // Also notify general editorial office if distinct
-      if (targetJournalEmail !== "editorial@scholarlyopen.org") {
+      // Also notify central editorial office if not already included
+      if (!targetJournalEmails.includes("editorial@scholarlyopen.org")) {
         fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -5188,7 +5197,7 @@ Specific comments to the Author(s):
       }
 
       // If handling editor has distinct email, notify them directly
-      if (handlingEditorEmail && handlingEditorEmail !== targetJournalEmail) {
+      if (handlingEditorEmail && !targetJournalEmails.includes(handlingEditorEmail)) {
         fetch("/api/editorial360/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
