@@ -86,6 +86,9 @@ function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEdito
 }
 
 async function getStoredEditors(): Promise<OnboardedEditorRecord[]> {
+  let cloudEditors: OnboardedEditorRecord[] = []
+  let localEditors: OnboardedEditorRecord[] = []
+
   // 1. Try Supabase Cloud Storage
   try {
     const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
@@ -94,26 +97,47 @@ async function getStoredEditors(): Promise<OnboardedEditorRecord[]> {
     if (res.ok) {
       const parsed = await res.json()
       if (parsed && Array.isArray(parsed.onboardedEditors)) {
-        return sanitizeEditorRecords(parsed.onboardedEditors)
+        cloudEditors = sanitizeEditorRecords(parsed.onboardedEditors)
       }
     }
   } catch (e) {
     console.warn("Supabase fetch editors warning:", e)
   }
 
-  // 2. Fallback to local file
+  // 2. Fallback / local file
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const raw = fs.readFileSync(DATA_FILE_PATH, "utf-8")
       const parsed = JSON.parse(raw)
       if (parsed && Array.isArray(parsed.onboardedEditors)) {
-        return sanitizeEditorRecords(parsed.onboardedEditors)
+        localEditors = sanitizeEditorRecords(parsed.onboardedEditors)
       }
     }
   } catch (e) {
     console.error("Error reading editorial-board-onboarding.json:", e)
   }
-  return []
+
+  // Overlay local over cloud so verified master records take precedence
+  const map = new Map<string, OnboardedEditorRecord>()
+  for (const ed of cloudEditors) {
+    const key = (ed.id || ed.slug || ed.email || "").toLowerCase().trim()
+    if (key) map.set(key, ed)
+  }
+  for (const ed of localEditors) {
+    const key = (ed.id || ed.slug || ed.email || "").toLowerCase().trim()
+    if (key) {
+      const existing = map.get(key)
+      map.set(key, { ...existing, ...ed })
+    }
+  }
+
+  const merged = Array.from(map.values())
+  if (merged.length > 0) {
+    saveStoredEditors(merged).catch(() => {})
+    return merged
+  }
+
+  return localEditors
 }
 
 async function saveStoredEditors(editors: OnboardedEditorRecord[]) {

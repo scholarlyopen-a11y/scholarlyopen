@@ -4168,8 +4168,9 @@ Specific comments to the Author(s):
           currentEditorName = "Hesham Hussein, PhD"
           currentEditorRank = "Editorial Board Member & Handling Editor"
           currentEditorJournal = "Scholarly Open: Social Sciences & Humanities"
-          currentEditorInstitution = "Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt"
+          currentEditorInstitution = "Supreme Council of Antiquities, Egypt"
           currentEditorCountry = "Egypt"
+          currentEditorOrcid = "0000-0002-9646-5325"
           currentEditorPhotoUrl = "/images/editors/hesham-hussein.png"
 
           setEditorName(currentEditorName)
@@ -4177,6 +4178,7 @@ Specific comments to the Author(s):
           setEditorJournal(currentEditorJournal)
           setEditorInstitution(currentEditorInstitution)
           setEditorCountry(currentEditorCountry)
+          setEditorOrcid(currentEditorOrcid)
           setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (matchedCloudUser && matchedCloudUser.email.toLowerCase() === cleanEmail.toLowerCase()) {

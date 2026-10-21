@@ -1962,9 +1962,8 @@ Dr. Chamberland earned her Ph.D. in History from the University of California, D
     affiliation: "Supreme Council of Antiquities, Ministry of Tourism and Antiquities, Egypt",
     specialization: "Archaeology, Egyptology, Frontier Fortifications, Epigraphy and Digital Heritage Documentation",
     email: "editor.socsci@scholarlyopen.org",
-    orcid: "",
-    googleScholar: "",
-    linkedin: "https://www.linkedin.com/in/hesham-hussein",
+    orcid: "0000-0002-9646-5325",
+    googleScholar: "https://scholar.google.com/citations?user=VQqtsp8AAAAJ&hl=ar",
     imageUrl: "/images/editors/hesham-hussein.png",
     journalSlug: "social-sciences-humanities",
     assignedSections: [

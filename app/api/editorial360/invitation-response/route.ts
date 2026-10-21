@@ -115,13 +115,13 @@ async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
     localResponses = responseStore
   }
 
-  // Merge map: local + cloud, keyed by unique ID or slug/email
+  // Merge map: cloud base + local overlays so verified local master data takes precedence
   const mergedMap = new Map<string, InvitationResponseRecord>()
-  for (const r of localResponses) {
+  for (const r of cloudResponses) {
     const key = (r.id || r.slug || r.candidateEmail || "").toLowerCase().trim()
     if (key) mergedMap.set(key, r)
   }
-  for (const r of cloudResponses) {
+  for (const r of localResponses) {
     const key = (r.id || r.slug || r.candidateEmail || "").toLowerCase().trim()
     if (key) {
       const existing = mergedMap.get(key)
@@ -134,10 +134,8 @@ async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
     candidateName: r.candidateName ? sanitizeAcademicName(r.candidateName) : r.candidateName
   }))
 
-  // If cloud was missing any entries from local (e.g. RESP-CACCIOLA), sync merged list up to Supabase
-  if (merged.length > cloudResponses.length) {
-    saveStoredResponses(merged).catch(() => {})
-  }
+  // Keep Supabase cloud storage in sync with verified master records
+  saveStoredResponses(merged).catch(() => {})
 
   return merged
 }
