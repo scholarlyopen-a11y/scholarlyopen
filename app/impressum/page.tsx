@@ -114,11 +114,11 @@ export default function ImpressumPage() {
                 <div className="p-6 bg-muted/50 rounded-lg border border-border">
                   <p className="text-muted-foreground">
                     <strong className="text-foreground">Herr Gregor Fefer</strong><br />
-                    Scholarly Open i.G.
+                    Scholarly Open (Vorgründungsphase)
                   </p>
                   <p className="text-muted-foreground mt-4">
                     <strong className="text-foreground">Herr M. Abbas Qurasani</strong><br />
-                    Scholarly Open i.G.
+                    Scholarly Open (Vorgründungsphase)
                   </p>
                 </div>
               </div>
