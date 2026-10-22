@@ -8347,7 +8347,7 @@ Specific comments to the Author(s):
                         }`}
                       >
                         <Users className="h-4 w-4" />
-                        {language === "de" ? "Gutachter" : "Reviewers"}
+                        {language === "de" ? "Scholars Gateway" : "Scholars Gateway"}
                       </button>
 
                       <button 

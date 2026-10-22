@@ -15,42 +15,36 @@ const coreJournals = [
     descriptionKey: "journals.eng.description",
     icon: Settings,
     href: "/journals/engineering",
-    iconColor: "text-slate-500",
   },
   {
     titleKey: "journals.ss.title",
     descriptionKey: "journals.ss.description",
     icon: UsersRound,
     href: "/journals/social-sciences-humanities",
-    iconColor: "text-amber-500",
   },
   {
     titleKey: "journals.bio.title",
     descriptionKey: "journals.bio.description",
     icon: Leaf,
     href: "/journals/biology",
-    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.chem.title",
     descriptionKey: "journals.chem.description",
     icon: Beaker,
     href: "/journals/chemistry",
-    iconColor: "text-yellow-500",
   },
   {
     titleKey: "journals.med.title",
     descriptionKey: "journals.med.description",
     icon: Stethoscope,
     href: "/journals/medicine",
-    iconColor: "text-rose-500",
   },
   {
     titleKey: "journals.env.title",
     descriptionKey: "journals.env.description",
     icon: Sprout,
     href: "/journals/environmental-science",
-    iconColor: "text-lime-500",
   },
 ]
 
@@ -60,49 +54,42 @@ const frontiersJournals = [
     descriptionKey: "journals.ds.description",
     icon: Cpu,
     href: "/journals/data-science",
-    iconColor: "text-blue-500",
   },
   {
     titleKey: "journals.clinical-ai.title",
     descriptionKey: "journals.clinical-ai.description",
     icon: HeartPulse,
     href: "/journals/clinical-ai-digital-health",
-    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.ai-safety.title",
     descriptionKey: "journals.ai-safety.description",
     icon: Shield,
     href: "/journals/ai-safety-governance",
-    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.decarbonization.title",
     descriptionKey: "journals.decarbonization.description",
     icon: Wind,
     href: "/journals/decarbonization-carbon-tech",
-    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.quantum-engineering.title",
     descriptionKey: "journals.quantum-engineering.description",
     icon: Atom,
     href: "/journals/quantum-engineering",
-    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.synthetic-biology.title",
     descriptionKey: "journals.synthetic-biology.description",
     icon: Dna,
     href: "/journals/synthetic-biology-bio-design",
-    iconColor: "text-green-500",
   },
   {
     titleKey: "journals.space-resources.title",
     descriptionKey: "journals.space-resources.description",
     icon: Rocket,
     href: "/journals/space-resources-orbital-economy",
-    iconColor: "text-green-500",
   },
 ]
 
@@ -141,7 +128,7 @@ export default function JournalsIndexPage() {
                       <CardHeader>
                         <div className="flex items-start justify-between gap-4">
                           <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <journal.icon className={`h-6 w-6 ${journal.iconColor}`} />
+                            <journal.icon className="h-6 w-6 text-primary" />
                           </div>
                           <Badge className="bg-accent text-accent-foreground font-semibold">Gold OA</Badge>
                         </div>
@@ -166,7 +153,7 @@ export default function JournalsIndexPage() {
                       <CardHeader>
                         <div className="flex items-start justify-between gap-4">
                           <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <journal.icon className={`h-6 w-6 ${journal.iconColor}`} />
+                            <journal.icon className="h-6 w-6 text-primary" />
                           </div>
                           <Badge className="bg-accent text-accent-foreground font-semibold">Gold OA</Badge>
                         </div>

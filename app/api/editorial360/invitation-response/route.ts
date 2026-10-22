@@ -115,7 +115,7 @@ async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
     localResponses = responseStore
   }
 
-  // Merge map: cloud base + local overlays so verified local master data takes precedence
+  // Merge map: cloud base + local overlays so verified master data takes precedence without resetting approvals
   const mergedMap = new Map<string, InvitationResponseRecord>()
   for (const r of cloudResponses) {
     const key = (r.id || r.slug || r.candidateEmail || "").toLowerCase().trim()
@@ -125,7 +125,13 @@ async function getStoredResponses(): Promise<InvitationResponseRecord[]> {
     const key = (r.id || r.slug || r.candidateEmail || "").toLowerCase().trim()
     if (key) {
       const existing = mergedMap.get(key)
-      mergedMap.set(key, { ...existing, ...r })
+      const approved = Boolean(r.jmApproved || existing?.jmApproved)
+      mergedMap.set(key, { 
+        ...existing, 
+        ...r,
+        jmApproved: approved,
+        status: approved ? (r.status && !r.status.includes("Pending") ? r.status : (r.type === "reviewer_claim" ? "Active Referee" : "Active Handling Editor")) : r.status
+      })
     }
   }
 
@@ -442,13 +448,22 @@ export async function GET() {
                        (r.candidateName && r.candidateName.toLowerCase().includes("cacciola")) ||
                        (r.slug && r.slug.toLowerCase().includes("cacciola")) ||
                        r.id === "RESP-CACCIOLA"
-    const isConfirmedEiC = isVerpoort || isCacciola
+    const isHesham = (r.candidateEmail && (r.candidateEmail.toLowerCase().includes("hecham") || r.candidateEmail.toLowerCase().includes("hesham"))) ||
+                     (r.candidateName && r.candidateName.toLowerCase().includes("hesham")) ||
+                     (r.slug && r.slug.toLowerCase().includes("hesham")) ||
+                     r.id === "RESP-HUSSEIN" || r.id === "EBM-HUSSEIN"
+
+    if (isHesham && (!credId || credId === "EBM-EDITOR")) {
+      credId = "EBM-HESHAM"
+    }
+
+    const isConfirmedApproved = isVerpoort || isCacciola || isHesham || Boolean(r.jmApproved)
 
     return { 
       ...r, 
       credentialId: credId,
-      jmApproved: isConfirmedEiC ? true : Boolean(r.jmApproved),
-      status: isConfirmedEiC ? "Active Handling Editor" : (r.status || (r.jmApproved ? "Active Handling Editor" : "Pending JM Approval"))
+      jmApproved: isConfirmedApproved,
+      status: isConfirmedApproved ? "Active Handling Editor" : (r.status || (r.jmApproved ? "Active Handling Editor" : "Pending JM Approval"))
     }
   })
 

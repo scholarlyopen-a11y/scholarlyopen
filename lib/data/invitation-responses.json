@@ -8,7 +8,7 @@
       "candidateEmail": "hecham.husein@gmail.com",
       "journal": "Scholarly Open: Social Sciences & Humanities",
       "decision": "yes",
-      "credentialId": "",
+      "credentialId": "EBM-HESHAM",
       "timestamp": "Mon, 19 Oct 2026 21:20:14 GMT",
       "notes": "Action logged via editorial360 invitation link (board: yes)",
       "affiliation": "Supreme Council of Antiquities, Egypt",
@@ -72,8 +72,8 @@
       ],
       "hasAcceptedTerms": true,
       "consentProfileUpload": true,
-      "status": "Pending Approval",
-      "jmApproved": false,
+      "status": "Active Handling Editor",
+      "jmApproved": true,
       "watchlistFlagged": false
     },
     {

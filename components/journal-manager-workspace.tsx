@@ -2633,7 +2633,8 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     }
   ])
 
-  // Filtered Active Reviewer Pool: strictly excludes AEs/EBMs (who belong in Editorial Board) and unapproved/disapproved/removed candidates
+  // Filtered Reviewer Pool: strictly excludes AEs/EBMs (who belong in Editorial Board) and unapproved/disapproved/removed candidates
+  // Keeps Inactive & Sabbatical members visible so managers can track their entire referee bench and toggle status back to Active.
   const activeReviewersPool = useMemo(() => {
     return reviewersList.filter((rev) => {
       const normName = (rev.name || "").trim().toLowerCase()
@@ -2643,7 +2644,7 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
       if (normEmail === "cacciolaf@unime.it" || normEmail.includes("unime.it") || normName.includes("cacciola") || String(rev.id || "").startsWith("EBM")) return false
       // Exclude removed / unverified / disapproved candidates (e.g. Palak Chitkara)
       if (normEmail.includes("palak") || normName.includes("palak") || (rev as any).isFlagged || (rev as any).jmApproved === false) return false
-      if ((rev.status as string) === "Inactive" || (rev as any).status === "Pending JM Approval") return false
+      if ((rev as any).status === "Pending JM Approval") return false
       return true
     })
   }, [reviewersList])
@@ -6824,9 +6825,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       )}
       {activeTab === "users" && (
         <Card className="bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] rounded-2xl shadow-xs overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 {reviewerRegistryTab === "directory" 
                   ? "Reviewer Registry" 
                   : reviewerRegistryTab === "ecr" 
@@ -6839,7 +6840,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   ? "Journal Integrity Watchlist & Disapproved Directory"
                   : "Reviewer History"}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-4xl leading-relaxed">
                 {reviewerRegistryTab === "directory"
                   ? "Directory listing of vetted peer reviewers and availability status."
                   : reviewerRegistryTab === "ecr"
@@ -6854,7 +6855,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </p>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
               <div className="inline-flex items-center p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-xs gap-1 overflow-x-auto max-w-full">
                 <button
                   type="button"
@@ -6968,7 +6969,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <Button
                 onClick={() => setIsAddReviewerOpen(true)}
                 size="sm"
-                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer h-8 px-3.5 rounded-xl shadow-xs shrink-0 self-start lg:self-auto"
+                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer h-8 px-3.5 rounded-xl shadow-xs shrink-0 self-start sm:self-auto"
               >
                 <UserPlus className="h-4 w-4" />
                 Invite Reviewer
@@ -7220,9 +7221,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20">
-                  <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wider block">Chemistry Portfolio</span>
+                  <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wider block">Journals Represented</span>
                   <span className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5 block">
-                    {gatewayResponses.filter((r: any) => r.journal?.toLowerCase().includes("chem") || r.journal?.toLowerCase().includes("applied")).length}
+                    {new Set(gatewayResponses.map((r: any) => r.journal).filter(Boolean)).size}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/40 dark:bg-indigo-950/20">
@@ -7354,7 +7355,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
                                       <XCircle className="w-3 h-3" /> Disapproved - Blocked
                                     </span>
-                                  ) : (resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola")) ? (
+                                  ) : (resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham")) ? (
                                     <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                       <CheckCircle2 className="w-3 h-3" /> Live on Masthead
                                     </span>
@@ -7395,7 +7396,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </td>
                           <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             {(() => {
-                              const isApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola"))
+                              const isApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham"))
                               const displayCred = (resp.credentialId || "").trim() || (
                                 isApproved
                                   ? (resp.type === "reviewer_claim" 
@@ -7431,19 +7432,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 <Mail className="h-3.5 w-3.5 text-sky-600" />
                                 <span>Welcome Letter</span>
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => handleToggleCandidateApproval(resp)}
-                                title={resp.jmApproved ? (resp.type === "reviewer_claim" ? "Revoke Referee Approval" : "Revoke / Unpublish from Masthead") : (resp.type === "reviewer_claim" ? "Approve Referee & Activate Privileges" : "Approve & Publish to Public Masthead")}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
-                                  resp.jmApproved
-                                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-100"
-                                    : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 hover:bg-amber-100"
-                                }`}
-                              >
-                                {resp.jmApproved ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />}
-                                <span>{resp.jmApproved ? "Approved" : "Approve"}</span>
-                              </button>
+                              {(() => {
+                                const isRowApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham"))
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleCandidateApproval(resp)}
+                                    title={isRowApproved ? (resp.type === "reviewer_claim" ? "Revoke Referee Approval" : "Revoke / Unpublish from Masthead") : (resp.type === "reviewer_claim" ? "Approve Referee & Activate Privileges" : "Approve & Publish to Public Masthead")}
+                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                                      isRowApproved
+                                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-100"
+                                        : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 hover:bg-amber-100"
+                                    }`}
+                                  >
+                                    {isRowApproved ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />}
+                                    <span>{isRowApproved ? "Approved" : "Approve"}</span>
+                                  </button>
+                                )
+                              })()}
                               {resp.status !== "Disapproved - Access Blocked" && (
                                 <button
                                   type="button"
