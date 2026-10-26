@@ -12745,45 +12745,114 @@ Specific comments to the Author(s):
             </div>
           ) : (
             <div className="space-y-3.5 py-2 text-xs">
-              {/* 1. File Downloads */}
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={selectedRevisionManuscript?.revisedFileUrl || selectedRevisionManuscript?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt"}
-                  download={selectedRevisionManuscript?.revisedFileName || selectedRevisionManuscript?.fileName || `${selectedRevisionManuscript?.id || "Manuscript"}_Clean_Revision.pdf`}
-                  className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <FileCheck2 className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                    <div className="truncate">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
-                        {selectedRevisionManuscript?.revisedFileName || selectedRevisionManuscript?.fileName || "Clean Revised PDF"}
-                      </span>
-                      <span className="text-[10px] text-slate-400 block font-mono">
-                        {selectedRevisionManuscript?.revisedFileSize || selectedRevisionManuscript?.fileSize || "2.8 MB"}
-                      </span>
-                    </div>
+              {/* 1. File Downloads - Dual Track: Editor (Unblinded) & Reviewer (Blinded) */}
+              <div className="space-y-2.5">
+                {/* Track A: Handling Editor Copy (Unblinded) */}
+                <div className="p-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/40 rounded-xl space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-blue-950 dark:text-blue-300 text-[11px] flex items-center gap-1.5">
+                      <FileCheck2 className="h-3.5 w-3.5 text-[#0b99ff]" />
+                      Handling Editor Track (Unblinded) · Prof. Weihua Gong
+                    </span>
+                    <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                      Author PII Included
+                    </span>
                   </div>
-                  <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
-                </a>
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : (selectedRevisionManuscript?.revisedFileUrl || selectedRevisionManuscript?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Revised_Manuscript_Unblinded.docx" : (selectedRevisionManuscript?.revisedFileName || `${selectedRevisionManuscript?.id || "Manuscript"}_Clean_Revision.docx`)}
+                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/60 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                        <div className="truncate">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                            Revised Manuscript (.docx)
+                          </span>
+                          <span className="text-[10px] text-slate-400 block font-mono">
+                            84.1 KB · Unblinded Fulltext
+                          </span>
+                        </div>
+                      </div>
+                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
+                    </a>
 
-                <a
-                  href={selectedRevisionManuscript?.rebuttalFileUrl || selectedRevisionManuscript?.revisedFileUrl || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                  download={selectedRevisionManuscript?.rebuttalFileName || `${selectedRevisionManuscript?.id || "Manuscript"}_Response_to_Reviewers.docx`}
-                  className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-emerald-500/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
-                    <div className="truncate">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
-                        {selectedRevisionManuscript?.rebuttalFileName || "Response_to_Reviewers.docx"}
-                      </span>
-                      <span className="text-[10px] text-slate-400 block font-mono">
-                        {selectedRevisionManuscript?.rebuttalFileSize || "28.4 KB"} · Author Rebuttal Document
-                      </span>
-                    </div>
+                    <a
+                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : (selectedRevisionManuscript?.rebuttalFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Author_Rebuttal_Unblinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Response_to_Reviewers.docx`}
+                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/60 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                        <div className="truncate">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                            Author Rebuttal (.docx)
+                          </span>
+                          <span className="text-[10px] text-slate-400 block font-mono">
+                            25.8 KB · Full Letterhead
+                          </span>
+                        </div>
+                      </div>
+                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
+                    </a>
                   </div>
-                  <Download className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                </a>
+                </div>
+
+                {/* Track B: Reviewer Copy (Blinded / Anonymized for Double-Blind Review) */}
+                <div className="p-2.5 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/40 rounded-xl space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-emerald-950 dark:text-emerald-300 text-[11px] flex items-center gap-1.5">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                      Reviewer Track (Anonymized) · Dr. Praveen Nagula & Dr. Chaud GJ
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
+                      Double-Blind Verified
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx" : (selectedRevisionManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Revised_Manuscript_Blinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Blinded_Revision.docx`}
+                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-emerald-500/60 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <FileCheck2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <div className="truncate">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                            Blinded Manuscript (.docx)
+                          </span>
+                          <span className="text-[10px] text-slate-400 block font-mono">
+                            84.1 KB · Redacted Details
+                          </span>
+                        </div>
+                      </div>
+                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
+                    </a>
+
+                    <a
+                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal-blinded.docx" : (selectedRevisionManuscript?.rebuttalFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Author_Rebuttal_Blinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Blinded_Rebuttal.docx`}
+                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-emerald-500/60 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <div className="truncate">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                            Blinded Rebuttal (.docx)
+                          </span>
+                          <span className="text-[10px] text-slate-400 block font-mono">
+                            25.8 KB · Sign-off Redacted
+                          </span>
+                        </div>
+                      </div>
+                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
+                    </a>
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 pt-0.5">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓ ICMJE Redaction:</span> Author name, academic credentials, institutional affiliations, and contact email have been sanitized.
+                  </div>
+                </div>
               </div>
 
               {/* 2. Point-by-Point Author Rebuttal */}
@@ -12964,8 +13033,8 @@ Evaluation Summary & Resources:
 • Article Type: Review Article
 • Target Journal: ${journalName}
 • Re-assessment Turnaround: 14 calendar days
-• Rebuttal Document: Available on your reviewer desk
-• Clean Revised Manuscript (.docx / PDF): Available on your reviewer desk
+• Blinded Author Rebuttal (.docx): Point-by-point responses (anonymized for double-blind review)
+• Blinded Revised Manuscript (.docx): Clean revised text (author & institutional PII redacted)
 
 Please click the secure button below to access the evaluation form and revised files:
 ${baseUrl}/editorial360?action=review&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}

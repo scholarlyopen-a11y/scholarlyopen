@@ -2,10 +2,8 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
 const FILE_PATH = "reviews.json"
 
 export interface StoredReview {
@@ -123,110 +121,18 @@ Specific comments to the Author(s):
   }
 ]
 
-// Helper: Fetch reviews from Supabase PostgreSQL table or Cloud Storage
+// Helper: Fetch reviews from storage layer with local file fallback
 async function getStoredReviews(): Promise<StoredReview[]> {
-  // 1. Try Supabase Cloud Storage
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data && Array.isArray(data.reviews)) {
-        return data.reviews
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase storage fetch reviews warning:", e)
+  const data = await readEditorialData<{ reviews: StoredReview[] }>(FILE_PATH, { reviews: DEFAULT_REVIEWS })
+  if (data && Array.isArray(data.reviews) && data.reviews.length > 0) {
+    return data.reviews
   }
-
-  // 2. Try Supabase REST table `reviews`
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/reviews?select=*&order=created_at.desc`, {
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json"
-      },
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const dbReviews = await res.json()
-      if (Array.isArray(dbReviews) && dbReviews.length > 0) {
-        return dbReviews.map((r: any) => ({
-          id: r.id,
-          paperId: r.paper_id,
-          reviewerName: r.reviewer_name || "Anonymous Referee",
-          reviewerEmail: r.reviewer_email || "",
-          status: (r.status as any) || "Pending Moderation",
-          originality: r.originality || 4,
-          methodology: r.methodology || 4,
-          clarity: r.clarity || 4,
-          significance: r.significance || 4,
-          commentsAuthor: r.comments_author || "",
-          commentsEditor: r.comments_editor || "",
-          recommendation: r.recommendation || "Minor Revisions",
-          sanitizedCommentsAuthor: r.sanitized_comments_author || r.comments_author || "",
-          createdAt: r.created_at || new Date().toISOString()
-        }))
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase rest fetch reviews warning:", e)
-  }
-
   return DEFAULT_REVIEWS
 }
 
-// Helper: Save reviews to Supabase Cloud Storage & Postgres REST
+// Helper: Save reviews to storage layer with local file fallback
 async function saveStoredReviews(reviews: StoredReview[]) {
-  // 1. Save to Supabase Cloud Storage
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ reviews, updatedAt: new Date().toISOString() })
-    })
-  } catch (err) {
-    console.error("Supabase save reviews storage error:", err)
-  }
-
-  // 2. Upsert into Supabase Postgres `reviews` table
-  try {
-    const payload = reviews.map(r => ({
-      id: r.id,
-      paper_id: r.paperId,
-      reviewer_name: r.reviewerName,
-      reviewer_email: r.reviewerEmail,
-      status: r.status,
-      originality: r.originality,
-      methodology: r.methodology,
-      clarity: r.clarity,
-      significance: r.significance,
-      comments_author: r.commentsAuthor,
-      comments_editor: r.commentsEditor,
-      recommendation: r.recommendation,
-      sanitized_comments_author: r.sanitizedCommentsAuthor
-    }))
-
-    await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates"
-      },
-      body: JSON.stringify(payload)
-    })
-  } catch (e) {
-    console.warn("Supabase upsert reviews table warning:", e)
-  }
+  await writeEditorialData(FILE_PATH, { reviews, updatedAt: new Date().toISOString() })
 }
 
 export async function GET(req: Request) {

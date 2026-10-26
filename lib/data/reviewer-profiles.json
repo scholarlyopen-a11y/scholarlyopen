@@ -1,0 +1,46 @@
+{
+  "profiles": {
+    "102500216@hbut.edu.cn": {
+      "title": "Dr.",
+      "name": "Dr. Wenxiong Sun (孙文雄)",
+      "email": "102500216@hbut.edu.cn",
+      "institution": "Hubei University of Technology",
+      "department": "School of Materials and Chemical Engineering",
+      "country": "China",
+      "orcid": "0009-0002-8812-4190",
+      "scholarUrl": "",
+      "photoUrl": "",
+      "badges": [
+        "Gateway Certified (92%)",
+        "COPE Ethics Verified",
+        "Fast Turnaround"
+      ],
+      "primaryDiscipline": "engineering",
+      "subDisciplines": [
+        "Materials Science",
+        "Nanotechnology",
+        "Composite Materials"
+      ],
+      "keywords": [
+        "Nanomaterials",
+        "Smart Grids",
+        "Additive Manufacturing",
+        "Composite Materials",
+        "Fluid Dynamics"
+      ],
+      "maxReviewsPerMonth": 2,
+      "preferredTurnaround": 14,
+      "availabilityStatus": "Available",
+      "sabbaticalUntil": "",
+      "coiAcknowledged": true,
+      "isCompleted": true,
+      "credentialId": "CERT-SO-2026-9088",
+      "gatewayScore": 92,
+      "accountStatus": "Passed - Account Active",
+      "paymentMethod": "Wise",
+      "paymentAccount": "102500216@hbut.edu.cn",
+      "notes": "Verified Referee via Reviewer Gateway (Sep 23, 2026). Specialized in engineering materials & nanotechnology.",
+      "createdAt": "2026-09-23T21:40:00Z"
+    }
+  }
+}

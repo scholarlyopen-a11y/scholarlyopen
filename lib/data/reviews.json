@@ -1,0 +1,36 @@
+{
+  "reviews": [
+    {
+      "id": "REV-FB-SAM-01",
+      "paperId": "SOMED-26-RW01",
+      "reviewerName": "Dr. Praveen Nagula",
+      "reviewerEmail": "drpraveennagula@gmail.com",
+      "status": "Released",
+      "originality": 3,
+      "methodology": 3,
+      "clarity": 3,
+      "significance": 3,
+      "commentsAuthor": "General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+      "commentsEditor": "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
+      "recommendation": "Re-write and Re-submit",
+      "sanitizedCommentsAuthor": "General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
+      "createdAt": "2026-08-28T14:20:00Z"
+    },
+    {
+      "id": "REV-FB-1791559472514-816",
+      "paperId": "SOMED-26-RW01",
+      "reviewerName": "Chaud GJ",
+      "reviewerEmail": "germanchaud@gmail.com",
+      "status": "Released",
+      "originality": 4,
+      "methodology": 4,
+      "clarity": 4,
+      "significance": 4,
+      "commentsAuthor": "This manuscript addresses an important challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.",
+      "commentsEditor": "Dear Editor-in-Chief,\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.",
+      "recommendation": "Re-review and Accept with Major Changes",
+      "sanitizedCommentsAuthor": "This manuscript addresses an important challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.",
+      "createdAt": "2026-10-09T15:24:33.340Z"
+    }
+  ]
+}

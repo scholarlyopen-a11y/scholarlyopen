@@ -3,9 +3,8 @@ export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+
 const FILE_PATH = "payout-requests.json"
 
 export interface StoredPayoutRequest {
@@ -37,37 +36,12 @@ const DEFAULT_PAYOUTS: StoredPayoutRequest[] = [
 ]
 
 async function getStoredPayouts(): Promise<StoredPayoutRequest[]> {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data && Array.isArray(data.payouts)) {
-        return data.payouts
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch payouts warning:", e)
-  }
-  return DEFAULT_PAYOUTS
+  const data = await readEditorialData<{ payouts: StoredPayoutRequest[] }>(FILE_PATH, { payouts: DEFAULT_PAYOUTS })
+  return Array.isArray(data?.payouts) && data.payouts.length > 0 ? data.payouts : DEFAULT_PAYOUTS
 }
 
 async function saveStoredPayouts(payouts: StoredPayoutRequest[]): Promise<void> {
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ payouts, updatedAt: new Date().toISOString() })
-    })
-  } catch (err) {
-    console.error("Supabase save payouts error:", err)
-  }
+  await writeEditorialData(FILE_PATH, { payouts, updatedAt: new Date().toISOString() })
 }
 
 export async function GET() {

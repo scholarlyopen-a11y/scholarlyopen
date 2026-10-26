@@ -17,41 +17,13 @@ function safeText(value: unknown, max = 5000) {
   return str.slice(0, max)
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+
 const RESPONSES_FILE = "invitation-responses.json"
-const LOCAL_RESPONSES_PATH = path.join(process.cwd(), "lib", "data", "invitation-responses.json")
 
 async function recordApplicationInDatabase(record: any) {
-  let existingResponses: any[] = []
-
-  // 1. Fetch current responses
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${RESPONSES_FILE}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (Array.isArray(data?.responses)) {
-        existingResponses = data.responses
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch warning in join-editorial-board:", e)
-  }
-
-  if (existingResponses.length === 0) {
-    try {
-      if (fs.existsSync(LOCAL_RESPONSES_PATH)) {
-        const raw = fs.readFileSync(LOCAL_RESPONSES_PATH, "utf-8")
-        const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed?.responses)) {
-          existingResponses = parsed.responses
-        }
-      }
-    } catch (e) {}
-  }
+  const data = await readEditorialData<{ responses: any[] }>(RESPONSES_FILE, { responses: [] })
+  let existingResponses: any[] = Array.isArray(data?.responses) ? [...data.responses] : []
 
   // Update or append
   const idx = existingResponses.findIndex(r => r.candidateEmail?.toLowerCase() === record.candidateEmail?.toLowerCase())
@@ -61,30 +33,7 @@ async function recordApplicationInDatabase(record: any) {
     existingResponses.unshift(record)
   }
 
-  // Save locally
-  try {
-    const dir = path.dirname(LOCAL_RESPONSES_PATH)
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(LOCAL_RESPONSES_PATH, JSON.stringify({ responses: existingResponses, lastUpdated: new Date().toISOString() }, null, 2), "utf-8")
-  } catch (e) {
-    console.error("Local file write error in join-editorial-board:", e)
-  }
-
-  // Save to Supabase Cloud Storage
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${RESPONSES_FILE}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ responses: existingResponses, lastUpdated: new Date().toISOString() })
-    })
-  } catch (e) {
-    console.warn("Supabase save error in join-editorial-board:", e)
-  }
+  await writeEditorialData(RESPONSES_FILE, { responses: existingResponses, lastUpdated: new Date().toISOString() })
 }
 
 export async function POST(request: Request) {

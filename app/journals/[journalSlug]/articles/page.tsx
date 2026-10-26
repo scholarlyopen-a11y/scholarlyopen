@@ -14,10 +14,26 @@ interface JournalArticlesPageProps {
   }>
 }
 
-// Generate static params for all journals present in articles dataset
+const ALL_JOURNAL_SLUGS = [
+  "medicine",
+  "biology",
+  "chemistry",
+  "data-science",
+  "ai-safety-governance",
+  "clinical-ai-digital-health",
+  "decarbonization-carbon-tech",
+  "engineering",
+  "environmental-science",
+  "quantum-engineering",
+  "social-sciences-humanities",
+  "social-sciences-open",
+  "space-resources-orbital-economy",
+  "synthetic-biology-bio-design",
+]
+
+// Generate static params for all recognized journals
 export async function generateStaticParams() {
-  const uniqueSlugs = Array.from(new Set(articles.map((a) => a.journalSlug)))
-  return uniqueSlugs.map((journalSlug) => ({
+  return ALL_JOURNAL_SLUGS.map((journalSlug) => ({
     journalSlug,
   }))
 }
@@ -30,21 +46,9 @@ export async function generateMetadata({ params }: JournalArticlesPageProps) {
     .join(" ")
     .replace("And", "&")
 
-  const journalArticles = articles.filter((a) => a.journalSlug === journalSlug)
-  const isSampleSet = journalArticles.length > 0 && journalArticles.every(isSampleArticle)
-
   return {
-    title: isSampleSet 
-      ? `Articles & Format Previews - ${journalName} | Scholarly Open` 
-      : `Articles - ${journalName} | Scholarly Open`,
-    description: `Browse open access research articles published in ${journalName} at Scholarly Open.`,
-    robots: isSampleSet ? {
-      index: false,
-      follow: true,
-    } : {
-      index: true,
-      follow: true,
-    },
+    title: `Articles - ${journalName} | Scholarly Open`,
+    description: `Browse peer-reviewed open access research articles published in ${journalName} at Scholarly Open.`,
     alternates: {
       canonical: `https://www.scholarlyopen.org/journals/${journalSlug}/articles`,
     },
@@ -53,14 +57,12 @@ export async function generateMetadata({ params }: JournalArticlesPageProps) {
 
 export default async function JournalArticlesPage({ params }: JournalArticlesPageProps) {
   const { journalSlug } = await params
-  const journalArticles = articles.filter((a) => a.journalSlug === journalSlug)
-
-  if (journalArticles.length === 0) {
-    // If invalid journal slug, return 404
+  if (!ALL_JOURNAL_SLUGS.includes(journalSlug)) {
     notFound()
   }
 
-  const isSampleSet = journalArticles.every(isSampleArticle)
+  const journalArticles = articles.filter((a) => a.journalSlug === journalSlug && !a.isUnpublishedProof)
+  const isSampleSet = false
 
   const journalName = journalSlug
     .split("-")
@@ -136,11 +138,28 @@ export default async function JournalArticlesPage({ params }: JournalArticlesPag
             </p>
           </div>
 
-          <div className="space-y-6">
-            {journalArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} journalSlug={journalSlug} />
-            ))}
-          </div>
+          {journalArticles.length > 0 ? (
+            <div className="space-y-6">
+              {journalArticles.map((article) => (
+                <ArticleCard key={article.id} article={article} journalSlug={journalSlug} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4 text-center py-16 px-6 bg-muted/20 rounded-2xl border border-dashed border-border max-w-2xl mx-auto">
+              <h3 className="text-xl font-bold tracking-tight text-foreground">Inaugural Volume in Formation</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Scholarly Open: {journalName} is currently accepting original research manuscripts and reviews for Volume 1. Founding authors benefit from prioritized editorial evaluation and inaugural APC fee waivers.
+              </p>
+              <div className="flex justify-center gap-3 pt-2">
+                <Button asChild size="sm" className="font-semibold text-xs">
+                  <Link href={`/submit?journal=${journalSlug}`}>Submit Your Manuscript</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="text-xs">
+                  <Link href="/author-guidelines">Author Guidelines</Link>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

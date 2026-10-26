@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.3 20210610//EN" "JATS-archivearticle1-3.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" article-type="perspective" dtd-version="1.3" xml:lang="en">
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="publisher-id">SOMED</journal-id>
+      <journal-title-group>
+        <journal-title>Scholarly Open: Medicine</journal-title>
+        <abbrev-journal-title abbrev-type="pubmed">Schol Open Med</abbrev-journal-title>
+      </journal-title-group>
+      <issn pub-type="epub">Pending</issn>
+      <publisher>
+        <publisher-name>Scholarly Open Publishing</publisher-name>
+        <publisher-loc>Stuttgart, Germany</publisher-loc>
+      </publisher>
+    </journal-meta>
+    <article-meta>
+      <article-id pub-id-type="publisher-id">SOMED-26-RW01</article-id>
+      <article-id pub-id-type="accession">SOMED-26-RW01</article-id>
+      <article-categories>
+        <subj-group subj-group-type="heading">
+          <subject>Perspective Article</subject>
+        </subj-group>
+        <subj-group subj-group-type="discipline">
+          <subject>Cardiovascular Medicine &amp; Healthcare Operations</subject>
+        </subj-group>
+      </article-categories>
+      <title-group>
+        <article-title>Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author" corresp="yes">
+          <name>
+            <surname>Lee</surname>
+            <given-names>Sam</given-names>
+          </name>
+          <degrees>MD, PhD</degrees>
+          <role>Doctor of Health Administration Candidate; Founder and Chief EBM Scientist</role>
+          <xref ref-type="aff" rid="aff1">1</xref>
+          <xref ref-type="aff" rid="aff2">2</xref>
+          <xref ref-type="corresp" rid="cor1">*</xref>
+        </contrib>
+      </contrib-group>
+      <aff id="aff1"><label>1</label>College of Doctoral Studies, Grand Canyon University, Phoenix, AZ, USA</aff>
+      <aff id="aff2"><label>2</label>Applied Clinical EBM Institute (ACEI), Honolulu, Hawaii, USA</aff>
+      <author-notes>
+        <corresp id="cor1"><label>*</label>Correspondence: Sam Lee, MD, PhD, Applied Clinical EBM Institute (ACEI), Honolulu, HI, USA. Email: <email>Applied.EBM.Institute@proton.me</email></corresp>
+      </author-notes>
+      <pub-date date-type="pub" publication-format="electronic" iso-8601-date="2026-10-26">
+        <day>26</day>
+        <month>10</month>
+        <year>2026</year>
+      </pub-date>
+      <volume>1</volume>
+      <issue>1</issue>
+      <elocation-id>SOMED-26-RW01</elocation-id>
+      <history>
+        <date date-type="received" iso-8601-date="2026-09-27">
+          <day>27</day>
+          <month>09</month>
+          <year>2026</year>
+        </date>
+        <date date-type="rev-recd" iso-8601-date="2026-10-20">
+          <day>20</day>
+          <month>10</month>
+          <year>2026</year>
+        </date>
+        <date date-type="accepted" iso-8601-date="2026-10-24">
+          <day>24</day>
+          <month>10</month>
+          <year>2026</year>
+        </date>
+      </history>
+      <permissions>
+        <copyright-statement>© 2026 The Author(s). Published by Scholarly Open.</copyright-statement>
+        <copyright-year>2026</copyright-year>
+        <license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+          <license-p>This is an open access article distributed under the terms of the Creative Commons Attribution 4.0 International License (CC BY 4.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original work is properly cited.</license-p>
+        </license>
+      </permissions>
+      <abstract>
+        <sec>
+          <title>Background</title>
+          <p>Acute aortic dissection (AAD) remains a rapidly fatal cardiovascular emergency despite major advances in diagnostic imaging, perioperative management, intensive care, and cardiovascular surgery. Although evidence-based guidelines have improved diagnosis and treatment, mortality remains high when prevention is inadequate, recognition is delayed, or multidisciplinary treatment is not rapidly coordinated.</p>
+        </sec>
+        <sec>
+          <title>Objective</title>
+          <p>To explore opportunities for preventing AAD earlier, recognizing it sooner, and treating it faster through an Evidence-Based Medicine (EBM)-guided healthcare operations framework spanning the continuum of care from home and primary care to emergency treatment and long-term follow-up.</p>
+        </sec>
+        <sec>
+          <title>Methods</title>
+          <p>This scholarly perspective synthesizes contemporary clinical guidelines, major observational studies, healthcare quality-improvement literature, systems thinking, implementation science, and publicly available educational discussions by experienced physicians. It proposes an Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) as a conceptual model for future implementation research.</p>
+        </sec>
+        <sec>
+          <title>Results (Evidence Synthesis)</title>
+          <p>Current evidence supports timely diagnosis and imaging, rapid hemodynamic stabilization, prompt surgical intervention when indicated, cardiovascular risk-factor management, surveillance of high-risk individuals, and multidisciplinary expert care. Building upon this evidence, seven complementary healthcare operations strategies are proposed: (1) earlier prevention from home through healthcare systems; (2) urgent clinical reporting and early-warning mechanisms; (3) organizational readiness and rapid multidisciplinary mobilization; (4) continuous application of EBM from prevention through recovery; (5) shared multidisciplinary expertise and organizational accountability supported by Medical Directors and EBM specialists; (6) validated artificial intelligence to augment clinical decision support and operational efficiency; and (7) graded executive coordination to optimize hospital-wide resource mobilization during severe emergencies.</p>
+        </sec>
+        <sec>
+          <title>Conclusion</title>
+          <p>Improving AAD outcomes may require not only continued clinical and technological advances but also stronger prevention, earlier recognition, coordinated multidisciplinary response, evidence-based organizational readiness, and continuous healthcare quality improvement.</p>
+        </sec>
+      </abstract>
+      <kwd-group kwd-group-type="author">
+        <kwd>Acute Aortic Dissection</kwd>
+        <kwd>Evidence-Based Medicine</kwd>
+        <kwd>Healthcare Operations</kwd>
+        <kwd>Healthcare Management</kwd>
+        <kwd>Quality Improvement</kwd>
+        <kwd>Patient Safety</kwd>
+        <kwd>Multidisciplinary Care</kwd>
+        <kwd>Cardiovascular Surgery</kwd>
+        <kwd>Primary Prevention</kwd>
+        <kwd>Artificial Intelligence</kwd>
+        <kwd>Organizational Leadership</kwd>
+        <kwd>Systems Thinking</kwd>
+      </kwd-group>
+    </article-meta>
+  </front>
+  <body>
+    <sec id="1-introduction">
+      <title>1. Introduction</title>
+      <p>Acute aortic dissection is one of the most time-sensitive cardiovascular emergencies encountered in modern medicine. Although relatively uncommon compared with acute myocardial infarction or ischemic stroke, its consequences can be catastrophic. Mortality increases when recognition, definitive diagnosis, or treatment is delayed, particularly in Stanford Type A dissection, making early identification and coordinated intervention essential.</p>
+      <p>During recent decades, advances in diagnostic imaging, anesthesiology, intensive care, cardiopulmonary bypass technology, endovascular therapy, and cardiovascular surgery have substantially improved the ability to diagnose and treat aortic disease. Contemporary guidelines from the American College of Cardiology and American Heart Association, together with European recommendations, provide extensive evidence-based guidance regarding risk assessment, imaging, medical stabilization, surveillance, and intervention1,2.</p>
+      <p>Nevertheless, acute aortic dissection continues to carry considerable morbidity and mortality. The persistence of poor outcomes in some patients raises questions that extend beyond the technical aspects of surgery.</p>
+      <p>Historically, much of the literature has understandably concentrated on clinical management after the patient presents with acute disease. Comparatively less attention has been directed toward the broader operational continuum surrounding the patient: prevention at home, primary care surveillance, urgent escalation of warning signals, multidisciplinary mobilization, leadership coordination, resource allocation, and continuous organizational learning.</p>
+      <p>This perspective was inspired in part by publicly available educational discussions among experienced physicians regarding acute aortic dissection. The intent is not to evaluate any particular individual&apos;s care. Rather, such discussions provide an opportunity to reflect on broader healthcare-system questions.</p>
+      <p>From the perspective of EBM, improving outcomes extends beyond identifying the most effective treatment after a disease is fully established. Evidence-informed healthcare also encompasses prevention, risk identification, diagnostic strategy, multidisciplinary expertise, patient participation, organizational preparedness, resource coordination, and continuous quality improvement.</p>
+      <p>A central question therefore emerges:</p>
+      <p>How might healthcare systems improve the continuum from prevention to definitive treatment so that catastrophic aortic events can be prevented when possible, recognized earlier when they occur, and treated through coordinated evidence-informed action?</p>
+      <p>The purpose of this article is to explore that question and propose a conceptual healthcare-operations framework for future investigation.</p>
+    </sec>
+    <sec id="2-literature-review">
+      <title>2. Literature Review</title>
+    </sec>
+    <sec id="21-acute-aortic-dissection-as-a-persistent-cardiov">
+      <title>2.1 Acute Aortic Dissection as a Persistent Cardiovascular Challenge</title>
+      <p>Acute aortic dissection remains among the most catastrophic cardiovascular emergencies. Although its incidence is considerably lower than that of coronary artery disease, delayed recognition and treatment are associated with substantial mortality2,3.</p>
+      <p>The International Registry of Acute Aortic Dissection has contributed substantially to understanding clinical presentation, diagnostic patterns, treatment strategies, and outcomes. Registry findings have repeatedly emphasized the importance of rapid recognition and appropriate intervention4,5.</p>
+      <p>Consequently, AAD represents not only a cardiovascular disease but also a healthcare-systems challenge involving emergency medicine, imaging, cardiovascular and vascular surgery, cardiology, anesthesiology, intensive care, nursing, transfusion services, operating-room management, and organizational leadership.</p>
+    </sec>
+    <sec id="22-pathophysiology-and-clinical-progression">
+      <title>2.2 Pathophysiology and Clinical Progression</title>
+      <p>Aortic dissection generally involves separation of layers within the aortic wall after blood enters the media, commonly through an intimal tear. Propagation may create a false lumen and compromise branch vessels, interfere with organ perfusion, produce aortic regurgitation or tamponade, or result in rupture and sudden death1.</p>
+      <p>Stanford Type A dissection involves the ascending aorta and commonly requires urgent surgical management because of the risk of catastrophic complications.</p>
+      <p>Stanford Type B dissection originates distal to the ascending aorta and may be managed medically or through endovascular or surgical approaches depending upon complications, anatomy, malperfusion, rupture risk, persistent symptoms, and other clinical considerations.</p>
+      <p>The management pathways differ, but both conditions require timely recognition and coordinated expertise.</p>
+    </sec>
+    <sec id="23-epidemiology">
+      <title>2.3 Epidemiology</title>
+      <p>Population-based studies have estimated an incidence of several cases per 100,000 persons annually, although true incidence may be underestimated because some patients die before reaching medical care5.</p>
+      <p>AAD occurs more frequently among older adults and men, while important presentations also occur among younger individuals with inherited aortopathies or congenital cardiovascular abnormalities.</p>
+    </sec>
+    <sec id="24-risk-factors">
+      <title>2.4 Risk Factors</title>
+      <p>Hypertension</p>
+      <p>Hypertension represents the most important common modifiable risk factor. Chronic arterial pressure contributes to mechanical stress on the aortic wall and is highly prevalent among patients presenting with dissection4.</p>
+      <p>Genetic and Heritable Disorders</p>
+      <p>Marfan syndrome, Loeys-Dietz syndrome, vascular Ehlers-Danlos syndrome, and other heritable thoracic aortic diseases substantially increase lifetime risk in selected populations.</p>
+      <p>Bicuspid Aortic Valve</p>
+      <p>Bicuspid aortic valve may be associated with progressive aortic enlargement and requires appropriate longitudinal assessment in affected individuals.</p>
+      <p>Smoking and Cardiovascular Risk</p>
+      <p>Smoking and other vascular risk factors contribute to adverse cardiovascular health. Smoking cessation remains an important component of comprehensive cardiovascular prevention.</p>
+      <p>Family History</p>
+      <p>Family history of thoracic aortic aneurysm, dissection, or unexplained premature sudden death may help identify individuals requiring additional assessment, genetic consideration, or surveillance.</p>
+    </sec>
+    <sec id="25-prevention">
+      <title>2.5 Prevention</title>
+      <p>Prevention represents the earliest opportunity to alter the clinical trajectory.</p>
+      <p>Primary Prevention</p>
+      <p>Primary prevention may encompass rigorous blood pressure management, tobacco avoidance, cardiovascular risk reduction, healthy lifestyle practices, and identification of individuals with inherited or structural risks.</p>
+      <p>Secondary Prevention</p>
+      <p>Secondary prevention focuses on identifying existing aortic disease before catastrophic complications occur. Potential components include surveillance of known thoracic aneurysms, imaging follow-up of selected bicuspid aortic valve patients, family screening in appropriate hereditary conditions, and genetic evaluation when clinically indicated.</p>
+      <p>The broader EBM principle is straightforward: preventing a catastrophic event or identifying disease before an emergency may provide benefits that cannot be fully reproduced by even technically successful rescue after acute deterioration.</p>
+    </sec>
+    <sec id="26-diagnostic-imaging">
+      <title>2.6 Diagnostic Imaging</title>
+      <p>Rapid diagnostic evaluation is fundamental when acute aortic syndrome is clinically suspected.</p>
+      <p>CTA is widely used because it is rapid, broadly available, and capable of visualizing the extent of dissection and branch-vessel involvement.</p>
+      <p>TEE can provide valuable bedside information, particularly in selected unstable patients or circumstances in which transport or CT is problematic.</p>
+      <p>MRI provides excellent anatomical information but is often less practical for rapidly evolving emergencies.</p>
+      <p>TTE remains useful for initial assessment of cardiac function and certain proximal aortic findings but cannot reliably exclude all aortic dissections.</p>
+      <p>The appropriate imaging strategy depends upon clinical status, probability of disease, institutional capabilities, and expert judgment.</p>
+    </sec>
+    <sec id="27-contemporary-guideline-principles">
+      <title>2.7 Contemporary Guideline Principles</title>
+      <p>Contemporary guidelines emphasize several recurrent themes:</p>
+      <p>early clinical recognition;</p>
+      <p>appropriate rapid imaging when acute aortic syndrome is suspected;</p>
+      <p>anti-impulse and hemodynamic therapy as clinically appropriate;</p>
+      <p>urgent specialist involvement;</p>
+      <p>surgical treatment for appropriate Type A dissections;</p>
+      <p>expert multidisciplinary management;</p>
+      <p>surveillance of patients with known or inherited aortic disease; and</p>
+      <p>long-term follow-up.</p>
+      <p>These recommendations form the established evidence-based foundation upon which operational innovations can be evaluated.</p>
+    </sec>
+    <sec id="28-existing-models-of-rapid-healthcare-response">
+      <title>2.8 Existing Models of Rapid Healthcare Response</title>
+      <p>Modern healthcare has developed coordinated response pathways for time-sensitive diseases such as STEMI, stroke, severe trauma, and sepsis.</p>
+      <p>Common features include predefined activation criteria, rapid communication, standardized workflows, concurrent resource preparation, performance measurement, and continuous quality improvement.</p>
+      <p>These experiences raise an important healthcare-management question: whether similar operational thinking can be further developed for acute aortic dissection while building upon existing multidisciplinary aortic programs.</p>
+    </sec>
+    <sec id="3-knowledge-gap">
+      <title>3. Knowledge Gap</title>
+      <p>Despite substantial advances in cardiovascular diagnosis and treatment, several potential gaps remain.</p>
+      <p>First, prevention may receive less attention than rescue after an acute event, despite the importance of hypertension management, hereditary risk identification, and surveillance.</p>
+      <p>Second, clinical expertise may exist within a hospital without being operationally mobilized as quickly as the emergency requires.</p>
+      <p>Third, communication can remain sequential when certain processes might safely occur in parallel.</p>
+      <p>Fourth, responsibility for system performance may be fragmented across departments even when the clinical emergency requires coordinated organizational action.</p>
+      <p>Fifth, emerging technologies such as artificial intelligence may offer new opportunities for imaging support, triage, communication, evidence retrieval, and workflow monitoring, but their optimal role remains uncertain.</p>
+      <p>Finally, relatively little research has evaluated comprehensive models integrating home prevention, primary care, emergency response, multidisciplinary expertise, EBM, AI, hospital leadership, and continuous quality improvement within one healthcare-operations framework for AAD.</p>
+    </sec>
+    <sec id="4-reflection-questions">
+      <title>4. Reflection Questions</title>
+      <p>This perspective addresses the following questions:</p>
+      <p>How might healthcare operations and management further improve patient outcomes in acute aortic dissection beyond advances in clinical and surgical treatment?</p>
+      <p>How might prevention at home, in primary care, and throughout the healthcare system reduce the likelihood of catastrophic aortic events?</p>
+      <p>Could urgent reporting and early-warning systems shorten the interval between the first meaningful warning signal and expert medical attention?</p>
+      <p>Could parallel multidisciplinary activation reduce diagnostic and treatment delays compared with predominantly sequential processes?</p>
+      <p>How might EBM be incorporated continuously rather than primarily at isolated clinical decision points?</p>
+      <p>Could structured shared multidisciplinary expertise improve complex emergency decision-making without diluting individual professional accountability?</p>
+      <p>What role might validated AI technologies play in diagnosis, evidence retrieval, triage, communication, and healthcare operations?</p>
+      <p>When a life-threatening event requires institution-wide resources, could predefined executive escalation improve operational coordination?</p>
+      <p>Could the same principles be adapted to other time-critical diseases?</p>
+    </sec>
+    <sec id="5-significance-of-this-perspective">
+      <title>5. Significance of This Perspective</title>
+      <p>Clinical Significance</p>
+      <p>AAD remains associated with substantial mortality. Even modest improvements in prevention, recognition, diagnostic efficiency, and treatment coordination could therefore carry important clinical implications.</p>
+      <p>Public Health Significance</p>
+      <p>Because hypertension is common and represents a major modifiable risk factor, improvement in risk-factor control has significance extending beyond AAD to cardiovascular health more broadly.</p>
+      <p>Healthcare Operations Significance</p>
+      <p>AAD highlights the relationship between clinical excellence and operational performance. Having a skilled surgeon, advanced CT scanner, blood bank, ICU, and operating room is not equivalent to having all of these resources coordinated and immediately available.</p>
+      <p>Leadership Significance</p>
+      <p>Time-critical care may require both clinical leadership and organizational leadership. Medical directors, nursing leaders, operational administrators, and executive teams can influence whether resources and expertise become available without avoidable delay.</p>
+      <p>Research Significance</p>
+      <p>The concepts proposed here may generate measurable operational hypotheses suitable for prospective implementation research.</p>
+    </sec>
+    <sec id="6-conceptual-foundations">
+      <title>6. Conceptual Foundations</title>
+    </sec>
+    <sec id="61-evidence-based-medicine">
+      <title>6.1 Evidence-Based Medicine</title>
+      <p>EBM integrates the best available scientific evidence, clinical expertise, and patient values and circumstances.</p>
+      <p>Within this perspective, EBM is expanded conceptually across the entire continuum of care—from prevention and surveillance to emergency diagnosis, definitive intervention, recovery, and long-term follow-up.</p>
+    </sec>
+    <sec id="62-donabedian-structureprocessoutcome-model">
+      <title>6.2 Donabedian Structure–Process–Outcome Model</title>
+      <p>Donabedian&apos;s framework offers a useful foundation for examining healthcare operations7.</p>
+      <p>Structure includes personnel, facilities, imaging capability, operating rooms, blood products, technology, organizational arrangements, and leadership.</p>
+      <p>Process includes prevention, surveillance, diagnosis, communication, consultation, treatment, transfer, surgery, and follow-up.</p>
+      <p>Outcome includes mortality, complications, functional status, treatment delay, readmission, and patient-centered outcomes.</p>
+      <p>The EB-IRARF framework proposes that outcomes depend not only upon the availability of appropriate structures, but also upon how effectively those structures are connected through clinical and organizational processes7.</p>
+    </sec>
+    <sec id="63-systems-thinking">
+      <title>6.3 Systems Thinking</title>
+      <p>Healthcare consists of interacting subsystems. A delay in radiology can delay surgery; delayed communication can delay mobilization; unavailable blood products or operating-room capacity can affect definitive treatment.</p>
+      <p>Systems thinking therefore encourages optimization of the entire pathway rather than isolated departments.</p>
+    </sec>
+    <sec id="64-continuous-quality-improvement">
+      <title>6.4 Continuous Quality Improvement</title>
+      <p>Every critical event provides information about system performance. Measurement, feedback, root-cause analysis, process redesign, and reassessment can transform individual cases into opportunities for organizational learning.</p>
+    </sec>
+    <sec id="7-reflection-on-public-educational-discussions">
+      <title>7. Reflection on Public Educational Discussions</title>
+      <p>The reflections presented in this article were inspired in part by publicly available educational discussions involving experienced physicians addressing acute aortic dissection.</p>
+      <p>Such educational discussions can highlight recurring themes described in the literature, including diagnostic uncertainty, variable presentation, the importance of risk identification, rapid imaging, timely specialist involvement, and public awareness.</p>
+      <p>This manuscript does not attempt to determine how any individual patient was diagnosed or treated. Publicly discussed cases serve only as educational stimuli for considering broader questions about healthcare quality, operations, prevention, and emergency preparedness.</p>
+    </sec>
+    <sec id="8-evidence-based-integrated-rapid-aortic-response-">
+      <title>8. Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF)</title>
+    </sec>
+    <sec id="81-purpose-and-scope">
+      <title>8.1 Purpose and Scope</title>
+      <p>The Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) is proposed as a systems-oriented model for improving prevention, recognition, diagnosis, treatment, and organizational management of acute aortic dissection.</p>
+      <p>The framework does not replace ACC/AHA, ESC, or institutional clinical guidelines.</p>
+      <p>Instead, it combines established clinical evidence with evidence-informed operational concepts intended for future evaluation.</p>
+      <p>An important distinction is maintained throughout:</p>
+      <p>Established evidence includes risk-factor management, surveillance of high-risk individuals, rapid diagnostic evaluation, appropriate imaging, medical stabilization, expert multidisciplinary management, timely surgical or endovascular intervention when indicated, and longitudinal follow-up.</p>
+      <p>Evidence-informed conceptual proposals include formalized early-warning pathways, continuous EBM support, structured multidisciplinary shared system accountability, immediate consideration of validated AI tools, and graded escalation to medical-director or executive coordination7.</p>
+      <p>Then: Seven proposed solutions form the core of the framework.</p>
+    </sec>
+    <sec id="82-solution-1-begin-prevention-earlierat-home-in-p">
+      <title>8.2 Solution 1: Begin Prevention Earlier—At Home, in Primary Care, and Throughout the Healthcare System</title>
+      <p>The first and potentially most important opportunity exists before an acute dissection develops.</p>
+      <p>Prevention can be conceptualized as a continuous pathway beginning in the home, continuing through primary care, and extending across outpatient specialty and hospital systems.</p>
+      <p>At home, patients and families can participate through awareness and monitoring of blood pressure when appropriate, medication adherence, avoidance of tobacco, maintenance of cardiovascular health, understanding relevant family history, and recognition of symptoms that warrant urgent medical attention.</p>
+      <p>Primary care provides an essential second layer. Longitudinal relationships may permit recognition of uncontrolled hypertension, family histories of aneurysm or dissection, bicuspid aortic valve, known aortic enlargement, genetic syndromes, and other clinically meaningful risks.</p>
+      <p>Hospitals and health systems can extend prevention through coordinated surveillance programs, referral pathways, specialist consultation, electronic risk identification, patient education, and continuity between primary care and cardiovascular services.</p>
+      <p>Under this framework:</p>
+      <p>Prevention starts as soon as meaningful risk can be identified and continues for as long as clinically relevant.</p>
+    </sec>
+    <sec id="83-solution-2-establish-urgent-reporting-and-early">
+      <title>8.3 Solution 2: Establish Urgent Reporting and Early-Warning Systems Before Crisis</title>
+      <p>Life-threatening diseases frequently evolve before full physiological collapse.</p>
+      <p>A healthcare system that responds only after catastrophe has become unmistakable may lose valuable time.</p>
+      <p>The EB-IRARF framework therefore proposes an urgent clinical reporting and early-warning pathway for situations in which AAD becomes a reasonable diagnostic concern.</p>
+      <p>Potential triggers could include combinations of symptoms, vital signs, physical findings, known aortic disease, family history, imaging observations, or validated risk-assessment tools.</p>
+      <p>The objective is not to label every patient with chest or back pain as having an aortic dissection. Rather, the objective is to prevent meaningful warning information from remaining isolated.</p>
+      <p>Electronic health records, secure communication tools, standardized escalation protocols, and validated decision-support systems may help transmit concern rapidly to the appropriate clinical team.</p>
+      <p>The operational principle is:</p>
+      <p>Recognize early → report immediately → evaluate rapidly → intervene before deterioration whenever possible.</p>
+      <p>For people outside the hospital, this principle also supports education encouraging timely emergency evaluation of highly concerning symptoms rather than prolonged observation at home.</p>
+    </sec>
+    <sec id="84-solution-3-maintain-readiness-for-immediate-tre">
+      <title>8.4 Solution 3: Maintain Readiness for Immediate Treatment or Surgery Through Comprehensive Expertise</title>
+      <p>A hospital may possess excellent specialists and sophisticated technology but still experience treatment delays if resources are activated one after another.</p>
+      <p>The EB-IRARF model therefore proposes a state of organizational readiness for high-probability aortic emergencies.</p>
+      <p>When predefined clinical criteria are reached, a comprehensive expertise group could be activated in parallel.</p>
+      <p>Depending upon the institution and patient&apos;s condition, participants may include emergency medicine, cardiovascular surgery, vascular surgery, cardiology, radiology, cardiac anesthesiology, intensive care, nursing leadership, perfusion, blood bank, operating-room management, pharmacy, laboratory medicine, respiratory therapy, transfer coordination, and quality or patient-safety personnel.</p>
+      <p>Not every specialist needs to participate in every patient encounter. A tiered activation process can match resources to severity and diagnostic probability.</p>
+      <p>The principle is that emergency readiness becomes an organizational capability rather than the burden of one physician.</p>
+    </sec>
+    <sec id="85-solution-4-begin-evidence-based-medicine-as-ear">
+      <title>8.5 Solution 4: Begin Evidence-Based Medicine as Early as Possible and Continue It as Long as Clinically Relevant</title>
+      <p>EBM is sometimes considered mainly when selecting treatment after diagnosis.</p>
+      <p>A broader operational interpretation begins much earlier.</p>
+      <p>Before an emergency, evidence informs hypertension management, family screening, genetic evaluation, imaging surveillance, lifestyle counseling, and elective intervention.</p>
+      <p>During acute evaluation, evidence informs differential diagnosis, risk assessment, imaging selection, hemodynamic management, specialist involvement, and transfer decisions.</p>
+      <p>During treatment, evidence informs surgical, endovascular, anesthetic, and critical-care approaches.</p>
+      <p>After the acute event, EBM continues through secondary prevention, rehabilitation, blood pressure optimization, surveillance, genetic counseling when appropriate, and long-term follow-up.</p>
+      <p>Thus, one core EB-IRARF principle is:</p>
+      <p>EBM as early as reasonably possible and for as long as clinically relevant.</p>
+      <p>EBM thereby becomes a continuous companion to the patient&apos;s healthcare journey rather than an isolated clinical exercise.</p>
+    </sec>
+    <sec id="86-solution-5-move-from-dependence-on-a-single-phy">
+      <title>8.6 Solution 5: Move From Dependence on a Single Physician Toward Shared Multidisciplinary Expertise and System Accountability</title>
+      <p>The complexity of modern medical emergencies makes sole dependence upon one physician&apos;s knowledge, availability, and decision-making increasingly vulnerable.</p>
+      <p>Individual clinicians retain professional responsibility within their roles. However, complex emergency management may benefit from structured shared multidisciplinary expertise and system responsibility.</p>
+      <p>A designated medical expertise group could include responsible specialists, nursing leadership, a Medical Director or designated aortic-response leader, and access to an EBM specialist or evidence-support function.</p>
+      <p>The role of the EBM expert would not be to overrule treating clinicians. Rather, that role could facilitate rapid identification of current guidelines, systematic reviews, key evidence, contraindications, and areas of uncertainty when time and circumstances permit.</p>
+      <p>Under this model, specialists retain authority within their fields while major decisions are communicated across disciplines, evidence is accessible rapidly, and operational barriers are escalated promptly.</p>
+      <p>The objective is therefore not diffusion of responsibility.</p>
+      <p>It is shared expertise with clearly defined individual clinical accountability and explicit organizational accountability.</p>
+    </sec>
+    <sec id="87-solution-6-incorporate-artificial-intelligence-">
+      <title>8.7 Solution 6: Incorporate Artificial Intelligence Early When Validated, Safe, and Clinically Appropriate</title>
+      <p>AI is increasingly entering medical imaging, clinical decision support, triage, predictive analytics, evidence retrieval, and hospital workflow.</p>
+      <p>For AAD, validated AI tools may eventually contribute to identifying concerning imaging patterns, integrating clinical warning signals, prioritizing studies for expert review, generating alerts, retrieving evidence, supporting transfer decisions, anticipating resource requirements, or identifying operational delays.</p>
+      <p>Within EB-IRARF, AI functions as an additional layer of intelligence supporting human expertise, not as a replacement for physicians.</p>
+      <p>Early incorporation may be appropriate when a tool has adequate validation for its intended clinical context, regulatory requirements are satisfied, clinicians understand its limitations, and safeguards exist against automation bias.</p>
+      <p>Possible functions include:</p>
+      <p>CT-image prioritization or pattern recognition;</p>
+      <p>synthesis of clinical warning features;</p>
+      <p>rapid evidence and guideline retrieval;</p>
+      <p>automated multidisciplinary alerts;</p>
+      <p>clinical deterioration prediction;</p>
+      <p>operating-room and ICU capacity forecasting;</p>
+      <p>transfer-network support; and</p>
+      <p>real-time monitoring of operational bottlenecks.</p>
+      <p>Final clinical decisions remain under qualified human professional responsibility.</p>
+    </sec>
+    <sec id="88-solution-7-inform-hospital-leadership-early-and">
+      <title>8.8 Solution 7: Inform Hospital Leadership Early and Establish Central Operational Coordination for Severe Events</title>
+      <p>An AAD emergency can rapidly extend beyond one physician or department.</p>
+      <p>Imaging, surgery, anesthesia, intensive care, blood products, operating-room availability, staffing, transfer capacity, and communication may all become relevant simultaneously.</p>
+      <p>For high-severity events meeting predefined criteria, EB-IRARF proposes rapid notification of the Medical Director and, when the scale of the event warrants it, an appropriate hospital executive or incident-command function.</p>
+      <p>Executive leadership does not replace specialist clinical judgment.</p>
+      <p>Its purpose is operational.</p>
+      <p>Leadership may assist by eliminating organizational barriers, facilitating cross-departmental coordination, resolving resource conflicts, supporting transfer to advanced aortic centers, mobilizing additional personnel, ensuring availability of critical resources, and maintaining institutional situational awareness.</p>
+      <p>The approach is analogous to large-scale emergency management: specialized departments continue exercising their expertise while centralized leadership coordinates the response to the overall threat.</p>
+      <p>The operational principle is:</p>
+      <p>Central operational coordination with decentralized clinical expertise.</p>
+      <p>A graded escalation model makes the proposal practical. Routine suspected cases may remain within established clinical pathways; exceptionally complex or resource-intensive events may escalate from departmental leadership to Medical Director, incident command, or executive-level involvement.</p>
+    </sec>
+    <sec id="89-integrated-seven-solution-pathway">
+      <title>8.9 Integrated Seven-Solution Pathway</title>
+      <p>The seven components can be visualized as a continuous continuum:</p>
+      <p>Earlier prevention at home, primary care, and healthcare-system levels</p>
+      <p>↓</p>
+      <p>Urgent warning and rapid reporting</p>
+      <p>↓</p>
+      <p>Immediate availability of appropriate multidisciplinary expertise</p>
+      <p>↓</p>
+      <p>Continuous EBM beginning at the earliest meaningful opportunity</p>
+      <p>↓</p>
+      <p>Shared multidisciplinary expertise and organizational accountability</p>
+      <p>↓</p>
+      <p>Validated AI-supported medicine and operations</p>
+      <p>↓</p>
+      <p>Medical Director/executive coordination when event severity warrants</p>
+      <p>↓</p>
+      <p>Rapid definitive diagnosis</p>
+      <p>↓</p>
+      <p>Appropriate medical, endovascular, or surgical treatment</p>
+      <p>↓</p>
+      <p>Critical care and recovery</p>
+      <p>↓</p>
+      <p>Long-term surveillance and secondary prevention</p>
+      <p>↓</p>
+      <p>Case review</p>
+      <p>↓</p>
+      <p>Continuous quality improvement</p>
+      <p>This conceptual model seeks to shift the operational philosophy from predominantly reactive rescue toward a preventive, anticipatory, integrated, evidence-informed, and continuously learning healthcare system.</p>
+    </sec>
+    <sec id="810-parallel-rather-than-predominantly-sequential-">
+      <title>8.10 Parallel Rather Than Predominantly Sequential Operations</title>
+      <p>One of the operational concepts underlying EB-IRARF is the distinction between sequential and parallel activity.</p>
+      <p>A predominantly sequential pathway may resemble:</p>
+      <p>Emergency assessment → imaging → cardiology → cardiovascular surgery → anesthesia → operating room → ICU</p>
+      <p>Certain circumstances may instead permit appropriately coordinated parallel activity:</p>
+      <p>Emergency assessment</p>
+      <p>↘ Radiology preparation↘ Cardiovascular surgery notification↘ Medical stabilization↘ Anesthesiology notification↘ Blood-bank preparation↘ Operating-room readiness↘ ICU notification↘ Transfer planning if necessary</p>
+      <p>Parallel activation does not imply premature treatment before diagnosis. Rather, it seeks to prepare necessary resources while the diagnostic process proceeds when clinical probability and institutional protocols justify doing so.</p>
+      <p>The hypothesis is that selected parallel processes may reduce avoidable operational delay without sacrificing diagnostic accuracy or patient safety.</p>
+    </sec>
+    <sec id="811-established-evidence-versus-proposed-innovatio">
+      <title>8.11 Established Evidence Versus Proposed Innovation</title>
+      <p>Scientific clarity requires separating what contemporary evidence already supports from what this perspective proposes for investigation.</p>
+      <p>Established or Guideline-Supported Components</p>
+      <p>These include:</p>
+      <p>hypertension and cardiovascular risk management;</p>
+      <p>identification and surveillance of high-risk aortic disease;</p>
+      <p>appropriate family or genetic evaluation in selected patients;</p>
+      <p>urgent evaluation of suspected acute aortic syndromes;</p>
+      <p>timely definitive imaging;</p>
+      <p>anti-impulse and hemodynamic therapy when appropriate;</p>
+      <p>multidisciplinary aortic expertise;</p>
+      <p>urgent intervention for appropriate Type A disease;</p>
+      <p>endovascular or medical management in selected Type B disease;</p>
+      <p>expert-center referral or transfer when appropriate; and</p>
+      <p>longitudinal surveillance.</p>
+      <p>Evidence-Informed Conceptual Components Requiring Evaluation</p>
+      <p>These include:</p>
+      <p>a formal hospital-wide AAD-specific early-warning system;</p>
+      <p>defined continuous EBM support during high-complexity emergencies;</p>
+      <p>multidisciplinary shared system responsibility extending beyond ordinary consultation;</p>
+      <p>early systematic consideration of validated AI;</p>
+      <p>predetermined Medical Director activation;</p>
+      <p>graded executive or incident-command escalation;</p>
+      <p>parallel mobilization protocols beyond current institutional practice; and</p>
+      <p>integrated operational dashboards measuring the complete prevention-to-treatment pathway.</p>
+      <p>These are hypotheses rather than present standards of care.</p>
+    </sec>
+    <sec id="812-proposed-performance-measures">
+      <title>8.12 Proposed Performance Measures</title>
+      <p>Future evaluation of EB-IRARF could examine:</p>
+      <p>symptom-to-medical-attention interval;</p>
+      <p>arrival-to-initial-assessment time;</p>
+      <p>arrival-to-definitive-imaging time;</p>
+      <p>suspicion-to-specialist-notification interval;</p>
+      <p>diagnosis-to-surgical-decision interval;</p>
+      <p>diagnosis-to-operating-room time;</p>
+      <p>transfer time to advanced aortic centers;</p>
+      <p>adherence to evidence-based medical management;</p>
+      <p>multidisciplinary communication quality;</p>
+      <p>operating-room readiness;</p>
+      <p>blood-product readiness;</p>
+      <p>mortality;</p>
+      <p>complications;</p>
+      <p>length of stay;</p>
+      <p>readmission;</p>
+      <p>resource utilization;</p>
+      <p>patient and family experience; and</p>
+      <p>organizational learning after the event.</p>
+    </sec>
+    <sec id="9-discussion">
+      <title>9. Discussion</title>
+      <p>AAD demonstrates how the success of modern medicine depends upon more than the availability of effective treatment.</p>
+      <p>Clinical excellence remains indispensable. However, the ability to deliver that expertise at the correct time also depends upon prevention systems, communication, institutional readiness, coordination, leadership, technology, and organizational design.</p>
+      <p>The EB-IRARF framework therefore complements existing clinical guidelines rather than competing with them.</p>
+      <p>Its principal proposition is that the clinical question—</p>
+      <p>“What is the best evidence-based treatment?”</p>
+      <p>may be supplemented by an equally important operational question:</p>
+      <p>“How can the healthcare system deliver the best available evidence to the right patient, through the right expertise and resources, at the earliest appropriate moment?”</p>
+      <p>This distinction is central to Evidence-Based Healthcare Operations and Management.</p>
+    </sec>
+    <sec id="10-practical-implications">
+      <title>10. Practical Implications</title>
+      <p>Patients and Families</p>
+      <p>Patients can become active partners through blood-pressure awareness, medication adherence, smoking avoidance, understanding relevant family history, participation in recommended surveillance, and rapid emergency response to concerning symptoms.</p>
+      <p>Primary Care</p>
+      <p>Primary care occupies an important position between community prevention and specialty cardiovascular medicine. Longitudinal care provides opportunities for risk identification, hypertension optimization, family-history assessment, appropriate referral, and education.</p>
+      <p>Emergency Departments</p>
+      <p>Structured risk assessment, timely imaging, rapid escalation, and early multidisciplinary communication may help reduce avoidable diagnostic delays.</p>
+      <p>Cardiovascular Centers</p>
+      <p>Aortic centers may evaluate whether communication, resource mobilization, blood-bank readiness, operating-room preparation, transfer pathways, and critical-care coordination can occur more efficiently.</p>
+      <p>Medical Directors</p>
+      <p>Medical Directors may provide a bridge between clinical specialties and institutional operations, particularly when a rapidly evolving emergency requires simultaneous coordination across departments.</p>
+      <p>Hospital Executive Leadership</p>
+      <p>Executive leaders may contribute when events create organization-wide barriers requiring authority over staffing, capacity, interdepartmental coordination, transfer, or other institutional resources.</p>
+      <p>EBM Specialists</p>
+      <p>An EBM expertise function may facilitate timely access to current guidelines and evidence during complex cases and assist in post-event review, protocol development, and continuous quality improvement.</p>
+      <p>Artificial Intelligence</p>
+      <p>Validated AI systems may progressively complement clinical expertise and operational management but require robust evaluation, governance, transparency, and human oversight.</p>
+    </sec>
+    <sec id="11-limitations">
+      <title>11. Limitations</title>
+      <p>This manuscript is a scholarly perspective rather than an empirical study and contains no original patient-level data.</p>
+      <p>Several proposed components of EB-IRARF have not been prospectively evaluated as an integrated system. No conclusion can therefore be drawn regarding the framework&apos;s effectiveness, safety, feasibility, cost-effectiveness, or generalizability.</p>
+      <p>Healthcare organizations vary considerably in size, resources, staffing, cardiovascular surgical capability, geography, transfer networks, leadership structure, and culture. Implementation would consequently require substantial local adaptation.</p>
+      <p>Not every hospital can maintain comprehensive aortic surgical capability. For many institutions, rapid recognition, stabilization, consultation, and transfer may represent the most appropriate operational objectives.</p>
+      <p>The potential contribution of AI also depends upon validation, regulation, interoperability, clinician acceptance, workflow integration, data quality, and safeguards against erroneous output.</p>
+      <p>Finally, clinical guidelines and technologies continue to evolve. Any implementation model would require continuous updating as new evidence becomes available.</p>
+    </sec>
+    <sec id="12-future-research">
+      <title>12. Future Research</title>
+      <p>Future research could evaluate individual components and the integrated EB-IRARF model through prospective multicenter studies, implementation-science methodologies, simulation, interrupted time-series analysis, comparative effectiveness research, and cost-effectiveness evaluation.</p>
+      <p>Particularly important questions include:</p>
+      <p>Can prevention-focused systems improve identification and longitudinal management of high-risk individuals?</p>
+      <p>Can early-warning systems reduce diagnostic delay?</p>
+      <p>Does parallel multidisciplinary activation shorten time to definitive treatment?</p>
+      <p>Which specialties provide the greatest incremental value at different levels of activation?</p>
+      <p>Does real-time EBM support improve guideline concordance or decision efficiency?</p>
+      <p>Can AI safely reduce imaging, triage, communication, or operational delays?</p>
+      <p>When does Medical Director or executive escalation improve system performance?</p>
+      <p>What level of organizational activation provides the best balance between speed, resource use, and alarm fatigue?</p>
+      <p>Does EB-IRARF reduce mortality or major complications?</p>
+      <p>Can similar frameworks be adapted to stroke, STEMI, sepsis, major trauma, massive pulmonary embolism, and ruptured abdominal aortic aneurysm?</p>
+    </sec>
+    <sec id="13-conclusion">
+      <title>13. Conclusion</title>
+      <p>Acute aortic dissection remains one of the most formidable emergencies in cardiovascular medicine. Contemporary evidence demonstrates the importance of risk-factor management, early recognition, timely imaging, appropriate medical stabilization, multidisciplinary expertise, and definitive intervention.</p>
+      <p>Yet the continuing burden of catastrophic disease invites broader reflection.</p>
+      <p>The greatest opportunity for improvement may not reside solely in making surgery more sophisticated after catastrophe occurs. Additional opportunities may exist in preventing disease earlier, identifying danger sooner, reporting warning signs faster, preparing medical expertise before deterioration, applying EBM throughout the continuum of care, distributing complex decision-making across appropriate expertise, incorporating validated AI intelligently, and mobilizing hospital leadership when organization-wide coordination becomes necessary.</p>
+      <p>The proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) brings these concepts together within a single healthcare-operations model.</p>
+      <p>Its central argument is that:</p>
+      <p>Better outcomes in catastrophic disease may depend not only upon having the right treatment, but upon preventing disease earlier, recognizing danger sooner, bringing the right expertise together faster, applying evidence continuously, using validated technology intelligently, and coordinating the healthcare organization when the patient&apos;s condition demands it.</p>
+      <p>The framework remains conceptual and requires empirical evaluation.</p>
+      <p>Nevertheless, AAD provides an important model for reconsidering how Evidence-Based Medicine can extend beyond the individual bedside decision to encompass the design and management of the healthcare system itself.</p>
+      <p>Ultimately, excellence in healthcare may be reflected not only by the ability to rescue patients after catastrophic disease develops, but also by the ability to prevent the preventable, recognize the dangerous early, mobilize the right expertise without unnecessary delay, and continuously learn from every patient entrusted to our care.</p>
+    </sec>
+    <sec id="conflict-of-interest">
+      <title>Conflict of Interest</title>
+      <p>The author declares no conflicts of interest.</p>
+    </sec>
+  </body>
+  <back>
+    <notes notes-type="author-notes">
+      <title>Author's Note</title>
+      <p>First and foremost, I wish to express my sincere sympathy and deepest condolences to the family of Senator Lindsey Graham, as well as to every family that has experienced the loss of a loved one from acute aortic dissection or other life-threatening cardiovascular diseases.</p>
+      <p>This manuscript was inspired in part by the public discussion following the reported death of Senator Graham from acute aortic dissection and by educational analyses shared publicly by experienced physicians. The article is written solely for educational and scholarly purposes. It is not intended to evaluate, criticize, or comment upon the medical care of Senator Graham or any other individual, nor is it intended to intrude upon the privacy of any patient or family.</p>
+      <p>Rather, the reflections presented in this article use this tragic event as an opportunity to consider broader questions regarding prevention, early recognition, healthcare operations and management, systems thinking, organizational leadership, artificial intelligence in medicine, and continuous quality improvement through the principles of Evidence-Based Medicine (EBM).</p>
+      <p>The opinions expressed herein represent an academic perspective intended to stimulate constructive scientific discussion, future implementation research, and healthcare-system improvement. Wherever possible, established scientific evidence is distinguished from evidence-informed reflections and conceptual proposals that require future empirical evaluation.</p>
+    </notes>
+    <fn-group>
+      <fn fn-type="conflict">
+        <p>Conflict of Interest: The author declares no conflicts of interest.</p>
+      </fn>
+    </fn-group>
+    <ref-list>
+      <title>References</title>
+      <ref id="ref1">
+        <label>1</label>
+        <mixed-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <string-name>Erbel R, Aboyans V, Boileau C, et al.</string-name>
+          </person-group>
+          <article-title>2014 ESC Guidelines on the diagnosis and treatment of aortic diseases: Document covering acute and chronic aortic diseases of the thoracic and abdominal aorta of the adult.</article-title>
+          <source>Eur Heart J</source>.
+          <year>2014</year>;<volume>35</volume>(41):2873-2926.
+          <pub-id pub-id-type="doi">10.1093/eurheartj/ehu281</pub-id>
+        </mixed-citation>
+      </ref>
+      <ref id="ref2">
+        <label>2</label>
+        <mixed-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <string-name>Isselbacher EM, Preventza O, Hamilton Black J III, et al.</string-name>
+          </person-group>
+          <article-title>2022 ACC/AHA guideline for the diagnosis and management of aortic disease: A report of the American Heart Association/American College of Cardiology Joint Committee on Clinical Practice Guidelines.</article-title>
+          <source>Circulation</source>.
+          <year>2022</year>;<volume>146</volume>(24):e334-e482.
+          <pub-id pub-id-type="doi">10.1161/CIR.0000000000001106</pub-id>
+        </mixed-citation>
+      </ref>
+      <ref id="ref3">
+        <label>3</label>
+        <mixed-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <string-name>Nienaber CA, Clough RE.</string-name>
+          </person-group>
+          <article-title>Management of acute aortic dissection.</article-title>
+          <source>Lancet</source>.
+          <year>2015</year>;<volume>385</volume>(9970):800-811.
+          <pub-id pub-id-type="doi">10.1016/S0140-6736(14)61005-9</pub-id>
+        </mixed-citation>
+      </ref>
+      <ref id="ref4">
+        <label>4</label>
+        <mixed-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <string-name>Hagan PG, Nienaber CA, Isselbacher EM, et al.</string-name>
+          </person-group>
+          <article-title>The International Registry of Acute Aortic Dissection (IRAD): New insights into an old disease.</article-title>
+          <source>JAMA</source>.
+          <year>2000</year>;<volume>283</volume>(7):897-903.
+          <pub-id pub-id-type="doi">10.1001/jama.283.7.897</pub-id>
+        </mixed-citation>
+      </ref>
+      <ref id="ref5">
+        <label>5</label>
+        <mixed-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <string-name>Pape LA, Awais M, Woznicki EM, et al.</string-name>
+          </person-group>
+          <article-title>Presentation, diagnosis, and outcomes of acute aortic dissection: 17-year trends from the International Registry of Acute Aortic Dissection.</article-title>
+          <source>J Am Coll Cardiol</source>.
+          <year>2015</year>;<volume>66</volume>(4):350-358.
+          <pub-id pub-id-type="doi">10.1016/j.jacc.2015.05.029</pub-id>
+        </mixed-citation>
+      </ref>
+      <ref id="ref6">
+        <label>6</label>
+        <mixed-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <string-name>Howard DPJ, Banerjee A, Fairhead JF, Perkins J, Silver LE, Rothwell PM.</string-name>
+          </person-group>
+          <article-title>Population-based study of incidence and outcome of acute aortic dissection and premorbid risk factor control: 10-year results from the Oxford Vascular Study.</article-title>
+          <source>Circulation</source>.
+          <year>2013</year>;<volume>127</volume>(20):2031-2037.
+          <pub-id pub-id-type="doi">10.1161/CIRCULATIONAHA.112.000483</pub-id>
+        </mixed-citation>
+      </ref>
+      <ref id="ref7">
+        <label>7</label>
+        <mixed-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <string-name>Donabedian A.</string-name>
+          </person-group>
+          <article-title>The quality of care: How can it be assessed?</article-title>
+          <source>JAMA</source>.
+          <year>1988</year>;<volume>260</volume>(12):1743-1748.
+          <pub-id pub-id-type="doi">10.1001/jama.1988.03410120089033</pub-id>
+        </mixed-citation>
+      </ref>
+    </ref-list>
+  </back>
+</article>

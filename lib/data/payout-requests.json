@@ -1,0 +1,16 @@
+{
+  "payouts": [
+    {
+      "id": "SO-PAY-8821",
+      "reviewerName": "Dr. Marcus Vance",
+      "reviewerEmail": "m.vance@university-charite.de",
+      "institution": "Charité – Universitätsmedizin Berlin",
+      "manuscriptId": "SOMED-26-RW01",
+      "amount": 50,
+      "option": "bank",
+      "details": "Wise | Account Email: m.vance@university-charite.de | Recipient: Dr. Marcus Vance",
+      "requestedAt": "2026-09-29",
+      "status": "Pending"
+    }
+  ]
+}

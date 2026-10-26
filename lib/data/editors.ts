@@ -1165,7 +1165,7 @@ With over two decades of clinical and research experience, Dr. Gong has establis
         type: "milestone"
       }
     ],
-    biography: `Dr. Sam Lee, MD, PhD, DHA Candidate, is an accomplished physician-scientist, healthcare administrator, and evidence-based medicine researcher with over 30 years of clinical, academic, and biomedical research experience across the United States, China, and international healthcare systems. He currently serves as Principal Investigator at Grand Canyon University and is the Founder and Chief EBM Scientist at the Applied Clinical EBM Institute (ACEI) in Honolulu, Hawaii.
+    biography: `Sam Lee, M.D., Ph.D., DHA Candidate, is an accomplished physician-scientist, healthcare administrator, and evidence-based medicine researcher with over 30 years of clinical, academic, and biomedical research experience across the United States, China, and international healthcare systems. He currently serves as Principal Investigator at Grand Canyon University and is the Founder and Chief EBM Scientist at the Applied Clinical EBM Institute (ACEI) in Honolulu, Hawaii.
 
 Currently a Doctor of Health Administration (DHA) candidate at the College of Doctoral Studies, Grand Canyon University (Phoenix, AZ / Honolulu, HI), Dr. Lee's doctoral research focuses on hospital-level organizational factors associated with risk-standardized mortality rates among U.S. acute care hospitals using publicly available CMS datasets.
 

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholar Scout | Global Careers & Opportunities Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0b99ff;
+      --primary-hover: #0088e0;
+      --primary-light: #f0f9ff;
+      --primary-border: #bae6fd;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-hover: #fcfcfd;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #94a3b8;
+      --border: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 24px 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Scholar Scout Header Banner */
+    .scout-header {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+    }
+    .scout-header-stripe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #0b99ff 0%, #38bdf8 50%, #0077cc 100%);
+    }
+    .header-top-row {
+      display: flex;
+      flex-direction: column;
+      lg-flex-direction: row;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    @media (min-width: 900px) {
+      .header-top-row { flex-direction: row; align-items: center; }
+    }
+    .header-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+    .tag-dot { color: var(--text-sub); font-size: 12px; }
+    .tag-meta { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+    .header-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      max-width: 680px;
+    }
+
+    /* Live Quota Meter */
+    .quota-meter-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .quota-meter-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .quota-label {
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quota-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .quota-bar-track {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .quota-bar-fill {
+      height: 100%;
+      background: #10b981;
+      width: 100%;
+      border-radius: 999px;
+    }
+    .quota-subtext {
+      font-size: 10.5px;
+      color: var(--text-sub);
+    }
+
+    /* Sub-tabs Row */
+    .scout-nav {
+      display: flex;
+      gap: 8px;
+      padding-top: 16px;
+      margin-top: 16px;
+      border-top: 1px solid #f1f5f9;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+    }
+    .nav-btn {
+      background: #f1f5f9;
+      border: 1px solid transparent;
+      color: #475569;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+    .nav-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(11, 153, 255, 0.25);
+    }
+    .nav-count {
+      font-size: 10.5px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .nav-btn:not(.active) .nav-count {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    /* Search & Filter Controls Suite */
+    .controls-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow-xs);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .filter-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    @media (min-width: 900px) {
+      .filter-row {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      width: 100%;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-sub);
+      pointer-events: none;
+      font-size: 14px;
+    }
+    .search-field {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 10px 14px 10px 38px;
+      font-size: 12.5px;
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-field:focus {
+      background: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(11, 153, 255, 0.15);
+    }
+    .filters-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .select-control {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      color: #334155;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 9px 12px;
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 170px;
+    }
+    .select-control:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+    .extract-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 9px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(11, 153, 255, 0.25);
+      transition: all 0.15s;
+    }
+    .extract-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Results Header Stats */
+    .results-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+    .results-count-bold {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Jobs Grid */
+    .jobs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Job Card (Scholar Card Style) */
+    .job-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow-xs);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .job-card:hover {
+      border-color: #94a3b8;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .role-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+      letter-spacing: -0.2px;
+      line-height: 1.35;
+    }
+    .role-title:hover {
+      color: var(--primary);
+    }
+    .company-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #475569;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .company-name {
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .match-score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      white-space: nowrap;
+    }
+
+    .meta-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .skill-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+      text-transform: capitalize;
+    }
+
+    .card-actions-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid #f8fafc;
+      flex-wrap: wrap;
+    }
+    .actions-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .action-icon-btn {
+      background: #f8fafc;
+      border: 1px solid var(--border-dark);
+      color: #334155;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .action-icon-btn:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+    .action-icon-btn.is-saved {
+      background: #fef9c3;
+      color: #854d0e;
+      border-color: #fde047;
+    }
+    .action-icon-btn.is-applied {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #86efac;
+    }
+    .direct-apply-btn {
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(11, 153, 255, 0.2);
+      transition: all 0.15s;
+    }
+    .direct-apply-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .empty-state {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- 1. Scholar Scout Header Banner -->
+    <div class="scout-header">
+      <div class="scout-header-stripe"></div>
+      
+      <div class="header-top-row">
+        <div>
+          <div class="header-badge-row">
+            <span class="tag-badge">
+              🧭 Talent & Career Discovery
+            </span>
+            <span class="tag-dot">•</span>
+            <span class="tag-meta">250M+ Open Scholarly Graph</span>
+          </div>
+          <h1 class="header-title">Scholar Scout</h1>
+          <p class="header-subtitle">
+            Precision international scholarly talent discovery, editorial recruitment, and FAIR research data management radar.
+          </p>
+        </div>
+
+        <!-- Safe Verified Live Postings Meter -->
+        <div class="quota-meter-box">
+          <div class="quota-meter-top">
+            <span class="quota-label">
+              ⚡ Live Verified Openings
+            </span>
+            <span class="quota-badge" id="meterActiveBadge">
+              100% Active Links
+            </span>
+          </div>
+          <div class="quota-bar-track">
+            <div class="quota-bar-fill"></div>
+          </div>
+          <p class="quota-subtext">Direct Greenhouse, Workable & Nature Careers endpoints</p>
+        </div>
+      </div>
+
+      <!-- Scholar Scout Domain Sub-tabs -->
+      <div class="scout-nav" id="subTabs">
+        <button class="nav-btn active" data-tab="all">
+          🧭 <span>All Global Openings</span>
+          <span class="nav-count" id="count-all">0</span>
+        </button>
+        <button class="nav-btn" data-tab="Open Access & Publishing">
+          📖 <span>Open Access & Journals</span>
+          <span class="nav-count" id="count-oa">0</span>
+        </button>
+        <button class="nav-btn" data-tab="Research Integrity & Ethics">
+          🛡️ <span>Research Integrity & COPE</span>
+          <span class="nav-count" id="count-integrity">0</span>
+        </button>
+        <button class="nav-btn" data-tab="Data Stewardship & RDM">
+          💾 <span>Data Stewardship & FAIR RDM</span>
+          <span class="nav-count" id="count-rdm">0</span>
+        </button>
+        <button class="nav-btn" data-tab="saved">
+          ⭐️ <span>Saved Items</span>
+          <span class="nav-count" id="count-saved">0</span>
+        </button>
+        <button class="nav-btn" data-tab="applied">
+          ✅ <span>Applied</span>
+          <span class="nav-count" id="count-applied">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Search & Campaign Control Suite -->
+    <div class="controls-card">
+      <div class="filter-row">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-field"
+            placeholder="Enter research topic, role keywords or publisher (e.g. Associate Director, Ethics, Peer Review, PLOS, Nature)..."
+          >
+        </div>
+
+        <div class="filters-group">
+          <!-- Country / Region Filter Dropdown -->
+          <select id="countrySelect" class="select-control" title="Filter scholar harvest by country or region">
+            <optgroup label="🌍 Regional Groupings">
+              <option value="all">🌍 All Countries (Global)</option>
+              <option value="dach">🇩🇪🇦🇹🇨🇭 DACH Region (DE, AT, CH)</option>
+              <option value="eu">🇪🇺 European Union (EU)</option>
+              <option value="nordic">🇸🇪🇳🇴🇩🇰 Nordic Region (SE, NO, DK, FI)</option>
+              <option value="uk">🇬🇧 UK & Ireland</option>
+              <option value="na">🇺🇸🇨🇦 North America (US, CA)</option>
+              <option value="remote">🌍 Remote Worldwide</option>
+            </optgroup>
+            <optgroup label="🌐 Specific Countries">
+              <option value="de">🇩🇪 Germany</option>
+              <option value="gb">🇬🇧 United Kingdom</option>
+              <option value="us">🇺🇸 United States</option>
+              <option value="nl">🇳🇱 Netherlands</option>
+              <option value="ch">🇨🇭 Switzerland</option>
+              <option value="es">🇪🇸 Spain</option>
+              <option value="no">🇳🇴 Norway</option>
+              <option value="se">🇸🇪 Sweden</option>
+              <option value="be">🇧🇪 Belgium</option>
+              <option value="it">🇮🇹 Italy</option>
+              <option value="ca">🇨🇦 Canada</option>
+              <option value="au">🇦🇺 Australia</option>
+            </optgroup>
+          </select>
+
+          <!-- Work Mode Dropdown -->
+          <select id="modeSelect" class="select-control" style="min-width: 130px;">
+            <option value="all">All Work Modes</option>
+            <option value="remote">Remote (Work From Anywhere)</option>
+            <option value="hybrid">Hybrid / Flexible</option>
+            <option value="onsite">On-Site</option>
+          </select>
+
+          <!-- Quick Refresh Button -->
+          <button class="extract-btn" onclick="alert('To fetch latest real-time jobs, run Run-Job-Radar.bat on your Desktop!')">
+            🔄 Extract Live Roles
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Results Meta Bar -->
+    <div class="results-meta-bar">
+      <span>Showing <strong id="visibleCount" class="results-count-bold">0</strong> matching verified opportunities</span>
+      <span style="font-size:11.5px;">⭐ Sorted by Profile Relevance Score</span>
+    </div>
+
+    <!-- 4. Job Cards List -->
+    <div class="jobs-list" id="jobsContainer"></div>
+
+  </div>
+
+  <script>
+    /* __INJECT_JOBS_PAYLOAD__ */
+    const JOBS = window.RADAR_JOBS_DATA || [];
+
+    let currentTab = 'all';
+    let searchQuery = '';
+    let selectedCountry = 'all';
+    let selectedMode = 'all';
+
+    function getStorage(key) {
+      try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; }
+    }
+    function setStorage(key, val) {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+    }
+
+    let savedList = getStorage('scout_saved_jobs');
+    let appliedList = getStorage('scout_applied_jobs');
+
+    function toggleSave(id) {
+      if (savedList.includes(id)) {
+        savedList = savedList.filter(x => x !== id);
+      } else {
+        savedList.push(id);
+      }
+      setStorage('scout_saved_jobs', savedList);
+      updateCounts();
+      render();
+    }
+
+    function toggleApplied(id) {
+      if (appliedList.includes(id)) {
+        appliedList = appliedList.filter(x => x !== id);
+      } else {
+        appliedList.push(id);
+      }
+      setStorage('scout_applied_jobs', appliedList);
+      updateCounts();
+      render();
+    }
+
+    function updateCounts() {
+      document.getElementById('count-all').textContent = JOBS.length;
+      document.getElementById('count-oa').textContent = JOBS.filter(j => j.category === 'Open Access & Publishing').length;
+      document.getElementById('count-integrity').textContent = JOBS.filter(j => j.category === 'Research Integrity & Ethics').length;
+      document.getElementById('count-rdm').textContent = JOBS.filter(j => j.category === 'Data Stewardship & RDM').length;
+      document.getElementById('count-saved').textContent = savedList.length;
+      document.getElementById('count-applied').textContent = appliedList.length;
+    }
+
+    function matchesCountry(job, c) {
+      if (c === 'all') return true;
+      const text = (job.location + ' ' + (job.country || '')).toLowerCase();
+      if (c === 'dach') return text.includes('germany') || text.includes('deutschland') || text.includes('austria') || text.includes('switzerland') || text.includes('de-remote');
+      if (c === 'eu') return text.includes('germany') || text.includes('netherlands') || text.includes('belgium') || text.includes('spain') || text.includes('italy') || text.includes('france') || text.includes('europe') || text.includes('eu');
+      if (c === 'nordic') return text.includes('norway') || text.includes('sweden') || text.includes('denmark') || text.includes('finland');
+      if (c === 'uk') return text.includes('uk') || text.includes('united kingdom') || text.includes('london') || text.includes('ireland');
+      if (c === 'na') return text.includes('us') || text.includes('united states') || text.includes('canada');
+      if (c === 'remote') return text.includes('remote') || text.includes('anywhere');
+      if (c === 'de') return text.includes('germany') || text.includes('deutschland') || text.includes('de-remote');
+      if (c === 'gb') return text.includes('uk') || text.includes('united kingdom') || text.includes('london');
+      if (c === 'us') return text.includes('us') || text.includes('united states');
+      if (c === 'nl') return text.includes('netherlands') || text.includes('amsterdam') || text.includes('leiden');
+      if (c === 'ch') return text.includes('switzerland') || text.includes('lausanne') || text.includes('basel');
+      if (c === 'es') return text.includes('spain') || text.includes('madrid');
+      if (c === 'no') return text.includes('norway') || text.includes('oslo');
+      if (c === 'se') return text.includes('sweden') || text.includes('stockholm');
+      if (c === 'be') return text.includes('belgium') || text.includes('brussels');
+      if (c === 'it') return text.includes('italy') || text.includes('milan') || text.includes('rome');
+      if (c === 'ca') return text.includes('canada');
+      if (c === 'au') return text.includes('australia');
+      return true;
+    }
+
+    function matchesMode(job, m) {
+      if (m === 'all') return true;
+      const text = (job.title + ' ' + job.location).toLowerCase();
+      if (m === 'remote') return text.includes('remote');
+      if (m === 'hybrid') return text.includes('hybrid');
+      if (m === 'onsite') return !text.includes('remote') && !text.includes('hybrid');
+      return true;
+    }
+
+    function render() {
+      const container = document.getElementById('jobsContainer');
+
+      const filtered = JOBS.filter(job => {
+        // Tab filter
+        if (currentTab === 'saved') {
+          if (!savedList.includes(job.id)) return false;
+        } else if (currentTab === 'applied') {
+          if (!appliedList.includes(job.id)) return false;
+        } else if (currentTab !== 'all') {
+          if (job.category !== currentTab) return false;
+        }
+
+        // Country filter
+        if (!matchesCountry(job, selectedCountry)) return false;
+
+        // Mode filter
+        if (!matchesMode(job, selectedMode)) return false;
+
+        // Search query
+        if (searchQuery) {
+          const haystack = (job.title + ' ' + job.company + ' ' + job.location + ' ' + (job.keywords || []).join(' ')).toLowerCase();
+          if (!haystack.includes(searchQuery.toLowerCase())) return false;
+        }
+
+        return true;
+      });
+
+      document.getElementById('visibleCount').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin-bottom:6px;">No matching opportunities found</h3>
+            <p style="font-size:13px; color:#64748b;">Try adjusting your search keywords, region or work mode filters.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(job => {
+        const isSaved = savedList.includes(job.id);
+        const isApplied = appliedList.includes(job.id);
+        const tagsHtml = (job.keywords || []).map(k => `<span class="skill-tag">${k}</span>`).join('');
+
+        return `
+          <div class="job-card">
+            <div class="card-top">
+              <div>
+                <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="role-title">
+                  ${job.title}
+                </a>
+                <div class="company-line">
+                  <span class="company-name">🏢 ${job.company}</span>
+                  <span style="color:#cbd5e1">•</span>
+                  <span>📍 ${job.location}</span>
+                </div>
+              </div>
+              <div class="match-score-pill">
+                ⭐ ${job.matchScore}% Match
+              </div>
+            </div>
+
+            <div class="meta-badges-row">
+              <span class="meta-badge">🌐 <strong>${job.country || 'Global'}</strong></span>
+              <span class="meta-badge">📁 ${job.category}</span>
+              <span class="meta-badge">🔍 Via ${job.source}</span>
+              <span class="meta-badge">📅 ${job.deadline || 'Active Opening'}</span>
+            </div>
+
+            <div class="tags-row">
+              ${tagsHtml}
+            </div>
+
+            <div class="card-actions-row">
+              <div class="actions-left">
+                <button class="action-icon-btn ${isSaved ? 'is-saved' : ''}" onclick="toggleSave('${job.id}')">
+                  ${isSaved ? '★ Saved' : '☆ Save Role'}
+                </button>
+                <button class="action-icon-btn ${isApplied ? 'is-applied' : ''}" onclick="toggleApplied('${job.id}')">
+                  ${isApplied ? '✓ Applied' : 'Mark Applied'}
+                </button>
+              </div>
+              <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="direct-apply-btn">
+                Apply Directly ↗
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Event listeners
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      render();
+    });
+
+    document.getElementById('countrySelect').addEventListener('change', (e) => {
+      selectedCountry = e.target.value;
+      render();
+    });
+
+    document.getElementById('modeSelect').addEventListener('change', (e) => {
+      selectedMode = e.target.value;
+      render();
+    });
+
+    document.querySelectorAll('#subTabs .nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#subTabs .nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = btn.dataset.tab;
+        render();
+      });
+    });
+
+    updateCounts();
+    render();
+  </script>
+</body>
+</html>

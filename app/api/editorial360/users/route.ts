@@ -23,12 +23,9 @@ export interface StoredUserRecord {
   updatedAt?: string
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
-const FILE_PATH = "users.json"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
 
-const DATA_FILE_PATH = path.join(process.cwd(), "lib", "data", "users.json")
+const FILE_PATH = "users.json"
 
 const DEFAULT_USERS: StoredUserRecord[] = [
   {
@@ -80,63 +77,12 @@ const DEFAULT_USERS: StoredUserRecord[] = [
 ]
 
 async function getStoredUsers(): Promise<StoredUserRecord[]> {
-  // 1. Try Supabase Cloud Storage
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const parsed = await res.json()
-      if (parsed && Array.isArray(parsed.users)) {
-        return parsed.users
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch users warning:", e)
-  }
-
-  // 2. Fallback to local file
-  try {
-    if (fs.existsSync(DATA_FILE_PATH)) {
-      const raw = fs.readFileSync(DATA_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (parsed && Array.isArray(parsed.users)) {
-        return parsed.users
-      }
-    }
-  } catch (e) {
-    console.error("Error reading users.json:", e)
-  }
-  return DEFAULT_USERS
+  const parsed = await readEditorialData<{ users: StoredUserRecord[] }>(FILE_PATH, { users: DEFAULT_USERS })
+  return Array.isArray(parsed?.users) && parsed.users.length > 0 ? parsed.users : DEFAULT_USERS
 }
 
 async function saveStoredUsers(users: StoredUserRecord[]) {
-  // 1. Save to Supabase Cloud Storage
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ users, updatedAt: new Date().toISOString() })
-    })
-  } catch (err) {
-    console.error("Supabase save users error:", err)
-  }
-
-  // 2. Save locally
-  try {
-    const dir = path.dirname(DATA_FILE_PATH)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify({ users }, null, 2), "utf-8")
-  } catch (e) {
-    console.error("Error saving users.json:", e)
-  }
+  await writeEditorialData(FILE_PATH, { users, updatedAt: new Date().toISOString() })
 }
 
 export async function GET(req: Request) {
@@ -186,17 +132,14 @@ export async function POST(req: Request) {
 
     // Integrity check: if candidate identity was disapproved by JM, deny registration
     try {
-      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/disapproved-candidates.json?t=${Date.now()}`, { cache: "no-store" })
-      if (res.ok) {
-        const data = await res.json()
-        if (data && Array.isArray(data.disapproved)) {
-          const match = data.disapproved.find((d: any) => d.email && d.email.toLowerCase() === cleanEmail)
-          if (match) {
-            return NextResponse.json({
-              success: false,
-              error: "This applicant identity is currently flagged by the Journal Manager and cannot register an active account."
-            }, { status: 403 })
-          }
+      const data = await readEditorialData<{ disapproved: any[] }>("disapproved-candidates.json", { disapproved: [] })
+      if (data && Array.isArray(data.disapproved)) {
+        const match = data.disapproved.find((d: any) => d.email && d.email.toLowerCase() === cleanEmail)
+        if (match) {
+          return NextResponse.json({
+            success: false,
+            error: "This applicant identity is currently flagged by the Journal Manager and cannot register an active account."
+          }, { status: 403 })
         }
       }
     } catch (e) {}

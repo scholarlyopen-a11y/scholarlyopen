@@ -1143,8 +1143,8 @@ export function ReviewerWorkspace({
     if (type === "fulltext") {
       if (isAortic) {
         const link = document.createElement("a")
-        link.href = (rev as any).fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
-        link.download = (rev as any).fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx"
+        link.href = "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx"
+        link.download = "Blinded_Revised_Manuscript_SOMED-26-RW01.docx"
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -1182,6 +1182,15 @@ Quantitative comparisons demonstrate a 14.8% relative improvement in predictive 
 `
       handleDownloadFile(`${id}_Blinded_Manuscript_FullText.txt`, content)
     } else if (type === "supp") {
+      if (isAortic) {
+        const link = document.createElement("a")
+        link.href = "/manuscripts/SOMED-26-RW01-rebuttal-blinded.docx"
+        link.download = "Blinded_Author_Rebuttal_SOMED-26-RW01.docx"
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return
+      }
       const content = `================================================================================
 SCHOLARLY OPEN • SUPPLEMENTARY DATASETS, TABLES & HIGH-RES FIGURES
 ================================================================================
@@ -1225,8 +1234,8 @@ All clinical research procedures adhere strictly to COPE guidelines and local st
 
       if (isAortic) {
         const link = document.createElement("a")
-        link.href = (rev as any).fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
-        link.download = (rev as any).fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx"
+        link.href = "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx"
+        link.download = "Blinded_Revised_Manuscript_SOMED-26-RW01.docx"
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -4378,21 +4387,80 @@ COPE & Plan S Certified Archive
                 <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-lg border border-slate-200 dark:border-slate-800">
                   {(() => {
                     const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
+                    if (isAortic) {
+                      return (
+                        <>
+                          <div className="p-2.5 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                              <div>
+                                <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Blinded_Revised_Manuscript_SOMED-26-RW01.docx
+                                </div>
+                                <div className="text-[10px] text-slate-400">
+                                  Revised Fulltext · Anonymized for Double-Blind Peer Review (Authors/PII Redacted)
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-mono text-slate-400">84.1 KB</span>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
+                                className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
+                              >
+                                <Download className="h-3 w-3 mr-1" />
+                                {isDe ? "Laden" : "Download"}
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="p-2.5 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
+                              <div>
+                                <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                  Blinded_Author_Rebuttal_SOMED-26-RW01.docx
+                                </div>
+                                <div className="text-[10px] text-slate-400">
+                                  Point-by-Point Author Rebuttal Letter · Anonymized for Double-Blind Review
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-mono text-slate-400">25.8 KB</span>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
+                                className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                              >
+                                <Download className="h-3 w-3 mr-1" />
+                                {isDe ? "Laden" : "Download"}
+                              </Button>
+                            </div>
+                          </div>
+                        </>
+                      )
+                    }
                     return (
                       <div className="p-2.5 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
                           <div>
                             <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                              {isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : "Blinded_Manuscript_FullText.docx"}
+                              Blinded_Manuscript_FullText.docx
                             </div>
                             <div className="text-[10px] text-slate-400">
-                              {isAortic ? "Original Manuscript Word Document (.docx) · Evidence-Based Medicine Review" : "Main text · 14 Pages · Anonymized (Authors/PII Redacted)"}
+                              Main text · 14 Pages · Anonymized (Authors/PII Redacted)
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono text-slate-400">{isAortic ? "38.6 KB" : "2.4 MB"}</span>
+                          <span className="text-[11px] font-mono text-slate-400">2.4 MB</span>
                           <Button
                             type="button"
                             size="sm"
@@ -4411,11 +4479,7 @@ COPE & Plan S Certified Archive
                   {(() => {
                     const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
                     if (isAortic) {
-                      return (
-                        <div className="p-3 text-[11px] text-slate-500 dark:text-slate-400 italic bg-slate-50/50 dark:bg-slate-900/30">
-                          * Author submitted only the primary manuscript document. No supplementary figures, tables, or external archives were provided.
-                        </div>
-                      )
+                      return null
                     }
                     return (
                       <>

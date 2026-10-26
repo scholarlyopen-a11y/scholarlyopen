@@ -18,7 +18,7 @@ export interface Article {
   keywords: string[]
   doi: string
   publishedDate: string
-  articleType: "research" | "review" | "methodology" | "editorial"
+  articleType: "research" | "review" | "methodology" | "editorial" | "perspective"
   section?: string
   pdfUrl?: string
   isOpenAccess?: boolean
@@ -40,6 +40,7 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
     review: "Review Article",
     methodology: "Methodology Paper",
     editorial: "Editorial",
+    perspective: "Perspective Article",
   }
 
   return (
@@ -89,9 +90,9 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
         <div className="flex items-center justify-between pt-3 border-t border-border">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="font-medium">DOI:</span>
-            {isSample ? (
+            {isSample || article.doi?.includes("Pending") ? (
               <span className="font-mono text-[11px] text-muted-foreground/80 flex items-center gap-1" title="Official Crossref DOI assignment upon inaugural volume publication">
-                Deposit Pending (Inaugural Issue)
+                {article.doi || "Deposit Pending"}
               </span>
             ) : (
               <a 
@@ -133,36 +134,32 @@ export function ArticleCard({ article, journalSlug }: ArticleCardProps) {
 }
 
 export function ArticleList({ articles, journalSlug }: { articles: Article[]; journalSlug: string }) {
+  if (articles.length === 0) {
+    return (
+      <div className="space-y-4 text-center py-12 px-6 bg-muted/20 rounded-2xl border border-dashed border-border max-w-2xl mx-auto">
+        <h3 className="text-xl font-bold tracking-tight text-foreground">Inaugural Volume in Formation</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Scholarly Open is currently accepting original submissions for the inaugural volume of this journal. Founding authors benefit from prioritized editorial evaluation and inaugural APC fee waivers.
+        </p>
+        <Button asChild size="sm" className="font-semibold text-xs">
+          <Link href={`/submit?journal=${journalSlug}`}>Submit Your Manuscript</Link>
+        </Button>
+      </div>
+    )
+  }
+
   const hasOnlySamples = articles.length > 0 && articles.every(isSampleArticle)
   
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          {hasOnlySamples ? (
-            <>
-              <div className="flex items-center gap-2 mb-1.5">
-                <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25 text-xs font-semibold">
-                  Call for Papers · Inaugural Issue
-                </Badge>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-                Inaugural Volume · Layout Previews & Submissions
-              </h3>
-              <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-                Illustrative publication samples showcasing manuscript presentation and citation styles. Peer-reviewed research submissions are actively invited for the founding issue.
-              </p>
-            </>
-          ) : (
-            <>
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-                Articles
-              </h3>
-              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                Peer-reviewed research published in this journal.
-              </p>
-            </>
-          )}
+          <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            Published Articles
+          </h3>
+          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+            Peer-reviewed research and scholarly perspectives published in this journal.
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Button variant="default" size="sm" asChild className="font-semibold text-xs">

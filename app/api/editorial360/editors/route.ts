@@ -35,12 +35,9 @@ export interface OnboardedEditorRecord {
   acceptedAt: string
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
-const FILE_PATH = "editorial-board-onboarding.json"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
 
-const DATA_FILE_PATH = path.join(process.cwd(), "lib", "data", "editorial-board-onboarding.json")
+const FILE_PATH = "editorial-board-onboarding.json"
 
 function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEditorRecord[] {
   const seenKeys = new Set<string>()
@@ -91,87 +88,19 @@ function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEdito
 }
 
 async function getStoredEditors(): Promise<OnboardedEditorRecord[]> {
-  let cloudEditors: OnboardedEditorRecord[] = []
-  let localEditors: OnboardedEditorRecord[] = []
-
-  // 1. Try Supabase Cloud Storage
   try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const parsed = await res.json()
-      if (parsed && Array.isArray(parsed.onboardedEditors)) {
-        cloudEditors = sanitizeEditorRecords(parsed.onboardedEditors)
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch editors warning:", e)
-  }
-
-  // 2. Fallback / local file
-  try {
-    if (fs.existsSync(DATA_FILE_PATH)) {
-      const raw = fs.readFileSync(DATA_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (parsed && Array.isArray(parsed.onboardedEditors)) {
-        localEditors = sanitizeEditorRecords(parsed.onboardedEditors)
-      }
+    const parsed = await readEditorialData<{ onboardedEditors: OnboardedEditorRecord[] }>(FILE_PATH, { onboardedEditors: [] })
+    if (parsed && Array.isArray(parsed.onboardedEditors) && parsed.onboardedEditors.length > 0) {
+      return sanitizeEditorRecords(parsed.onboardedEditors)
     }
   } catch (e) {
     console.error("Error reading editorial-board-onboarding.json:", e)
   }
-
-  // Overlay local over cloud so verified master records take precedence
-  const map = new Map<string, OnboardedEditorRecord>()
-  for (const ed of cloudEditors) {
-    const key = (ed.id || ed.slug || ed.email || "").toLowerCase().trim()
-    if (key) map.set(key, ed)
-  }
-  for (const ed of localEditors) {
-    const key = (ed.id || ed.slug || ed.email || "").toLowerCase().trim()
-    if (key) {
-      const existing = map.get(key)
-      map.set(key, { ...existing, ...ed })
-    }
-  }
-
-  const merged = Array.from(map.values())
-  if (merged.length > 0) {
-    saveStoredEditors(merged).catch(() => {})
-    return merged
-  }
-
-  return localEditors
+  return []
 }
 
 async function saveStoredEditors(editors: OnboardedEditorRecord[]) {
-  // 1. Save to Supabase Cloud Storage
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ onboardedEditors: editors, lastUpdated: new Date().toISOString() })
-    })
-  } catch (e) {
-    console.error("Supabase save editors error:", e)
-  }
-
-  // 2. Local fallback
-  try {
-    const dir = path.dirname(DATA_FILE_PATH)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify({ onboardedEditors: editors }, null, 2), "utf-8")
-  } catch (e) {
-    // Non-fatal on Vercel
-  }
+  await writeEditorialData(FILE_PATH, { onboardedEditors: editors, lastUpdated: new Date().toISOString() })
 }
 
 export async function GET(req: Request) {

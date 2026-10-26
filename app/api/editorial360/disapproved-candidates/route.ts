@@ -5,11 +5,9 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+
 const FILE_PATH = "disapproved-candidates.json"
-const LOCAL_DATA_PATH = path.join(process.cwd(), "lib", "data", "disapproved-candidates.json")
 
 export interface DisapprovedCandidateRecord {
   id: string
@@ -26,31 +24,8 @@ export interface DisapprovedCandidateRecord {
 }
 
 export async function getStoredDisapproved(): Promise<DisapprovedCandidateRecord[]> {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data && Array.isArray(data.disapproved)) {
-        return data.disapproved
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch disapproved candidates warning:", e)
-  }
-
-  try {
-    if (fs.existsSync(LOCAL_DATA_PATH)) {
-      const raw = fs.readFileSync(LOCAL_DATA_PATH, "utf-8")
-      const data = JSON.parse(raw)
-      if (data && Array.isArray(data.disapproved)) {
-        return data.disapproved
-      }
-    }
-  } catch (e) {}
-
-  return []
+  const data = await readEditorialData<{ disapproved: DisapprovedCandidateRecord[] }>(FILE_PATH, { disapproved: [] })
+  return Array.isArray(data?.disapproved) ? data.disapproved : []
 }
 
 export async function saveStoredDisapproved(records: DisapprovedCandidateRecord[]): Promise<void> {
@@ -58,25 +33,7 @@ export async function saveStoredDisapproved(records: DisapprovedCandidateRecord[
     disapproved: records,
     lastUpdated: new Date().toISOString()
   }
-
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify(payload)
-    })
-  } catch (e) {
-    console.error("Supabase save disapproved candidates error:", e)
-  }
-
-  try {
-    fs.writeFileSync(LOCAL_DATA_PATH, JSON.stringify(payload, null, 2), "utf-8")
-  } catch (e) {}
+  await writeEditorialData(FILE_PATH, payload)
 }
 
 export async function GET() {

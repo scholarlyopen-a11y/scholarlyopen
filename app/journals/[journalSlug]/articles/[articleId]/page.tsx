@@ -8,6 +8,8 @@ import {
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { articles, isSampleArticle } from "@/lib/data/articles"
+import { samLeeArticleFullText } from "@/lib/data/fulltext/somed-26-rw01"
+import { ArticleFullTextViewer } from "@/components/article-fulltext-viewer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -18,13 +20,18 @@ interface ArticlePageProps {
     journalSlug: string
     articleId: string
   }>
+  searchParams?: Promise<{
+    preview?: string
+  }>
 }
 
 export async function generateStaticParams() {
-  return articles.map((article) => ({
-    journalSlug: article.journalSlug,
-    articleId: article.id,
-  }))
+  return articles
+    .filter((article) => !article.isUnpublishedProof)
+    .map((article) => ({
+      journalSlug: article.journalSlug,
+      articleId: article.id,
+    }))
 }
 
 export async function generateMetadata({ params }: ArticlePageProps) {
@@ -38,12 +45,22 @@ export async function generateMetadata({ params }: ArticlePageProps) {
     : `${article.title} | Scholarly Open`
   const descText = article.abstract.slice(0, 160) + (article.abstract.length > 160 ? "..." : "")
 
+  // Format journal name nicely from slug
+  const journalName = journalSlug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+    .replace("And", "&")
+
+  const pdfFullUrl = `https://www.scholarlyopen.org${article.pdfUrl || `/manuscripts/${article.id}-revised-manuscript.pdf`}`
+  const articleFullUrl = `https://www.scholarlyopen.org/journals/${journalSlug}/articles/${article.id}`
+
   return {
     title: titleText,
     description: descText,
-    robots: isSample ? {
+    robots: (isSample || article.isUnpublishedProof) ? {
       index: false,
-      follow: true,
+      follow: false,
     } : {
       index: true,
       follow: true,
@@ -52,7 +69,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       title: titleText,
       description: descText,
       type: "article",
-      url: `https://www.scholarlyopen.org/journals/${journalSlug}/articles/${article.id}`,
+      url: articleFullUrl,
       publishedTime: article.publishedDate,
       authors: article.authors,
     },
@@ -62,16 +79,40 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       description: descText,
     },
     alternates: {
-      canonical: `https://www.scholarlyopen.org/journals/${journalSlug}/articles/${article.id}`,
+      canonical: articleFullUrl,
     },
+    // Google Scholar and Academic Search Engine Citation Tags
+    other: !isSample ? {
+      "citation_title": article.title,
+      "citation_author": article.authors.join("; "),
+      "citation_publication_date": article.publishedDate.replace(/-/g, "/"),
+      "citation_journal_title": `Scholarly Open: ${journalName}`,
+      "citation_volume": "1",
+      "citation_issue": "1",
+      "citation_pdf_url": pdfFullUrl,
+      "citation_fulltext_html_url": articleFullUrl,
+      "citation_language": "en",
+      "DC.title": article.title,
+      "DC.creator": article.authors.join("; "),
+      "DC.date": article.publishedDate,
+      "DC.type": "Text.Serial.Article",
+      "DC.format": "text/html",
+      "DC.language": "eng",
+    } : {},
   }
 }
 
-export default async function ArticleDetailPage({ params }: ArticlePageProps) {
+export default async function ArticleDetailPage({ params, searchParams }: ArticlePageProps) {
   const { journalSlug, articleId } = await params
+  const sp = searchParams ? await searchParams : {}
   const article = articles.find((a) => a.id === articleId && a.journalSlug === journalSlug)
 
   if (!article) {
+    notFound()
+  }
+
+  // If this article is an unreleased proof, hide it completely on production (unless authorized preview token is provided)
+  if (article.isUnpublishedProof && process.env.NODE_ENV === "production" && sp.preview !== "somed26_review_access") {
     notFound()
   }
 
@@ -135,27 +176,31 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
       <main className="flex-1 py-10 md:py-14">
         <div className="container max-w-5xl mx-auto px-4">
-          {/* Navigation link back to Journal */}
-          <div className="mb-6 flex items-center justify-between">
-            <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary pl-0">
-              <Link href={`/journals/${journalSlug}`}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to {journalName} Journal
-              </Link>
-            </Button>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" asChild className="text-xs">
-                <Link href={`/submit?journal=${journalSlug}`}>
-                  <Send className="h-3.5 w-3.5 mr-1.5" />
-                  Submit to this Journal
-                </Link>
-              </Button>
-            </div>
-          </div>
+          {article.id === "SOMED-26-RW01" ? (
+            <ArticleFullTextViewer article={samLeeArticleFullText} />
+          ) : (
+            <>
+              {/* Navigation link back to Journal */}
+              <div className="mb-6 flex items-center justify-between">
+                <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary pl-0">
+                  <Link href={`/journals/${journalSlug}`}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to {journalName} Journal
+                  </Link>
+                </Button>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" asChild className="text-xs">
+                    <Link href={`/submit?journal=${journalSlug}`}>
+                      <Send className="h-3.5 w-3.5 mr-1.5" />
+                      Submit to this Journal
+                    </Link>
+                  </Button>
+                </div>
+              </div>
 
-          {/* Option A: Demonstration Layout Preview & Call for Papers Banner */}
-          {isSample && (
-            <div className="mb-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5 p-5 sm:p-6 shadow-sm">
+              {/* Option A: Demonstration Layout Preview & Call for Papers Banner */}
+              {isSample && (
+                <div className="mb-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5 p-5 sm:p-6 shadow-sm">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
                 <div className="space-y-2 max-w-2xl">
                   <div className="flex flex-wrap items-center gap-2">
@@ -406,6 +451,8 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               </Card>
             </div>
           </div>
+            </>
+          )}
         </div>
       </main>
 

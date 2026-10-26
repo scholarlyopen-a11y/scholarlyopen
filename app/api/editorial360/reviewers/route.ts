@@ -193,11 +193,9 @@ const globalReviewerHistory: ReviewerHistoryItem[] = [...DEFAULT_REVIEWER_HISTOR
 
 import fs from "fs"
 import path from "path"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const BUCKET = "editorial360_data"
 const FILE_PATH = "reviewer-records.json"
-const RECORDS_FILE_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
 
 function cleanReviewerList(list: any[]): any[] {
   return list.filter((r: any) => {
@@ -214,29 +212,10 @@ function cleanReviewerList(list: any[]): any[] {
 }
 
 async function getRegisteredReviewers(): Promise<any[]> {
-  // 1. Try Supabase Cloud Storage
   try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const parsed = await res.json()
-      if (parsed && Array.isArray(parsed.registeredReviewers)) {
-        return cleanReviewerList(parsed.registeredReviewers)
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch registeredReviewers warning:", e)
-  }
-
-  // 2. Fallback to local file
-  try {
-    if (fs.existsSync(RECORDS_FILE_PATH)) {
-      const raw = fs.readFileSync(RECORDS_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (parsed && Array.isArray(parsed.registeredReviewers)) {
-        return cleanReviewerList(parsed.registeredReviewers)
-      }
+    const parsed = await readEditorialData<{ registeredReviewers: any[] }>(FILE_PATH, { registeredReviewers: [] })
+    if (parsed && Array.isArray(parsed.registeredReviewers)) {
+      return cleanReviewerList(parsed.registeredReviewers)
     }
   } catch (e) {
     console.error("Error reading registeredReviewers:", e)
@@ -252,21 +231,12 @@ export async function GET(req: Request) {
 
     let results = [...globalReviewerHistory]
 
-    // Read persistent sent review invitations from Supabase storage / local file
+    // Read persistent sent review invitations using unified storage layer
     try {
       let sentList: any[] = []
-      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/sent-invitations.json?t=${Date.now()}`, { cache: "no-store" })
-      if (res.ok) {
-        const data = await res.json()
-        if (data && Array.isArray(data.sentInvitations)) {
-          sentList = data.sentInvitations
-        }
-      } else {
-        const localSentPath = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
-        if (fs.existsSync(localSentPath)) {
-          const parsed = JSON.parse(fs.readFileSync(localSentPath, "utf-8"))
-          if (Array.isArray(parsed?.sentInvitations)) sentList = parsed.sentInvitations
-        }
+      const data = await readEditorialData<{ sentInvitations: any[] }>("sent-invitations.json", { sentInvitations: [] })
+      if (data && Array.isArray(data.sentInvitations)) {
+        sentList = data.sentInvitations
       }
 
       for (const s of sentList) {
@@ -416,24 +386,11 @@ export async function POST(req: Request) {
         status: "Delivered"
       }
       
-      const getRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/sent-invitations.json?t=${Date.now()}`, { cache: "no-store" })
-      let currentSent: any[] = []
-      if (getRes.ok) {
-        const d = await getRes.json()
-        if (Array.isArray(d?.sentInvitations)) currentSent = d.sentInvitations
-      }
+      const d = await readEditorialData<{ sentInvitations: any[] }>("sent-invitations.json", { sentInvitations: [] })
+      let currentSent: any[] = Array.isArray(d?.sentInvitations) ? [...d.sentInvitations] : []
       if (!currentSent.some(s => s.recipientEmail?.toLowerCase() === reviewerEmail.toLowerCase() && s.paperId === paperId)) {
         currentSent.unshift(sentItem)
-        await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/sent-invitations.json`, {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_SERVICE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-            "Content-Type": "application/json",
-            "x-upsert": "true"
-          },
-          body: JSON.stringify({ sentInvitations: currentSent })
-        })
+        await writeEditorialData("sent-invitations.json", { sentInvitations: currentSent })
       }
     } catch (e) {
       console.warn("Could not persist to Supabase in reviewers POST:", e)
@@ -539,42 +496,29 @@ export async function PATCH(req: Request) {
       finalRecord = created
     }
 
-    // Persist status update to Supabase Cloud Storage sent-invitations.json
+    // Persist status update to sent-invitations.json
     try {
-      const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-      const getRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/sent-invitations.json?t=${Date.now()}`, { cache: "no-store" })
-      if (getRes.ok) {
-        const d = await getRes.json()
-        if (Array.isArray(d?.sentInvitations)) {
-          let hasChange = false
-          d.sentInvitations = d.sentInvitations.map((s: any) => {
-            const matches = s.recipientEmail?.toLowerCase() === reviewerEmail.toLowerCase() && 
-              (s.paperId?.toLowerCase() === paperId.toLowerCase() || s.subject?.toLowerCase().includes(paperId.toLowerCase()))
-            if (matches) {
-              hasChange = true
-              return {
-                ...s,
-                status: finalRecord.status,
-                deadline: finalRecord.deadline || s.deadline,
-                declineReason: finalRecord.declineReason || s.declineReason,
-                declineReferral: finalRecord.declineReferral || s.declineReferral,
-                respondedAt: finalRecord.respondedAt || todayStr
-              }
+      const d = await readEditorialData<{ sentInvitations: any[] }>("sent-invitations.json", { sentInvitations: [] })
+      if (Array.isArray(d?.sentInvitations)) {
+        let hasChange = false
+        const updatedList = d.sentInvitations.map((s: any) => {
+          const matches = s.recipientEmail?.toLowerCase() === reviewerEmail.toLowerCase() && 
+            (s.paperId?.toLowerCase() === paperId.toLowerCase() || s.subject?.toLowerCase().includes(paperId.toLowerCase()))
+          if (matches) {
+            hasChange = true
+            return {
+              ...s,
+              status: finalRecord.status,
+              deadline: finalRecord.deadline || s.deadline,
+              declineReason: finalRecord.declineReason || s.declineReason,
+              declineReferral: finalRecord.declineReferral || s.declineReferral,
+              respondedAt: finalRecord.respondedAt || todayStr
             }
-            return s
-          })
-          if (hasChange) {
-            await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/sent-invitations.json`, {
-              method: "POST",
-              headers: {
-                apikey: SUPABASE_SERVICE_KEY,
-                Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-                "Content-Type": "application/json",
-                "x-upsert": "true"
-              },
-              body: JSON.stringify({ sentInvitations: d.sentInvitations })
-            })
           }
+          return s
+        })
+        if (hasChange) {
+          await writeEditorialData("sent-invitations.json", { sentInvitations: updatedList })
         }
       }
     } catch (e) {

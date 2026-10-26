@@ -7,9 +7,8 @@ import nodemailer from "nodemailer"
 import { generateBrandedEmailHtml, interpolateTokens, DEFAULT_EMAIL_TEMPLATES } from "@/lib/email-templates"
 import { getJournalReplyTo, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-contacts"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+
 const SENT_FILE = "sent-invitations.json"
 
 interface EmailPayload {
@@ -239,34 +238,10 @@ export async function POST(req: Request) {
       messageId = info.messageId
     }
 
-    // Auto-record to sent-invitations.json in Supabase Cloud Storage so every outreach email is 100% permanently logged
+    // Auto-record to sent-invitations.json using unified storage layer
     try {
-      let sentList: any[] = []
-
-      // 1. Fetch from Supabase Cloud Storage
-      try {
-        const cloudRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${SENT_FILE}?t=${Date.now()}`, {
-          cache: "no-store"
-        })
-        if (cloudRes.ok) {
-          const cloudData = await cloudRes.json()
-          if (cloudData && Array.isArray(cloudData.sentInvitations)) {
-            sentList = cloudData.sentInvitations
-          }
-        }
-      } catch (e) {
-        console.warn("Supabase fetch sent-invitations warning in email route:", e)
-      }
-
-      // 2. Fallback to local file if empty
-      const sentFilePath = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
-      if (sentList.length === 0 && fs.existsSync(sentFilePath)) {
-        try {
-          const raw = fs.readFileSync(sentFilePath, "utf-8")
-          const parsed = JSON.parse(raw)
-          sentList = Array.isArray(parsed.sentInvitations) ? parsed.sentInvitations : []
-        } catch (e) {}
-      }
+      const data = await readEditorialData<{ sentInvitations: any[] }>(SENT_FILE, { sentInvitations: [] })
+      let sentList: any[] = Array.isArray(data?.sentInvitations) ? [...data.sentInvitations] : []
 
       const newSentItem = {
         id: `SENT-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 1000)}`,
@@ -290,29 +265,7 @@ export async function POST(req: Request) {
 
       if (!isDupe) {
         sentList.unshift(newSentItem)
-
-        // Save to Supabase Cloud Storage
-        try {
-          await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${SENT_FILE}`, {
-            method: "POST",
-            headers: {
-              apikey: SUPABASE_SERVICE_KEY,
-              Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-              "Content-Type": "application/json",
-              "x-upsert": "true"
-            },
-            body: JSON.stringify({ sentInvitations: sentList, lastUpdated: new Date().toISOString() })
-          })
-        } catch (cloudSaveErr) {
-          console.error("Supabase save sent-invitations error in email route:", cloudSaveErr)
-        }
-
-        // Save locally
-        try {
-          const dir = path.dirname(sentFilePath)
-          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-          fs.writeFileSync(sentFilePath, JSON.stringify({ sentInvitations: sentList }, null, 2), "utf-8")
-        } catch (e) {}
+        await writeEditorialData(SENT_FILE, { sentInvitations: sentList, lastUpdated: new Date().toISOString() })
       }
     } catch (saveErr) {
       console.warn("Could not auto-log to sent-invitations.json:", saveErr)

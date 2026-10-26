@@ -39,9 +39,8 @@ export interface ProfileAuditSummary {
   missingFields: { key: string; label: string; tip: string }[]
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+
 const FILE_PATH = "reviewer-profiles.json"
 
 const DEFAULT_PROFILES: Record<string, StoredReviewerProfile> = {
@@ -133,39 +132,12 @@ const DEFAULT_PROFILES: Record<string, StoredReviewerProfile> = {
 let inMemoryProfileCache: Record<string, StoredReviewerProfile> | null = null
 
 async function getStoredProfiles(): Promise<Record<string, StoredReviewerProfile>> {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data && typeof data.profiles === "object") {
-        inMemoryProfileCache = data.profiles
-        return data.profiles
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch reviewer-profiles warning:", e)
-  }
-  return inMemoryProfileCache || DEFAULT_PROFILES
+  const data = await readEditorialData<{ profiles: Record<string, StoredReviewerProfile> }>(FILE_PATH, { profiles: DEFAULT_PROFILES })
+  return data && typeof data.profiles === "object" && Object.keys(data.profiles).length > 0 ? data.profiles : DEFAULT_PROFILES
 }
 
 async function saveStoredProfiles(profiles: Record<string, StoredReviewerProfile>): Promise<void> {
-  inMemoryProfileCache = profiles
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ profiles, updatedAt: new Date().toISOString() })
-    })
-  } catch (err) {
-    console.error("Supabase save reviewer-profiles error:", err)
-  }
+  await writeEditorialData(FILE_PATH, { profiles, updatedAt: new Date().toISOString() })
 }
 
 export function analyzeProfileCompletion(profile: StoredReviewerProfile): ProfileAuditSummary {

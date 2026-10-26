@@ -1,0 +1,60 @@
+{
+  "users": [
+    {
+      "id": "USR-JM",
+      "name": "Noor F.",
+      "email": "info@scholarlyopen.org",
+      "role": "jm",
+      "affiliation": "Journal Management & Publishing Operations",
+      "country": "Germany",
+      "status": "Active",
+      "staffRole": "Editorial Manager & Publishing Coordinator",
+      "department": "Journal Management & Publishing Operations",
+      "officeLocation": "Mainz Editorial Office & Global Desk",
+      "createdAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "USR-JM2",
+      "name": "Noor F.",
+      "email": "manager@scholarlyopen.org",
+      "role": "jm",
+      "affiliation": "Journal Management & Publishing Operations",
+      "country": "Germany",
+      "status": "Active",
+      "staffRole": "Editorial Manager & Publishing Coordinator",
+      "department": "Journal Management & Publishing Operations",
+      "officeLocation": "Mainz Editorial Office & Global Desk",
+      "createdAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "USR-01",
+      "name": "Dr. Marcus Vance",
+      "email": "m.vance@scholarlyopen.org",
+      "role": "reviewer",
+      "affiliation": "Scholarly Open Verified Reviewer Community",
+      "country": "United Kingdom",
+      "status": "Active",
+      "createdAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "USR-02",
+      "name": "Prof. Aris Thorne",
+      "email": "a.thorne@scholarlyopen.org",
+      "role": "editor",
+      "affiliation": "Charité – Universitätsmedizin Berlin",
+      "country": "Germany",
+      "status": "Active",
+      "createdAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "USR-AUTHOR-01",
+      "name": "Sam Lee, M.D., Ph.D.",
+      "email": "Applied.EBM.Institute@proton.me",
+      "role": "author",
+      "affiliation": "Applied Evidence-Based Medicine (EBM) Institute",
+      "country": "United States",
+      "status": "Active",
+      "createdAt": "2026-09-27T10:00:00.000Z"
+    }
+  ]
+}

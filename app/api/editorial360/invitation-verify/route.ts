@@ -5,58 +5,19 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const BUCKET = "editorial360_data"
+import { readEditorialData } from "@/lib/editorial-storage"
+
 const SENT_FILE = "sent-invitations.json"
 const EDITORS_FILE = "editorial-board-onboarding.json"
 
-const SENT_FILE_PATH = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
-const EDITORS_FILE_PATH = path.join(process.cwd(), "lib", "data", "editorial-board-onboarding.json")
-
 async function getSentInvitations(): Promise<any[]> {
-  // 1. Try Supabase Cloud Storage
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${SENT_FILE}?t=${Date.now()}`, { cache: "no-store" })
-    if (res.ok) {
-      const parsed = await res.json()
-      if (parsed && Array.isArray(parsed.sentInvitations)) return parsed.sentInvitations
-    }
-  } catch (e) {}
-
-  // 2. Local fallback
-  try {
-    if (fs.existsSync(SENT_FILE_PATH)) {
-      const raw = fs.readFileSync(SENT_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      return Array.isArray(parsed.sentInvitations) ? parsed.sentInvitations : []
-    }
-  } catch (e) {
-    console.error("Error reading sent invitations:", e)
-  }
-  return []
+  const data = await readEditorialData<{ sentInvitations: any[] }>(SENT_FILE, { sentInvitations: [] })
+  return Array.isArray(data?.sentInvitations) ? data.sentInvitations : []
 }
 
 async function getOnboardedEditors(): Promise<any[]> {
-  // 1. Try Supabase Cloud Storage
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${EDITORS_FILE}?t=${Date.now()}`, { cache: "no-store" })
-    if (res.ok) {
-      const parsed = await res.json()
-      if (parsed && Array.isArray(parsed.onboardedEditors)) return parsed.onboardedEditors
-    }
-  } catch (e) {}
-
-  // 2. Local fallback
-  try {
-    if (fs.existsSync(EDITORS_FILE_PATH)) {
-      const raw = fs.readFileSync(EDITORS_FILE_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      return Array.isArray(parsed.onboardedEditors) ? parsed.onboardedEditors : []
-    }
-  } catch (e) {
-    console.error("Error reading onboarded editors:", e)
-  }
-  return []
+  const data = await readEditorialData<{ onboardedEditors: any[] }>(EDITORS_FILE, { onboardedEditors: [] })
+  return Array.isArray(data?.onboardedEditors) ? data.onboardedEditors : []
 }
 
 export async function GET(req: Request) {

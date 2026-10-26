@@ -5,83 +5,21 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+
 const FILE_PATH = "sent-invitations.json"
 
-const LOCAL_DATA_PATH = path.join(process.cwd(), "lib", "data", "sent-invitations.json")
-
-// Helper: Read sent invitations from Supabase Cloud Storage (primary) or local file (fallback)
+// Helper: Read sent invitations using unified storage layer with local file fallback
 async function getStoredSent(): Promise<any[]> {
-  // 1. Try Supabase Cloud Storage (persistent across all Vercel lambdas & users)
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data && Array.isArray(data.sentInvitations)) {
-        return data.sentInvitations
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase fetch sent-invitations warning:", e)
-  }
-
-  // 2. Fallback to local file if available
-  try {
-    if (fs.existsSync(LOCAL_DATA_PATH)) {
-      const raw = fs.readFileSync(LOCAL_DATA_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (parsed && Array.isArray(parsed.sentInvitations)) {
-        return parsed.sentInvitations
-      }
-    }
-  } catch (e) {
-    console.error("Local read sent-invitations error:", e)
-  }
-
-  return []
+  const data = await readEditorialData<{ sentInvitations: any[] }>(FILE_PATH, { sentInvitations: [] })
+  return Array.isArray(data?.sentInvitations) ? data.sentInvitations : []
 }
 
-// Helper: Save sent invitations to Supabase Cloud Storage (primary) and local file (secondary)
+// Helper: Save sent invitations using unified storage layer with local file fallback
 async function saveStoredSent(items: any[]): Promise<boolean> {
-  let cloudSuccess = false
-
-  // 1. Save to Supabase Cloud Storage
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ sentInvitations: items, lastUpdated: new Date().toISOString() })
-    })
-    cloudSuccess = res.ok
-    if (!res.ok) {
-      console.warn("Supabase save sent-invitations status:", res.status, await res.text().catch(() => ""))
-    }
-  } catch (e) {
-    console.error("Supabase save sent-invitations error:", e)
-  }
-
-  // 2. Also save to local file for dev environment
-  try {
-    const dir = path.dirname(LOCAL_DATA_PATH)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    fs.writeFileSync(LOCAL_DATA_PATH, JSON.stringify({ sentInvitations: items }, null, 2), "utf-8")
-  } catch (e) {
-    // Non-fatal on Vercel read-only filesystem
-  }
-
-  return cloudSuccess
+  return await writeEditorialData(FILE_PATH, { sentInvitations: items, lastUpdated: new Date().toISOString() })
 }
+
 
 export async function GET() {
   const sent = await getStoredSent()

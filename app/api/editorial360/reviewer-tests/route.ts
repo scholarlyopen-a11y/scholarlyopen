@@ -30,73 +30,22 @@ export interface ReviewerTestRecord {
   notes?: string
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
-const BUCKET = "editorial360_data"
+import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+
 const FILE_PATH = "reviewer-records.json"
 
-const LOCAL_DATA_PATH = path.join(process.cwd(), "lib", "data", "reviewer-records.json")
-
 async function getStoredRecords(): Promise<{ tests: ReviewerTestRecord[]; registeredReviewers: any[] }> {
-  let cloudTests: ReviewerTestRecord[] = []
-  let cloudReviewers: any[] = []
-  let localTests: ReviewerTestRecord[] = []
-  let localReviewers: any[] = []
+  let tests: ReviewerTestRecord[] = []
+  let registeredReviewers: any[] = []
 
-  // 1. Try Supabase Cloud Storage (primary)
   try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FILE_PATH}?t=${Date.now()}`, {
-      cache: "no-store"
-    })
-    if (res.ok) {
-      const parsed = await res.json()
-      if (parsed) {
-        if (Array.isArray(parsed.tests)) cloudTests = parsed.tests
-        if (Array.isArray(parsed.registeredReviewers)) cloudReviewers = parsed.registeredReviewers
-      }
+    const parsed = await readEditorialData<{ tests?: ReviewerTestRecord[]; registeredReviewers?: any[] }>(FILE_PATH, { tests: [], registeredReviewers: [] })
+    if (parsed) {
+      if (Array.isArray(parsed.tests)) tests = parsed.tests
+      if (Array.isArray(parsed.registeredReviewers)) registeredReviewers = parsed.registeredReviewers
     }
   } catch (e) {
-    console.warn("Supabase fetch reviewer-records warning:", e)
-  }
-
-  // 2. Fallback / local file
-  try {
-    if (fs.existsSync(LOCAL_DATA_PATH)) {
-      const raw = fs.readFileSync(LOCAL_DATA_PATH, "utf-8")
-      const parsed = JSON.parse(raw)
-      if (parsed) {
-        if (Array.isArray(parsed.tests)) localTests = parsed.tests
-        if (Array.isArray(parsed.registeredReviewers)) localReviewers = parsed.registeredReviewers
-      }
-    }
-  } catch (e) {
-    console.error("Error reading reviewer-records.json:", e)
-  }
-
-  const mergedTestsMap = new Map<string, ReviewerTestRecord>()
-  for (const t of localTests) {
-    const k = (t.id || t.candidateEmail || "").toLowerCase().trim()
-    if (k) mergedTestsMap.set(k, t)
-  }
-  for (const t of cloudTests) {
-    const k = (t.id || t.candidateEmail || "").toLowerCase().trim()
-    if (k) {
-      const ex = mergedTestsMap.get(k)
-      mergedTestsMap.set(k, { ...ex, ...t })
-    }
-  }
-
-  const mergedRevsMap = new Map<string, any>()
-  for (const r of localReviewers) {
-    const k = (r.id || r.email || "").toLowerCase().trim()
-    if (k) mergedRevsMap.set(k, r)
-  }
-  for (const r of cloudReviewers) {
-    const k = (r.id || r.email || "").toLowerCase().trim()
-    if (k) {
-      const ex = mergedRevsMap.get(k)
-      mergedRevsMap.set(k, { ...ex, ...r })
-    }
+    console.error("Error reading reviewer-records:", e)
   }
 
   // Cross-reference with Integrity Watchlist
@@ -105,7 +54,7 @@ async function getStoredRecords(): Promise<{ tests: ReviewerTestRecord[]; regist
     disapprovedList = await getStoredDisapproved()
   } catch (e) {}
 
-  const finalTests = Array.from(mergedTestsMap.values()).map(test => {
+  const finalTests = tests.map(test => {
     const isDisapproved = disapprovedList.some(d => 
       (d.email && test.candidateEmail && d.email.toLowerCase() === test.candidateEmail.toLowerCase()) ||
       (d.id && test.id && d.id.toLowerCase() === test.id.toLowerCase())
@@ -123,7 +72,7 @@ async function getStoredRecords(): Promise<{ tests: ReviewerTestRecord[]; regist
     return test
   })
 
-  const finalReviewers = Array.from(mergedRevsMap.values()).filter(r => {
+  const finalReviewers = registeredReviewers.filter(r => {
     const isDisapproved = disapprovedList.some(d => 
       (d.email && r.email && d.email.toLowerCase() === r.email.toLowerCase())
     )
@@ -134,36 +83,7 @@ async function getStoredRecords(): Promise<{ tests: ReviewerTestRecord[]; regist
 }
 
 async function saveStoredRecords(data: { tests: ReviewerTestRecord[]; registeredReviewers: any[] }): Promise<boolean> {
-  let cloudSuccess = false
-  // 1. Save to Supabase Cloud Storage
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE_PATH}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: JSON.stringify({ ...data, lastUpdated: new Date().toISOString() })
-    })
-    cloudSuccess = res.ok
-  } catch (e) {
-    console.error("Supabase save reviewer-records error:", e)
-  }
-
-  // 2. Save locally for dev environment fallback
-  try {
-    const dir = path.dirname(LOCAL_DATA_PATH)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    fs.writeFileSync(LOCAL_DATA_PATH, JSON.stringify(data, null, 2), "utf-8")
-  } catch (e) {
-    // Non-fatal in cloud lambdas
-  }
-
-  return cloudSuccess
+  return await writeEditorialData(FILE_PATH, { ...data, lastUpdated: new Date().toISOString() })
 }
 
 export async function GET() {
