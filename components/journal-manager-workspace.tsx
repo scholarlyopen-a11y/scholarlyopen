@@ -167,6 +167,9 @@ export interface JmManuscript {
   revisedFileName?: string
   revisedFileSize?: string
   revisedFileUrl?: string
+  rebuttalFileUrl?: string
+  rebuttalText?: string
+  doi?: string
   revisionDate?: string
   updatedAt?: string
   lastActivity?: string
@@ -2667,6 +2670,20 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   const [selectedRevisionManuscript, setSelectedRevisionManuscript] = useState<JmManuscript | null>(null)
   const [selectedRound2Reviewers, setSelectedRound2Reviewers] = useState<string[]>([])
   const [editorRoutingNote, setEditorRoutingNote] = useState("")
+  const [selectedReviewerPackageFiles, setSelectedReviewerPackageFiles] = useState<{
+    blindedManuscript: boolean
+    blindedRebuttal: boolean
+  }>({
+    blindedManuscript: true,
+    blindedRebuttal: true,
+  })
+  const [selectedEditorPackageFiles, setSelectedEditorPackageFiles] = useState<{
+    unblindedManuscript: boolean
+    unblindedRebuttal: boolean
+  }>({
+    unblindedManuscript: true,
+    unblindedRebuttal: true,
+  })
 
   // Dynamic candidate reviewers for Round 2 re-evaluation of the revised manuscript
   const availableRound2Reviewers = useMemo(() => {
@@ -12748,109 +12765,192 @@ Specific comments to the Author(s):
               {/* 1. File Downloads - Dual Track: Editor (Unblinded) & Reviewer (Blinded) */}
               <div className="space-y-2.5">
                 {/* Track A: Handling Editor Copy (Unblinded) */}
-                <div className="p-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/40 rounded-xl space-y-1.5">
+                <div className="p-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/40 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-blue-950 dark:text-blue-300 text-[11px] flex items-center gap-1.5">
                       <FileCheck2 className="h-3.5 w-3.5 text-[#0b99ff]" />
                       Handling Editor Track (Unblinded) · Prof. Weihua Gong
                     </span>
-                    <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
-                      Author PII Included
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-blue-700 dark:text-blue-300 font-semibold bg-blue-100/70 dark:bg-blue-900/50 px-2 py-0.5 rounded-full">
+                        {((selectedEditorPackageFiles.unblindedManuscript ? 1 : 0) + (selectedEditorPackageFiles.unblindedRebuttal ? 1 : 0))} / 2 Selected for Editor
+                      </span>
+                      <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                        Author PII Included
+                      </span>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <a
-                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : (selectedRevisionManuscript?.revisedFileUrl || selectedRevisionManuscript?.fileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Revised_Manuscript_Unblinded.docx" : (selectedRevisionManuscript?.revisedFileName || `${selectedRevisionManuscript?.id || "Manuscript"}_Clean_Revision.docx`)}
-                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/60 transition-colors cursor-pointer"
-                    >
+                    {/* Editor Manuscript */}
+                    <div className={`flex items-center justify-between p-2 rounded-lg border transition-all ${
+                      selectedEditorPackageFiles.unblindedManuscript
+                        ? "bg-white dark:bg-slate-900 border-[#0b99ff]/70 shadow-xs"
+                        : "bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60"
+                    }`}>
                       <div className="flex items-center gap-2 truncate">
-                        <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                        <div className="truncate">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
-                            Revised Manuscript (.docx)
-                          </span>
-                          <span className="text-[10px] text-slate-400 block font-mono">
-                            84.1 KB · Unblinded Fulltext
-                          </span>
-                        </div>
+                        <input
+                          type="checkbox"
+                          id="chk-editor-manuscript"
+                          checked={selectedEditorPackageFiles.unblindedManuscript}
+                          onChange={(e) => setSelectedEditorPackageFiles(prev => ({ ...prev, unblindedManuscript: e.target.checked }))}
+                          className="h-4 w-4 text-[#0b99ff] rounded border-slate-300 focus:ring-[#0b99ff] cursor-pointer accent-[#0b99ff] shrink-0"
+                        />
+                        <label htmlFor="chk-editor-manuscript" className="flex items-center gap-1.5 truncate cursor-pointer select-none">
+                          <FileText className="h-3.5 w-3.5 text-[#0b99ff] shrink-0" />
+                          <div className="truncate">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                              Revised Manuscript (.docx)
+                            </span>
+                            <span className="text-[10px] text-slate-400 block font-mono">
+                              84.1 KB · Unblinded Fulltext
+                            </span>
+                          </div>
+                        </label>
                       </div>
-                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
-                    </a>
+                      <a
+                        href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : (selectedRevisionManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                        download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Revised_Manuscript_Unblinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Clean_Revision.docx`}
+                        title="Download Unblinded Manuscript"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors ml-1 shrink-0"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
 
-                    <a
-                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : (selectedRevisionManuscript?.rebuttalFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Author_Rebuttal_Unblinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Response_to_Reviewers.docx`}
-                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#0b99ff]/60 transition-colors cursor-pointer"
-                    >
+                    {/* Editor Rebuttal */}
+                    <div className={`flex items-center justify-between p-2 rounded-lg border transition-all ${
+                      selectedEditorPackageFiles.unblindedRebuttal
+                        ? "bg-white dark:bg-slate-900 border-blue-500/70 shadow-xs"
+                        : "bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60"
+                    }`}>
                       <div className="flex items-center gap-2 truncate">
-                        <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                        <div className="truncate">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
-                            Author Rebuttal (.docx)
-                          </span>
-                          <span className="text-[10px] text-slate-400 block font-mono">
-                            25.8 KB · Full Letterhead
-                          </span>
-                        </div>
+                        <input
+                          type="checkbox"
+                          id="chk-editor-rebuttal"
+                          checked={selectedEditorPackageFiles.unblindedRebuttal}
+                          onChange={(e) => setSelectedEditorPackageFiles(prev => ({ ...prev, unblindedRebuttal: e.target.checked }))}
+                          className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer accent-blue-600 shrink-0"
+                        />
+                        <label htmlFor="chk-editor-rebuttal" className="flex items-center gap-1.5 truncate cursor-pointer select-none">
+                          <FileText className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                          <div className="truncate">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                              Author Rebuttal (.docx)
+                            </span>
+                            <span className="text-[10px] text-slate-400 block font-mono">
+                              25.8 KB · Full Letterhead
+                            </span>
+                          </div>
+                        </label>
                       </div>
-                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
-                    </a>
+                      <a
+                        href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : (selectedRevisionManuscript?.rebuttalFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                        download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Author_Rebuttal_Unblinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Response_to_Reviewers.docx`}
+                        title="Download Unblinded Rebuttal"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors ml-1 shrink-0"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
                   </div>
                 </div>
 
                 {/* Track B: Reviewer Copy (Blinded / Anonymized for Double-Blind Review) */}
-                <div className="p-2.5 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/40 rounded-xl space-y-1.5">
+                <div className="p-2.5 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/40 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-emerald-950 dark:text-emerald-300 text-[11px] flex items-center gap-1.5">
                       <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                       Reviewer Track (Anonymized) · Dr. Praveen Nagula & Dr. Chaud GJ
                     </span>
-                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
-                      Double-Blind Verified
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-100/70 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
+                        {((selectedReviewerPackageFiles.blindedManuscript ? 1 : 0) + (selectedReviewerPackageFiles.blindedRebuttal ? 1 : 0))} / 2 Selected for Reviewers
+                      </span>
+                      <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
+                        Double-Blind Verified
+                      </span>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <a
-                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx" : (selectedRevisionManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Revised_Manuscript_Blinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Blinded_Revision.docx`}
-                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-emerald-500/60 transition-colors cursor-pointer"
-                    >
+                    {/* Reviewer Blinded Manuscript */}
+                    <div className={`flex items-center justify-between p-2 rounded-lg border transition-all ${
+                      selectedReviewerPackageFiles.blindedManuscript
+                        ? "bg-white dark:bg-slate-900 border-emerald-500/80 shadow-xs"
+                        : "bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60"
+                    }`}>
                       <div className="flex items-center gap-2 truncate">
-                        <FileCheck2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <div className="truncate">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
-                            Blinded Manuscript (.docx)
-                          </span>
-                          <span className="text-[10px] text-slate-400 block font-mono">
-                            84.1 KB · Redacted Details
-                          </span>
-                        </div>
+                        <input
+                          type="checkbox"
+                          id="chk-reviewer-manuscript"
+                          checked={selectedReviewerPackageFiles.blindedManuscript}
+                          onChange={(e) => setSelectedReviewerPackageFiles(prev => ({ ...prev, blindedManuscript: e.target.checked }))}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+                        />
+                        <label htmlFor="chk-reviewer-manuscript" className="flex items-center gap-1.5 truncate cursor-pointer select-none">
+                          <FileCheck2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <div className="truncate">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                              Blinded Manuscript (.docx)
+                            </span>
+                            <span className="text-[10px] text-slate-400 block font-mono">
+                              84.1 KB · Redacted Details
+                            </span>
+                          </div>
+                        </label>
                       </div>
-                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
-                    </a>
+                      <a
+                        href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx" : (selectedRevisionManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                        download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Revised_Manuscript_Blinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Blinded_Revision.docx`}
+                        title="Download Blinded Manuscript"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors ml-1 shrink-0"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
 
-                    <a
-                      href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal-blinded.docx" : (selectedRevisionManuscript?.rebuttalFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                      download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Author_Rebuttal_Blinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Blinded_Rebuttal.docx`}
-                      className="flex items-center justify-between p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-emerald-500/60 transition-colors cursor-pointer"
-                    >
+                    {/* Reviewer Blinded Rebuttal */}
+                    <div className={`flex items-center justify-between p-2 rounded-lg border transition-all ${
+                      selectedReviewerPackageFiles.blindedRebuttal
+                        ? "bg-white dark:bg-slate-900 border-emerald-500/80 shadow-xs"
+                        : "bg-slate-100/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60"
+                    }`}>
                       <div className="flex items-center gap-2 truncate">
-                        <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <div className="truncate">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
-                            Blinded Rebuttal (.docx)
-                          </span>
-                          <span className="text-[10px] text-slate-400 block font-mono">
-                            25.8 KB · Sign-off Redacted
-                          </span>
-                        </div>
+                        <input
+                          type="checkbox"
+                          id="chk-reviewer-rebuttal"
+                          checked={selectedReviewerPackageFiles.blindedRebuttal}
+                          onChange={(e) => setSelectedReviewerPackageFiles(prev => ({ ...prev, blindedRebuttal: e.target.checked }))}
+                          className="h-4 w-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+                        />
+                        <label htmlFor="chk-reviewer-rebuttal" className="flex items-center gap-1.5 truncate cursor-pointer select-none">
+                          <FileText className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <div className="truncate">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate block">
+                              Blinded Rebuttal (.docx)
+                            </span>
+                            <span className="text-[10px] text-slate-400 block font-mono">
+                              25.8 KB · Sign-off Redacted
+                            </span>
+                          </div>
+                        </label>
                       </div>
-                      <Download className="h-3.5 w-3.5 text-slate-400 shrink-0 ml-1" />
-                    </a>
+                      <a
+                        href={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal-blinded.docx" : (selectedRevisionManuscript?.rebuttalFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                        download={selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "SOMED-26-RW01_Author_Rebuttal_Blinded.docx" : `${selectedRevisionManuscript?.id || "Manuscript"}_Blinded_Rebuttal.docx`}
+                        title="Download Blinded Rebuttal"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors ml-1 shrink-0"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 pt-0.5">
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓ ICMJE Redaction:</span> Author name, academic credentials, institutional affiliations, and contact email have been sanitized.
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-0.5">
+                    <span className="flex items-center gap-1">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓ ICMJE Redaction:</span> Author name, academic credentials, institutional affiliations, and contact email have been sanitized.
+                    </span>
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium italic">
+                      Tick boxes indicate documents attached for reviewer dispatch
+                    </span>
                   </div>
                 </div>
               </div>
@@ -12886,6 +12986,7 @@ Specific comments to the Author(s):
                   </div>
                   <Button
                     size="sm"
+                    disabled={!selectedEditorPackageFiles.unblindedManuscript && !selectedEditorPackageFiles.unblindedRebuttal}
                     onClick={() => {
                       if (!selectedRevisionManuscript) return
                       const ms = selectedRevisionManuscript
@@ -12893,6 +12994,11 @@ Specific comments to the Author(s):
                       const journalName = ms.journal || "Scholarly Open: Medicine"
                       const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
                       const directAccessUrl = `${baseUrl}/editorial360?action=handling_editor&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(editor.email)}&name=${encodeURIComponent(editor.name)}`
+
+                      const editorFilesSummary = [
+                        selectedEditorPackageFiles.unblindedManuscript ? "• Revised Manuscript (.docx): Clean Revised Manuscript (Author details included)" : null,
+                        selectedEditorPackageFiles.unblindedRebuttal ? "• Author Rebuttal (.docx): Comprehensive Point-by-Point Response to Reviewers (Letterhead included)" : null,
+                      ].filter(Boolean).join("\n") || "• (No revision files attached)"
 
                       setIsRevisionModalOpen(false)
                       openEmailDispatch({
@@ -12911,8 +13017,7 @@ We are pleased to inform you that the author has submitted the revised version o
 "${ms.title}"
 
 Submission & Revision Files Summary:
-• Revised Manuscript: Clean Revised Manuscript (.docx / PDF)
-• Author Rebuttal: Comprehensive Point-by-Point Response to Reviewers
+${editorFilesSummary}
 
 Peer Review Re-Assessment Context:
 The author team has addressed the critiques from Round 1 peer evaluations (including reports from Dr. Praveen Nagula and Dr. Chaud GJ). The revision incorporates acute workflow benchmarks (<30 min door-to-imaging), clinical coordination protocols, and expanded operational metrics.
@@ -12999,15 +13104,21 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                     </div>
                     <Button
                       size="sm"
-                      disabled={selectedRound2Reviewers.length === 0}
+                      disabled={selectedRound2Reviewers.length === 0 || ((selectedReviewerPackageFiles.blindedManuscript ? 1 : 0) + (selectedReviewerPackageFiles.blindedRebuttal ? 1 : 0)) === 0}
                       onClick={() => {
-                        if (!selectedRevisionManuscript || selectedRound2Reviewers.length === 0) return
+                        const reviewerFilesCount = (selectedReviewerPackageFiles.blindedManuscript ? 1 : 0) + (selectedReviewerPackageFiles.blindedRebuttal ? 1 : 0)
+                        if (!selectedRevisionManuscript || selectedRound2Reviewers.length === 0 || reviewerFilesCount === 0) return
                         const ms = selectedRevisionManuscript
                         const journalName = ms.journal || "Scholarly Open: Medicine"
                         const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
                         const reviewerDetailsList = selectedRound2Reviewers.map(rName => resolveReviewerDetails(rName))
                         const reviewerNamesStr = reviewerDetailsList.map(r => r.name).join(" & ")
                         const allReviewerEmails = reviewerDetailsList.map(r => r.email).join(", ")
+
+                        const reviewerAttachedFiles = [
+                          selectedReviewerPackageFiles.blindedManuscript ? "• Blinded Revised Manuscript (.docx): Clean revised text (author & institutional PII redacted)" : null,
+                          selectedReviewerPackageFiles.blindedRebuttal ? "• Blinded Author Rebuttal (.docx): Point-by-point responses (anonymized for double-blind review)" : null,
+                        ].filter(Boolean).join("\n") || "• (No revision files attached)"
 
                         setIsRevisionModalOpen(false)
                         openEmailDispatch({
@@ -13033,8 +13144,7 @@ Evaluation Summary & Resources:
 • Article Type: Review Article
 • Target Journal: ${journalName}
 • Re-assessment Turnaround: 14 calendar days
-• Blinded Author Rebuttal (.docx): Point-by-point responses (anonymized for double-blind review)
-• Blinded Revised Manuscript (.docx): Clean revised text (author & institutional PII redacted)
+${reviewerAttachedFiles}
 
 Please click the secure button below to access the evaluation form and revised files:
 ${baseUrl}/editorial360?action=review&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}
