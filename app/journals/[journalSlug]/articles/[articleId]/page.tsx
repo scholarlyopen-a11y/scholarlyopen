@@ -26,12 +26,10 @@ interface ArticlePageProps {
 }
 
 export async function generateStaticParams() {
-  return articles
-    .filter((article) => !article.isUnpublishedProof)
-    .map((article) => ({
-      journalSlug: article.journalSlug,
-      articleId: article.id,
-    }))
+  return articles.map((article) => ({
+    journalSlug: article.journalSlug,
+    articleId: article.id,
+  }))
 }
 
 export async function generateMetadata({ params }: ArticlePageProps) {
@@ -40,9 +38,12 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   if (!article) return {}
 
   const isSample = isSampleArticle(article)
-  const titleText = isSample 
-    ? `[Format Preview] ${article.title} | Scholarly Open` 
-    : `${article.title} | Scholarly Open`
+  const isProof = Boolean(article.isUnpublishedProof)
+  const titleText = isProof
+    ? `[Confidential Proof] ${article.title} | Scholarly Open`
+    : isSample 
+      ? `[Format Preview] ${article.title} | Scholarly Open` 
+      : `${article.title} | Scholarly Open`
   const descText = article.abstract.slice(0, 160) + (article.abstract.length > 160 ? "..." : "")
 
   // Format journal name nicely from slug
@@ -58,9 +59,18 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   return {
     title: titleText,
     description: descText,
-    robots: (isSample || article.isUnpublishedProof) ? {
+    robots: (isSample || isProof) ? {
       index: false,
       follow: false,
+      nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+        noimageindex: true,
+        "max-video-preview": -1,
+        "max-image-preview": "none",
+        "max-snippet": -1,
+      },
     } : {
       index: true,
       follow: true,
@@ -81,8 +91,8 @@ export async function generateMetadata({ params }: ArticlePageProps) {
     alternates: {
       canonical: articleFullUrl,
     },
-    // Google Scholar and Academic Search Engine Citation Tags
-    other: !isSample ? {
+    // Google Scholar and Academic Search Engine Citation Tags (omitted for unreleased proofs)
+    other: (!isSample && !isProof) ? {
       "citation_title": article.title,
       "citation_author": article.authors.join("; "),
       "citation_publication_date": article.publishedDate.replace(/-/g, "/"),
@@ -102,17 +112,11 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   }
 }
 
-export default async function ArticleDetailPage({ params, searchParams }: ArticlePageProps) {
+export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   const { journalSlug, articleId } = await params
-  const sp = searchParams ? await searchParams : {}
   const article = articles.find((a) => a.id === articleId && a.journalSlug === journalSlug)
 
   if (!article) {
-    notFound()
-  }
-
-  // If this article is an unreleased proof, hide it completely on production (unless authorized preview token is provided)
-  if (article.isUnpublishedProof && process.env.NODE_ENV === "production" && sp.preview !== "somed26_review_access") {
     notFound()
   }
 
@@ -177,7 +181,27 @@ export default async function ArticleDetailPage({ params, searchParams }: Articl
       <main className="flex-1 py-10 md:py-14">
         <div className="container max-w-5xl mx-auto px-4">
           {article.id === "SOMED-26-RW01" ? (
-            <ArticleFullTextViewer article={samLeeArticleFullText} />
+            <>
+              {article.isUnpublishedProof && (
+                <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-center justify-between gap-3 shadow-xs">
+                  <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <div>
+                      <div className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                        Confidential Proofreading Preview · Editorial Evaluation Desk
+                      </div>
+                      <div className="text-[11px] text-amber-700 dark:text-amber-400">
+                        This article is an unreleased proof. It is hidden from public discovery and search engines (noindex, nofollow).
+                      </div>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 border-amber-300 shrink-0">
+                    Unreleased Proof
+                  </Badge>
+                </div>
+              )}
+              <ArticleFullTextViewer article={samLeeArticleFullText} />
+            </>
           ) : (
             <>
               {/* Navigation link back to Journal */}
