@@ -78,8 +78,7 @@ export function ArticleFullTextViewer() {
     setTimeout(() => setCopiedCitation(null), 3000)
   }
 
-  // Helper to parse in-text citations into interactive superscripts crosslinked to references
-  const renderTextWithCitations = (text: string) => {
+  const renderCitationsOnly = (text: string) => {
     const uniMap: Record<string, string> = {
       '¹':'1', '²':'2', '³':'3', '⁴':'4', '⁵':'5',
       '⁶':'6', '⁷':'7', '⁸':'8', '⁹':'9', '⁰':'0',
@@ -149,6 +148,34 @@ export function ArticleFullTextViewer() {
     }
 
     return parts.length > 0 ? parts : text
+  }
+
+  // Helper to parse markdown bold (**text**), italics (*text*), and in-text citations
+  const renderTextWithCitations = (text: string) => {
+    if (!text) return text
+
+    // Parse Markdown bold and italics first, then parse citations inside each token
+    const mdTokens = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
+    
+    return mdTokens.map((token, idx) => {
+      if (token.startsWith("**") && token.endsWith("**")) {
+        const inner = token.slice(2, -2)
+        return (
+          <strong key={idx} className="font-bold text-foreground">
+            {renderCitationsOnly(inner)}
+          </strong>
+        )
+      } else if (token.startsWith("*") && token.endsWith("*")) {
+        const inner = token.slice(1, -1)
+        return (
+          <em key={idx} className="italic text-foreground">
+            {renderCitationsOnly(inner)}
+          </em>
+        )
+      } else {
+        return <React.Fragment key={idx}>{renderCitationsOnly(token)}</React.Fragment>
+      }
+    })
   }
 
   const amaCitation = `Lee S. Prevent Earlier, Recognize Sooner, Treat Faster: A Proposed Evidence-Based Medicine–Integrated Rapid Response Framework (EBM-IRRF) for Acute Aortic Dissection. Scholarly Open: Medicine. 2026;1(1):SOMED-26-RW01.`
@@ -546,19 +573,19 @@ export function ArticleFullTextViewer() {
                                 </h5>
                                 
                                 <div className="space-y-2 max-w-2xl mx-auto">
-                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-medium text-foreground">
+                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-bold text-foreground">
                                     1. Prevention and Risk-Based Surveillance
                                   </div>
                                   <div className="text-center text-muted-foreground font-bold text-base leading-none">↓</div>
-                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-medium text-foreground">
+                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-bold text-foreground">
                                     2. Early Recognition and Diagnostic Escalation
                                   </div>
                                   <div className="text-center text-muted-foreground font-bold text-base leading-none">↓</div>
-                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-medium text-foreground">
+                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-bold text-foreground">
                                     3. Regional Referral and Interhospital Transfer
                                   </div>
                                   <div className="text-center text-muted-foreground font-bold text-base leading-none">↓</div>
-                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-medium text-foreground">
+                                  <div className="p-3 rounded-lg border border-border bg-muted/30 text-center font-bold text-foreground">
                                     4. Multidisciplinary Emergency Readiness and Definitive Treatment
                                   </div>
                                 </div>
@@ -572,16 +599,16 @@ export function ArticleFullTextViewer() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                   <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-1">
-                                    <span className="font-semibold text-foreground block">5. Continuous Evidence-Based Medicine Support</span>
-                                    <p className="text-muted-foreground text-xs leading-relaxed font-normal">Including optional independent third-party EBM consultation.</p>
+                                    <span className="font-bold text-foreground block">5. Continuous Evidence-Based Medicine Support</span>
+                                    <p className="text-foreground/90 text-xs leading-relaxed font-bold">Including optional independent third-party EBM consultation.</p>
                                   </div>
                                   <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-1">
-                                    <span className="font-semibold text-foreground block">6. Appropriately Validated, Clinician-Supervised AI Assistance</span>
-                                    <p className="text-muted-foreground text-xs leading-relaxed font-normal">Clinician-supervised diagnostic and triage algorithmic assistance.</p>
+                                    <span className="font-bold text-foreground block">6. Appropriately Validated, Clinician-Supervised AI Assistance</span>
+                                    <p className="text-foreground/90 text-xs leading-relaxed font-bold">Clinician-supervised diagnostic and triage algorithmic assistance.</p>
                                   </div>
                                   <div className="p-3 rounded-lg border border-border bg-muted/30 space-y-1">
-                                    <span className="font-semibold text-foreground block">7. Tiered Organizational Leadership, Accountability, and Continuous Quality Improvement</span>
-                                    <p className="text-muted-foreground text-xs leading-relaxed font-normal">Institutional escalation, resource availability, and safety accountability.</p>
+                                    <span className="font-bold text-foreground block">7. Tiered Organizational Leadership, Accountability, and Continuous Quality Improvement</span>
+                                    <p className="text-foreground/90 text-xs leading-relaxed font-bold">Institutional escalation, resource availability, and safety accountability.</p>
                                   </div>
                                 </div>
                               </div>
@@ -591,7 +618,7 @@ export function ArticleFullTextViewer() {
                                 <h5 className="font-bold text-xs uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-1.5">
                                   Patient-Centered Principle Across All Components
                                 </h5>
-                                <div className="p-3 rounded-lg border border-border bg-muted/20 text-center text-xs sm:text-sm font-medium text-foreground">
+                                <div className="p-3 rounded-lg border border-border bg-muted/20 text-center text-xs sm:text-sm font-bold text-foreground">
                                   Patient Participation • Patient Autonomy • Informed Decision-Making • Patient Safety
                                 </div>
                               </div>
@@ -617,11 +644,12 @@ export function ArticleFullTextViewer() {
                       }
 
                       // Check for Numbered Components 1-7 (bold lead-in ONLY, text in normal font weight with crosslinked citations)
-                      const numberedMatch = p.match(/^([1-7]\.\s+[^.]+\.)\s+(.+)$/)
+                      const numberedMatch = p.match(/^(\*{0,2}[1-7]\.\s+[^.]+\.\*{0,2})\s+(.+)$/)
                       if (numberedMatch) {
+                        const leadClean = numberedMatch[1].replace(/\*\*/g, '')
                         return (
                           <p key={pIdx} className="text-foreground/90 leading-relaxed font-normal">
-                            <strong className="font-bold text-foreground">{numberedMatch[1]}</strong>{" "}
+                            <strong className="font-bold text-foreground">{leadClean}</strong>{" "}
                             <span>{renderTextWithCitations(numberedMatch[2])}</span>
                           </p>
                         )
