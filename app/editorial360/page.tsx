@@ -6562,11 +6562,11 @@ Specific comments to the Author(s):
                             },
                             {
                               id: "low_income_fund",
-                              titleEn: "Donate to Low-Income Scholars",
-                              titleDe: "Spende für einkommensschwache Länder",
-                              descEn: "Donate your fee waiver credit to support unfunded researchers and scholars from low-income developing nations.",
-                              descDe: "Übertragen Sie Ihr Guthaben zur Unterstützung von Forschern aus einkommensschwachen Ländern ohne Förderung.",
-                              badge: "Global South"
+                              titleEn: "Donate to World Bank Low-Income Fund",
+                              titleDe: "Spende für einkommensschwache Volkswirtschaften",
+                              descEn: "Donate your fee waiver credit to support unfunded researchers and scholars from World Bank low-income economies.",
+                              descDe: "Übertragen Sie Ihr Guthaben zur Unterstützung von Forschern aus Ländern mit niedrigem Einkommen (World Bank Low-Income Economies).",
+                              badge: "Global Equity"
                             },
                             {
                               id: "library_fund",
@@ -12556,7 +12556,7 @@ Specific comments to the Author(s):
                               </span>
                             </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">
-                              Track Article Processing Charges across all journals, record 50% inaugural launch discounts, manage institutional purchase orders, and export Plan S compliant official PDF tax invoices.
+                              Track Article Processing Charges across all journals, record 50% inaugural launch discounts, manage institutional purchase orders, and export official PDF tax invoices.
                             </p>
                           </div>
                           
@@ -17141,7 +17141,7 @@ Specific comments to the Author(s):
                 <div className="flex items-center gap-2">
                   <Receipt className="h-5 w-5 text-[#0b99ff]" />
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Official Tax Invoice · Plan S Compliant
+                    Official Tax Invoice · Gold Open Access
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -17249,7 +17249,7 @@ Specific comments to the Author(s):
                           <td className="py-4 px-4 font-sans">
                             <div className="font-bold text-slate-900 dark:text-white">Gold Open Access Article Processing Charge (APC)</div>
                             <div className="text-[11px] text-slate-500 mt-0.5">
-                              Plan S & DOAJ compliant peer review, high-performance XML typesetting, CrossRef DOI deposit, permanent archival on CLOCKSS / PubMed Central.
+                              Peer review coordination, high-performance XML typesetting, CrossRef DOI deposit, permanent digital archiving.
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center">1</td>
