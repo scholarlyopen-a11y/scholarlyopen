@@ -64,12 +64,7 @@ export default function JoinEditorialBoardPage() {
     { id: "data-science", name: t("journals.ds.title") },
     { id: "engineering", name: t("journals.eng.title") },
     { id: "environmental-science", name: t("journals.env.title") },
-    { id: "clinical-ai-digital-health", name: t("journals.clinical-ai.title") },
-    { id: "ai-safety-governance", name: t("journals.ai-safety.title") },
     { id: "decarbonization-carbon-tech", name: t("journals.decarbonization.title") },
-    { id: "quantum-engineering", name: t("journals.quantum-engineering.title") },
-    { id: "synthetic-biology-bio-design", name: t("journals.synthetic-biology.title") },
-    { id: "space-resources-orbital-economy", name: t("journals.space-resources.title") },
   ]
 
   const roles = [

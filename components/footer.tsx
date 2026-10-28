@@ -117,7 +117,7 @@ export function Footer() {
   const { t } = useLanguage()
 
   const footerLinks = {
-    coreJournals: [
+    journals: [
       { name: t("journals.ss.title"), href: "/journals/social-sciences-humanities" },
       { name: t("journals.bio.title"), href: "/journals/biology" },
       { name: t("journals.chem.title"), href: "/journals/chemistry" },
@@ -125,14 +125,7 @@ export function Footer() {
       { name: t("journals.ds.title"), href: "/journals/data-science" },
       { name: t("journals.eng.title"), href: "/journals/engineering" },
       { name: t("journals.env.title"), href: "/journals/environmental-science" },
-    ],
-    frontiersJournals: [
-      { name: t("journals.clinical-ai.title"), href: "/journals/clinical-ai-digital-health" },
-      { name: t("journals.ai-safety.title"), href: "/journals/ai-safety-governance" },
       { name: t("journals.decarbonization.title"), href: "/journals/decarbonization-carbon-tech" },
-      { name: t("journals.quantum-engineering.title"), href: "/journals/quantum-engineering" },
-      { name: t("journals.synthetic-biology.title"), href: "/journals/synthetic-biology-bio-design" },
-      { name: t("journals.space-resources.title"), href: "/journals/space-resources-orbital-economy" },
     ],
     forAuthors: [
       { name: t("nav.authorGuidelines"), href: "/author-guidelines" },
@@ -187,7 +180,7 @@ export function Footer() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3">
@@ -223,28 +216,11 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Core Series */}
+          {/* Journals */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">Core Series</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">{t("nav.journals")}</h3>
             <ul className="mt-4 space-y-3">
-              {footerLinks.coreJournals.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/70 hover:text-white transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Emerging Frontiers */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">Emerging Frontiers</h3>
-            <ul className="mt-4 space-y-3">
-              {footerLinks.frontiersJournals.map((link) => (
+              {footerLinks.journals.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}

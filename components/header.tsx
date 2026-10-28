@@ -30,7 +30,7 @@ export function Header() {
     setMounted(true)
   }, [])
 
-  const coreJournals = [
+  const journalsList = [
     { name: t("journals.ss.title"), href: "/journals/social-sciences-humanities" },
     { name: t("journals.bio.title"), href: "/journals/biology" },
     { name: t("journals.chem.title"), href: "/journals/chemistry" },
@@ -38,15 +38,7 @@ export function Header() {
     { name: t("journals.ds.title"), href: "/journals/data-science" },
     { name: t("journals.eng.title"), href: "/journals/engineering" },
     { name: t("journals.env.title"), href: "/journals/environmental-science" },
-  ]
-
-  const frontiersJournals = [
-    { name: t("journals.clinical-ai.title"), href: "/journals/clinical-ai-digital-health" },
-    { name: t("journals.ai-safety.title"), href: "/journals/ai-safety-governance" },
     { name: t("journals.decarbonization.title"), href: "/journals/decarbonization-carbon-tech" },
-    { name: t("journals.quantum-engineering.title"), href: "/journals/quantum-engineering" },
-    { name: t("journals.synthetic-biology.title"), href: "/journals/synthetic-biology-bio-design" },
-    { name: t("journals.space-resources.title"), href: "/journals/space-resources-orbital-economy" },
   ]
 
   const navigation = [
@@ -150,45 +142,15 @@ export function Header() {
                       <ChevronDown className="ml-0.5 h-2.5 w-2.5 xl:h-3 xl:w-3 shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-60">
+                  <DropdownMenuContent align="start" className="w-72">
                     {item.isJournals ? (
-                      <>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
-                            Core Series
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuPortal>
-                            <DropdownMenuSubContent className="w-64">
-                              {coreJournals.map((child) => (
-                                <DropdownMenuItem key={child.name} asChild>
-                                  <Link href={child.href} className="w-full cursor-pointer text-sm">
-                                    {child.name}
-                                  </Link>
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuSubContent>
-                          </DropdownMenuPortal>
-                        </DropdownMenuSub>
-                        
-                        <DropdownMenuSeparator />
-                        
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger className="cursor-pointer font-medium text-sm">
-                            Emerging Frontiers
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuPortal>
-                            <DropdownMenuSubContent className="w-64">
-                              {frontiersJournals.map((child) => (
-                                <DropdownMenuItem key={child.name} asChild>
-                                  <Link href={child.href} className="w-full cursor-pointer text-sm">
-                                    {child.name}
-                                  </Link>
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuSubContent>
-                          </DropdownMenuPortal>
-                        </DropdownMenuSub>
-                      </>
+                      journalsList.map((child) => (
+                        <DropdownMenuItem key={child.name} asChild>
+                          <Link href={child.href} className="w-full cursor-pointer text-sm">
+                            {child.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))
                     ) : (
                       item.children.map((child) => (
                         <DropdownMenuItem key={child.name} asChild>
@@ -274,33 +236,17 @@ export function Header() {
                     {item.name}
                   </span>
                   {item.isJournals ? (
-                    <div className="space-y-4 pt-1">
-                      <div>
-                        <span className="block px-6 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Core Series</span>
-                        {coreJournals.map((child) => (
-                          <Link
-                            key={child.name}
-                            href={child.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block px-8 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
-                      <div>
-                        <span className="block px-6 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Emerging Frontiers</span>
-                        {frontiersJournals.map((child) => (
-                          <Link
-                            key={child.name}
-                            href={child.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block px-8 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
+                    <div className="space-y-1 pt-1">
+                      {journalsList.map((child) => (
+                        <Link
+                          key={child.name}
+                          href={child.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block px-6 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                        >
+                          {child.name}
+                        </Link>
+                      ))}
                     </div>
                   ) : (
                     item.children.map((child) => (

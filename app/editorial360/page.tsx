@@ -13255,25 +13255,15 @@ Specific comments to the Author(s):
                       onChange={(e) => setNewJournal(e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff] transition-all"
                     >
-                      <optgroup label="Core Disciplinary Series">
                         <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
                         <option value="Scholarly Open: Biology">Scholarly Open: Biology</option>
                         <option value="Scholarly Open: Chemistry">Scholarly Open: Chemistry</option>
                         <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering & Applied Sciences</option>
                         <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences & Humanities</option>
-                        <option value="Scholarly Open: Social Sciences Open">Scholarly Open: Social Sciences Open</option>
                         <option value="Scholarly Open: Environmental Science">Scholarly Open: Environmental Science</option>
-                      </optgroup>
-                      <optgroup label="Emerging Frontiers Series">
-                        <option value="Scholarly Open: Clinical AI & Digital Health">Scholarly Open: Clinical AI & Digital Health</option>
-                        <option value="Scholarly Open: AI Safety & Governance">Scholarly Open: AI Safety & Governance</option>
                         <option value="Scholarly Open: Data Science & Analytics">Scholarly Open: Data Science & Analytics</option>
                         <option value="Scholarly Open: Decarbonization & Carbon Tech">Scholarly Open: Decarbonization & Carbon Tech</option>
-                        <option value="Scholarly Open: Quantum Engineering">Scholarly Open: Quantum Engineering</option>
-                        <option value="Scholarly Open: Synthetic Biology & Bio-Design">Scholarly Open: Synthetic Biology & Bio-Design</option>
-                        <option value="Scholarly Open: Space Resources & Orbital Economy">Scholarly Open: Space Resources & Orbital Economy</option>
-                      </optgroup>
-                    </select>
+                      </select>
                   </div>
 
                   {/* Submission Stage & Article Category */}

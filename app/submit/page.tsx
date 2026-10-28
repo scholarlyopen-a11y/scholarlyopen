@@ -512,23 +512,14 @@ export default function SubmitPage() {
                           required
                         >
                           <option value="">Select a discipline / journal</option>
-                          <optgroup label="Core Series">
-                            <option value="social-sciences-humanities">Social Sciences & Humanities</option>
-                            <option value="biology">Biology</option>
-                            <option value="chemistry">Chemistry</option>
-                            <option value="medicine">Medicine</option>
-                            <option value="data-science">Data Science</option>
-                            <option value="engineering">Engineering & Applied Sciences</option>
-                            <option value="environmental-science">Environmental Science</option>
-                          </optgroup>
-                          <optgroup label="Emerging Frontiers Series">
-                            <option value="clinical-ai-digital-health">Clinical AI & Digital Health</option>
-                            <option value="ai-safety-governance">AI Safety & Governance</option>
-                            <option value="decarbonization-carbon-tech">Decarbonization & Carbon Tech</option>
-                            <option value="quantum-engineering">Quantum Engineering</option>
-                            <option value="synthetic-biology-bio-design">Synthetic Biology & Bio-Design</option>
-                            <option value="space-resources-orbital-economy">Space Resources & Orbital Economy</option>
-                          </optgroup>
+                          <option value="social-sciences-humanities">Social Sciences & Humanities</option>
+                          <option value="biology">Biology</option>
+                          <option value="chemistry">Chemistry</option>
+                          <option value="medicine">Medicine</option>
+                          <option value="data-science">Data Science</option>
+                          <option value="engineering">Engineering & Applied Sciences</option>
+                          <option value="environmental-science">Environmental Science</option>
+                          <option value="decarbonization-carbon-tech">Decarbonization & Carbon Tech</option>
                         </select>
                       </div>
                     </div>

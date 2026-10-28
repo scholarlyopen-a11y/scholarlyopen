@@ -114,36 +114,7 @@ const apcDetails = [
       "Data visualization and sustainability support",
     ],
   },
-  {
-    titleKey: "journals.clinical-ai.title",
-    regularAPC: "2,000",
-    launchAPC: "1,000",
-    currency: "EUR",
-    includes: [
-      "Full Gold open access publication",
-      "Peer review coordination",
-      "Professional copyediting",
-      "XML and PDF production",
-      "DOI assignment",
-      "Permanent digital archiving",
-      "AI verification and clinical coding validation",
-    ],
-  },
-  {
-    titleKey: "journals.ai-safety.title",
-    regularAPC: "1,500",
-    launchAPC: "750",
-    currency: "EUR",
-    includes: [
-      "Full Gold open access publication",
-      "Peer review coordination",
-      "Professional copyediting",
-      "XML and PDF production",
-      "DOI assignment",
-      "Permanent digital archiving",
-      "Open data and codebase transparency support",
-    ],
-  },
+
   {
     titleKey: "journals.decarbonization.title",
     regularAPC: "1,600",
@@ -159,51 +130,7 @@ const apcDetails = [
       "Carbon accounting and lifecycle assessment verification",
     ],
   },
-  {
-    titleKey: "journals.quantum-engineering.title",
-    regularAPC: "1,650",
-    launchAPC: "825",
-    currency: "EUR",
-    includes: [
-      "Full Gold open access publication",
-      "Peer review coordination",
-      "Professional copyediting",
-      "XML and PDF production",
-      "DOI assignment",
-      "Permanent digital archiving",
-      "Mathematical schema and hardware blueprint formatting",
-    ],
-  },
-  {
-    titleKey: "journals.synthetic-biology.title",
-    regularAPC: "1,700",
-    launchAPC: "850",
-    currency: "EUR",
-    includes: [
-      "Full Gold open access publication",
-      "Peer review coordination",
-      "Professional copyediting",
-      "XML and PDF production",
-      "DOI assignment",
-      "Permanent digital archiving",
-      "Gene sequence submission and plasmid mapping support",
-    ],
-  },
-  {
-    titleKey: "journals.space-resources.title",
-    regularAPC: "1,550",
-    launchAPC: "775",
-    currency: "EUR",
-    includes: [
-      "Full Gold open access publication",
-      "Peer review coordination",
-      "Professional copyediting",
-      "XML and PDF production",
-      "DOI assignment",
-      "Permanent digital archiving",
-      "Legal policy and orbital slot map indexing",
-    ],
-  },
+
 ]
 
 const waiverEligibility = [
@@ -374,7 +301,7 @@ export default function APCFeesPage() {
             <div className="max-w-2xl mb-12">
               <h2 className="text-3xl font-bold tracking-tight">Current APC Rates</h2>
               <p className="mt-4 text-muted-foreground">
-                Our APCs vary by discipline to reflect the different costs and services involved. These rates apply across our portfolio of 13 Scholarly Open journals.
+                Our APCs vary by discipline to reflect the different costs and services involved. These rates apply across our portfolio of Scholarly Open journals.
               </p>
             </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Unlock, Leaf, Heart, Settings, Stethoscope, Cpu, Sprout, UsersRound, HeartPulse, Atom } from "lucide-react"
+import { ArrowRight, BookOpen, Users, Shield, Globe, FileCheck, Microscope, Landmark, Brain, Beaker, Unlock, Leaf, Heart, Settings, Stethoscope, Cpu, Sprout, UsersRound, HeartPulse, Atom, Wind } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header"
@@ -71,7 +71,7 @@ export default function HomePage() {
     },
   ]
 
-  const coreJournals = [
+  const journals = [
     {
       title: t("journals.ss.title"),
       description: t("journals.ss.description"),
@@ -128,54 +128,11 @@ export default function HomePage() {
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
     },
-  ]
-
-  const frontiersJournals = [
-    {
-      title: t("journals.clinical-ai.title"),
-      description: t("journals.clinical-ai.description"),
-      icon: HeartPulse,
-      href: "/journals/clinical-ai-digital-health",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
-    {
-      title: t("journals.ai-safety.title"),
-      description: t("journals.ai-safety.description"),
-      icon: Brain,
-      href: "/journals/ai-safety-governance",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
     {
       title: t("journals.decarbonization.title"),
       description: t("journals.decarbonization.description"),
-      icon: Leaf,
+      icon: Wind,
       href: "/journals/decarbonization-carbon-tech",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
-    {
-      title: t("journals.quantum-engineering.title"),
-      description: t("journals.quantum-engineering.description"),
-      icon: Atom,
-      href: "/journals/quantum-engineering",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
-    {
-      title: t("journals.synthetic-biology.title"),
-      description: t("journals.synthetic-biology.description"),
-      icon: Microscope,
-      href: "/journals/synthetic-biology-bio-design",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
-    {
-      title: t("journals.space-resources.title"),
-      description: t("journals.space-resources.description"),
-      icon: Globe,
-      href: "/journals/space-resources-orbital-economy",
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
     },
@@ -183,7 +140,7 @@ export default function HomePage() {
 
   const stats = [
     { value: "100%", label: t("stats.openAccess") },
-    { value: "13", label: t("stats.journals") },
+    { value: "8", label: t("stats.journals") },
     { value: String(editorCount), label: t("stats.editors") },
     { value: "Global", label: t("stats.reach") },
     { value: "COPE", label: t("stats.guidelines") },
@@ -254,74 +211,31 @@ export default function HomePage() {
                 {t("journals.subtitle")}
               </p>
             </div>
-            <Tabs defaultValue="core" className="w-full">
-              <div className="flex justify-center mb-8">
-                <TabsList className="bg-muted p-1 rounded-xl">
-                  <TabsTrigger value="core" className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">
-                    Core Series
-                  </TabsTrigger>
-                  <TabsTrigger value="frontiers" className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">
-                    Emerging Frontiers
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="core" className="focus-visible:outline-none animate-in fade-in duration-300">
-                <div className="grid gap-6 md:grid-cols-2">
-                  {coreJournals.map((journal) => (
-                    <Card key={journal.title} className="relative overflow-hidden border-border hover:border-primary/50 transition-colors group">
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <journal.icon className="h-6 w-6 text-primary" />
-                          </div>
-                          <Badge className={journal.typeColor}>{journal.type}</Badge>
-                        </div>
-                        <CardTitle className="mt-4 group-hover:text-primary transition-colors">{journal.title}</CardTitle>
-                        <CardDescription className="text-base">{journal.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Link 
-                          href={journal.href} 
-                          className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                        >
-                          {t("journals.viewJournal")}
-                          <ArrowRight className="ml-1 h-4 w-4" />
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="frontiers" className="focus-visible:outline-none animate-in fade-in duration-300">
-                <div className="grid gap-6 md:grid-cols-2">
-                  {frontiersJournals.map((journal) => (
-                    <Card key={journal.title} className="relative overflow-hidden border-border hover:border-primary/50 transition-colors group">
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <journal.icon className="h-6 w-6 text-primary" />
-                          </div>
-                          <Badge className={journal.typeColor}>{journal.type}</Badge>
-                        </div>
-                        <CardTitle className="mt-4 group-hover:text-primary transition-colors">{journal.title}</CardTitle>
-                        <CardDescription className="text-base">{journal.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Link 
-                          href={journal.href} 
-                          className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                        >
-                          {t("journals.viewJournal")}
-                          <ArrowRight className="ml-1 h-4 w-4" />
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
+            <div className="grid gap-6 md:grid-cols-2">
+              {journals.map((journal) => (
+                <Card key={journal.title} className="relative overflow-hidden border-border hover:border-primary/50 transition-colors group">
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <journal.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <Badge className={journal.typeColor}>{journal.type}</Badge>
+                    </div>
+                    <CardTitle className="mt-4 group-hover:text-primary transition-colors">{journal.title}</CardTitle>
+                    <CardDescription className="text-base">{journal.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Link 
+                      href={journal.href} 
+                      className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {t("journals.viewJournal")}
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </section>
 

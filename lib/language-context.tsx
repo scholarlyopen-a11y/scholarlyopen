@@ -52,7 +52,7 @@ export const translations = {
 
     // Journals Section
     "journals.title": "Our Journals",
-    "journals.subtitle": "We publish high-quality research across our core disciplines and our new Emerging Frontiers Series, all offering Gold open access.",
+    "journals.subtitle": "We publish high-quality, peer-reviewed research across key scientific disciplines, all offering Gold open access.",
     "journals.viewJournal": "View Journal",
     "journals.bio.title": "Scholarly Open: Biology",
     "journals.bio.description": "Experimental and translational biology spanning molecular, cellular, and systems research.",
@@ -712,7 +712,7 @@ export const translations = {
 
     // Journals Section
     "journals.title": "Unsere Zeitschriften",
-    "journals.subtitle": "Wir veröffentlichen hochwertige Forschung in unseren Kerndisziplinen und unserer neuen Serie 'Emerging Frontiers' mit vollständigem Gold-Open-Access.",
+    "journals.subtitle": "Wir veröffentlichen hochwertige, begutachtete Forschung in zentralen wissenschaftlichen Disziplinen mit vollständigem Gold-Open-Access.",
     "journals.viewJournal": "Zeitschrift ansehen",
     "journals.bio.title": "Scholarly Open: Biology",
     "journals.bio.description": "Experimentelle und translationale Biologie von molekularer bis systemischer Ebene.",
