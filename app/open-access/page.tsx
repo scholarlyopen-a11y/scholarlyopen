@@ -248,28 +248,20 @@ export default function OpenAccessPage() {
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold tracking-tight">Funder Compliance</h2>
               <p className="mt-4 text-muted-foreground">
-                Our open access policies are designed to comply with the requirements of major research funders.
+                Funder policies vary. Check your funder’s rules before submitting.
               </p>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 max-w-xl mx-auto">
                 <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <p className="font-medium">Plan S</p>
-                  <p className="text-sm text-muted-foreground">cOAlition S</p>
+                  <p className="font-medium">Plan S Alignment</p>
+                  <p className="text-sm text-muted-foreground">Working toward Plan S compliance</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <p className="font-medium">Horizon Europe</p>
-                  <p className="text-sm text-muted-foreground">European Commission</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <p className="font-medium">DFG</p>
-                  <p className="text-sm text-muted-foreground">German Research Foundation</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <p className="font-medium">Wellcome Trust</p>
-                  <p className="text-sm text-muted-foreground">UK Funder</p>
+                  <p className="font-medium">CC BY 4.0 Licensing</p>
+                  <p className="text-sm text-muted-foreground">Immediate open access rights</p>
                 </div>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                If your funder has specific requirements not listed here, please contact us to discuss compliance options.
+                Research funder eligibility and open access reimbursement policies vary. We recommend verifying your funding institution’s specific mandates prior to submission.
               </p>
             </div>
           </div>

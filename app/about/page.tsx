@@ -227,7 +227,7 @@ export default function AboutPage() {
                   <h3 className="text-lg font-bold">Independent German Academic Initiative</h3>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Scholarly Open is an independent Gold Open Access publishing and scientific training initiative operating in its founding phase (<em>in Gründung / i.G.</em>) in Germany. The platform is committed to FAIR data principles, community-led peer review, and transparent APC structures with comprehensive fee waivers for inaugural authors.
+                  Scholarly Open is an independent Gold Open Access publishing and scientific training initiative operating in its pre-incorporation founding phase (<em>Vorgründungsphase</em>) in Germany. The platform is committed to FAIR data principles, community-led peer review, and transparent APC structures with comprehensive fee waivers for inaugural authors.
                 </p>
               </div>
 

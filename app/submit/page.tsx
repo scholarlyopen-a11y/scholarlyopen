@@ -94,7 +94,7 @@ export default function SubmitPage() {
                   Manuscript Submission Receipt
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Scholarly Open i.G. • Editorial Office
+                  Scholarly Open • Editorial Office
                 </p>
               </div>
               <div className="flex items-center gap-2">

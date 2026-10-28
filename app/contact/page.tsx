@@ -49,7 +49,7 @@ export default function ContactPage() {
       title: t("contact.info.address"),
       details: [
         { label: t("contact.info.address"), value: "Am Gonsenheim 49a, 55122 Mainz, Germany" },
-        { label: t("contact.info.headquarters"), value: "Scholarly Open i.G." },
+        { label: t("contact.info.headquarters"), value: "Scholarly Open" },
       ],
     },
     {

@@ -195,7 +195,7 @@ export default function JoinEditorialBoardPage() {
                           Reviewer Gateway
                         </span>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Want priority assignment and eligibility for the €35–€50 honoraria pool? Take our 15-minute standardized online assessment.
+                          Want priority assignment and eligibility for the €10–€50 honoraria pool (capped at 1 review per month)? Take our 15-minute standardized online assessment.
                         </p>
                       </div>
                       <Button asChild size="sm" className="text-xs font-semibold shrink-0 gap-1.5 cursor-pointer">
@@ -223,7 +223,7 @@ export default function JoinEditorialBoardPage() {
                               <Award className="h-4 w-4" /> Fast-Track: Reviewer Gateway
                             </h4>
                             <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                              Complete our 15-minute standardized online test evaluating constructive phrasing and COPE ethics to become a <strong>Certified Peer Reviewer</strong> and unlock the €35–€50 honoraria pool.
+                              Complete our 15-minute standardized online test evaluating constructive phrasing and COPE ethics to become a <strong>Certified Peer Reviewer</strong> and unlock the €10–€50 honoraria pool (capped at 1 review per month).
                             </p>
                             <div className="mt-4">
                               <Button asChild className="w-full text-xs font-semibold gap-1.5 cursor-pointer">

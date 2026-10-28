@@ -68,7 +68,7 @@ const principles = [
   },
   {
     title: "Conflict of Interest",
-    description: "We require disclosure of any potential conflicts of interest and ensure reviewers have no competing interests.",
+    description: "We require disclosure of competing interests and screen for conflicts.",
   },
   {
     title: "Appeals Process",
@@ -166,9 +166,9 @@ export default function PeerReviewPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight">Expected Timelines</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Target Timelines (Not Guaranteed)</h2>
                 <p className="mt-4 text-muted-foreground">
-                  We are committed to providing timely decisions to help you advance your research.
+                  Target timelines, not guaranteed. As an emerging platform, our initial review cycles are guided by these benchmark targets while measured throughput data is being established.
                 </p>
                 <div className="mt-8 space-y-4">
                   <div className="flex items-center gap-4">
@@ -266,7 +266,7 @@ export default function PeerReviewPage() {
                   <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <span><strong>Editor Rigor Scoring & Dynamic Calculation:</strong> The Handling Editor assigns an Editorial Rigor Score (0–100%). Reports scoring ≥ 80% dynamically receive <strong>€35 to €50 EUR</strong> (strictly capped at €50 EUR max). Reports scoring below 80% are ineligible until revised to COPE standards.</span>
+                      <span><strong>Editor Rigor Scoring & Dynamic Calculation:</strong> The Handling Editor assigns an Editorial Rigor Score (0–100%). Reports scoring ≥ 80% dynamically receive <strong>€10 to €50 EUR</strong> (capped at 1 review per month). Reports scoring below 80% are ineligible until revised to COPE standards.</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
@@ -274,11 +274,11 @@ export default function PeerReviewPage() {
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <span><strong>100% Publication Waiver Alternative:</strong> Reviewers can convert honoraria into 100% APC waiver credits for their own future submissions, with an enhanced 3× credit multiplier for scholars from low-income nations.</span>
+                      <span><strong>100% Publication Waiver Alternative:</strong> Reviewers can convert honoraria into 100% APC waiver credits for their own future submissions, with an enhanced 3× credit multiplier for scholars from World Bank low-income economies. Reviewer credits and honoraria are awarded for rigor and timeliness; they never depend on whether the review recommendation is to accept or reject.</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <span><strong>Handling Editor Stipend:</strong> Handling Editors receive a dedicated honorarium of €40 – €60 EUR per completed decision cycle upon synthesizing referee scorecards and issuing reasoned decision letters.</span>
+                      <span><strong>Handling Editor Stipend:</strong> Handling Editors receive a dedicated honorarium of €40 – €50 EUR per completed decision cycle upon synthesizing referee scorecards and issuing reasoned decision letters.</span>
                     </li>
                   </ul>
                 </div>
@@ -294,7 +294,7 @@ export default function PeerReviewPage() {
                   <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <span><strong>English & Competency Assessment Gateway:</strong> Researchers from developing nations and independent applicants without an established international indexed record must pass a standardized <strong>15-minute online test</strong> evaluating academic English comprehension, constructive phrasing, and COPE ethics (passing threshold: ≥ 80%).</span>
+                      <span><strong>English & Competency Assessment Gateway:</strong> Any applicant without an established international indexed record completes a short assessment evaluating academic English comprehension, constructive phrasing, and COPE guidance (passing threshold: ≥ 80%).</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
@@ -302,7 +302,7 @@ export default function PeerReviewPage() {
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <span><strong>Monthly Workload Cap:</strong> Reviewers are capped at a maximum of <strong>2 active evaluations per month</strong> to prevent reviewer fatigue, maintain quality, and eliminate review-farming.</span>
+                      <span><strong>Monthly Workload Cap:</strong> Reviewers are capped at a maximum of <strong>1 active evaluation per month</strong> to prevent reviewer fatigue, maintain quality, and eliminate review-farming.</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />

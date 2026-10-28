@@ -20,7 +20,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Unlimited article length",
     ],
   },
@@ -35,7 +35,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Figures and data presentation support",
     ],
   },
@@ -50,7 +50,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Chemical structure and equation support",
     ],
   },
@@ -63,10 +63,10 @@ const apcDetails = [
       "Full Gold open access publication",
       "Peer review coordination",
       "Professional copyediting",
-      "XML and PDF production",
+      "Full-text PDF production",
+      "JATS XML production",
       "DOI assignment",
-      "Indexing and archiving",
-      "MEDLINE formatting",
+      "Permanent digital archiving",
     ],
   },
   {
@@ -80,7 +80,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Code and dataset availability support",
     ],
   },
@@ -95,7 +95,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Technical figure and schematic support",
     ],
   },
@@ -110,7 +110,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Data visualization and sustainability support",
     ],
   },
@@ -125,7 +125,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "AI verification and clinical coding validation",
     ],
   },
@@ -140,7 +140,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Open data and codebase transparency support",
     ],
   },
@@ -155,7 +155,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Carbon accounting and lifecycle assessment verification",
     ],
   },
@@ -170,7 +170,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Mathematical schema and hardware blueprint formatting",
     ],
   },
@@ -185,7 +185,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Gene sequence submission and plasmid mapping support",
     ],
   },
@@ -200,7 +200,7 @@ const apcDetails = [
       "Professional copyediting",
       "XML and PDF production",
       "DOI assignment",
-      "Indexing and archiving",
+      "Permanent digital archiving",
       "Legal policy and orbital slot map indexing",
     ],
   },
@@ -315,7 +315,7 @@ export default function APCFeesPage() {
                   <div className="text-2xl font-bold text-primary">35%</div>
                   <h3 className="font-semibold text-sm mt-1">Production & Preservation</h3>
                   <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    Full-text XML/JATS generation, CrossRef DOI registration, CrossMark metadata, Portico & PKP-PN archiving.
+                    Full-text XML/JATS generation and CrossRef DOI registration.
                   </p>
                 </div>
               </div>
@@ -325,7 +325,7 @@ export default function APCFeesPage() {
                   <div className="text-2xl font-bold text-primary">25%</div>
                   <h3 className="font-semibold text-sm mt-1">Platform & Infrastructure</h3>
                   <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    editorial360 double-blind portal maintenance, similarity forensics, automated image checks, and cloud hosting.
+                    editorial360 double-blind portal maintenance, planned similarity forensics, planned automated image checks, and cloud hosting.
                   </p>
                 </div>
               </div>
@@ -335,7 +335,7 @@ export default function APCFeesPage() {
                   <div className="text-2xl font-bold text-primary">24%</div>
                   <h3 className="font-semibold text-sm mt-1">Global Equity & Waivers</h3>
                   <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    Subsidizing 100% full fee waivers for scholars from low-income countries and discretionary hardship grants.
+                    Subsidizing 100% full fee waivers for scholars from World Bank low-income economies and discretionary hardship grants.
                   </p>
                 </div>
               </div>
@@ -345,7 +345,7 @@ export default function APCFeesPage() {
                   <div className="text-2xl font-bold text-primary">10%</div>
                   <h3 className="font-semibold text-sm mt-1">Governance & Ethics</h3>
                   <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    COPE compliance oversight, research integrity investigations, and editorial board operations.
+                    Following COPE guidance, research integrity investigations, and editorial board operations.
                   </p>
                 </div>
               </div>
@@ -476,15 +476,15 @@ export default function APCFeesPage() {
                 </p>
                 <div className="space-y-4">
                   <div className="p-4 rounded-lg bg-background border border-border">
-                    <h4 className="font-medium">Credit Card</h4>
+                    <h4 className="font-medium">Invoice on Acceptance</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Visa, Mastercard, and American Express accepted through our secure payment portal.
+                      Formal invoice issued upon manuscript acceptance. Payment payable via SEPA bank transfer or international wire. Card payments available upon request.
                     </p>
                   </div>
                   <div className="p-4 rounded-lg bg-background border border-border">
                     <h4 className="font-medium">Bank Transfer</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Invoice payment via SEPA or international wire transfer. Bank details provided upon acceptance.
+                      Invoice payment via SEPA or international wire transfer. Bank details provided on the official invoice upon acceptance.
                     </p>
                   </div>
                   <div className="p-4 rounded-lg bg-background border border-border">
@@ -498,31 +498,19 @@ export default function APCFeesPage() {
               <div>
                 <h2 className="text-3xl font-bold tracking-tight">Funder Compliance</h2>
                 <p className="mt-4 text-muted-foreground mb-8">
-                  Our open access policies comply with major research funder mandates.
+                  Funder policies vary. Check your funder’s rules before submitting.
                 </p>
                 <div className="space-y-4">
                   <div className="p-4 rounded-lg bg-background border border-border">
                     <h4 className="font-medium">Plan S / cOAlition S</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Our Gold OA journals are fully compliant with Plan S requirements.
+                      We’re working toward Plan S compliance.
                     </p>
                   </div>
                   <div className="p-4 rounded-lg bg-background border border-border">
-                    <h4 className="font-medium">EU Horizon Europe</h4>
+                    <h4 className="font-medium">Research Funder Policies</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      APCs are eligible costs under Horizon Europe grants.
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-background border border-border">
-                    <h4 className="font-medium">DFG (German Research Foundation)</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Eligible for DFG open access publication funding.
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-background border border-border">
-                    <h4 className="font-medium">Wellcome Trust & Other Funders</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      CC BY licensing meets requirements of most major research funders.
+                      Funder policies vary. Check your funder’s rules before submitting.
                     </p>
                   </div>
                 </div>

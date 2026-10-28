@@ -705,7 +705,7 @@ export default function ReviewerGatewayPage() {
                   Certified Peer Reviewer Assessment
                 </h1>
                 <p className="mt-4 text-muted-foreground text-sm sm:text-base leading-relaxed">
-                  In accordance with our Plan S transparency commitments and COPE standards, independent referee candidates must demonstrate mastery of constructive academic English, publication ethics, and methodological rigor.
+                  Following COPE guidance and open science principles, candidates without an established international indexed record complete a short assessment evaluating constructive academic English, publication ethics, and methodological rigor.
                 </p>
               </div>
 
@@ -742,7 +742,7 @@ export default function ReviewerGatewayPage() {
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold">Honoraria Access</h4>
-                      <p className="text-xs text-muted-foreground mt-1">Unlocks immediate eligibility for our €35–€50 reward pool.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Unlocks immediate eligibility for our €10–€50 reward pool (capped at 1 review per month).</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -756,7 +756,7 @@ export default function ReviewerGatewayPage() {
                     <CardTitle className="text-xl">Candidate Vetting & Accreditation Dossier</CardTitle>
                   </div>
                   <CardDescription className="text-xs">
-                    In compliance with COPE research integrity guidelines and Plan S standards, referee candidates must provide verified institutional affiliations, an ORCID iD, and an academic CV prior to assessment qualification.
+                    Following COPE research integrity guidance, referee candidates provide verified institutional affiliations, an ORCID iD, and an academic CV prior to assessment qualification.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1245,7 +1245,7 @@ export default function ReviewerGatewayPage() {
                       <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
                         <div className="text-left">
                           <span className="block font-semibold text-foreground">editorial360 Governance Framework</span>
-                          <span className="block text-[11px]">COPE Guidelines & Plan S Compliant</span>
+                          <span className="block text-[11px]">COPE Guidance & Plan S Benchmark</span>
                         </div>
 
                         <div className="flex items-center gap-2">

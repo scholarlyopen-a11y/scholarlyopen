@@ -1268,7 +1268,7 @@ REFEREE INSTRUCTIONS & EVALUATION RUBRIC:
 - Submit final scorecard via editorial360 Referee Workspace to claim your €50 honorarium.
 
 Scholarly Open i.G. • editorial360 Governance Framework
-COPE & Plan S Certified Archive
+COPE Guidance & Plan S Benchmark Archive
 `
       handleDownloadFile(`${id}_Complete_Blinded_Package.txt`, content)
       setSelectedPackageRev(null)
@@ -1293,9 +1293,9 @@ COPE & Plan S Certified Archive
         details: payoutOption === "bank" 
           ? `${payoutService} | Account Email: ${payoutEmail || profile.email || "reviewer@scholarlyopen.org"} | Recipient: ${payoutBeneficiary || recipientName}`
           : payoutOption === "voucher"
-          ? "APC Credit Voucher generated for next submission across 13 journals"
+          ? "APC Credit Voucher generated for next submission across 13 journals (independent of review recommendation)"
           : payoutOption === "waiver_fund"
-          ? "Solidarity Waiver Pool for Low-Income Country Researchers"
+          ? "Solidarity Waiver Pool for World Bank Low-Income Economies"
           : `Institutional Library Donation: ${payoutLibraryName || (profile.institution + " Medical Library OA Fund")}`,
         requestedAt: new Date().toISOString().split("T")[0],
         status: "Pending"
@@ -1781,7 +1781,7 @@ COPE & Plan S Certified Archive
               {/* 4. Honoraria Tier */}
               <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
                 <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 leading-tight">
-                  €35 – €50
+                  €10 – €50
                 </div>
                 <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
                   {isDe ? "HONORAR PRO BERICHT" : "HONORARIUM / REPORT"}
@@ -1791,7 +1791,7 @@ COPE & Plan S Certified Archive
               {/* 5. Max Review Load */}
               <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 col-span-2 sm:col-span-1">
                 <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
-                  {profile.maxReviewsPerMonth || 2} / mo
+                  1 / mo
                 </div>
                 <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
                   {isDe ? "MAX. KAPAZITÄT" : "MAX LOAD CAPACITY"}
@@ -2772,8 +2772,8 @@ COPE & Plan S Certified Archive
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                     {isDe 
-                      ? "Reinvestieren Sie das Honorar für 50% bis 100% APC-Erlass bei eigener Einreichung in einem unserer 13 Journale."
-                      : "Convert your honorarium into an official transferable APC waiver voucher valid across all 13 Scholarly Open journals."}
+                      ? "Reinvestieren Sie das Honorar für 50% bis 100% APC-Erlass bei eigener Einreichung. Gutschriften werden für Gründlichkeit und Pünktlichkeit vergeben und hängen niemals von Ihrer Gutachten-Empfehlung ab."
+                      : "Convert your honorarium into an official transferable APC waiver voucher valid across all 13 journals. Reviewer credits are awarded for thoroughness and timeliness; they never depend on your review recommendation."}
                   </p>
                   {payoutOption === "voucher" && (
                     <div className="p-2.5 rounded bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 text-[11px] text-[#0b99ff] dark:text-[#38bdf8] font-medium">
@@ -2782,7 +2782,7 @@ COPE & Plan S Certified Archive
                   )}
                 </div>
 
-                {/* Option 3: Developing Countries Fee-Waiver Fund */}
+                {/* Option 3: World Bank Low-Income Economies Fee-Waiver Fund */}
                 <div 
                   onClick={() => setPayoutOption("waiver_fund")}
                   className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
@@ -2795,7 +2795,7 @@ COPE & Plan S Certified Archive
                     <div className="flex items-center gap-2">
                       <HeartHandshake className="h-4 w-4 text-rose-500" />
                       <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        {isDe ? "3. Spende an Entwicklungsland-Erlassfonds" : "3. Donate to Developing Countries Fee-Waiver Fund"}
+                        {isDe ? "3. Spende an Erlassfonds für Weltbank-Niedrigeinkommen" : "3. Donate to World Bank Low-Income Economies Fee-Waiver Fund"}
                       </span>
                     </div>
                     <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
@@ -2806,12 +2806,12 @@ COPE & Plan S Certified Archive
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                     {isDe 
-                      ? "100% Ihrer €50 finanzieren Artikel-Bearbeitungsgebühren für Forscher aus Ländern mit niedrigem Einkommen (Plan S Solidarität)."
-                      : "100% of your €50 subsidizes publication fees for researchers and scholars from low-income nations under our Plan S solidarity program."}
+                      ? "100% Ihres Honorars finanzieren Artikel-Bearbeitungsgebühren für Forscher aus Ländern mit niedrigem Einkommen (Weltbank-Klassifizierung)."
+                      : "100% of your honorarium subsidizes publication fees for researchers and scholars from World Bank low-income economies under our solidarity program."}
                   </p>
                   {payoutOption === "waiver_fund" && (
                     <div className="p-2.5 rounded bg-rose-50/80 dark:bg-rose-950/40 text-[11px] text-rose-800 dark:text-rose-300 font-medium">
-                      ♥ You will receive an official Plan S Philanthropic Recognition Certificate for your academic dossier.
+                      ♥ You will receive an official Philanthropic Recognition Certificate for your academic dossier.
                     </div>
                   )}
                 </div>
