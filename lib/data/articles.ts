@@ -17,7 +17,8 @@ export function isSampleArticle(article: { doi?: string; id?: string }): boolean
   return false
 }
 
-export const articles: Article[] = [
+// Unpublished in-evaluation manuscripts kept for reference; not published to the live site until officially accepted
+export const pendingEvaluationArticles: Article[] = [
   {
     "id": "SOMED-26-RW01",
     "title": "Prevent Earlier, Recognize Sooner, Treat Faster: A Proposed Evidence-Based Medicine–Integrated Rapid Response Framework (EBM-IRRF) for Acute Aortic Dissection",
@@ -46,3 +47,7 @@ export const articles: Article[] = [
     "isUnpublishedProof": true
   }
 ];
+
+// Live officially accepted articles published to the public website
+export const articles: Article[] = [];
+
