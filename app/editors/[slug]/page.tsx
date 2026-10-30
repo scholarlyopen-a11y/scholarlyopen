@@ -35,11 +35,17 @@ function findEditorBySlug(rawSlug: string) {
     if (found) return found
   }
 
+  // Aliases for Dr. S. K. Kanthlal
+  if (slug.includes("kanthlal")) {
+    found = editors.find(e => e.slug.includes("kanthlal") || e.name.toLowerCase().includes("kanthlal"))
+    if (found) return found
+  }
+
   // 2. Strip post-nominal credentials and common prefixes
   const normalizedSlug = slug
     .replace(/^assoc-prof-|^asst-prof-|^prof-|^dr-/i, "")
-    .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d)$/i, "")
-    .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d)-/i, "-")
+    .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d|d-?pharm)$/i, "")
+    .replace(/-(ph-?d|m-?d|dr|prof|d-?sc|eng-?d|d-?pharm)-/i, "-")
   found = editors.find((e) => e.slug.toLowerCase() === normalizedSlug)
   if (found) return found
 
@@ -48,7 +54,7 @@ function findEditorBySlug(rawSlug: string) {
     const rawNameSlug = e.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
     const cleanNameSlug = e.name.toLowerCase()
       .replace(/\b(assoc\.\s*prof\.|asst\.\s*prof\.|assoc\s*prof|prof\.|dr\.|dr|mr\.|ms\.)\b/gi, "")
-      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?|msc|bsc)/gi, "")
+      .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?|msc|bsc|d\.?pharm\.?)/gi, "")
       .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")

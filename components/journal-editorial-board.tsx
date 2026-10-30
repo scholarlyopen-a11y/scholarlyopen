@@ -59,7 +59,7 @@ function getEditorProfileSlug(editor: EditorMember): string | undefined {
   return editor.name
     .toLowerCase()
     .replace(/\b(assoc\.\s*prof\.|asst\.\s*prof\.|assoc\s*prof|prof\.|dr\.|dr|mr\.|ms\.)\b/gi, "")
-    .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?|msc|bsc)/gi, "")
+    .replace(/,\s*(ph\.?d\.?|m\.?d\.?|d\.?sc\.?|eng\.?d\.?|msc|bsc|d\.?pharm\.?)/gi, "")
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")

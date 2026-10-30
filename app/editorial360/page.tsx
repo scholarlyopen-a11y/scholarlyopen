@@ -4309,7 +4309,7 @@ Specific comments to the Author(s):
           setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isKanthlal) {
-          currentEditorName = "S. K. Kanthlal, Ph.D."
+          currentEditorName = "S. K. Kanthlal, D.Pharm., Ph.D."
           currentEditorRank = "Editorial Board Member & Handling Editor"
           currentEditorJournal = "Scholarly Open: Medicine"
           currentEditorInstitution = "Kerala University of Health Sciences, Kerala, India"
@@ -14219,7 +14219,7 @@ Specific comments to the Author(s):
                     <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 space-y-1">
                       <div className="flex items-center gap-1.5 font-bold text-[#0b99ff]">
                         <ShieldCheck className="h-4 w-4" />
-                        <span>Appointed Editor Verified: S. K. Kanthlal, Ph.D.</span>
+                        <span>Appointed Editor Verified: S. K. Kanthlal, D.Pharm., Ph.D.</span>
                       </div>
                       <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
                         Editorial Board Member &amp; Handling Editor for <em>Scholarly Open: Medicine</em>. Pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Kanthlal2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Medicine2026!</code>.
