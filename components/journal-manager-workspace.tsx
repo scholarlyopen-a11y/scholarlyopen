@@ -14140,6 +14140,8 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                             e.currentTarget.src = "/images/editors/ahmed-magdy-rabea.jpg"
                           } else if (selectedCandidateDossier.candidateName?.toLowerCase().includes("hussein")) {
                             e.currentTarget.src = "/images/editors/hesham-hussein.png"
+                          } else if (selectedCandidateDossier.candidateName?.toLowerCase().includes("kanthlal")) {
+                            e.currentTarget.src = "/images/editors/kanthlal-sk.png"
                           }
                         }}
                       />

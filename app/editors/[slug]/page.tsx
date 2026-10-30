@@ -88,6 +88,12 @@ export async function generateStaticParams() {
       allSlugs.add("aboubakr-abdelmonsef")
       allSlugs.add("abdelmonsef")
     }
+    if (editor.slug.includes("kanthlal")) {
+      allSlugs.add("kanthlal-sk")
+      allSlugs.add("s-k-kanthlal")
+      allSlugs.add("dr-s-k-kanthlal")
+      allSlugs.add("kanthlal")
+    }
   })
   return Array.from(allSlugs).map((slug) => ({ slug }))
 }

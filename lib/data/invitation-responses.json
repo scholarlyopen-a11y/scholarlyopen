@@ -325,7 +325,85 @@
       "jmApproved": true,
       "watchlistFlagged": false,
       "specialization": "Academic Medical Oncology & Hematology, Thoracic Oncology, Breast & Prostate Cancers, Malignant Hematology (Multiple Myeloma & Lymphomas)"
+    },
+    {
+      "id": "RESP-KANTHLAL",
+      "slug": "kanthlal-sk",
+      "type": "board",
+      "candidateName": "S. K. Kanthlal, Ph.D.",
+      "candidateEmail": "lalpharm@gmail.com",
+      "journal": "Scholarly Open: Medicine",
+      "decision": "yes",
+      "credentialId": "EBM-KANTHLAL",
+      "timestamp": "Wed, 28 Oct 2026 11:48:00 GMT",
+      "notes": "Action logged via editorial360 appointment & profile acceptance (board: yes)",
+      "affiliation": "Kerala University of Health Sciences, Kerala, India",
+      "department": "Faculty of Pharmaceutical Sciences",
+      "country": "India",
+      "biography": "Dr. S. K. Kanthlal, M.Pharm, Ph.D., is a Professor at the Kerala University of Health Sciences, Kerala, India, with over 13 years of distinguished academic teaching, laboratory leadership, and biomedical research experience. He previously served as an Assistant Professor at the Amrita School of Pharmacy, Amrita Vishwa Vidyapeetham, Kochi, from 2013 to 2024. He earned his Ph.D. in Pharmaceutical Sciences (2022) from Amrita Vishwa Vidyapeetham, investigating the vasorelaxant and antioxidant mechanisms of large cardamom in experimental hypertension and endothelial dysfunction. He holds an M.Pharm in Pharmacology (2012) and a B.Pharm (2009) from The Tamil Nadu Dr. M.G.R. Medical University, and a D.Pharm (2005) from NMS College. Dr. Kanthlal's research focuses on cardiovascular pharmacology, endothelial dysfunction, cancer biology, and inflammatory bowel disease (IBD). He served as Co-Investigator on an INR 25 Lakhs Spices Board of India grant and has published 39 Scopus-indexed papers (h-index 9, cumulative impact factor 82) and 51 Google Scholar articles. He is a two-time recipient of the AIRA Best Paper Award, an active editor and reviewer for F6 Publishing / Baishideng and leading Elsevier/Springer journals, and serves as an Editorial Board Member & Handling Editor for Scholarly Open: Medicine.",
+      "photoUrl": "/images/editors/kanthlal-sk.png",
+      "cvFileName": "Kanthlal CV- full Oct.docx",
+      "cvFileSize": "73 KB",
+      "researchInterests": [
+        "Pharmaceutical Sciences",
+        "Pharmacology",
+        "Molecular Biology",
+        "Cardiovascular Pharmacology & Hypertension",
+        "Endothelium Function & Vascular Biology",
+        "Cancer Biology & Oncology",
+        "Inflammatory Bowel Disease (IBD)",
+        "Mammalian Cell Culture (Vascular, Neural, Cancer)",
+        "Biochemical & Molecular Assays (PCR, ELISA, Western Blotting)"
+      ],
+      "orcid": "0000-0003-2655-846X",
+      "scopusId": "54974085300",
+      "googleScholar": "https://scholar.google.com/citations?user=__mD25IAAAAJ&hl=en",
+      "researchGate": "",
+      "linkedin": "",
+      "publications": [
+        {
+          "title": "Antioxidant and vasorelaxant effects of aqueous extract of large cardamom in L-NAME induced hypertensive rats",
+          "journal": "Clinical and Experimental Hypertension",
+          "year": "2020",
+          "doi": "10.1080/10641963.2019.1678129"
+        },
+        {
+          "title": "The role of dietary polyphenols in inflammatory bowel disease: A possible clue on the molecular mechanisms involved in the prevention of immune and inflammatory reactions",
+          "journal": "Journal of Food Biochemistry",
+          "year": "2020",
+          "doi": "10.1111/jfbc.13522"
+        },
+        {
+          "title": "Clozapine Disrupts Endothelial Nitric Oxide Signaling and Antioxidant System for its Cardiovascular Complications",
+          "journal": "Drug Research",
+          "year": "2019",
+          "doi": "10.1055/a-0967-7888"
+        },
+        {
+          "title": "The role of mitochondrial genes in neurodegenerative disorders",
+          "journal": "Current Neuropharmacology",
+          "year": "2022",
+          "doi": "10.2174/1570159X20666220327221013"
+        },
+        {
+          "title": "Combating methotrexate resistance in cancer treatment: A review on navigating pathways and enhancing its efficacy with fat‐soluble vitamins",
+          "journal": "Scientifica",
+          "year": "2025"
+        },
+        {
+          "title": "Amelioration of oxidative stress by Tabernaemontana divaricata on alloxan-induced diabetic rats",
+          "journal": "Ancient Science of Life",
+          "year": "2014",
+          "doi": "10.4103/0257-7941.147424"
+        }
+      ],
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "status": "Active Handling Editor",
+      "jmApproved": true,
+      "watchlistFlagged": false,
+      "specialization": "Pharmaceutical Sciences, Pharmacology, Cardiovascular & Cancer Research, Molecular Biology, Endothelium Function"
     }
   ],
-  "lastUpdated": "2026-10-15T03:52:34.837Z"
+  "lastUpdated": "2026-10-28T11:48:00.000Z"
 }

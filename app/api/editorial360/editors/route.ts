@@ -78,6 +78,11 @@ function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEdito
       ed.photoUrl = "/images/editors/ahmed-magdy-rabea.jpg"
     }
 
+    const isKanthlal = normName.includes("kanthlal") || normSlug.includes("kanthlal")
+    if (isKanthlal) {
+      ed.photoUrl = "/images/editors/kanthlal-sk.png"
+    }
+
     const key = (ed.id || ed.email || ed.name).toLowerCase()
     if (seenKeys.has(key)) continue
     seenKeys.add(key)

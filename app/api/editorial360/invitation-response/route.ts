@@ -265,12 +265,19 @@ export async function GET() {
                      (r.candidateName && r.candidateName.toLowerCase().includes("hesham")) ||
                      (r.slug && r.slug.toLowerCase().includes("hesham")) ||
                      r.id === "RESP-HUSSEIN" || r.id === "EBM-HUSSEIN"
+    const isKanthlal = (r.candidateEmail && (r.candidateEmail.toLowerCase().includes("lalpharm") || r.candidateEmail.toLowerCase().includes("kanthsklal"))) ||
+                       (r.candidateName && r.candidateName.toLowerCase().includes("kanthlal")) ||
+                       (r.slug && r.slug.toLowerCase().includes("kanthlal")) ||
+                       r.id === "RESP-KANTHLAL" || r.id === "EBM-KANTHLAL"
 
     if (isHesham && (!credId || credId === "EBM-EDITOR")) {
       credId = "EBM-HESHAM"
     }
+    if (isKanthlal && (!credId || credId === "EBM-EDITOR")) {
+      credId = "EBM-KANTHLAL"
+    }
 
-    const isConfirmedApproved = isVerpoort || isCacciola || isHesham || Boolean(r.jmApproved)
+    const isConfirmedApproved = isVerpoort || isCacciola || isHesham || isKanthlal || Boolean(r.jmApproved)
 
     return { 
       ...r, 

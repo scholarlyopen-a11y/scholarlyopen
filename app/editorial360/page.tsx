@@ -4237,6 +4237,7 @@ Specific comments to the Author(s):
                        (cleanEmail.toLowerCase().includes("editor.med") && !cleanEmail.toLowerCase().includes("justice"))
         const isJustice = cleanEmail.toLowerCase().includes("justice") || cleanEmail.toLowerCase().includes("boakye")
         const isKumar = cleanEmail.toLowerCase().includes("kumar") || cleanEmail.toLowerCase().includes("prashant") || cleanEmail.toLowerCase().includes("surrey")
+        const isKanthlal = cleanEmail.toLowerCase().includes("kanthlal") || cleanEmail.toLowerCase().includes("lalpharm") || cleanEmail.toLowerCase() === "lalpharm@gmail.com" || cleanEmail.toLowerCase() === "kanthsklal@hotmail.com"
         const matchedCloudUser = users.find(u => u.email?.toLowerCase() === cleanEmail.toLowerCase())
 
         if (isVerpoort) {
@@ -4298,6 +4299,23 @@ Specific comments to the Author(s):
           currentEditorCountry = "Egypt"
           currentEditorOrcid = "0000-0002-9646-5325"
           currentEditorPhotoUrl = "/images/editors/hesham-hussein.png"
+
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
+          setEditorOrcid(currentEditorOrcid)
+          setEditorPhotoUrl(currentEditorPhotoUrl)
+          setEditorEmail(cleanEmail)
+        } else if (isKanthlal) {
+          currentEditorName = "S. K. Kanthlal, Ph.D."
+          currentEditorRank = "Editorial Board Member & Handling Editor"
+          currentEditorJournal = "Scholarly Open: Medicine"
+          currentEditorInstitution = "Kerala University of Health Sciences, Kerala, India"
+          currentEditorCountry = "India"
+          currentEditorOrcid = "0000-0003-2655-846X"
+          currentEditorPhotoUrl = "/images/editors/kanthlal-sk.png"
 
           setEditorName(currentEditorName)
           setEditorRank(currentEditorRank)
@@ -14190,6 +14208,21 @@ Specific comments to the Author(s):
                       </div>
                       <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
                         Editorial Board Member for <em>Scholarly Open: Social Sciences &amp; Humanities</em>. Pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Hussein2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">hesham2026</code>.
+                      </p>
+                    </div>
+                  )
+                }
+
+                const isKanthlal = low.includes("kanthlal") || low.includes("lalpharm") || low === "lalpharm@gmail.com" || low === "kanthsklal@hotmail.com"
+                if (isKanthlal) {
+                  return (
+                    <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold text-[#0b99ff]">
+                        <ShieldCheck className="h-4 w-4" />
+                        <span>Appointed Editor Verified: S. K. Kanthlal, Ph.D.</span>
+                      </div>
+                      <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
+                        Editorial Board Member &amp; Handling Editor for <em>Scholarly Open: Medicine</em>. Pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Kanthlal2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Medicine2026!</code>.
                       </p>
                     </div>
                   )

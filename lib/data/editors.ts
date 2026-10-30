@@ -868,6 +868,171 @@ Dr. Rabea actively serves in international oncology leadership, having served as
     ]
   },
   {
+    slug: "kanthlal-sk",
+    name: "S. K. Kanthlal, Ph.D.",
+    role: "Editorial Board Member & Handling Editor",
+    affiliation: "Kerala University of Health Sciences, Kerala, India",
+    specialization: "Pharmaceutical Sciences, Pharmacology, Cardiovascular & Cancer Research, Molecular Biology, Endothelium Function",
+    email: "editor.med@scholarlyopen.org",
+    orcid: "0000-0003-2655-846X",
+    scopusId: "54974085300",
+    googleScholar: "https://scholar.google.com/citations?user=__mD25IAAAAJ&hl=en",
+    imageUrl: "/images/editors/kanthlal-sk.png",
+    journalSlug: "medicine",
+    assignedSections: [
+      "Pharmacology",
+      "Translational Research",
+      "Precision Medicine",
+      "Clinical Medicine and Therapy"
+    ],
+    expertise: [
+      "Pharmaceutical Sciences",
+      "Pharmacology",
+      "Cardiovascular Pharmacology & Hypertension",
+      "Endothelium Function & Vascular Biology",
+      "Cancer Biology & Oncology",
+      "Inflammatory Bowel Disease (IBD)",
+      "Mammalian Cell Culture (Vascular, Neural, Cancer)",
+      "Molecular Biology (PCR, Blotting, Electrophoresis, ELISA)"
+    ],
+    badges: [
+      "Verified Board Member",
+      "COPE Ethics Verified",
+      "Professor",
+      "AIRA Best Paper Awardee"
+    ],
+    stats: [
+      {
+        label: "Academic & Research Career",
+        value: "13+",
+        description: "Years of distinguished academic teaching and laboratory investigation in pharmacology and pharmaceutical sciences."
+      },
+      {
+        label: "Peer-Reviewed Publications",
+        value: "51+",
+        description: "Google Scholar publications (39 Scopus-indexed, h-index 9, cumulative impact factor 82)."
+      },
+      {
+        label: "Peer Reviews Completed",
+        value: "40+",
+        description: "Expert peer reviews for Elsevier, Springer, Wiley, Bentham Science, and BMJ journals."
+      }
+    ],
+    timeline: [
+      {
+        year: "2005",
+        title: "D.Pharm",
+        description: "NMS College, Mathar Thiruvattar; Directorate of Medical Education.",
+        type: "education"
+      },
+      {
+        year: "2009",
+        title: "B.Pharm",
+        description: "S B College of Pharmacy, The Tamil Nadu Dr. M.G.R. Medical University.",
+        type: "education"
+      },
+      {
+        year: "2012",
+        title: "M.Pharm in Pharmacology",
+        description: "JKK Munirajah College of Pharmacy, The Tamil Nadu Dr. M.G.R. Medical University. Research on anti-obesity activity in atherogenic diet-induced models.",
+        type: "education"
+      },
+      {
+        year: "2013–2024",
+        title: "Assistant Professor",
+        description: "Amrita School of Pharmacy, Amrita Vishwa Vidyapeetham, Kochi, India.",
+        type: "career"
+      },
+      {
+        year: "2016–2019",
+        title: "Co-Investigator, Spices Board of India Grant",
+        description: "Funded research grant (INR 25 Lakhs) investigating large cardamom on experimental hypertension and endothelial functions.",
+        type: "milestone"
+      },
+      {
+        year: "2022",
+        title: "Ph.D. in Pharmaceutical Sciences",
+        description: "Amrita School of Pharmacy, Amrita Vishwa Vidyapeetham. Doctoral thesis: Effect of Aqueous Extract of Large Cardamom on Experimental Models of Hypertension and Endothelium Function.",
+        type: "education"
+      },
+      {
+        year: "2024–Present",
+        title: "Professor",
+        description: "Kerala University of Health Sciences, Kerala, India.",
+        type: "career"
+      },
+      {
+        year: "2026",
+        title: "Appointed Editorial Board Member & Handling Editor",
+        description: "Scholarly Open: Medicine. Guiding peer review and editorial handling in pharmacology, molecular biology, and translational clinical science.",
+        type: "milestone"
+      }
+    ],
+    biography: `Dr. S. K. Kanthlal, M.Pharm, Ph.D., is a Professor at the Kerala University of Health Sciences, Kerala, India, bringing over 13 years of distinguished academic teaching, laboratory leadership, and biomedical research experience. He previously served as an Assistant Professor at the Amrita School of Pharmacy, Amrita Vishwa Vidyapeetham, Kochi, from January 2013 to November 2024. He earned his Ph.D. in Pharmaceutical Sciences (2022) from Amrita Vishwa Vidyapeetham, where his doctoral research demonstrated the vasorelaxant and antioxidant mechanisms of aqueous large cardamom extracts in experimental models of hypertension and endothelial dysfunction. He holds an M.Pharm in Pharmacology (2012) and a B.Pharm (2009) from The Tamil Nadu Dr. M.G.R. Medical University, and a D.Pharm (2005) from NMS College, Directorate of Medical Education.
+
+Dr. Kanthlal's research portfolio centers on cardiovascular pharmacology, endothelial dysfunction, cancer therapeutics, and inflammatory bowel disease (IBD). His laboratory competencies include mammalian cell culture across vascular, neural, and oncologic cell lines, isolation of primary cells from animal models, and molecular/biochemical methodologies including nucleic acid isolation, PCR, western blotting, agarose/polyacrylamide electrophoresis, and ELISA. Between 2016 and 2019, he served as Co-Investigator on a competitive INR 25 Lakhs grant funded by the Spices Board of India investigating aortic endothelial dynamics under hypertensive stress.
+
+Dr. Kanthlal has authored 39 Scopus-indexed papers (h-index 9, cumulative impact factor 82) and 51 Google Scholar publications. He has delivered 2 invited talks, presented 7 scientific papers (5 oral, 2 poster), and participated in 18 national and international conferences, including the Indian Pharmaceutical Congress. He is a two-time recipient of the AIRA (Amrita Innovation & Research Award) for Best Research Paper. An active scientific editor and reviewer, he has evaluated more than 40 manuscripts for top international journals across Elsevier, Springer, Wiley, BMJ, and Bentham Science, serves as an Editor & Reviewer for F6 Publishing (Baishideng Publishing Group Inc, USA), and acts as a Scientific Advisor/Content Editor for Zenwick Pharma Pvt Ltd. He serves as an Editorial Board Member & Handling Editor for Scholarly Open: Medicine.`,
+    personalPublications: [
+      {
+        title: "Antioxidant and vasorelaxant effects of aqueous extract of large cardamom in L-NAME induced hypertensive rats",
+        journal: "Clinical and Experimental Hypertension",
+        year: "2020",
+        doi: "10.1080/10641963.2019.1678129",
+        link: "https://doi.org/10.1080/10641963.2019.1678129"
+      },
+      {
+        title: "The role of dietary polyphenols in inflammatory bowel disease: A possible clue on the molecular mechanisms involved in the prevention of immune and inflammatory reactions",
+        journal: "Journal of Food Biochemistry",
+        year: "2020",
+        doi: "10.1111/jfbc.13522",
+        link: "https://doi.org/10.1111/jfbc.13522"
+      },
+      {
+        title: "Clozapine Disrupts Endothelial Nitric Oxide Signaling and Antioxidant System for its Cardiovascular Complications",
+        journal: "Drug Research",
+        year: "2019",
+        doi: "10.1055/a-0967-7888",
+        link: "https://doi.org/10.1055/a-0967-7888"
+      },
+      {
+        title: "The role of mitochondrial genes in neurodegenerative disorders",
+        journal: "Current Neuropharmacology",
+        year: "2022",
+        doi: "10.2174/1570159X20666220327221013",
+        link: "https://doi.org/10.2174/1570159X20666220327221013"
+      },
+      {
+        title: "Combating methotrexate resistance in cancer treatment: A review on navigating pathways and enhancing its efficacy with fat‐soluble vitamins",
+        journal: "Scientifica",
+        year: "2025",
+        link: "https://scholar.google.com/citations?user=__mD25IAAAAJ&hl=en"
+      },
+      {
+        title: "Amelioration of oxidative stress by Tabernaemontana divaricata on alloxan-induced diabetic rats",
+        journal: "Ancient Science of Life",
+        year: "2014",
+        doi: "10.4103/0257-7941.147424",
+        link: "https://doi.org/10.4103/0257-7941.147424"
+      }
+    ],
+    honors: [
+      "AIRA (Amrita Innovation & Research Award for Best Paper) – 2-time Recipient",
+      "Co-Investigator, Spices Board of India Research Grant (INR 25 Lakhs, 2016–2019)",
+      "Appointed Full Professor, Kerala University of Health Sciences (2024)",
+      "Editor & Reviewer, F6 Publishing (Baishideng Publishing Group Inc, USA)",
+      "Scientific Advisor / Content Editor, Zenwick Pharma Pvt Ltd",
+      "Over 13 Years of Academic Excellence, Laboratory Mentorship, and GLP Protocol Design"
+    ],
+    editorialRoles: [
+      "Editorial Board Member & Handling Editor, Scholarly Open: Medicine (2026–Present)",
+      "Editor & Reviewer, F6 Publishing / Baishideng Publishing Group Inc, USA (2022–Present)",
+      "Freelance Scientific Editor, Manuscript Edit & Resapro Scientific Solutions",
+      "Peer Reviewer for 40+ manuscripts across Elsevier, Springer, Wiley, BMJ, and Bentham Science",
+      "Scientific Advisor & Content Editor, Zenwick Pharma Pvt Ltd, Ernakulam, Kerala"
+    ]
+  },
+  {
     slug: "mohamed-eletmany",
     name: "Mohamed R. Eletmany, Ph.D.",
     role: "Associate Editor",
@@ -2207,7 +2372,7 @@ const onboardedList: EditorMember[] = (
               ? matchingBase.email
               : (jSlug === "social-sciences-humanities" || jSlug === "social-sciences-open")
               ? "editor.socsci@scholarlyopen.org"
-              : (jSlug === "chemistry" ? "editor.chem@scholarlyopen.org" : matchingBase.email)
+              : (jSlug === "chemistry" ? "editor.chem@scholarlyopen.org" : (jSlug === "medicine" ? "editor.med@scholarlyopen.org" : matchingBase.email))
           }
         }
 

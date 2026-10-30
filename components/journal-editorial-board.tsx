@@ -102,6 +102,8 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                 e.currentTarget.src = "/images/editors/ahmed-magdy-rabea.jpg"
               } else if (editor.slug === "hesham-hussein" || editor.name.toLowerCase().includes("hussein")) {
                 e.currentTarget.src = "/images/editors/hesham-hussein.png"
+              } else if (editor.slug?.includes("kanthlal") || editor.name.toLowerCase().includes("kanthlal")) {
+                e.currentTarget.src = "/images/editors/kanthlal-sk.png"
               }
             }}
           />
@@ -143,6 +145,8 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
                         e.currentTarget.src = "/images/editors/ahmed-magdy-rabea.jpg"
                       } else if (editor.slug === "hesham-hussein" || editor.name.toLowerCase().includes("hussein")) {
                         e.currentTarget.src = "/images/editors/hesham-hussein.png"
+                      } else if (editor.slug?.includes("kanthlal") || editor.name.toLowerCase().includes("kanthlal")) {
+                        e.currentTarget.src = "/images/editors/kanthlal-sk.png"
                       }
                     }}
                   />
