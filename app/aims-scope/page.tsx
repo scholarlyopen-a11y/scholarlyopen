@@ -78,22 +78,6 @@ const disciplines = [
     color: "accent",
   },
   {
-    icon: Cpu,
-    title: "Data Science",
-    description: "Our data science journal publishes research on AI, analytics, and FAIR data practices.",
-    areas: [
-      "Machine Learning and AI",
-      "Data Mining and Visualization",
-      "Statistical Modeling",
-      "Reproducible Research",
-      "Big Data Systems",
-      "Ethics in Data Science",
-      "Open Data, Metadata & Metrics",
-      "Computational Methods",
-    ],
-    color: "primary",
-  },
-  {
     icon: Sprout,
     title: "Environmental Science",
     description: "Our environmental science journal publishes research on ecosystems, sustainability, and climate resilience.",
@@ -125,23 +109,6 @@ const disciplines = [
     ],
     color: "chart-3",
   },
-
-  {
-    icon: Wind,
-    title: "Decarbonization & Carbon Tech",
-    description: "Our Decarbonization and Carbon Tech journal publishes research on engineered climate solutions, carbon capture, hydrogen economy, and net-zero industrial systems.",
-    areas: [
-      "Carbon capture technologies (flue gas and direct air capture)",
-      "Carbon utilization and conversion (fuels, chemicals, materials)",
-      "Carbon storage and mineralization (geological, ocean, soils)",
-      "Hydrogen production (green, blue), storage, and transport",
-      "Industrial electrification and high-temperature heat decarbonization",
-      "Lifecycle carbon accounting, greenhouse gas auditing, and LCA protocols",
-      "Climate engineering policy, carbon markets, and regulatory compliance",
-    ],
-    color: "accent",
-  },
-
 ]
 
 const aims = [

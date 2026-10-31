@@ -2480,11 +2480,9 @@ Specific comments to the Author(s):
     { name: "Scholarly Open: Biology", code: "BIO", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Helen Vance" },
     { name: "Scholarly Open: Chemistry", code: "CHEM", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Robert Lang" },
     { name: "Scholarly Open: Medicine", code: "MED", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Sarah Jenkins" },
-    { name: "Scholarly Open: Data Science & Analytics", code: "DSA", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Marcus Vance" },
     { name: "Scholarly Open: Environmental Science", code: "ENV", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. David Miller" },
     { name: "Scholarly Open: Clinical AI & Digital Health", code: "CAI", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Alex Johnson" },
     { name: "Scholarly Open: AI Safety & Governance", code: "AIS", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Marcus Vance" },
-    { name: "Scholarly Open: Decarbonization & Carbon Tech", code: "DCT", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Clara Zhang" },
     { name: "Scholarly Open: Quantum Engineering", code: "QE", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. Aris Thorne" },
     { name: "Scholarly Open: Synthetic Biology & Bio-Design", code: "SBD", submissions: 0, latency: 0, status: "Active", editorInChief: "Dr. Helen Vance" },
     { name: "Scholarly Open: Space Resources & Orbital Economy", code: "SRE", submissions: 0, latency: 0, status: "Active", editorInChief: "Prof. David Miller" }
@@ -3075,12 +3073,12 @@ Specific comments to the Author(s):
         {
           id: "INV-003",
           invoiceNumber: "SO-INV-2026-0831",
-          manuscriptId: "SO-DSA-2026-118",
+          manuscriptId: "SO-AIS-2026-118",
           title: "Zero-Knowledge Verifiable Audit Frameworks for Autonomous Financial Agents",
           authorName: "Dr. Marcus Vance",
           authorEmail: "m.vance@scholarlyopen.org",
           institution: "Oxford Internet Institute",
-          journal: "Scholarly Open: Data Science & Analytics",
+          journal: "Scholarly Open: AI Safety & Governance",
           standardApc: 1200,
           discountAmount: 600,
           discountReason: "50% Inaugural Issue Launch Discount",
@@ -5240,10 +5238,8 @@ Specific comments to the Author(s):
         "Scholarly Open: Biology": ["sobio@scholarlyopen.org", "editor.sobio@scholarlyopen.org", "editor.bio@scholarlyopen.org"],
         "Scholarly Open: Engineering": ["soengg@scholarlyopen.org", "editor.engg@scholarlyopen.org"],
         "Scholarly Open: Engineering & Applied Sciences": ["soeas@scholarlyopen.org", "editor.engg@scholarlyopen.org"],
-        "Scholarly Open: Data Science": ["sodatasci@scholarlyopen.org", "editor.datasci@scholarlyopen.org"],
         "Scholarly Open: AI Safety & Governance": ["soaisg@scholarlyopen.org", "editor.aisg@scholarlyopen.org"],
         "Scholarly Open: Clinical AI & Digital Health": ["socal@scholarlyopen.org", "editor.caidh@scholarlyopen.org"],
-        "Scholarly Open: Decarbonization & Carbon Tech": ["sodcct@scholarlyopen.org", "editor.dcct@scholarlyopen.org"],
         "Scholarly Open: Quantum Engineering": ["soqe@scholarlyopen.org", "editor.qe@scholarlyopen.org"],
         "Scholarly Open: Synthetic Biology & Bio-Design": ["sosbbd@scholarlyopen.org", "editor.sbbd@scholarlyopen.org"],
         "Scholarly Open: Space Resources & Orbital Economy": ["sosroe@scholarlyopen.org", "editor.sroe@scholarlyopen.org"]
@@ -13279,8 +13275,6 @@ Specific comments to the Author(s):
                         <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering & Applied Sciences</option>
                         <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences & Humanities</option>
                         <option value="Scholarly Open: Environmental Science">Scholarly Open: Environmental Science</option>
-                        <option value="Scholarly Open: Data Science & Analytics">Scholarly Open: Data Science & Analytics</option>
-                        <option value="Scholarly Open: Decarbonization & Carbon Tech">Scholarly Open: Decarbonization & Carbon Tech</option>
                       </select>
                   </div>
 

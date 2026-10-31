@@ -208,7 +208,6 @@ export function CrossDeskActivityFeed({
             <option value="Medicine">Scholarly Open: Medicine</option>
             <option value="Engineering">Engineering & Applied Sciences</option>
             <option value="Social">Social Sciences & Humanities</option>
-            <option value="Decarbonization">Decarbonization & Carbon Tech</option>
           </select>
 
           {onRefresh && (

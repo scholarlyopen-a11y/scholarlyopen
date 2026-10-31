@@ -8,6 +8,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { editors } from "@/lib/data/editors"
 import { articles } from "@/lib/data/articles"
+import { OFFICIAL_JOURNALS } from "@/lib/data/journal-contacts"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -183,7 +184,7 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
     ],
     "memberOf": {
       "@type": "AcademicJournal",
-      "name": "Scholarly Open: Decarbonization & Carbon Tech",
+      "name": OFFICIAL_JOURNALS.find(j => j.slug === editor.journalSlug)?.name || `Scholarly Open: ${editor.journalSlug}`,
       "url": `https://scholarlyopen.org/journals/${editor.journalSlug}`
     },
     "identifier": editor.orcid ? {

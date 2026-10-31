@@ -70,21 +70,6 @@ const apcDetails = [
     ],
   },
   {
-    titleKey: "journals.ds.title",
-    regularAPC: "1,350",
-    launchAPC: "675",
-    currency: "EUR",
-    includes: [
-      "Full Gold open access publication",
-      "Peer review coordination",
-      "Professional copyediting",
-      "XML and PDF production",
-      "DOI assignment",
-      "Permanent digital archiving",
-      "Code and dataset availability support",
-    ],
-  },
-  {
     titleKey: "journals.eng.title",
     regularAPC: "1,350",
     launchAPC: "675",
@@ -114,23 +99,6 @@ const apcDetails = [
       "Data visualization and sustainability support",
     ],
   },
-
-  {
-    titleKey: "journals.decarbonization.title",
-    regularAPC: "1,600",
-    launchAPC: "800",
-    currency: "EUR",
-    includes: [
-      "Full Gold open access publication",
-      "Peer review coordination",
-      "Professional copyediting",
-      "XML and PDF production",
-      "DOI assignment",
-      "Permanent digital archiving",
-      "Carbon accounting and lifecycle assessment verification",
-    ],
-  },
-
 ]
 
 const waiverEligibility = [

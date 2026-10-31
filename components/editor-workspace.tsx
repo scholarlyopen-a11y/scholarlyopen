@@ -1954,7 +1954,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <option value="medicine">Scholarly Open: Medicine</option>
                   <option value="engineering">Engineering & Applied Sciences</option>
                   <option value="social">Social Sciences & Humanities</option>
-                  <option value="decarbonization">Decarbonization & Clean Tech</option>
                 </select>
 
                 <span className="text-xs text-slate-500 font-medium px-2.5 py-1.5 bg-slate-100 dark:bg-[#20222a] rounded-xl border border-slate-200/80 dark:border-[#272832] whitespace-nowrap hidden sm:inline-block">
@@ -5984,7 +5983,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <option value="Scholarly Open: Medicine & Applied Sciences">Scholarly Open: Medicine & Applied Sciences</option>
                 <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering & Applied Sciences</option>
                 <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences & Humanities</option>
-                <option value="Scholarly Open: Decarbonization & Clean Tech">Scholarly Open: Decarbonization & Clean Tech</option>
               </select>
             </div>
 

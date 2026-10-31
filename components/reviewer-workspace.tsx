@@ -1606,9 +1606,9 @@ COPE Guidance & Plan S Benchmark Archive
               <td>2025-11-14</td>
             </tr>
             <tr>
-              <td><strong>SODEC-25-CT044</strong></td>
+              <td><strong>SOENV-25-ES044</strong></td>
               <td>Electrochemical Direct Air Capture via Solid Sorbents</td>
-              <td>Decarbonization & Carbon Tech</td>
+              <td>Environmental Science</td>
               <td>2025-09-03</td>
             </tr>
           </tbody>
@@ -3317,7 +3317,7 @@ COPE Guidance & Plan S Benchmark Archive
                       <div className="text-[11px] text-slate-500">2 Reviews · Reviewer</div>
                     </div>
                     <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
-                      <div className="font-bold text-slate-900 dark:text-white">Decarbonization & Clean Tech</div>
+                      <div className="font-bold text-slate-900 dark:text-white">Environmental Science</div>
                       <div className="text-[11px] text-slate-500">1 Review · Expert Contributor</div>
                     </div>
                   </div>
@@ -3374,9 +3374,9 @@ COPE Guidance & Plan S Benchmark Archive
                           <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
                         </tr>
                         <tr>
-                          <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SODEC-25-CT044</td>
+                          <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOENV-25-ES044</td>
                           <td className="p-3 font-medium text-slate-900 dark:text-white">Electrochemical Direct Air Capture via Solid Sorbents</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">Decarbonization & Carbon Tech</td>
+                          <td className="p-3 text-slate-600 dark:text-slate-400">Environmental Science</td>
                           <td className="p-3 text-slate-500">2025-09-03</td>
                           <td className="p-3 text-slate-500">Double-Blind</td>
                           <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
