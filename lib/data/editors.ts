@@ -1039,14 +1039,14 @@ Dr. Kanthlal has authored 39 Scopus-indexed papers (h-index 9, cumulative impact
     role: "Associate Editor",
     affiliation: "South Valley University, Egypt",
     specialization: "Polymer chemistry, sustainable textile dyeing, molecular modeling (DFT), and surface modifications.",
-    email: "editor.dcct@scholarlyopen.org",
+    email: "editor.chem@scholarlyopen.org",
     orcid: "0000-0003-4868-4678",
     researchGate: "https://www.researchgate.net/profile/Mohamed-Eletmany",
     googleScholar: "https://scholar.google.com.eg/citations?user=tP25O2kAAAAJ&hl=ar",
     imageUrl: "/images/editors/mohamed-eletmany.jpg",
     assignedSections: [
-      "Carbon Utilization & Conversion",
-      "Industrial Decarbonization"
+      "Polymer Chemistry & Sustainable Materials",
+      "Organic & Green Chemistry"
     ],
     expertise: [
       "Polymer Chemistry",
@@ -1057,8 +1057,8 @@ Dr. Kanthlal has authored 39 Scopus-indexed papers (h-index 9, cumulative impact
       "Surface Chemistry"
     ],
     badges: ["Founding Member"],
-    journalSlug: "decarbonization-carbon-tech",
-    welcomeMessage: "As an associate editor, my goal is to foster a rigorous, constructive, and transparent peer-review environment. I invite researchers to submit original research and reviews in sustainable polymers, organic synthesis, and computational chemistry to help accelerate the global transition to a net-zero future.",
+    journalSlug: "chemistry",
+    welcomeMessage: "As an associate editor, my goal is to foster a rigorous, constructive, and transparent peer-review environment. I invite researchers to submit original research and reviews in sustainable polymers, organic synthesis, and computational chemistry to advance chemical innovation and open science.",
     stats: [
       { label: "Status", value: "Accepting Submissions", description: "Ready to assign reviewers" },
       { label: "Avg. Turnaround", value: "24 Days", description: "From submission to initial decision" },
@@ -1086,7 +1086,7 @@ Dr. Kanthlal has authored 39 Scopus-indexed papers (h-index 9, cumulative impact
       {
         year: "2026",
         title: "Joined Scholarly Open",
-        description: "Appointed as founding Associate Editor for Decarbonization & Carbon Tech, leading polymer and carbon conversion sections.",
+        description: "Appointed as founding Associate Editor for Chemistry, leading polymer and sustainable materials sections.",
         type: "milestone"
       }
     ],
@@ -1367,38 +1367,7 @@ His broad research portfolio spans evidence-based medicine (EBM), health service
     ]
   },
   {
-    slug: "position-open-carbon-ae-1",
-    name: "Position Open",
-    role: "Associate Editor",
-    affiliation: "Seeking experts in decarbonization and carbon tech.",
-    specialization: "Carbon Conversion & Utilization",
-    journalSlug: "decarbonization-carbon-tech",
-  },
-  {
-    slug: "position-open-carbon-ae-2",
-    name: "Position Open",
-    role: "Associate Editor",
-    affiliation: "Seeking experts in decarbonization and carbon tech.",
-    specialization: "Carbon Conversion & Utilization",
-    journalSlug: "decarbonization-carbon-tech",
-  },
-  {
-    slug: "position-open-carbon-ebm-1",
-    name: "Position Open",
-    role: "Editorial Board Member",
-    affiliation: "Seeking experts in decarbonization and carbon tech.",
-    specialization: "Carbon Conversion & Utilization",
-    journalSlug: "decarbonization-carbon-tech",
-  },
-  {
-    slug: "position-open-carbon-ebm-2",
-    name: "Position Open",
-    role: "Editorial Board Member",
-    affiliation: "Seeking experts in decarbonization and carbon tech.",
-    specialization: "Carbon Conversion & Utilization",
-    journalSlug: "decarbonization-carbon-tech",
-  },
-  {
+
     slug: "position-open-med-ae-1",
     name: "Position Open",
     role: "Associate Editor",
@@ -1662,38 +1631,6 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     affiliation: "Seeking qualified experts in this field.",
     specialization: "Editorial Board",
     journalSlug: "clinical-ai-digital-health",
-  },
-  {
-    slug: "position-open-data-science-ae-1",
-    name: "Position Open",
-    role: "Associate Editor",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
-    journalSlug: "data-science",
-  },
-  {
-    slug: "position-open-data-science-ae-2",
-    name: "Position Open",
-    role: "Associate Editor",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
-    journalSlug: "data-science",
-  },
-  {
-    slug: "position-open-data-science-ebm-1",
-    name: "Position Open",
-    role: "Editorial Board Member",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
-    journalSlug: "data-science",
-  },
-  {
-    slug: "position-open-data-science-ebm-2",
-    name: "Position Open",
-    role: "Editorial Board Member",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
-    journalSlug: "data-science",
   },
   {
     slug: "position-open-engineering-ae-1",

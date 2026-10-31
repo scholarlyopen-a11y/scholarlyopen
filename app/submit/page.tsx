@@ -19,12 +19,10 @@ const JOURNAL_NAMES: Record<string, string> = {
   "biology": "Scholarly Open: Biology",
   "chemistry": "Scholarly Open: Chemistry",
   "medicine": "Scholarly Open: Medicine",
-  "data-science": "Scholarly Open: Data Science",
   "engineering": "Scholarly Open: Engineering & Applied Sciences",
   "environmental-science": "Scholarly Open: Environmental Science",
   "clinical-ai-digital-health": "Scholarly Open: Clinical AI & Digital Health",
   "ai-safety-governance": "Scholarly Open: AI Safety & Governance",
-  "decarbonization-carbon-tech": "Scholarly Open: Decarbonization & Carbon Tech",
   "quantum-engineering": "Scholarly Open: Quantum Engineering",
   "synthetic-biology-bio-design": "Scholarly Open: Synthetic Biology & Bio-Design",
   "space-resources-orbital-economy": "Scholarly Open: Space Resources & Orbital Economy",
@@ -516,10 +514,8 @@ export default function SubmitPage() {
                           <option value="biology">Biology</option>
                           <option value="chemistry">Chemistry</option>
                           <option value="medicine">Medicine</option>
-                          <option value="data-science">Data Science</option>
                           <option value="engineering">Engineering & Applied Sciences</option>
                           <option value="environmental-science">Environmental Science</option>
-                          <option value="decarbonization-carbon-tech">Decarbonization & Carbon Tech</option>
                         </select>
                       </div>
                     </div>

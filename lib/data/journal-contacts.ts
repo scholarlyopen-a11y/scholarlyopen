@@ -1,4 +1,4 @@
-// Official 13 Journals Contact & Sender Mapping for Scholarly Open and editorial360
+// Official 11 Journals Contact & Sender Mapping for Scholarly Open and editorial360
 
 export interface OfficialJournal {
   name: string
@@ -33,12 +33,6 @@ export const OFFICIAL_JOURNALS: OfficialJournal[] = [
     category: "Medical & Health"
   },
   {
-    name: "Scholarly Open: Data Science",
-    shortName: "Data Science",
-    email: "editor.datasci@scholarlyopen.org",
-    category: "Computer Science & AI"
-  },
-  {
     name: "Scholarly Open: Engineering",
     shortName: "Engineering",
     email: "editor.engg@scholarlyopen.org",
@@ -61,12 +55,6 @@ export const OFFICIAL_JOURNALS: OfficialJournal[] = [
     shortName: "AI Safety & Governance",
     email: "editor.aisg@scholarlyopen.org",
     category: "AI & Policy"
-  },
-  {
-    name: "Scholarly Open: Decarbonization & Carbon Tech",
-    shortName: "Decarbonization & Carbon Tech",
-    email: "editor.dcct@scholarlyopen.org",
-    category: "Climate & Energy"
   },
   {
     name: "Scholarly Open: Quantum Engineering",
@@ -113,46 +101,35 @@ export const JOURNAL_REPLY_TO_MAP: Record<string, string> = {
   "Scholarly Open: Medicine & Health Sciences": "editor.med@scholarlyopen.org",
   "Medicine & Health Sciences": "editor.med@scholarlyopen.org",
 
-  // 5. Data Science
-  "Scholarly Open: Data Science": "editor.datasci@scholarlyopen.org",
-  "Data Science": "editor.datasci@scholarlyopen.org",
-  "Scholarly Open: Data Science & Artificial Intelligence": "editor.datasci@scholarlyopen.org",
-  "Scholarly Open: Data Science & Analytics": "editor.datasci@scholarlyopen.org",
-  "Data Science & Analytics": "editor.datasci@scholarlyopen.org",
-
-  // 6. Engineering
+  // 5. Engineering
   "Scholarly Open: Engineering": "editor.engg@scholarlyopen.org",
   "Engineering": "editor.engg@scholarlyopen.org",
   "Scholarly Open: Engineering & Applied Sciences": "editor.engg@scholarlyopen.org",
   "Engineering & Applied Sciences": "editor.engg@scholarlyopen.org",
 
-  // 7. Environmental Science
+  // 6. Environmental Science
   "Scholarly Open: Environmental Science": "editor.environsci@scholarlyopen.org",
   "Environmental Science": "editor.environsci@scholarlyopen.org",
   "Scholarly Open: Environmental Science & Sustainability": "editor.environsci@scholarlyopen.org",
   "Environmental Science & Sustainability": "editor.environsci@scholarlyopen.org",
 
-  // 8. Clinical AI & Digital Health
+  // 7. Clinical AI & Digital Health
   "Scholarly Open: Clinical AI & Digital Health": "editor.caidh@scholarlyopen.org",
   "Clinical AI & Digital Health": "editor.caidh@scholarlyopen.org",
 
-  // 9. AI Safety & Governance
+  // 8. AI Safety & Governance
   "Scholarly Open: AI Safety & Governance": "editor.aisg@scholarlyopen.org",
   "AI Safety & Governance": "editor.aisg@scholarlyopen.org",
 
-  // 10. Decarbonization & Carbon Tech
-  "Scholarly Open: Decarbonization & Carbon Tech": "editor.dcct@scholarlyopen.org",
-  "Decarbonization & Carbon Tech": "editor.dcct@scholarlyopen.org",
-
-  // 11. Quantum Engineering
+  // 9. Quantum Engineering
   "Scholarly Open: Quantum Engineering": "editor.qe@scholarlyopen.org",
   "Quantum Engineering": "editor.qe@scholarlyopen.org",
 
-  // 12. Synthetic Biology & Bio-Design
+  // 10. Synthetic Biology & Bio-Design
   "Scholarly Open: Synthetic Biology & Bio-Design": "editor.sbbd@scholarlyopen.org",
   "Synthetic Biology & Bio-Design": "editor.sbbd@scholarlyopen.org",
 
-  // 13. Space Resources & Orbital Economy
+  // 11. Space Resources & Orbital Economy
   "Scholarly Open: Space Resources & Orbital Economy": "editor.sroe@scholarlyopen.org",
   "Space Resources & Orbital Economy": "editor.sroe@scholarlyopen.org",
 }

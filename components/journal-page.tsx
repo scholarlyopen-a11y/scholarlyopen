@@ -301,15 +301,6 @@ export function JournalPage({
       iconBg: "bg-rose-900/10 text-rose-800",
       badge: "bg-rose-900/10 text-rose-900 border-rose-900/25 shadow-none hover:bg-rose-900/20"
     },
-    "data-science": {
-      bgColor: "#E0F2FE", // stunning light sky or sea blue
-      border: "border-[#BAE6FD]",
-      text: "text-blue-950",
-      subtext: "text-blue-900/80",
-      buttonOutline: "border-blue-300 bg-blue-100/30 text-blue-900 hover:bg-blue-100/60",
-      iconBg: "bg-blue-950/10 text-blue-900",
-      badge: "bg-blue-900/10 text-blue-900 border-blue-900/25 shadow-none hover:bg-blue-900/20"
-    },
     "engineering": {
       bgColor: "#F3F4F6", // very light grey
       border: "border-slate-200",
@@ -363,15 +354,6 @@ export function JournalPage({
       buttonOutline: "border-purple-300 bg-purple-100/30 text-purple-900 hover:bg-purple-100/60",
       iconBg: "bg-purple-500/10 text-purple-600",
       badge: "bg-purple-900/10 text-purple-900 border-purple-900/25 shadow-none hover:bg-purple-900/20"
-    },
-    "decarbonization-carbon-tech": {
-      bgColor: "#F0FDFA", // very light teal
-      border: "border-[#CCFBF1]",
-      text: "text-teal-950",
-      subtext: "text-teal-900/80",
-      buttonOutline: "border-teal-300 bg-teal-100/30 text-teal-900 hover:bg-teal-100/60",
-      iconBg: "bg-teal-500/10 text-teal-600",
-      badge: "bg-teal-900/10 text-teal-900 border-teal-900/25 shadow-none hover:bg-teal-900/20"
     },
     "quantum-engineering": {
       bgColor: "#ECFEFF", // very light cyan

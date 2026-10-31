@@ -34,12 +34,6 @@ const journals = [
     href: "/journals/medicine",
   },
   {
-    titleKey: "journals.ds.title",
-    descriptionKey: "journals.ds.description",
-    icon: Cpu,
-    href: "/journals/data-science",
-  },
-  {
     titleKey: "journals.eng.title",
     descriptionKey: "journals.eng.description",
     icon: Settings,
@@ -50,12 +44,6 @@ const journals = [
     descriptionKey: "journals.env.description",
     icon: Sprout,
     href: "/journals/environmental-science",
-  },
-  {
-    titleKey: "journals.decarbonization.title",
-    descriptionKey: "journals.decarbonization.description",
-    icon: Wind,
-    href: "/journals/decarbonization-carbon-tech",
   },
 ]
 

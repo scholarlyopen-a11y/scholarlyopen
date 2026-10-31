@@ -1,8 +1,9 @@
 import fs from "fs"
 import path from "path"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg2NjUzNSwiZXhwIjoyMTA0NDQyNTM1fQ.H6xldZUHFnoTUajtmGdoI_E59cDh3xEADVzPiUj0L2Y"
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lfnwqbzcwticwdjowsmv.supabase.co"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbndxYnpjd3RpY3dkam93c212Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzQzMzkwMiwiZXhwIjoyMTA5MDA5OTAyfQ.PWV1-blUTTsEzQjNKRAUa5AUlFttEoPcGWokk7GCAIM"
+
 const BUCKET = "editorial360_data"
 
 // Global memory cache to prevent rapid repeated network requests and save bandwidth
@@ -69,6 +70,8 @@ export async function readEditorialData<T>(fileName: string, fallbackDefault: T)
       }
     }
   } catch (err) {
+    // If Supabase project is paused (DNS lookup fails) or network down, mark restricted to avoid stalling
+    markCloudRestricted()
     console.warn(`Supabase storage read error for ${fileName}, falling back to local:`, err)
   }
 
@@ -106,6 +109,7 @@ export async function writeEditorialData<T>(fileName: string, data: T): Promise<
         markCloudRestricted()
       }
     } catch (err) {
+      markCloudRestricted()
       console.warn(`Supabase storage write error for ${fileName}:`, err)
     }
   }

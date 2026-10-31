@@ -863,10 +863,9 @@ export default function ReviewerGatewayPage() {
                           <option value="chemistry">Chemistry & Materials</option>
                           <option value="clinical-ai">Clinical AI & Digital Health</option>
                           <option value="ai-safety">AI Safety & Governance</option>
-                          <option value="data-science">Data Science & Computing</option>
                           <option value="engineering">Engineering & Physical Sciences</option>
                           <option value="social-sciences">Social Sciences & Humanities</option>
-                          <option value="environmental">Environmental Sciences & Decarbonization</option>
+                          <option value="environmental">Environmental Sciences & Sustainability</option>
                         </select>
                       </div>
                     </div>

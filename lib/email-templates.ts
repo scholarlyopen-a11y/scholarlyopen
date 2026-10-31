@@ -745,15 +745,6 @@ export const JOURNAL_BRAND_THEMES: Record<string, JournalBrandMeta> = {
     iconStroke: "#9f1239",
     svgPath: '<path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/>'
   },
-  "data-science": {
-    cleanName: "Data Science",
-    slug: "data-science",
-    bgColor: "#E0F2FE",
-    borderColor: "#BAE6FD",
-    textColor: "#082f49",
-    iconStroke: "#1e40af",
-    svgPath: '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>'
-  },
   "biology": {
     cleanName: "Biology",
     slug: "biology",
@@ -808,15 +799,6 @@ export const JOURNAL_BRAND_THEMES: Record<string, JournalBrandMeta> = {
     iconStroke: "#3730a3",
     svgPath: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>'
   },
-  "decarbonization-carbon-tech": {
-    cleanName: "Decarbonization & Carbon Tech",
-    slug: "decarbonization-carbon-tech",
-    bgColor: "#F0FDFA",
-    borderColor: "#CCFBF1",
-    textColor: "#042f2e",
-    iconStroke: "#115e59",
-    svgPath: '<path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>'
-  },
   "quantum-engineering": {
     cleanName: "Quantum Engineering",
     slug: "quantum-engineering",
@@ -855,12 +837,10 @@ export function getJournalBranding(journalName?: string): JournalBrandMeta {
 
   if (norm.includes("ai safety") || norm.includes("governance")) return JOURNAL_BRAND_THEMES["ai-safety-governance"]
   if (norm.includes("clinical ai") || norm.includes("digital health")) return JOURNAL_BRAND_THEMES["clinical-ai-digital-health"]
-  if (norm.includes("decarbon") || norm.includes("carbon tech")) return JOURNAL_BRAND_THEMES["decarbonization-carbon-tech"]
   if (norm.includes("quantum")) return JOURNAL_BRAND_THEMES["quantum-engineering"]
   if (norm.includes("synthetic bio") || norm.includes("bio-design")) return JOURNAL_BRAND_THEMES["synthetic-biology-bio-design"]
   if (norm.includes("space") || norm.includes("orbital")) return JOURNAL_BRAND_THEMES["space-resources-orbital-economy"]
   if (norm.includes("medicine")) return JOURNAL_BRAND_THEMES["medicine"]
-  if (norm.includes("data science")) return JOURNAL_BRAND_THEMES["data-science"]
   if (norm.includes("biology")) return JOURNAL_BRAND_THEMES["biology"]
   if (norm.includes("chemistry")) return JOURNAL_BRAND_THEMES["chemistry"]
   if (norm.includes("engineering")) return JOURNAL_BRAND_THEMES["engineering"]

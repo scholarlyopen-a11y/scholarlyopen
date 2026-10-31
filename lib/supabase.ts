@@ -2,9 +2,10 @@
 import fs from "fs"
 import path from "path"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wrccglyypgxtuikrupkh.supabase.co"
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2NnbHl5cGd4dHVpa3J1cGtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NjY1MzUsImV4cCI6MjEwNDQ0MjUzNX0.NoW6vkygKvmF8sIJmHAYPmvPmEKXqJ_m_ugt1lhPOIg"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lfnwqbzcwticwdjowsmv.supabase.co"
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbndxYnpjd3RpY3dkam93c212Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzM5MDIsImV4cCI6MjEwOTAwOTkwMn0.tD9CHdYhRATOpOmPz2nHkMoZq86--ZuyuTyERxSL0ww"
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbndxYnpjd3RpY3dkam93c212Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzQzMzkwMiwiZXhwIjoyMTA5MDA5OTAyfQ.PWV1-blUTTsEzQjNKRAUa5AUlFttEoPcGWokk7GCAIM"
+
 
 const LOCAL_MANUSCRIPTS_FILE = path.join(process.cwd(), "lib", "data", "manuscripts.json")
 
@@ -148,6 +149,7 @@ export async function getDbManuscripts(): Promise<DbManuscript[]> {
       return remote
     }
   } catch (error) {
+    lastRestrictedTime = now
     console.warn("Supabase fetch fallback to local:", error)
   }
   return getLocalManuscripts()

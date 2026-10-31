@@ -39,8 +39,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'biology',
     'chemistry',
     'clinical-ai-digital-health',
-    'data-science',
-    'decarbonization-carbon-tech',
     'engineering',
     'environmental-science',
     'medicine',

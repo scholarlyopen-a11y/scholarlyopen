@@ -122,10 +122,8 @@ export function Footer() {
       { name: t("journals.bio.title"), href: "/journals/biology" },
       { name: t("journals.chem.title"), href: "/journals/chemistry" },
       { name: t("journals.med.title"), href: "/journals/medicine" },
-      { name: t("journals.ds.title"), href: "/journals/data-science" },
       { name: t("journals.eng.title"), href: "/journals/engineering" },
       { name: t("journals.env.title"), href: "/journals/environmental-science" },
-      { name: t("journals.decarbonization.title"), href: "/journals/decarbonization-carbon-tech" },
     ],
     forAuthors: [
       { name: t("nav.authorGuidelines"), href: "/author-guidelines" },

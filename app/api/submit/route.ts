@@ -39,8 +39,6 @@ function journalLabel(value: string) {
       return "Chemistry"
     case "medicine":
       return "Medicine"
-    case "data-science":
-      return "Data Science"
     case "engineering":
       return "Engineering & Applied Sciences"
     case "environmental-science":
@@ -49,8 +47,6 @@ function journalLabel(value: string) {
       return "Clinical AI & Digital Health"
     case "ai-safety-governance":
       return "AI Safety & Governance"
-    case "decarbonization-carbon-tech":
-      return "Decarbonization & Carbon Tech"
     case "quantum-engineering":
       return "Quantum Engineering"
     case "synthetic-biology-bio-design":
@@ -77,9 +73,6 @@ function getJournalShortCode(discipline: string): string {
     case "chemistry":
     case "chem":
       return "SOCHEM"
-    case "data-science":
-    case "dsa":
-      return "SODSA"
     case "engineering":
     case "eas":
       return "SOEAS"
@@ -92,9 +85,6 @@ function getJournalShortCode(discipline: string): string {
     case "ai-safety-governance":
     case "ais":
       return "SOAIS"
-    case "decarbonization-carbon-tech":
-    case "dct":
-      return "SODCT"
     case "quantum-engineering":
     case "qe":
       return "SOQE"

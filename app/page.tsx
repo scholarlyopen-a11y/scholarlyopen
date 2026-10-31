@@ -105,14 +105,6 @@ export default function HomePage() {
       typeColor: "bg-accent text-accent-foreground",
     },
     {
-      title: t("journals.ds.title"),
-      description: t("journals.ds.description"),
-      icon: Cpu,
-      href: "/journals/data-science",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
-    {
       title: t("journals.eng.title"),
       description: t("journals.eng.description"),
       icon: Settings,
@@ -128,19 +120,11 @@ export default function HomePage() {
       type: "Gold OA",
       typeColor: "bg-accent text-accent-foreground",
     },
-    {
-      title: t("journals.decarbonization.title"),
-      description: t("journals.decarbonization.description"),
-      icon: Wind,
-      href: "/journals/decarbonization-carbon-tech",
-      type: "Gold OA",
-      typeColor: "bg-accent text-accent-foreground",
-    },
   ]
 
   const stats = [
     { value: "100%", label: t("stats.openAccess") },
-    { value: "8", label: t("stats.journals") },
+    { value: "6", label: t("stats.journals") },
     { value: String(editorCount), label: t("stats.editors") },
     { value: "Global", label: t("stats.reach") },
     { value: "COPE", label: t("stats.guidelines") },

@@ -6,6 +6,20 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/journals/data-science',
+        destination: '/journals',
+        permanent: true,
+      },
+      {
+        source: '/journals/decarbonization-carbon-tech',
+        destination: '/journals',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default nextConfig

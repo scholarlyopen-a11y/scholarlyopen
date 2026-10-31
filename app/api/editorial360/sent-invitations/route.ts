@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
-import { readEditorialData, writeEditorialData } from "@/lib/editorial-storage"
+import { readEditorialData, writeEditorialData, isCloudRestricted } from "@/lib/editorial-storage"
 
 const FILE_PATH = "sent-invitations.json"
 
@@ -23,7 +23,12 @@ async function saveStoredSent(items: any[]): Promise<boolean> {
 
 export async function GET() {
   const sent = await getStoredSent()
-  return NextResponse.json({ ok: true, sentInvitations: sent, count: sent.length })
+  return NextResponse.json({
+    ok: true,
+    sentInvitations: sent,
+    count: sent.length,
+    cloudOnline: !isCloudRestricted()
+  })
 }
 
 export async function POST(req: Request) {

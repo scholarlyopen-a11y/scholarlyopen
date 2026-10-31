@@ -1500,6 +1500,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
   // localStorage is only a fallback cache; server API always takes priority.
   const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>([])
   const [isSentHistoryLoaded, setIsSentHistoryLoaded] = useState(false)
+  const [isSupabasePaused, setIsSupabasePaused] = useState(false)
 
   // Load sent invitations: server first (shared), then merge local-only session records and auto-sync
   const fetchSentInvitations = useCallback(() => {
@@ -1508,6 +1509,12 @@ ${journalEmail} | https://www.scholarlyopen.org`
     fetch("/api/editorial360/sent-invitations")
       .then(res => res.json())
       .then(data => {
+        if (data && data.cloudOnline === false) {
+          setIsSupabasePaused(true)
+        } else if (data && data.cloudOnline === true) {
+          setIsSupabasePaused(false)
+        }
+
         const serverItems: SentEmailRecord[] = (Array.isArray(data) ? data : (data?.sentInvitations || []))
           .filter((d: SentEmailRecord) => !BLOCKED_IDS.has(d.id))
 
@@ -1530,8 +1537,8 @@ ${journalEmail} | https://www.scholarlyopen.org`
           !serverKeys.has(`${(l.recipientEmail || '').toLowerCase()}::${l.subject}`)
         )
 
-        // If this client has local items not yet in the cloud, push them to Supabase now
-        if (localOnly.length > 0) {
+        // If this client has local items not yet in the cloud, push them to Supabase now (only if cloud is online)
+        if (localOnly.length > 0 && data?.cloudOnline !== false) {
           fetch("/api/editorial360/sent-invitations", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1543,7 +1550,10 @@ ${journalEmail} | https://www.scholarlyopen.org`
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         )
         if (typeof window !== "undefined") {
-          try { localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(merged)) } catch (e) {}
+          // Never overwrite localStorage with an empty list when Supabase is paused
+          if (merged.length > 0 || (data && data.cloudOnline !== false)) {
+            try { localStorage.setItem("editorial360_scout_sent_history", JSON.stringify(merged)) } catch (e) {}
+          }
         }
         setSentEmailsHistory(merged)
         setIsSentHistoryLoaded(true)
@@ -1578,23 +1588,23 @@ ${journalEmail} | https://www.scholarlyopen.org`
     return () => clearInterval(interval)
   }, [])
 
-  // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 3,250/day across all 13 journals)
+  // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 2,750/day across all 11 journals)
   const quotaInfo = useMemo(() => {
     const todayStr = new Date().toISOString().split("T")[0]
     const todayEmails = sentEmailsHistory.filter(e => e.timestamp && e.timestamp.startsWith(todayStr))
     
     if (scoutTargetJournal === "all") {
-      const maxQuota = 13 * 250 // 3,250 total capacity across all 13 official journal mailboxes
+      const maxQuota = OFFICIAL_JOURNALS.length * 250 // 2,750 total capacity across all 11 official journal mailboxes
       const sentCount = todayEmails.length
       const percentage = Math.min(100, Math.max(sentCount > 0 ? 4 : 0, Math.round((sentCount / maxQuota) * 100)))
       return {
-        label: "Portfolio Dispatch Rail (13 Desks)",
+        label: `Portfolio Dispatch Rail (${OFFICIAL_JOURNALS.length} Desks)`,
         sentCount,
         maxQuota,
         percentage,
-        isWarning: sentCount > 650,
-        isCaution: sentCount > 400,
-        subtext: "Deliverability target: ≤50/day per desk (650 total) to prevent blacklisting (server limit: 3,250/day)."
+        isWarning: sentCount > (OFFICIAL_JOURNALS.length * 50),
+        isCaution: sentCount > (OFFICIAL_JOURNALS.length * 30),
+        subtext: `Deliverability target: ≤50/day per desk (${OFFICIAL_JOURNALS.length * 50} total) to prevent blacklisting (server limit: ${maxQuota.toLocaleString()}/day).`
       }
     } else {
       const officialJ = OFFICIAL_JOURNALS.find(j => j.name === scoutTargetJournal)
@@ -4761,7 +4771,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <option value="Medicine">Scholarly Open: Medicine</option>
                 <option value="Engineering">Engineering & Applied Sciences</option>
                 <option value="Social">Social Sciences & Humanities</option>
-                <option value="Decarbonization">Decarbonization & Carbon Tech</option>
               </select>
 
               <Button
@@ -5220,6 +5229,34 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {(activeTab === "scout" || activeTab === "sent") && (
         <div className="space-y-5 animate-in fade-in duration-200">
           
+          {/* Supabase Paused Notice */}
+          {isSupabasePaused && (
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-in fade-in">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/60 shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-amber-900 dark:text-amber-100">
+                    Supabase Cloud Database is Paused (Free Tier Inactivity)
+                  </h4>
+                  <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300/90 leading-relaxed">
+                    Your sent invitations, manuscripts, and reviews are safely saved in Supabase. Supabase pauses free projects after 7 days of inactivity. Simply click &quot;Unpause Project&quot; in your Supabase dashboard (~1–2 min) to restore all cloud data.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="https://supabase.com/dashboard/project/lfnwqbzcwticwdjowsmv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Open Supabase Dashboard
+              </a>
+            </div>
+          )}
+
           {/* Header Banner: Clean, Standardized, International Scholarly Style */}
           <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs relative overflow-hidden space-y-4">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0077cc]" />
@@ -5539,14 +5576,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         "Structural Nanocomposites",
                         "Microfluidic Devices & MEMS"
                       ],
-                      "Scholarly Open: Data Science": [
-                        "Transformer Architectures & Attention",
-                        "Graph Neural Networks & Relational Learning",
-                        "Multimodal Foundation Models",
-                        "High-Dimensional Statistics & Inference",
-                        "Federated Learning & Differential Privacy",
-                        "Reinforcement Learning with Human Feedback"
-                      ],
                       "Scholarly Open: AI Safety & Governance": [
                         "Model Alignment & Red-Teaming",
                         "Algorithmic Fairness & Bias Mitigation",
@@ -5578,14 +5607,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         "Hydrological Climate Modeling",
                         "Urban Heat Islands & Eco-Design",
                         "PFAS Remediation & Soil Chemistry"
-                      ],
-                      "Scholarly Open: Decarbonization & Carbon Tech": [
-                        "Direct Air Capture (DAC)",
-                        "Green Hydrogen & Electrolyzers",
-                        "Industrial Point-Source CCUS",
-                        "Thermal Energy Storage",
-                        "Biochar & Mineral Carbonation",
-                        "Zero-Carbon Cement & Green Steel"
                       ],
                       "Scholarly Open: Quantum Engineering": [
                         "Superconducting Qubits & Scalability",
@@ -7944,7 +7965,6 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <option value="Medicine">Medicine</option>
                 <option value="Engineering">Engineering</option>
                 <option value="Social">Social Sciences</option>
-                <option value="Decarbonization">Decarbonization</option>
               </select>
 
               {/* Export Buttons */}
@@ -15003,7 +15023,6 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                       <option value="Scholarly Open: Medicine">Scholarly Open: Medicine</option>
                       <option value="Scholarly Open: Engineering & Applied Sciences">Scholarly Open: Engineering</option>
                       <option value="Scholarly Open: Social Sciences & Humanities">Scholarly Open: Social Sciences</option>
-                      <option value="Scholarly Open: Decarbonization & Carbon Tech">Scholarly Open: Decarbonization</option>
                     </select>
                   </div>
 

@@ -61,10 +61,8 @@ export default function JoinEditorialBoardPage() {
     { id: "biology", name: t("journals.bio.title") },
     { id: "chemistry", name: t("journals.chem.title") },
     { id: "medicine", name: t("journals.med.title") },
-    { id: "data-science", name: t("journals.ds.title") },
     { id: "engineering", name: t("journals.eng.title") },
     { id: "environmental-science", name: t("journals.env.title") },
-    { id: "decarbonization-carbon-tech", name: t("journals.decarbonization.title") },
   ]
 
   const roles = [
