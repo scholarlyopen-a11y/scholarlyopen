@@ -1501,6 +1501,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
   const [sentEmailsHistory, setSentEmailsHistory] = useState<SentEmailRecord[]>([])
   const [isSentHistoryLoaded, setIsSentHistoryLoaded] = useState(false)
   const [isSupabasePaused, setIsSupabasePaused] = useState(false)
+  const [isSupabasePausedDismissed, setIsSupabasePausedDismissed] = useState(false)
 
   // Load sent invitations: server first (shared), then merge local-only session records and auto-sync
   const fetchSentInvitations = useCallback(() => {
@@ -1509,14 +1510,14 @@ ${journalEmail} | https://www.scholarlyopen.org`
     fetch("/api/editorial360/sent-invitations")
       .then(res => res.json())
       .then(data => {
-        if (data && data.cloudOnline === false) {
-          setIsSupabasePaused(true)
-        } else if (data && data.cloudOnline === true) {
-          setIsSupabasePaused(false)
-        }
-
         const serverItems: SentEmailRecord[] = (Array.isArray(data) ? data : (data?.sentInvitations || []))
           .filter((d: SentEmailRecord) => !BLOCKED_IDS.has(d.id))
+
+        if (data && data.cloudOnline === false && serverItems.length === 0) {
+          setIsSupabasePaused(true)
+        } else {
+          setIsSupabasePaused(false)
+        }
 
         // Merge any local-only records that the server doesn't have yet
         let localItems: SentEmailRecord[] = []
@@ -5230,7 +5231,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         <div className="space-y-5 animate-in fade-in duration-200">
           
           {/* Supabase Paused Notice */}
-          {isSupabasePaused && (
+          {isSupabasePaused && !isSupabasePausedDismissed && (
             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-in fade-in">
               <div className="flex items-start sm:items-center gap-3">
                 <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/60 shrink-0">
@@ -5245,15 +5246,24 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   </p>
                 </div>
               </div>
-              <a
-                href="https://supabase.com/dashboard/project/lfnwqbzcwticwdjowsmv"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Open Supabase Dashboard
-              </a>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href="https://supabase.com/dashboard/project/lfnwqbzcwticwdjowsmv"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Open Supabase Dashboard
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setIsSupabasePausedDismissed(true)}
+                  className="px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-200 font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
             </div>
           )}
 

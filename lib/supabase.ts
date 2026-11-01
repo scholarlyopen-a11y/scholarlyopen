@@ -1,10 +1,11 @@
 // Supabase Cloud Database Client for Editorial360 with Local Persistence Fallback
 import fs from "fs"
 import path from "path"
+import { getActiveSupabaseUrl, getActiveSupabaseAnonKey, getActiveSupabaseServiceKey } from "@/lib/supabase-config"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lfnwqbzcwticwdjowsmv.supabase.co"
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbndxYnpjd3RpY3dkam93c212Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzM5MDIsImV4cCI6MjEwOTAwOTkwMn0.tD9CHdYhRATOpOmPz2nHkMoZq86--ZuyuTyERxSL0ww"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbndxYnpjd3RpY3dkam93c212Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzQzMzkwMiwiZXhwIjoyMTA5MDA5OTAyfQ.PWV1-blUTTsEzQjNKRAUa5AUlFttEoPcGWokk7GCAIM"
+const SUPABASE_URL = getActiveSupabaseUrl()
+const SUPABASE_ANON_KEY = getActiveSupabaseAnonKey()
+const SUPABASE_SERVICE_KEY = getActiveSupabaseServiceKey()
 
 
 const LOCAL_MANUSCRIPTS_FILE = path.join(process.cwd(), "lib", "data", "manuscripts.json")

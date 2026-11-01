@@ -1,8 +1,9 @@
 import fs from "fs"
 import path from "path"
+import { getActiveSupabaseUrl, getActiveSupabaseServiceKey } from "@/lib/supabase-config"
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lfnwqbzcwticwdjowsmv.supabase.co"
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbndxYnpjd3RpY3dkam93c212Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzQzMzkwMiwiZXhwIjoyMTA5MDA5OTAyfQ.PWV1-blUTTsEzQjNKRAUa5AUlFttEoPcGWokk7GCAIM"
+const SUPABASE_URL = getActiveSupabaseUrl()
+const SUPABASE_SERVICE_KEY = getActiveSupabaseServiceKey()
 
 const BUCKET = "editorial360_data"
 
@@ -24,6 +25,10 @@ export function isCloudRestricted(): boolean {
 
 export function markCloudRestricted() {
   lastRestrictedTime = Date.now()
+}
+
+export function clearCloudRestricted() {
+  lastRestrictedTime = 0
 }
 
 /**
@@ -49,16 +54,29 @@ export async function readEditorialData<T>(fileName: string, fallbackDefault: T)
 
   // 3. Try reading from Supabase Cloud Storage (WITHOUT cache-busting timestamp to avoid egress spikes)
   try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${fileName}`, {
+    let res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${fileName}`, {
       cache: "default",
       headers: {
         "Accept": "application/json"
       }
     })
 
+    // If public read fails with auth or permissions, attempt authenticated fetch with service role key
+    if (!res.ok && res.status !== 404 && res.status !== 402 && res.status !== 429) {
+      res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`, {
+        cache: "default",
+        headers: {
+          apikey: SUPABASE_SERVICE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          Accept: "application/json"
+        }
+      })
+    }
+
     if (res.ok) {
       const data = await res.json()
       if (data !== undefined && data !== null) {
+        clearCloudRestricted()
         memoryCache[fileName] = { data, timestamp: now }
         // Keep local fallback file synchronized
         saveLocalFile(localFilePath, data)
