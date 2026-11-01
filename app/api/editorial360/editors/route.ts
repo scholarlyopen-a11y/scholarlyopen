@@ -73,6 +73,32 @@ function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEdito
       continue
     }
 
+    const isEletmany = normName.includes("eletmany") || normSlug.includes("eletmany")
+    if (isEletmany) {
+      if (seenKeys.has("mohamed-eletmany")) continue
+      seenKeys.add("mohamed-eletmany")
+      result.push({
+        ...ed,
+        id: ed.id || "EBM-ELETMANY",
+        slug: "mohamed-eletmany",
+        name: "Mohamed R. Eletmany, Ph.D.",
+        role: "Associate Editor",
+        journal: "Scholarly Open: Chemistry",
+        journalSlug: "chemistry",
+        affiliation: "Chemistry Department, Faculty of Science, South Valley University, Qena, Egypt",
+        department: "Chemistry Department, Faculty of Science",
+        country: "Egypt",
+        photoUrl: "/images/editors/mohamed-eletmany.jpg",
+        orcid: "0000-0003-4868-4678",
+        googleScholar: "https://scholar.google.com.eg/citations?user=tP25O2kAAAAJ&hl=ar",
+        researchGate: "https://www.researchgate.net/profile/Mohamed-Eletmany",
+        email: "editor.chem@scholarlyopen.org",
+        status: "Active Handling Editor",
+        jmApproved: true
+      })
+      continue
+    }
+
     const isRabea = normName.includes("rabea") || normSlug.includes("rabea")
     if (isRabea) {
       ed.photoUrl = "/images/editors/ahmed-magdy-rabea.jpg"

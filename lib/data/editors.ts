@@ -1037,7 +1037,7 @@ Dr. Kanthlal has authored 39 Scopus-indexed papers (h-index 9, cumulative impact
     slug: "mohamed-eletmany",
     name: "Mohamed R. Eletmany, Ph.D.",
     role: "Associate Editor",
-    affiliation: "South Valley University, Egypt",
+    affiliation: "Chemistry Department, Faculty of Science, South Valley University, Qena, Egypt",
     specialization: "Polymer chemistry, sustainable textile dyeing, molecular modeling (DFT), and surface modifications.",
     email: "editor.chem@scholarlyopen.org",
     orcid: "0000-0003-4868-4678",
@@ -2346,6 +2346,8 @@ export const editors: EditorMember[] = [
     if (ol.name.toLowerCase() === be.name.toLowerCase()) return true
     if (ol.slug.includes("abdelmonsef") && be.slug.includes("abdelmonsef")) return true
     if (ol.name.toLowerCase().includes("abdelmonsef") && be.name.toLowerCase().includes("abdelmonsef")) return true
+    if (ol.slug.includes("eletmany") && be.slug.includes("eletmany")) return true
+    if (ol.name.toLowerCase().includes("eletmany") && be.name.toLowerCase().includes("eletmany")) return true
     if (ol.journalSlug === be.journalSlug && be.name === "Position Open") {
       const isOlEic = ol.role?.toLowerCase().includes("chief")
       const isBeEic = be.role?.toLowerCase().includes("chief")

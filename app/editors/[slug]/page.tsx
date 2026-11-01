@@ -42,6 +42,12 @@ function findEditorBySlug(rawSlug: string) {
     if (found) return found
   }
 
+  // Aliases for Dr. Mohamed R. Eletmany
+  if (slug.includes("eletmany")) {
+    found = editors.find(e => e.slug.includes("eletmany") || e.name.toLowerCase().includes("eletmany"))
+    if (found) return found
+  }
+
   // 2. Strip post-nominal credentials and common prefixes
   const normalizedSlug = slug
     .replace(/^assoc-prof-|^asst-prof-|^prof-|^dr-/i, "")
@@ -100,6 +106,11 @@ export async function generateStaticParams() {
       allSlugs.add("s-k-kanthlal")
       allSlugs.add("dr-s-k-kanthlal")
       allSlugs.add("kanthlal")
+    }
+    if (editor.slug.includes("eletmany")) {
+      allSlugs.add("mohamed-r-eletmany")
+      allSlugs.add("dr-mohamed-eletmany")
+      allSlugs.add("eletmany")
     }
   })
   return Array.from(allSlugs).map((slug) => ({ slug }))

@@ -195,23 +195,26 @@ export function JournalPage({
           const mappedAEs: EditorMember[] = liveAEs.map((e: any) => {
             const isAbdelmonsef = (e.name && (e.name.toLowerCase().includes("abdelmonsef") || e.name.toLowerCase().includes("aboubakr"))) || (e.slug && e.slug.includes("abdelmonsef"))
             const isTahir = (e.name && e.name.toLowerCase().includes("tahir")) || (e.slug && e.slug.includes("tahir"))
+            const isEletmany = (e.name && e.name.toLowerCase().includes("eletmany")) || (e.slug && e.slug.includes("eletmany"))
             return {
-              name: isAbdelmonsef ? "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D." : e.name,
-              slug: isAbdelmonsef ? "aboubakr-haredi-abdelmonsef" : (isTahir ? "furqan-tahir" : e.slug),
+              name: isAbdelmonsef ? "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D." : (isEletmany ? "Mohamed R. Eletmany, Ph.D." : e.name),
+              slug: isAbdelmonsef ? "aboubakr-haredi-abdelmonsef" : (isTahir ? "furqan-tahir" : (isEletmany ? "mohamed-eletmany" : e.slug)),
               role: e.role || "Associate Editor",
               affiliation: isAbdelmonsef 
                 ? "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt" 
+                : isEletmany
+                ? "Chemistry Department, Faculty of Science, South Valley University, Qena, Egypt"
                 : isTahir
                 ? "King Abdullah University of Science and Technology (KAUST),\nEnvironmental Science and Engineering, Saudi Arabia"
                 : (e.affiliation || "Academic Institution"),
               specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
-              imageUrl: isAbdelmonsef ? "/images/editors/aboubakr-abdelmonsef.png" : (liveEiC && liveEiC.email === e.email ? liveEiC.photoUrl : e.photoUrl),
-              email: isAbdelmonsef ? "editor.chem@scholarlyopen.org" : e.email,
-              orcid: isAbdelmonsef ? "0000-0002-4616-0224" : e.orcid,
+              imageUrl: isAbdelmonsef ? "/images/editors/aboubakr-abdelmonsef.png" : (isEletmany ? "/images/editors/mohamed-eletmany.jpg" : (liveEiC && liveEiC.email === e.email ? liveEiC.photoUrl : e.photoUrl)),
+              email: (isAbdelmonsef || isEletmany) ? "editor.chem@scholarlyopen.org" : e.email,
+              orcid: isAbdelmonsef ? "0000-0002-4616-0224" : (isEletmany ? "0000-0003-4868-4678" : e.orcid),
               scopusId: isAbdelmonsef ? "57191850843" : e.scopusId,
               googleScholar: e.googleScholar || e.scholarUrl,
               linkedin: isAbdelmonsef ? "https://www.linkedin.com/in/dr-aboubakr-h-abdelmonsef" : e.linkedin,
-              researchGate: e.researchGate,
+              researchGate: isEletmany ? "https://www.researchgate.net/profile/Mohamed-Eletmany" : e.researchGate,
               biography: e.biography,
               expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
             }
@@ -222,6 +225,7 @@ export function JournalPage({
               if (existing.name !== "Position open" && !combined.some(c => {
                 if (c.name.toLowerCase() === existing.name.toLowerCase()) return true
                 if ((c.name.toLowerCase().includes("abdelmonsef") || (c.slug && c.slug.includes("abdelmonsef"))) && (existing.name.toLowerCase().includes("abdelmonsef") || (existing.slug && existing.slug.includes("abdelmonsef")))) return true
+                if ((c.name.toLowerCase().includes("eletmany") || (c.slug && c.slug.includes("eletmany"))) && (existing.name.toLowerCase().includes("eletmany") || (existing.slug && existing.slug.includes("eletmany")))) return true
                 return false
               })) {
                 combined.push(existing)
@@ -256,6 +260,7 @@ export function JournalPage({
               if (existing.name !== "Position open" && !combined.some(c => {
                 if (c.name.toLowerCase() === existing.name.toLowerCase()) return true
                 if ((c.name.toLowerCase().includes("abdelmonsef") || (c.slug && c.slug.includes("abdelmonsef"))) && (existing.name.toLowerCase().includes("abdelmonsef") || (existing.slug && existing.slug.includes("abdelmonsef")))) return true
+                if ((c.name.toLowerCase().includes("eletmany") || (c.slug && c.slug.includes("eletmany"))) && (existing.name.toLowerCase().includes("eletmany") || (existing.slug && existing.slug.includes("eletmany")))) return true
                 return false
               })) {
                 combined.push(existing)

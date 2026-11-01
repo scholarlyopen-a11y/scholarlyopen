@@ -5,6 +5,7 @@ export interface OfficialJournal {
   shortName: string
   email: string
   category?: string
+  slug?: string
 }
 
 export const OFFICIAL_JOURNALS: OfficialJournal[] = [

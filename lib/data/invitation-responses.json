@@ -227,6 +227,27 @@
       "consentProfileUpload": true
     },
     {
+      "id": "RESP-ELETMANY",
+      "slug": "mohamed-eletmany",
+      "type": "ae",
+      "candidateName": "Mohamed R. Eletmany, Ph.D.",
+      "candidateEmail": "editor.chem@scholarlyopen.org",
+      "journal": "Scholarly Open: Chemistry",
+      "decision": "yes",
+      "credentialId": "EBM-ELETMANY",
+      "timestamp": "2026-10-15T08:00:00.000Z",
+      "notes": "Associate Editor appointment accepted via verified portal",
+      "affiliation": "Chemistry Department, Faculty of Science, South Valley University, Qena, Egypt",
+      "department": "Chemistry Department, Faculty of Science",
+      "country": "Egypt",
+      "photoUrl": "/images/editors/mohamed-eletmany.jpg",
+      "orcid": "0000-0003-4868-4678",
+      "status": "Live on Masthead",
+      "jmApproved": true,
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true
+    },
+    {
       "id": "RESP-3844",
       "type": "board",
       "candidateName": "Ahmed Magdy Rabea, M.D., Ph.D.",
