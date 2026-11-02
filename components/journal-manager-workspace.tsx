@@ -1507,7 +1507,10 @@ ${journalEmail} | https://www.scholarlyopen.org`
   const fetchSentInvitations = useCallback(() => {
     const BLOCKED_IDS = new Set(["SENT-1090", "SENT-1091", "SENT-1092", "SENT-6640", "SENT-0281"])
 
-    fetch("/api/editorial360/sent-invitations")
+    fetch("/api/editorial360/sent-invitations", {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" }
+    })
       .then(res => res.json())
       .then(data => {
         const serverItems: SentEmailRecord[] = (Array.isArray(data) ? data : (data?.sentInvitations || []))

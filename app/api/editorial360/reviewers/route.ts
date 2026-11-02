@@ -12,7 +12,8 @@ export interface ReviewerHistoryItem {
   reviewerName: string
   reviewerEmail: string
   invitedDate: string
-  status: "Invited" | "Accepted" | "Declined" | "Completed" | "Rescinded"
+  status: "Invited" | "Accepted" | "Declined" | "Completed" | "Rescinded" | "In Progress"
+  isRound2?: boolean
   deadline?: string
   declineReason?: string
   declineReferral?: string
@@ -37,9 +38,10 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     journal: "Scholarly Open: Medicine",
     reviewerName: "Dr. Praveen Nagula",
     reviewerEmail: "drpraveennagula@gmail.com",
-    invitedDate: "2026-08-15",
-    status: "Completed",
-    deadline: "2026-08-29",
+    invitedDate: "2026-10-21",
+    status: "In Progress",
+    deadline: "2026-11-15",
+    isRound2: true,
     respondedAt: "2026-08-28"
   },
   {
@@ -61,9 +63,10 @@ const DEFAULT_REVIEWER_HISTORY: ReviewerHistoryItem[] = [
     journal: "Scholarly Open: Medicine",
     reviewerName: "Dr. Chaud GJ",
     reviewerEmail: "germanchaud@gmail.com",
-    invitedDate: "2026-10-01",
-    status: "Completed",
-    deadline: "2026-10-15",
+    invitedDate: "2026-10-21",
+    status: "In Progress",
+    deadline: "2026-11-15",
+    isRound2: true,
     respondedAt: "2026-10-09"
   },
   {
@@ -266,6 +269,7 @@ export async function GET(req: Request) {
           s.campaignType === "reviewer_invitation" || 
           s.campaignType === "reviewer" ||
           s.campaignType === "ecr_reviewer" ||
+          s.campaignType === "round2_review_dispatch" ||
           (s.subject && s.subject.toLowerCase().includes("review invitation"))
 
         // Must have an explicit manuscript ID associated with it (NEVER fallback to SOMED-26-RW01)
@@ -280,7 +284,11 @@ export async function GET(req: Request) {
             r.paperId.toLowerCase() === matchPid.toLowerCase()
           )
           if (existingItem) {
-            if (sStatus !== "Invited" && existingItem.status === "Invited") {
+            if (s.campaignType === "round2_review_dispatch") {
+              existingItem.status = "In Progress"
+              existingItem.isRound2 = true
+              if (s.deadline) existingItem.deadline = s.deadline
+            } else if (sStatus !== "Invited" && existingItem.status === "Invited") {
               existingItem.status = sStatus
             }
             if (s.deadline) existingItem.deadline = s.deadline

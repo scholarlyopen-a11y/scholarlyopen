@@ -1079,6 +1079,39 @@ export default function Editorial360Page() {
       const urlJournal = params.get("journal") || ""
       const urlTitle = params.get("title") || ""
 
+      if (urlAction && (urlAction === "review" || urlAction === "round2")) {
+        setRole("reviewer")
+        if (urlEmail) {
+          setEmail(urlEmail)
+          setRegEmail(urlEmail)
+        }
+        setIsLoggedIn(true)
+        setActiveReviewerTab("overview")
+        const targetPaperId = urlId || "SOMED-26-RW01"
+        setActiveReviews(prev => {
+          const existing = prev.find(p => p.id.toLowerCase() === targetPaperId.toLowerCase())
+          if (existing) {
+            return prev.map(p => p.id.toLowerCase() === targetPaperId.toLowerCase() ? { ...p, status: "In Progress", isRound2: true } : p)
+          }
+          return [
+            ...prev,
+            {
+              id: targetPaperId,
+              title: urlTitle || "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
+              journal: urlJournal || "Scholarly Open: Medicine",
+              deadline: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+              status: "In Progress",
+              isRound2: true
+            }
+          ]
+        })
+        setSuccess(
+          language === "de"
+            ? `Zweitbegutachtung (R2) für [${targetPaperId}] freigeschaltet. Bitte bewerten Sie die überarbeitete Fassung.`
+            : `Round 2 re-assessment unlocked for [${targetPaperId}]. You can now review the author's revisions and rebuttal.`
+        )
+      }
+
       if (urlAction && (urlAction === "accept" || urlAction === "decline")) {
         let alreadyAccepted = false
         if (urlAction === "accept" && urlEmail) {
@@ -1739,7 +1772,15 @@ export default function Editorial360Page() {
               abstract: m.abstract,
               fileName: m.file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
               fileSize: m.file_size || (m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
-              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : undefined),
+              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
+              revisedFileName: m.revised_file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
+              revisedFileSize: m.revised_file_size || (m.id === "SOMED-26-RW01" ? "39.5 KB" : undefined),
+              revisedFileUrl: m.revised_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
+              rebuttalFileName: m.rebuttal_file_name || (m.id === "SOMED-26-RW01" ? "Response to Reviewers_101926.docx" : undefined),
+              rebuttalFileSize: m.rebuttal_file_size || (m.id === "SOMED-26-RW01" ? "25.8 KB" : undefined),
+              rebuttalFileUrl: m.rebuttal_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : undefined),
+              rebuttalText: m.rebuttal_text || (m.id === "SOMED-26-RW01" ? INITIAL_MEDICINE_MANUSCRIPT.rebuttalText : undefined),
+              revisionDate: m.revision_date || (m.id === "SOMED-26-RW01" ? "2026-10-21T07:30:00.000Z" : undefined),
               coverLetter: m.cover_letter,
               ethicsIrb: m.ethics_irb,
               fundingGrant: m.funding_grant,
@@ -1963,7 +2004,15 @@ export default function Editorial360Page() {
               abstract: m.abstract,
               fileName: m.file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
               fileSize: m.file_size || (m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
-              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : undefined),
+              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
+              revisedFileName: m.revised_file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
+              revisedFileSize: m.revised_file_size || (m.id === "SOMED-26-RW01" ? "39.5 KB" : undefined),
+              revisedFileUrl: m.revised_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
+              rebuttalFileName: m.rebuttal_file_name || (m.id === "SOMED-26-RW01" ? "Response to Reviewers_101926.docx" : undefined),
+              rebuttalFileSize: m.rebuttal_file_size || (m.id === "SOMED-26-RW01" ? "25.8 KB" : undefined),
+              rebuttalFileUrl: m.rebuttal_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : undefined),
+              rebuttalText: m.rebuttal_text || (m.id === "SOMED-26-RW01" ? INITIAL_MEDICINE_MANUSCRIPT.rebuttalText : undefined),
+              revisionDate: m.revision_date || (m.id === "SOMED-26-RW01" ? "2026-10-21T07:30:00.000Z" : undefined),
               coverLetter: m.cover_letter,
               ethicsIrb: m.ethics_irb,
               fundingGrant: m.funding_grant,
@@ -8349,6 +8398,19 @@ Specific comments to the Author(s):
                       >
                         <Compass className="h-4 w-4 text-[#0b99ff]" />
                         <span>Scholar Scout</span>
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => setActiveJmTab("sent")}
+                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                          activeJmTab === "sent"
+                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
+                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
+                        }`}
+                      >
+                        <History className="h-4 w-4 text-[#0b99ff]" />
+                        <span>{language === "de" ? "Gesendete Elemente" : "Sent Items"}</span>
                       </button>
 
                       <button 

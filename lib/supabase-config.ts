@@ -40,3 +40,4 @@ export function getActiveSupabaseAnonKey(): string {
   }
   return envKey
 }
+

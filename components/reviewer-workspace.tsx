@@ -526,6 +526,7 @@ export function ReviewerWorkspace({
   const [selectedInvForAccept, setSelectedInvForAccept] = useState<ReviewInvitationItem | null>(null)
   const [selectedInvForDecline, setSelectedInvForDecline] = useState<ReviewInvitationItem | null>(null)
   const [selectedReviewForEval, setSelectedReviewForEval] = useState<ActiveReviewItem | null>(null)
+  const [isRound2Active, setIsRound2Active] = useState<boolean>(false)
   const [selectedPackageRev, setSelectedPackageRev] = useState<ActiveReviewItem | null>(null)
   const [selectedCertReview, setSelectedCertReview] = useState<ActiveReviewItem | null>(null)
   const [requestCertificate, setRequestCertificate] = useState(true)
@@ -931,7 +932,8 @@ export function ReviewerWorkspace({
     }, 600)
   }
 
-  const handleOpenEval = (rev: ActiveReviewItem) => {
+  const handleOpenEval = (rev: ActiveReviewItem, isRound2 = false) => {
+    setIsRound2Active(isRound2 || Boolean((rev as any).isRound2) || rev.status === "Completed")
     setSelectedReviewForEval(rev)
     setEvalError("")
 
@@ -1995,7 +1997,7 @@ COPE Guidance & Plan S Benchmark Archive
             </div>
 
             <div className="p-4 space-y-3">
-              {localActiveReviews.filter(r => r.status === "In Progress" || r.status === "Pending").map((rev) => {
+              {localActiveReviews.filter(r => r.status === "In Progress" || r.status === "Pending" || Boolean((r as any).isRound2)).map((rev) => {
                 const forensicData = FORENSIC_PROFILES[rev.manuscriptId || rev.id] || FORENSIC_PROFILES["SOMED-26-RS001"]
                 const isEscalated = !!(escalatedPaperIds[rev.id] || escalatedPaperIds[rev.manuscriptId || ""])
                 const daysLeft = getDaysRemaining(rev.deadline)
