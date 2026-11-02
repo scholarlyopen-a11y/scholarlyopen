@@ -1,4 +1,5 @@
 export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
 import { getDbManuscripts, upsertDbManuscript, updateDbManuscriptStatus, deleteDbManuscript } from "@/lib/supabase"
@@ -29,7 +30,7 @@ export async function GET() {
         } as any
       ]
     }
-    return NextResponse.json({ ok: true, manuscripts })
+    return NextResponse.json({ ok: true, manuscripts }, { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } })
   } catch (error: any) {
     return NextResponse.json({ 
       ok: true, 

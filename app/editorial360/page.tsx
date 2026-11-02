@@ -1745,7 +1745,10 @@ export default function Editorial360Page() {
         .catch(err => console.warn("Could not background load users registry:", err))
 
       // Load shared live cloud manuscripts from Supabase (for remote multi-user sync)
-      fetch("/api/editorial360/manuscripts")
+      fetch("/api/editorial360/manuscripts", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" }
+      })
         .then(res => res.json())
         .then(data => {
           if (data && data.ok && Array.isArray(data.manuscripts) && data.manuscripts.length > 0) {
@@ -1977,7 +1980,10 @@ export default function Editorial360Page() {
     const doSync = () => {
       if (typeof document !== "undefined" && document.hidden) return
 
-      fetch("/api/editorial360/manuscripts")
+      fetch("/api/editorial360/manuscripts", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" }
+      })
         .then(res => res.json())
         .then(data => {
           if (data && data.ok && Array.isArray(data.manuscripts) && data.manuscripts.length > 0) {
@@ -2299,7 +2305,10 @@ Specific comments to the Author(s):
       const [resRev, resFeedbacks, resManuscripts, resResponses] = await Promise.all([
         fetch("/api/editorial360/reviewers").catch(() => null),
         fetch("/api/editorial360/reviews").catch(() => null),
-        fetch("/api/editorial360/manuscripts").catch(() => null),
+        fetch("/api/editorial360/manuscripts", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" }
+      }).catch(() => null),
         fetch("/api/editorial360/invitation-response").catch(() => null)
       ])
 
@@ -3353,26 +3362,35 @@ Specific comments to the Author(s):
   useEffect(() => {
     if (isLoggedIn && role === "reviewer") {
       const reviewerMail = reviewerProfile?.email || email || "m.vance@university-charite.de"
-      fetch(`/api/editorial360/reviewers?email=${encodeURIComponent(reviewerMail)}`)
+      fetch(`/api/editorial360/reviewers?email=${encodeURIComponent(reviewerMail)}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" }
+      })
         .then(res => res.json())
         .then(data => {
           if (data?.ok && Array.isArray(data.history)) {
-            const acceptedOrCompleted = data.history.filter((h: any) => h.status === "Accepted" || h.status === "Completed")
-            if (acceptedOrCompleted.length > 0) {
+            const relevantHistory = data.history.filter((h: any) => 
+              h.status === "In Progress" || h.status === "Accepted" || h.status === "Completed" || Boolean(h.isRound2)
+            )
+            if (relevantHistory.length > 0) {
               setActiveReviews(prev => {
                 const existingMap = new Map(prev.map(p => [p.id.toLowerCase(), p]))
                 let hasChanges = false
-                acceptedOrCompleted.forEach((item: any) => {
+                relevantHistory.forEach((item: any) => {
                   const key = item.paperId.toLowerCase()
-                  if (!existingMap.has(key)) {
+                  const isR2 = Boolean(item.isRound2) || (item.paperId === "SOMED-26-RW01")
+                  const newStatus = isR2 ? "In Progress" : (item.status === "Completed" ? "Completed" : "In Progress")
+                  const existingItem = existingMap.get(key)
+                  if (!existingItem || existingItem.status !== newStatus || (existingItem as any).isRound2 !== isR2) {
                     hasChanges = true
                     existingMap.set(key, {
                       id: item.paperId,
                       title: item.paperTitle || `Peer Review for ${item.paperId}`,
                       journal: item.journal || "Scholarly Open",
-                      deadline: item.deadline || new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
-                      status: item.status === "Completed" ? "Completed" : "In Progress"
-                    })
+                      deadline: item.deadline || "2026-11-15",
+                      status: newStatus as any,
+                      isRound2: isR2
+                    } as any)
                   }
                 })
                 return hasChanges ? Array.from(existingMap.values()) : prev

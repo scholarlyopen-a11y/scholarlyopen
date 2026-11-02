@@ -1595,39 +1595,74 @@ ${journalEmail} | https://www.scholarlyopen.org`
   // Dynamic Safe Dispatch Quota Meter (250/day per journal mailbox, 2,750/day across all 11 journals)
   const quotaInfo = useMemo(() => {
     const todayStr = new Date().toISOString().split("T")[0]
-    const todayEmails = sentEmailsHistory.filter(e => e.timestamp && e.timestamp.startsWith(todayStr))
+    const localTodayStr = new Date().toLocaleDateString('en-CA')
+    const now = Date.now()
+
+    const isTodayEmail = (e: SentEmailRecord) => {
+      if (!e.timestamp) return false
+      if (e.timestamp.startsWith(todayStr) || e.timestamp.startsWith(localTodayStr)) return true
+      const t = new Date(e.timestamp).getTime()
+      if (!isNaN(t) && (now - t) < 24 * 60 * 60 * 1000 && (now - t) >= 0) return true
+      return false
+    }
+
+    const todayEmails = sentEmailsHistory.filter(isTodayEmail)
+    const portfolioSentToday = todayEmails.length
+    const portfolioSentTotal = sentEmailsHistory.length
     
     if (scoutTargetJournal === "all") {
-      const maxQuota = OFFICIAL_JOURNALS.length * 250 // 2,750 total capacity across all 11 official journal mailboxes
-      const sentCount = todayEmails.length
+      const maxQuota = OFFICIAL_JOURNALS.length * 250
+      const sentCount = portfolioSentToday
       const percentage = Math.min(100, Math.max(sentCount > 0 ? 4 : 0, Math.round((sentCount / maxQuota) * 100)))
       return {
         label: `Portfolio Dispatch Rail (${OFFICIAL_JOURNALS.length} Desks)`,
         sentCount,
+        portfolioSentToday,
         maxQuota,
         percentage,
+        displayCount: `${sentCount.toLocaleString()} / ${maxQuota.toLocaleString()} sent today`,
         isWarning: sentCount > (OFFICIAL_JOURNALS.length * 50),
         isCaution: sentCount > (OFFICIAL_JOURNALS.length * 30),
-        subtext: `Deliverability target: ≤50/day per desk (${OFFICIAL_JOURNALS.length * 50} total) to prevent blacklisting (server limit: ${maxQuota.toLocaleString()}/day).`
+        subtext: `Deliverability target: ≤50/day per desk (${OFFICIAL_JOURNALS.length * 50} total) to prevent blacklisting (server limit: ${maxQuota.toLocaleString()}/day). ${portfolioSentTotal} total invitations dispatched.`
       }
     } else {
       const officialJ = OFFICIAL_JOURNALS.find(j => j.name === scoutTargetJournal)
       const deskName = officialJ ? officialJ.shortName : scoutTargetJournal.replace("Scholarly Open: ", "")
-      const maxQuota = 250 // Safe server ceiling for this specific mailbox
-      const sentCount = todayEmails.filter(e => {
+      const maxQuota = 250
+      
+      const deskFilter = (e: SentEmailRecord) => {
         if (!e.journal) return false
         return e.journal.toLowerCase().includes(deskName.toLowerCase()) || 
                scoutTargetJournal.toLowerCase().includes(e.journal.toLowerCase())
-      }).length
-      const percentage = Math.min(100, Math.max(sentCount > 0 ? 4 : 0, Math.round((sentCount / maxQuota) * 100)))
+      }
+      
+      const deskSentToday = todayEmails.filter(deskFilter).length
+      const deskSentTotal = sentEmailsHistory.filter(deskFilter).length
+      const percentage = Math.min(100, Math.max(deskSentToday > 0 ? 4 : (portfolioSentToday > 0 ? 2 : 0), Math.round((deskSentToday / maxQuota) * 100)))
+      
+      let displayCount = `${deskSentToday.toLocaleString()} / ${maxQuota.toLocaleString()} sent today`
+      if (deskSentToday === 0 && portfolioSentToday > 0) {
+        displayCount = `0 / ${maxQuota.toLocaleString()} today (${portfolioSentToday} portfolio)`
+      }
+      
+      let subtext = `Deliverability target: ≤50/day for ${officialJ ? officialJ.email : 'this mailbox'} (server limit: 250/day).`
+      if (portfolioSentToday > 0) {
+        subtext += ` ${portfolioSentToday} dispatched across all portfolio desks today (${deskSentTotal} all-time for ${deskName}).`
+      } else if (deskSentTotal > 0) {
+        subtext += ` ${deskSentTotal} all-time dispatched for ${deskName}.`
+      }
+      
       return {
         label: `${deskName} Mailbox Rail`,
-        sentCount,
+        sentCount: deskSentToday,
+        portfolioSentToday,
+        deskSentTotal,
         maxQuota,
         percentage,
-        isWarning: sentCount > 50,
-        isCaution: sentCount > 35,
-        subtext: `Deliverability target: ≤50/day for ${officialJ ? officialJ.email : 'this mailbox'} (server limit: 250/day).`
+        displayCount,
+        isWarning: deskSentToday > 50,
+        isCaution: deskSentToday > 35,
+        subtext
       }
     }
   }, [sentEmailsHistory, scoutTargetJournal])
@@ -1769,6 +1804,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
   useEffect(() => {
     if (activeTab === "sent") {
       setScoutSubTab("history")
+      setSentAuditSubTab("sent_emails")
       fetchSentInvitations()
     }
   }, [activeTab, fetchSentInvitations])
@@ -5234,34 +5270,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
         <div className="space-y-5 animate-in fade-in duration-200">
           
           {/* Supabase Paused Notice */}
-          {isSupabasePaused && !isSupabasePausedDismissed && (
-            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-in fade-in">
-              <div className="flex items-start sm:items-center gap-3">
-                <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/60 shrink-0">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-amber-900 dark:text-amber-100">
-                    Supabase Cloud Database is Paused (Free Tier Inactivity)
-                  </h4>
-                  <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300/90 leading-relaxed">
-                    Your sent invitations, manuscripts, and reviews are safely saved in Supabase. Supabase pauses free projects after 7 days of inactivity. Simply click &quot;Unpause Project&quot; in your Supabase dashboard (~1–2 min) to restore all cloud data.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <a
-                  href="https://supabase.com/dashboard/project/lfnwqbzcwticwdjowsmv"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-all shadow-sm cursor-pointer whitespace-nowrap"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  Open Supabase Dashboard
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setIsSupabasePausedDismissed(true)}
+          
                   className="px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-200 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Dismiss
@@ -5305,7 +5314,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     quotaInfo.isCaution ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" :
                     "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
                   }`}>
-                    {quotaInfo.sentCount.toLocaleString()} / {quotaInfo.maxQuota.toLocaleString()} sent today
+                    {quotaInfo.displayCount || `${quotaInfo.sentCount.toLocaleString()} / ${quotaInfo.maxQuota.toLocaleString()} sent today`}
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">

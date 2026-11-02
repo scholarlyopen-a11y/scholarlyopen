@@ -2225,6 +2225,14 @@ COPE Guidance & Plan S Benchmark Archive
                             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> {isDe ? "ORCID synchronisiert" : "ORCID Synced"}
                           </span>
                           <Button
+                            onClick={() => handleOpenEval(rev, true)}
+                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded shadow-xs flex items-center gap-1"
+                            title="Open Round 2 Re-evaluation Form for Author Revision"
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" />
+                            <span>{isDe ? "Zweitbegutachtung (R2)" : "Round 2 Re-evaluation"}</span>
+                          </Button>
+                          <Button
                             onClick={() => setSelectedCertReview(rev)}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
                           >
