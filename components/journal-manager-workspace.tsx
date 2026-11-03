@@ -564,7 +564,7 @@ export function JournalManagerWorkspace({
   const [scoutKeyword, setScoutKeyword] = useState("Artificial Intelligence in Medicine")
   const [scoutTargetJournal, setScoutTargetJournal] = useState("Scholarly Open: Medicine")
   const [scoutCountry, setScoutCountry] = useState<string>("all")
-  const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver">("call_for_papers")
+  const [scoutCampaignType, setScoutCampaignType] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver" | "ecr">("call_for_papers")
   const [scoutViewMode, setScoutViewMode] = useState<"list" | "cards">("list")
   const [scoutSubTab, setScoutSubTab] = useState<"finder" | "ecr" | "history">("finder")
   const [scoutLimit, setScoutLimit] = useState<number>(25)
@@ -579,7 +579,7 @@ export function JournalManagerWorkspace({
   const [quickInviteName, setQuickInviteName] = useState("")
   const [quickInviteEmail, setQuickInviteEmail] = useState("")
   const [quickInviteJournal, setQuickInviteJournal] = useState("Scholarly Open: Chemistry")
-  const [quickInviteCampaign, setQuickInviteCampaign] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up">("eic")
+  const [quickInviteCampaign, setQuickInviteCampaign] = useState<"call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr">("eic")
 
   // Reviewer Registry & History Tracking States
   const [paperReviewerHistory, setPaperReviewerHistory] = useState<ReviewerHistoryItem[]>([])
@@ -2025,7 +2025,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
 
   const handleDispatchScoutOutreach = (
     scholar: any,
-    campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver",
+    campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver" | "ecr",
     overrideJournal?: string
   ) => {
     const rawJournal = overrideJournal || scholar?.journal || (scoutTargetJournal === "all" ? "Scholarly Open" : scoutTargetJournal)
@@ -2080,6 +2080,11 @@ ${journalEmail} | https://www.scholarlyopen.org`
       actionLabel = "Submit Preprint Manuscript"
       actionUrl = "https://www.scholarlyopen.org/submit"
       defaultBody = `Dear ${scholarName},\n\nWe recently reviewed your preprint${scholar.preprintTitle ? ` ("${scholar.preprintTitle}")` : ""} and were impressed by the originality and methodological rigor demonstrated by your research team at ${institution}.\n\nAs you consider permanent journal venues for this work, we cordially invite you to submit your manuscript for peer review in ${journalName}.\n\nWhy Publish Your Preprint with Scholarly Open?\n• Inaugural 50% Fee Discount: As an Early Career lead author, your submission will automatically qualify for our 50% APC fee waiver, with full hardship waivers available for unfunded researchers.\n• Rapid Double-Blind Peer Review: Expedited initial editorial decision within 14 days by specialists in ${specialty}.\n• Immediate Gold Open Access: Published under Creative Commons CC BY 4.0 with Crossref DOI registration, indexed across international open discovery engines.\n• Author Retention of Rights: You retain 100% copyright over your work and raw datasets.\n\nWe would be thrilled to feature your cutting-edge findings in our upcoming volume.\n\nPlease use the link below to submit your manuscript or review our author guidelines.\n\nSincerely,\nNoor F.\nJournal Management Office\n${journalName}\nScholarly Open i.G.`
+    } else if (campaign === "ecr") {
+      defaultSubject = `Early Career Researcher (ECR) Invitation: Editorial & Reviewer Track for ${journalName}`
+      actionLabel = "Accept ECR Track Invitation"
+      actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ecr&name=${encodeURIComponent(scholarName)}&email=${encodeURIComponent(scholarEmail)}&journal=${encodeURIComponent(journalName)}`
+      defaultBody = `Dear ${scholarName},\n\nIn recognition of your emerging scholarship and impactful research in ${specialty} at ${institution}, the Editorial Leadership of ${journalName} cordially invites you to join our journal as an Early Career Researcher (ECR) Board Member & Reviewer.\n\nAt Scholarly Open, we believe early career researchers bring vital energy, methodological rigor, and forward-looking perspectives to peer review and scientific curation. Our ECR Board program provides structured mentorship, editorial experience, and visibility for emerging investigators.\n\nKey Opportunities & ECR Benefits:\n• Official Recognition: Appointment to the Early Career Editorial Board with listing on the official journal masthead and web registry.\n• Fast-Track "Level 1 Verified Reviewer" status on your editorial360 public profile.\n• Rigorous Mentorship: Opportunity to co-review manuscripts alongside Senior Editors and receive constructive editorial feedback.\n• Publication Fee Waivers: 50% discount on Article Processing Charges (APCs) for your own submissions to ${journalName}, plus 100% full waiver eligibility for unfunded research.\n• Reviewer Recognition: Official Reviewer Certificate of Excellence with Crossref / ORCID peer-review verification for your academic CV.\n• Reviewer Wallet: Merit Points credited for completed peer-review evaluations (redeemable for publication discounts).\n\nWe would be honored to support your academic trajectory and have you join our international editorial community.\n\nPlease click the button below to confirm your interest and join our ECR Board.\n\nWarm regards,\nNoor F.\nEarly Career Editorial Committee\n${journalName}\nScholarly Open i.G.`
     }
 
     openEmailDispatch({
@@ -2161,7 +2166,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
   // Handle batch dispatching to multiple selected scholars in Leads or ECR
   const handleBatchDispatchScoutOutreach = async (
     scholars: any[],
-    campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver"
+    campaign: "call_for_papers" | "ebm" | "eic" | "associate_editor" | "follow_up" | "ecr_reviewer" | "ecr_masterclass" | "ecr_author_waiver" | "ecr"
   ) => {
     if (!scholars || scholars.length === 0) return
     if (scholars.length === 1) {
@@ -2228,6 +2233,11 @@ ${journalEmail} | https://www.scholarlyopen.org`
         actionLabel = "Submit Preprint Manuscript"
         actionUrl = "https://www.scholarlyopen.org/submit"
         defaultBody = `Dear ${scholarName},\n\nWe cordially invite you to submit your preprint research to ${journalName} with an immediate 50% early career fee discount.\n\nSincerely,\nNoor F.\nJournal Management Office\n${journalName}\nScholarly Open i.G.`
+      } else if (campaign === "ecr") {
+        defaultSubject = `Early Career Researcher (ECR) Invitation: Editorial & Reviewer Track for ${journalName}`
+        actionLabel = "Accept ECR Track Invitation"
+        actionUrl = `https://www.scholarlyopen.org/editorial360?action=accept_ecr&name=${encodeURIComponent(scholarName)}&email=${encodeURIComponent(scholarEmail)}&journal=${encodeURIComponent(journalName)}`
+        defaultBody = `Dear ${scholarName},\n\nIn recognition of your emerging scholarship in ${specialty} at ${institution}, the Editorial Leadership of ${journalName} cordially invites you to join our journal as an Early Career Researcher (ECR) Board Member & Reviewer.\n\nBenefits include:\n• Fast-Track Level 1 Verified Reviewer status and official ORCID verification.\n• 50% author fee discounts and full hardship waivers.\n• Transparent co-reviewing and structured editorial mentorship.\n\nWarm regards,\nNoor F.\nEarly Career Editorial Committee\n${journalName}\nScholarly Open i.G.`
       } else {
         defaultSubject = `Editorial Invitation: ${journalName}`
         actionLabel = "Access Editorial Portal"
@@ -5691,12 +5701,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
                     {[
                       { id: "call_for_papers", label: "Call for Papers", icon: FileText },
                       { id: "ebm", label: "Editorial Board (EBM)", icon: Users },
                       { id: "eic", label: "Editor-in-Chief (EiC)", icon: Award },
                       { id: "associate_editor", label: "Associate Editor", icon: BookOpen },
+                      { id: "ecr", label: "Early Career (ECR)", icon: GraduationCap },
                       { id: "follow_up", label: "Follow-Up Invite", icon: RotateCcw },
                     ].map((c) => {
                       const isSelected = scoutCampaignType === c.id
@@ -5793,6 +5804,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             { id: "associate_editor", label: "✏️ Associate Editor" },
                             { id: "call_for_papers", label: "📄 Call for Papers" },
                             { id: "follow_up", label: "🔁 Follow-Up" },
+                            { id: "ecr", label: "🎓 Early Career (ECR)" },
                           ].map(c => (
                             <button
                               key={c.id}
@@ -5939,7 +5951,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               scoutCampaignType === "call_for_papers" ? "Send CFP" :
                               scoutCampaignType === "ebm" ? "Invite EBM" :
                               scoutCampaignType === "eic" ? "Nominate EiC" :
-                              scoutCampaignType === "follow_up" ? "Send Follow-Up" : "Invite AE"
+                              scoutCampaignType === "follow_up" ? "Send Follow-Up" :
+                              scoutCampaignType === "ecr" ? "Invite ECR" : "Invite AE"
 
                             const cleanOrcid = (scholar.orcid || "").replace(/^https?:\/\/orcid\.org\//, "")
 
@@ -6127,7 +6140,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         scoutCampaignType === "call_for_papers" ? "Invite to Submit Paper" :
                         scoutCampaignType === "ebm" ? "Invite as EBM" :
                         scoutCampaignType === "eic" ? "Nominate as EiC" :
-                        scoutCampaignType === "follow_up" ? "Send Follow-Up" : "Invite as Associate Editor"
+                        scoutCampaignType === "follow_up" ? "Send Follow-Up" :
+                        scoutCampaignType === "ecr" ? "Invite to ECR Track" : "Invite as Associate Editor"
 
                       const cleanOrcid = (scholar.orcid || "").replace(/^https?:\/\/orcid\.org\//, "")
 
@@ -6623,6 +6637,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                       record.campaignType === "eic" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800" :
                                       record.campaignType === "ebm" ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800" :
                                       record.campaignType === "follow_up" ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800" :
+                                      record.campaignType === "ecr" || record.campaignType === "ecr_reviewer" || record.campaignType === "ecr_board" ? "bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300 border border-teal-200 dark:border-teal-800" :
                                       "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                                     }`}>
                                       {record.campaignType.replace(/_/g, " ")}
