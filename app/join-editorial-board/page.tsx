@@ -30,6 +30,10 @@ export default function JoinEditorialBoardPage() {
       if (j) {
         setJournal(j)
       }
+      const r = params.get("role")
+      if (r === "eceb" || r === "ecr" || r === "early-career") {
+        setSelectedRole("Early Career Editorial Board")
+      }
     }
   }, [t])
 

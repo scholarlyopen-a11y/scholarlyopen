@@ -50,6 +50,7 @@ interface JournalEditorialBoardProps {
   editorInChief: EditorMember
   associateEditors: EditorMember[]
   editorialBoard: EditorMember[]
+  ecrEditorialBoard?: EditorMember[]
 }
 
 function getEditorProfileSlug(editor: EditorMember): string | undefined {
@@ -119,7 +120,7 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed mb-3">{editor.affiliation}</p>
         
         {isOpen ? (
-          <Link href="/join-editorial-board" className="w-auto">
+          <Link href={editor.role?.toLowerCase().includes("early career") || editor.name?.toLowerCase().includes("early career") ? "/join-editorial-board?role=eceb" : "/join-editorial-board"} className="w-auto">
             <Button variant="outline" size="sm" className="w-auto h-8 px-4 text-[11px] font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
               Apply Now
             </Button>
@@ -446,7 +447,8 @@ function BoardMemberRow({ editor }: { editor: EditorMember }) {
 export function JournalEditorialBoard({ 
   editorInChief, 
   associateEditors = [], 
-  editorialBoard = [] 
+  editorialBoard = [],
+  ecrEditorialBoard = []
 }: JournalEditorialBoardProps) {
   const { t } = useLanguage()
 
@@ -484,6 +486,21 @@ export function JournalEditorialBoard({
       role: "Editorial Board Member",
       affiliation: "Seeking qualified experts in this field.",
       specialization: "Editorial Board",
+    }
+  ]
+
+  const defaultOpenEcrEditorialBoard: EditorMember[] = [
+    {
+      name: "Early Career Position Open",
+      role: "Early Career Editorial Board Member",
+      affiliation: "Applications open for postdoctoral fellows and junior researchers.",
+      specialization: "Peer Review Mentorship & Specialty Curation",
+    },
+    {
+      name: "Early Career Position Open",
+      role: "Early Career Editorial Board Member",
+      affiliation: "Applications open for postdoctoral fellows and junior researchers.",
+      specialization: "Peer Review Mentorship & Specialty Curation",
     }
   ]
 
@@ -548,6 +565,10 @@ export function JournalEditorialBoard({
     ? deduplicateList(editorialBoard) 
     : defaultOpenEditorialBoard
 
+  const displayEcrEditorialBoard = ecrEditorialBoard && ecrEditorialBoard.length > 0 
+    ? deduplicateList(ecrEditorialBoard) 
+    : defaultOpenEcrEditorialBoard
+
   return (
     <div className="space-y-12">
       {/* Editor-in-Chief */}
@@ -574,6 +595,33 @@ export function JournalEditorialBoard({
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {displayEditorialBoard.map((editor, index) => (
             <EditorCard key={`${editor.role}-${index}`} editor={editor} />
+          ))}
+        </div>
+      </div>
+
+      {/* Early Career Editorial Board (ECEB) */}
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-semibold">{t("editorial.ecrBoard") || "Early Career Editorial Board"}</h3>
+              <Badge variant="outline" className="bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border-sky-200 dark:border-sky-800 text-[10px] font-bold">
+                ECR Fellowship
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
+              {t("editorial.ecrBoardSubtitle") || "Our Early Career Editorial Board (ECEB) empowers emerging investigators, postdocs, and junior faculty to gain mentored peer-review and editorial curation experience."}
+            </p>
+          </div>
+          <Link href="/join-editorial-board?role=eceb">
+            <Button variant="outline" size="sm" className="h-8 text-xs font-semibold border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors shrink-0">
+              Apply for ECR Board
+            </Button>
+          </Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {displayEcrEditorialBoard.map((editor, index) => (
+            <EditorCard key={`ecr-${editor.role}-${index}`} editor={editor} />
           ))}
         </div>
       </div>

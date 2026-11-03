@@ -25,6 +25,7 @@ interface JournalPageProps {
   editorInChief?: EditorMember
   associateEditors?: EditorMember[]
   editorialBoard?: EditorMember[]
+  ecrEditorialBoard?: EditorMember[]
 }
 
 const placeholderEditorInChief = {
@@ -76,6 +77,27 @@ const placeholderEditorialBoard = [
   },
 ]
 
+const placeholderEcrEditorialBoard: EditorMember[] = [
+  {
+    name: "Early Career Position Open",
+    role: "Early Career Board Member",
+    affiliation: "Under formation · Applications open",
+    specialization: "Peer Review Mentorship & Specialty Curation",
+  },
+  {
+    name: "Early Career Position Open",
+    role: "Early Career Board Member",
+    affiliation: "Under formation · Applications open",
+    specialization: "Peer Review Mentorship & Specialty Curation",
+  },
+  {
+    name: "Early Career Position Open",
+    role: "Early Career Board Member",
+    affiliation: "Under formation · Applications open",
+    specialization: "Peer Review Mentorship & Specialty Curation",
+  },
+]
+
 export function JournalPage({
   title,
   description,
@@ -89,6 +111,7 @@ export function JournalPage({
   editorInChief = placeholderEditorInChief,
   associateEditors = placeholderAssociateEditors,
   editorialBoard = placeholderEditorialBoard,
+  ecrEditorialBoard = placeholderEcrEditorialBoard,
 }: JournalPageProps) {
   const { t } = useLanguage()
 
@@ -98,6 +121,9 @@ export function JournalPage({
   )
   const [currentEditorialBoard, setCurrentEditorialBoard] = useState<EditorMember[]>(
     editorialBoard && editorialBoard.length > 0 ? editorialBoard : placeholderEditorialBoard
+  )
+  const [currentEcrEditorialBoard, setCurrentEcrEditorialBoard] = useState<EditorMember[]>(
+    ecrEditorialBoard && ecrEditorialBoard.length > 0 ? ecrEditorialBoard : placeholderEcrEditorialBoard
   )
 
   useEffect(() => {
@@ -115,6 +141,12 @@ export function JournalPage({
       editorialBoard && editorialBoard.length > 0 ? editorialBoard : placeholderEditorialBoard
     )
   }, [editorialBoard])
+
+  useEffect(() => {
+    setCurrentEcrEditorialBoard(
+      ecrEditorialBoard && ecrEditorialBoard.length > 0 ? ecrEditorialBoard : placeholderEcrEditorialBoard
+    )
+  }, [ecrEditorialBoard])
 
   // Real-time synchronization: Fetch approved editorial board members from live API
   useEffect(() => {
@@ -236,7 +268,7 @@ export function JournalPage({
         }
 
         // 3. Live Editorial Board Members
-        const liveBoard = approved.filter((e: any) => !e.role?.toLowerCase().includes("chief") && !e.role?.toLowerCase().includes("associate"))
+        const liveBoard = approved.filter((e: any) => !e.role?.toLowerCase().includes("chief") && !e.role?.toLowerCase().includes("associate") && !e.role?.toLowerCase().includes("early career") && !e.role?.toLowerCase().includes("ecr"))
         if (liveBoard.length > 0) {
           const mappedBoard: EditorMember[] = liveBoard.map((e: any) => ({
             name: e.name,
@@ -263,6 +295,34 @@ export function JournalPage({
                 if ((c.name.toLowerCase().includes("eletmany") || (c.slug && c.slug.includes("eletmany"))) && (existing.name.toLowerCase().includes("eletmany") || (existing.slug && existing.slug.includes("eletmany")))) return true
                 return false
               })) {
+                combined.push(existing)
+              }
+            }
+            return combined
+          })
+        }
+
+        // 4. Live Early Career Editorial Board Members
+        const liveEcr = approved.filter((e: any) => e.role?.toLowerCase().includes("early career") || e.role?.toLowerCase().includes("ecr"))
+        if (liveEcr.length > 0) {
+          const mappedEcr: EditorMember[] = liveEcr.map((e: any) => ({
+            name: e.name,
+            role: e.role || "Early Career Editorial Board Member",
+            affiliation: e.affiliation || "Academic Institution",
+            specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Peer Review & Emerging Research"),
+            imageUrl: (e.photoUrl && !e.photoUrl.includes("supabase.co")) ? e.photoUrl : undefined,
+            email: e.email,
+            orcid: e.orcid,
+            googleScholar: e.googleScholar || e.scholarUrl,
+            linkedin: e.linkedin,
+            researchGate: e.researchGate,
+            biography: e.biography,
+            expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
+          }))
+          setCurrentEcrEditorialBoard(prev => {
+            const combined = [...mappedEcr]
+            for (const existing of prev) {
+              if (!existing.name.toLowerCase().includes("position open") && !combined.some(c => c.name.toLowerCase() === existing.name.toLowerCase())) {
                 combined.push(existing)
               }
             }
@@ -550,6 +610,7 @@ export function JournalPage({
               editorInChief={currentEiC}
               associateEditors={currentAssociateEditors}
               editorialBoard={currentEditorialBoard}
+              ecrEditorialBoard={currentEcrEditorialBoard}
             />
 
             <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
