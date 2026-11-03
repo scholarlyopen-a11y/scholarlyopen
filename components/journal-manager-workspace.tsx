@@ -5269,15 +5269,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       {(activeTab === "scout" || activeTab === "sent") && (
         <div className="space-y-5 animate-in fade-in duration-200">
           
-          {/* Supabase Paused Notice */}
           
-                  className="px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-200 font-semibold text-xs transition-colors cursor-pointer"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Header Banner: Clean, Standardized, International Scholarly Style */}
           <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#18191e] border border-slate-200/90 dark:border-[#272832] shadow-xs relative overflow-hidden space-y-4">
