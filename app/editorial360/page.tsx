@@ -1603,7 +1603,7 @@ export default function Editorial360Page() {
             setIsLoggedIn(true)
             if (!isScoutDirect && !isClaimDirect && session.role) setRole(session.role)
             if (!isClaimDirect && session.email) setEmail(session.email)
-            if (!isScoutDirect && session.activeJmTab) setActiveJmTab(session.activeJmTab === "activity" ? "board" : session.activeJmTab)
+            if (!isScoutDirect && session.activeJmTab) setActiveJmTab(session.activeJmTab === "activity" || session.activeJmTab === "sent" ? "board" : session.activeJmTab)
             if (session.activeEditorTab) setActiveEditorTab(session.activeEditorTab === "activity" ? "desk" : session.activeEditorTab)
             if (session.activeRiaTab) setActiveRiaTab(session.activeRiaTab === "activity" ? "alerts" : session.activeRiaTab)
             if (session.editorName) setEditorName(session.editorName)
@@ -8417,19 +8417,6 @@ Specific comments to the Author(s):
                       >
                         <Compass className="h-4 w-4 text-[#0b99ff]" />
                         <span>Scholar Scout</span>
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => setActiveJmTab("sent")}
-                        className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeJmTab === "sent"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <History className="h-4 w-4 text-[#0b99ff]" />
-                        <span>{language === "de" ? "Gesendete Elemente" : "Sent Items"}</span>
                       </button>
 
                       <button 

@@ -68,7 +68,10 @@ function getEditorProfileSlug(editor: EditorMember): string | undefined {
 
 function EditorCard({ editor, featured = false }: { editor: EditorMember; featured?: boolean }) {
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-  const isOpen = editor.name.toLowerCase() === "position open"
+  const isOpen = editor.name.toLowerCase().includes("position open")
+  const isEcr = editor.role?.toLowerCase().includes("early career") || 
+                editor.role?.toLowerCase().includes("ecr") || 
+                editor.name?.toLowerCase().includes("early career")
 
   // Always use official journal editorial contact email per Scholarly Open EB standard
   const displayEmail = editor.email && editor.email.endsWith("@scholarlyopen.org") && editor.email !== "info@scholarlyopen.org"
@@ -120,9 +123,9 @@ function EditorCard({ editor, featured = false }: { editor: EditorMember; featur
         <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed mb-3">{editor.affiliation}</p>
         
         {isOpen ? (
-          <Link href={editor.role?.toLowerCase().includes("early career") || editor.name?.toLowerCase().includes("early career") ? "/join-editorial-board?role=eceb" : "/join-editorial-board"} className="w-auto">
+          <Link href={isEcr ? "/join-editorial-board?role=eceb" : "/join-editorial-board"} className="w-auto">
             <Button variant="outline" size="sm" className="w-auto h-8 px-4 text-[11px] font-semibold border-secondary/50 text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground transition-all">
-              Apply Now
+              {isEcr ? "Apply for ECR Board" : "Apply Now"}
             </Button>
           </Link>
         ) : (
@@ -601,23 +604,11 @@ export function JournalEditorialBoard({
 
       {/* Early Career Editorial Board (ECEB) */}
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-xl font-semibold">{t("editorial.ecrBoard") || "Early Career Editorial Board"}</h3>
-              <Badge variant="outline" className="bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border-sky-200 dark:border-sky-800 text-[10px] font-bold">
-                ECR Fellowship
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
-              {t("editorial.ecrBoardSubtitle") || "Our Early Career Editorial Board (ECEB) empowers emerging investigators, postdocs, and junior faculty to gain mentored peer-review and editorial curation experience."}
-            </p>
-          </div>
-          <Link href="/join-editorial-board?role=eceb">
-            <Button variant="outline" size="sm" className="h-8 text-xs font-semibold border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors shrink-0">
-              Apply for ECR Board
-            </Button>
-          </Link>
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-2">{t("editorial.ecrBoard") || "Early Career Editorial Board"}</h3>
+          <p className="text-muted-foreground">
+            {t("editorial.ecrBoardSubtitle") || "Our Early Career Editorial Board (ECEB) empowers emerging investigators, postdocs, and junior faculty to gain mentored peer-review and editorial curation experience."}
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {displayEcrEditorialBoard.map((editor, index) => (
