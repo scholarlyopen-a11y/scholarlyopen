@@ -34,7 +34,7 @@ export default function Editorial360Error({
             </p>
           )}
         </div>
-        <div className="flex items-center justify-center gap-2 pt-2">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
           <button
             type="button"
             onClick={() => {
@@ -44,14 +44,30 @@ export default function Editorial360Error({
                 reset()
               }
             }}
-            className="flex-1 py-2 px-4 rounded-xl bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            className="w-full sm:flex-1 py-2 px-4 rounded-xl bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             <span>Reload Workspace</span>
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                try {
+                  sessionStorage.removeItem("editorial360_session")
+                } catch (e) {}
+                window.location.href = "/editorial360"
+              } else {
+                reset()
+              }
+            }}
+            className="w-full sm:flex-1 py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
+          >
+            <span>Reset Session</span>
+          </button>
           <Link
             href="/"
-            className="py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Home</span>
