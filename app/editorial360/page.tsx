@@ -7829,21 +7829,27 @@ Specific comments to the Author(s):
                   </div>
 
                   {/* Official ORCID Identity Badge for Reviewer */}
-                  <a
-                    href="https://orcid.org/0000-0004-7711-2093"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
-                    title={language === "de" ? "Verifiziertes ORCID-Profil aufrufen" : "View Verified ORCID Record"}
-                  >
-                    <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
-                      iD
-                    </span>
-                    <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
-                      0000-0004-7711-2093
-                    </span>
-                    <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
-                  </a>
+                  {(() => {
+                    const activeOrcid = reviewerProfile?.orcid || (email === "germanchaud@gmail.com" ? "" : (profOrcid || regOrcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : "")))
+                    if (!activeOrcid) return null
+                    return (
+                      <a
+                        href={`https://orcid.org/${activeOrcid}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
+                        title={language === "de" ? "Verifiziertes ORCID-Profil aufrufen" : "View Verified ORCID Record"}
+                      >
+                        <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
+                          iD
+                        </span>
+                        <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
+                          {activeOrcid}
+                        </span>
+                        <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
+                      </a>
+                    )
+                  })()}
                 </div>
               )}
 

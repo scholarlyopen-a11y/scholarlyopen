@@ -2751,7 +2751,7 @@ COPE Guidance & Plan S Benchmark Archive
                       </div>
 
                       <div className="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
-                        <span>Valid across all 13 Scholarly Open journals</span>
+                        <span>Valid across all 11 Scholarly Open journals</span>
                         <span className="text-[#0b99ff] font-medium">Single Use / Transferable</span>
                       </div>
                     </div>
@@ -2770,25 +2770,26 @@ COPE Guidance & Plan S Benchmark Archive
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        {isDe ? "Gutachter-Honorare & 4-Wege Auszahlungsportal" : "Reviewer Honoraria & 4-Option Disbursement Portal"}
+                        {isDe ? "Gutachter-Honorare & Vergütungsportal" : "Reviewer Honoraria & Recognition Portal"}
                       </h4>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                        {reviewsDone > 0 ? `€${reviewsDone * 50}.00 Available` : "€50.00 Per Review"}
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                        {isDe ? "Honorarpolitik in Abstimmung" : "Policy in Discussion"}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                       {isDe 
-                        ? "Gemäß unserem 6% Gutachterfonds: Wählen Sie, wie Sie Ihr €50-Honorar auszahlen, anrechnen oder stiften möchten." 
-                        : "Quality-gated micro-honorarium fund (6% APC allocation): Choose how to receive, convert, or donate your €50 peer review honorarium."}
+                        ? "Direkte Barhonorare befinden sich derzeit im Herausgebergremium in Abstimmung. Gutachter erhalten aktuell prioritäre APC-Erlass-Gutscheine (25%–100%) und verifizierte ORCID-Zertifikate." 
+                        : "Cash honoraria policies are currently under executive editorial board discussion. Referees currently receive transferable APC waiver vouchers (25%–100%), verified ORCID certificates, and prestige credentials."}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right shrink-0">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">{isDe ? "Verfügbares Honorar" : "Available Honorarium"}</div>
-                  <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">
-                    €{Math.max(50, (reviewsDone || 1) * 50)}.00
+                  <div className="text-[10px] uppercase font-bold text-slate-400">{isDe ? "Verfügbares Barhonorar" : "Available Cash Honorarium"}</div>
+                  <div className="text-xl font-black text-slate-400 dark:text-slate-500">
+                    €0.00
                   </div>
+                  <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">{isDe ? "Derzeit in Beratung" : "Under Policy Discussion"}</div>
                 </div>
               </div>
 
@@ -2814,21 +2815,19 @@ COPE Guidance & Plan S Benchmark Archive
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-[#0b99ff]" />
+                      <CreditCard className="h-4 w-4 text-amber-500" />
                       <span className="font-bold text-xs text-slate-900 dark:text-white">
                         {isDe ? "1. Digitale Auszahlung (PayPal / Payoneer / Wise)" : "1. Digital Cashout (PayPal / Payoneer / Wise)"}
                       </span>
                     </div>
-                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "bank" ? "border-[#0b99ff] bg-[#0b99ff] text-white" : "border-slate-300 dark:border-slate-700"
-                    }`}>
-                      {payoutOption === "bank" && <Check className="h-3 w-3" />}
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                      {isDe ? "Pausiert" : "Paused"}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                     {isDe 
-                      ? "Direkte gebührenfreie Überweisung an Ihre registrierte PayPal-, Payoneer- oder Wise-E-Mail innerhalb von 24–48 Stunden."
-                      : "Direct disbursement to your registered digital payout email (PayPal, Payoneer, or Wise) within 24–48 hours without bank wire fees."}
+                      ? "Barauszahlungen sind während der laufenden Vorstandskonsultation vorübergehend pausiert. Wählen Sie Option 2, um einen sofortigen APC-Publikationsgutschein zu generieren."
+                      : "Cash disbursement rails are currently paused while executive honorarium policy is under editorial review. Please select Option 2 to claim transferable APC publication waivers."}
                   </p>
                   {payoutOption === "bank" && (
                     <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 text-xs">
@@ -2909,7 +2908,7 @@ COPE Guidance & Plan S Benchmark Archive
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                     {isDe 
                       ? "Reinvestieren Sie das Honorar für 50% bis 100% APC-Erlass bei eigener Einreichung. Gutschriften werden für Gründlichkeit und Pünktlichkeit vergeben und hängen niemals von Ihrer Gutachten-Empfehlung ab."
-                      : "Convert your honorarium into an official transferable APC waiver voucher valid across all 13 journals. Reviewer credits are awarded for thoroughness and timeliness; they never depend on your review recommendation."}
+                      : "Convert your honorarium into an official transferable APC waiver voucher valid across all 11 journals. Reviewer credits are awarded for thoroughness and timeliness; they never depend on your review recommendation."}
                   </p>
                   {payoutOption === "voucher" && (
                     <div className="p-2.5 rounded bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 text-[11px] text-[#0b99ff] dark:text-[#38bdf8] font-medium">
@@ -3004,13 +3003,15 @@ COPE Guidance & Plan S Benchmark Archive
 
                 <Button
                   onClick={handleSubmitPayout}
-                  disabled={isSubmittingPayout}
-                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-xs shrink-0"
+                  disabled={isSubmittingPayout || payoutOption === "bank"}
+                  className={`${payoutOption === "bank" ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed" : "bg-[#0b99ff] hover:bg-[#0088e0] text-white cursor-pointer"} text-xs font-bold px-5 py-2 shadow-xs shrink-0`}
                 >
                   <CreditCard className="h-3.5 w-3.5 mr-1.5" />
-                  {isSubmittingPayout 
+                  {payoutOption === "bank" 
+                    ? (isDe ? "Barauszahlung pausiert (in Beratung)" : "Cashout Paused (Policy in Discussion)")
+                    : isSubmittingPayout 
                     ? (isDe ? "Wird übermittelt..." : "Submitting Request...") 
-                    : (isDe ? "Auszahlung / Spende jetzt einreichen" : "Submit Disbursement Request")}
+                    : (isDe ? "Gutschein / Spende einreichen" : "Submit Voucher / Donation Request")}
                 </Button>
               </div>
             </div>
