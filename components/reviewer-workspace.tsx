@@ -255,33 +255,7 @@ export function ReviewerWorkspace({
   const [profile, setProfile] = useState<ReviewerProfile>(() => {
     const rawName = user?.name || initialProfile?.name || ""
     const rawEmail = user?.email || initialProfile?.email || ""
-    const isChaud = rawName.toLowerCase().includes("chaud") || rawEmail.toLowerCase().includes("chaud") || (typeof window !== "undefined" && (window.location.search.toLowerCase().includes("chaud") || window.location.search.includes("SOMED-26-RW01")))
     const isBolutife = rawName.toLowerCase().includes("bolutife") || rawEmail.toLowerCase().includes("olofinjana")
-    const isMarcus = rawEmail.includes("m.vance") || rawName.includes("Marcus Vance")
-
-    if (isChaud) {
-      return {
-        title: "Dr.",
-        name: "Dr. German J. Chaud",
-        email: rawEmail || "germanchaud@gmail.com",
-        photoUrl: "",
-        badges: ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"],
-        institution: "Hospital las Higueras, Talcahuano, Chile",
-        department: "Department of Cardiovascular Surgery",
-        country: "Chile",
-        orcid: user?.orcid || "",
-        scholarUrl: "",
-        primaryDiscipline: "medicine",
-        subDisciplines: ["Cardiovascular Surgery", "Aortic Dissection", "Thoracic Surgery", "Emergency Medicine"],
-        keywords: ["Acute Aortic Dissection", "Aortic Repair", "Cardiovascular Surgery", "Emergency Protocols", "Clinical Outcomes"],
-        maxReviewsPerMonth: 2,
-        preferredTurnaround: 14,
-        availabilityStatus: "Available",
-        sabbaticalUntil: "",
-        coiAcknowledged: true,
-        isCompleted: true
-      }
-    }
 
     if (isBolutife) {
       return {
@@ -289,12 +263,12 @@ export function ReviewerWorkspace({
         name: rawName || "Prof. Bolutife Olofinjana",
         email: rawEmail || "b.olofinjana@oauife.edu.ng",
         photoUrl: user?.photoUrl || initialProfile?.photoUrl || "",
-        badges: ["Gateway Certified (95%)", "Verified Referee", "COPE Ethics Verified"],
+        badges: ["Verified Referee", "COPE Ethics Verified"],
         institution: user?.institution || "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
         department: "Department of Physics and Engineering Physics",
         country: "Nigeria",
         orcid: user?.orcid || "0000-0002-3652-3213",
-        scholarUrl: "https://scholar.google.com/citations?user=Gze_tvm8uEVqyX3mmpuh9SI1hZ5ZGCQKj2aVhxwOS9RLFzPbqvEQwltNpodj9vk0lnOTnPo57Zpnh5UkL9Vkr2WQlHnwDaQfUMNtATQerpIrunXu-J4klwKhc5RfJkwnT0VAh8gjEE_Da1Tx0cXsul8g==",
+        scholarUrl: "",
         primaryDiscipline: "engineering",
         subDisciplines: ["Materials Science", "Nanostructured Materials", "Thin Films", "Energy Storage"],
         keywords: ["Materials Science", "Nanostructured Materials", "Thin Films", "Sensors", "Energy Storage", "Physics"],
@@ -307,61 +281,21 @@ export function ReviewerWorkspace({
       }
     }
 
-    if (isMarcus) {
-      return {
-        title: initialProfile?.title || "Dr.",
-        name: rawName || "Marcus Vance",
-        email: rawEmail || "m.vance@university-charite.de",
-        photoUrl: user?.photoUrl || initialProfile?.photoUrl || "",
-        badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"],
-        institution: user?.institution || initialProfile?.institution || "Charité – Universitätsmedizin Berlin",
-        department: initialProfile?.department || "Department of Cardiology & Vascular Medicine",
-        country: initialProfile?.country || "Germany",
-        orcid: user?.orcid || initialProfile?.orcid || "0000-0004-7711-2093",
-        scholarUrl: initialProfile?.scholarUrl || "https://scholar.google.com/citations?user=vance-m",
-        primaryDiscipline: initialProfile?.primaryDiscipline || "medicine",
-        subDisciplines: initialProfile?.subDisciplines || ["Cardiology", "Cardiovascular Imaging", "Biomarkers"],
-        keywords: initialProfile?.keywords || ["CRISPR", "Cardiovascular Imaging", "AI Diagnostics", "Randomized Controlled Trials", "Echocardiography"],
-        maxReviewsPerMonth: initialProfile?.maxReviewsPerMonth ?? 2,
-        preferredTurnaround: initialProfile?.preferredTurnaround ?? 14,
-        availabilityStatus: initialProfile?.availabilityStatus || "Available",
-        sabbaticalUntil: initialProfile?.sabbaticalUntil || "",
-        coiAcknowledged: initialProfile?.coiAcknowledged ?? true,
-        isCompleted: initialProfile?.isCompleted ?? true
-      }
-    }
+    // Default & Invited Expert Referee: Dr. German J. Chaud
+    const effectiveName = (rawName && !rawName.includes("Vane") && !rawName.includes("Referee") && !rawName.includes("Author")) ? rawName : "Dr. German J. Chaud"
+    const effectiveEmail = (rawEmail && !rawEmail.includes("orcid") && !rawEmail.includes("proton") && !rawEmail.includes("vane")) ? rawEmail : "germanchaud@gmail.com"
+    const effectiveInst = (user?.institution && !user.institution.includes("Advanced Medical Sciences")) ? user.institution : "Hospital las Higueras, Talcahuano, Chile"
 
-    // Clean initial profile for any newly registered reviewer
-    // Default profile for invited expert referee (Dr. German J. Chaud)
     return {
-      title: initialProfile?.title || "Dr.",
-      name: rawName || "Academic Referee",
-      email: rawEmail || "reviewer@scholarlyopen.org",
-      photoUrl: user?.photoUrl || initialProfile?.photoUrl || "",
-      badges: ["Qualified Referee", "COPE Ethics Verified"],
-      institution: user?.institution || initialProfile?.institution || "Academic Institution",
-      department: initialProfile?.department || "",
-      country: initialProfile?.country || "",
-      orcid: user?.orcid || initialProfile?.orcid || "",
-      scholarUrl: initialProfile?.scholarUrl || "",
-      primaryDiscipline: initialProfile?.primaryDiscipline || "general",
-      subDisciplines: initialProfile?.subDisciplines || ["Peer Review", "Methodology"],
-      keywords: initialProfile?.keywords || ["Academic Research", "Peer Review"],
-      maxReviewsPerMonth: initialProfile?.maxReviewsPerMonth ?? 2,
-      preferredTurnaround: initialProfile?.preferredTurnaround ?? 14,
-      availabilityStatus: initialProfile?.availabilityStatus || "Available",
-      sabbaticalUntil: initialProfile?.sabbaticalUntil || "",
-      coiAcknowledged: initialProfile?.coiAcknowledged ?? true,
-      isCompleted: initialProfile?.isCompleted ?? false
       title: "Dr.",
-      name: (rawName && !rawName.includes("Vane") && !rawName.includes("Referee")) ? rawName : "Dr. German J. Chaud",
-      email: (rawEmail && !rawEmail.includes("orcid") && !rawEmail.includes("proton")) ? rawEmail : "germanchaud@gmail.com",
+      name: effectiveName,
+      email: effectiveEmail,
       photoUrl: "",
       badges: ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"],
-      institution: (user?.institution && !user.institution.includes("Advanced Medical Sciences")) ? user.institution : "Hospital las Higueras, Talcahuano, Chile",
+      institution: effectiveInst,
       department: "Department of Cardiovascular Surgery",
       country: "Chile",
-      orcid: user?.orcid || "",
+      orcid: (user?.orcid && user.orcid !== "0000-0002-1825-0097" && user.orcid !== "0000-0004-7711-2093") ? user.orcid : "",
       scholarUrl: "",
       primaryDiscipline: "medicine",
       subDisciplines: ["Cardiovascular Surgery", "Aortic Dissection", "Thoracic Surgery", "Emergency Medicine"],
@@ -379,69 +313,36 @@ export function ReviewerWorkspace({
   useEffect(() => {
     const rawName = user?.name || initialProfile?.name || ""
     const rawEmail = user?.email || initialProfile?.email || ""
-    const isChaud = rawName.toLowerCase().includes("chaud") || rawEmail.toLowerCase().includes("chaud") || (typeof window !== "undefined" && (window.location.search.toLowerCase().includes("chaud") || window.location.search.includes("SOMED-26-RW01")))
     const isBolutife = rawName.toLowerCase().includes("bolutife") || rawEmail.toLowerCase().includes("olofinjana")
-    const isMarcus = rawEmail.includes("m.vance") || rawName.includes("Marcus Vance")
 
-    if (isChaud) {
-      if (isBolutife) {
-        setProfile(prev => ({
-          ...prev,
-          title: "Dr.",
-          name: "Dr. German J. Chaud",
-          email: rawEmail || "germanchaud@gmail.com",
-          institution: "Hospital las Higueras, Talcahuano, Chile",
-          department: "Department of Cardiovascular Surgery",
-          country: "Chile",
-          primaryDiscipline: "medicine",
-          photoUrl: ""
-        }))
-      } else if (isBolutife) {
-        setProfile(prev => ({
-          ...prev,
-          title: "Prof.",
-          name: "Prof. Bolutife Olofinjana",
-          email: rawEmail || "b.olofinjana@oauife.edu.ng",
-          primaryDiscipline: "engineering",
-          department: "Department of Physics and Engineering Physics",
-          institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
-          country: "Nigeria",
-          orcid: user?.orcid || prev.orcid || "0000-0002-3652-3213",
-          photoUrl: user?.photoUrl || initialProfile?.photoUrl || prev.photoUrl || ""
-        }))
-      } else if (user?.name || user?.photoUrl !== undefined || initialProfile?.name || initialProfile?.photoUrl !== undefined) {
-      } else if (isMarcus) {
-        setProfile(prev => ({
-          ...prev,
-          name: user?.name || initialProfile?.name || prev.name,
-          email: user?.email || initialProfile?.email || prev.email,
-          institution: user?.institution || initialProfile?.institution || prev.institution,
-          photoUrl: user?.photoUrl !== undefined ? user.photoUrl : (initialProfile?.photoUrl !== undefined ? initialProfile.photoUrl : prev.photoUrl)
+    if (isBolutife) {
+      setProfile(prev => ({
+        ...prev,
+        title: "Prof.",
+        name: "Prof. Bolutife Olofinjana",
+        email: rawEmail || "b.olofinjana@oauife.edu.ng",
+        primaryDiscipline: "engineering",
+        department: "Department of Physics and Engineering Physics",
+        institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
+        country: "Nigeria",
+        orcid: user?.orcid || prev.orcid || "0000-0002-3652-3213",
+        photoUrl: user?.photoUrl || initialProfile?.photoUrl || prev.photoUrl || ""
+      }))
+    } else {
+      setProfile(prev => ({
+        ...prev,
         title: "Dr.",
-          name: "Dr. Marcus Vance",
-          email: rawEmail || "m.vance@university-charite.de",
-          institution: "Charité – Universitätsmedizin Berlin",
-          department: "Department of Cardiology & Vascular Medicine",
-          country: "Germany",
-          primaryDiscipline: "medicine",
-          photoUrl: ""
-        }))
-      } else {
-        // Default & Invited Expert Referee: Dr. German J. Chaud (never bleed author photos or placeholder names)
-        setProfile(prev => ({
-          ...prev,
-          title: "Dr.",
-          name: (rawName && !rawName.includes("Vane") && !rawName.includes("Referee")) ? rawName : "Dr. German J. Chaud",
-          email: (rawEmail && !rawEmail.includes("orcid") && !rawEmail.includes("proton")) ? rawEmail : "germanchaud@gmail.com",
-          institution: (user?.institution && !user.institution.includes("Advanced Medical Sciences")) ? user.institution : "Hospital las Higueras, Talcahuano, Chile",
-          department: "Department of Cardiovascular Surgery",
-          country: "Chile",
-          primaryDiscipline: "medicine",
-          photoUrl: "", // Never bleed Sam Lee or other author photos
-          keywords: ["Acute Aortic Dissection", "Aortic Repair", "Cardiovascular Surgery", "Emergency Protocols", "Clinical Outcomes"]
-        }))
-      }
-    }, [user?.name, user?.photoUrl, user?.email, user?.institution, initialProfile?.name, initialProfile?.photoUrl])
+        name: (rawName && !rawName.includes("Vane") && !rawName.includes("Referee")) ? rawName : "Dr. German J. Chaud",
+        email: (rawEmail && !rawEmail.includes("orcid") && !rawEmail.includes("proton")) ? rawEmail : "germanchaud@gmail.com",
+        institution: (user?.institution && !user.institution.includes("Advanced Medical Sciences")) ? user.institution : "Hospital las Higueras, Talcahuano, Chile",
+        department: "Department of Cardiovascular Surgery",
+        country: "Chile",
+        primaryDiscipline: "medicine",
+        photoUrl: "", // Never bleed Sam Lee or other author photos
+        keywords: ["Acute Aortic Dissection", "Aortic Repair", "Cardiovascular Surgery", "Emergency Protocols", "Clinical Outcomes"]
+      }))
+    }
+  }, [user?.name, user?.photoUrl, user?.email, user?.institution, initialProfile?.name, initialProfile?.photoUrl])
 
   // Profile Modal Form States
   const [showProfileModal, setShowProfileModal] = useState(false)
@@ -1453,21 +1354,19 @@ COPE Guidance & Plan S Benchmark Archive
 
     const origin = typeof window !== "undefined" ? window.location.origin : ""
     const recipientName = getFormattedReviewerName(profile.title, profile.name)
-    const orcidVal = profile.orcid || "0000-0004-7711-2093"
     const orcidVal = profile.orcid ? `Verified ORCID Record: <strong>${profile.orcid}</strong>` : "Official Editorial Office Registry"
 
     if (reviewsDone === 0) {
-      // Print Reviewer Gateway Qualification Certificate
       // Print Official Certificate of Editorial Peer Review Appointment
+      const deptStr = profile.department ? `${profile.department}, ` : ""
+      const instStr = profile.institution || "Hospital las Higueras, Talcahuano, Chile"
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Scholarly Open • Reviewer Gateway Qualification Certificate</title>
           <title>Scholarly Open: Medicine • Certificate of Editorial Peer Review Appointment</title>
           <style>
             body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
-            .cert-box { border: 8px double #0284c7; padding: 40px; text-align: center; border-radius: 4px; position: relative; }
             .cert-box { border: 8px double #0284c7; padding: 40px; text-align: center; border-radius: 4px; position: relative; background: #fff; }
             .logo-container { margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
             .logo-wrap { display: inline-flex; align-items: center; gap: 12px; }
@@ -1476,8 +1375,6 @@ COPE Guidance & Plan S Benchmark Archive
             .logo-text span { color: #F6BB14; }
             h1 { color: #0369a1; font-size: 24px; text-transform: uppercase; margin: 16px 0 4px; letter-spacing: 2px; }
             h2 { font-size: 13px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; }
-            .recipient { font-size: 24px; font-weight: bold; margin: 24px 0 10px; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: inline-block; padding-bottom: 5px; }
-            .body-text { font-size: 14px; max-width: 600px; margin: 0 auto 26px; color: #334155; }
             .recipient { font-size: 24px; font-weight: bold; margin: 24px 0 4px; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: inline-block; padding-bottom: 5px; }
             .affiliation { font-size: 14px; color: #475569; margin-bottom: 20px; font-weight: 500; }
             .body-text { font-size: 14px; max-width: 620px; margin: 0 auto 26px; color: #334155; }
@@ -1496,32 +1393,21 @@ COPE Guidance & Plan S Benchmark Archive
                 <div class="logo-text">Scholarly <span>Open</span></div>
               </div>
             </div>
-            <h1>Certificate of Peer Review Qualification</h1>
-            <h2>Scholarly Open Standards Board • Gateway Examination</h2>
             <h1>Certificate of Editorial Peer Review Appointment</h1>
             <h2>Scholarly Open: Medicine • Executive Editorial Board</h2>
             <div class="recipient">${recipientName}</div>
-            <div class="affiliation">${profile.department ? `${profile.department}, ` : ""}${profile.institution || "Hospital las Higueras, Talcahuano, Chile"}</div>
+            <div class="affiliation">${deptStr}${instStr}</div>
             <div class="body-text">
-              This official credential certifies that the scholar named above has successfully completed the Reviewer Gateway Examination, demonstrating verified competence in academic English phrasing, COPE research integrity guidelines, and methodological evaluation in <strong>${profile.primaryDiscipline.toUpperCase()}</strong>.
               This official credential certifies that the distinguished clinician named above has been formally appointed as an <strong>Invited Expert Peer Reviewer</strong> for <strong>Scholarly Open: Medicine</strong>, in recognition of scholarly expertise, surgical leadership, and adherence to international Committee on Publication Ethics (COPE) standards in <strong>Cardiovascular Surgery & Thoracic Medicine</strong>.
             </div>
             <table class="meta-table">
               <tr>
-                <th>Gateway Credential ID</th>
-                <th>Assessment Status</th>
-                <th>Discipline</th>
-                <th>COPE & Plan S Benchmark</th>
                 <th>Appointment ID</th>
                 <th>Appointment Type</th>
                 <th>Journal</th>
                 <th>Evaluation Desk</th>
               </tr>
               <tr>
-                <td><strong>SO-GW-2026-9041</strong></td>
-                <td><strong style="color: #16a34a;">Passed (80%+ Standard)</strong></td>
-                <td>${profile.primaryDiscipline.toUpperCase()}</td>
-                <td>Verified & Active for Matching</td>
                 <td><strong>SO-MED-REF-2026-0419</strong></td>
                 <td><strong style="color: #0369a1;">Invited Expert Referee (Direct Appointment)</strong></td>
                 <td>Scholarly Open: Medicine</td>
@@ -1530,12 +1416,9 @@ COPE Guidance & Plan S Benchmark Archive
             </table>
             <div class="seal-row">
               <div style="text-align: left; font-size: 12px; color: #64748b;">
-                <div>Verified ORCID Record: <strong>${orcidVal}</strong></div>
-                <div>Status: <strong>Qualified Peer Reviewer</strong></div>
                 <div>${orcidVal}</div>
                 <div>Status: <strong>Invited Expert Referee</strong></div>
               </div>
-              <div class="seal">Gateway Certified Seal</div>
               <div class="seal">Editorial Board Seal • Medicine</div>
             </div>
           </div>
@@ -1805,7 +1688,7 @@ COPE Guidance & Plan S Benchmark Archive
           )}
 
           {/* Peer Review Evaluation Standard Guidance Banner */}
-          <div className="p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900/50 text-sky-800 dark:text-sky-300 text-xs flex items-center justify-between gap-2.5 shadow-2xs">
+          <div className="p-3.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900/50 text-sky-800 dark:text-sky-300 text-xs flex items-center justify-between gap-2.5 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <Lightbulb className="h-4 w-4 text-[#0b99ff] shrink-0" />
               <span className="font-medium leading-relaxed">
@@ -1813,619 +1696,294 @@ COPE Guidance & Plan S Benchmark Archive
                   ? "Gutachter-Leitfaden: Bewerten Sie Manuskripte objektiv auf wissenschaftliche Originalität, empirische Methodik, Datenintegrität und die Einhaltung ethischer COPE-Standards."
                   : "Reviewer Guidance: Please evaluate manuscripts objectively for research methodology, empirical validity, data integrity, and international COPE reporting ethics."}
               </span>
-              {/* Journal Masthead & Official Peer Review Desk Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl border border-sky-100 dark:border-sky-900/60 bg-gradient-to-r from-sky-50/90 via-white to-blue-50/40 dark:from-sky-950/40 dark:via-slate-900 dark:to-blue-950/20 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="h-11 w-11 rounded-xl bg-sky-600 dark:bg-sky-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-                    <BookOpen className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold tracking-wider uppercase text-sky-700 dark:text-sky-400">
-                        Official Journal Peer Review Desk
-                      </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                        Round 2 Re-evaluation
-                      </span>
-                    </div>
-                    <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                      Scholarly Open: Medicine
-                    </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      ISSN: 3028-112X · Double-Blind Peer Review · COPE Ethical Standard · Direct Editorial Appointment
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      onTabChange && onTabChange("portfolio")
-                      if (activeReviews.length > 0) {
-                        setSelectedReviewForEval(activeReviews[0])
-                      }
-                    }}
-                    className="bg-[#0b99ff] hover:bg-[#0080dd] text-white font-semibold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer"
-                  >
-                    <FileText className="h-4 w-4 mr-1.5" />
-                    <span>{isDe ? "Manuskript SOMED-26-RW01 bewerten" : "Evaluate Manuscript SOMED-26-RW01"}</span>
-                  </Button>
-                </div>
+            </div>
+          </div>
+
+          {/* Journal Masthead & Official Peer Review Desk Banner */}
+          <div className="p-4 sm:p-5 rounded-2xl border border-sky-100 dark:border-sky-900/60 bg-gradient-to-r from-sky-50/90 via-white to-blue-50/40 dark:from-sky-950/40 dark:via-slate-900 dark:to-blue-950/20 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="h-11 w-11 rounded-xl bg-sky-600 dark:bg-sky-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+                <BookOpen className="h-5 w-5" />
               </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-sky-700 dark:text-sky-400">
+                    Official Journal Peer Review Desk
+                  </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    Round 2 Re-evaluation
+                  </span>
+                </div>
+                <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Scholarly Open: Medicine
+                </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  ISSN: 3028-112X · Double-Blind Peer Review · COPE Ethical Standard · Direct Editorial Appointment
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                type="button"
+                onClick={() => {
+                  onTabChange && onTabChange("portfolio")
+                  if (activeReviews.length > 0) {
+                    setSelectedReviewForEval(activeReviews[0])
+                  }
+                }}
+                className="bg-[#0b99ff] hover:bg-[#0080dd] text-white font-semibold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer"
+              >
+                <FileText className="h-4 w-4 mr-1.5" />
+                <span>{isDe ? "Manuskript SOMED-26-RW01 bewerten" : "Evaluate Manuscript SOMED-26-RW01"}</span>
+              </Button>
+            </div>
+          </div>
 
-              {/* Profile Card (from screenshot) */}
-              {/* Profile Card (Elegant & Minimal Academic Layout) */}
-              <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start sm:items-center gap-4">
-                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
-                      {profile.photoUrl ? (
-                        <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{getReviewerInitials(profile.name)}</span>
-                      )}
-                    </div>
+          {/* Profile Card (Elegant & Minimal Academic Layout) */}
+          <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-4">
+                <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
+                  {profile.photoUrl ? (
+                    <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{getReviewerInitials(profile.name)}</span>
+                  )}
+                </div>
 
-                    <div className="space-y-1">
-                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
-                        {getFormattedReviewerName(profile.title, profile.name)}
-                      </h2>
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
-                          {getFormattedReviewerName(profile.title, profile.name)}
-                        </h2>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                          {isDe ? "Eingeladener Fachgutachter" : "Invited Expert Referee"}
-                        </span>
-                      </div>
-                      <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-                        {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria"}
-                        {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Hospital las Higueras, Talcahuano, Chile"}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        <strong className="text-slate-700 dark:text-slate-300 font-semibold">{isDe ? "Forschungsinteressen: " : "Research Interests: "}</strong>
-                        {profile.keywords.length > 0
-                          ? profile.keywords.slice(0, 4).join(", ")
-                          : "Materials Science, Nanostructured Materials, Thin Films, Sensors"}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
+                      {getFormattedReviewerName(profile.title, profile.name)}
+                    </h2>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                      {isDe ? "Eingeladener Fachgutachter" : "Invited Expert Referee"}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                    {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Hospital las Higueras, Talcahuano, Chile"}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <strong className="text-slate-700 dark:text-slate-300 font-semibold">{isDe ? "Forschungsgebiete: " : "Research Focus: "}</strong>
+                    {profile.keywords.length > 0
+                      ? profile.keywords.slice(0, 4).join(", ")
                       : "Cardiovascular Surgery, Acute Aortic Dissection, Thoracic Surgery, Clinical Outcomes"}
-                      </p>
-                      <div className="pt-1.5 flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={handleOpenProfileModal}
-                          className="px-3.5 py-1 rounded-lg border border-sky-200 dark:border-sky-800/80 bg-sky-50/70 dark:bg-sky-950/40 text-[#0b99ff] hover:bg-sky-100 dark:hover:bg-sky-900/60 font-semibold text-xs transition-colors cursor-pointer"
-                        >
-                          {isDe ? "Vollständiges Profil ansehen" : "View Full Profile"}
-                          {isDe ? "Profil verwalten" : "Edit Profile"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCertViewMode("cv")
-                            setCertViewMode("certificate")
-                            onTabChange && onTabChange("certificate")
-                          }}
-                          className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 text-xs font-medium transition-colors cursor-pointer"
-                        >
-                          {isDe ? "CV Exportieren" : "Export CV"}
-                          {isDe ? "Bestellungsurkunde ansehen" : "View Appointment Certificate"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Matching Topics Quick Tag */}
-                  <div className="hidden lg:flex flex-col items-end gap-1.5 text-right">
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                      {isDe ? "Fachgebiet" : "Primary Discipline"}
-                    </span>
-                    <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-800">
-                      {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}
-                      {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || "Medicine & Clinical Health"}
-                    </span>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                      ● {profile.availabilityStatus === "Available" ? (isDe ? "Verfügbar für Gutachten" : "Available for Invitations") : (isDe ? "Im Forschungsurlaub" : "On Sabbatical")}
-                      ● {isDe ? "Aktiv für Runde-2-Begutachtung" : "Active for Round 2 Evaluation"}
-                    </span>
+                  </p>
+                  <div className="pt-1.5 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleOpenProfileModal}
+                      className="px-3.5 py-1 rounded-lg border border-sky-200 dark:border-sky-800/80 bg-sky-50/70 dark:bg-sky-950/40 text-[#0b99ff] hover:bg-sky-100 dark:hover:bg-sky-900/60 font-semibold text-xs transition-colors cursor-pointer"
+                    >
+                      {isDe ? "Profil verwalten" : "Edit Profile"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCertViewMode("certificate")
+                        onTabChange && onTabChange("certificate")
+                      }}
+                      className="px-3.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Lock className="h-3 w-3 text-slate-400" />
+                      <span>{isDe ? "Bestellungsurkunde" : "Appointment Certificate"}</span>
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Concise Reviewer Metrics Card */}
-              <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3">
-                {/* Standard Editorial Metrics (Concise & Academic) */}
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <Award className="h-4 w-4 text-[#0b99ff]" />
-                      {isDe ? "Gutachter-Kennzahlen & Rigor-Status" : "Reviewer Metrics & Rigor Performance"}
-                      {isDe ? "Begutachtungs-Status & Editorial-Standards" : "Editorial Review Status & Rigor Standards"}
-                    </h3>
-                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
-                      {isDe ? "COPE-Audit: Konform" : "COPE Ethics Verified"}
-                    </span>
-                  </div>
+              {/* Discipline Quick Tag */}
+              <div className="hidden lg:flex flex-col items-end gap-1.5 text-right">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  {isDe ? "Fachgebiet" : "Primary Discipline"}
+                </span>
+                <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-800">
+                  {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || "Medicine & Clinical Health"}
+                </span>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  ● {isDe ? "Aktiv für Runde-2-Begutachtung" : "Active for Round 2 Evaluation"}
+                </span>
+              </div>
+            </div>
+          </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center items-center py-1">
-                    {/* 1. Completed Evaluations */}
-                    <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                      <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
-                        {reviewsDone}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center items-center py-1">
-                          {/* 1. Active Assignment */}
-                          <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                            <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight font-mono">
-                              SOMED-26-RW01
-                            </div>
-                            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                              {isDe ? "ABGESCHL. GUTACHTEN" : "REVIEWS COMPLETED"}
-                              {isDe ? "AKTIVES MANUSKRIPT" : "ASSIGNED MANUSCRIPT"}
-                            </div>
-                          </div>
+          {/* Standard Editorial Metrics (Concise & Academic) */}
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <Award className="h-4 w-4 text-[#0b99ff]" />
+                {isDe ? "Begutachtungs-Status & Editorial-Standards" : "Editorial Review Status & Rigor Standards"}
+              </h3>
+              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
+                {isDe ? "COPE-Audit: Konform" : "COPE Ethics Verified"}
+              </span>
+            </div>
 
-                          {/* 2. Review Turnaround Target */}
-                          <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                            <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                              <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
-                                {profile.preferredTurnaround || 14} {isDe ? "Tage" : "Days"}
-                              </div>
-                              <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                                {isDe ? "ZIEL-BEGUTACHTUNGSZEIT" : "TARGET TURNAROUND"}
-                                {isDe ? "BEGUTACHTUNGSZEIT" : "TARGET TURNAROUND"}
-                              </div>
-                            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center items-center py-1">
+              {/* 1. Active Assignment */}
+              <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight font-mono">
+                  SOMED-26-RW01
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "AKTIVES MANUSKRIPT" : "ASSIGNED MANUSCRIPT"}
+                </div>
+              </div>
 
-                            {/* 3. Gateway Rigor Score */}
-                            <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                              {/* 3. Appointment Basis */}
-                              <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                                <div className="text-base sm:text-lg font-black text-[#0b99ff] leading-tight">
-                                  95%
-                                  {isDe ? "Eingeladener Experte" : "Invited Expert"}
-                                </div>
-                                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                                  {isDe ? "GATEWAY-QUALIFIKATION" : "GATEWAY RIGOR SCORE"}
-                                  {isDe ? "EDITORIAL-STATUS" : "APPOINTMENT BASIS"}
-                                </div>
-                              </div>
+              {/* 2. Review Turnaround Target */}
+              <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                  {profile.preferredTurnaround || 14} {isDe ? "Tage" : "Days"}
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "BEGUTACHTUNGSZEIT" : "TARGET TURNAROUND"}
+                </div>
+              </div>
 
-                              {/* 4. Honoraria Tier */}
-                              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                                {/* 4. COPE Compliance */}
-                                <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                                  <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 leading-tight">
-                                    €10 – €50
-                                    100% {isDe ? "Konform" : "Compliant"}
-                                  </div>
-                                  <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                                    {isDe ? "HONORAR PRO BERICHT" : "HONORARIUM / REPORT"}
-                                    {isDe ? "PUBLIKATIONSETHIK" : "COPE ETHICS BENCHMARK"}
-                                  </div>
-                                </div>
+              {/* 3. Appointment Basis */}
+              <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-[#0b99ff] leading-tight">
+                  {isDe ? "Eingeladener Experte" : "Invited Expert"}
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "EDITORIAL-STATUS" : "APPOINTMENT BASIS"}
+                </div>
+              </div>
 
-                                {/* 5. Max Review Load */}
-                                <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 col-span-2 sm:col-span-1">
-                                  <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
-                                    1 / mo
-                                  </div>
-                                  <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                                    {isDe ? "MAX. KAPAZITÄT" : "MAX LOAD CAPACITY"}
-                                  </div>
-                                </div>
-                              </div>
+              {/* 4. COPE Compliance */}
+              <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 leading-tight">
+                  100% {isDe ? "Konform" : "Compliant"}
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                  {isDe ? "PUBLIKATIONSETHIK" : "COPE ETHICS BENCHMARK"}
+                </div>
+              </div>
+            </div>
 
-                              {/* Share ORCID & LinkedIn */}
-                              {/* Accreditation Note */}
-                              <div className="flex flex-col sm:flex-row items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 gap-2">
-                                <span>{isDe ? "Offiziell akkreditiert im Scholarly Open Gutachter-Register" : "Officially accredited in the Scholarly Open Verified Reviewer Registry"}</span>
-                                <span>{isDe ? "Offiziell akkreditiert im Scholarly Open Gutachter-Register · Scholarly Open: Medicine" : "Officially accredited in the Scholarly Open Verified Reviewer Registry · Scholarly Open: Medicine"}</span>
-                                <div className="flex items-center gap-4">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (typeof window !== "undefined") {
-                                        const orcidUrl = profile.orcid ? `https://orcid.org/${profile.orcid}` : "https://orcid.org"
-                                        window.open(orcidUrl, "_blank")
-                                      }
-                                      setCertViewMode("certificate")
-                                      onTabChange && onTabChange("certificate")
-                                    }}
-                                    className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                                  >
-                                    <Link2 className="h-3 w-3" />
-                                    <span>ORCID</span>
-                                    <Award className="h-3.5 w-3.5" />
-                                    <span>{isDe ? "Bestellungsurkunde" : "Appointment Record"}</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (typeof window !== "undefined") {
-                                        const text = encodeURIComponent("I am a verified Peer Reviewer with Scholarly Open! Track my verified peer evaluations and academic badges.")
-                                        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
-                                      }
-                                    }}
-                                    className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                                  >
-                                    <Linkedin className="h-3 w-3" />
-                                    <span>LinkedIn</span>
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
+            {/* Accreditation Note */}
+            <div className="flex flex-col sm:flex-row items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 gap-2">
+              <span>{isDe ? "Offiziell akkreditiert im Scholarly Open Gutachter-Register · Scholarly Open: Medicine" : "Officially accredited in the Scholarly Open Verified Reviewer Registry · Scholarly Open: Medicine"}</span>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCertViewMode("certificate")
+                    onTabChange && onTabChange("certificate")
+                  }}
+                  className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                >
+                  <Award className="h-3.5 w-3.5" />
+                  <span>{isDe ? "Bestellungsurkunde" : "Appointment Record"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
-                            {/* Academic Recognition Badges (BIG BADGES & SMALL TEXT UNDERNEATH) */}
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                  {isDe ? "Erhaltene Auszeichnungen & Abzeichen" : "Earned Academic Prestige Badges"}
-                                </h4>
-                                <span className="text-[11px] text-slate-400">
-                                  {isDe ? "Freigeschaltet durch Peer-Review-Leistung" : "Unlocked through verified review contributions"}
-                                </span>
-                              </div>
+          {/* Active Manuscript Evaluation Desk (Direct Action Card) */}
+          <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                  {isDe ? "ZUR BEGUTACHTUNG VORLIEGEND (RUNDE 2)" : "ASSIGNED UNDER REVIEW (ROUND 2 RE-EVALUATION)"}
+                </span>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+                  Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection
+                </h3>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                  <span>ID: <strong className="text-slate-700 dark:text-slate-300 font-mono">SOMED-26-RW01</strong></span>
+                  <span>·</span>
+                  <span>Journal: <strong className="text-slate-700 dark:text-slate-300">Scholarly Open: Medicine</strong></span>
+                  <span>·</span>
+                  <span>Track: <strong className="text-slate-700 dark:text-slate-300">Cardiovascular Surgery</strong></span>
+                  <span>·</span>
+                  <span>Editor: <strong className="text-slate-700 dark:text-slate-300">Prof. Weihua Gong, M.D., Ph.D.</strong></span>
+                </div>
+              </div>
+              <div className="shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                  <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                  {isDe ? "Runde 2 Rückmeldung ausstehend" : "Round 2 Feedback Pending"}
+                </span>
+              </div>
+            </div>
 
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {/* Badge 1 */}
-                                <div className="p-4 rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-amber-400 hover:shadow-xs transition-all">
-                                  <div className="h-12 w-12 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2 ring-4 ring-amber-100/60 dark:ring-amber-900/20">
-                                    <Trophy className="h-6 w-6" />
-                                    {/* Active Manuscript Evaluation Desk (Direct Action Card) */}
-                                    <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-4">
-                                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-                                        <div>
-                                          <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
-                                            {isDe ? "ZUR BEGUTACHTUNG VORLIEGEND (RUNDE 2)" : "ASSIGNED UNDER REVIEW (ROUND 2 RE-EVALUATION)"}
-                                          </span>
-                                          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-                                            Acute Aortic Dissection: An Evidence-Based Medicine Perspective
-                                          </h3>
-                                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-2">
-                                            <span>ID: <strong className="text-slate-700 dark:text-slate-300 font-mono">SOMED-26-RW01</strong></span>
-                                            <span>·</span>
-                                            <span>Journal: <strong className="text-slate-700 dark:text-slate-300">Scholarly Open: Medicine</strong></span>
-                                            <span>·</span>
-                                            <span>Track: <strong className="text-slate-700 dark:text-slate-300">Cardiovascular Surgery</strong></span>
-                                          </div>
-                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                                            Top Reviewer 2026
-                                          </div>
-                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                                            {isDe ? "EDITORIAL BOARD AUSZEICHNUNG" : "EDITORIAL BOARD COMMENDATION"}
-                                          </div>
-                                        </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {isDe
+                ? "Der Autor hat die überarbeitete Manuskriptfassung eingereicht und ein detailliertes Punkt-für-Punkt-Antwortschreiben zu den Gutachteranmerkungen aus Runde 1 hinterlegt. Alle Autorenangaben und Telefonnummern wurden für das Double-Blind-Verfahren vollständig geschwärzt."
+                : "The author has submitted the revised manuscript and a detailed point-by-point response to Round 1 reviewer recommendations. All author contact details and telephone numbers have been strictly redacted for double-blind peer review compliance."}
+            </p>
 
-                                        {/* Badge 2 */}
-                                        <div className="p-4 rounded-xl border border-sky-200/80 dark:border-sky-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-sky-400 hover:shadow-xs transition-all">
-                                          <div className="h-12 w-12 rounded-full bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] flex items-center justify-center mb-2 ring-4 ring-sky-100/60 dark:ring-sky-900/20">
-                                            <Zap className="h-6 w-6" />
-                                          </div>
-                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                                            Fast Turnaround
-                                          </div>
-                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                                            {isDe ? "TOP 5% SCHNELLIGKEIT (<12 TAGE)" : "TOP 5% RESPONSE SPEED (<12D)"}
-                                          </div>
-                                          <div className="shrink-0">
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                                              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                                              {isDe ? "Runde 2 Rückmeldung ausstehend" : "Round 2 Feedback Pending"}
-                                            </span>
-                                          </div>
-                                        </div>
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <Button
+                type="button"
+                onClick={() => {
+                  onTabChange && onTabChange("portfolio")
+                  if (activeReviews.length > 0) {
+                    setSelectedReviewForEval(activeReviews[0])
+                  }
+                }}
+                className="bg-[#0b99ff] hover:bg-[#0080dd] text-white font-semibold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer"
+              >
+                <FileText className="h-4 w-4 mr-1.5" />
+                <span>{isDe ? "Runde 2 Begutachtungsformular öffnen" : "Open Round 2 Review & Decision Form"}</span>
+              </Button>
+              <a
+                href="/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx"
+                download
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <Download className="h-4 w-4 text-slate-400" />
+                <span>{isDe ? "Revidiertes Manuskript (DOCX)" : "Download Revised Manuscript (DOCX)"}</span>
+              </a>
+              <a
+                href="/manuscripts/SOMED-26-RW01-rebuttal-blinded.docx"
+                download
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <FileText className="h-4 w-4 text-slate-400" />
+                <span>{isDe ? "Autoren-Rebuttal (DOCX)" : "Download Author Rebuttal (DOCX)"}</span>
+              </a>
+            </div>
+          </div>
 
-                                        {/* Badge 3 */}
-                                        <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-emerald-400 hover:shadow-xs transition-all">
-                                          <div className="h-12 w-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 ring-4 ring-emerald-100/60 dark:ring-emerald-900/20">
-                                            <ShieldCheck className="h-6 w-6" />
-                                          </div>
-                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                                            COPE Ethics Certified
-                                          </div>
-                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                                            {isDe ? "PUBLIKATIONSETHIK VERIFIZIERT" : "PUBLICATION ETHICS VERIFIED"}
-                                          </div>
-                                        </div>
-                                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                                          {isDe
-                                            ? "Der Autor hat die überarbeitete Manuskriptfassung eingereicht und ein detailliertes Punkt-für-Punkt-Antwortschreiben zu den Gutachteranmerkungen aus Runde 1 hinterlegt. Erweiterte klinische Vergleichstabellen und aktuelle Studienreferenzen wurden integriert."
-                                            : "The author has submitted the revised manuscript and a detailed point-by-point response to Round 1 reviewer recommendations. Structured clinical comparison tables and expanded recent trial references have been incorporated."}
-                                        </p>
-
-                                        {/* Badge 4 */}
-                                        <div className="p-4 rounded-xl border border-purple-200/80 dark:border-purple-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-purple-400 hover:shadow-xs transition-all">
-                                          <div className="h-12 w-12 rounded-full bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 ring-4 ring-purple-100/60 dark:ring-purple-900/20">
-                                            <Star className="h-6 w-6 fill-purple-600/20" />
-                                          </div>
-                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                                            5-Star Rigor Endorsed
-                                          </div>
-                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                                            {isDe ? "HANDLING EDITOR AUSZEICHNUNG" : "HANDLING EDITOR DISTINCTION"}
-                                          </div>
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                                          <Button
-                                            type="button"
-                                            onClick={() => {
-                                              onTabChange && onTabChange("portfolio")
-                                              if (activeReviews.length > 0) {
-                                                setSelectedReviewForEval(activeReviews[0])
-                                              }
-                                            }}
-                                            className="bg-[#0b99ff] hover:bg-[#0080dd] text-white font-semibold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer"
-                                          >
-                                            <FileText className="h-4 w-4 mr-1.5" />
-                                            <span>{isDe ? "Runde 2 Begutachtungsformular öffnen" : "Open Round 2 Review & Decision Form"}</span>
-                                          </Button>
-                                          <a
-                                            href="/manuscripts/Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx"
-                                            download
-                                            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-                                          >
-                                            <Download className="h-4 w-4 text-slate-400" />
-                                            <span>{isDe ? "Revidiertes Manuskript (DOCX)" : "Download Revised Manuscript (DOCX)"}</span>
-                                          </a>
-                                          <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => {
-                                              onTabChange && onTabChange("portfolio")
-                                              if (activeReviews.length > 0) {
-                                                setSelectedReviewForEval(activeReviews[0])
-                                              }
-                                            }}
-                                            className="text-xs h-9 px-3.5 rounded-xl border-slate-200 dark:border-slate-800 cursor-pointer"
-                                          >
-                                            <Eye className="h-4 w-4 mr-1.5 text-slate-400" />
-                                            <span>{isDe ? "Autoren-Stellungnahme anzeigen" : "View Author Rebuttal Letter"}</span>
-                                          </Button>
-                                        </div>
-                                      </div>
-
-                                      {/* Reviewer Academy & Masterclasses Hub */}
-                                      <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                                        <div className="flex items-center gap-3">
-                                          <div className="h-8 w-8 rounded-lg bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                                            <GraduationCap className="h-4 w-4" />
-                                            {/* Editorial Instructions & Peer Review Ethics Card */}
-                                            <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                                              <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs">
-                                                <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                                                {isDe ? "Leitlinien für die Runde-2-Wiedervorlage" : "Editorial Instructions for Round 2 Re-evaluation"}
-                                              </h4>
-                                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                                                <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
-                                                  <div className="font-bold text-slate-900 dark:text-white">1. {isDe ? "Methodik & Evidenz" : "Clinical & Methodological Rigor"}</div>
-                                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                    {isDe
-                                                      ? "Prüfen Sie, ob die Evidenzbasis im Bereich der Aortendissektion und die klinische Einordnung den aktuellen chirurgischen Leitlinien entsprechen."
-                                                      : "Verify whether the evidence base and clinical framing of acute aortic dissection align with current surgical emergency guidelines."}
-                                                  </p>
-                                                </div>
-                                                <div className="space-y-0.5">
-                                                  <h3 className="font-semibold text-slate-900 dark:text-white text-xs">
-                                                    {isDe ? "Gutachter-Akademie & Weiterbildung" : "Reviewer Academy & Masterclasses"}
-                                                  </h3>
-                                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-2xl">
-                                                    <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
-                                                      <div className="font-bold text-slate-900 dark:text-white">2. {isDe ? "Überarbeitung & Rebuttal" : "Rebuttal Completeness"}</div>
-                                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                        {isDe
-                                                          ? "Kurse zu konstruktivem Feedback, COPE-Ethik und KI-Forensik."
-                                                          : "Sharpen your peer-review rigor with specialized courses in constructive author feedback, COPE ethics, and synthetic image forensics."}
-                                                        ? "Bewerten Sie, ob die Autoren auf alle Kritikpunkte aus Runde 1 (Referenzen, Tabellen, Strukturierung) adäquat eingegangen sind."
+          {/* Editorial Instructions & Peer Review Ethics Card */}
+          <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              {isDe ? "Leitlinien für die Runde-2-Wiedervorlage" : "Editorial Instructions for Round 2 Re-evaluation"}
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
+                <div className="font-bold text-slate-900 dark:text-white">1. {isDe ? "Methodik & Evidenz" : "Clinical & Methodological Rigor"}</div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {isDe
+                    ? "Prüfen Sie, ob die Evidenzbasis im Bereich der Aortendissektion und die klinische Einordnung den aktuellen chirurgischen Leitlinien entsprechen."
+                    : "Verify whether the evidence base and clinical framing of acute aortic dissection align with current surgical emergency guidelines."}
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
+                <div className="font-bold text-slate-900 dark:text-white">2. {isDe ? "Überarbeitung & Rebuttal" : "Rebuttal Completeness"}</div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {isDe
+                    ? "Bewerten Sie, ob die Autoren auf alle Kritikpunkte aus Runde 1 (Referenzen, Tabellen, Strukturierung) adäquat eingegangen sind."
                     : "Assess whether the authors have satisfactorily addressed all Round 1 comments (tables, literature breadth, structural flow)."}
-                                                      </p>
-                                                    </div>
-                                                    <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
-                                                      <div className="font-bold text-slate-900 dark:text-white">3. {isDe ? "Vertraulichkeit (COPE)" : "Double-Blind Confidentiality"}</div>
-                                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                        {isDe
-                                                          ? "Alle Manuskriptinhalte und Gutachterdaten unterliegen strikter Vertraulichkeit gemäß COPE-Richtlinien."
-                                                          : "All manuscript data and evaluation commentary remain strictly confidential under international COPE double-blind standards."}
-                                                      </p>
-                                                    </div>
-                                                </div>
-
-                                                <Link
-                                                  href="/trainings"
-                                                  className="text-xs font-semibold text-[#0b99ff] hover:underline flex items-center gap-1 shrink-0"
-                                                >
-                                                  <span>{isDe ? "Kurse ansehen" : "Explore Masterclasses"}</span>
-                                                  <ArrowRight className="h-3.5 w-3.5" />
-                                                </Link>
-                                              </div>
-
-                                              {/* Pending Invitations Alert Block */}
-                                              {reviewInvitations.length > 0 && (
-                                                <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
-                                                  <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                      <span className="h-2 w-2 rounded-full bg-[#0b99ff]" />
-                                                      <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                                                        {isDe ? "Ausstehende Begutachtungsanfrage" : "Pending Review Invitation"}
-                                                      </h3>
-                                                    </div>
-                                                    <span className="text-[11px] text-slate-400 font-medium">Standard 14 Days</span>
-                                                  </div>
-
-                                                  <div className="p-4 space-y-3">
-                                                    {reviewInvitations.map((inv) => (
-                                                      <div key={inv.id} className="space-y-2.5">
-                                                        <div className="flex items-center justify-between text-xs">
-                                                          <span className="font-semibold text-[#0b99ff]">{inv.journal}</span>
-                                                          <span className="text-slate-400 font-mono text-[11px]">MS ID: {inv.manuscriptId || inv.id}</span>
-                                                        </div>
-
-                                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                                                          {inv.title}
-                                                        </h4>
-
-                                                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
-                                                          {inv.abstract}
-                                                        </p>
-
-                                                        <div className="flex items-center gap-2 pt-1">
-                                                          <Button
-                                                            onClick={() => handleOpenAccept(inv)}
-                                                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3.5 py-1.5 h-auto cursor-pointer rounded shadow-xs"
-                                                          >
-                                                            <Check className="h-3.5 w-3.5 mr-1" />
-                                                            {isDe ? "Annehmen & Frist setzen" : "Accept & Set Deadline"}
-                                                          </Button>
-                                                          <Button
-                                                            onClick={() => handleOpenDecline(inv)}
-                                                            variant="outline"
-                                                            className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded"
-                                                          >
-                                                            <X className="h-3.5 w-3.5 mr-1" />
-                                                            {isDe ? "Ablehnen" : "Decline"}
-                                                          </Button>
-                                                        </div>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                </Card>
-                                              )}
-
-                                              {/* Active Assignments Quick Table */}
-                                              <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
-                                                <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex items-center justify-between">
-                                                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                                                    {isDe ? "Laufende Begutachtungen" : "Active Review Assignments"}
-                                                  </h3>
-                                                  {onTabChange && (
-                                                    <button
-                                                      onClick={() => onTabChange("portfolio")}
-                                                      className="text-xs text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                                                    >
-                                                      {isDe ? "Alle anzeigen" : "View All Portfolio"} →
-                                                    </button>
-                                                  )}
-                                                </div>
-
-                                                <div className="p-4 space-y-3">
-                                                  {localActiveReviews.filter(r => r.status === "In Progress" || r.status === "Pending" || Boolean((r as any).isRound2)).map((rev) => {
-                                                    const forensicData = FORENSIC_PROFILES[rev.manuscriptId || rev.id] || FORENSIC_PROFILES["SOMED-26-RS001"]
-                                                    const isEscalated = !!(escalatedPaperIds[rev.id] || escalatedPaperIds[rev.manuscriptId || ""])
-                                                    const daysLeft = getDaysRemaining(rev.deadline)
-                                                    const isOverdue = daysLeft < 0
-                                                    return (
-                                                      <div
-                                                        key={rev.id}
-                                                        className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${isEscalated
-                                                            ? "border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20"
-                                                            : "border-slate-200 dark:border-slate-800"
-                                                          }`}
-                                                      >
-                                                        <div className="space-y-1.5">
-                                                          <div className="flex flex-wrap items-center gap-2">
-                                                            <span className="text-[10px] font-bold text-slate-500 uppercase">{rev.journal}</span>
-                                                            <span className="text-slate-300">•</span>
-                                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${isOverdue
-                                                                ? "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50"
-                                                                : daysLeft <= 3
-                                                                  ? "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50"
-                                                                  : "text-[#0b99ff] dark:text-[#0b99ff] bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50"
-                                                              }`}>
-                                                              <Clock className="w-3 h-3" />
-                                                              {isOverdue
-                                                                ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig (${rev.deadline})` : `${Math.abs(daysLeft)} days overdue (${rev.deadline})`)
-                                                                : (isDe ? `Noch ${daysLeft} Tage (${rev.deadline})` : `Due in ${daysLeft} days (${rev.deadline})`)}
-                                                            </span>
-                                                            <span className="text-slate-300">•</span>
-                                                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
-                                                              <ShieldCheck className="h-3 w-3 text-emerald-600" />
-                                                              AI: {forensicData?.aiScore || "4%"} · Figures: Clean ✓
-                                                            </span>
-                                                            {isEscalated && (
-                                                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
-                                                                <AlertTriangle className="h-3 w-3 text-amber-600" />
-                                                                {isDe ? "Eskaliert" : "Escalated to IM"}
-                                                              </span>
-                                                            )}
-                                                          </div>
-                                                          <h4 className="text-xs font-bold text-slate-900 dark:text-white">{rev.title}</h4>
-                                                        </div>
-
-                                                        <div className="flex flex-wrap items-center gap-2 shrink-0">
-                                                          {(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01") && (
-                                                            <>
-                                                              <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                onClick={() => handleDownloadSpecificFile("fulltext", rev)}
-                                                                className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
-                                                                title="Download Blinded Revised Manuscript (.docx)"
-                                                              >
-                                                                <Download className="h-3.5 w-3.5" />
-                                                                <span>{isDe ? "Überarb. Manuskript" : "Revised MS (.docx)"}</span>
-                                                              </Button>
-                                                              <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                onClick={() => handleDownloadSpecificFile("supp", rev)}
-                                                                className="border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
-                                                                title="Download Author Point-by-Point Rebuttal (.docx)"
-                                                              >
-                                                                <FileText className="h-3.5 w-3.5" />
-                                                                <span>{isDe ? "Autoren-Rebuttal" : "Rebuttal (.docx)"}</span>
-                                                              </Button>
-                                                            </>
-                                                          )}
-
-                                                          <Button
-                                                            variant="outline"
-                                                            onClick={() => setSelectedPackageRev(rev)}
-                                                            className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                                                            title={isDe ? "Blinded PDF & Begleitdaten herunterladen" : "Download Blinded Manuscript PDF & Data"}
-                                                          >
-                                                            <FileDown className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                                                            {isDe ? "Manuskript-Paket" : "Blinded Package"}
-                                                          </Button>
-
-                                                          <Button
-                                                            variant="outline"
-                                                            onClick={() => handleOpenDeadlineModal(rev)}
-                                                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                                                            title={isDe ? "Frist anpassen oder verlängern" : "Set or adjust review deadline"}
-                                                          >
-                                                            <Calendar className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                                                            {isDe ? "Frist anpassen" : "Set Deadline"}
-                                                          </Button>
-
-                                                          {!isEscalated ? (
-                                                            <Button
-                                                              variant="outline"
-                                                              onClick={() => handleOpenEscalate(rev)}
-                                                              className="border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                                                              title={isDe ? "Fehlverhalten an Editor / IM melden" : "Escalate misconduct to Handling Editor or Integrity Manager"}
-                                                            >
-                                                              <AlertTriangle className="h-3.5 w-3.5 mr-1 text-amber-600 dark:text-amber-400" />
-                                                              {isDe ? "Fehlverhalten melden" : "Escalate"}
-                                                            </Button>
-                                                          ) : null}
-
-                                                          <Button
-                                                            onClick={() => handleOpenEval(rev, Boolean((rev as any).isRound2))}
-                                                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
-                                                          >
-                                                            <FileText className="h-3.5 w-3.5 mr-1" />
-                                                            {rev.isRound2
-                                                              ? (isDe ? "Zweitbegutachtung (R2) öffnen" : "Open Round 2 Assessment")
-                                                              : (isDe ? "Gutachten ausfüllen" : "Open Assessment Form")}
-                                                          </Button>
-                                                        </div>
-                                                      </div>
-                                                    )
-                                                  })}
-                                                </div>
-                                              </Card>
-                                            </div>
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
+                <div className="font-bold text-slate-900 dark:text-white">3. {isDe ? "Vertraulichkeit (COPE)" : "Double-Blind Confidentiality"}</div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {isDe
+                    ? "Alle Manuskriptinhalte und Gutachterdaten unterliegen strikter Vertraulichkeit gemäß COPE-Richtlinien."
+                    : "All manuscript data and evaluation commentary remain strictly confidential under international COPE double-blind standards."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
-                                            {/* ================= TAB 2: PORTFOLIO & ARCHIVE ================= */}
+      {/* ================= TAB 2: PORTFOLIO & ARCHIVE ================= */}
                                             {activeTab === "portfolio" && (
                                               <div className="space-y-4">
                                                 <div className="flex items-center justify-between">
@@ -2772,536 +2330,7 @@ COPE Guidance & Plan S Benchmark Archive
                                               )
                                             })()}
 
-                                            {/* ================= TAB 4: APC CREDIT WALLET ================= */}
-                                            {activeTab === "wallet" && (
-                                              <div className="space-y-4">
-
-                                                {/* Main Vault Card */}
-                                                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
-                                                  {/* Main Vault Card (Standard Academic Benefits Layout) */}
-                                                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
-
-                                                    {/* Header: Balance & Status */}
-                                                    {/* Header: Recognition Overview */}
-                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-                                                      <div className="flex items-center gap-4">
-                                                        <div className="flex items-baseline gap-1.5">
-                                                          <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                                                            {points}
-                                                          </span>
-                                                          <span className="text-xs font-bold text-slate-400">/ 100 PTS</span>
-                                                          <div className="flex items-center gap-3.5">
-                                                            <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800/60">
-                                                              <Award className="h-6 w-6" />
-                                                            </div>
-
-                                                            <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
-
-                                                            <div>
-                                                              <div className="text-xs font-bold text-[#0b99ff]">
-                                                                Silver Tier · 30% APC Waiver
-                                                                <div className="flex items-center gap-2">
-                                                                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                                                                    {isDe ? "Gutachter-Anerkennung & APC-Erlass-Programm" : "Reviewer Recognition & APC Waiver Program"}
-                                                                  </h3>
-                                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                                                    {isDe ? "Aktiv" : "Active Program"}
-                                                                  </span>
-                                                                </div>
-                                                                <div className="text-[11px] text-slate-400 font-mono">
-                                                                  ORCID: 0000-0004-7711-2093 · 312 Days Left
-                                                                </div>
-                                                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                                                  {isDe
-                                                                    ? "Offizielles Programm zur Anerkennung wissenschaftlicher Peer-Review-Leistungen bei Scholarly Open."
-                                                                    : "Official recognition framework honoring scholarly peer review contributions across all 11 Scholarly Open journals."}
-                                                                </p>
-                                                              </div>
-                                                            </div>
-
-                                                            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 sm:text-right">
-                                                              <span>{100 - points} pts to 100% Free Waiver</span>
-                                                              <div className="text-left sm:text-right shrink-0">
-                                                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                                                  {isDe ? "Erlass-Stufe" : "Waiver Status"}
-                                                                </div>
-                                                                <div className="text-lg font-black text-sky-600 dark:text-sky-400">
-                                                                  30% – 100% APC Waiver
-                                                                </div>
-                                                                <div className="text-[11px] text-slate-500 font-medium">
-                                                                  {isDe ? "Übertragbar auf Co-Autoren" : "Transferable to Co-Authors"}
-                                                                </div>
-                                                              </div>
-                                                            </div>
-
-                                                            {/* Clean Progress Track with Points */}
-                                                            <div className="space-y-3 pt-1">
-                                                              {/* Progress Bar in Workspace Signature Blue */}
-                                                              <div className="relative py-2">
-                                                                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                                                                  <div
-                                                                    className="h-full bg-[#0b99ff] rounded-full transition-all duration-500"
-                                                                    style={{ width: `${points}%` }}
-                                                                  />
-                                                                  {/* Academic Benefits Explanation Cards */}
-                                                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
-                                                                    <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-1.5">
-                                                                      <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                                                                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                                                                        <span>{isDe ? "30% Basis-Erlass pro Gutachten" : "30% APC Waiver Per Review"}</span>
-                                                                      </div>
-                                                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                                        {isDe
-                                                                          ? "Für jedes vom Herausgeber abgenommene Fachgutachten erhalten Sie einen Gutscheincode für 30% Rabatt auf zukünftige eigene Einreichungen."
-                                                                          : "For every editor-endorsed peer review evaluation, referees receive a verified 30% APC waiver code applicable to their next publication."}
-                                                                      </p>
-                                                                    </div>
-
-                                                                    {/* Milestone Node Points on the Bar */}
-                                                                    <div className="relative flex justify-between text-[11px] pt-2 font-medium">
-                                                                      <div className="text-left">
-                                                                        <span className="block font-bold text-slate-900 dark:text-white">0</span>
-                                                                        <span className="text-[10px] text-slate-400">Start</span>
-                                                                      </div>
-
-                                                                      <div className="text-center">
-                                                                        <span className="block font-bold text-slate-700 dark:text-slate-300">10 Pts</span>
-                                                                        <span className="text-[10px] text-slate-500 font-medium">Bronze (10%)</span>
-                                                                      </div>
-
-                                                                      <div className="text-center">
-                                                                        <span className="block font-bold text-[#0b99ff]">30 Pts</span>
-                                                                        <span className="text-[10px] text-[#0b99ff] font-bold">Silver (30% Active)</span>
-                                                                      </div>
-
-                                                                      <div className="text-center">
-                                                                        <span className="block font-bold text-slate-600 dark:text-slate-400">50 Pts</span>
-                                                                        <span className="text-[10px] text-slate-400">Gold (50%)</span>
-                                                                      </div>
-
-                                                                      <div className="text-right">
-                                                                        <span className="block font-bold text-slate-600 dark:text-slate-400">100 Pts</span>
-                                                                        <span className="text-[10px] text-slate-400">Platinum (100%)</span>
-                                                                      </div>
-                                                                      <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-1.5">
-                                                                        <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                                                                          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                                                                          <span>{isDe ? "Übertragbar auf das Laborteam" : "Fully Transferable"}</span>
-                                                                        </div>
-                                                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                                          {isDe
-                                                                            ? "Waiver-Codes können auf Doktoranden, Postdocs oder institutionelle Kooperationspartner übertragen werden."
-                                                                            : "Waiver vouchers may be transferred to PhD candidates, postdoctoral fellows, or institutional co-authors."}
-                                                                        </p>
-                                                                      </div>
-
-                                                                      {/* 4 Minimal Tier Cards */}
-                                                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                                                                        <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
-                                                                          <div className="text-slate-400 text-[10px] font-semibold">10 PTS</div>
-                                                                          <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Bronze</div>
-                                                                          <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">10% APC Waiver</div>
-                                                                          <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-1.5">
-                                                                            <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                                                                              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                                                                              <span>{isDe ? "Gültig für alle 11 Journale" : "Valid Across All 11 Journals"}</span>
-                                                                            </div>
-
-                                                                            <div className="p-3 rounded-lg border-2 border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 text-xs">
-                                                                              <div className="text-[#0b99ff] text-[10px] font-bold">30 PTS · ACTIVE</div>
-                                                                              <div className="text-sm font-black text-slate-900 dark:text-white mt-0.5">Silver</div>
-                                                                              <div className="text-xs font-bold text-[#0b99ff]">30% APC Waiver</div>
-                                                                            </div>
-
-                                                                            <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
-                                                                              <div className="text-slate-400 text-[10px] font-semibold">50 PTS</div>
-                                                                              <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Gold</div>
-                                                                              <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">50% APC Waiver</div>
-                                                                            </div>
-
-                                                                            <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
-                                                                              <div className="text-slate-400 text-[10px] font-semibold">100 PTS</div>
-                                                                              <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Platinum</div>
-                                                                              <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">100% Free Waiver</div>
-                                                                            </div>
-                                                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                                              {isDe
-                                                                                ? "Einlösbar in allen Scholarly-Open-Publikationen einschließlich Scholarly Open: Medicine und Chemistry."
-                                                                                : "Redeemable in any Scholarly Open journal including Medicine, Environmental Science, and Chemistry."}
-                                                                            </p>
-                                                                          </div>
-                                                                        </div>
-
-                                                                        {/* Points Guide */}
-                                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-                                                                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                                                                            <div className="font-bold text-slate-900 dark:text-white">+10 Base Points</div>
-                                                                            <div className="text-[11px] text-slate-500">Editor-endorsed peer review evaluation</div>
-                                                                          </div>
-                                                                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                                                                            <div className="font-bold text-[#0b99ff]">+2.5 On-Time Bonus</div>
-                                                                            <div className="text-[11px] text-slate-500">Submitted within agreed 14-day window</div>
-                                                                          </div>
-                                                                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                                                                            <div className="font-bold text-[#0b99ff]">+2.5 Quality Bonus</div>
-                                                                            <div className="text-[11px] text-slate-500">5-Star rigor score endorsed by editor</div>
-                                                                          </div>
-                                                                        </div>
-
-                                                                        {/* Awarded Peer Review Vouchers & APC Waivers */}
-                                                                        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-5 shadow-xs">
-                                                                          <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
-                                                                            <div className="flex items-center gap-3">
-                                                                              <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff]">
-                                                                                <Award className="h-5 w-5" />
-                                                                              </div>
-                                                                              <div>
-                                                                                <div className="flex items-center gap-2">
-                                                                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                                                                                    {isDe ? "Verliehene Gutachter-Voucher & APC-Rabattcodes" : "Awarded Peer Review Vouchers & APC Waivers"}
-                                                                                  </h4>
-                                                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                                                                                    {awardedVouchers.length} Available
-                                                                                  </span>
-                                                                                </div>
-                                                                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                                                                  {isDe
-                                                                                    ? "Von Handling Editors verliehene Anerkennungen. Einlösbar für 25% – 100% APC-Erlass bei eigenen Manuskripteinreichungen."
-                                                                                    : "Official incentives awarded by Handling Editors upon decision endorsement. Redeemable for 25%–100% APC waivers on your own submissions."}
-                                                                                </p>
-                                                                              </div>
-                                                                            </div>
-                                                                          </div>
-
-                                                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
-                                                                            {awardedVouchers.map((vouch) => {
-                                                                              const isCopied = copiedVoucherCode === vouch.code
-
-                                                                              return (
-                                                                                <div
-                                                                                  key={vouch.id || vouch.code}
-                                                                                  className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 relative overflow-hidden hover:border-slate-300 dark:hover:border-slate-700 transition-all"
-                                                                                >
-                                                                                  <div className="flex items-start justify-between gap-2">
-                                                                                    <div>
-                                                                                      <div className="flex items-center gap-2">
-                                                                                        <span className="font-bold text-sm text-emerald-700 dark:text-emerald-400">
-                                                                                          {vouch.discount}
-                                                                                        </span>
-                                                                                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                                                                          {vouch.status}
-                                                                                        </span>
-                                                                                      </div>
-                                                                                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                                                                                        Ref: <strong className="text-slate-700 dark:text-slate-300">{vouch.paperId}</strong> · Awarded on {vouch.awardedAt}
-                                                                                      </div>
-                                                                                      {vouch.awardedBy && (
-                                                                                        <div className="text-[10px] text-slate-400 mt-0.5">
-                                                                                          By: {vouch.awardedBy}
-                                                                                        </div>
-                                                                                      )}
-                                                                                    </div>
-                                                                                  </div>
-
-                                                                                  {/* Voucher Code Box */}
-                                                                                  <div className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
-                                                                                    <div className="space-y-0.5">
-                                                                                      <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Redemption Code</div>
-                                                                                      <span className="font-mono font-bold text-xs text-slate-900 dark:text-white tracking-wider">
-                                                                                        {vouch.code}
-                                                                                      </span>
-                                                                                    </div>
-                                                                                    <button
-                                                                                      type="button"
-                                                                                      onClick={() => {
-                                                                                        if (typeof navigator !== "undefined" && navigator.clipboard) {
-                                                                                          navigator.clipboard.writeText(vouch.code)
-                                                                                        }
-                                                                                        setCopiedVoucherCode(vouch.code)
-                                                                                        setTimeout(() => setCopiedVoucherCode(null), 2500)
-                                                                                      }}
-                                                                                      className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${isCopied
-                                                                                          ? "bg-emerald-600 text-white shadow-xs"
-                                                                                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
-                                                                                        }`}
-                                                                                    >
-                                                                                      {isCopied ? (
-                                                                                        <>
-                                                                                          <Check className="h-3.5 w-3.5" />
-                                                                                          <span>{isDe ? "Kopiert!" : "Copied!"}</span>
-                                                                                        </>
-                                                                                      ) : (
-                                                                                        <>
-                                                                                          <Copy className="h-3.5 w-3.5 text-slate-400" />
-                                                                                          <span>{isDe ? "Code kopieren" : "Copy Code"}</span>
-                                                                                        </>
-                                                                                      )}
-                                                                                    </button>
-                                                                                  </div>
-
-                                                                                  <div className="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
-                                                                                    <span>Valid across all 11 Scholarly Open journals</span>
-                                                                                    <span className="text-[#0b99ff] font-medium">Single Use / Transferable</span>
-                                                                                  </div>
-                                                                                </div>
-                                                                              )
-                                                                            })}
-                                                                          </div>
-                                                                        </div>
-
-                                                                        {/* Reviewer Honoraria & 4-Option Disbursement Portal */}
-                                                                        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
-                                                                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                                                                            <div className="flex items-center gap-3">
-                                                                              <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff]">
-                                                                                <Landmark className="h-5 w-5" />
-                                                                              </div>
-                                                                              <div>
-                                                                                <div className="flex items-center gap-2">
-                                                                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                                                                                    {isDe ? "Gutachter-Honorare & Vergütungsportal" : "Reviewer Honoraria & Recognition Portal"}
-                                                                                  </h4>
-                                                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                                                                                    {isDe ? "Honorarpolitik in Abstimmung" : "Policy in Discussion"}
-                                                                                  </span>
-                                                                                </div>
-                                                                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                                                                  {isDe
-                                                                                    ? "Direkte Barhonorare befinden sich derzeit im Herausgebergremium in Abstimmung. Gutachter erhalten aktuell prioritäre APC-Erlass-Gutscheine (25%–100%) und verifizierte ORCID-Zertifikate."
-                                                                                    : "Cash honoraria policies are currently under executive editorial board discussion. Referees currently receive transferable APC waiver vouchers (25%–100%), verified ORCID certificates, and prestige credentials."}
-                                                                                </p>
-                                                                              </div>
-                                                                            </div>
-
-                                                                            <div className="text-right shrink-0">
-                                                                              <div className="text-[10px] uppercase font-bold text-slate-400">{isDe ? "Verfügbares Barhonorar" : "Available Cash Honorarium"}</div>
-                                                                              <div className="text-xl font-black text-slate-400 dark:text-slate-500">
-                                                                                €0.00
-                                                                              </div>
-                                                                              <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">{isDe ? "Derzeit in Beratung" : "Under Policy Discussion"}</div>
-                                                                            </div>
-                                                                          </div>
-
-                                                                          {/* Success Notification Banner */}
-                                                                          {payoutSuccessMsg && (
-                                                                            <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-3 text-xs text-emerald-900 dark:text-emerald-200 animate-in fade-in">
-                                                                              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-                                                                              <span className="font-semibold">{payoutSuccessMsg}</span>
-                                                                            </div>
-                                                                          )}
-
-                                                                          {/* 4 Interactive Option Cards */}
-                                                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-
-                                                                            {/* Option 1: Digital Cashout (PayPal / Payoneer / Wise) */}
-                                                                            <div
-                                                                              onClick={() => setPayoutOption("bank")}
-                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "bank"
-                                                                                  ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 shadow-xs ring-1 ring-[#0b99ff]/20"
-                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                                                                                }`}
-                                                                            >
-                                                                              <div className="flex items-center justify-between">
-                                                                                <div className="flex items-center gap-2">
-                                                                                  <CreditCard className="h-4 w-4 text-amber-500" />
-                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
-                                                                                    {isDe ? "1. Digitale Auszahlung (PayPal / Payoneer / Wise)" : "1. Digital Cashout (PayPal / Payoneer / Wise)"}
-                                                                                  </span>
-                                                                                </div>
-                                                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                                                                                  {isDe ? "Pausiert" : "Paused"}
-                                                                                </span>
-                                                                              </div>
-                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                                                {isDe
-                                                                                  ? "Barauszahlungen sind während der laufenden Vorstandskonsultation vorübergehend pausiert. Wählen Sie Option 2, um einen sofortigen APC-Publikationsgutschein zu generieren."
-                                                                                  : "Cash disbursement rails are currently paused while executive honorarium policy is under editorial review. Please select Option 2 to claim transferable APC publication waivers."}
-                                                                              </p>
-                                                                              {payoutOption === "bank" && (
-                                                                                <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 text-xs">
-                                                                                  <div>
-                                                                                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Select Payout Rail</label>
-                                                                                    <div className="grid grid-cols-4 gap-1.5">
-                                                                                      {(["PayPal", "Payoneer", "Wise", "Other"] as const).map((service) => (
-                                                                                        <button
-                                                                                          key={service}
-                                                                                          type="button"
-                                                                                          onClick={(e) => {
-                                                                                            e.stopPropagation()
-                                                                                            setPayoutService(service)
-                                                                                          }}
-                                                                                          className={`py-1.5 px-1.5 rounded-lg text-[11px] font-bold border transition-all text-center ${payoutService === service
-                                                                                              ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-2xs"
-                                                                                              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]"
-                                                                                            }`}
-                                                                                        >
-                                                                                          {service}
-                                                                                        </button>
-                                                                                      ))}
-                                                                                    </div>
-                                                                                  </div>
-
-                                                                                  <div>
-                                                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">
-                                                                                      {payoutService} Account Email
-                                                                                    </label>
-                                                                                    <input
-                                                                                      type="email"
-                                                                                      value={payoutEmail}
-                                                                                      onChange={(e) => setPayoutEmail(e.target.value)}
-                                                                                      placeholder={`name@domain.com (${payoutService} account)`}
-                                                                                      className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
-                                                                                    />
-                                                                                  </div>
-
-                                                                                  <div>
-                                                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">
-                                                                                      Account Holder / Full Name (Optional)
-                                                                                    </label>
-                                                                                    <input
-                                                                                      type="text"
-                                                                                      value={payoutBeneficiary}
-                                                                                      onChange={(e) => setPayoutBeneficiary(e.target.value)}
-                                                                                      placeholder={getFormattedReviewerName(profile.title, profile.name) || "Dr. Marcus Vance"}
-                                                                                      className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
-                                                                                    />
-                                                                                  </div>
-                                                                                </div>
-                                                                              )}
-                                                                            </div>
-
-                                                                            {/* Option 2: APC Credit Voucher */}
-                                                                            <div
-                                                                              onClick={() => setPayoutOption("voucher")}
-                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "voucher"
-                                                                                  ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 shadow-xs ring-1 ring-[#0b99ff]/20"
-                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                                                                                }`}
-                                                                            >
-                                                                              <div className="flex items-center justify-between">
-                                                                                <div className="flex items-center gap-2">
-                                                                                  <Award className="h-4 w-4 text-[#0b99ff]" />
-                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
-                                                                                    {isDe ? "2. APC-Gutschein für nächste Publikation" : "2. Re-use as APC Voucher for Next Submission"}
-                                                                                  </span>
-                                                                                </div>
-                                                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${payoutOption === "voucher" ? "border-[#0b99ff] bg-[#0b99ff] text-white" : "border-slate-300 dark:border-slate-700"
-                                                                                  }`}>
-                                                                                  {payoutOption === "voucher" && <Check className="h-3 w-3" />}
-                                                                                </span>
-                                                                              </div>
-                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                                                {isDe
-                                                                                  ? "Reinvestieren Sie das Honorar für 50% bis 100% APC-Erlass bei eigener Einreichung. Gutschriften werden für Gründlichkeit und Pünktlichkeit vergeben und hängen niemals von Ihrer Gutachten-Empfehlung ab."
-                                                                                  : "Convert your honorarium into an official transferable APC waiver voucher valid across all 11 journals. Reviewer credits are awarded for thoroughness and timeliness; they never depend on your review recommendation."}
-                                                                              </p>
-                                                                              {payoutOption === "voucher" && (
-                                                                                <div className="p-2.5 rounded bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 text-[11px] text-[#0b99ff] dark:text-[#38bdf8] font-medium">
-                                                                                  ✓ An immediate promotional code will be generated upon confirmation and stored in your wallet.
-                                                                                </div>
-                                                                              )}
-                                                                            </div>
-
-                                                                            {/* Option 3: World Bank Low-Income Economies Fee-Waiver Fund */}
-                                                                            <div
-                                                                              onClick={() => setPayoutOption("waiver_fund")}
-                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "waiver_fund"
-                                                                                  ? "border-rose-500 dark:border-rose-500 bg-rose-50/20 dark:bg-rose-950/20 shadow-xs ring-1 ring-rose-500/20"
-                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                                                                                }`}
-                                                                            >
-                                                                              <div className="flex items-center justify-between">
-                                                                                <div className="flex items-center gap-2">
-                                                                                  <HeartHandshake className="h-4 w-4 text-rose-500" />
-                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
-                                                                                    {isDe ? "3. Spende an Erlassfonds für Weltbank-Niedrigeinkommen" : "3. Donate to World Bank Low-Income Economies Fee-Waiver Fund"}
-                                                                                  </span>
-                                                                                </div>
-                                                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${payoutOption === "waiver_fund" ? "border-rose-600 bg-rose-600 text-white" : "border-slate-300 dark:border-slate-700"
-                                                                                  }`}>
-                                                                                  {payoutOption === "waiver_fund" && <Check className="h-3 w-3" />}
-                                                                                </span>
-                                                                              </div>
-                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                                                {isDe
-                                                                                  ? "100% Ihres Honorars finanzieren Artikel-Bearbeitungsgebühren für Forscher aus Ländern mit niedrigem Einkommen (Weltbank-Klassifizierung)."
-                                                                                  : "100% of your honorarium subsidizes publication fees for researchers and scholars from World Bank low-income economies under our solidarity program."}
-                                                                              </p>
-                                                                              {payoutOption === "waiver_fund" && (
-                                                                                <div className="p-2.5 rounded bg-rose-50/80 dark:bg-rose-950/40 text-[11px] text-rose-800 dark:text-rose-300 font-medium">
-                                                                                  ♥ You will receive an official Philanthropic Recognition Certificate for your academic dossier.
-                                                                                </div>
-                                                                              )}
-                                                                            </div>
-
-                                                                            {/* Option 4: University Library Donation */}
-                                                                            <div
-                                                                              onClick={() => setPayoutOption("library")}
-                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "library"
-                                                                                  ? "border-amber-500 dark:border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 shadow-xs ring-1 ring-amber-500/20"
-                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                                                                                }`}
-                                                                            >
-                                                                              <div className="flex items-center justify-between">
-                                                                                <div className="flex items-center gap-2">
-                                                                                  <Library className="h-4 w-4 text-amber-500" />
-                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
-                                                                                    {isDe ? "4. Spende an Ihre Universitätsbibliothek" : "4. Donate to Your University Library OA Fund"}
-                                                                                  </span>
-                                                                                </div>
-                                                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${payoutOption === "library" ? "border-amber-600 bg-amber-600 text-white" : "border-slate-300 dark:border-slate-700"
-                                                                                  }`}>
-                                                                                  {payoutOption === "library" && <Check className="h-3 w-3" />}
-                                                                                </span>
-                                                                              </div>
-                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                                                                                {isDe
-                                                                                  ? "Stiften Sie das Honorar direkt an den Open-Access-Erwerbungsfonds Ihrer Heimatuniversität zur Förderung freier Forschung."
-                                                                                  : "Direct the €50 honorarium directly to your home institution's academic library to support university open access publishing."}
-                                                                              </p>
-                                                                              {payoutOption === "library" && (
-                                                                                <div className="space-y-1 pt-1 text-xs">
-                                                                                  <label className="text-[10px] font-bold text-slate-500 uppercase">Institutional Library</label>
-                                                                                  <input
-                                                                                    type="text"
-                                                                                    value={payoutLibraryName || `${profile.institution} Medical Library`}
-                                                                                    onChange={(e) => setPayoutLibraryName(e.target.value)}
-                                                                                    className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
-                                                                                  />
-                                                                                </div>
-                                                                              )}
-                                                                            </div>
-
-                                                                          </div>
-
-                                                                          {/* Submit Action */}
-                                                                          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                                                                            <span className="text-[11px] text-slate-500">
-                                                                              {isDe
-                                                                                ? "Auszahlungsanträge werden vom Managing Editor im Admin-Ledger geprüft und freigegeben."
-                                                                                : "Requests are recorded in the editorial360 Admin Ledger for managing editor release."}
-                                                                            </span>
-
-                                                                            <Button
-                                                                              onClick={handleSubmitPayout}
-                                                                              disabled={isSubmittingPayout || payoutOption === "bank"}
-                                                                              className={`${payoutOption === "bank" ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed" : "bg-[#0b99ff] hover:bg-[#0088e0] text-white cursor-pointer"} text-xs font-bold px-5 py-2 shadow-xs shrink-0`}
-                                                                            >
-                                                                              <CreditCard className="h-3.5 w-3.5 mr-1.5" />
-                                                                              {payoutOption === "bank"
-                                                                                ? (isDe ? "Barauszahlung pausiert (in Beratung)" : "Cashout Paused (Policy in Discussion)")
-                                                                                : isSubmittingPayout
-                                                                                  ? (isDe ? "Wird übermittelt..." : "Submitting Request...")
-                                                                                  : (isDe ? "Gutschein / Spende einreichen" : "Submit Voucher / Donation Request")}
-                                                                            </Button>
-                                                                          </div>
-                                                                        </div>
-
-                                                                      </div>
-                                                                    </div>
-      )}
-
-                                                                    {/* ================= TAB 5: CERTIFICATE & PEER REVIEW CV EXPORT ================= */}
+                                            {/* ================= TAB 5: CERTIFICATE & PEER REVIEW CV EXPORT ================= */}
                                                                     {activeTab === "certificate" && (
                                                                       <div className="space-y-5">
 
@@ -3344,303 +2373,170 @@ COPE Guidance & Plan S Benchmark Archive
                                                                         </div>
 
                                                                         {/* VIEW 1: OFFICIAL CERTIFICATE */}
-                                                                        {certViewMode === "certificate" && (
-                                                                          <div className="space-y-4">
+                                                                          {certViewMode === "certificate" && (
+                                                                            <div className="space-y-5">
+                                                                              {/* Status Bar */}
+                                                                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                                  <span className="text-slate-500 font-semibold">{isDe ? "Status:" : "Credential Status:"}</span>
+                                                                                  <span className="px-2.5 py-0.5 rounded-full font-bold text-xs bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1.5">
+                                                                                    <Lock className="h-3 w-3" />
+                                                                                    <span>{isDe ? "Gesperrt (Begutachtung ausstehend)" : "Locked (Round 2 Evaluation Pending)"}</span>
+                                                                                  </span>
+                                                                                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
+                                                                                    {isDe ? "Direkte Editorial-Bestellung · Scholarly Open: Medicine" : "Direct Editorial Appointment · Scholarly Open: Medicine"}
+                                                                                  </span>
+                                                                                </div>
 
-                                                                            {/* Quick Status / Switcher Bar */}
-                                                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-                                                                              <div className="flex items-center gap-2 flex-wrap">
-                                                                                <span className="text-slate-500 font-semibold">{isDe ? "Status:" : "Earned Status:"}</span>
-                                                                                <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs ${reviewsDone > 0
-                                                                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300"
-                                                                                    : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300"
-                                                                                  }`}>
-                                                                                  {reviewsDone > 0
-                                                                                    ? (isDe ? `${reviewsDone} Manuskripte Begutachtet (Zertifiziert)` : `${reviewsDone} Manuscripts Reviewed (Active)`)
-                                                                                    : (isDe ? "0 / 1 Begutachtungen (In Bearbeitung)" : "0 / 1 Reviews Completed (In Progress)")}
-                                                                                </span>
-                                                                                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
-                                                                                  ⚡ {isDe ? "100% Pünktliche Abgabe (Gold-Siegel)" : "100% On-Time Turnaround (Gold Distinction)"}
-                                                                                </span>
-                                                                              </div>
-
-                                                                              <div className="flex items-center gap-2">
-                                                                                {reviewsDone === 0 ? (
-                                                                                  <Button
-                                                                                    size="sm"
-                                                                                    onClick={() => {
-                                                                                      const newDone = 1
-                                                                                      setReviewsDone(newDone)
-                                                                                      try {
-                                                                                        const email = user?.email || "reviewer@scholarlyopen.org"
-                                                                                        localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, String(newDone))
-                                                                                      } catch (e) { }
-                                                                                    }}
-                                                                                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-7 px-3 cursor-pointer"
-                                                                                  >
-                                                                                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                                                                                    {isDe ? "1. Gutachten abschließen (Demo)" : "Simulate 1st Completed Review"}
-                                                                                  </Button>
-                                                                                ) : (
-                                                                                  <Button
-                                                                                    size="sm"
-                                                                                    variant="outline"
-                                                                                    onClick={() => {
-                                                                                      const newDone = 0
-                                                                                      setReviewsDone(newDone)
-                                                                                      try {
-                                                                                        const email = user?.email || "reviewer@scholarlyopen.org"
-                                                                                        localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, "0")
-                                                                                      } catch (e) { }
-                                                                                    }}
-                                                                                    className="text-xs h-7 px-2.5 text-slate-500 border-slate-300 cursor-pointer"
-                                                                                  >
-                                                                                    {isDe ? "Auf 0 zurücksetzen (Neuer Gutachter)" : "Reset to 0 (New Reviewer)"}
-                                                                                  </Button>
-                                                                                )}
-
-                                                                                {reviewsDone === 0 ? (
+                                                                                <div className="flex items-center gap-2">
                                                                                   <Button
                                                                                     disabled
                                                                                     className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-xs font-semibold px-3.5 h-8 cursor-not-allowed shadow-none flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
-                                                                                    title={isDe ? "Gesperrt: Erfordert mindestens 1 abgeschlossenes Gutachten" : "Locked: Complete at least 1 peer review to unlock certificate"}
+                                                                                    title={isDe ? "Gesperrt: Erfordert eingereichtes Gutachten" : "Locked: Requires submitted Round 2 review"}
                                                                                   >
                                                                                     <Lock className="h-3.5 w-3.5 text-slate-400" />
-                                                                                    {isDe ? "Zertifikat gesperrt (0 Gutachten)" : "Certificate Locked (0 Reviews)"}
+                                                                                    <span>{isDe ? "Zertifikat gesperrt (PDF)" : "Certificate Locked (PDF)"}</span>
                                                                                   </Button>
-                                                                                ) : (
+                                                                                </div>
+                                                                              </div>
+
+                                                                              {/* Milestone Lock Banner */}
+                                                                              <div className="p-4 rounded-xl border border-sky-200 dark:border-sky-900/60 bg-sky-50/70 dark:bg-sky-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+                                                                                <div className="flex items-start gap-3">
+                                                                                  <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-[#0b99ff] shrink-0 mt-0.5">
+                                                                                    <Lock className="h-5 w-5" />
+                                                                                  </div>
+                                                                                  <div>
+                                                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                                                                                      {isDe ? "Bestellungsurkunde: Gesperrt (Begutachtung in Bearbeitung)" : "Appointment Certificate: Locked (Evaluation in Progress)"}
+                                                                                    </h4>
+                                                                                    <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed max-w-2xl">
+                                                                                      {isDe
+                                                                                        ? "Gemäß den internationalen COPE-Qualitätsstandards wird das offizielle Zertifikat freigeschaltet, sobald das Gutachten zu Manuskript SOMED-26-RW01 vollständig eingereicht und vom Associate Editor validiert wurde."
+                                                                                        : "In accordance with COPE publishing ethics and editorial transparency standards, this official certificate is locked and will unlock automatically once your peer evaluation for manuscript SOMED-26-RW01 is submitted to the editorial desk."}
+                                                                                    </p>
+                                                                                  </div>
+                                                                                </div>
+                                                                                {activeReviews.length > 0 && (
                                                                                   <Button
-                                                                                    onClick={handlePrintCertificate}
-                                                                                    className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                      setSelectedReviewForEval(activeReviews[0])
+                                                                                      onTabChange && onTabChange("portfolio")
+                                                                                    }}
+                                                                                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs h-9 px-4 shrink-0 cursor-pointer shadow-xs rounded-xl"
                                                                                   >
-                                                                                    <Download className="h-3.5 w-3.5" />
-                                                                                    {isDe ? "Zertifikat drucken (PDF)" : "Print Certificate (PDF)"}
+                                                                                    <FileText className="h-3.5 w-3.5 mr-1.5" />
+                                                                                    <span>{isDe ? "Manuskript SOMED-26-RW01 bewerten" : "Evaluate SOMED-26-RW01"}</span>
                                                                                   </Button>
                                                                                 )}
-                                                                                <Button
-                                                                                  onClick={handlePrintCertificate}
-                                                                                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
-                                                                                >
-                                                                                  <Download className="h-3.5 w-3.5" />
-                                                                                  {isDe ? "Bestellungsurkunde drucken (PDF)" : "Print Appointment Certificate (PDF)"}
-                                                                                </Button>
                                                                               </div>
-                                                                            </div>
 
-                                                                            {/* IF 0 REVIEWS DONE: SHOW GATEWAY QUALIFICATION CERTIFICATE + LOCKED MILESTONE */}
-                                                                            {/* OFFICIAL CERTIFICATE OF EDITORIAL PEER REVIEW APPOINTMENT */}
-                                                                            {reviewsDone === 0 ? (
-                                                                              <div className="space-y-6">
-                                                                                {/* Milestone Card Explaining Why Peer Review Certificate requires contributions */}
-                                                                                <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-                                                                                  <div className="flex items-start gap-3">
-                                                                                    <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                                                                                    <div>
-                                                                                      <h4 className="font-bold text-amber-950 dark:text-amber-200 text-sm">
-                                                                                        {isDe ? "Peer-Review-Zertifikat noch gesperrt (0 Gutachten abgeschlossen)" : "Verified Peer Review Certificate Locked (0 Reviews Completed)"}
-                                                                                      </h4>
-                                                                                      <p className="text-[11px] text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
-                                                                                        {isDe
-                                                                                          ? "Um akademische Integrität zu gewährleisten, ist das offizielle Begutachtungszertifikat an reale Gutachterbeiträge gebunden. Schließen Sie Ihr erstes zugewiesenes Manuskript ab, um Ihr offizielles Zertifikat mit Crossref-Zeitstempel freizuschalten."
-                                                                                          : "In compliance with COPE transparency standards, verified peer evaluation certificates are earned through genuine contributions. Complete your first assigned evaluation below to activate your permanent, Crossref-timestamped credential."}
-                                                                                      </p>
+                                                                              {/* Certificate Container: Locked & Hazy with Blurred Text */}
+                                                                              <div className="relative rounded-2xl overflow-hidden p-2">
+                                                                                {/* Floating Lock Overlay Badge */}
+                                                                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/45 dark:bg-slate-950/45 backdrop-blur-[2px] p-6 text-center">
+                                                                                  <div className="p-6 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-xl max-w-md mx-auto space-y-3">
+                                                                                    <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center mx-auto ring-4 ring-slate-200/50 dark:ring-slate-700/50">
+                                                                                      <Lock className="h-6 w-6 text-slate-700 dark:text-slate-200" />
                                                                                     </div>
-                                                                                  </div>
-                                                                                  <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/80 dark:border-sky-500/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
-                                                                                    <div className="flex items-center justify-center">
-                                                                                      <img
-                                                                                        src="/logo-full-color.svg"
-                                                                                        alt="Scholarly Open"
-                                                                                        className="h-14 sm:h-16 w-auto object-contain dark:hidden"
-                                                                                        onError={(e) => {
-                                                                                          ; (e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
-                                                                                        }}
-                                                                                      />
-                                                                                      <img
-                                                                                        src="/logo-full.svg"
-                                                                                        alt="Scholarly Open"
-                                                                                        className="h-14 sm:h-16 w-auto object-contain hidden dark:block"
-                                                                                      />
-                                                                                    </div>
-
+                                                                                    <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                                                                                      {isDe ? "Zertifikat gesperrt" : "Official Certificate Locked"}
+                                                                                    </h4>
+                                                                                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                                      {isDe
+                                                                                        ? "Die offizielle Urkunde wird nach Einreichung und redaktioneller Bestätigung Ihres Runde-2-Gutachtens freigeschaltet."
+                                                                                        : "Your verified credential and high-resolution PDF download will be activated upon submission of your Round 2 review scorecard for manuscript SOMED-26-RW01."}
+                                                                                    </p>
                                                                                     {activeReviews.length > 0 && (
-                                                                                      <Button
-                                                                                        type="button"
-                                                                                        onClick={() => {
-                                                                                          setSelectedReviewForEval(activeReviews[0])
-                                                                                        }}
-                                                                                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs h-8 px-4 shrink-0 cursor-pointer shadow-xs"
-                                                                                      >
-                                                                                        <FileText className="h-3.5 w-3.5 mr-1" />
-                                                                                        {isDe ? "Manuskript jetzt begutachten" : `Evaluate ${activeReviews[0].id}`}
-                                                                                      </Button>
-                                                                                    )}
-                                                                                    <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
-                                                                                      Scholarly Open: Medicine • Executive Editorial Board
-                                                                                    </div>
-
-                                                                                    {/* GATEWAY CERTIFICATE (Earned upon passing the exam) */}
-                                                                                    <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/80 dark:border-sky-500/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
-                                                                                      <div className="flex items-center justify-center">
-                                                                                        <img
-                                                                                          src="/logo-full-color.svg"
-                                                                                          alt="Scholarly Open"
-                                                                                          className="h-14 sm:h-16 w-auto object-contain dark:hidden"
-                                                                                          onError={(e) => {
-                                                                                            ; (e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
+                                                                                      <div className="pt-2">
+                                                                                        <Button
+                                                                                          type="button"
+                                                                                          onClick={() => {
+                                                                                            setSelectedReviewForEval(activeReviews[0])
+                                                                                            onTabChange && onTabChange("portfolio")
                                                                                           }}
-                                                                                        />
-                                                                                        <img
-                                                                                          src="/logo-full.svg"
-                                                                                          alt="Scholarly Open"
-                                                                                          className="h-14 sm:h-16 w-auto object-contain hidden dark:block"
-                                                                                        />
+                                                                                          className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs h-8 px-4 rounded-lg cursor-pointer shadow-xs"
+                                                                                        >
+                                                                                          <FileText className="h-3.5 w-3.5 mr-1" />
+                                                                                          <span>{isDe ? "Gutachten jetzt starten" : "Start Evaluation"}</span>
+                                                                                        </Button>
                                                                                       </div>
-                                                                                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
-                                                                                        Certificate of Editorial Peer Review Appointment
-                                                                                      </h2>
-
-                                                                                      <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
-                                                                                        Scholarly Open Standards Board • Gateway Examination
-                                                                                      </div>
-
-                                                                                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
-                                                                                        Certificate of Peer Review Qualification
-                                                                                      </h2>
-
-                                                                                      <div className="inline-block border-b-2 border-sky-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                                                                                        <div className="space-y-1">
-                                                                                          <div className="inline-block border-b-2 border-sky-600 pb-1 text-xl font-bold text-slate-900 dark:text-slate-100">
-                                                                                            {getFormattedReviewerName(profile.title, profile.name)}
-                                                                                          </div>
-                                                                                          <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                                                                                            {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Hospital las Higueras, Talcahuano, Chile"}
-                                                                                          </div>
-                                                                                        </div>
-
-                                                                                        <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-                                                                                          This official credential confirms that <strong>{getFormattedReviewerName(profile.title, profile.name)}</strong> has successfully passed the Reviewer Gateway Examination, verifying proficiency in constructive academic English, COPE publication ethics, and methodological rigor in <strong>{profile.primaryDiscipline.toUpperCase()}</strong>.
-                                                                                        </p>
-                                                                                        <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-                                                                                          This official credential certifies the formal appointment of <strong>{getFormattedReviewerName(profile.title, profile.name)}</strong> as an <strong>Invited Expert Peer Reviewer</strong> for <strong>Scholarly Open: Medicine</strong>, in recognition of clinical scholarship, surgical leadership, and rigorous adherence to international Committee on Publication Ethics (COPE) standards in <strong>Cardiovascular Surgery & Thoracic Medicine</strong>.
-                                                                                        </p>
-
-                                                                                        <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
-                                                                                          <div className="flex justify-between">
-                                                                                            <span className="text-slate-500">Gateway Credential ID:</span>
-                                                                                            <strong className="text-slate-900 dark:text-white font-mono">SO-GW-2026-9041</strong>
-                                                                                          </div>
-                                                                                          <div className="flex justify-between">
-                                                                                            <span className="text-slate-500">Assessment Status:</span>
-                                                                                            <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Passed (80%+ Standard) ✓</strong>
-                                                                                          </div>
-                                                                                          <div className="flex justify-between">
-                                                                                            <span className="text-slate-500">Discipline Track:</span>
-                                                                                            <strong className="text-slate-900 dark:text-white">{DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}</strong>
-                                                                                          </div>
-                                                                                          <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
-                                                                                            <div className="flex justify-between">
-                                                                                              <span className="text-slate-500">Appointment Credential ID:</span>
-                                                                                              <strong className="text-slate-900 dark:text-white font-mono">SO-MED-REF-2026-0419</strong>
-                                                                                            </div>
-                                                                                            <div className="flex justify-between">
-                                                                                              <span className="text-slate-500">Appointment Status:</span>
-                                                                                              <strong className="text-sky-600 dark:text-sky-400 font-bold">Invited Expert Referee (Direct Appointment)</strong>
-                                                                                            </div>
-                                                                                            <div className="flex justify-between">
-                                                                                              <span className="text-slate-500">Journal:</span>
-                                                                                              <strong className="text-slate-900 dark:text-white">Scholarly Open: Medicine</strong>
-                                                                                            </div>
-                                                                                            <div className="flex justify-between">
-                                                                                              <span className="text-slate-500">Discipline Track:</span>
-                                                                                              <strong className="text-slate-900 dark:text-white">Cardiovascular Surgery & Thoracic Medicine</strong>
-                                                                                            </div>
-                                                                                            <div className="flex justify-between">
-                                                                                              <span className="text-slate-500">Evaluation Desk:</span>
-                                                                                              <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">Round 2 Re-evaluation Desk (SOMED-26-RW01)</strong>
-                                                                                            </div>
-                                                                                          </div>
-
-                                                                                          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                                                                                            <span>Verified ORCID: {profile.orcid || "Verified Academic Record"}</span>
-                                                                                            <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Gateway Certified Seal</span>
-                                                                                          </div>
-                                                                                        </Card>
-                                                                                      </div>
-                                                                                      <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                                                                                        <span>{profile.orcid ? `Verified ORCID: ${profile.orcid}` : "Official Editorial Registry Record"}</span>
-                                                                                        <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Editorial Board Seal • Medicine</span>
-                                                                                      </div>
-                                                                                    </Card>
+                                                                                    )}
+                                                                                  </div>
                                                                                 </div>
-                                                                                ) : (
-                                                                                /* IF 1+ REVIEWS DONE: SHOW OFFICIAL VERIFIED PEER REVIEW CERTIFICATE */
-                                                                                <Card className="bg-white dark:bg-slate-950 border-4 border-double border-emerald-700/80 dark:border-emerald-600/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
 
-                                                                                  {/* Official Brand Logo */}
-                                                                                  <div className="flex items-center justify-center gap-3">
+                                                                                {/* Hazy / Blurred Certificate Representation */}
+                                                                                <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/50 dark:border-sky-500/50 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto filter blur-[5px] opacity-35 select-none pointer-events-none transition-all">
+                                                                                  <div className="flex items-center justify-center">
                                                                                     <img
-                                                                                      src="/logo-mark.svg"
+                                                                                      src="/logo-full-color.svg"
                                                                                       alt="Scholarly Open"
-                                                                                      className="h-12 w-auto object-contain"
+                                                                                      className="h-14 sm:h-16 w-auto object-contain dark:hidden"
                                                                                       onError={(e) => {
-                                                                                        ; (e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                                                                                        ; (e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
                                                                                       }}
                                                                                     />
-                                                                                    <div className="text-2xl font-black text-[#132415] dark:text-white tracking-tight">
-                                                                                      Scholarly <span className="text-[#F6BB14]">Open</span>
-                                                                                    </div>
+                                                                                    <img
+                                                                                      src="/logo-full.svg"
+                                                                                      alt="Scholarly Open"
+                                                                                      className="h-14 sm:h-16 w-auto object-contain hidden dark:block"
+                                                                                    />
                                                                                   </div>
 
-                                                                                  <div className="text-[11px] uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
-                                                                                    Official Editorial Board Verification
+                                                                                  <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
+                                                                                    Scholarly Open: Medicine • Executive Editorial Board
                                                                                   </div>
 
-                                                                                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                                                                                    Certificate of Verified Peer Review
+                                                                                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
+                                                                                    Certificate of Editorial Peer Review Appointment
                                                                                   </h2>
 
-                                                                                  <div className="inline-block border-b-2 border-emerald-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
+                                                                                  <div className="inline-block border-b-2 border-sky-600 pb-1 text-xl font-bold text-slate-900 dark:text-slate-100">
                                                                                     {getFormattedReviewerName(profile.title, profile.name)}
                                                                                   </div>
 
+                                                                                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                                                    {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Hospital las Higueras, Talcahuano, Chile"}
+                                                                                  </div>
+
                                                                                   <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-                                                                                    This official credential confirms that {getFormattedReviewerName(profile.title, profile.name)} has completed verified, editor-endorsed scientific peer evaluations in full compliance with COPE standards and Scholarly Open ethical guidelines.
+                                                                                    This official credential certifies the formal appointment of <strong>{getFormattedReviewerName(profile.title, profile.name)}</strong> as an <strong>Invited Expert Peer Reviewer</strong> for <strong>Scholarly Open: Medicine</strong>, in recognition of clinical scholarship, surgical leadership, and rigorous adherence to international Committee on Publication Ethics (COPE) standards in <strong>Cardiovascular Surgery & Thoracic Medicine</strong>.
                                                                                   </p>
 
                                                                                   <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
                                                                                     <div className="flex justify-between">
-                                                                                      <span className="text-slate-500">Verified ORCID Record:</span>
-                                                                                      <strong className="text-slate-900 dark:text-white font-mono">{profile.orcid || "Verified Academic Record"}</strong>
+                                                                                      <span className="text-slate-500">Appointment Credential ID:</span>
+                                                                                      <strong className="text-slate-900 dark:text-white font-mono">SO-MED-REF-2026-0419</strong>
                                                                                     </div>
                                                                                     <div className="flex justify-between">
-                                                                                      <span className="text-slate-500">Total Completed Reviews:</span>
-                                                                                      <strong className="text-slate-900 dark:text-white">{reviewsDone} Verified Manuscript{reviewsDone > 1 ? "s" : ""} (2026)</strong>
+                                                                                      <span className="text-slate-500">Appointment Status:</span>
+                                                                                      <strong className="text-sky-600 dark:text-sky-400 font-bold">Invited Expert Referee (Direct Appointment)</strong>
                                                                                     </div>
                                                                                     <div className="flex justify-between">
-                                                                                      <span className="text-slate-500">Crossref Review Activity:</span>
-                                                                                      <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Synced & Timestamped ✓</strong>
+                                                                                      <span className="text-slate-500">Journal:</span>
+                                                                                      <strong className="text-slate-900 dark:text-white">Scholarly Open: Medicine</strong>
                                                                                     </div>
                                                                                     <div className="flex justify-between">
-                                                                                      <span className="text-slate-500">Turnaround Performance:</span>
-                                                                                      <strong className="text-sky-700 dark:text-sky-400 font-bold">100% On-Time Delivery Seal (Avg 11.4d) ⚡</strong>
+                                                                                      <span className="text-slate-500">Discipline Track:</span>
+                                                                                      <strong className="text-slate-900 dark:text-white">Cardiovascular Surgery & Thoracic Medicine</strong>
                                                                                     </div>
                                                                                     <div className="flex justify-between">
-                                                                                      <span className="text-slate-500">Editorial Rigor Distinction:</span>
-                                                                                      <strong className="text-purple-700 dark:text-purple-400 font-bold">4.9 / 5.0 (Top 5% Reviewer Honors) 🏆</strong>
+                                                                                      <span className="text-slate-500">Evaluation Desk:</span>
+                                                                                      <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">Round 2 Re-evaluation Desk (SOMED-26-RW01)</strong>
                                                                                     </div>
                                                                                   </div>
 
                                                                                   <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                                                                                    <span>Hash: SHA256:88a109fe2c041</span>
-                                                                                    <span className="font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Editorial Board Certified Seal</span>
+                                                                                    <span>Official Editorial Registry Record</span>
+                                                                                    <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Editorial Board Seal • Medicine</span>
                                                                                   </div>
                                                                                 </Card>
-              )}
                                                                               </div>
-                                                                            )}
+                                                                            </div>
+                                                                          )}
 
-                                                                            {/* VIEW 2: COMPREHENSIVE PEER REVIEW ACADEMIC CV & IMPACT DOSSIER */}
+                                                                          {/* VIEW 2: COMPREHENSIVE PEER REVIEW ACADEMIC CV & IMPACT DOSSIER */}
                                                                             {certViewMode === "cv" && (
                                                                               <div className="space-y-4">
                                                                                 <div className="flex flex-wrap items-center justify-between gap-3">

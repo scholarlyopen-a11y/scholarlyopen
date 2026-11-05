@@ -94,7 +94,7 @@ export const samLeeArticleFullText: PeerJArticle = {
         "Founder and Chief Evidence-Based Medicine Scientist, Applied Clinical EBM Institute (ACEI), Honolulu, Hawaii, USA"
       ],
       "email": "Applied.EBM.Institute@proton.me",
-      "phone": "+1 808 358 6058",
+      "phone": "[Redacted for Double-Blind Review]",
       "corresponding": true
     }
   ],

@@ -1946,7 +1946,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
 
   // Auto-fetch journal-matched scholars when entering Scholar Scout or changing journal desk
   useEffect(() => {
-    if (activeTab === "scout" && scoutSubTab === "lead-generation") {
+    if (activeTab === "scout" && scoutSubTab === "finder") {
       const defaultTopicMap: Record<string, string> = {
         "Scholarly Open: Chemistry": "Organocatalysis & Green Synthesis",
         "Scholarly Open: Medicine": "Cardiology & Tele-health",

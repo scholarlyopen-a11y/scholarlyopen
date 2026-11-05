@@ -1666,6 +1666,34 @@ export default function Editorial360Page() {
           const now = Date.now()
           const maxAge = 24 * 60 * 60 * 1000 // 24 hours persistent active session window
           if (session.isLoggedIn && (now - session.timestamp < maxAge)) {
+            // Automatic Sanitization: Clean up any legacy mock "Evelyn Vane" or author photo bleed
+            if (
+              session.role === "reviewer" && 
+              (session.profFullName?.includes("Vane") || 
+               session.email?.includes("vane") || 
+               session.reviewerProfile?.name?.includes("Vane") ||
+               session.profPhotoUrl?.includes("sam-lee"))
+            ) {
+              session.reviewerProfile = {
+                title: "Dr.",
+                name: "Dr. German J. Chaud",
+                email: "germanchaud@gmail.com",
+                institution: "Hospital las Higueras, Talcahuano, Chile",
+                department: "Department of Cardiovascular Surgery",
+                country: "Chile",
+                specialization: "Cardiovascular Surgery, Acute Aortic Dissection, Thoracic Surgery",
+                photoUrl: "",
+                badges: ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"]
+              }
+              session.profFullName = "Dr. German J. Chaud"
+              session.email = "germanchaud@gmail.com"
+              session.profPhotoUrl = ""
+              try {
+                sessionStorage.setItem("editorial360_session", JSON.stringify(session))
+                localStorage.removeItem("editorial360_user_photo")
+              } catch (e) {}
+            }
+
             setIsLoggedIn(true)
             if (!isScoutDirect && !isClaimDirect && session.role) setRole(session.role)
             if (!isClaimDirect && session.email) setEmail(session.email)
@@ -1681,7 +1709,7 @@ export default function Editorial360Page() {
             if (session.editorPhotoUrl) setEditorPhotoUrl(session.editorPhotoUrl)
             if (session.editorOrcid) setEditorOrcid(session.editorOrcid)
             if (session.reviewerProfile) setReviewerProfile(session.reviewerProfile)
-            if (session.profPhotoUrl) setProfPhotoUrl(session.profPhotoUrl)
+            if (session.profPhotoUrl && !session.profPhotoUrl.includes("sam-lee")) setProfPhotoUrl(session.profPhotoUrl)
             if (session.jmFullName) setJmFullName(session.jmFullName)
             if (session.jmStaffRole) setJmStaffRole(session.jmStaffRole)
             if (session.jmDepartment) setJmDepartment(session.jmDepartment)
@@ -7852,8 +7880,8 @@ Specific comments to the Author(s):
 
                   {/* Official ORCID Identity Badge for Reviewer - ONLY if reviewer has a registered ORCID */}
                   {(() => {
-                    const activeOrcid = reviewerProfile?.orcid || (email.toLowerCase().includes("chaud") ? "" : (profOrcid || regOrcid || ""))
-                    if (!activeOrcid) return null
+                    const activeOrcid = reviewerProfile?.orcid || (email.toLowerCase().includes("chaud") || email.toLowerCase().includes("vane") ? "" : (profOrcid || regOrcid || ""))
+                    if (!activeOrcid || activeOrcid === "0000-0002-1825-0097" || activeOrcid === "0000-0004-7711-2093") return null
                     return (
                       <a
                         href={`https://orcid.org/${activeOrcid}`}
@@ -8110,7 +8138,7 @@ Specific comments to the Author(s):
                 >
                   <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
                     <div className="h-full w-full rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
-                      {((role === "reviewer" && reviewerProfile?.photoUrl && !reviewerProfile.photoUrl.includes("sam-lee")) ||
+                      {((role === "reviewer" && reviewerProfile?.photoUrl && !reviewerProfile.photoUrl.includes("sam-lee") && !reviewerProfile?.name?.includes("Vane")) ||
                         (role === "editor" && editorPhotoUrl) ||
                         (role === "jm" && (profPhotoUrl || "/images/editors/noor.jpeg")) ||
                         (role === "author" && authorPhotoUrl)) ? (
@@ -8120,13 +8148,13 @@ Specific comments to the Author(s):
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name && !reviewerProfile.name.includes("Vane") ? reviewerProfile.name : "Dr. German J. Chaud") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                       )}
                     </div>
                   </div>
                   <div className="hidden lg:flex flex-col text-left pr-1">
                     <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 leading-tight">
-                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name && !reviewerProfile.name.includes("Vane") ? reviewerProfile.name : "Dr. German J. Chaud") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                     </span>
                     <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
                       {role === "editor"
@@ -8158,7 +8186,7 @@ Specific comments to the Author(s):
                       {/* User Header */}
                       <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                          {((role === "reviewer" && reviewerProfile?.photoUrl && !reviewerProfile.photoUrl.includes("sam-lee")) ||
+                          {((role === "reviewer" && reviewerProfile?.photoUrl && !reviewerProfile.photoUrl.includes("sam-lee") && !reviewerProfile?.name?.includes("Vane")) ||
                             (role === "editor" && editorPhotoUrl) ||
                             (role === "jm" && (profPhotoUrl || "/images/editors/noor.jpeg")) ||
                             (role === "author" && authorPhotoUrl)) ? (
@@ -8168,14 +8196,14 @@ Specific comments to the Author(s):
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name && !reviewerProfile.name.includes("Vane") ? reviewerProfile.name : "Dr. German J. Chaud") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                           )}
                         </div>
                         <div className="space-y-0.5 overflow-hidden text-left flex-1">
                           <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? (profFullName || (email ? email.split('@')[0] : "Author")) : role === "reviewer" ? (reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? (profFullName || (email ? email.split('@')[0] : "Author")) : role === "reviewer" ? (reviewerProfile?.name && !reviewerProfile.name.includes("Vane") ? reviewerProfile.name : "Dr. German J. Chaud") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                           </h4>
-                          <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : role === "reviewer" ? (reviewerProfile?.email || (email?.toLowerCase().includes("chaud") ? "germanchaud@gmail.com" : email)) : email}</p>
+                          <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : role === "reviewer" ? (reviewerProfile?.email && !reviewerProfile.email.includes("vane") ? reviewerProfile.email : "germanchaud@gmail.com") : email}</p>
                           <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
                             {role === "editor"
                               ? editorRank
@@ -8378,24 +8406,6 @@ Specific comments to the Author(s):
 
                       <button 
                         type="button"
-                        onClick={() => setActiveReviewerTab("wallet")}
-                        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                          activeReviewerTab === "wallet"
-                            ? "bg-[#0b99ff]/10 dark:bg-[#0b99ff]/15 text-[#0b99ff] dark:text-sky-400 font-bold border border-[#0b99ff]/20 shadow-2xs"
-                            : "text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#20222a] hover:shadow-2xs"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Wallet className="h-4 w-4" />
-                          <span>{language === "de" ? "APC-Guthaben & Prämien" : "APC Rewards & Wallet"}</span>
-                        </div>
-                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#0b99ff]/10 text-[#0b99ff] font-bold">
-                          35 Pts
-                        </span>
-                      </button>
-
-                      <button 
-                        type="button"
                         onClick={() => setActiveReviewerTab("certificate")}
                         className={`flex items-center gap-2.5 px-3.5 py-2.5 text-sm rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                           activeReviewerTab === "certificate"
@@ -8404,7 +8414,7 @@ Specific comments to the Author(s):
                         }`}
                       >
                         <FileCheck2 className="h-4 w-4" />
-                        <span>{language === "de" ? "Zertifikate & Nachweise" : "Certificates & Records"}</span>
+                        <span>{language === "de" ? "Bestellungsurkunde & Nachweise" : "Appointment & Records"}</span>
                       </button>
                     </>
                   )}

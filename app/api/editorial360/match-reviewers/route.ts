@@ -2332,7 +2332,9 @@ export async function POST(req: Request) {
 
     const selectedCountry = (country || "all").toLowerCase().trim()
     const selectedEcrSource = (ecrSource || source || "all").toLowerCase()
-    const searchQuery = (customQuery || query || keywords || title?.slice(0, 80) || "").trim() || (isEcr ? "machine learning biology medicine" : "clinical medicine engineering")
+    const initialDiscipline = detectDiscipline(journal, "")
+    const journalDefaultTopic = getCuratedPoolForDiscipline(initialDiscipline, journal).topics[0] || (isEcr ? "machine learning biology medicine" : "clinical medicine engineering")
+    const searchQuery = (customQuery || query || keywords || title?.slice(0, 80) || "").trim() || journalDefaultTopic
     const excludeEmails: string[] = (Array.isArray(body.excludeEmails) ? body.excludeEmails : [])
       .map((e: any) => String(e).toLowerCase().trim())
       .filter(Boolean)
