@@ -140,6 +140,7 @@ export interface ReviewInvitationItem {
 }
 
 export interface ActiveReviewItem {
+  isRound2?: boolean
   id: string
   title: string
   journal: string

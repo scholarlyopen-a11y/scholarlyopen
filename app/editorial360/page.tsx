@@ -145,6 +145,7 @@ type UserRole = "admin" | "author" | "reviewer" | "editor" | "im" | "ria" | "jm"
 
 // Manuscript mock data structure
 interface Manuscript {
+  assignedEditorEmail?: string
   id: string
   title: string
   journal: string

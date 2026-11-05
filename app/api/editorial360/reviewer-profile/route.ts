@@ -140,7 +140,7 @@ async function saveStoredProfiles(profiles: Record<string, StoredReviewerProfile
   await writeEditorialData(FILE_PATH, { profiles, updatedAt: new Date().toISOString() })
 }
 
-export function analyzeProfileCompletion(profile: StoredReviewerProfile): ProfileAuditSummary {
+function analyzeProfileCompletion(profile: StoredReviewerProfile): ProfileAuditSummary {
   const fieldsToCheck = [
     { key: "name", label: "Full Name", tip: "Add official title and full name" },
     { key: "email", label: "Email Address", tip: "Institutional academic email" },

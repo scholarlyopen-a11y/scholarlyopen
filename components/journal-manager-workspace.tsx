@@ -1667,68 +1667,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
     }
   }, [sentEmailsHistory, scoutTargetJournal])
 
-  const [scoutResults, setScoutResults] = useState<any[]>([
-    {
-      name: "Prof. Juhani Knuuti",
-      institution: "Turku PET Centre, University of Turku & Turku University Hospital (Finland)",
-      email: "jknuuti@utu.fi",
-      orcid: "0000-0001-9494-0994",
-      specialty: "Nuclear Medicine, Cardiovascular Imaging & Molecular Imaging",
-      metrics: "480+ papers · 28,000+ citations · h-index: 82",
-      editorialRationale: "Head of Turku PET Centre; international authority in myocardial perfusion and clinical telemetry.",
-      country: "Finland",
-      verificationStatus: "✓ Scraped from Source Paper",
-      emailSource: "extracted"
-    },
-    {
-      name: "Prof. Sanna Järvelä",
-      institution: "University of Oulu · Department of Educational Sciences (Finland)",
-      email: "sanna.jarvela@oulu.fi",
-      orcid: "0000-0001-6223-3668",
-      specialty: "AI in Education, Self-Regulated Learning & Multimodal Learning Analytics",
-      metrics: "160+ papers · 14,000+ citations · h-index: 54",
-      editorialRationale: "Leading researcher on AI-augmented learning systems and physiological learning analytics.",
-      country: "Finland",
-      verificationStatus: "✓ Scraped from Source Paper",
-      emailSource: "extracted"
-    },
-    {
-      name: "Dr. Sarah Jenkins",
-      institution: "University of Edinburgh · Centre for Medical Informatics (UK)",
-      email: "s.jenkins@ed.ac.uk",
-      orcid: "0000-0001-9921-3481",
-      specialty: "Deep Learning Medical Image Triaging & AUROC Benchmarking",
-      metrics: "19 papers · 540 citations · h-index: 11",
-      editorialRationale: "Expert in deep convolutional neural network validation across decentralized community telemetry.",
-      country: "United Kingdom",
-      verificationStatus: "✓ Scraped from Source Paper",
-      emailSource: "extracted"
-    },
-    {
-      name: "Dr. Yidan Sun",
-      institution: "Washington University School of Medicine in St. Louis · Department of Genetics (USA)",
-      email: "yidan.sun@wustl.edu",
-      orcid: "0000-0002-3190-8411",
-      specialty: "High-Order Enhancer Hubs, Nanopore-HiChIP & Kinetic Buffering",
-      metrics: "bioRxiv Lead Author · 2026 Preprint · 145 citations",
-      editorialRationale: "First author on Nanopore-HiChIP and transcriptional compensation; verified genomic expertise.",
-      country: "United States",
-      verificationStatus: "✓ Scraped from Source Paper",
-      emailSource: "extracted"
-    },
-    {
-      name: "Prof. Dr. Peter W. de Leeuw",
-      institution: "Maastricht University Medical Center · Department of Internal Medicine (Netherlands)",
-      email: "p.deleeuw@mumc.nl",
-      orcid: "0000-0002-9988-1123",
-      specialty: "Hypertension, Cardiovascular Pharmacotherapy & Primary Care",
-      metrics: "medRxiv First Author · 2026 Preprint · 1,420 citations",
-      editorialRationale: "Lead investigator on primary care clinical stratification study; exceptional referee.",
-      country: "Netherlands",
-      verificationStatus: "✓ Scraped from Source Paper",
-      emailSource: "extracted"
-    }
-  ])
+  const [scoutResults, setScoutResults] = useState<any[]>([])
   const [isScouting, setIsScouting] = useState(false)
   const [scoutSelectedNames, setScoutSelectedNames] = useState<string[]>([])
   const [scoutSuccessMessage, setScoutSuccessMessage] = useState<string | null>(null)
@@ -1929,7 +1868,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
     })
   }
 
-  const handleSearchScoutScholars = async (queryToSearch?: string, pageToSearch = 1, limitToSearch = scoutLimit, countryToSearch = scoutCountry) => {
+  const handleSearchScoutScholars = async (queryToSearch?: string, pageToSearch = 1, limitToSearch = scoutLimit, countryToSearch = scoutCountry, journalToSearch = scoutTargetJournal) => {
     const term = (queryToSearch !== undefined ? queryToSearch : scoutKeyword).trim()
     if (!term) return
     setIsScouting(true)
@@ -1944,7 +1883,7 @@ ${journalEmail} | https://www.scholarlyopen.org`
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customQuery: term,
-          journal: scoutTargetJournal,
+          journal: journalToSearch,
           country: countryToSearch,
           page: pageToSearch,
           limit: limitToSearch
@@ -2004,6 +1943,29 @@ ${journalEmail} | https://www.scholarlyopen.org`
       setIsEcrScouting(false)
     }
   }
+
+  // Auto-fetch journal-matched scholars when entering Scholar Scout or changing journal desk
+  useEffect(() => {
+    if (activeTab === "scout" && scoutSubTab === "lead-generation") {
+      const defaultTopicMap: Record<string, string> = {
+        "Scholarly Open: Chemistry": "Organocatalysis & Green Synthesis",
+        "Scholarly Open: Medicine": "Cardiology & Tele-health",
+        "Scholarly Open: Clinical AI & Digital Health": "AI Diagnostics & Medical Imaging",
+        "Scholarly Open: Biology": "CRISPR-Cas9 & Base Editing",
+        "Scholarly Open: Engineering": "Battery Materials & Solid-State Cells",
+        "Scholarly Open: Environmental Science": "Carbon Sequestration & Peatland Sinks",
+        "Scholarly Open: AI Safety & Governance": "Model Alignment & Red-Teaming",
+        "Scholarly Open: Quantum Engineering": "Superconducting Qubits & Scalability",
+        "Scholarly Open: Synthetic Biology & Bio-Design": "Metabolic Pathway Engineering",
+        "Scholarly Open: Space Resources & Orbital Economy": "In-Situ Resource Utilization (ISRU)",
+        "Scholarly Open: Social Sciences & Humanities": "Digital Humanities & Computational History",
+        "all": "Academic Research & Peer Review"
+      }
+      const targetTopic = defaultTopicMap[scoutTargetJournal] || "Academic Research"
+      setScoutKeyword(targetTopic)
+      handleSearchScoutScholars(targetTopic, 1, scoutLimit, scoutCountry, scoutTargetJournal)
+    }
+  }, [activeTab, scoutSubTab, scoutTargetJournal])
 
   // Load initial ECR results when scout sub-tab switches to "ecr" or reviewer registry switches to "ecr"
   useEffect(() => {
@@ -5459,8 +5421,28 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <div className="w-full sm:w-64 lg:w-72">
                       <select
                         value={scoutTargetJournal}
-                        onChange={(e) => setScoutTargetJournal(e.target.value)}
-                        className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] truncate"
+                        onChange={(e) => {
+                          const newJournal = e.target.value
+                          setScoutTargetJournal(newJournal)
+                          const defaultTopicMap: Record<string, string> = {
+                            "Scholarly Open: Chemistry": "Organocatalysis & Green Synthesis",
+                            "Scholarly Open: Medicine": "Cardiology & Tele-health",
+                            "Scholarly Open: Clinical AI & Digital Health": "AI Diagnostics & Medical Imaging",
+                            "Scholarly Open: Biology": "CRISPR-Cas9 & Base Editing",
+                            "Scholarly Open: Engineering": "Battery Materials & Solid-State Cells",
+                            "Scholarly Open: Environmental Science": "Carbon Sequestration & Peatland Sinks",
+                            "Scholarly Open: AI Safety & Governance": "Model Alignment & Red-Teaming",
+                            "Scholarly Open: Quantum Engineering": "Superconducting Qubits & Scalability",
+                            "Scholarly Open: Synthetic Biology & Bio-Design": "Metabolic Pathway Engineering",
+                            "Scholarly Open: Space Resources & Orbital Economy": "In-Situ Resource Utilization (ISRU)",
+                            "Scholarly Open: Social Sciences & Humanities": "Digital Humanities & Computational History",
+                            "all": "Academic Research & Peer Review"
+                          }
+                          const newTopic = defaultTopicMap[newJournal] || "Academic Research"
+                          setScoutKeyword(newTopic)
+                          handleSearchScoutScholars(newTopic, 1, scoutLimit, scoutCountry, newJournal)
+                        }}
+                        className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] truncate font-medium cursor-pointer"
                         title="Select official journal desk for outreach"
                       >
                         <option value="all">All Journals (General Portfolio)</option>
@@ -5479,7 +5461,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         onChange={(e) => {
                           const newCountry = e.target.value
                           setScoutCountry(newCountry)
-                          handleSearchScoutScholars(undefined, 1, scoutLimit, newCountry)
+                          handleSearchScoutScholars(undefined, 1, scoutLimit, newCountry, scoutTargetJournal)
                         }}
                         className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] font-medium cursor-pointer truncate"
                         title="Filter scholar harvest by country or region"
@@ -5508,7 +5490,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         onChange={(e) => {
                           const newLimit = parseInt(e.target.value, 10)
                           setScoutLimit(newLimit)
-                          handleSearchScoutScholars(undefined, 1, newLimit, scoutCountry)
+                          handleSearchScoutScholars(undefined, 1, newLimit, scoutCountry, scoutTargetJournal)
                         }}
                         className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
                         title="Result batch limit per search"
@@ -5524,7 +5506,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <Button
                         type="button"
                         disabled={isScouting}
-                        onClick={() => handleSearchScoutScholars()}
+                        onClick={() => handleSearchScoutScholars(undefined, 1, scoutLimit, scoutCountry, scoutTargetJournal)}
                         className="flex-1 sm:flex-initial bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-10 px-4 rounded-xl cursor-pointer shadow-xs shrink-0 flex items-center justify-center gap-2"
                       >
                         {isScouting ? (
@@ -5680,7 +5662,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         type="button"
                         onClick={() => {
                           setScoutKeyword(topic)
-                          handleSearchScoutScholars(topic)
+                          handleSearchScoutScholars(topic, 1, scoutLimit, scoutCountry, scoutTargetJournal)
                         }}
                         className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-slate-100 hover:bg-sky-50 dark:bg-slate-800 dark:hover:bg-sky-950/40 text-slate-700 hover:text-sky-600 dark:text-slate-300 dark:hover:text-sky-300 transition-colors cursor-pointer border border-slate-200 hover:border-sky-300 dark:border-slate-700 shadow-2xs"
                       >
@@ -6326,7 +6308,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           size="sm"
                           variant="outline"
                           disabled={scoutPage <= 1 || isScouting}
-                          onClick={() => handleSearchScoutScholars(undefined, scoutPage - 1, scoutLimit)}
+                          onClick={() => handleSearchScoutScholars(undefined, scoutPage - 1, scoutLimit, scoutCountry, scoutTargetJournal)}
                           className="h-8 px-2.5 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer"
                         >
                           <ChevronLeft className="h-3.5 w-3.5 mr-0.5" />
@@ -6349,7 +6331,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               key={pageNum}
                               type="button"
                               disabled={isScouting}
-                              onClick={() => handleSearchScoutScholars(undefined, pageNum, scoutLimit)}
+                              onClick={() => handleSearchScoutScholars(undefined, pageNum, scoutLimit, scoutCountry, scoutTargetJournal)}
                               className={`h-8 min-w-[32px] px-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                                 isCurrent
                                   ? "bg-[#0b99ff] text-white shadow-2xs"
@@ -6366,7 +6348,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           size="sm"
                           variant="outline"
                           disabled={scoutPage >= cappedTotalPages || isScouting}
-                          onClick={() => handleSearchScoutScholars(undefined, scoutPage + 1, scoutLimit)}
+                          onClick={() => handleSearchScoutScholars(undefined, scoutPage + 1, scoutLimit, scoutCountry, scoutTargetJournal)}
                           className="h-8 px-2.5 text-xs font-semibold rounded-lg border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer"
                         >
                           <span>Next</span>
