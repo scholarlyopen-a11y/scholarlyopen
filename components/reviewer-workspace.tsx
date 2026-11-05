@@ -2,25 +2,25 @@
 
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import { 
-  CheckCircle2, 
-  Clock, 
-  Calendar, 
-  ShieldCheck, 
-  AlertCircle, 
-  Send, 
-  FileText, 
-  Award, 
+import {
+  CheckCircle2,
+  Clock,
+  Calendar,
+  ShieldCheck,
+  AlertCircle,
+  Send,
+  FileText,
+  Award,
   Sparkles,
-  RotateCcw, 
-  ThumbsUp, 
-  ThumbsDown, 
-  UserPlus, 
-  ChevronRight, 
-  Check, 
-  X, 
-  Bell, 
-  Lock, 
+  RotateCcw,
+  ThumbsUp,
+  ThumbsDown,
+  UserPlus,
+  ChevronRight,
+  Check,
+  X,
+  Bell,
+  Lock,
   AlertTriangle,
   Info,
   Layers,
@@ -332,6 +332,7 @@ export function ReviewerWorkspace({
     }
 
     // Clean initial profile for any newly registered reviewer
+    // Default profile for invited expert referee (Dr. German J. Chaud)
     return {
       title: initialProfile?.title || "Dr.",
       name: rawName || "Academic Referee",
@@ -352,6 +353,25 @@ export function ReviewerWorkspace({
       sabbaticalUntil: initialProfile?.sabbaticalUntil || "",
       coiAcknowledged: initialProfile?.coiAcknowledged ?? true,
       isCompleted: initialProfile?.isCompleted ?? false
+      title: "Dr.",
+      name: (rawName && !rawName.includes("Vane") && !rawName.includes("Referee")) ? rawName : "Dr. German J. Chaud",
+      email: (rawEmail && !rawEmail.includes("orcid") && !rawEmail.includes("proton")) ? rawEmail : "germanchaud@gmail.com",
+      photoUrl: "",
+      badges: ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"],
+      institution: (user?.institution && !user.institution.includes("Advanced Medical Sciences")) ? user.institution : "Hospital las Higueras, Talcahuano, Chile",
+      department: "Department of Cardiovascular Surgery",
+      country: "Chile",
+      orcid: user?.orcid || "",
+      scholarUrl: "",
+      primaryDiscipline: "medicine",
+      subDisciplines: ["Cardiovascular Surgery", "Aortic Dissection", "Thoracic Surgery", "Emergency Medicine"],
+      keywords: ["Acute Aortic Dissection", "Aortic Repair", "Cardiovascular Surgery", "Emergency Protocols", "Clinical Outcomes"],
+      maxReviewsPerMonth: 2,
+      preferredTurnaround: 14,
+      availabilityStatus: "Available",
+      sabbaticalUntil: "",
+      coiAcknowledged: true,
+      isCompleted: true
     }
   })
 
@@ -361,42 +381,67 @@ export function ReviewerWorkspace({
     const rawEmail = user?.email || initialProfile?.email || ""
     const isChaud = rawName.toLowerCase().includes("chaud") || rawEmail.toLowerCase().includes("chaud") || (typeof window !== "undefined" && (window.location.search.toLowerCase().includes("chaud") || window.location.search.includes("SOMED-26-RW01")))
     const isBolutife = rawName.toLowerCase().includes("bolutife") || rawEmail.toLowerCase().includes("olofinjana")
+    const isMarcus = rawEmail.includes("m.vance") || rawName.includes("Marcus Vance")
 
     if (isChaud) {
-      setProfile(prev => ({
-        ...prev,
+      if (isBolutife) {
+        setProfile(prev => ({
+          ...prev,
+          title: "Dr.",
+          name: "Dr. German J. Chaud",
+          email: rawEmail || "germanchaud@gmail.com",
+          institution: "Hospital las Higueras, Talcahuano, Chile",
+          department: "Department of Cardiovascular Surgery",
+          country: "Chile",
+          primaryDiscipline: "medicine",
+          photoUrl: ""
+        }))
+      } else if (isBolutife) {
+        setProfile(prev => ({
+          ...prev,
+          title: "Prof.",
+          name: "Prof. Bolutife Olofinjana",
+          email: rawEmail || "b.olofinjana@oauife.edu.ng",
+          primaryDiscipline: "engineering",
+          department: "Department of Physics and Engineering Physics",
+          institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
+          country: "Nigeria",
+          orcid: user?.orcid || prev.orcid || "0000-0002-3652-3213",
+          photoUrl: user?.photoUrl || initialProfile?.photoUrl || prev.photoUrl || ""
+        }))
+      } else if (user?.name || user?.photoUrl !== undefined || initialProfile?.name || initialProfile?.photoUrl !== undefined) {
+      } else if (isMarcus) {
+        setProfile(prev => ({
+          ...prev,
+          name: user?.name || initialProfile?.name || prev.name,
+          email: user?.email || initialProfile?.email || prev.email,
+          institution: user?.institution || initialProfile?.institution || prev.institution,
+          photoUrl: user?.photoUrl !== undefined ? user.photoUrl : (initialProfile?.photoUrl !== undefined ? initialProfile.photoUrl : prev.photoUrl)
         title: "Dr.",
-        name: "Dr. German J. Chaud",
-        email: rawEmail || "germanchaud@gmail.com",
-        institution: "Hospital las Higueras, Talcahuano, Chile",
-        department: "Department of Cardiovascular Surgery",
-        country: "Chile",
-        primaryDiscipline: "medicine",
-        photoUrl: ""
-      }))
-    } else if (isBolutife) {
-      setProfile(prev => ({
-        ...prev,
-        title: "Prof.",
-        name: "Prof. Bolutife Olofinjana",
-        email: rawEmail || "b.olofinjana@oauife.edu.ng",
-        primaryDiscipline: "engineering",
-        department: "Department of Physics and Engineering Physics",
-        institution: "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria",
-        country: "Nigeria",
-        orcid: user?.orcid || prev.orcid || "0000-0002-3652-3213",
-        photoUrl: user?.photoUrl || initialProfile?.photoUrl || prev.photoUrl || ""
-      }))
-    } else if (user?.name || user?.photoUrl !== undefined || initialProfile?.name || initialProfile?.photoUrl !== undefined) {
-      setProfile(prev => ({
-        ...prev,
-        name: user?.name || initialProfile?.name || prev.name,
-        email: user?.email || initialProfile?.email || prev.email,
-        institution: user?.institution || initialProfile?.institution || prev.institution,
-        photoUrl: user?.photoUrl !== undefined ? user.photoUrl : (initialProfile?.photoUrl !== undefined ? initialProfile.photoUrl : prev.photoUrl)
-      }))
-    }
-  }, [user?.name, user?.photoUrl, user?.email, user?.institution, initialProfile?.name, initialProfile?.photoUrl])
+          name: "Dr. Marcus Vance",
+          email: rawEmail || "m.vance@university-charite.de",
+          institution: "Charité – Universitätsmedizin Berlin",
+          department: "Department of Cardiology & Vascular Medicine",
+          country: "Germany",
+          primaryDiscipline: "medicine",
+          photoUrl: ""
+        }))
+      } else {
+        // Default & Invited Expert Referee: Dr. German J. Chaud (never bleed author photos or placeholder names)
+        setProfile(prev => ({
+          ...prev,
+          title: "Dr.",
+          name: (rawName && !rawName.includes("Vane") && !rawName.includes("Referee")) ? rawName : "Dr. German J. Chaud",
+          email: (rawEmail && !rawEmail.includes("orcid") && !rawEmail.includes("proton")) ? rawEmail : "germanchaud@gmail.com",
+          institution: (user?.institution && !user.institution.includes("Advanced Medical Sciences")) ? user.institution : "Hospital las Higueras, Talcahuano, Chile",
+          department: "Department of Cardiovascular Surgery",
+          country: "Chile",
+          primaryDiscipline: "medicine",
+          photoUrl: "", // Never bleed Sam Lee or other author photos
+          keywords: ["Acute Aortic Dissection", "Aortic Repair", "Cardiovascular Surgery", "Emergency Protocols", "Clinical Outcomes"]
+        }))
+      }
+    }, [user?.name, user?.photoUrl, user?.email, user?.institution, initialProfile?.name, initialProfile?.photoUrl])
 
   // Profile Modal Form States
   const [showProfileModal, setShowProfileModal] = useState(false)
@@ -529,7 +574,7 @@ export function ReviewerWorkspace({
       // Sync candidate from passed gateway only if email strictly matches currently logged in reviewer
       const currentEmail = (email || user?.email || "").toLowerCase().trim()
       const isBol = currentEmail.includes("olofinjana") || (user?.name || "").toLowerCase().includes("bolutife")
-      
+
       const gatewayPassStr = typeof window !== "undefined" ? localStorage.getItem("scholarlyopen_passed_reviewer_gateway") : null
       if (isBol) {
         setProfile(prev => ({
@@ -555,7 +600,7 @@ export function ReviewerWorkspace({
               primaryDiscipline: gw.discipline || prev.primaryDiscipline
             }))
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       // Sync completed reviews count so certificate is not predefined
@@ -746,7 +791,7 @@ export function ReviewerWorkspace({
     message: "",
     confirmButtonLabel: "Yes, Proceed",
     confirmColorClass: "bg-[#0b99ff] hover:bg-[#0088e0]",
-    onConfirm: () => {}
+    onConfirm: () => { }
   })
 
   const triggerConfirm = (config: {
@@ -837,7 +882,7 @@ export function ReviewerWorkspace({
     try {
       localStorage.setItem(`so_reviewer_profile_${formEmail}`, JSON.stringify(updated))
       localStorage.setItem("so_reviewer_profile_default", JSON.stringify(updated))
-    } catch (err) {}
+    } catch (err) { }
     // Sync with central editorial360 database
     fetch("/api/editorial360/reviewer-profile", {
       method: "POST",
@@ -891,7 +936,7 @@ export function ReviewerWorkspace({
     const newDeadline = customDeadlineDate || getCalculatedDate(deadlinePresetDays)
 
     // Update local active reviews state immediately
-    setLocalActiveReviews(prev => 
+    setLocalActiveReviews(prev =>
       prev.map(r => r.id === selectedReviewForDeadline.id ? { ...r, deadline: newDeadline } : r)
     )
 
@@ -904,8 +949,8 @@ export function ReviewerWorkspace({
       onUpdateDeadline(selectedReviewForDeadline.id, newDeadline, deadlineExtensionReason)
     }
 
-    setDeadlineUpdateSuccess(isDe 
-      ? `Frist erfolgreich auf ${newDeadline} aktualisiert!` 
+    setDeadlineUpdateSuccess(isDe
+      ? `Frist erfolgreich auf ${newDeadline} aktualisiert!`
       : `Deadline successfully updated to ${newDeadline}!`
     )
 
@@ -928,11 +973,11 @@ export function ReviewerWorkspace({
     if (!selectedInvForDecline) return
     const rec = declineColleagueName.trim()
       ? {
-          name: declineColleagueName.trim(),
-          email: declineColleagueEmail.trim(),
-          affiliation: declineColleagueAffiliation.trim(),
-          note: declineColleagueNote.trim()
-        }
+        name: declineColleagueName.trim(),
+        email: declineColleagueEmail.trim(),
+        affiliation: declineColleagueAffiliation.trim(),
+        note: declineColleagueNote.trim()
+      }
       : undefined
     onDeclineInvitation(selectedInvForDecline.id, declineReason, rec)
     setSelectedInvForDecline(null)
@@ -963,22 +1008,22 @@ export function ReviewerWorkspace({
     setIsSubmittingEscalation(true)
     setTimeout(() => {
       setIsSubmittingEscalation(false)
-      const targetLabel = escalateTarget === "both" 
-        ? (isDe ? "Integritäts-Manager (IM), zuständigen Editor & Journal Manager (JM als Kopie)" : "Integrity Manager (IM), Handling Editor & Journal Manager (JM - CC copy)") 
-        : escalateTarget === "integrity_manager" 
-        ? (isDe ? "Integritäts-Manager (IM) & Journal Manager (JM als Kopie)" : "Integrity Manager (IM) & Journal Manager (JM - CC copy)") 
-        : (isDe ? "zuständigen Editor & Journal Manager (JM als Kopie)" : "Handling Editor & Journal Manager (JM - CC copy)")
-      
+      const targetLabel = escalateTarget === "both"
+        ? (isDe ? "Integritäts-Manager (IM), zuständigen Editor & Journal Manager (JM als Kopie)" : "Integrity Manager (IM), Handling Editor & Journal Manager (JM - CC copy)")
+        : escalateTarget === "integrity_manager"
+          ? (isDe ? "Integritäts-Manager (IM) & Journal Manager (JM als Kopie)" : "Integrity Manager (IM) & Journal Manager (JM - CC copy)")
+          : (isDe ? "zuständigen Editor & Journal Manager (JM als Kopie)" : "Handling Editor & Journal Manager (JM - CC copy)")
+
       setEscalatedPaperIds(prev => ({
         ...prev,
         [selectedEscalateRev.id]: true,
         [selectedEscalateRev.manuscriptId || ""]: true
       }))
 
-      const successMsg = isDe 
+      const successMsg = isDe
         ? `Fehlverhaltensmeldung für [${selectedEscalateRev.manuscriptId || selectedEscalateRev.id}] wurde vertraulich an ${targetLabel} übermittelt. Der Begutachtungsprozess wurde für eine formelle Prüfung pausiert.`
         : `Confidential misconduct escalation for [${selectedEscalateRev.manuscriptId || selectedEscalateRev.id}] has been dispatched to ${targetLabel}. Editorial progression is now flagged for forensic investigation.`
-      
+
       alert(successMsg)
       setSelectedEscalateRev(null)
     }, 600)
@@ -1008,7 +1053,7 @@ export function ReviewerWorkspace({
           return
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     setGeneralComments("")
     setSpecificComments("")
@@ -1028,8 +1073,8 @@ export function ReviewerWorkspace({
     if (effectiveTargetId && (localActiveReviews.length > 0 || activeReviews.length > 0)) {
       const allReviews = localActiveReviews.length > 0 ? localActiveReviews : activeReviews
       const matched = allReviews.find(
-        r => (r.id && r.id.toLowerCase() === effectiveTargetId.toLowerCase()) || 
-             (r.manuscriptId && r.manuscriptId.toLowerCase() === effectiveTargetId.toLowerCase())
+        r => (r.id && r.id.toLowerCase() === effectiveTargetId.toLowerCase()) ||
+          (r.manuscriptId && r.manuscriptId.toLowerCase() === effectiveTargetId.toLowerCase())
       ) || allReviews[0]
 
       if (matched && !selectedReviewForEval) {
@@ -1060,7 +1105,7 @@ export function ReviewerWorkspace({
     try {
       localStorage.setItem(draftKey, JSON.stringify(draftData))
       setLastDraftSavedAt(timeStr)
-    } catch (e) {}
+    } catch (e) { }
   }, [generalComments, specificComments, editorConfidentialComments, recommendation, answers, notes, priorityRating, evalCopeCheck, selectedReviewForEval, profile?.email, user?.email])
 
   // Explicit Manual Save Draft Handler
@@ -1084,7 +1129,7 @@ export function ReviewerWorkspace({
       setLastDraftSavedAt(timeStr)
       setDraftSavedToast(isDe ? `Entwurf gespeichert (${timeStr}) ✓` : `Draft saved (${timeStr}) ✓`)
       setTimeout(() => setDraftSavedToast(null), 3500)
-    } catch (e) {}
+    } catch (e) { }
   }
 
   const handleSubmitEvaluation = (e: React.FormEvent) => {
@@ -1099,8 +1144,8 @@ export function ReviewerWorkspace({
     // Enforce mandatory 10-point questionnaire completion
     const unansweredQuestions = QUESTIONNAIRE_CRITERIA.filter(item => !answers[item.id])
     if (unansweredQuestions.length > 0) {
-      setEvalError(isDe 
-        ? `Bitte beantworten Sie alle 10 Kriterien im Gutachter-Fragebogen (${unansweredQuestions.length} noch unbeantwortet).` 
+      setEvalError(isDe
+        ? `Bitte beantworten Sie alle 10 Kriterien im Gutachter-Fragebogen (${unansweredQuestions.length} noch unbeantwortet).`
         : `Please complete all 10 criteria in the Reviewer Questionnaire (${unansweredQuestions.length} criteria unanswered).`)
       return
     }
@@ -1153,7 +1198,7 @@ export function ReviewerWorkspace({
           onSubmitScorecard(payload)
 
           // Strict Turnaround Benefit Policy: Only reviewers who complete on-time receive points & waiver voucher
-          const isOverdue = (currentPaper.daysLeft !== undefined && currentPaper.daysLeft < 0) || 
+          const isOverdue = (currentPaper.daysLeft !== undefined && currentPaper.daysLeft < 0) ||
             Boolean(currentPaper.deadline && new Date(currentPaper.deadline).getTime() < Date.now() - 86400000)
           if (!isOverdue) {
             setPoints(prev => Math.min(100, prev + 12))
@@ -1177,7 +1222,7 @@ export function ReviewerWorkspace({
               const existing = JSON.parse(localStorage.getItem(vKey) || "[]")
               existing.unshift(newVoucher)
               localStorage.setItem(vKey, JSON.stringify(existing))
-            } catch (e) {}
+            } catch (e) { }
           } else {
             console.warn("Peer review evaluation submitted past deadline: waiver voucher and merit points withheld per editorial turnaround policy.")
           }
@@ -1190,7 +1235,7 @@ export function ReviewerWorkspace({
             // Remove draft after successful submission
             const draftKey = `editorial360_draft_eval_${currentPaper.manuscriptId || currentPaper.id}_${profile?.email || user?.email || ""}`
             localStorage.removeItem(draftKey)
-          } catch (e) {}
+          } catch (e) { }
           setLastDraftSavedAt(null)
           setSelectedReviewForEval(null)
         }, 600)
@@ -1366,13 +1411,13 @@ COPE Guidance & Plan S Benchmark Archive
         manuscriptId: "SOMED-26-RS001",
         amount: 50,
         option: payoutOption,
-        details: payoutOption === "bank" 
+        details: payoutOption === "bank"
           ? `${payoutService} | Account Email: ${payoutEmail || profile.email || "reviewer@scholarlyopen.org"} | Recipient: ${payoutBeneficiary || recipientName}`
           : payoutOption === "voucher"
-          ? "APC Credit Voucher generated for next submission across 13 journals (independent of review recommendation)"
-          : payoutOption === "waiver_fund"
-          ? "Solidarity Waiver Pool for World Bank Low-Income Economies"
-          : `Institutional Library Donation: ${payoutLibraryName || (profile.institution + " Medical Library OA Fund")}`,
+            ? "APC Credit Voucher generated for next submission across 13 journals (independent of review recommendation)"
+            : payoutOption === "waiver_fund"
+              ? "Solidarity Waiver Pool for World Bank Low-Income Economies"
+              : `Institutional Library Donation: ${payoutLibraryName || (profile.institution + " Medical Library OA Fund")}`,
         requestedAt: new Date().toISOString().split("T")[0],
         status: "Pending"
       }
@@ -1382,7 +1427,7 @@ COPE Guidance & Plan S Benchmark Archive
         const list = existing ? JSON.parse(existing) : []
         list.unshift(newRequest)
         localStorage.setItem("editorial360_payout_requests", JSON.stringify(list))
-      } catch (e) {}
+      } catch (e) { }
 
       // Sync payout request to Supabase
       fetch("/api/editorial360/payouts", {
@@ -1391,8 +1436,8 @@ COPE Guidance & Plan S Benchmark Archive
         body: JSON.stringify(newRequest)
       }).catch(err => console.error("Cloud payout request sync failed:", err))
 
-      setPayoutSuccessMsg(isDe 
-        ? `Auszahlungsantrag (${ticketId}) eingereicht! Die Buchhaltung/Admin prüft und gibt die €50 frei.` 
+      setPayoutSuccessMsg(isDe
+        ? `Auszahlungsantrag (${ticketId}) eingereicht! Die Buchhaltung/Admin prüft und gibt die €50 frei.`
         : `Disbursement request (${ticketId}) submitted! Managing Editor will review and release the €50 honorarium within 24–48 hours.`)
       setTimeout(() => setPayoutSuccessMsg(null), 6000)
     }, 600)
@@ -1409,17 +1454,21 @@ COPE Guidance & Plan S Benchmark Archive
     const origin = typeof window !== "undefined" ? window.location.origin : ""
     const recipientName = getFormattedReviewerName(profile.title, profile.name)
     const orcidVal = profile.orcid || "0000-0004-7711-2093"
+    const orcidVal = profile.orcid ? `Verified ORCID Record: <strong>${profile.orcid}</strong>` : "Official Editorial Office Registry"
 
     if (reviewsDone === 0) {
       // Print Reviewer Gateway Qualification Certificate
+      // Print Official Certificate of Editorial Peer Review Appointment
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
           <title>Scholarly Open • Reviewer Gateway Qualification Certificate</title>
+          <title>Scholarly Open: Medicine • Certificate of Editorial Peer Review Appointment</title>
           <style>
             body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
             .cert-box { border: 8px double #0284c7; padding: 40px; text-align: center; border-radius: 4px; position: relative; }
+            .cert-box { border: 8px double #0284c7; padding: 40px; text-align: center; border-radius: 4px; position: relative; background: #fff; }
             .logo-container { margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
             .logo-wrap { display: inline-flex; align-items: center; gap: 12px; }
             .logo-img { height: 50px; width: auto; }
@@ -1429,6 +1478,9 @@ COPE Guidance & Plan S Benchmark Archive
             h2 { font-size: 13px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; }
             .recipient { font-size: 24px; font-weight: bold; margin: 24px 0 10px; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: inline-block; padding-bottom: 5px; }
             .body-text { font-size: 14px; max-width: 600px; margin: 0 auto 26px; color: #334155; }
+            .recipient { font-size: 24px; font-weight: bold; margin: 24px 0 4px; color: #0f172a; border-bottom: 2px solid #e2e8f0; display: inline-block; padding-bottom: 5px; }
+            .affiliation { font-size: 14px; color: #475569; margin-bottom: 20px; font-weight: 500; }
+            .body-text { font-size: 14px; max-width: 620px; margin: 0 auto 26px; color: #334155; }
             .meta-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; text-align: left; }
             .meta-table th, .meta-table td { border: 1px solid #cbd5e1; padding: 10px 14px; }
             .meta-table th { background: #f8fafc; font-weight: bold; color: #334155; }
@@ -1446,9 +1498,13 @@ COPE Guidance & Plan S Benchmark Archive
             </div>
             <h1>Certificate of Peer Review Qualification</h1>
             <h2>Scholarly Open Standards Board • Gateway Examination</h2>
+            <h1>Certificate of Editorial Peer Review Appointment</h1>
+            <h2>Scholarly Open: Medicine • Executive Editorial Board</h2>
             <div class="recipient">${recipientName}</div>
+            <div class="affiliation">${profile.department ? `${profile.department}, ` : ""}${profile.institution || "Hospital las Higueras, Talcahuano, Chile"}</div>
             <div class="body-text">
               This official credential certifies that the scholar named above has successfully completed the Reviewer Gateway Examination, demonstrating verified competence in academic English phrasing, COPE research integrity guidelines, and methodological evaluation in <strong>${profile.primaryDiscipline.toUpperCase()}</strong>.
+              This official credential certifies that the distinguished clinician named above has been formally appointed as an <strong>Invited Expert Peer Reviewer</strong> for <strong>Scholarly Open: Medicine</strong>, in recognition of scholarly expertise, surgical leadership, and adherence to international Committee on Publication Ethics (COPE) standards in <strong>Cardiovascular Surgery & Thoracic Medicine</strong>.
             </div>
             <table class="meta-table">
               <tr>
@@ -1456,20 +1512,31 @@ COPE Guidance & Plan S Benchmark Archive
                 <th>Assessment Status</th>
                 <th>Discipline</th>
                 <th>COPE & Plan S Benchmark</th>
+                <th>Appointment ID</th>
+                <th>Appointment Type</th>
+                <th>Journal</th>
+                <th>Evaluation Desk</th>
               </tr>
               <tr>
                 <td><strong>SO-GW-2026-9041</strong></td>
                 <td><strong style="color: #16a34a;">Passed (80%+ Standard)</strong></td>
                 <td>${profile.primaryDiscipline.toUpperCase()}</td>
                 <td>Verified & Active for Matching</td>
+                <td><strong>SO-MED-REF-2026-0419</strong></td>
+                <td><strong style="color: #0369a1;">Invited Expert Referee (Direct Appointment)</strong></td>
+                <td>Scholarly Open: Medicine</td>
+                <td>Round 2 Re-evaluation Desk</td>
               </tr>
             </table>
             <div class="seal-row">
               <div style="text-align: left; font-size: 12px; color: #64748b;">
                 <div>Verified ORCID Record: <strong>${orcidVal}</strong></div>
                 <div>Status: <strong>Qualified Peer Reviewer</strong></div>
+                <div>${orcidVal}</div>
+                <div>Status: <strong>Invited Expert Referee</strong></div>
               </div>
               <div class="seal">Gateway Certified Seal</div>
+              <div class="seal">Editorial Board Seal • Medicine</div>
             </div>
           </div>
         </body>
@@ -1716,19 +1783,19 @@ COPE Guidance & Plan S Benchmark Archive
       {/* ================= TAB 1: OVERVIEW ================= */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          
+
           {/* Profile Saved Toast Notification */}
           {profileSavedToast && (
             <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span className="font-semibold">
-                  {isDe 
-                    ? "Gutachterprofil & Matching-Präferenzen erfolgreich aktualisiert!" 
+                  {isDe
+                    ? "Gutachterprofil & Matching-Präferenzen erfolgreich aktualisiert!"
                     : "Reviewer profile & manuscript matching criteria updated successfully!"}
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => setProfileSavedToast(false)}
                 className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 text-xs font-bold"
               >
@@ -1742,3856 +1809,4114 @@ COPE Guidance & Plan S Benchmark Archive
             <div className="flex items-center gap-2.5">
               <Lightbulb className="h-4 w-4 text-[#0b99ff] shrink-0" />
               <span className="font-medium leading-relaxed">
-                {isDe 
-                  ? "Gutachter-Leitfaden: Bewerten Sie Manuskripte objektiv auf wissenschaftliche Originalität, empirische Methodik, Datenintegrität und die Einhaltung ethischer COPE-Standards." 
+                {isDe
+                  ? "Gutachter-Leitfaden: Bewerten Sie Manuskripte objektiv auf wissenschaftliche Originalität, empirische Methodik, Datenintegrität und die Einhaltung ethischer COPE-Standards."
                   : "Reviewer Guidance: Please evaluate manuscripts objectively for research methodology, empirical validity, data integrity, and international COPE reporting ethics."}
               </span>
-            </div>
-          </div>
-
-          {/* Profile Card (from screenshot) */}
-          <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-4">
-                <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
-                  {profile.photoUrl ? (
-                    <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{getReviewerInitials(profile.name)}</span>
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
-                    {getFormattedReviewerName(profile.title, profile.name)}
-                  </h2>
-                  <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-                    {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria"}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    <strong className="text-slate-700 dark:text-slate-300 font-semibold">{isDe ? "Forschungsinteressen: " : "Research Interests: "}</strong>
-                    {profile.keywords.length > 0 
-                      ? profile.keywords.slice(0, 4).join(", ") 
-                      : "Materials Science, Nanostructured Materials, Thin Films, Sensors"}
-                  </p>
-                  <div className="pt-1.5 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleOpenProfileModal}
-                      className="px-3.5 py-1 rounded-lg border border-sky-200 dark:border-sky-800/80 bg-sky-50/70 dark:bg-sky-950/40 text-[#0b99ff] hover:bg-sky-100 dark:hover:bg-sky-900/60 font-semibold text-xs transition-colors cursor-pointer"
-                    >
-                      {isDe ? "Vollständiges Profil ansehen" : "View Full Profile"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCertViewMode("cv")
-                        onTabChange && onTabChange("certificate")
-                      }}
-                      className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 text-xs font-medium transition-colors cursor-pointer"
-                    >
-                      {isDe ? "CV Exportieren" : "Export CV"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Matching Topics Quick Tag */}
-              <div className="hidden lg:flex flex-col items-end gap-1.5 text-right">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  {isDe ? "Fachgebiet" : "Primary Discipline"}
-                </span>
-                <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-800">
-                  {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}
-                </span>
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                  ● {profile.availabilityStatus === "Available" ? (isDe ? "Verfügbar für Gutachten" : "Available for Invitations") : (isDe ? "Im Forschungsurlaub" : "On Sabbatical")}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Concise Reviewer Metrics Card */}
-          <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                <Award className="h-4 w-4 text-[#0b99ff]" />
-                {isDe ? "Gutachter-Kennzahlen & Rigor-Status" : "Reviewer Metrics & Rigor Performance"}
-              </h3>
-              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
-                {isDe ? "COPE-Audit: Konform" : "COPE Ethics Verified"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center items-center py-1">
-              {/* 1. Completed Evaluations */}
-              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
-                  {reviewsDone}
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                  {isDe ? "ABGESCHL. GUTACHTEN" : "REVIEWS COMPLETED"}
-                </div>
-              </div>
-
-              {/* 2. Review Turnaround Target */}
-              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
-                  {profile.preferredTurnaround || 14} {isDe ? "Tage" : "Days"}
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                  {isDe ? "ZIEL-BEGUTACHTUNGSZEIT" : "TARGET TURNAROUND"}
-                </div>
-              </div>
-
-              {/* 3. Gateway Rigor Score */}
-              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                <div className="text-base sm:text-lg font-black text-[#0b99ff] leading-tight">
-                  95%
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                  {isDe ? "GATEWAY-QUALIFIKATION" : "GATEWAY RIGOR SCORE"}
-                </div>
-              </div>
-
-              {/* 4. Honoraria Tier */}
-              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
-                <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 leading-tight">
-                  €10 – €50
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                  {isDe ? "HONORAR PRO BERICHT" : "HONORARIUM / REPORT"}
-                </div>
-              </div>
-
-              {/* 5. Max Review Load */}
-              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 col-span-2 sm:col-span-1">
-                <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
-                  1 / mo
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                  {isDe ? "MAX. KAPAZITÄT" : "MAX LOAD CAPACITY"}
-                </div>
-              </div>
-            </div>
-
-            {/* Share ORCID & LinkedIn */}
-            <div className="flex flex-col sm:flex-row items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 gap-2">
-              <span>{isDe ? "Offiziell akkreditiert im Scholarly Open Gutachter-Register" : "Officially accredited in the Scholarly Open Verified Reviewer Registry"}</span>
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      const orcidUrl = profile.orcid ? `https://orcid.org/${profile.orcid}` : "https://orcid.org"
-                      window.open(orcidUrl, "_blank")
-                    }
-                  }}
-                  className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                >
-                  <Link2 className="h-3 w-3" />
-                  <span>ORCID</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      const text = encodeURIComponent("I am a verified Peer Reviewer with Scholarly Open! Track my verified peer evaluations and academic badges.")
-                      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
-                    }
-                  }}
-                  className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                >
-                  <Linkedin className="h-3 w-3" />
-                  <span>LinkedIn</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Academic Recognition Badges (BIG BADGES & SMALL TEXT UNDERNEATH) */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                {isDe ? "Erhaltene Auszeichnungen & Abzeichen" : "Earned Academic Prestige Badges"}
-              </h4>
-              <span className="text-[11px] text-slate-400">
-                {isDe ? "Freigeschaltet durch Peer-Review-Leistung" : "Unlocked through verified review contributions"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {/* Badge 1 */}
-              <div className="p-4 rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-amber-400 hover:shadow-xs transition-all">
-                <div className="h-12 w-12 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2 ring-4 ring-amber-100/60 dark:ring-amber-900/20">
-                  <Trophy className="h-6 w-6" />
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                  Top Reviewer 2026
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                  {isDe ? "EDITORIAL BOARD AUSZEICHNUNG" : "EDITORIAL BOARD COMMENDATION"}
-                </div>
-              </div>
-
-              {/* Badge 2 */}
-              <div className="p-4 rounded-xl border border-sky-200/80 dark:border-sky-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-sky-400 hover:shadow-xs transition-all">
-                <div className="h-12 w-12 rounded-full bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] flex items-center justify-center mb-2 ring-4 ring-sky-100/60 dark:ring-sky-900/20">
-                  <Zap className="h-6 w-6" />
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                  Fast Turnaround
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                  {isDe ? "TOP 5% SCHNELLIGKEIT (<12 TAGE)" : "TOP 5% RESPONSE SPEED (<12D)"}
-                </div>
-              </div>
-
-              {/* Badge 3 */}
-              <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-emerald-400 hover:shadow-xs transition-all">
-                <div className="h-12 w-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 ring-4 ring-emerald-100/60 dark:ring-emerald-900/20">
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                  COPE Ethics Certified
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                  {isDe ? "PUBLIKATIONSETHIK VERIFIZIERT" : "PUBLICATION ETHICS VERIFIED"}
-                </div>
-              </div>
-
-              {/* Badge 4 */}
-              <div className="p-4 rounded-xl border border-purple-200/80 dark:border-purple-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-purple-400 hover:shadow-xs transition-all">
-                <div className="h-12 w-12 rounded-full bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 ring-4 ring-purple-100/60 dark:ring-purple-900/20">
-                  <Star className="h-6 w-6 fill-purple-600/20" />
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                  5-Star Rigor Endorsed
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
-                  {isDe ? "HANDLING EDITOR AUSZEICHNUNG" : "HANDLING EDITOR DISTINCTION"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Reviewer Academy & Masterclasses Hub */}
-          <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                <GraduationCap className="h-4 w-4" />
-              </div>
-              <div className="space-y-0.5">
-                <h3 className="font-semibold text-slate-900 dark:text-white text-xs">
-                  {isDe ? "Gutachter-Akademie & Weiterbildung" : "Reviewer Academy & Masterclasses"}
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-2xl">
-                  {isDe 
-                    ? "Kurse zu konstruktivem Feedback, COPE-Ethik und KI-Forensik." 
-                    : "Sharpen your peer-review rigor with specialized courses in constructive author feedback, COPE ethics, and synthetic image forensics."}
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/trainings"
-              className="text-xs font-semibold text-[#0b99ff] hover:underline flex items-center gap-1 shrink-0"
-            >
-              <span>{isDe ? "Kurse ansehen" : "Explore Masterclasses"}</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-
-          {/* Pending Invitations Alert Block */}
-          {reviewInvitations.length > 0 && (
-            <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
-              <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#0b99ff]" />
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                    {isDe ? "Ausstehende Begutachtungsanfrage" : "Pending Review Invitation"}
-                  </h3>
-                </div>
-                <span className="text-[11px] text-slate-400 font-medium">Standard 14 Days</span>
-              </div>
-
-              <div className="p-4 space-y-3">
-                {reviewInvitations.map((inv) => (
-                  <div key={inv.id} className="space-y-2.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-[#0b99ff]">{inv.journal}</span>
-                      <span className="text-slate-400 font-mono text-[11px]">MS ID: {inv.manuscriptId || inv.id}</span>
-                    </div>
-
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                      {inv.title}
-                    </h4>
-
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
-                      {inv.abstract}
-                    </p>
-
-                    <div className="flex items-center gap-2 pt-1">
-                      <Button
-                        onClick={() => handleOpenAccept(inv)}
-                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3.5 py-1.5 h-auto cursor-pointer rounded shadow-xs"
-                      >
-                        <Check className="h-3.5 w-3.5 mr-1" />
-                        {isDe ? "Annehmen & Frist setzen" : "Accept & Set Deadline"}
-                      </Button>
-                      <Button
-                        onClick={() => handleOpenDecline(inv)}
-                        variant="outline"
-                        className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded"
-                      >
-                        <X className="h-3.5 w-3.5 mr-1" />
-                        {isDe ? "Ablehnen" : "Decline"}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Active Assignments Quick Table */}
-          <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
-            <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                {isDe ? "Laufende Begutachtungen" : "Active Review Assignments"}
-              </h3>
-              {onTabChange && (
-                <button 
-                  onClick={() => onTabChange("portfolio")} 
-                  className="text-xs text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                >
-                  {isDe ? "Alle anzeigen" : "View All Portfolio"} →
-                </button>
-              )}
-            </div>
-
-            <div className="p-4 space-y-3">
-              {localActiveReviews.filter(r => r.status === "In Progress" || r.status === "Pending" || Boolean((r as any).isRound2)).map((rev) => {
-                const forensicData = FORENSIC_PROFILES[rev.manuscriptId || rev.id] || FORENSIC_PROFILES["SOMED-26-RS001"]
-                const isEscalated = !!(escalatedPaperIds[rev.id] || escalatedPaperIds[rev.manuscriptId || ""])
-                const daysLeft = getDaysRemaining(rev.deadline)
-                const isOverdue = daysLeft < 0
-                return (
-                  <div 
-                    key={rev.id} 
-                    className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
-                      isEscalated 
-                        ? "border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20" 
-                        : "border-slate-200 dark:border-slate-800"
-                    }`}
-                  >
-                    <div className="space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">{rev.journal}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                          isOverdue 
-                            ? "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50" 
-                            : daysLeft <= 3 
-                            ? "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50"
-                            : "text-[#0b99ff] dark:text-[#0b99ff] bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50"
-                        }`}>
-                          <Clock className="w-3 h-3" />
-                          {isOverdue 
-                            ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig (${rev.deadline})` : `${Math.abs(daysLeft)} days overdue (${rev.deadline})`)
-                            : (isDe ? `Noch ${daysLeft} Tage (${rev.deadline})` : `Due in ${daysLeft} days (${rev.deadline})`)}
-                        </span>
-                        <span className="text-slate-300">•</span>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
-                          <ShieldCheck className="h-3 w-3 text-emerald-600" />
-                          AI: {forensicData?.aiScore || "4%"} · Figures: Clean ✓
-                        </span>
-                        {isEscalated && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
-                            <AlertTriangle className="h-3 w-3 text-amber-600" />
-                            {isDe ? "Eskaliert" : "Escalated to IM"}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">{rev.title}</h4>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 shrink-0">
-                      {(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01") && (
-                        <>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleDownloadSpecificFile("fulltext", rev)}
-                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
-                            title="Download Blinded Revised Manuscript (.docx)"
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                            <span>{isDe ? "Überarb. Manuskript" : "Revised MS (.docx)"}</span>
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleDownloadSpecificFile("supp", rev)}
-                            className="border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
-                            title="Download Author Point-by-Point Rebuttal (.docx)"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            <span>{isDe ? "Autoren-Rebuttal" : "Rebuttal (.docx)"}</span>
-                          </Button>
-                        </>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedPackageRev(rev)}
-                        className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                        title={isDe ? "Blinded PDF & Begleitdaten herunterladen" : "Download Blinded Manuscript PDF & Data"}
-                      >
-                        <FileDown className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                        {isDe ? "Manuskript-Paket" : "Blinded Package"}
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        onClick={() => handleOpenDeadlineModal(rev)}
-                        className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                        title={isDe ? "Frist anpassen oder verlängern" : "Set or adjust review deadline"}
-                      >
-                        <Calendar className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                        {isDe ? "Frist anpassen" : "Set Deadline"}
-                      </Button>
-
-                      {!isEscalated ? (
-                        <Button
-                          variant="outline"
-                          onClick={() => handleOpenEscalate(rev)}
-                          className="border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                          title={isDe ? "Fehlverhalten an Editor / IM melden" : "Escalate misconduct to Handling Editor or Integrity Manager"}
-                        >
-                          <AlertTriangle className="h-3.5 w-3.5 mr-1 text-amber-600 dark:text-amber-400" />
-                          {isDe ? "Fehlverhalten melden" : "Escalate"}
-                        </Button>
-                      ) : null}
-
-                      <Button
-                        onClick={() => handleOpenEval(rev, Boolean((rev as any).isRound2))}
-                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
-                      >
-                        <FileText className="h-3.5 w-3.5 mr-1" />
-                        {rev.isRound2 
-                          ? (isDe ? "Zweitbegutachtung (R2) öffnen" : "Open Round 2 Assessment")
-                          : (isDe ? "Gutachten ausfüllen" : "Open Assessment Form")}
-                      </Button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* ================= TAB 2: PORTFOLIO & ARCHIVE ================= */}
-      {activeTab === "portfolio" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                {isDe ? "Begutachtungs-Portfolio & Archiv" : "Review Portfolio & Assessment History"}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {isDe ? "Verwalten Sie aktive Begutachtungen und sehen Sie archivierte Berichte ein." : "Track in-progress evaluations and inspect past verified review reports."}
-              </p>
-            </div>
-
-            {/* Sub-filter chips */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 p-1 rounded border border-slate-200 dark:border-slate-800 text-xs font-medium">
-              <button
-                onClick={() => setPortfolioFilter("all")}
-                className={`px-2.5 py-1 rounded cursor-pointer ${portfolioFilter === "all" ? "bg-white dark:bg-slate-800 font-bold text-slate-900 dark:text-white shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
-              >
-                {isDe ? "Alle" : "All"} ({activeReviews.length})
-              </button>
-              <button
-                onClick={() => setPortfolioFilter("in_progress")}
-                className={`px-2.5 py-1 rounded cursor-pointer ${portfolioFilter === "in_progress" ? "bg-white dark:bg-slate-800 font-bold text-slate-900 dark:text-white shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
-              >
-                {isDe ? "In Bearbeitung" : "In Progress"}
-              </button>
-              <button
-                onClick={() => setPortfolioFilter("completed")}
-                className={`px-2.5 py-1 rounded cursor-pointer ${portfolioFilter === "completed" ? "bg-white dark:bg-slate-800 font-bold text-slate-900 dark:text-white shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
-              >
-                {isDe ? "Abgeschlossen" : "Completed"}
-              </button>
-            </div>
-          </div>
-
-          <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredActiveReviews.map((rev) => {
-                const forensicData = FORENSIC_PROFILES[rev.manuscriptId || rev.id] || FORENSIC_PROFILES["SOMED-26-RS001"]
-                const isEscalated = !!(escalatedPaperIds[rev.id] || escalatedPaperIds[rev.manuscriptId || ""])
-                return (
-                  <div key={rev.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-bold text-[#0b99ff] dark:text-[#0b99ff] uppercase">{rev.journal}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
-                          rev.status === "Completed" 
-                            ? "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400" 
-                            : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
-                        }`}>
-                          {rev.status === "Completed" ? (isDe ? "Abgeschlossen" : "Completed & Verified") : (isDe ? "In Bearbeitung" : "In Progress")}
-                        </span>
-                        <span className="text-slate-300">•</span>
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                          AI: {forensicData?.aiScore || "4%"} · Figures: Clean ✓
-                        </span>
-                        {isEscalated && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
-                            <AlertTriangle className="h-3 w-3 text-amber-600" />
-                            {isDe ? "Eskaliert (IM-Prüfung)" : "Escalated to IM"}
-                          </span>
-                        )}
-                      </div>
-
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{rev.title}</h4>
-                      
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        {rev.status === "Completed" ? (
-                          <span>{isDe ? "Empfehlung:" : "Verdict:"} <strong>{rev.recommendation || "Minor Revision"}</strong> • {isDe ? "Geprüft von Editor" : "Signed off by Handling Editor"}</span>
-                        ) : (() => {
-                          const daysLeft = getDaysRemaining(rev.deadline)
-                          const isOverdue = daysLeft < 0
-                          return (
-                            <span>
-                              {isDe ? "Frist:" : "Deadline:"} <strong>{rev.deadline}</strong>{" "}
-                              <span className={isOverdue ? "text-rose-600 dark:text-rose-400 font-semibold" : daysLeft <= 3 ? "text-amber-600 dark:text-amber-400 font-semibold" : "text-slate-600 dark:text-slate-300"}>
-                                ({isOverdue 
-                                  ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig` : `${Math.abs(daysLeft)} days overdue`) 
-                                  : (isDe ? `${daysLeft} Tage verbleibend` : `${daysLeft} days remaining`)})
-                              </span>
-                            </span>
-                          )
-                        })()}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 shrink-0">
-                      {(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01") && (
-                        <>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleDownloadSpecificFile("fulltext", rev)}
-                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
-                            title="Download Blinded Revised Manuscript (.docx)"
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                            <span>{isDe ? "Überarb. Manuskript" : "Revised MS (.docx)"}</span>
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleDownloadSpecificFile("supp", rev)}
-                            className="border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
-                            title="Download Author Point-by-Point Rebuttal (.docx)"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            <span>{isDe ? "Autoren-Rebuttal" : "Rebuttal (.docx)"}</span>
-                          </Button>
-                        </>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedPackageRev(rev)}
-                        className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                      >
-                        <FileDown className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                        {isDe ? "Paket" : "Package"}
-                      </Button>
-
-                      {rev.status === "In Progress" || rev.status === "Pending" ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            onClick={() => handleOpenDeadlineModal(rev)}
-                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                            title={isDe ? "Frist anpassen oder verlängern" : "Set or adjust review deadline"}
-                          >
-                            <Calendar className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
-                            {isDe ? "Frist anpassen" : "Set Deadline"}
-                          </Button>
-
-                          {!isEscalated && (
-                            <Button
-                              variant="outline"
-                              onClick={() => handleOpenEscalate(rev)}
-                              className="border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
-                            >
-                              <AlertTriangle className="h-3.5 w-3.5 mr-1 text-amber-600" />
-                              {isDe ? "Melden" : "Escalate"}
-                            </Button>
-                          )}
-                          <Button
-                            onClick={() => handleOpenEval(rev, Boolean(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01"))}
-                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs flex items-center gap-1"
-                          >
-                            {rev.isRound2 || rev.id === "SOMED-26-RW01" ? <RotateCcw className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
-                            <span>{rev.isRound2 || rev.id === "SOMED-26-RW01" ? (isDe ? "Zweitbegutachtung (R2) starten" : "Start Round 2 Re-Assessment") : (isDe ? "Formular öffnen" : "Open Assessment")}</span>
-                          </Button>
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 px-2 py-1 rounded flex items-center gap-1">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> {isDe ? "ORCID synchronisiert" : "ORCID Synced"}
-                          </span>
-                          <Button
-                            onClick={() => handleOpenEval(rev, true)}
-                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded shadow-xs flex items-center gap-1"
-                            title="Open Round 2 Re-evaluation Form for Author Revision"
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                            <span>{isDe ? "Zweitbegutachtung (R2)" : "Round 2 Re-evaluation"}</span>
-                          </Button>
-                          <Button
-                            onClick={() => setSelectedCertReview(rev)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
-                          >
-                            <Award className="h-3.5 w-3.5 mr-1" />
-                            {isDe ? "Zertifikat ansehen" : "View Certificate"}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* ================= TAB 3: AI & PAPER FORENSICS ================= */}
-      {activeTab === "forensics" && (() => {
-        const activeProfile = FORENSIC_PROFILES[selectedForensicPaperId] || FORENSIC_PROFILES["SOMED-26-RS001"]
-        return (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {isDe ? "Automatisierter Integritäts- & KI-Prüfbericht" : "Automated Integrity & AI Pre-Check Brief"}
-                  </h3>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                    <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                    {isDe ? "Vorprüfung Bestanden" : "Editorial Pre-Screening: Clean"}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {isDe 
-                    ? "Vorabprüfung durch die Redaktion (editorial360 Integrity Desk): Plagiate, Bildmanipulation und KI-Anomalien wurden bereits gescannt, damit Sie sich ganz auf die wissenschaftliche Methodik konzentrieren können." 
-                    : "Pre-screening completed by editorial360 before referee dispatch. Image forensics, citation networks, and synthetic text scans are verified clean so you can focus strictly on the science."}
-                </p>
-              </div>
-
-              {/* Manuscript Selector */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
-                  {isDe ? "Manuskript:" : "Manuscript:"}
-                </span>
-                <select
-                  value={selectedForensicPaperId}
-                  onChange={(e) => setSelectedForensicPaperId(e.target.value)}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold rounded-lg px-2.5 py-1.5 text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                >
-                  <option value="SOMED-26-RS001">SOMED-26-RS001 (AI Diagnostics Cardiology)</option>
-                  <option value="SOENG-26-RS002">SOENG-26-RS002 (Federated Learning Non-IID)</option>
-                  <option value="SOSOC-26-RV003">SOSOC-26-RV003 (Urban Green Spaces Socio-Economic)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Misconduct Escalation Quick Action Banner */}
-            <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                <div>
-                  <div className="font-bold text-amber-950 dark:text-amber-200">
-                    {isDe ? "Integritätsbedenken oder Fälschungsvorwürfe?" : "Suspected Image Manipulation or Research Misconduct?"}
-                  </div>
-                  <p className="text-[11px] text-amber-800 dark:text-amber-300">
-                    {isDe 
-                      ? "Leiten Sie diesen Fall direkt an den Integrity Manager (IM) oder den zuständigen Editor weiter (COPE-Whistleblower-Schutz)."
-                      : "Directly escalate forensic evidence to the Integrity Manager (IM) and Handling Editor under COPE whistleblower protections."}
-                  </p>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                onClick={() => {
-                  const rev = activeReviews.find(r => r.id === selectedForensicPaperId || r.manuscriptId === selectedForensicPaperId) || activeReviews[0]
-                  if (rev) handleOpenEscalate(rev)
-                }}
-                className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 h-auto cursor-pointer shrink-0 rounded shadow-xs"
-              >
-                <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                {isDe ? "An IM / Editor eskalieren" : "Escalate to IM / Editor"}
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-lg shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">AI Linguistic Index</div>
-                  <span className="text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-950/40 px-1.5 py-0.2 rounded">
-                    {activeProfile.aiStatus}
-                  </span>
-                </div>
-                <div className="text-xl font-bold text-green-600 dark:text-green-400 mt-1">{activeProfile.aiScore}</div>
-                <p className="text-[11px] text-slate-500 mt-1">{activeProfile.aiConfidence}</p>
-              </Card>
-
-              <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-lg shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">Image & Figure Forensics</div>
-                  <span className="text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-950/40 px-1.5 py-0.2 rounded">
-                    {activeProfile.figureStatus}
-                  </span>
-                </div>
-                <div className="text-xl font-bold text-green-600 dark:text-green-400 mt-1">{activeProfile.figureScore}</div>
-                <p className="text-[11px] text-slate-500 mt-1">{activeProfile.figureDetails}</p>
-              </Card>
-
-              <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-lg shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">Citation & COI Graph</div>
-                  <span className="text-[10px] font-bold text-[#0b99ff] bg-sky-50 dark:bg-sky-950/40 px-1.5 py-0.2 rounded">
-                    {activeProfile.citationStatus}
-                  </span>
-                </div>
-                <div className="text-xl font-bold text-[#0b99ff] dark:text-[#0b99ff] mt-1">{activeProfile.citationScore}</div>
-                <p className="text-[11px] text-slate-500 mt-1">{activeProfile.citationDetails}</p>
-              </Card>
-            </div>
-
-            {/* Collapsible Paper Mill Spotting Checklist */}
-            <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
-              <button
-                type="button"
-                onClick={() => setIsFraudGuideExpanded(!isFraudGuideExpanded)}
-                className="w-full p-4 flex items-center justify-between bg-slate-50/70 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 text-left transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    {isDe ? "COPE-Leitfaden: Wie man Paper-Mill-Muster & gefälschte Daten erkennt" : "COPE Quick-Guide: How to Spot Paper Mills & Fabricated Data"}
-                  </span>
-                </div>
-                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isFraudGuideExpanded ? "rotate-180" : ""}`} />
-              </button>
-
-              {isFraudGuideExpanded && (
-                <div className="p-4 border-t border-slate-200 dark:border-slate-800 text-xs space-y-2.5 text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-950">
-                  <div className="flex items-start gap-2">
-                    <span className="text-[#0b99ff] font-bold">•</span>
-                    <div><strong>Generic Western Blots / Micrographs:</strong> Check for duplicated background noise or identical bands reused across different experimental conditions.</div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-[#0b99ff] font-bold">•</span>
-                    <div><strong>Irrelevant Keyword Stuffing:</strong> Paper mills often insert disconnected medical keywords to artificially inflate indexing matches.</div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-[#0b99ff] font-bold">•</span>
-                    <div><strong>Non-Institutional Email Addresses:</strong> Verify whether corresponding authors use free webmail instead of verified institutional academic domains.</div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-[#0b99ff] font-bold">•</span>
-                    <div><strong>Unrealistic Patient Sample Sizes:</strong> Scrutinize clinical studies reporting massive participant numbers without clear multi-center IRB documentation.</div>
-                  </div>
-                </div>
-              )}
-            </Card>
-
-            {/* Forensics Training Banner */}
-            <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
-                <span className="text-slate-700 dark:text-slate-300">
-                  {isDe 
-                    ? "Möchten Sie mehr über die Erkennung manipulierter Grafiken lernen?" 
-                    : "Want hands-on practice identifying manipulated images and synthetic datasets?"}
-                </span>
-              </div>
-              <Link
-                href="/trainings"
-                className="text-[#0b99ff] dark:text-[#0b99ff] font-semibold hover:underline flex items-center gap-1 shrink-0"
-              >
-                <span>{isDe ? "Training starten" : "Take Masterclass"}</span>
-                <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* ================= TAB 4: APC CREDIT WALLET ================= */}
-      {activeTab === "wallet" && (
-        <div className="space-y-4">
-          
-          {/* Main Vault Card */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
-            
-            {/* Header: Balance & Status */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-4">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                    {points}
-                  </span>
-                  <span className="text-xs font-bold text-slate-400">/ 100 PTS</span>
-                </div>
-
-                <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
-
-                <div>
-                  <div className="text-xs font-bold text-[#0b99ff]">
-                    Silver Tier · 30% APC Waiver
-                  </div>
-                  <div className="text-[11px] text-slate-400 font-mono">
-                    ORCID: 0000-0004-7711-2093 · 312 Days Left
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 sm:text-right">
-                <span>{100 - points} pts to 100% Free Waiver</span>
-              </div>
-            </div>
-
-            {/* Clean Progress Track with Points */}
-            <div className="space-y-3 pt-1">
-              {/* Progress Bar in Workspace Signature Blue */}
-              <div className="relative py-2">
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#0b99ff] rounded-full transition-all duration-500" 
-                    style={{ width: `${points}%` }} 
-                  />
-                </div>
-
-                {/* Milestone Node Points on the Bar */}
-                <div className="relative flex justify-between text-[11px] pt-2 font-medium">
-                  <div className="text-left">
-                    <span className="block font-bold text-slate-900 dark:text-white">0</span>
-                    <span className="text-[10px] text-slate-400">Start</span>
-                  </div>
-
-                  <div className="text-center">
-                    <span className="block font-bold text-slate-700 dark:text-slate-300">10 Pts</span>
-                    <span className="text-[10px] text-slate-500 font-medium">Bronze (10%)</span>
-                  </div>
-
-                  <div className="text-center">
-                    <span className="block font-bold text-[#0b99ff]">30 Pts</span>
-                    <span className="text-[10px] text-[#0b99ff] font-bold">Silver (30% Active)</span>
-                  </div>
-
-                  <div className="text-center">
-                    <span className="block font-bold text-slate-600 dark:text-slate-400">50 Pts</span>
-                    <span className="text-[10px] text-slate-400">Gold (50%)</span>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="block font-bold text-slate-600 dark:text-slate-400">100 Pts</span>
-                    <span className="text-[10px] text-slate-400">Platinum (100%)</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 4 Minimal Tier Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
-                  <div className="text-slate-400 text-[10px] font-semibold">10 PTS</div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Bronze</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">10% APC Waiver</div>
-                </div>
-
-                <div className="p-3 rounded-lg border-2 border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 text-xs">
-                  <div className="text-[#0b99ff] text-[10px] font-bold">30 PTS · ACTIVE</div>
-                  <div className="text-sm font-black text-slate-900 dark:text-white mt-0.5">Silver</div>
-                  <div className="text-xs font-bold text-[#0b99ff]">30% APC Waiver</div>
-                </div>
-
-                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
-                  <div className="text-slate-400 text-[10px] font-semibold">50 PTS</div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Gold</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">50% APC Waiver</div>
-                </div>
-
-                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
-                  <div className="text-slate-400 text-[10px] font-semibold">100 PTS</div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Platinum</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">100% Free Waiver</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Points Guide */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                <div className="font-bold text-slate-900 dark:text-white">+10 Base Points</div>
-                <div className="text-[11px] text-slate-500">Editor-endorsed peer review evaluation</div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                <div className="font-bold text-[#0b99ff]">+2.5 On-Time Bonus</div>
-                <div className="text-[11px] text-slate-500">Submitted within agreed 14-day window</div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-                <div className="font-bold text-[#0b99ff]">+2.5 Quality Bonus</div>
-                <div className="text-[11px] text-slate-500">5-Star rigor score endorsed by editor</div>
-              </div>
-            </div>
-
-            {/* Awarded Peer Review Vouchers & APC Waivers */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-5 shadow-xs">
-              <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff]">
-                    <Award className="h-5 w-5" />
+              {/* Journal Masthead & Official Peer Review Desk Banner */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-sky-100 dark:border-sky-900/60 bg-gradient-to-r from-sky-50/90 via-white to-blue-50/40 dark:from-sky-950/40 dark:via-slate-900 dark:to-blue-950/20 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="h-11 w-11 rounded-xl bg-sky-600 dark:bg-sky-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+                    <BookOpen className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        {isDe ? "Verliehene Gutachter-Voucher & APC-Rabattcodes" : "Awarded Peer Review Vouchers & APC Waivers"}
-                      </h4>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                        {awardedVouchers.length} Available
+                      <span className="text-[11px] font-bold tracking-wider uppercase text-sky-700 dark:text-sky-400">
+                        Official Journal Peer Review Desk
+                      </span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        Round 2 Re-evaluation
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      {isDe 
-                        ? "Von Handling Editors verliehene Anerkennungen. Einlösbar für 25% – 100% APC-Erlass bei eigenen Manuskripteinreichungen."
-                        : "Official incentives awarded by Handling Editors upon decision endorsement. Redeemable for 25%–100% APC waivers on your own submissions."}
+                    <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      Scholarly Open: Medicine
+                    </h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      ISSN: 3028-112X · Double-Blind Peer Review · COPE Ethical Standard · Direct Editorial Appointment
                     </p>
                   </div>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
-                {awardedVouchers.map((vouch) => {
-                  const isCopied = copiedVoucherCode === vouch.code
-
-                  return (
-                    <div
-                      key={vouch.id || vouch.code}
-                      className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 relative overflow-hidden hover:border-slate-300 dark:hover:border-slate-700 transition-all"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-emerald-700 dark:text-emerald-400">
-                              {vouch.discount}
-                            </span>
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                              {vouch.status}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                            Ref: <strong className="text-slate-700 dark:text-slate-300">{vouch.paperId}</strong> · Awarded on {vouch.awardedAt}
-                          </div>
-                          {vouch.awardedBy && (
-                            <div className="text-[10px] text-slate-400 mt-0.5">
-                              By: {vouch.awardedBy}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Voucher Code Box */}
-                      <div className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
-                        <div className="space-y-0.5">
-                          <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Redemption Code</div>
-                          <span className="font-mono font-bold text-xs text-slate-900 dark:text-white tracking-wider">
-                            {vouch.code}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (typeof navigator !== "undefined" && navigator.clipboard) {
-                              navigator.clipboard.writeText(vouch.code)
-                            }
-                            setCopiedVoucherCode(vouch.code)
-                            setTimeout(() => setCopiedVoucherCode(null), 2500)
-                          }}
-                          className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                            isCopied
-                              ? "bg-emerald-600 text-white shadow-xs"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
-                          }`}
-                        >
-                          {isCopied ? (
-                            <>
-                              <Check className="h-3.5 w-3.5" />
-                              <span>{isDe ? "Kopiert!" : "Copied!"}</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="h-3.5 w-3.5 text-slate-400" />
-                              <span>{isDe ? "Code kopieren" : "Copy Code"}</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-
-                      <div className="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
-                        <span>Valid across all 11 Scholarly Open journals</span>
-                        <span className="text-[#0b99ff] font-medium">Single Use / Transferable</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Reviewer Honoraria & 4-Option Disbursement Portal */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff]">
-                    <Landmark className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        {isDe ? "Gutachter-Honorare & Vergütungsportal" : "Reviewer Honoraria & Recognition Portal"}
-                      </h4>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                        {isDe ? "Honorarpolitik in Abstimmung" : "Policy in Discussion"}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      {isDe 
-                        ? "Direkte Barhonorare befinden sich derzeit im Herausgebergremium in Abstimmung. Gutachter erhalten aktuell prioritäre APC-Erlass-Gutscheine (25%–100%) und verifizierte ORCID-Zertifikate." 
-                        : "Cash honoraria policies are currently under executive editorial board discussion. Referees currently receive transferable APC waiver vouchers (25%–100%), verified ORCID certificates, and prestige credentials."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">{isDe ? "Verfügbares Barhonorar" : "Available Cash Honorarium"}</div>
-                  <div className="text-xl font-black text-slate-400 dark:text-slate-500">
-                    €0.00
-                  </div>
-                  <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">{isDe ? "Derzeit in Beratung" : "Under Policy Discussion"}</div>
-                </div>
-              </div>
-
-              {/* Success Notification Banner */}
-              {payoutSuccessMsg && (
-                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-3 text-xs text-emerald-900 dark:text-emerald-200 animate-in fade-in">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-                  <span className="font-semibold">{payoutSuccessMsg}</span>
-                </div>
-              )}
-
-              {/* 4 Interactive Option Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                
-                {/* Option 1: Digital Cashout (PayPal / Payoneer / Wise) */}
-                <div 
-                  onClick={() => setPayoutOption("bank")}
-                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
-                    payoutOption === "bank"
-                      ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 shadow-xs ring-1 ring-[#0b99ff]/20"
-                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-amber-500" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        {isDe ? "1. Digitale Auszahlung (PayPal / Payoneer / Wise)" : "1. Digital Cashout (PayPal / Payoneer / Wise)"}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                      {isDe ? "Pausiert" : "Paused"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {isDe 
-                      ? "Barauszahlungen sind während der laufenden Vorstandskonsultation vorübergehend pausiert. Wählen Sie Option 2, um einen sofortigen APC-Publikationsgutschein zu generieren."
-                      : "Cash disbursement rails are currently paused while executive honorarium policy is under editorial review. Please select Option 2 to claim transferable APC publication waivers."}
-                  </p>
-                  {payoutOption === "bank" && (
-                    <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 text-xs">
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Select Payout Rail</label>
-                        <div className="grid grid-cols-4 gap-1.5">
-                          {(["PayPal", "Payoneer", "Wise", "Other"] as const).map((service) => (
-                            <button
-                              key={service}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setPayoutService(service)
-                              }}
-                              className={`py-1.5 px-1.5 rounded-lg text-[11px] font-bold border transition-all text-center ${
-                                payoutService === service
-                                  ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-2xs"
-                                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]"
-                              }`}
-                            >
-                              {service}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">
-                          {payoutService} Account Email
-                        </label>
-                        <input 
-                          type="email" 
-                          value={payoutEmail} 
-                          onChange={(e) => setPayoutEmail(e.target.value)}
-                          placeholder={`name@domain.com (${payoutService} account)`}
-                          className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">
-                          Account Holder / Full Name (Optional)
-                        </label>
-                        <input 
-                          type="text" 
-                          value={payoutBeneficiary} 
-                          onChange={(e) => setPayoutBeneficiary(e.target.value)}
-                          placeholder={getFormattedReviewerName(profile.title, profile.name) || "Dr. Marcus Vance"}
-                          className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Option 2: APC Credit Voucher */}
-                <div 
-                  onClick={() => setPayoutOption("voucher")}
-                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
-                    payoutOption === "voucher"
-                      ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 shadow-xs ring-1 ring-[#0b99ff]/20"
-                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-[#0b99ff]" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        {isDe ? "2. APC-Gutschein für nächste Publikation" : "2. Re-use as APC Voucher for Next Submission"}
-                      </span>
-                    </div>
-                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "voucher" ? "border-[#0b99ff] bg-[#0b99ff] text-white" : "border-slate-300 dark:border-slate-700"
-                    }`}>
-                      {payoutOption === "voucher" && <Check className="h-3 w-3" />}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {isDe 
-                      ? "Reinvestieren Sie das Honorar für 50% bis 100% APC-Erlass bei eigener Einreichung. Gutschriften werden für Gründlichkeit und Pünktlichkeit vergeben und hängen niemals von Ihrer Gutachten-Empfehlung ab."
-                      : "Convert your honorarium into an official transferable APC waiver voucher valid across all 11 journals. Reviewer credits are awarded for thoroughness and timeliness; they never depend on your review recommendation."}
-                  </p>
-                  {payoutOption === "voucher" && (
-                    <div className="p-2.5 rounded bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 text-[11px] text-[#0b99ff] dark:text-[#38bdf8] font-medium">
-                      ✓ An immediate promotional code will be generated upon confirmation and stored in your wallet.
-                    </div>
-                  )}
-                </div>
-
-                {/* Option 3: World Bank Low-Income Economies Fee-Waiver Fund */}
-                <div 
-                  onClick={() => setPayoutOption("waiver_fund")}
-                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
-                    payoutOption === "waiver_fund"
-                      ? "border-rose-500 dark:border-rose-500 bg-rose-50/20 dark:bg-rose-950/20 shadow-xs ring-1 ring-rose-500/20"
-                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <HeartHandshake className="h-4 w-4 text-rose-500" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        {isDe ? "3. Spende an Erlassfonds für Weltbank-Niedrigeinkommen" : "3. Donate to World Bank Low-Income Economies Fee-Waiver Fund"}
-                      </span>
-                    </div>
-                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "waiver_fund" ? "border-rose-600 bg-rose-600 text-white" : "border-slate-300 dark:border-slate-700"
-                    }`}>
-                      {payoutOption === "waiver_fund" && <Check className="h-3 w-3" />}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {isDe 
-                      ? "100% Ihres Honorars finanzieren Artikel-Bearbeitungsgebühren für Forscher aus Ländern mit niedrigem Einkommen (Weltbank-Klassifizierung)."
-                      : "100% of your honorarium subsidizes publication fees for researchers and scholars from World Bank low-income economies under our solidarity program."}
-                  </p>
-                  {payoutOption === "waiver_fund" && (
-                    <div className="p-2.5 rounded bg-rose-50/80 dark:bg-rose-950/40 text-[11px] text-rose-800 dark:text-rose-300 font-medium">
-                      ♥ You will receive an official Philanthropic Recognition Certificate for your academic dossier.
-                    </div>
-                  )}
-                </div>
-
-                {/* Option 4: University Library Donation */}
-                <div 
-                  onClick={() => setPayoutOption("library")}
-                  className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${
-                    payoutOption === "library"
-                      ? "border-amber-500 dark:border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 shadow-xs ring-1 ring-amber-500/20"
-                      : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Library className="h-4 w-4 text-amber-500" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        {isDe ? "4. Spende an Ihre Universitätsbibliothek" : "4. Donate to Your University Library OA Fund"}
-                      </span>
-                    </div>
-                    <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                      payoutOption === "library" ? "border-amber-600 bg-amber-600 text-white" : "border-slate-300 dark:border-slate-700"
-                    }`}>
-                      {payoutOption === "library" && <Check className="h-3 w-3" />}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {isDe 
-                      ? "Stiften Sie das Honorar direkt an den Open-Access-Erwerbungsfonds Ihrer Heimatuniversität zur Förderung freier Forschung."
-                      : "Direct the €50 honorarium directly to your home institution's academic library to support university open access publishing."}
-                  </p>
-                  {payoutOption === "library" && (
-                    <div className="space-y-1 pt-1 text-xs">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Institutional Library</label>
-                      <input 
-                        type="text" 
-                        value={payoutLibraryName || `${profile.institution} Medical Library`}
-                        onChange={(e) => setPayoutLibraryName(e.target.value)}
-                        className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
-                      />
-                    </div>
-                  )}
-                </div>
-
-              </div>
-
-              {/* Submit Action */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                <span className="text-[11px] text-slate-500">
-                  {isDe 
-                    ? "Auszahlungsanträge werden vom Managing Editor im Admin-Ledger geprüft und freigegeben." 
-                    : "Requests are recorded in the editorial360 Admin Ledger for managing editor release."}
-                </span>
-
-                <Button
-                  onClick={handleSubmitPayout}
-                  disabled={isSubmittingPayout || payoutOption === "bank"}
-                  className={`${payoutOption === "bank" ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed" : "bg-[#0b99ff] hover:bg-[#0088e0] text-white cursor-pointer"} text-xs font-bold px-5 py-2 shadow-xs shrink-0`}
-                >
-                  <CreditCard className="h-3.5 w-3.5 mr-1.5" />
-                  {payoutOption === "bank" 
-                    ? (isDe ? "Barauszahlung pausiert (in Beratung)" : "Cashout Paused (Policy in Discussion)")
-                    : isSubmittingPayout 
-                    ? (isDe ? "Wird übermittelt..." : "Submitting Request...") 
-                    : (isDe ? "Gutschein / Spende einreichen" : "Submit Voucher / Donation Request")}
-                </Button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* ================= TAB 5: CERTIFICATE & PEER REVIEW CV EXPORT ================= */}
-      {activeTab === "certificate" && (
-        <div className="space-y-5">
-          
-          {/* Header & Sub-Tab Switcher */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {isDe ? "Verifiziertes Gutachter-Zertifikat & Akademischer CV" : "Verified Reviewer Certificate & Academic CV"}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {isDe ? "Offizielle Nachweise und vollständiges Gutachter-Dossier für Berufungsverfahren, Tenure und Fördermittel." : "Official verification credentials and comprehensive peer review dossier for tenure, promotion, and grant filings."}
-              </p>
-            </div>
-
-            {/* Mode Switcher Tabs */}
-            <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold shadow-2xs shrink-0">
-              <button
-                type="button"
-                onClick={() => setCertViewMode("certificate")}
-                className={`px-3.5 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
-                  certViewMode === "certificate" 
-                    ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-xs font-bold border border-slate-200/80 dark:border-slate-700" 
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <span>{isDe ? "Offizielles Zertifikat" : "Official Certificate"}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setCertViewMode("cv")}
-                className={`px-3.5 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-2 ${
-                  certViewMode === "cv" 
-                    ? "bg-white dark:bg-slate-900 text-[#0b99ff] dark:text-sky-400 shadow-xs font-bold border border-slate-200/80 dark:border-slate-700" 
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <FileText className="h-4 w-4 text-[#0b99ff]" />
-                <span>{isDe ? "Akademischer Reviewer-CV" : "Peer Review Academic CV"}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* VIEW 1: OFFICIAL CERTIFICATE */}
-          {certViewMode === "certificate" && (
-            <div className="space-y-4">
-              
-              {/* Quick Status / Switcher Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-slate-500 font-semibold">{isDe ? "Status:" : "Earned Status:"}</span>
-                  <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs ${
-                    reviewsDone > 0 
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300"
-                      : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300"
-                  }`}>
-                    {reviewsDone > 0 
-                      ? (isDe ? `${reviewsDone} Manuskripte Begutachtet (Zertifiziert)` : `${reviewsDone} Manuscripts Reviewed (Active)`)
-                      : (isDe ? "0 / 1 Begutachtungen (In Bearbeitung)" : "0 / 1 Reviews Completed (In Progress)")}
-                  </span>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
-                    ⚡ {isDe ? "100% Pünktliche Abgabe (Gold-Siegel)" : "100% On-Time Turnaround (Gold Distinction)"}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {reviewsDone === 0 ? (
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        const newDone = 1
-                        setReviewsDone(newDone)
-                        try {
-                          const email = user?.email || "reviewer@scholarlyopen.org"
-                          localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, String(newDone))
-                        } catch (e) {}
-                      }}
-                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-7 px-3 cursor-pointer"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                      {isDe ? "1. Gutachten abschließen (Demo)" : "Simulate 1st Completed Review"}
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const newDone = 0
-                        setReviewsDone(newDone)
-                        try {
-                          const email = user?.email || "reviewer@scholarlyopen.org"
-                          localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, "0")
-                        } catch (e) {}
-                      }}
-                      className="text-xs h-7 px-2.5 text-slate-500 border-slate-300 cursor-pointer"
-                    >
-                      {isDe ? "Auf 0 zurücksetzen (Neuer Gutachter)" : "Reset to 0 (New Reviewer)"}
-                    </Button>
-                  )}
-
-                  {reviewsDone === 0 ? (
-                    <Button
-                      disabled
-                      className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-xs font-semibold px-3.5 h-8 cursor-not-allowed shadow-none flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
-                      title={isDe ? "Gesperrt: Erfordert mindestens 1 abgeschlossenes Gutachten" : "Locked: Complete at least 1 peer review to unlock certificate"}
-                    >
-                      <Lock className="h-3.5 w-3.5 text-slate-400" />
-                      {isDe ? "Zertifikat gesperrt (0 Gutachten)" : "Certificate Locked (0 Reviews)"}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handlePrintCertificate}
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
-                    >
-                      <Download className="h-3.5 w-3.5" />
-                      {isDe ? "Zertifikat drucken (PDF)" : "Print Certificate (PDF)"}
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* IF 0 REVIEWS DONE: SHOW GATEWAY QUALIFICATION CERTIFICATE + LOCKED MILESTONE */}
-              {reviewsDone === 0 ? (
-                <div className="space-y-6">
-                  {/* Milestone Card Explaining Why Peer Review Certificate requires contributions */}
-                  <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-                    <div className="flex items-start gap-3">
-                      <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-amber-950 dark:text-amber-200 text-sm">
-                          {isDe ? "Peer-Review-Zertifikat noch gesperrt (0 Gutachten abgeschlossen)" : "Verified Peer Review Certificate Locked (0 Reviews Completed)"}
-                        </h4>
-                        <p className="text-[11px] text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
-                          {isDe 
-                            ? "Um akademische Integrität zu gewährleisten, ist das offizielle Begutachtungszertifikat an reale Gutachterbeiträge gebunden. Schließen Sie Ihr erstes zugewiesenes Manuskript ab, um Ihr offizielles Zertifikat mit Crossref-Zeitstempel freizuschalten."
-                            : "In compliance with COPE transparency standards, verified peer evaluation certificates are earned through genuine contributions. Complete your first assigned evaluation below to activate your permanent, Crossref-timestamped credential."}
-                        </p>
-                      </div>
-                    </div>
-
-                    {activeReviews.length > 0 && (
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          setSelectedReviewForEval(activeReviews[0])
-                        }}
-                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs h-8 px-4 shrink-0 cursor-pointer shadow-xs"
-                      >
-                        <FileText className="h-3.5 w-3.5 mr-1" />
-                        {isDe ? "Manuskript jetzt begutachten" : `Evaluate ${activeReviews[0].id}`}
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* GATEWAY CERTIFICATE (Earned upon passing the exam) */}
-                  <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/80 dark:border-sky-500/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
-                    <div className="flex items-center justify-center">
-                      <img 
-                        src="/logo-full-color.svg" 
-                        alt="Scholarly Open" 
-                        className="h-14 sm:h-16 w-auto object-contain dark:hidden"
-                        onError={(e) => {
-                          ;(e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
-                        }}
-                      />
-                      <img 
-                        src="/logo-full.svg" 
-                        alt="Scholarly Open" 
-                        className="h-14 sm:h-16 w-auto object-contain hidden dark:block"
-                      />
-                    </div>
-
-                    <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
-                      Scholarly Open Standards Board • Gateway Examination
-                    </div>
-
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
-                      Certificate of Peer Review Qualification
-                    </h2>
-
-                    <div className="inline-block border-b-2 border-sky-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                      {getFormattedReviewerName(profile.title, profile.name)}
-                    </div>
-
-                    <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-                      This official credential confirms that <strong>{getFormattedReviewerName(profile.title, profile.name)}</strong> has successfully passed the Reviewer Gateway Examination, verifying proficiency in constructive academic English, COPE publication ethics, and methodological rigor in <strong>{profile.primaryDiscipline.toUpperCase()}</strong>.
-                    </p>
-
-                    <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Gateway Credential ID:</span>
-                        <strong className="text-slate-900 dark:text-white font-mono">SO-GW-2026-9041</strong>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Assessment Status:</span>
-                        <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Passed (80%+ Standard) ✓</strong>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Discipline Track:</span>
-                        <strong className="text-slate-900 dark:text-white">{DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}</strong>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>Verified ORCID: {profile.orcid || "Verified Academic Record"}</span>
-                      <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Gateway Certified Seal</span>
-                    </div>
-                  </Card>
-                </div>
-              ) : (
-                /* IF 1+ REVIEWS DONE: SHOW OFFICIAL VERIFIED PEER REVIEW CERTIFICATE */
-                <Card className="bg-white dark:bg-slate-950 border-4 border-double border-emerald-700/80 dark:border-emerald-600/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
-                  
-                  {/* Official Brand Logo */}
-                  <div className="flex items-center justify-center gap-3">
-                    <img 
-                      src="/logo-mark.svg" 
-                      alt="Scholarly Open" 
-                      className="h-12 w-auto object-contain"
-                      onError={(e) => {
-                        ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
-                      }}
-                    />
-                    <div className="text-2xl font-black text-[#132415] dark:text-white tracking-tight">
-                      Scholarly <span className="text-[#F6BB14]">Open</span>
-                    </div>
-                  </div>
-
-                  <div className="text-[11px] uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
-                    Official Editorial Board Verification
-                  </div>
-
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Certificate of Verified Peer Review
-                  </h2>
-
-                  <div className="inline-block border-b-2 border-emerald-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                    {getFormattedReviewerName(profile.title, profile.name)}
-                  </div>
-
-                  <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-                    This official credential confirms that {getFormattedReviewerName(profile.title, profile.name)} has completed verified, editor-endorsed scientific peer evaluations in full compliance with COPE standards and Scholarly Open ethical guidelines.
-                  </p>
-
-                  <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Verified ORCID Record:</span>
-                      <strong className="text-slate-900 dark:text-white font-mono">{profile.orcid || "Verified Academic Record"}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Total Completed Reviews:</span>
-                      <strong className="text-slate-900 dark:text-white">{reviewsDone} Verified Manuscript{reviewsDone > 1 ? "s" : ""} (2026)</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Crossref Review Activity:</span>
-                      <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Synced & Timestamped ✓</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Turnaround Performance:</span>
-                      <strong className="text-sky-700 dark:text-sky-400 font-bold">100% On-Time Delivery Seal (Avg 11.4d) ⚡</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Editorial Rigor Distinction:</span>
-                      <strong className="text-purple-700 dark:text-purple-400 font-bold">4.9 / 5.0 (Top 5% Reviewer Honors) 🏆</strong>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                    <span>Hash: SHA256:88a109fe2c041</span>
-                    <span className="font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Editorial Board Certified Seal</span>
-                  </div>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {/* VIEW 2: COMPREHENSIVE PEER REVIEW ACADEMIC CV & IMPACT DOSSIER */}
-          {certViewMode === "cv" && (
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  <span>Tenure-Ready Academic Dossier · Synchronized with ORCID and Web of Science</span>
-                </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <Button
+                    type="button"
                     onClick={() => {
-                      const orcidData = JSON.stringify({
-                        scholar: getFormattedReviewerName(profile.title, profile.name),
-                        orcid: profile.orcid || "N/A",
-                        publisher: "Scholarly Open",
-                        verifiedReviews: [
-                          { id: "SOENG-26-RS001", journal: "Engineering & Applied Sciences", date: "2026-08-20", type: "review", blind: "double-blind" },
-                          { id: "SOMED-26-CR002", journal: "Scholarly Open: Medicine", date: "2026-06-12", type: "review", blind: "double-blind" },
-                          { id: "SOSOC-26-RV003", journal: "Social Sciences & Humanities", date: "2026-05-28", type: "review", blind: "double-blind" }
-                        ]
-                      }, null, 2)
-                      const blob = new Blob([orcidData], { type: "application/json" })
-                      const url = URL.createObjectURL(blob)
-                      const a = document.createElement("a")
-                      a.href = url
-                      const cleanPrefix = (profile.name || "Reviewer").replace(/[^a-zA-Z0-9]/g, "_")
-                      a.download = `${cleanPrefix}_PeerReview_ORCID_Record.json`
-                      a.click()
+                      onTabChange && onTabChange("portfolio")
+                      if (activeReviews.length > 0) {
+                        setSelectedReviewForEval(activeReviews[0])
+                      }
                     }}
-                    variant="outline"
-                    className="text-xs font-semibold px-3 py-2 cursor-pointer shadow-xs flex items-center gap-1.5"
+                    className="bg-[#0b99ff] hover:bg-[#0080dd] text-white font-semibold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer"
                   >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>{isDe ? "ORCID JSON Exportieren" : "Export ORCID (JSON)"}</span>
-                  </Button>
-
-                  <Button
-                    onClick={handlePrintCV}
-                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-4 py-2 cursor-pointer shadow-xs flex items-center gap-1.5"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>{isDe ? "Akademischen CV drucken (PDF)" : "Print Academic CV (PDF)"}</span>
+                    <FileText className="h-4 w-4 mr-1.5" />
+                    <span>{isDe ? "Manuskript SOMED-26-RW01 bewerten" : "Evaluate Manuscript SOMED-26-RW01"}</span>
                   </Button>
                 </div>
               </div>
 
-              {/* Complete Academic CV Layout */}
-              <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
-                
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b-2 border-[#166534] dark:border-emerald-600">
-                  <div className="flex items-center">
-                    <img 
-                      src="/logo-full-color.svg" 
-                      alt="Scholarly Open" 
-                      className="h-10 sm:h-12 w-auto object-contain dark:hidden"
-                      onError={(e) => {
-                        ;(e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
-                      }}
-                    />
-                    <img 
-                      src="/logo-full.svg" 
-                      alt="Scholarly Open" 
-                      className="h-10 sm:h-12 w-auto object-contain hidden dark:block"
-                    />
-                  </div>
-
-                  <div className="text-left sm:text-right text-xs">
-                    <div className="font-extrabold text-slate-900 dark:text-white text-xs uppercase tracking-wider">
-                      Academic Peer Review Dossier
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-mono">
-                      Verifier ID: SO-REV-CV-2026 · Updated 2026-08-24
-                    </div>
-                  </div>
-                </div>
-
-                {/* Scholar Profile Card */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
+              {/* Profile Card (from screenshot) */}
+              {/* Profile Card (Elegant & Minimal Academic Layout) */}
+              <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-4">
+                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
                       {profile.photoUrl ? (
                         <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
                       ) : (
                         <span>{getReviewerInitials(profile.name)}</span>
                       )}
                     </div>
-                    <div>
-                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+
+                    <div className="space-y-1">
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
                         {getFormattedReviewerName(profile.title, profile.name)}
-                      </h3>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">
-                        {profile.department ? `${profile.department} · ` : ""}{profile.institution} ({profile.country})
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
+                          {getFormattedReviewerName(profile.title, profile.name)}
+                        </h2>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                          {isDe ? "Eingeladener Fachgutachter" : "Invited Expert Referee"}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                        {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Obafemi Awolowo University (OAU), Ile-Ife, Nigeria"}
+                        {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Hospital las Higueras, Talcahuano, Chile"}
                       </p>
-                      <div className="flex items-center gap-2 mt-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
-                        <span>✓ ORCID: {profile.orcid || "Verified Academic Record"}</span>
-                        <span>•</span>
-                        <span>WoS: WOS-REV-2026-9812</span>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <strong className="text-slate-700 dark:text-slate-300 font-semibold">{isDe ? "Forschungsinteressen: " : "Research Interests: "}</strong>
+                        {profile.keywords.length > 0
+                          ? profile.keywords.slice(0, 4).join(", ")
+                          : "Materials Science, Nanostructured Materials, Thin Films, Sensors"}
+                      : "Cardiovascular Surgery, Acute Aortic Dissection, Thoracic Surgery, Clinical Outcomes"}
+                      </p>
+                      <div className="pt-1.5 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleOpenProfileModal}
+                          className="px-3.5 py-1 rounded-lg border border-sky-200 dark:border-sky-800/80 bg-sky-50/70 dark:bg-sky-950/40 text-[#0b99ff] hover:bg-sky-100 dark:hover:bg-sky-900/60 font-semibold text-xs transition-colors cursor-pointer"
+                        >
+                          {isDe ? "Vollständiges Profil ansehen" : "View Full Profile"}
+                          {isDe ? "Profil verwalten" : "Edit Profile"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCertViewMode("cv")
+                            setCertViewMode("certificate")
+                            onTabChange && onTabChange("certificate")
+                          }}
+                          className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 text-xs font-medium transition-colors cursor-pointer"
+                        >
+                          {isDe ? "CV Exportieren" : "Export CV"}
+                          {isDe ? "Bestellungsurkunde ansehen" : "View Appointment Certificate"}
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="shrink-0 flex flex-wrap gap-2 text-[11px]">
-                    <span className="px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold flex items-center gap-1">
-                      <Trophy className="h-3 w-3 text-amber-600 dark:text-amber-400" /> Top Reviewer 2026
+                  {/* Matching Topics Quick Tag */}
+                  <div className="hidden lg:flex flex-col items-end gap-1.5 text-right">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      {isDe ? "Fachgebiet" : "Primary Discipline"}
                     </span>
-                    <span className="px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1">
-                      <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" /> COPE Certified Reviewer
+                    <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-800">
+                      {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}
+                      {DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || "Medicine & Clinical Health"}
                     </span>
-                    <span className="px-2.5 py-1 rounded-md bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-bold flex items-center gap-1">
-                      <Zap className="h-3 w-3 text-[#0b99ff]" /> Fast Turnaround (&lt;12d)
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      ● {profile.availabilityStatus === "Available" ? (isDe ? "Verfügbar für Gutachten" : "Available for Invitations") : (isDe ? "Im Forschungsurlaub" : "On Sabbatical")}
+                      ● {isDe ? "Aktiv für Runde-2-Begutachtung" : "Active for Round 2 Evaluation"}
                     </span>
                   </div>
                 </div>
-
-                {/* Lifetime Summary Metrics */}
-                <div className="space-y-2">
-                  <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-700 dark:text-slate-300">
-                    Lifetime Peer Review Summary Metrics
-                  </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
-                      <div className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">12</div>
-                      <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Completed Reviews</div>
-                    </div>
-                    <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
-                      <div className="text-2xl font-extrabold text-[#0b99ff] dark:text-[#0b99ff]">4.9 / 5.0</div>
-                      <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Editorial Rigor Score</div>
-                    </div>
-                    <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
-                      <div className="text-2xl font-extrabold text-slate-900 dark:text-white">9.2 Days</div>
-                      <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Avg Turnaround Time</div>
-                    </div>
-                    <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
-                      <div className="text-2xl font-extrabold text-slate-900 dark:text-white">4 Journals</div>
-                      <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Core Disciplines</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Journal Contributions Breakdown */}
-                <div className="space-y-2">
-                  <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-700 dark:text-slate-300">
-                    Disciplinary Portfolio Contributions
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
-                    <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
-                      <div className="font-bold text-slate-900 dark:text-white">Scholarly Open: Medicine</div>
-                      <div className="text-[11px] text-slate-500">6 Reviews · Lead Reviewer</div>
-                    </div>
-                    <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
-                      <div className="font-bold text-slate-900 dark:text-white">Engineering & Applied Sciences</div>
-                      <div className="text-[11px] text-slate-500">3 Reviews · Senior Reviewer</div>
-                    </div>
-                    <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
-                      <div className="font-bold text-slate-900 dark:text-white">Social Sciences & Humanities</div>
-                      <div className="text-[11px] text-slate-500">2 Reviews · Reviewer</div>
-                    </div>
-                    <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
-                      <div className="font-bold text-slate-900 dark:text-white">Environmental Science</div>
-                      <div className="text-[11px] text-slate-500">1 Review · Expert Contributor</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Verified Manuscript Activity Log Table */}
-                <div className="space-y-2">
-                  <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-700 dark:text-slate-300">
-                    Verified Chronological Review Activity Log
-                  </h4>
-                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead className="bg-slate-100/80 dark:bg-slate-900 text-slate-700 dark:text-slate-300 uppercase text-[10px] font-bold">
-                        <tr>
-                          <th className="p-3 border-b border-slate-200 dark:border-slate-800">Manuscript ID</th>
-                          <th className="p-3 border-b border-slate-200 dark:border-slate-800">Title</th>
-                          <th className="p-3 border-b border-slate-200 dark:border-slate-800">Journal</th>
-                          <th className="p-3 border-b border-slate-200 dark:border-slate-800">Completed Date</th>
-                          <th className="p-3 border-b border-slate-200 dark:border-slate-800">Protocol</th>
-                          <th className="p-3 border-b border-slate-200 dark:border-slate-800">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        <tr>
-                          <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOENG-26-RS001</td>
-                          <td className="p-3 font-medium text-slate-900 dark:text-white">Decentralized Federated Learning on Non-IID Data</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">Engineering & Applied Sciences</td>
-                          <td className="p-3 text-slate-500">2026-08-20</td>
-                          <td className="p-3 text-slate-500">Double-Blind</td>
-                          <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
-                        </tr>
-                        <tr>
-                          <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOMED-26-CR002</td>
-                          <td className="p-3 font-medium text-slate-900 dark:text-white">Clinical Evaluation of AI Diagnostics in Cardiology</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">Scholarly Open: Medicine</td>
-                          <td className="p-3 text-slate-500">2026-06-12</td>
-                          <td className="p-3 text-slate-500">Double-Blind</td>
-                          <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
-                        </tr>
-                        <tr>
-                          <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOSOC-26-RV003</td>
-                          <td className="p-3 font-medium text-slate-900 dark:text-white">Socio-Economic Impacts of Urban Green Spaces</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">Social Sciences & Humanities</td>
-                          <td className="p-3 text-slate-500">2026-05-28</td>
-                          <td className="p-3 text-slate-500">Double-Blind</td>
-                          <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
-                        </tr>
-                        <tr>
-                          <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOMED-25-RS119</td>
-                          <td className="p-3 font-medium text-slate-900 dark:text-white">Pharmacokinetic Optimization of Targeted Nanocarriers</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">Scholarly Open: Medicine</td>
-                          <td className="p-3 text-slate-500">2025-11-14</td>
-                          <td className="p-3 text-slate-500">Double-Blind</td>
-                          <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
-                        </tr>
-                        <tr>
-                          <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOENV-25-ES044</td>
-                          <td className="p-3 font-medium text-slate-900 dark:text-white">Electrochemical Direct Air Capture via Solid Sorbents</td>
-                          <td className="p-3 text-slate-600 dark:text-slate-400">Environmental Science</td>
-                          <td className="p-3 text-slate-500">2025-09-03</td>
-                          <td className="p-3 text-slate-500">Double-Blind</td>
-                          <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500">
-                  <div>Digital Cryptographic Hash: <span className="font-mono font-bold text-slate-700 dark:text-slate-300">SHA256:88a109fe2c041</span></div>
-                  <div>Scholarly Open Editorial Registry • Germany & Global Publishing</div>
-                </div>
-
               </div>
-            </div>
-          )}
 
-        </div>
+              {/* Concise Reviewer Metrics Card */}
+              <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3">
+                {/* Standard Editorial Metrics (Concise & Academic) */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Award className="h-4 w-4 text-[#0b99ff]" />
+                      {isDe ? "Gutachter-Kennzahlen & Rigor-Status" : "Reviewer Metrics & Rigor Performance"}
+                      {isDe ? "Begutachtungs-Status & Editorial-Standards" : "Editorial Review Status & Rigor Standards"}
+                    </h3>
+                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
+                      {isDe ? "COPE-Audit: Konform" : "COPE Ethics Verified"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center items-center py-1">
+                    {/* 1. Completed Evaluations */}
+                    <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                      <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                        {reviewsDone}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center items-center py-1">
+                          {/* 1. Active Assignment */}
+                          <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                            <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight font-mono">
+                              SOMED-26-RW01
+                            </div>
+                            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                              {isDe ? "ABGESCHL. GUTACHTEN" : "REVIEWS COMPLETED"}
+                              {isDe ? "AKTIVES MANUSKRIPT" : "ASSIGNED MANUSCRIPT"}
+                            </div>
+                          </div>
+
+                          {/* 2. Review Turnaround Target */}
+                          <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                            <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                              <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                                {profile.preferredTurnaround || 14} {isDe ? "Tage" : "Days"}
+                              </div>
+                              <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                                {isDe ? "ZIEL-BEGUTACHTUNGSZEIT" : "TARGET TURNAROUND"}
+                                {isDe ? "BEGUTACHTUNGSZEIT" : "TARGET TURNAROUND"}
+                              </div>
+                            </div>
+
+                            {/* 3. Gateway Rigor Score */}
+                            <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                              {/* 3. Appointment Basis */}
+                              <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                                <div className="text-base sm:text-lg font-black text-[#0b99ff] leading-tight">
+                                  95%
+                                  {isDe ? "Eingeladener Experte" : "Invited Expert"}
+                                </div>
+                                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                                  {isDe ? "GATEWAY-QUALIFIKATION" : "GATEWAY RIGOR SCORE"}
+                                  {isDe ? "EDITORIAL-STATUS" : "APPOINTMENT BASIS"}
+                                </div>
+                              </div>
+
+                              {/* 4. Honoraria Tier */}
+                              <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                                {/* 4. COPE Compliance */}
+                                <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60">
+                                  <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 leading-tight">
+                                    €10 – €50
+                                    100% {isDe ? "Konform" : "Compliant"}
+                                  </div>
+                                  <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                                    {isDe ? "HONORAR PRO BERICHT" : "HONORARIUM / REPORT"}
+                                    {isDe ? "PUBLIKATIONSETHIK" : "COPE ETHICS BENCHMARK"}
+                                  </div>
+                                </div>
+
+                                {/* 5. Max Review Load */}
+                                <div className="p-2 rounded-lg bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 col-span-2 sm:col-span-1">
+                                  <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                                    1 / mo
+                                  </div>
+                                  <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
+                                    {isDe ? "MAX. KAPAZITÄT" : "MAX LOAD CAPACITY"}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Share ORCID & LinkedIn */}
+                              {/* Accreditation Note */}
+                              <div className="flex flex-col sm:flex-row items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 gap-2">
+                                <span>{isDe ? "Offiziell akkreditiert im Scholarly Open Gutachter-Register" : "Officially accredited in the Scholarly Open Verified Reviewer Registry"}</span>
+                                <span>{isDe ? "Offiziell akkreditiert im Scholarly Open Gutachter-Register · Scholarly Open: Medicine" : "Officially accredited in the Scholarly Open Verified Reviewer Registry · Scholarly Open: Medicine"}</span>
+                                <div className="flex items-center gap-4">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (typeof window !== "undefined") {
+                                        const orcidUrl = profile.orcid ? `https://orcid.org/${profile.orcid}` : "https://orcid.org"
+                                        window.open(orcidUrl, "_blank")
+                                      }
+                                      setCertViewMode("certificate")
+                                      onTabChange && onTabChange("certificate")
+                                    }}
+                                    className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                                  >
+                                    <Link2 className="h-3 w-3" />
+                                    <span>ORCID</span>
+                                    <Award className="h-3.5 w-3.5" />
+                                    <span>{isDe ? "Bestellungsurkunde" : "Appointment Record"}</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (typeof window !== "undefined") {
+                                        const text = encodeURIComponent("I am a verified Peer Reviewer with Scholarly Open! Track my verified peer evaluations and academic badges.")
+                                        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${text}`, "_blank")
+                                      }
+                                    }}
+                                    className="inline-flex items-center gap-1 text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                                  >
+                                    <Linkedin className="h-3 w-3" />
+                                    <span>LinkedIn</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Academic Recognition Badges (BIG BADGES & SMALL TEXT UNDERNEATH) */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                  {isDe ? "Erhaltene Auszeichnungen & Abzeichen" : "Earned Academic Prestige Badges"}
+                                </h4>
+                                <span className="text-[11px] text-slate-400">
+                                  {isDe ? "Freigeschaltet durch Peer-Review-Leistung" : "Unlocked through verified review contributions"}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {/* Badge 1 */}
+                                <div className="p-4 rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-amber-400 hover:shadow-xs transition-all">
+                                  <div className="h-12 w-12 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2 ring-4 ring-amber-100/60 dark:ring-amber-900/20">
+                                    <Trophy className="h-6 w-6" />
+                                    {/* Active Manuscript Evaluation Desk (Direct Action Card) */}
+                                    <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xs space-y-4">
+                                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                        <div>
+                                          <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                                            {isDe ? "ZUR BEGUTACHTUNG VORLIEGEND (RUNDE 2)" : "ASSIGNED UNDER REVIEW (ROUND 2 RE-EVALUATION)"}
+                                          </span>
+                                          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+                                            Acute Aortic Dissection: An Evidence-Based Medicine Perspective
+                                          </h3>
+                                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                                            <span>ID: <strong className="text-slate-700 dark:text-slate-300 font-mono">SOMED-26-RW01</strong></span>
+                                            <span>·</span>
+                                            <span>Journal: <strong className="text-slate-700 dark:text-slate-300">Scholarly Open: Medicine</strong></span>
+                                            <span>·</span>
+                                            <span>Track: <strong className="text-slate-700 dark:text-slate-300">Cardiovascular Surgery</strong></span>
+                                          </div>
+                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                                            Top Reviewer 2026
+                                          </div>
+                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                                            {isDe ? "EDITORIAL BOARD AUSZEICHNUNG" : "EDITORIAL BOARD COMMENDATION"}
+                                          </div>
+                                        </div>
+
+                                        {/* Badge 2 */}
+                                        <div className="p-4 rounded-xl border border-sky-200/80 dark:border-sky-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-sky-400 hover:shadow-xs transition-all">
+                                          <div className="h-12 w-12 rounded-full bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] flex items-center justify-center mb-2 ring-4 ring-sky-100/60 dark:ring-sky-900/20">
+                                            <Zap className="h-6 w-6" />
+                                          </div>
+                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                                            Fast Turnaround
+                                          </div>
+                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                                            {isDe ? "TOP 5% SCHNELLIGKEIT (<12 TAGE)" : "TOP 5% RESPONSE SPEED (<12D)"}
+                                          </div>
+                                          <div className="shrink-0">
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                                              {isDe ? "Runde 2 Rückmeldung ausstehend" : "Round 2 Feedback Pending"}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        {/* Badge 3 */}
+                                        <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-emerald-400 hover:shadow-xs transition-all">
+                                          <div className="h-12 w-12 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 ring-4 ring-emerald-100/60 dark:ring-emerald-900/20">
+                                            <ShieldCheck className="h-6 w-6" />
+                                          </div>
+                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                                            COPE Ethics Certified
+                                          </div>
+                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                                            {isDe ? "PUBLIKATIONSETHIK VERIFIZIERT" : "PUBLICATION ETHICS VERIFIED"}
+                                          </div>
+                                        </div>
+                                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                          {isDe
+                                            ? "Der Autor hat die überarbeitete Manuskriptfassung eingereicht und ein detailliertes Punkt-für-Punkt-Antwortschreiben zu den Gutachteranmerkungen aus Runde 1 hinterlegt. Erweiterte klinische Vergleichstabellen und aktuelle Studienreferenzen wurden integriert."
+                                            : "The author has submitted the revised manuscript and a detailed point-by-point response to Round 1 reviewer recommendations. Structured clinical comparison tables and expanded recent trial references have been incorporated."}
+                                        </p>
+
+                                        {/* Badge 4 */}
+                                        <div className="p-4 rounded-xl border border-purple-200/80 dark:border-purple-900/40 bg-white dark:bg-slate-950 text-center flex flex-col items-center shadow-2xs hover:border-purple-400 hover:shadow-xs transition-all">
+                                          <div className="h-12 w-12 rounded-full bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 ring-4 ring-purple-100/60 dark:ring-purple-900/20">
+                                            <Star className="h-6 w-6 fill-purple-600/20" />
+                                          </div>
+                                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                                            5-Star Rigor Endorsed
+                                          </div>
+                                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1 text-center">
+                                            {isDe ? "HANDLING EDITOR AUSZEICHNUNG" : "HANDLING EDITOR DISTINCTION"}
+                                          </div>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                                          <Button
+                                            type="button"
+                                            onClick={() => {
+                                              onTabChange && onTabChange("portfolio")
+                                              if (activeReviews.length > 0) {
+                                                setSelectedReviewForEval(activeReviews[0])
+                                              }
+                                            }}
+                                            className="bg-[#0b99ff] hover:bg-[#0080dd] text-white font-semibold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer"
+                                          >
+                                            <FileText className="h-4 w-4 mr-1.5" />
+                                            <span>{isDe ? "Runde 2 Begutachtungsformular öffnen" : "Open Round 2 Review & Decision Form"}</span>
+                                          </Button>
+                                          <a
+                                            href="/manuscripts/Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx"
+                                            download
+                                            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+                                          >
+                                            <Download className="h-4 w-4 text-slate-400" />
+                                            <span>{isDe ? "Revidiertes Manuskript (DOCX)" : "Download Revised Manuscript (DOCX)"}</span>
+                                          </a>
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                              onTabChange && onTabChange("portfolio")
+                                              if (activeReviews.length > 0) {
+                                                setSelectedReviewForEval(activeReviews[0])
+                                              }
+                                            }}
+                                            className="text-xs h-9 px-3.5 rounded-xl border-slate-200 dark:border-slate-800 cursor-pointer"
+                                          >
+                                            <Eye className="h-4 w-4 mr-1.5 text-slate-400" />
+                                            <span>{isDe ? "Autoren-Stellungnahme anzeigen" : "View Author Rebuttal Letter"}</span>
+                                          </Button>
+                                        </div>
+                                      </div>
+
+                                      {/* Reviewer Academy & Masterclasses Hub */}
+                                      <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                        <div className="flex items-center gap-3">
+                                          <div className="h-8 w-8 rounded-lg bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                                            <GraduationCap className="h-4 w-4" />
+                                            {/* Editorial Instructions & Peer Review Ethics Card */}
+                                            <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                                              <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs">
+                                                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                                                {isDe ? "Leitlinien für die Runde-2-Wiedervorlage" : "Editorial Instructions for Round 2 Re-evaluation"}
+                                              </h4>
+                                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                                                <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
+                                                  <div className="font-bold text-slate-900 dark:text-white">1. {isDe ? "Methodik & Evidenz" : "Clinical & Methodological Rigor"}</div>
+                                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                    {isDe
+                                                      ? "Prüfen Sie, ob die Evidenzbasis im Bereich der Aortendissektion und die klinische Einordnung den aktuellen chirurgischen Leitlinien entsprechen."
+                                                      : "Verify whether the evidence base and clinical framing of acute aortic dissection align with current surgical emergency guidelines."}
+                                                  </p>
+                                                </div>
+                                                <div className="space-y-0.5">
+                                                  <h3 className="font-semibold text-slate-900 dark:text-white text-xs">
+                                                    {isDe ? "Gutachter-Akademie & Weiterbildung" : "Reviewer Academy & Masterclasses"}
+                                                  </h3>
+                                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-2xl">
+                                                    <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
+                                                      <div className="font-bold text-slate-900 dark:text-white">2. {isDe ? "Überarbeitung & Rebuttal" : "Rebuttal Completeness"}</div>
+                                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                        {isDe
+                                                          ? "Kurse zu konstruktivem Feedback, COPE-Ethik und KI-Forensik."
+                                                          : "Sharpen your peer-review rigor with specialized courses in constructive author feedback, COPE ethics, and synthetic image forensics."}
+                                                        ? "Bewerten Sie, ob die Autoren auf alle Kritikpunkte aus Runde 1 (Referenzen, Tabellen, Strukturierung) adäquat eingegangen sind."
+                    : "Assess whether the authors have satisfactorily addressed all Round 1 comments (tables, literature breadth, structural flow)."}
+                                                      </p>
+                                                    </div>
+                                                    <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 space-y-1">
+                                                      <div className="font-bold text-slate-900 dark:text-white">3. {isDe ? "Vertraulichkeit (COPE)" : "Double-Blind Confidentiality"}</div>
+                                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                        {isDe
+                                                          ? "Alle Manuskriptinhalte und Gutachterdaten unterliegen strikter Vertraulichkeit gemäß COPE-Richtlinien."
+                                                          : "All manuscript data and evaluation commentary remain strictly confidential under international COPE double-blind standards."}
+                                                      </p>
+                                                    </div>
+                                                </div>
+
+                                                <Link
+                                                  href="/trainings"
+                                                  className="text-xs font-semibold text-[#0b99ff] hover:underline flex items-center gap-1 shrink-0"
+                                                >
+                                                  <span>{isDe ? "Kurse ansehen" : "Explore Masterclasses"}</span>
+                                                  <ArrowRight className="h-3.5 w-3.5" />
+                                                </Link>
+                                              </div>
+
+                                              {/* Pending Invitations Alert Block */}
+                                              {reviewInvitations.length > 0 && (
+                                                <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
+                                                  <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                      <span className="h-2 w-2 rounded-full bg-[#0b99ff]" />
+                                                      <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                                                        {isDe ? "Ausstehende Begutachtungsanfrage" : "Pending Review Invitation"}
+                                                      </h3>
+                                                    </div>
+                                                    <span className="text-[11px] text-slate-400 font-medium">Standard 14 Days</span>
+                                                  </div>
+
+                                                  <div className="p-4 space-y-3">
+                                                    {reviewInvitations.map((inv) => (
+                                                      <div key={inv.id} className="space-y-2.5">
+                                                        <div className="flex items-center justify-between text-xs">
+                                                          <span className="font-semibold text-[#0b99ff]">{inv.journal}</span>
+                                                          <span className="text-slate-400 font-mono text-[11px]">MS ID: {inv.manuscriptId || inv.id}</span>
+                                                        </div>
+
+                                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                                                          {inv.title}
+                                                        </h4>
+
+                                                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                                                          {inv.abstract}
+                                                        </p>
+
+                                                        <div className="flex items-center gap-2 pt-1">
+                                                          <Button
+                                                            onClick={() => handleOpenAccept(inv)}
+                                                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3.5 py-1.5 h-auto cursor-pointer rounded shadow-xs"
+                                                          >
+                                                            <Check className="h-3.5 w-3.5 mr-1" />
+                                                            {isDe ? "Annehmen & Frist setzen" : "Accept & Set Deadline"}
+                                                          </Button>
+                                                          <Button
+                                                            onClick={() => handleOpenDecline(inv)}
+                                                            variant="outline"
+                                                            className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded"
+                                                          >
+                                                            <X className="h-3.5 w-3.5 mr-1" />
+                                                            {isDe ? "Ablehnen" : "Decline"}
+                                                          </Button>
+                                                        </div>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                </Card>
+                                              )}
+
+                                              {/* Active Assignments Quick Table */}
+                                              <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
+                                                <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 flex items-center justify-between">
+                                                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                                                    {isDe ? "Laufende Begutachtungen" : "Active Review Assignments"}
+                                                  </h3>
+                                                  {onTabChange && (
+                                                    <button
+                                                      onClick={() => onTabChange("portfolio")}
+                                                      className="text-xs text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                                                    >
+                                                      {isDe ? "Alle anzeigen" : "View All Portfolio"} →
+                                                    </button>
+                                                  )}
+                                                </div>
+
+                                                <div className="p-4 space-y-3">
+                                                  {localActiveReviews.filter(r => r.status === "In Progress" || r.status === "Pending" || Boolean((r as any).isRound2)).map((rev) => {
+                                                    const forensicData = FORENSIC_PROFILES[rev.manuscriptId || rev.id] || FORENSIC_PROFILES["SOMED-26-RS001"]
+                                                    const isEscalated = !!(escalatedPaperIds[rev.id] || escalatedPaperIds[rev.manuscriptId || ""])
+                                                    const daysLeft = getDaysRemaining(rev.deadline)
+                                                    const isOverdue = daysLeft < 0
+                                                    return (
+                                                      <div
+                                                        key={rev.id}
+                                                        className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${isEscalated
+                                                            ? "border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20"
+                                                            : "border-slate-200 dark:border-slate-800"
+                                                          }`}
+                                                      >
+                                                        <div className="space-y-1.5">
+                                                          <div className="flex flex-wrap items-center gap-2">
+                                                            <span className="text-[10px] font-bold text-slate-500 uppercase">{rev.journal}</span>
+                                                            <span className="text-slate-300">•</span>
+                                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${isOverdue
+                                                                ? "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50"
+                                                                : daysLeft <= 3
+                                                                  ? "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50"
+                                                                  : "text-[#0b99ff] dark:text-[#0b99ff] bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50"
+                                                              }`}>
+                                                              <Clock className="w-3 h-3" />
+                                                              {isOverdue
+                                                                ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig (${rev.deadline})` : `${Math.abs(daysLeft)} days overdue (${rev.deadline})`)
+                                                                : (isDe ? `Noch ${daysLeft} Tage (${rev.deadline})` : `Due in ${daysLeft} days (${rev.deadline})`)}
+                                                            </span>
+                                                            <span className="text-slate-300">•</span>
+                                                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
+                                                              <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                                                              AI: {forensicData?.aiScore || "4%"} · Figures: Clean ✓
+                                                            </span>
+                                                            {isEscalated && (
+                                                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
+                                                                <AlertTriangle className="h-3 w-3 text-amber-600" />
+                                                                {isDe ? "Eskaliert" : "Escalated to IM"}
+                                                              </span>
+                                                            )}
+                                                          </div>
+                                                          <h4 className="text-xs font-bold text-slate-900 dark:text-white">{rev.title}</h4>
+                                                        </div>
+
+                                                        <div className="flex flex-wrap items-center gap-2 shrink-0">
+                                                          {(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01") && (
+                                                            <>
+                                                              <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                onClick={() => handleDownloadSpecificFile("fulltext", rev)}
+                                                                className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                                                                title="Download Blinded Revised Manuscript (.docx)"
+                                                              >
+                                                                <Download className="h-3.5 w-3.5" />
+                                                                <span>{isDe ? "Überarb. Manuskript" : "Revised MS (.docx)"}</span>
+                                                              </Button>
+                                                              <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                onClick={() => handleDownloadSpecificFile("supp", rev)}
+                                                                className="border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                                                                title="Download Author Point-by-Point Rebuttal (.docx)"
+                                                              >
+                                                                <FileText className="h-3.5 w-3.5" />
+                                                                <span>{isDe ? "Autoren-Rebuttal" : "Rebuttal (.docx)"}</span>
+                                                              </Button>
+                                                            </>
+                                                          )}
+
+                                                          <Button
+                                                            variant="outline"
+                                                            onClick={() => setSelectedPackageRev(rev)}
+                                                            className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                                                            title={isDe ? "Blinded PDF & Begleitdaten herunterladen" : "Download Blinded Manuscript PDF & Data"}
+                                                          >
+                                                            <FileDown className="h-3.5 w-3.5 mr-1 text-slate-500" />
+                                                            {isDe ? "Manuskript-Paket" : "Blinded Package"}
+                                                          </Button>
+
+                                                          <Button
+                                                            variant="outline"
+                                                            onClick={() => handleOpenDeadlineModal(rev)}
+                                                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                                                            title={isDe ? "Frist anpassen oder verlängern" : "Set or adjust review deadline"}
+                                                          >
+                                                            <Calendar className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                                            {isDe ? "Frist anpassen" : "Set Deadline"}
+                                                          </Button>
+
+                                                          {!isEscalated ? (
+                                                            <Button
+                                                              variant="outline"
+                                                              onClick={() => handleOpenEscalate(rev)}
+                                                              className="border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                                                              title={isDe ? "Fehlverhalten an Editor / IM melden" : "Escalate misconduct to Handling Editor or Integrity Manager"}
+                                                            >
+                                                              <AlertTriangle className="h-3.5 w-3.5 mr-1 text-amber-600 dark:text-amber-400" />
+                                                              {isDe ? "Fehlverhalten melden" : "Escalate"}
+                                                            </Button>
+                                                          ) : null}
+
+                                                          <Button
+                                                            onClick={() => handleOpenEval(rev, Boolean((rev as any).isRound2))}
+                                                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
+                                                          >
+                                                            <FileText className="h-3.5 w-3.5 mr-1" />
+                                                            {rev.isRound2
+                                                              ? (isDe ? "Zweitbegutachtung (R2) öffnen" : "Open Round 2 Assessment")
+                                                              : (isDe ? "Gutachten ausfüllen" : "Open Assessment Form")}
+                                                          </Button>
+                                                        </div>
+                                                      </div>
+                                                    )
+                                                  })}
+                                                </div>
+                                              </Card>
+                                            </div>
       )}
 
-      {/* ================= MODAL 1: ACCEPT INVITATION & AUTO-DEADLINE ================= */}
-      <Dialog open={!!selectedInvForAccept} onOpenChange={(open) => !open && setSelectedInvForAccept(null)}>
-        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
-              {isDe ? "Begutachtung annehmen & Frist festlegen" : "Accept Assignment & Configure Schedule"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              {isDe ? "Prüfen Sie den Abgabetermin und aktivieren Sie automatische Erinnerungen." : "Review target delivery timeline, auto-reminders, and confidentiality commitment."}
-            </DialogDescription>
-          </DialogHeader>
+                                            {/* ================= TAB 2: PORTFOLIO & ARCHIVE ================= */}
+                                            {activeTab === "portfolio" && (
+                                              <div className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                  <div>
+                                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                                      {isDe ? "Begutachtungs-Portfolio & Archiv" : "Review Portfolio & Assessment History"}
+                                                    </h3>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                      {isDe ? "Verwalten Sie aktive Begutachtungen und sehen Sie archivierte Berichte ein." : "Track in-progress evaluations and inspect past verified review reports."}
+                                                    </p>
+                                                  </div>
 
-          {selectedInvForAccept && (
-            <div className="space-y-4 py-2 text-xs">
-              <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                <div className="text-[11px] text-slate-500 font-semibold">{selectedInvForAccept.journal}</div>
-                <div className="font-bold text-slate-900 dark:text-white text-sm">{selectedInvForAccept.title}</div>
-              </div>
+                                                  {/* Sub-filter chips */}
+                                                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 p-1 rounded border border-slate-200 dark:border-slate-800 text-xs font-medium">
+                                                    <button
+                                                      onClick={() => setPortfolioFilter("all")}
+                                                      className={`px-2.5 py-1 rounded cursor-pointer ${portfolioFilter === "all" ? "bg-white dark:bg-slate-800 font-bold text-slate-900 dark:text-white shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
+                                                    >
+                                                      {isDe ? "Alle" : "All"} ({activeReviews.length})
+                                                    </button>
+                                                    <button
+                                                      onClick={() => setPortfolioFilter("in_progress")}
+                                                      className={`px-2.5 py-1 rounded cursor-pointer ${portfolioFilter === "in_progress" ? "bg-white dark:bg-slate-800 font-bold text-slate-900 dark:text-white shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
+                                                    >
+                                                      {isDe ? "In Bearbeitung" : "In Progress"}
+                                                    </button>
+                                                    <button
+                                                      onClick={() => setPortfolioFilter("completed")}
+                                                      className={`px-2.5 py-1 rounded cursor-pointer ${portfolioFilter === "completed" ? "bg-white dark:bg-slate-800 font-bold text-slate-900 dark:text-white shadow-2xs" : "text-slate-600 dark:text-slate-400"}`}
+                                                    >
+                                                      {isDe ? "Abgeschlossen" : "Completed"}
+                                                    </button>
+                                                  </div>
+                                                </div>
 
-              <div className="space-y-2">
-                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
-                  {isDe ? "Abgabetermin festlegen:" : "Submission Turnaround & Deadline:"}
-                </label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {[7, 14, 21, 28].map(d => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setAutoDeadlineDays(d)}
-                      className={`py-1.5 px-2 rounded text-xs font-semibold border transition-all cursor-pointer ${
-                        autoDeadlineDays === d
-                          ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
-                          : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                      }`}
-                    >
-                      {d} {isDe ? "Tage" : "Days"}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="date"
-                    min={new Date().toISOString().split("T")[0]}
-                    value={getCalculatedDate(autoDeadlineDays)}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        const targetTime = new Date(e.target.value).getTime()
-                        const nowTime = new Date().setHours(0,0,0,0)
-                        const diff = Math.max(1, Math.ceil((targetTime - nowTime) / (1000 * 60 * 60 * 24)))
-                        setAutoDeadlineDays(diff)
-                      }
-                    }}
-                    className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-[#0b99ff]"
-                  />
-                  <span className="text-[11px] text-slate-500 whitespace-nowrap">
-                    ({autoDeadlineDays} {isDe ? "Tage ab heute" : "days from today"})
-                  </span>
-                </div>
-              </div>
+                                                <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
+                                                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                    {filteredActiveReviews.map((rev) => {
+                                                      const forensicData = FORENSIC_PROFILES[rev.manuscriptId || rev.id] || FORENSIC_PROFILES["SOMED-26-RS001"]
+                                                      const isEscalated = !!(escalatedPaperIds[rev.id] || escalatedPaperIds[rev.manuscriptId || ""])
+                                                      return (
+                                                        <div key={rev.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                          <div className="space-y-1">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                              <span className="text-[10px] font-bold text-[#0b99ff] dark:text-[#0b99ff] uppercase">{rev.journal}</span>
+                                                              <span className="text-slate-300">•</span>
+                                                              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${rev.status === "Completed"
+                                                                  ? "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400"
+                                                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
+                                                                }`}>
+                                                                {rev.status === "Completed" ? (isDe ? "Abgeschlossen" : "Completed & Verified") : (isDe ? "In Bearbeitung" : "In Progress")}
+                                                              </span>
+                                                              <span className="text-slate-300">•</span>
+                                                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                                                AI: {forensicData?.aiScore || "4%"} · Figures: Clean ✓
+                                                              </span>
+                                                              {isEscalated && (
+                                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
+                                                                  <AlertTriangle className="h-3 w-3 text-amber-600" />
+                                                                  {isDe ? "Eskaliert (IM-Prüfung)" : "Escalated to IM"}
+                                                                </span>
+                                                              )}
+                                                            </div>
 
-              <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
-                <span className="font-semibold text-slate-700 dark:text-slate-300 block">
-                  {isDe ? "Automatische Benachrichtigungen & Kalender-Sync:" : "Automated Reminders & Calendar Sync:"}
-                </span>
+                                                            <h4 className="text-sm font-bold text-slate-900 dark:text-white">{rev.title}</h4>
 
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox"
-                    checked={reminder5Days}
-                    onChange={(e) => setReminder5Days(e.target.checked)}
-                    className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
-                  />
-                  <span className="text-slate-600 dark:text-slate-300">
-                    {isDe ? "Sanfte Erinnerung 5 Tage vor Abgabetermin per E-Mail" : "Gentle email reminder 5 days before deadline"}
-                  </span>
-                </label>
+                                                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                              {rev.status === "Completed" ? (
+                                                                <span>{isDe ? "Empfehlung:" : "Verdict:"} <strong>{rev.recommendation || "Minor Revision"}</strong> • {isDe ? "Geprüft von Editor" : "Signed off by Handling Editor"}</span>
+                                                              ) : (() => {
+                                                                const daysLeft = getDaysRemaining(rev.deadline)
+                                                                const isOverdue = daysLeft < 0
+                                                                return (
+                                                                  <span>
+                                                                    {isDe ? "Frist:" : "Deadline:"} <strong>{rev.deadline}</strong>{" "}
+                                                                    <span className={isOverdue ? "text-rose-600 dark:text-rose-400 font-semibold" : daysLeft <= 3 ? "text-amber-600 dark:text-amber-400 font-semibold" : "text-slate-600 dark:text-slate-300"}>
+                                                                      ({isOverdue
+                                                                        ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig` : `${Math.abs(daysLeft)} days overdue`)
+                                                                        : (isDe ? `${daysLeft} Tage verbleibend` : `${daysLeft} days remaining`)})
+                                                                    </span>
+                                                                  </span>
+                                                                )
+                                                              })()}
+                                                            </div>
+                                                          </div>
 
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox"
-                    checked={reminder48Hours}
-                    onChange={(e) => setReminder48Hours(e.target.checked)}
-                    className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
-                  />
-                  <span className="text-slate-600 dark:text-slate-300">
-                    {isDe ? "Dringende Erinnerung 48 Stunden vor Fälligkeit" : "Priority reminder notice 48 hours before due date"}
-                  </span>
-                </label>
+                                                          <div className="flex flex-wrap items-center gap-2 shrink-0">
+                                                            {(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01") && (
+                                                              <>
+                                                                <Button
+                                                                  type="button"
+                                                                  variant="outline"
+                                                                  onClick={() => handleDownloadSpecificFile("fulltext", rev)}
+                                                                  className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                                                                  title="Download Blinded Revised Manuscript (.docx)"
+                                                                >
+                                                                  <Download className="h-3.5 w-3.5" />
+                                                                  <span>{isDe ? "Überarb. Manuskript" : "Revised MS (.docx)"}</span>
+                                                                </Button>
+                                                                <Button
+                                                                  type="button"
+                                                                  variant="outline"
+                                                                  onClick={() => handleDownloadSpecificFile("supp", rev)}
+                                                                  className="border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                                                                  title="Download Author Point-by-Point Rebuttal (.docx)"
+                                                                >
+                                                                  <FileText className="h-3.5 w-3.5" />
+                                                                  <span>{isDe ? "Autoren-Rebuttal" : "Rebuttal (.docx)"}</span>
+                                                                </Button>
+                                                              </>
+                                                            )}
 
-                <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setAcceptCalendarSynced(true)}
-                    className="text-xs font-semibold text-[#0b99ff] dark:text-[#0b99ff] hover:underline flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Calendar className="h-3.5 w-3.5" />
-                    {acceptCalendarSynced 
-                      ? (isDe ? "✓ Im Kalender vorgemerkt (.ics exportiert)" : "✓ Calendar entry pre-configured (.ics ready)") 
-                      : (isDe ? "Zu Google Kalender / Outlook (.ics) hinzufügen" : "Add to Google Calendar / Outlook (.ics)")}
-                  </button>
-                </div>
-              </div>
+                                                            <Button
+                                                              variant="outline"
+                                                              onClick={() => setSelectedPackageRev(rev)}
+                                                              className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                                                            >
+                                                              <FileDown className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                                              {isDe ? "Paket" : "Package"}
+                                                            </Button>
 
-              <div className="p-3 rounded bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-2">
-                <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-400">
-                  <ShieldCheck className="h-4 w-4" />
-                  <span>{isDe ? "COPE-Vertraulichkeit & Anti-KI-Erklärung" : "COPE Confidentiality & Anti-AI Declaration"}</span>
-                </div>
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox"
-                    checked={acceptCopeCertified}
-                    onChange={(e) => setAcceptCopeCertified(e.target.checked)}
-                    className="mt-0.5 h-3.5 w-3.5 rounded text-amber-600 focus:ring-amber-500"
-                  />
-                  <span className="text-[11px] text-amber-900 dark:text-amber-300 leading-tight">
-                    {isDe 
-                      ? "Ich versichere, dass ich dieses unveröffentlichte Manuskript nicht in öffentliche generative KI-Modelle (wie ChatGPT) hochlade und die Autorendaten strikt vertraulich behandle."
-                      : "I confirm that I will not upload this unpublished manuscript to public generative AI tools (such as ChatGPT), and will uphold strict author confidentiality under COPE standards."}
-                  </span>
-                </label>
-              </div>
-            </div>
-          )}
+                                                            {rev.status === "In Progress" || rev.status === "Pending" ? (
+                                                              <>
+                                                                <Button
+                                                                  variant="outline"
+                                                                  onClick={() => handleOpenDeadlineModal(rev)}
+                                                                  className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                                                                  title={isDe ? "Frist anpassen oder verlängern" : "Set or adjust review deadline"}
+                                                                >
+                                                                  <Calendar className="h-3.5 w-3.5 mr-1 text-[#0b99ff]" />
+                                                                  {isDe ? "Frist anpassen" : "Set Deadline"}
+                                                                </Button>
 
-          <DialogFooter className="gap-2">
-            <Button 
-              onClick={() => setSelectedInvForAccept(null)}
-              variant="ghost"
-              className="text-xs font-semibold cursor-pointer"
-            >
-              {isDe ? "Abbrechen" : "Cancel"}
-            </Button>
-            <Button
-              onClick={handleConfirmAccept}
-              disabled={!acceptCopeCertified}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold cursor-pointer disabled:opacity-50"
-            >
-              {isDe ? "Verbindlich annehmen" : "Confirm Acceptance"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                                                                {!isEscalated && (
+                                                                  <Button
+                                                                    variant="outline"
+                                                                    onClick={() => handleOpenEscalate(rev)}
+                                                                    className="border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded"
+                                                                  >
+                                                                    <AlertTriangle className="h-3.5 w-3.5 mr-1 text-amber-600" />
+                                                                    {isDe ? "Melden" : "Escalate"}
+                                                                  </Button>
+                                                                )}
+                                                                <Button
+                                                                  onClick={() => handleOpenEval(rev, Boolean(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01"))}
+                                                                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs flex items-center gap-1"
+                                                                >
+                                                                  {rev.isRound2 || rev.id === "SOMED-26-RW01" ? <RotateCcw className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+                                                                  <span>{rev.isRound2 || rev.id === "SOMED-26-RW01" ? (isDe ? "Zweitbegutachtung (R2) starten" : "Start Round 2 Re-Assessment") : (isDe ? "Formular öffnen" : "Open Assessment")}</span>
+                                                                </Button>
+                                                              </>
+                                                            ) : (
+                                                              <div className="flex items-center gap-2">
+                                                                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 px-2 py-1 rounded flex items-center gap-1">
+                                                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> {isDe ? "ORCID synchronisiert" : "ORCID Synced"}
+                                                                </span>
+                                                                <Button
+                                                                  onClick={() => handleOpenEval(rev, true)}
+                                                                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded shadow-xs flex items-center gap-1"
+                                                                  title="Open Round 2 Re-evaluation Form for Author Revision"
+                                                                >
+                                                                  <RotateCcw className="h-3.5 w-3.5" />
+                                                                  <span>{isDe ? "Zweitbegutachtung (R2)" : "Round 2 Re-evaluation"}</span>
+                                                                </Button>
+                                                                <Button
+                                                                  onClick={() => setSelectedCertReview(rev)}
+                                                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
+                                                                >
+                                                                  <Award className="h-3.5 w-3.5 mr-1" />
+                                                                  {isDe ? "Zertifikat ansehen" : "View Certificate"}
+                                                                </Button>
+                                                              </div>
+                                                            )}
+                                                          </div>
+                                                        </div>
+                                                      )
+                                                    })}
+                                                  </div>
+                                                </Card>
+                                              </div>
+                                            )}
 
-      {/* ================= MODAL 2: DECLINE INVITATION & RECOMMEND PEER ================= */}
-      <Dialog open={!!selectedInvForDecline} onOpenChange={(open) => !open && setSelectedInvForDecline(null)}>
-        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <UserPlus className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-              {isDe ? "Begutachtung ablehnen & Kollegen empfehlen" : "Decline Review & Recommend Peer"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              {isDe ? "Geben Sie kurz den Grund an und schlagen Sie optional qualifizierte Fachkollegen vor." : "State your reason for declining and optionally suggest alternative domain experts for the editor."}
-            </DialogDescription>
-          </DialogHeader>
+                                            {/* ================= TAB 3: AI & PAPER FORENSICS ================= */}
+                                            {activeTab === "forensics" && (() => {
+                                              const activeProfile = FORENSIC_PROFILES[selectedForensicPaperId] || FORENSIC_PROFILES["SOMED-26-RS001"]
+                                              return (
+                                                <div className="space-y-4">
+                                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                                                    <div>
+                                                      <div className="flex items-center gap-2">
+                                                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                                          {isDe ? "Automatisierter Integritäts- & KI-Prüfbericht" : "Automated Integrity & AI Pre-Check Brief"}
+                                                        </h3>
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                                                          <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                                                          {isDe ? "Vorprüfung Bestanden" : "Editorial Pre-Screening: Clean"}
+                                                        </span>
+                                                      </div>
+                                                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                                        {isDe
+                                                          ? "Vorabprüfung durch die Redaktion (editorial360 Integrity Desk): Plagiate, Bildmanipulation und KI-Anomalien wurden bereits gescannt, damit Sie sich ganz auf die wissenschaftliche Methodik konzentrieren können."
+                                                          : "Pre-screening completed by editorial360 before referee dispatch. Image forensics, citation networks, and synthetic text scans are verified clean so you can focus strictly on the science."}
+                                                      </p>
+                                                    </div>
 
-          {selectedInvForDecline && (
-            <div className="space-y-4 py-2 text-xs">
-              <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
-                  {isDe ? "Grund für die Ablehnung:" : "Reason for declining:"}
-                </label>
-                <select
-                  value={declineReason}
-                  onChange={(e) => setDeclineReason(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-[#0b99ff]"
-                >
-                  <option value="workload">{isDe ? "Hohe Arbeitsbelastung / Keine Zeit in den nächsten 3 Wochen" : "Heavy workload / Insufficient time in the next 3 weeks"}</option>
-                  <option value="scope">{isDe ? "Außerhalb meines direkten Fachgebiets" : "Outside my direct technical expertise"}</option>
-                  <option value="coi">{isDe ? "Interessenkonflikt mit Autoren oder Institut" : "Conflict of Interest (COI) with authors or institution"}</option>
-                  <option value="leave">{isDe ? "Forschungsfreisemester / Urlaub" : "Academic leave / sabbatical"}</option>
-                  <option value="other">{isDe ? "Sonstiger Grund" : "Other"}</option>
-                </select>
-              </div>
+                                                    {/* Manuscript Selector */}
+                                                    <div className="flex items-center gap-2">
+                                                      <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+                                                        {isDe ? "Manuskript:" : "Manuscript:"}
+                                                      </span>
+                                                      <select
+                                                        value={selectedForensicPaperId}
+                                                        onChange={(e) => setSelectedForensicPaperId(e.target.value)}
+                                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold rounded-lg px-2.5 py-1.5 text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                                                      >
+                                                        <option value="SOMED-26-RS001">SOMED-26-RS001 (AI Diagnostics Cardiology)</option>
+                                                        <option value="SOENG-26-RS002">SOENG-26-RS002 (Federated Learning Non-IID)</option>
+                                                        <option value="SOSOC-26-RV003">SOSOC-26-RV003 (Urban Green Spaces Socio-Economic)</option>
+                                                      </select>
+                                                    </div>
+                                                  </div>
 
-              <div className="p-3.5 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 dark:text-white text-xs">
-                    {isDe ? "Empfehlung alternativer Gutachter (Optional)" : "Suggest Alternate Reviewers (Optional)"}
-                  </span>
-                  <span className="text-[10px] text-slate-400">{isDe ? "Hilft dem Editor" : "Helps the editor"}</span>
-                </div>
+                                                  {/* Misconduct Escalation Quick Action Banner */}
+                                                  <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                                    <div className="flex items-start gap-2.5">
+                                                      <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                                      <div>
+                                                        <div className="font-bold text-amber-950 dark:text-amber-200">
+                                                          {isDe ? "Integritätsbedenken oder Fälschungsvorwürfe?" : "Suspected Image Manipulation or Research Misconduct?"}
+                                                        </div>
+                                                        <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                                                          {isDe
+                                                            ? "Leiten Sie diesen Fall direkt an den Integrity Manager (IM) oder den zuständigen Editor weiter (COPE-Whistleblower-Schutz)."
+                                                            : "Directly escalate forensic evidence to the Integrity Manager (IM) and Handling Editor under COPE whistleblower protections."}
+                                                        </p>
+                                                      </div>
+                                                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input 
-                    type="text"
-                    placeholder={isDe ? "Name des Kollegen" : "Colleague Full Name"}
-                    value={declineColleagueName}
-                    onChange={(e) => setDeclineColleagueName(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
-                  />
-                  <input 
-                    type="email"
-                    placeholder={isDe ? "Akademische E-Mail" : "Academic Email"}
-                    value={declineColleagueEmail}
-                    onChange={(e) => setDeclineColleagueEmail(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
-                  />
-                </div>
+                                                    <Button
+                                                      type="button"
+                                                      onClick={() => {
+                                                        const rev = activeReviews.find(r => r.id === selectedForensicPaperId || r.manuscriptId === selectedForensicPaperId) || activeReviews[0]
+                                                        if (rev) handleOpenEscalate(rev)
+                                                      }}
+                                                      className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 h-auto cursor-pointer shrink-0 rounded shadow-xs"
+                                                    >
+                                                      <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                                                      {isDe ? "An IM / Editor eskalieren" : "Escalate to IM / Editor"}
+                                                    </Button>
+                                                  </div>
 
-                <input 
-                  type="text"
-                  placeholder={isDe ? "Institution / Universität" : "Institution / University affiliation"}
-                  value={declineColleagueAffiliation}
-                  onChange={(e) => setDeclineColleagueAffiliation(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
-                />
+                                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                    <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-lg shadow-xs">
+                                                      <div className="flex items-center justify-between">
+                                                        <div className="text-[10px] uppercase font-bold text-slate-400">AI Linguistic Index</div>
+                                                        <span className="text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-950/40 px-1.5 py-0.2 rounded">
+                                                          {activeProfile.aiStatus}
+                                                        </span>
+                                                      </div>
+                                                      <div className="text-xl font-bold text-green-600 dark:text-green-400 mt-1">{activeProfile.aiScore}</div>
+                                                      <p className="text-[11px] text-slate-500 mt-1">{activeProfile.aiConfidence}</p>
+                                                    </Card>
 
-                <input 
-                  type="text"
-                  placeholder={isDe ? "Kurzer Hinweis zur Eignung" : "Brief suitability note"}
-                  value={declineColleagueNote}
-                  onChange={(e) => setDeclineColleagueNote(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
-                />
-              </div>
-            </div>
-          )}
+                                                    <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-lg shadow-xs">
+                                                      <div className="flex items-center justify-between">
+                                                        <div className="text-[10px] uppercase font-bold text-slate-400">Image & Figure Forensics</div>
+                                                        <span className="text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-950/40 px-1.5 py-0.2 rounded">
+                                                          {activeProfile.figureStatus}
+                                                        </span>
+                                                      </div>
+                                                      <div className="text-xl font-bold text-green-600 dark:text-green-400 mt-1">{activeProfile.figureScore}</div>
+                                                      <p className="text-[11px] text-slate-500 mt-1">{activeProfile.figureDetails}</p>
+                                                    </Card>
 
-          <DialogFooter className="gap-2">
-            <Button 
-              onClick={() => setSelectedInvForDecline(null)}
-              variant="ghost"
-              className="text-xs font-semibold cursor-pointer"
-            >
-              {isDe ? "Abbrechen" : "Cancel"}
-            </Button>
-            <Button
-              onClick={handleConfirmDecline}
-              className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-semibold cursor-pointer"
-            >
-              {isDe ? "Ablehnung übermitteln" : "Submit Decline & Recommendation"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                                                    <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-lg shadow-xs">
+                                                      <div className="flex items-center justify-between">
+                                                        <div className="text-[10px] uppercase font-bold text-slate-400">Citation & COI Graph</div>
+                                                        <span className="text-[10px] font-bold text-[#0b99ff] bg-sky-50 dark:bg-sky-950/40 px-1.5 py-0.2 rounded">
+                                                          {activeProfile.citationStatus}
+                                                        </span>
+                                                      </div>
+                                                      <div className="text-xl font-bold text-[#0b99ff] dark:text-[#0b99ff] mt-1">{activeProfile.citationScore}</div>
+                                                      <p className="text-[11px] text-slate-500 mt-1">{activeProfile.citationDetails}</p>
+                                                    </Card>
+                                                  </div>
 
-      {/* ================= MODAL: SET / ADJUST REVIEW DEADLINE ================= */}
-      <Dialog open={!!selectedReviewForDeadline} onOpenChange={(open) => !open && setSelectedReviewForDeadline(null)}>
-        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-w-lg rounded-xl p-6 shadow-xl">
-          <DialogHeader>
-            <div className="flex items-center gap-2 text-[#0b99ff]">
-              <Calendar className="h-5 w-5" />
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-                {isDe ? "Begutachtungsfrist festlegen oder anpassen" : "Set or Adjust Review Deadline"}
-              </DialogTitle>
-            </div>
-            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              {isDe 
-                ? "Legen Sie den verbindlichen Abgabetermin für dieses Manuskript fest oder fordern Sie eine Fristverlängerung an." 
-                : "Set the target submission deadline for this assigned manuscript or configure an extended turnaround schedule."}
-            </DialogDescription>
-          </DialogHeader>
+                                                  {/* Collapsible Paper Mill Spotting Checklist */}
+                                                  <Card className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => setIsFraudGuideExpanded(!isFraudGuideExpanded)}
+                                                      className="w-full p-4 flex items-center justify-between bg-slate-50/70 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 text-left transition-colors cursor-pointer"
+                                                    >
+                                                      <div className="flex items-center gap-2">
+                                                        <ShieldCheck className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
+                                                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                                          {isDe ? "COPE-Leitfaden: Wie man Paper-Mill-Muster & gefälschte Daten erkennt" : "COPE Quick-Guide: How to Spot Paper Mills & Fabricated Data"}
+                                                        </span>
+                                                      </div>
+                                                      <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isFraudGuideExpanded ? "rotate-180" : ""}`} />
+                                                    </button>
 
-          {selectedReviewForDeadline && (
-            <div className="space-y-4 py-2 text-xs">
-              {deadlineUpdateSuccess && (
-                <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold text-xs flex items-center gap-2 animate-in fade-in duration-200">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{deadlineUpdateSuccess}</span>
-                </div>
+                                                    {isFraudGuideExpanded && (
+                                                      <div className="p-4 border-t border-slate-200 dark:border-slate-800 text-xs space-y-2.5 text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-950">
+                                                        <div className="flex items-start gap-2">
+                                                          <span className="text-[#0b99ff] font-bold">•</span>
+                                                          <div><strong>Generic Western Blots / Micrographs:</strong> Check for duplicated background noise or identical bands reused across different experimental conditions.</div>
+                                                        </div>
+                                                        <div className="flex items-start gap-2">
+                                                          <span className="text-[#0b99ff] font-bold">•</span>
+                                                          <div><strong>Irrelevant Keyword Stuffing:</strong> Paper mills often insert disconnected medical keywords to artificially inflate indexing matches.</div>
+                                                        </div>
+                                                        <div className="flex items-start gap-2">
+                                                          <span className="text-[#0b99ff] font-bold">•</span>
+                                                          <div><strong>Non-Institutional Email Addresses:</strong> Verify whether corresponding authors use free webmail instead of verified institutional academic domains.</div>
+                                                        </div>
+                                                        <div className="flex items-start gap-2">
+                                                          <span className="text-[#0b99ff] font-bold">•</span>
+                                                          <div><strong>Unrealistic Patient Sample Sizes:</strong> Scrutinize clinical studies reporting massive participant numbers without clear multi-center IRB documentation.</div>
+                                                        </div>
+                                                      </div>
+                                                    )}
+                                                  </Card>
+
+                                                  {/* Forensics Training Banner */}
+                                                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 flex items-center justify-between text-xs">
+                                                    <div className="flex items-center gap-2">
+                                                      <GraduationCap className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
+                                                      <span className="text-slate-700 dark:text-slate-300">
+                                                        {isDe
+                                                          ? "Möchten Sie mehr über die Erkennung manipulierter Grafiken lernen?"
+                                                          : "Want hands-on practice identifying manipulated images and synthetic datasets?"}
+                                                      </span>
+                                                    </div>
+                                                    <Link
+                                                      href="/trainings"
+                                                      className="text-[#0b99ff] dark:text-[#0b99ff] font-semibold hover:underline flex items-center gap-1 shrink-0"
+                                                    >
+                                                      <span>{isDe ? "Training starten" : "Take Masterclass"}</span>
+                                                      <ArrowRight className="h-3 w-3" />
+                                                    </Link>
+                                                  </div>
+                                                </div>
+                                              )
+                                            })()}
+
+                                            {/* ================= TAB 4: APC CREDIT WALLET ================= */}
+                                            {activeTab === "wallet" && (
+                                              <div className="space-y-4">
+
+                                                {/* Main Vault Card */}
+                                                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
+                                                  {/* Main Vault Card (Standard Academic Benefits Layout) */}
+                                                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
+
+                                                    {/* Header: Balance & Status */}
+                                                    {/* Header: Recognition Overview */}
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                                      <div className="flex items-center gap-4">
+                                                        <div className="flex items-baseline gap-1.5">
+                                                          <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                                                            {points}
+                                                          </span>
+                                                          <span className="text-xs font-bold text-slate-400">/ 100 PTS</span>
+                                                          <div className="flex items-center gap-3.5">
+                                                            <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800/60">
+                                                              <Award className="h-6 w-6" />
+                                                            </div>
+
+                                                            <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
+
+                                                            <div>
+                                                              <div className="text-xs font-bold text-[#0b99ff]">
+                                                                Silver Tier · 30% APC Waiver
+                                                                <div className="flex items-center gap-2">
+                                                                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                                                    {isDe ? "Gutachter-Anerkennung & APC-Erlass-Programm" : "Reviewer Recognition & APC Waiver Program"}
+                                                                  </h3>
+                                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                                    {isDe ? "Aktiv" : "Active Program"}
+                                                                  </span>
+                                                                </div>
+                                                                <div className="text-[11px] text-slate-400 font-mono">
+                                                                  ORCID: 0000-0004-7711-2093 · 312 Days Left
+                                                                </div>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                                                  {isDe
+                                                                    ? "Offizielles Programm zur Anerkennung wissenschaftlicher Peer-Review-Leistungen bei Scholarly Open."
+                                                                    : "Official recognition framework honoring scholarly peer review contributions across all 11 Scholarly Open journals."}
+                                                                </p>
+                                                              </div>
+                                                            </div>
+
+                                                            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 sm:text-right">
+                                                              <span>{100 - points} pts to 100% Free Waiver</span>
+                                                              <div className="text-left sm:text-right shrink-0">
+                                                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                                                  {isDe ? "Erlass-Stufe" : "Waiver Status"}
+                                                                </div>
+                                                                <div className="text-lg font-black text-sky-600 dark:text-sky-400">
+                                                                  30% – 100% APC Waiver
+                                                                </div>
+                                                                <div className="text-[11px] text-slate-500 font-medium">
+                                                                  {isDe ? "Übertragbar auf Co-Autoren" : "Transferable to Co-Authors"}
+                                                                </div>
+                                                              </div>
+                                                            </div>
+
+                                                            {/* Clean Progress Track with Points */}
+                                                            <div className="space-y-3 pt-1">
+                                                              {/* Progress Bar in Workspace Signature Blue */}
+                                                              <div className="relative py-2">
+                                                                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                                                                  <div
+                                                                    className="h-full bg-[#0b99ff] rounded-full transition-all duration-500"
+                                                                    style={{ width: `${points}%` }}
+                                                                  />
+                                                                  {/* Academic Benefits Explanation Cards */}
+                                                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+                                                                    <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                                                                      <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                                                                        <span>{isDe ? "30% Basis-Erlass pro Gutachten" : "30% APC Waiver Per Review"}</span>
+                                                                      </div>
+                                                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                        {isDe
+                                                                          ? "Für jedes vom Herausgeber abgenommene Fachgutachten erhalten Sie einen Gutscheincode für 30% Rabatt auf zukünftige eigene Einreichungen."
+                                                                          : "For every editor-endorsed peer review evaluation, referees receive a verified 30% APC waiver code applicable to their next publication."}
+                                                                      </p>
+                                                                    </div>
+
+                                                                    {/* Milestone Node Points on the Bar */}
+                                                                    <div className="relative flex justify-between text-[11px] pt-2 font-medium">
+                                                                      <div className="text-left">
+                                                                        <span className="block font-bold text-slate-900 dark:text-white">0</span>
+                                                                        <span className="text-[10px] text-slate-400">Start</span>
+                                                                      </div>
+
+                                                                      <div className="text-center">
+                                                                        <span className="block font-bold text-slate-700 dark:text-slate-300">10 Pts</span>
+                                                                        <span className="text-[10px] text-slate-500 font-medium">Bronze (10%)</span>
+                                                                      </div>
+
+                                                                      <div className="text-center">
+                                                                        <span className="block font-bold text-[#0b99ff]">30 Pts</span>
+                                                                        <span className="text-[10px] text-[#0b99ff] font-bold">Silver (30% Active)</span>
+                                                                      </div>
+
+                                                                      <div className="text-center">
+                                                                        <span className="block font-bold text-slate-600 dark:text-slate-400">50 Pts</span>
+                                                                        <span className="text-[10px] text-slate-400">Gold (50%)</span>
+                                                                      </div>
+
+                                                                      <div className="text-right">
+                                                                        <span className="block font-bold text-slate-600 dark:text-slate-400">100 Pts</span>
+                                                                        <span className="text-[10px] text-slate-400">Platinum (100%)</span>
+                                                                      </div>
+                                                                      <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                                                                        <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                                          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                                                                          <span>{isDe ? "Übertragbar auf das Laborteam" : "Fully Transferable"}</span>
+                                                                        </div>
+                                                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                          {isDe
+                                                                            ? "Waiver-Codes können auf Doktoranden, Postdocs oder institutionelle Kooperationspartner übertragen werden."
+                                                                            : "Waiver vouchers may be transferred to PhD candidates, postdoctoral fellows, or institutional co-authors."}
+                                                                        </p>
+                                                                      </div>
+
+                                                                      {/* 4 Minimal Tier Cards */}
+                                                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                                                                        <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
+                                                                          <div className="text-slate-400 text-[10px] font-semibold">10 PTS</div>
+                                                                          <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Bronze</div>
+                                                                          <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">10% APC Waiver</div>
+                                                                          <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                                                                            <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                                              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                                                                              <span>{isDe ? "Gültig für alle 11 Journale" : "Valid Across All 11 Journals"}</span>
+                                                                            </div>
+
+                                                                            <div className="p-3 rounded-lg border-2 border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 text-xs">
+                                                                              <div className="text-[#0b99ff] text-[10px] font-bold">30 PTS · ACTIVE</div>
+                                                                              <div className="text-sm font-black text-slate-900 dark:text-white mt-0.5">Silver</div>
+                                                                              <div className="text-xs font-bold text-[#0b99ff]">30% APC Waiver</div>
+                                                                            </div>
+
+                                                                            <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
+                                                                              <div className="text-slate-400 text-[10px] font-semibold">50 PTS</div>
+                                                                              <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Gold</div>
+                                                                              <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">50% APC Waiver</div>
+                                                                            </div>
+
+                                                                            <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
+                                                                              <div className="text-slate-400 text-[10px] font-semibold">100 PTS</div>
+                                                                              <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Platinum</div>
+                                                                              <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">100% Free Waiver</div>
+                                                                            </div>
+                                                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                              {isDe
+                                                                                ? "Einlösbar in allen Scholarly-Open-Publikationen einschließlich Scholarly Open: Medicine und Chemistry."
+                                                                                : "Redeemable in any Scholarly Open journal including Medicine, Environmental Science, and Chemistry."}
+                                                                            </p>
+                                                                          </div>
+                                                                        </div>
+
+                                                                        {/* Points Guide */}
+                                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
+                                                                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                                                                            <div className="font-bold text-slate-900 dark:text-white">+10 Base Points</div>
+                                                                            <div className="text-[11px] text-slate-500">Editor-endorsed peer review evaluation</div>
+                                                                          </div>
+                                                                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                                                                            <div className="font-bold text-[#0b99ff]">+2.5 On-Time Bonus</div>
+                                                                            <div className="text-[11px] text-slate-500">Submitted within agreed 14-day window</div>
+                                                                          </div>
+                                                                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                                                                            <div className="font-bold text-[#0b99ff]">+2.5 Quality Bonus</div>
+                                                                            <div className="text-[11px] text-slate-500">5-Star rigor score endorsed by editor</div>
+                                                                          </div>
+                                                                        </div>
+
+                                                                        {/* Awarded Peer Review Vouchers & APC Waivers */}
+                                                                        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-5 shadow-xs">
+                                                                          <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                                                            <div className="flex items-center gap-3">
+                                                                              <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff]">
+                                                                                <Award className="h-5 w-5" />
+                                                                              </div>
+                                                                              <div>
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                                                                                    {isDe ? "Verliehene Gutachter-Voucher & APC-Rabattcodes" : "Awarded Peer Review Vouchers & APC Waivers"}
+                                                                                  </h4>
+                                                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                                                                                    {awardedVouchers.length} Available
+                                                                                  </span>
+                                                                                </div>
+                                                                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                                                                  {isDe
+                                                                                    ? "Von Handling Editors verliehene Anerkennungen. Einlösbar für 25% – 100% APC-Erlass bei eigenen Manuskripteinreichungen."
+                                                                                    : "Official incentives awarded by Handling Editors upon decision endorsement. Redeemable for 25%–100% APC waivers on your own submissions."}
+                                                                                </p>
+                                                                              </div>
+                                                                            </div>
+                                                                          </div>
+
+                                                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+                                                                            {awardedVouchers.map((vouch) => {
+                                                                              const isCopied = copiedVoucherCode === vouch.code
+
+                                                                              return (
+                                                                                <div
+                                                                                  key={vouch.id || vouch.code}
+                                                                                  className="p-4 rounded-xl bg-slate-50/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 relative overflow-hidden hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+                                                                                >
+                                                                                  <div className="flex items-start justify-between gap-2">
+                                                                                    <div>
+                                                                                      <div className="flex items-center gap-2">
+                                                                                        <span className="font-bold text-sm text-emerald-700 dark:text-emerald-400">
+                                                                                          {vouch.discount}
+                                                                                        </span>
+                                                                                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                                                          {vouch.status}
+                                                                                        </span>
+                                                                                      </div>
+                                                                                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                                                                        Ref: <strong className="text-slate-700 dark:text-slate-300">{vouch.paperId}</strong> · Awarded on {vouch.awardedAt}
+                                                                                      </div>
+                                                                                      {vouch.awardedBy && (
+                                                                                        <div className="text-[10px] text-slate-400 mt-0.5">
+                                                                                          By: {vouch.awardedBy}
+                                                                                        </div>
+                                                                                      )}
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  {/* Voucher Code Box */}
+                                                                                  <div className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                                                                                    <div className="space-y-0.5">
+                                                                                      <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Redemption Code</div>
+                                                                                      <span className="font-mono font-bold text-xs text-slate-900 dark:text-white tracking-wider">
+                                                                                        {vouch.code}
+                                                                                      </span>
+                                                                                    </div>
+                                                                                    <button
+                                                                                      type="button"
+                                                                                      onClick={() => {
+                                                                                        if (typeof navigator !== "undefined" && navigator.clipboard) {
+                                                                                          navigator.clipboard.writeText(vouch.code)
+                                                                                        }
+                                                                                        setCopiedVoucherCode(vouch.code)
+                                                                                        setTimeout(() => setCopiedVoucherCode(null), 2500)
+                                                                                      }}
+                                                                                      className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${isCopied
+                                                                                          ? "bg-emerald-600 text-white shadow-xs"
+                                                                                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                                                                        }`}
+                                                                                    >
+                                                                                      {isCopied ? (
+                                                                                        <>
+                                                                                          <Check className="h-3.5 w-3.5" />
+                                                                                          <span>{isDe ? "Kopiert!" : "Copied!"}</span>
+                                                                                        </>
+                                                                                      ) : (
+                                                                                        <>
+                                                                                          <Copy className="h-3.5 w-3.5 text-slate-400" />
+                                                                                          <span>{isDe ? "Code kopieren" : "Copy Code"}</span>
+                                                                                        </>
+                                                                                      )}
+                                                                                    </button>
+                                                                                  </div>
+
+                                                                                  <div className="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
+                                                                                    <span>Valid across all 11 Scholarly Open journals</span>
+                                                                                    <span className="text-[#0b99ff] font-medium">Single Use / Transferable</span>
+                                                                                  </div>
+                                                                                </div>
+                                                                              )
+                                                                            })}
+                                                                          </div>
+                                                                        </div>
+
+                                                                        {/* Reviewer Honoraria & 4-Option Disbursement Portal */}
+                                                                        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-6 shadow-xs">
+                                                                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                                                            <div className="flex items-center gap-3">
+                                                                              <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff]">
+                                                                                <Landmark className="h-5 w-5" />
+                                                                              </div>
+                                                                              <div>
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                                                                                    {isDe ? "Gutachter-Honorare & Vergütungsportal" : "Reviewer Honoraria & Recognition Portal"}
+                                                                                  </h4>
+                                                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                                                                    {isDe ? "Honorarpolitik in Abstimmung" : "Policy in Discussion"}
+                                                                                  </span>
+                                                                                </div>
+                                                                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                                                                  {isDe
+                                                                                    ? "Direkte Barhonorare befinden sich derzeit im Herausgebergremium in Abstimmung. Gutachter erhalten aktuell prioritäre APC-Erlass-Gutscheine (25%–100%) und verifizierte ORCID-Zertifikate."
+                                                                                    : "Cash honoraria policies are currently under executive editorial board discussion. Referees currently receive transferable APC waiver vouchers (25%–100%), verified ORCID certificates, and prestige credentials."}
+                                                                                </p>
+                                                                              </div>
+                                                                            </div>
+
+                                                                            <div className="text-right shrink-0">
+                                                                              <div className="text-[10px] uppercase font-bold text-slate-400">{isDe ? "Verfügbares Barhonorar" : "Available Cash Honorarium"}</div>
+                                                                              <div className="text-xl font-black text-slate-400 dark:text-slate-500">
+                                                                                €0.00
+                                                                              </div>
+                                                                              <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">{isDe ? "Derzeit in Beratung" : "Under Policy Discussion"}</div>
+                                                                            </div>
+                                                                          </div>
+
+                                                                          {/* Success Notification Banner */}
+                                                                          {payoutSuccessMsg && (
+                                                                            <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center gap-3 text-xs text-emerald-900 dark:text-emerald-200 animate-in fade-in">
+                                                                              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                                                                              <span className="font-semibold">{payoutSuccessMsg}</span>
+                                                                            </div>
+                                                                          )}
+
+                                                                          {/* 4 Interactive Option Cards */}
+                                                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+
+                                                                            {/* Option 1: Digital Cashout (PayPal / Payoneer / Wise) */}
+                                                                            <div
+                                                                              onClick={() => setPayoutOption("bank")}
+                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "bank"
+                                                                                  ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 shadow-xs ring-1 ring-[#0b99ff]/20"
+                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
+                                                                                }`}
+                                                                            >
+                                                                              <div className="flex items-center justify-between">
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <CreditCard className="h-4 w-4 text-amber-500" />
+                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
+                                                                                    {isDe ? "1. Digitale Auszahlung (PayPal / Payoneer / Wise)" : "1. Digital Cashout (PayPal / Payoneer / Wise)"}
+                                                                                  </span>
+                                                                                </div>
+                                                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                                                                  {isDe ? "Pausiert" : "Paused"}
+                                                                                </span>
+                                                                              </div>
+                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                                {isDe
+                                                                                  ? "Barauszahlungen sind während der laufenden Vorstandskonsultation vorübergehend pausiert. Wählen Sie Option 2, um einen sofortigen APC-Publikationsgutschein zu generieren."
+                                                                                  : "Cash disbursement rails are currently paused while executive honorarium policy is under editorial review. Please select Option 2 to claim transferable APC publication waivers."}
+                                                                              </p>
+                                                                              {payoutOption === "bank" && (
+                                                                                <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 text-xs">
+                                                                                  <div>
+                                                                                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Select Payout Rail</label>
+                                                                                    <div className="grid grid-cols-4 gap-1.5">
+                                                                                      {(["PayPal", "Payoneer", "Wise", "Other"] as const).map((service) => (
+                                                                                        <button
+                                                                                          key={service}
+                                                                                          type="button"
+                                                                                          onClick={(e) => {
+                                                                                            e.stopPropagation()
+                                                                                            setPayoutService(service)
+                                                                                          }}
+                                                                                          className={`py-1.5 px-1.5 rounded-lg text-[11px] font-bold border transition-all text-center ${payoutService === service
+                                                                                              ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-2xs"
+                                                                                              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#0b99ff]"
+                                                                                            }`}
+                                                                                        >
+                                                                                          {service}
+                                                                                        </button>
+                                                                                      ))}
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  <div>
+                                                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">
+                                                                                      {payoutService} Account Email
+                                                                                    </label>
+                                                                                    <input
+                                                                                      type="email"
+                                                                                      value={payoutEmail}
+                                                                                      onChange={(e) => setPayoutEmail(e.target.value)}
+                                                                                      placeholder={`name@domain.com (${payoutService} account)`}
+                                                                                      className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
+                                                                                    />
+                                                                                  </div>
+
+                                                                                  <div>
+                                                                                    <label className="text-[10px] font-bold text-slate-500 uppercase">
+                                                                                      Account Holder / Full Name (Optional)
+                                                                                    </label>
+                                                                                    <input
+                                                                                      type="text"
+                                                                                      value={payoutBeneficiary}
+                                                                                      onChange={(e) => setPayoutBeneficiary(e.target.value)}
+                                                                                      placeholder={getFormattedReviewerName(profile.title, profile.name) || "Dr. Marcus Vance"}
+                                                                                      className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
+                                                                                    />
+                                                                                  </div>
+                                                                                </div>
+                                                                              )}
+                                                                            </div>
+
+                                                                            {/* Option 2: APC Credit Voucher */}
+                                                                            <div
+                                                                              onClick={() => setPayoutOption("voucher")}
+                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "voucher"
+                                                                                  ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 shadow-xs ring-1 ring-[#0b99ff]/20"
+                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
+                                                                                }`}
+                                                                            >
+                                                                              <div className="flex items-center justify-between">
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <Award className="h-4 w-4 text-[#0b99ff]" />
+                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
+                                                                                    {isDe ? "2. APC-Gutschein für nächste Publikation" : "2. Re-use as APC Voucher for Next Submission"}
+                                                                                  </span>
+                                                                                </div>
+                                                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${payoutOption === "voucher" ? "border-[#0b99ff] bg-[#0b99ff] text-white" : "border-slate-300 dark:border-slate-700"
+                                                                                  }`}>
+                                                                                  {payoutOption === "voucher" && <Check className="h-3 w-3" />}
+                                                                                </span>
+                                                                              </div>
+                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                                {isDe
+                                                                                  ? "Reinvestieren Sie das Honorar für 50% bis 100% APC-Erlass bei eigener Einreichung. Gutschriften werden für Gründlichkeit und Pünktlichkeit vergeben und hängen niemals von Ihrer Gutachten-Empfehlung ab."
+                                                                                  : "Convert your honorarium into an official transferable APC waiver voucher valid across all 11 journals. Reviewer credits are awarded for thoroughness and timeliness; they never depend on your review recommendation."}
+                                                                              </p>
+                                                                              {payoutOption === "voucher" && (
+                                                                                <div className="p-2.5 rounded bg-[#0b99ff]/10 dark:bg-[#0b99ff]/20 text-[11px] text-[#0b99ff] dark:text-[#38bdf8] font-medium">
+                                                                                  ✓ An immediate promotional code will be generated upon confirmation and stored in your wallet.
+                                                                                </div>
+                                                                              )}
+                                                                            </div>
+
+                                                                            {/* Option 3: World Bank Low-Income Economies Fee-Waiver Fund */}
+                                                                            <div
+                                                                              onClick={() => setPayoutOption("waiver_fund")}
+                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "waiver_fund"
+                                                                                  ? "border-rose-500 dark:border-rose-500 bg-rose-50/20 dark:bg-rose-950/20 shadow-xs ring-1 ring-rose-500/20"
+                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
+                                                                                }`}
+                                                                            >
+                                                                              <div className="flex items-center justify-between">
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <HeartHandshake className="h-4 w-4 text-rose-500" />
+                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
+                                                                                    {isDe ? "3. Spende an Erlassfonds für Weltbank-Niedrigeinkommen" : "3. Donate to World Bank Low-Income Economies Fee-Waiver Fund"}
+                                                                                  </span>
+                                                                                </div>
+                                                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${payoutOption === "waiver_fund" ? "border-rose-600 bg-rose-600 text-white" : "border-slate-300 dark:border-slate-700"
+                                                                                  }`}>
+                                                                                  {payoutOption === "waiver_fund" && <Check className="h-3 w-3" />}
+                                                                                </span>
+                                                                              </div>
+                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                                {isDe
+                                                                                  ? "100% Ihres Honorars finanzieren Artikel-Bearbeitungsgebühren für Forscher aus Ländern mit niedrigem Einkommen (Weltbank-Klassifizierung)."
+                                                                                  : "100% of your honorarium subsidizes publication fees for researchers and scholars from World Bank low-income economies under our solidarity program."}
+                                                                              </p>
+                                                                              {payoutOption === "waiver_fund" && (
+                                                                                <div className="p-2.5 rounded bg-rose-50/80 dark:bg-rose-950/40 text-[11px] text-rose-800 dark:text-rose-300 font-medium">
+                                                                                  ♥ You will receive an official Philanthropic Recognition Certificate for your academic dossier.
+                                                                                </div>
+                                                                              )}
+                                                                            </div>
+
+                                                                            {/* Option 4: University Library Donation */}
+                                                                            <div
+                                                                              onClick={() => setPayoutOption("library")}
+                                                                              className={`p-4 rounded-xl border transition-all space-y-2.5 cursor-pointer ${payoutOption === "library"
+                                                                                  ? "border-amber-500 dark:border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 shadow-xs ring-1 ring-amber-500/20"
+                                                                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700"
+                                                                                }`}
+                                                                            >
+                                                                              <div className="flex items-center justify-between">
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <Library className="h-4 w-4 text-amber-500" />
+                                                                                  <span className="font-bold text-xs text-slate-900 dark:text-white">
+                                                                                    {isDe ? "4. Spende an Ihre Universitätsbibliothek" : "4. Donate to Your University Library OA Fund"}
+                                                                                  </span>
+                                                                                </div>
+                                                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center ${payoutOption === "library" ? "border-amber-600 bg-amber-600 text-white" : "border-slate-300 dark:border-slate-700"
+                                                                                  }`}>
+                                                                                  {payoutOption === "library" && <Check className="h-3 w-3" />}
+                                                                                </span>
+                                                                              </div>
+                                                                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                                                                {isDe
+                                                                                  ? "Stiften Sie das Honorar direkt an den Open-Access-Erwerbungsfonds Ihrer Heimatuniversität zur Förderung freier Forschung."
+                                                                                  : "Direct the €50 honorarium directly to your home institution's academic library to support university open access publishing."}
+                                                                              </p>
+                                                                              {payoutOption === "library" && (
+                                                                                <div className="space-y-1 pt-1 text-xs">
+                                                                                  <label className="text-[10px] font-bold text-slate-500 uppercase">Institutional Library</label>
+                                                                                  <input
+                                                                                    type="text"
+                                                                                    value={payoutLibraryName || `${profile.institution} Medical Library`}
+                                                                                    onChange={(e) => setPayoutLibraryName(e.target.value)}
+                                                                                    className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0b99ff]/20 focus:border-[#0b99ff]"
+                                                                                  />
+                                                                                </div>
+                                                                              )}
+                                                                            </div>
+
+                                                                          </div>
+
+                                                                          {/* Submit Action */}
+                                                                          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                                                                            <span className="text-[11px] text-slate-500">
+                                                                              {isDe
+                                                                                ? "Auszahlungsanträge werden vom Managing Editor im Admin-Ledger geprüft und freigegeben."
+                                                                                : "Requests are recorded in the editorial360 Admin Ledger for managing editor release."}
+                                                                            </span>
+
+                                                                            <Button
+                                                                              onClick={handleSubmitPayout}
+                                                                              disabled={isSubmittingPayout || payoutOption === "bank"}
+                                                                              className={`${payoutOption === "bank" ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed" : "bg-[#0b99ff] hover:bg-[#0088e0] text-white cursor-pointer"} text-xs font-bold px-5 py-2 shadow-xs shrink-0`}
+                                                                            >
+                                                                              <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                                                                              {payoutOption === "bank"
+                                                                                ? (isDe ? "Barauszahlung pausiert (in Beratung)" : "Cashout Paused (Policy in Discussion)")
+                                                                                : isSubmittingPayout
+                                                                                  ? (isDe ? "Wird übermittelt..." : "Submitting Request...")
+                                                                                  : (isDe ? "Gutschein / Spende einreichen" : "Submit Voucher / Donation Request")}
+                                                                            </Button>
+                                                                          </div>
+                                                                        </div>
+
+                                                                      </div>
+                                                                    </div>
+      )}
+
+                                                                    {/* ================= TAB 5: CERTIFICATE & PEER REVIEW CV EXPORT ================= */}
+                                                                    {activeTab === "certificate" && (
+                                                                      <div className="space-y-5">
+
+                                                                        {/* Header & Sub-Tab Switcher */}
+                                                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                                                                          <div>
+                                                                            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                                                              {isDe ? "Verifiziertes Gutachter-Zertifikat & Akademischer CV" : "Verified Reviewer Certificate & Academic CV"}
+                                                                            </h3>
+                                                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                                              {isDe ? "Offizielle Nachweise und vollständiges Gutachter-Dossier für Berufungsverfahren, Tenure und Fördermittel." : "Official verification credentials and comprehensive peer review dossier for tenure, promotion, and grant filings."}
+                                                                            </p>
+                                                                          </div>
+
+                                                                          {/* Mode Switcher Tabs */}
+                                                                          <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold shadow-2xs shrink-0">
+                                                                            <button
+                                                                              type="button"
+                                                                              onClick={() => setCertViewMode("certificate")}
+                                                                              className={`px-3.5 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-2 ${certViewMode === "certificate"
+                                                                                  ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-xs font-bold border border-slate-200/80 dark:border-slate-700"
+                                                                                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                                                                }`}
+                                                                            >
+                                                                              <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                                                              <span>{isDe ? "Offizielles Zertifikat" : "Official Certificate"}</span>
+                                                                            </button>
+                                                                            <button
+                                                                              type="button"
+                                                                              onClick={() => setCertViewMode("cv")}
+                                                                              className={`px-3.5 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-2 ${certViewMode === "cv"
+                                                                                  ? "bg-white dark:bg-slate-900 text-[#0b99ff] dark:text-sky-400 shadow-xs font-bold border border-slate-200/80 dark:border-slate-700"
+                                                                                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                                                                }`}
+                                                                            >
+                                                                              <FileText className="h-4 w-4 text-[#0b99ff]" />
+                                                                              <span>{isDe ? "Akademischer Reviewer-CV" : "Peer Review Academic CV"}</span>
+                                                                            </button>
+                                                                          </div>
+                                                                        </div>
+
+                                                                        {/* VIEW 1: OFFICIAL CERTIFICATE */}
+                                                                        {certViewMode === "certificate" && (
+                                                                          <div className="space-y-4">
+
+                                                                            {/* Quick Status / Switcher Bar */}
+                                                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                                                                              <div className="flex items-center gap-2 flex-wrap">
+                                                                                <span className="text-slate-500 font-semibold">{isDe ? "Status:" : "Earned Status:"}</span>
+                                                                                <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs ${reviewsDone > 0
+                                                                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300"
+                                                                                    : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300"
+                                                                                  }`}>
+                                                                                  {reviewsDone > 0
+                                                                                    ? (isDe ? `${reviewsDone} Manuskripte Begutachtet (Zertifiziert)` : `${reviewsDone} Manuscripts Reviewed (Active)`)
+                                                                                    : (isDe ? "0 / 1 Begutachtungen (In Bearbeitung)" : "0 / 1 Reviews Completed (In Progress)")}
+                                                                                </span>
+                                                                                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
+                                                                                  ⚡ {isDe ? "100% Pünktliche Abgabe (Gold-Siegel)" : "100% On-Time Turnaround (Gold Distinction)"}
+                                                                                </span>
+                                                                              </div>
+
+                                                                              <div className="flex items-center gap-2">
+                                                                                {reviewsDone === 0 ? (
+                                                                                  <Button
+                                                                                    size="sm"
+                                                                                    onClick={() => {
+                                                                                      const newDone = 1
+                                                                                      setReviewsDone(newDone)
+                                                                                      try {
+                                                                                        const email = user?.email || "reviewer@scholarlyopen.org"
+                                                                                        localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, String(newDone))
+                                                                                      } catch (e) { }
+                                                                                    }}
+                                                                                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold h-7 px-3 cursor-pointer"
+                                                                                  >
+                                                                                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                                                                                    {isDe ? "1. Gutachten abschließen (Demo)" : "Simulate 1st Completed Review"}
+                                                                                  </Button>
+                                                                                ) : (
+                                                                                  <Button
+                                                                                    size="sm"
+                                                                                    variant="outline"
+                                                                                    onClick={() => {
+                                                                                      const newDone = 0
+                                                                                      setReviewsDone(newDone)
+                                                                                      try {
+                                                                                        const email = user?.email || "reviewer@scholarlyopen.org"
+                                                                                        localStorage.setItem(`editorial360_reviewer_completed_reviews_${email}`, "0")
+                                                                                      } catch (e) { }
+                                                                                    }}
+                                                                                    className="text-xs h-7 px-2.5 text-slate-500 border-slate-300 cursor-pointer"
+                                                                                  >
+                                                                                    {isDe ? "Auf 0 zurücksetzen (Neuer Gutachter)" : "Reset to 0 (New Reviewer)"}
+                                                                                  </Button>
+                                                                                )}
+
+                                                                                {reviewsDone === 0 ? (
+                                                                                  <Button
+                                                                                    disabled
+                                                                                    className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-xs font-semibold px-3.5 h-8 cursor-not-allowed shadow-none flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
+                                                                                    title={isDe ? "Gesperrt: Erfordert mindestens 1 abgeschlossenes Gutachten" : "Locked: Complete at least 1 peer review to unlock certificate"}
+                                                                                  >
+                                                                                    <Lock className="h-3.5 w-3.5 text-slate-400" />
+                                                                                    {isDe ? "Zertifikat gesperrt (0 Gutachten)" : "Certificate Locked (0 Reviews)"}
+                                                                                  </Button>
+                                                                                ) : (
+                                                                                  <Button
+                                                                                    onClick={handlePrintCertificate}
+                                                                                    className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
+                                                                                  >
+                                                                                    <Download className="h-3.5 w-3.5" />
+                                                                                    {isDe ? "Zertifikat drucken (PDF)" : "Print Certificate (PDF)"}
+                                                                                  </Button>
+                                                                                )}
+                                                                                <Button
+                                                                                  onClick={handlePrintCertificate}
+                                                                                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-3.5 h-8 cursor-pointer shadow-xs flex items-center gap-1.5"
+                                                                                >
+                                                                                  <Download className="h-3.5 w-3.5" />
+                                                                                  {isDe ? "Bestellungsurkunde drucken (PDF)" : "Print Appointment Certificate (PDF)"}
+                                                                                </Button>
+                                                                              </div>
+                                                                            </div>
+
+                                                                            {/* IF 0 REVIEWS DONE: SHOW GATEWAY QUALIFICATION CERTIFICATE + LOCKED MILESTONE */}
+                                                                            {/* OFFICIAL CERTIFICATE OF EDITORIAL PEER REVIEW APPOINTMENT */}
+                                                                            {reviewsDone === 0 ? (
+                                                                              <div className="space-y-6">
+                                                                                {/* Milestone Card Explaining Why Peer Review Certificate requires contributions */}
+                                                                                <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+                                                                                  <div className="flex items-start gap-3">
+                                                                                    <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                                                                    <div>
+                                                                                      <h4 className="font-bold text-amber-950 dark:text-amber-200 text-sm">
+                                                                                        {isDe ? "Peer-Review-Zertifikat noch gesperrt (0 Gutachten abgeschlossen)" : "Verified Peer Review Certificate Locked (0 Reviews Completed)"}
+                                                                                      </h4>
+                                                                                      <p className="text-[11px] text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
+                                                                                        {isDe
+                                                                                          ? "Um akademische Integrität zu gewährleisten, ist das offizielle Begutachtungszertifikat an reale Gutachterbeiträge gebunden. Schließen Sie Ihr erstes zugewiesenes Manuskript ab, um Ihr offizielles Zertifikat mit Crossref-Zeitstempel freizuschalten."
+                                                                                          : "In compliance with COPE transparency standards, verified peer evaluation certificates are earned through genuine contributions. Complete your first assigned evaluation below to activate your permanent, Crossref-timestamped credential."}
+                                                                                      </p>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                  <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/80 dark:border-sky-500/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
+                                                                                    <div className="flex items-center justify-center">
+                                                                                      <img
+                                                                                        src="/logo-full-color.svg"
+                                                                                        alt="Scholarly Open"
+                                                                                        className="h-14 sm:h-16 w-auto object-contain dark:hidden"
+                                                                                        onError={(e) => {
+                                                                                          ; (e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
+                                                                                        }}
+                                                                                      />
+                                                                                      <img
+                                                                                        src="/logo-full.svg"
+                                                                                        alt="Scholarly Open"
+                                                                                        className="h-14 sm:h-16 w-auto object-contain hidden dark:block"
+                                                                                      />
+                                                                                    </div>
+
+                                                                                    {activeReviews.length > 0 && (
+                                                                                      <Button
+                                                                                        type="button"
+                                                                                        onClick={() => {
+                                                                                          setSelectedReviewForEval(activeReviews[0])
+                                                                                        }}
+                                                                                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white font-bold text-xs h-8 px-4 shrink-0 cursor-pointer shadow-xs"
+                                                                                      >
+                                                                                        <FileText className="h-3.5 w-3.5 mr-1" />
+                                                                                        {isDe ? "Manuskript jetzt begutachten" : `Evaluate ${activeReviews[0].id}`}
+                                                                                      </Button>
+                                                                                    )}
+                                                                                    <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
+                                                                                      Scholarly Open: Medicine • Executive Editorial Board
+                                                                                    </div>
+
+                                                                                    {/* GATEWAY CERTIFICATE (Earned upon passing the exam) */}
+                                                                                    <Card className="bg-white dark:bg-slate-950 border-4 border-double border-sky-600/80 dark:border-sky-500/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
+                                                                                      <div className="flex items-center justify-center">
+                                                                                        <img
+                                                                                          src="/logo-full-color.svg"
+                                                                                          alt="Scholarly Open"
+                                                                                          className="h-14 sm:h-16 w-auto object-contain dark:hidden"
+                                                                                          onError={(e) => {
+                                                                                            ; (e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
+                                                                                          }}
+                                                                                        />
+                                                                                        <img
+                                                                                          src="/logo-full.svg"
+                                                                                          alt="Scholarly Open"
+                                                                                          className="h-14 sm:h-16 w-auto object-contain hidden dark:block"
+                                                                                        />
+                                                                                      </div>
+                                                                                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
+                                                                                        Certificate of Editorial Peer Review Appointment
+                                                                                      </h2>
+
+                                                                                      <div className="text-[11px] uppercase tracking-widest text-sky-800 dark:text-sky-400 font-bold">
+                                                                                        Scholarly Open Standards Board • Gateway Examination
+                                                                                      </div>
+
+                                                                                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
+                                                                                        Certificate of Peer Review Qualification
+                                                                                      </h2>
+
+                                                                                      <div className="inline-block border-b-2 border-sky-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
+                                                                                        <div className="space-y-1">
+                                                                                          <div className="inline-block border-b-2 border-sky-600 pb-1 text-xl font-bold text-slate-900 dark:text-slate-100">
+                                                                                            {getFormattedReviewerName(profile.title, profile.name)}
+                                                                                          </div>
+                                                                                          <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                                                            {profile.department ? `${profile.department}, ` : ""}{profile.institution || "Hospital las Higueras, Talcahuano, Chile"}
+                                                                                          </div>
+                                                                                        </div>
+
+                                                                                        <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+                                                                                          This official credential confirms that <strong>{getFormattedReviewerName(profile.title, profile.name)}</strong> has successfully passed the Reviewer Gateway Examination, verifying proficiency in constructive academic English, COPE publication ethics, and methodological rigor in <strong>{profile.primaryDiscipline.toUpperCase()}</strong>.
+                                                                                        </p>
+                                                                                        <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+                                                                                          This official credential certifies the formal appointment of <strong>{getFormattedReviewerName(profile.title, profile.name)}</strong> as an <strong>Invited Expert Peer Reviewer</strong> for <strong>Scholarly Open: Medicine</strong>, in recognition of clinical scholarship, surgical leadership, and rigorous adherence to international Committee on Publication Ethics (COPE) standards in <strong>Cardiovascular Surgery & Thoracic Medicine</strong>.
+                                                                                        </p>
+
+                                                                                        <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
+                                                                                          <div className="flex justify-between">
+                                                                                            <span className="text-slate-500">Gateway Credential ID:</span>
+                                                                                            <strong className="text-slate-900 dark:text-white font-mono">SO-GW-2026-9041</strong>
+                                                                                          </div>
+                                                                                          <div className="flex justify-between">
+                                                                                            <span className="text-slate-500">Assessment Status:</span>
+                                                                                            <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Passed (80%+ Standard) ✓</strong>
+                                                                                          </div>
+                                                                                          <div className="flex justify-between">
+                                                                                            <span className="text-slate-500">Discipline Track:</span>
+                                                                                            <strong className="text-slate-900 dark:text-white">{DISCIPLINE_DATA[profile.primaryDiscipline]?.[isDe ? "labelDe" : "labelEn"] || profile.primaryDiscipline}</strong>
+                                                                                          </div>
+                                                                                          <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
+                                                                                            <div className="flex justify-between">
+                                                                                              <span className="text-slate-500">Appointment Credential ID:</span>
+                                                                                              <strong className="text-slate-900 dark:text-white font-mono">SO-MED-REF-2026-0419</strong>
+                                                                                            </div>
+                                                                                            <div className="flex justify-between">
+                                                                                              <span className="text-slate-500">Appointment Status:</span>
+                                                                                              <strong className="text-sky-600 dark:text-sky-400 font-bold">Invited Expert Referee (Direct Appointment)</strong>
+                                                                                            </div>
+                                                                                            <div className="flex justify-between">
+                                                                                              <span className="text-slate-500">Journal:</span>
+                                                                                              <strong className="text-slate-900 dark:text-white">Scholarly Open: Medicine</strong>
+                                                                                            </div>
+                                                                                            <div className="flex justify-between">
+                                                                                              <span className="text-slate-500">Discipline Track:</span>
+                                                                                              <strong className="text-slate-900 dark:text-white">Cardiovascular Surgery & Thoracic Medicine</strong>
+                                                                                            </div>
+                                                                                            <div className="flex justify-between">
+                                                                                              <span className="text-slate-500">Evaluation Desk:</span>
+                                                                                              <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">Round 2 Re-evaluation Desk (SOMED-26-RW01)</strong>
+                                                                                            </div>
+                                                                                          </div>
+
+                                                                                          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                                                                                            <span>Verified ORCID: {profile.orcid || "Verified Academic Record"}</span>
+                                                                                            <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Gateway Certified Seal</span>
+                                                                                          </div>
+                                                                                        </Card>
+                                                                                      </div>
+                                                                                      <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                                                                                        <span>{profile.orcid ? `Verified ORCID: ${profile.orcid}` : "Official Editorial Registry Record"}</span>
+                                                                                        <span className="font-bold text-sky-800 dark:text-sky-400 uppercase tracking-wider">Editorial Board Seal • Medicine</span>
+                                                                                      </div>
+                                                                                    </Card>
+                                                                                </div>
+                                                                                ) : (
+                                                                                /* IF 1+ REVIEWS DONE: SHOW OFFICIAL VERIFIED PEER REVIEW CERTIFICATE */
+                                                                                <Card className="bg-white dark:bg-slate-950 border-4 border-double border-emerald-700/80 dark:border-emerald-600/80 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6 text-center max-w-2xl mx-auto relative overflow-hidden">
+
+                                                                                  {/* Official Brand Logo */}
+                                                                                  <div className="flex items-center justify-center gap-3">
+                                                                                    <img
+                                                                                      src="/logo-mark.svg"
+                                                                                      alt="Scholarly Open"
+                                                                                      className="h-12 w-auto object-contain"
+                                                                                      onError={(e) => {
+                                                                                        ; (e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                                                                                      }}
+                                                                                    />
+                                                                                    <div className="text-2xl font-black text-[#132415] dark:text-white tracking-tight">
+                                                                                      Scholarly <span className="text-[#F6BB14]">Open</span>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  <div className="text-[11px] uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">
+                                                                                    Official Editorial Board Verification
+                                                                                  </div>
+
+                                                                                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                                                                    Certificate of Verified Peer Review
+                                                                                  </h2>
+
+                                                                                  <div className="inline-block border-b-2 border-emerald-600 pb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
+                                                                                    {getFormattedReviewerName(profile.title, profile.name)}
+                                                                                  </div>
+
+                                                                                  <p className="text-xs text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+                                                                                    This official credential confirms that {getFormattedReviewerName(profile.title, profile.name)} has completed verified, editor-endorsed scientific peer evaluations in full compliance with COPE standards and Scholarly Open ethical guidelines.
+                                                                                  </p>
+
+                                                                                  <div className="max-w-md mx-auto text-left text-xs border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 space-y-2.5">
+                                                                                    <div className="flex justify-between">
+                                                                                      <span className="text-slate-500">Verified ORCID Record:</span>
+                                                                                      <strong className="text-slate-900 dark:text-white font-mono">{profile.orcid || "Verified Academic Record"}</strong>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between">
+                                                                                      <span className="text-slate-500">Total Completed Reviews:</span>
+                                                                                      <strong className="text-slate-900 dark:text-white">{reviewsDone} Verified Manuscript{reviewsDone > 1 ? "s" : ""} (2026)</strong>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between">
+                                                                                      <span className="text-slate-500">Crossref Review Activity:</span>
+                                                                                      <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Synced & Timestamped ✓</strong>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between">
+                                                                                      <span className="text-slate-500">Turnaround Performance:</span>
+                                                                                      <strong className="text-sky-700 dark:text-sky-400 font-bold">100% On-Time Delivery Seal (Avg 11.4d) ⚡</strong>
+                                                                                    </div>
+                                                                                    <div className="flex justify-between">
+                                                                                      <span className="text-slate-500">Editorial Rigor Distinction:</span>
+                                                                                      <strong className="text-purple-700 dark:text-purple-400 font-bold">4.9 / 5.0 (Top 5% Reviewer Honors) 🏆</strong>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+                                                                                    <span>Hash: SHA256:88a109fe2c041</span>
+                                                                                    <span className="font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Editorial Board Certified Seal</span>
+                                                                                  </div>
+                                                                                </Card>
               )}
-
-              {/* Manuscript Summary */}
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                <div className="text-[10px] uppercase font-bold text-[#0b99ff] tracking-wider">
-                  {selectedReviewForDeadline.journal} • {selectedReviewForDeadline.id}
-                </div>
-                <div className="font-bold text-slate-900 dark:text-white text-xs line-clamp-2">
-                  {selectedReviewForDeadline.title}
-                </div>
-                <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  <span>{isDe ? "Aktuelle Frist:" : "Current Deadline:"}</span>
-                  <strong className="text-slate-800 dark:text-slate-200">{selectedReviewForDeadline.deadline || "None"}</strong>
-                  {selectedReviewForDeadline.deadline && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                      {getDaysRemaining(selectedReviewForDeadline.deadline)} {isDe ? "Tage ab heute" : "days from today"}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Turnaround Quick Presets */}
-              <div className="space-y-2">
-                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
-                  {isDe ? "Schnellauswahl Bearbeitungszeit:" : "Select Standard Turnaround Window:"}
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {[
-                    { days: 7, labelEn: "7 Days", labelDe: "7 Tage", tagEn: "Expedited", tagDe: "Eilig" },
-                    { days: 14, labelEn: "14 Days", labelDe: "14 Tage", tagEn: "COPE Standard", tagDe: "Standard" },
-                    { days: 21, labelEn: "21 Days", labelDe: "21 Tage", tagEn: "+1 Week Ext.", tagDe: "+1 Woche" },
-                    { days: 28, labelEn: "28 Days", labelDe: "28 Tage", tagEn: "Complex Study", tagDe: "Ausführlich" }
-                  ].map((p) => {
-                    const isSelected = !customDeadlineDate && deadlinePresetDays === p.days
-                    return (
-                      <button
-                        key={p.days}
-                        type="button"
-                        onClick={() => {
-                          setDeadlinePresetDays(p.days)
-                          setCustomDeadlineDate(getCalculatedDate(p.days))
-                        }}
-                        className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
-                          isSelected
-                            ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white shadow-2xs ring-1 ring-[#0b99ff]"
-                            : "border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs">{isDe ? p.labelDe : p.labelEn}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#0b99ff]" />}
-                        </div>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
-                          {isDe ? p.tagDe : p.tagEn}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Exact Target Date Picker */}
-              <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
-                  {isDe ? "Genaue Abgabefrist festlegen (Datum):" : "Designated Target Deadline Date:"}
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    min={new Date().toISOString().split("T")[0]}
-                    value={customDeadlineDate || getCalculatedDate(deadlinePresetDays)}
-                    onChange={(e) => setCustomDeadlineDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
-                  />
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {isDe
-                    ? `Berechnet: ${getDaysRemaining(customDeadlineDate || getCalculatedDate(deadlinePresetDays))} Tage verbleibend ab heute.`
-                    : `Calculated: ${getDaysRemaining(customDeadlineDate || getCalculatedDate(deadlinePresetDays))} days remaining from today.`}
-                </p>
-              </div>
-
-              {/* Extension Reason / Note to Editor */}
-              <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
-                  {isDe ? "Grund für Fristanpassung / Notiz an Editor (Optional):" : "Reason / Note to Handling Editor (Optional):"}
-                </label>
-                <textarea
-                  rows={2}
-                  value={deadlineExtensionReason}
-                  onChange={(e) => setDeadlineExtensionReason(e.target.value)}
-                  placeholder={isDe ? "z.B. Zusätzliche Zeit für statistische Re-Analyse benötigt..." : "e.g. Additional time needed to cross-examine complex statistical supplement..."}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0b99ff] focus:outline-none resize-none"
-                />
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setSelectedReviewForDeadline(null)}
-              className="text-xs h-auto py-2 cursor-pointer"
-            >
-              {isDe ? "Abbrechen" : "Cancel"}
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSaveDeadline}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold py-2 px-4 h-auto cursor-pointer shadow-xs"
-            >
-              <Calendar className="w-3.5 h-3.5 mr-1" />
-              {isDe ? "Frist verbindlich speichern" : "Save Review Deadline"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ================= MODAL 3: FULL ELECTRONIC REVIEWER ASSESSMENT FORM ================= */}
-      <Dialog open={!!selectedReviewForEval} onOpenChange={(open) => !open && setSelectedReviewForEval(null)}>
-        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg p-0">
-          <form onSubmit={handleSubmitEvaluation}>
-            <div className="p-5 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-950 z-10 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
-                  Scholarly Open • Electronic Reviewer’s Assessment
-                </span>
-                <h2 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
-                  {selectedReviewForEval?.title}
-                </h2>
-              </div>
-              <div className="flex items-center gap-2">
-                {lastDraftSavedAt && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Draft saved ({lastDraftSavedAt})
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
-                  <ShieldCheck className="h-3 w-3" />
-                  AI Index: Clean (3%)
-                </span>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-6 text-xs">
-              {evalError && (
-                <div className="p-3 rounded bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400 font-semibold text-xs">
-                  {evalError}
-                </div>
-              )}
-
-              {/* Round 2 Re-Assessment Header Banner */}
-              {(isRound2Active || Boolean((selectedReviewForEval as any)?.isRound2)) && (
-                <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-2 border-[#0b99ff]/40 shadow-xs">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0b99ff] text-white flex items-center gap-1 shadow-xs">
-                          <RotateCcw className="h-3 w-3" />
-                          Round 2 Re-Assessment
-                        </span>
-                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                          Revised Manuscript & Author Rebuttal Available
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                        The author team has revised the manuscript in response to referee comments and provided a point-by-point rebuttal. Download the materials below to review changes.
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 shrink-0">
-                      <Button
-                        type="button"
-                        onClick={() => handleDownloadSpecificFile("fulltext", selectedReviewForEval!)}
-                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shadow-xs flex items-center gap-1.5"
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        <span>Revised Manuscript (.docx)</span>
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => handleDownloadSpecificFile("supp", selectedReviewForEval!)}
-                        className="bg-white dark:bg-slate-900 border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shadow-xs flex items-center gap-1.5"
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                        <span>Author Rebuttal (.docx)</span>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Review Submission Deadline Banner inside Assessment Form */}
-              {selectedReviewForEval && (
-                <div className="p-3.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-[#0b99ff] shrink-0">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-slate-900 dark:text-white text-xs">
-                          {isDe ? "Begutachtungsfrist:" : "Review Target Deadline:"} {selectedReviewForEval.deadline || "14 days"}
-                        </span>
-                        {(() => {
-                          const daysLeft = getDaysRemaining(selectedReviewForEval.deadline)
-                          const isOverdue = daysLeft < 0
-                          return (
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              isOverdue 
-                                ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40"
-                                : daysLeft <= 3 
-                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40"
-                                : "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40"
-                            }`}>
-                              {isOverdue 
-                                ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig` : `${Math.abs(daysLeft)} days overdue`)
-                                : (isDe ? `Noch ${daysLeft} Tage verbleibend` : `${daysLeft} days remaining`)}
-                            </span>
-                          )
-                        })()}
-                      </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        {isDe 
-                          ? "Benötigen Sie mehr Zeit für Literatur- oder Datenprüfung? Sie können die Frist hier direkt anpassen."
-                          : "Need additional time to verify data or references? You can adjust or extend your review deadline anytime."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleOpenDeadlineModal(selectedReviewForEval)}
-                    className="border-blue-300 dark:border-blue-800 text-[#0b99ff] hover:bg-blue-100 dark:hover:bg-blue-900/40 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shrink-0"
-                  >
-                    <Calendar className="w-3.5 h-3.5 mr-1" />
-                    {isDe ? "Frist anpassen" : "Adjust Deadline"}
-                  </Button>
-                </div>
-              )}
-
-              {/* Section 1: Manuscript Meta & Structural Verification */}
-              <div className="space-y-3">
-                <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1.5">
-                  1. {isDe ? "Manuskript-Struktur & Grunddaten" : "Manuscript Structure & Details"}
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-600 dark:text-slate-400">{isDe ? "Artikelumfang:" : "Length of article:"}</label>
-                    <input 
-                      type="text" 
-                      value={articleLength} 
-                      onChange={(e) => setArticleLength(e.target.value)} 
-                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-600 dark:text-slate-400">{isDe ? "Anzahl Tabellen:" : "Number of Tables:"}</label>
-                    <input 
-                      type="text" 
-                      value={tablesCount} 
-                      onChange={(e) => setTablesCount(e.target.value)} 
-                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-600 dark:text-slate-400">{isDe ? "Anzahl Abbildungen:" : "Number of Figures:"}</label>
-                    <input 
-                      type="text" 
-                      value={figuresCount} 
-                      onChange={(e) => setFiguresCount(e.target.value)} 
-                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 2: 10-Point Questionnaire Matrix */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
-                  <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide flex items-center gap-1.5">
-                    <span>2. {isDe ? "Gutachter-Fragebogen (10 Kriterien)" : "Reviewer Questionnaire (10 Criteria)"}</span>
-                    <span className="text-rose-500 font-bold">*</span>
-                  </h3>
-                  <span className="text-[10px] font-semibold text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/40">
-                    {isDe ? "Alle 10 Fragen erforderlich" : "All 10 criteria required"}
-                  </span>
-                </div>
-
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {QUESTIONNAIRE_CRITERIA.map((item, idx) => (
-                    <div key={item.id} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="text-slate-800 dark:text-slate-200 font-medium pr-2">
-                        <span className="text-slate-400 dark:text-slate-500 mr-1.5 font-bold">{idx + 1}.</span>
-                        {item.label}
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {(["yes", "no", "na"] as const).map((val) => (
-                          <button
-                            key={val}
-                            type="button"
-                            onClick={() => setAnswers(prev => ({ ...prev, [item.id]: val }))}
-                            className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors cursor-pointer ${
-                              answers[item.id] === val 
-                                ? val === "yes" 
-                                   ? "bg-green-600 text-white" 
-                                  : val === "no" 
-                                  ? "bg-red-600 text-white" 
-                                  : "bg-slate-700 text-white"
-                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
-                            }`}
-                          >
-                            {val === "na" ? "N/A" : val}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section 3: Publishing Priority Rating */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide">
-                    3. {isDe ? "Publikations-Priorität (1 = Höchste, 10 = Geringste Priorität):" : "Publishing Priority Rating (1 = Highest, 10 = Lowest):"}
-                  </label>
-                  <span className="font-bold text-[#0b99ff] dark:text-[#0b99ff] text-sm">
-                    {isDe ? "Stufe" : "Score"}: {priorityRating} / 10
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-10 gap-1">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setPriorityRating(num)}
-                      className={`py-2 rounded font-bold text-xs transition-colors cursor-pointer ${
-                        priorityRating === num
-                          ? "bg-[#0b99ff] text-white"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section 4: Comments to Authors */}
-              <div className="space-y-4">
-                <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1.5 flex items-center gap-1.5">
-                  <span>4. {isDe ? "Gutachter-Kommentare für den/die Autor(en)" : "Comments to Author(s)"}</span>
-                  <span className="text-rose-500 font-bold">*</span>
-                </h3>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                    <span>{isDe ? "Allgemeine Kommentare (Gesamteinschätzung, Stärken, Hauptaussagen) *" : "General comments to the Author(s) *"}</span>
-                    <span className="text-[10px] font-medium text-rose-500 dark:text-rose-400">({isDe ? "mind. 30 Zeichen" : "Mandatory, min. 30 chars"})</span>
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={generalComments}
-                    onChange={(e) => setGeneralComments(e.target.value)}
-                    placeholder={isDe ? "Fassen Sie die Hauptstärken und übergeordneten Verbesserungsbereiche zusammen..." : "Summarize the primary contribution, core strengths, and general structural feedback..."}
-                    className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                    <span>{isDe ? "Spezifische / Zeilengenaue Anmerkungen (Methoden, Gleichungen, Tabellen) *" : "Specific line-by-line comments to the Author(s) *"}</span>
-                    <span className="text-[10px] font-medium text-rose-500 dark:text-rose-400">({isDe ? "mind. 20 Zeichen" : "Mandatory, min. 20 chars"})</span>
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={specificComments}
-                    onChange={(e) => setSpecificComments(e.target.value)}
-                    placeholder={isDe ? "z.B. Seite 4, Zeile 112: Genauere Erläuterung der Stichprobenzusammensetzung erforderlich..." : "e.g. Page 4, line 112: Clarify statistical degrees of freedom in Table 2..."}
-                    className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
-                  />
-                </div>
-              </div>
-
-              {/* Section 5: Confidential Remarks for Handling Editor */}
-              <div className="space-y-1 p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white text-xs">
-                  <Lock className="h-3.5 w-3.5 text-slate-500" />
-                  <span>{isDe ? "Vertrauliche Bemerkungen für den zuständigen Editor (Nicht für Autoren sichtbar):" : "Confidential Remarks to Handling Editor (Not visible to authors):"}</span>
-                </div>
-                <textarea
-                  rows={2}
-                  value={editorConfidentialComments}
-                  onChange={(e) => setEditorConfidentialComments(e.target.value)}
-                  placeholder={isDe ? "Optionale vertrauliche Hinweise an den Editor bezüglich methodischer Bedenken..." : "Optional private notes to the handling editor regarding ethical concerns or candid publishability..."}
-                  className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
-                />
-              </div>
-
-              {/* Misconduct Escalation Callout in Evaluation Form */}
-              <div className="p-3.5 rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                  <div className="space-y-0.5">
-                    <div className="font-bold text-amber-900 dark:text-amber-200">
-                      {isDe ? "Verdacht auf schwerwiegendes Fehlverhalten oder Paper Mill?" : "Suspect Research Misconduct, Data Fabrication, or Paper Mill?"}
-                    </div>
-                    <p className="text-[11px] text-amber-800 dark:text-amber-300">
-                      {isDe 
-                        ? "Eskalieren Sie diesen Fall direkt an den Integritäts-Manager (IM) und den zuständigen Editor unter COPE-Whistleblower-Schutz."
-                        : "Escalate confidentially to the Integrity Manager (IM) and Handling Editor under COPE whistleblower protections."}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (selectedReviewForEval) {
-                      handleOpenEscalate(selectedReviewForEval)
-                    }
-                  }}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 h-auto cursor-pointer shrink-0 rounded shadow-xs"
-                >
-                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                  {isDe ? "Fehlverhalten melden" : "Escalate to IM / Editor"}
-                </Button>
-              </div>
-
-              {/* Section 6: Recommendation Verdict */}
-              <div className="space-y-2">
-                <label className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide block">
-                  5. {isDe ? "Abschließende Gutachter-Empfehlung (Recommendation):" : "Final Recommendation:"}
-                </label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {[
-                    "Accept without any Changes",
-                    "Re-review and Accept with Minor Changes",
-                    "Re-review and Accept with Major Changes",
-                    "Re-write and Re-submit",
-                    "Reject"
-                  ].map((rec) => (
-                    <label 
-                      key={rec}
-                      className={`flex items-center gap-2 p-2.5 rounded border text-xs cursor-pointer transition-colors ${
-                        recommendation === rec 
-                          ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white" 
-                          : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                      }`}
-                    >
-                      <input 
-                        type="radio" 
-                        name="recommendation" 
-                        value={rec} 
-                        checked={recommendation === rec} 
-                        onChange={() => setRecommendation(rec as any)}
-                        className="text-[#0b99ff] focus:ring-[#0b99ff]"
-                      />
-                      <span>{rec}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section 7: Mandatory Disclosures */}
-              <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    {isDe ? "Wären Sie bereit, eine überarbeitete Fassung (Revision) zu begutachten?" : "Would you be willing to review a revision of this manuscript?"}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="willingRevision" 
-                        value="Yes" 
-                        checked={willingRevision === "Yes"} 
-                        onChange={() => setWillingRevision("Yes")} 
-                      />
-                      <span>{isDe ? "Ja" : "Yes"}</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="willingRevision" 
-                        value="No" 
-                        checked={willingRevision === "No"} 
-                        onChange={() => setWillingRevision("No")} 
-                      />
-                      <span>{isDe ? "Nein" : "No"}</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    {isDe ? "Offenlegung von Interessenkonflikten (COI):" : "Conflict of Interest (COI) disclosure:"}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="coiStatus" 
-                        value="None" 
-                        checked={coiStatus === "None"} 
-                        onChange={() => setCoiStatus("None")} 
-                      />
-                      <span>{isDe ? "Keine Interessenkonflikte (None)" : "None"}</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="coiStatus" 
-                        value="Yes" 
-                        checked={coiStatus === "Yes"} 
-                        onChange={() => setCoiStatus("Yes")} 
-                      />
-                      <span>{isDe ? "Ja, vorhanden" : "Yes declared"}</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Section 8: Review Recognition & Certificate Preferences */}
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
-                  <div className="font-bold text-slate-800 dark:text-slate-200 text-xs">
-                    {isDe ? "Anerkennung & Gutachter-Zertifikat:" : "Review Recognition & Certificate Preferences:"}
-                  </div>
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox"
-                      checked={requestCertificate}
-                      onChange={(e) => setRequestCertificate(e.target.checked)}
-                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
-                    />
-                    <span className="text-xs text-slate-700 dark:text-slate-300">
-                      {isDe 
-                        ? "Offizielles Gutachter-Zertifikat (Certificate of Review Recognition) nach redaktioneller Entscheidung ausstellen."
-                        : "Issue an official Certificate of Review Recognition upon editorial sign-off."}
-                    </span>
-                  </label>
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox"
-                      checked={syncOrcid}
-                      onChange={(e) => setSyncOrcid(e.target.checked)}
-                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
-                    />
-                    <span className="text-xs text-slate-700 dark:text-slate-300">
-                      {isDe 
-                        ? `Begutachtungsnachweis automatisch mit meinem ORCID-Profil (${profile.orcid || "Verifizierter Datensatz"}) synchronisieren.`
-                        : `Automatically sync review credit to my ORCID profile (${profile.orcid || "Verified Record"}).`}
-                    </span>
-                  </label>
-                </div>
-
-                <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox"
-                      checked={evalCopeCheck}
-                      onChange={(e) => setEvalCopeCheck(e.target.checked)}
-                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
-                    />
-                    <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
-                      {isDe 
-                        ? "Ich bestätige, dass dieses Gutachten meine eigene unabhängige wissenschaftliche Bewertung darstellt und alle ethischen Standards (COPE) eingehalten wurden."
-                        : "I certify that this assessment is my own independent evaluation, free of unauthorized AI generation, and adheres to COPE peer-review ethics."}
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-wrap items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2.5">
-                <Button
-                  type="button"
-                  onClick={handleManualSaveDraft}
-                  variant="outline"
-                  className="text-xs font-semibold cursor-pointer border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 shadow-2xs"
-                >
-                  <Save className="h-3.5 w-3.5 text-[#0b99ff]" />
-                  <span>{isDe ? "Entwurf speichern" : "Save Draft"}</span>
-                </Button>
-                {draftSavedToast && (
-                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 animate-in fade-in duration-200">
-                    {draftSavedToast}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  onClick={() => setSelectedReviewForEval(null)}
-                  variant="ghost"
-                  className="text-xs font-semibold cursor-pointer text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                >
-                  {isDe ? "Schließen" : "Close"}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-sm"
-                >
-                  {isSubmitting 
-                    ? (isDe ? "Wird übermittelt..." : "Submitting...") 
-                    : (isDe ? "Gutachten einreichen (+12 Pkt)" : "Submit Evaluation (+12 Pts)")}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* ================= MODAL 3B: INDIVIDUAL PEER REVIEW RECOGNITION CERTIFICATE ================= */}
-      <Dialog open={!!selectedCertReview} onOpenChange={(open) => !open && setSelectedCertReview(null)}>
-        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-2xl rounded-2xl p-6 shadow-2xl">
-          <DialogHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
-              <span>Certificate of Peer Review Recognition</span>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/40">
-                Verified Credential ✓
-              </span>
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Official academic peer review recognition issued by Scholarly Open i.G.
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedCertReview && (
-            <div className="space-y-4 py-2">
-              {/* Institutional Certificate Canvas Card */}
-              <div className="border-4 border-double border-emerald-700/70 dark:border-emerald-600/70 rounded-xl p-6 sm:p-8 bg-gradient-to-b from-slate-50/60 to-white dark:from-slate-900/40 dark:to-slate-950 text-center space-y-4 shadow-sm relative overflow-hidden">
-                <div className="flex items-center justify-center gap-2">
-                  <img 
-                    src="/logo-mark.svg" 
-                    alt="Scholarly Open" 
-                    className="h-9 w-auto object-contain"
-                    onError={(e) => {
-                      ;(e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
-                    }}
-                  />
-                  <div className="text-xl font-black text-[#132415] dark:text-white">
-                    Scholarly <span className="text-[#F6BB14]">Open</span>
-                  </div>
-                </div>
-
-                <div className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-400 tracking-widest">
-                  Editorial Board Peer Review Recognition
-                </div>
-
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Certificate of Peer Review
-                </h3>
-
-                <div className="space-y-1">
-                  <div className="text-xs text-slate-500">This official certificate is presented to</div>
-                  <div className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 border-b-2 border-emerald-600 inline-block px-4 pb-0.5">
-                    {getFormattedReviewerName(profile.title, profile.name)}
-                  </div>
-                  <div className="text-xs text-slate-500">{profile.institution}</div>
-                </div>
-
-                <p className="text-xs text-slate-700 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-                  In recognition of your scholarly contribution as an expert peer reviewer for manuscript:
-                  <strong className="block text-slate-900 dark:text-white mt-1">
-                    {selectedCertReview.manuscriptId || selectedCertReview.id}: &ldquo;{selectedCertReview.title}&rdquo;
-                  </strong>
-                  <span className="text-slate-500 text-[11px] block mt-0.5">
-                    Journal: {selectedCertReview.journal} • Final Sign-Off: {selectedCertReview.completedDate || "2026-06-12"}
-                  </span>
-                </p>
-
-                <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500 flex-wrap gap-2">
-                  <div className="text-left font-mono">
-                    <div>Verification ID: CERT-REV-{selectedCertReview.id}-2026</div>
-                    <div>ORCID iD: {profile.orcid || "Verified Academic Record"} (Synced ✓)</div>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
-                      COPE Compliant Verification Seal
-                    </span>
-                    <span className="text-slate-400">Managing Editorial Office</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 flex-wrap">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedCertReview(null)}
-              className="text-xs h-8 cursor-pointer"
-            >
-              Close
-            </Button>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  alert(`✓ Review credential synced with ORCID record (0000-0004-7711-2093).`)
-                }}
-                className="text-xs h-8 font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 cursor-pointer"
-              >
-                Sync with ORCID
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    window.print()
-                  }
-                }}
-                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-4 shadow-xs cursor-pointer"
-              >
-                <Download className="h-3.5 w-3.5 mr-1.5" />
-                Download PDF / Print
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ================= MODAL 4: BLINDED MANUSCRIPT PACKAGE DOWNLOAD ================= */}
-      <Dialog open={!!selectedPackageRev} onOpenChange={(open) => !open && setSelectedPackageRev(null)}>
-        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <FileDown className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
-              {isDe ? "Blinded Manuskript-Paket herunterladen" : "Blinded Manuscript File Package"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              {isDe 
-                ? "Vertrauliche, anonymisierte Dokumente für das Doppelblind-Gutachten."
-                : "Confidential, anonymized documents pre-sanitized for double-blind review."}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedPackageRev && (
-            <div className="space-y-3.5 py-2 text-xs">
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-semibold text-[#0b99ff] dark:text-[#0b99ff]">{selectedPackageRev.journal}</span>
-                  <span className="text-slate-400">ID: {selectedPackageRev.manuscriptId || selectedPackageRev.id}</span>
-                </div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-xs">{selectedPackageRev.title}</h4>
-              </div>
-
-              <div className="space-y-2">
-                <span className="font-bold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider block">
-                  {isDe ? "Enthaltene anonymisierte Dateien:" : "Included Blinded Files:"}
-                </span>
-
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-lg border border-slate-200 dark:border-slate-800">
-                  {(() => {
-                    const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
-                    if (isAortic) {
-                      return (
-                        <>
-                          <div className="p-2.5 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                              <div>
-                                <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Blinded_Revised_Manuscript_SOMED-26-RW01.docx
-                                </div>
-                                <div className="text-[10px] text-slate-400">
-                                  Revised Fulltext · Anonymized for Double-Blind Peer Review (Authors/PII Redacted)
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-mono text-slate-400">84.1 KB</span>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
-                                className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
-                              >
-                                <Download className="h-3 w-3 mr-1" />
-                                {isDe ? "Laden" : "Download"}
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="p-2.5 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800">
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
-                              <div>
-                                <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                                  Blinded_Author_Rebuttal_SOMED-26-RW01.docx
-                                </div>
-                                <div className="text-[10px] text-slate-400">
-                                  Point-by-Point Author Rebuttal Letter · Anonymized for Double-Blind Review
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-mono text-slate-400">25.8 KB</span>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
-                                className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
-                              >
-                                <Download className="h-3 w-3 mr-1" />
-                                {isDe ? "Laden" : "Download"}
-                              </Button>
-                            </div>
-                          </div>
-                        </>
-                      )
-                    }
-                    return (
-                      <div className="p-2.5 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                          <div>
-                            <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                              Blinded_Manuscript_FullText.docx
-                            </div>
-                            <div className="text-[10px] text-slate-400">
-                              Main text · 14 Pages · Anonymized (Authors/PII Redacted)
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono text-slate-400">2.4 MB</span>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
-                            className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
-                          >
-                            <Download className="h-3 w-3 mr-1" />
-                            {isDe ? "Laden" : "Download"}
-                          </Button>
-                        </div>
-                      </div>
-                    )
-                  })()}
-
-                  {(() => {
-                    const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
-                    if (isAortic) {
-                      return null
-                    }
-                    return (
-                      <>
-                        <div className="p-2.5 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
-                            <div>
-                              <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Supplementary_Tables_Figures.txt</div>
-                              <div className="text-[10px] text-slate-400">High-res vector figures (300 DPI) & Extended Datasets</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono text-slate-400">8.1 MB</span>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
-                              className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
-                            >
-                              <Download className="h-3 w-3 mr-1" />
-                              {isDe ? "Laden" : "Download"}
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <ShieldCheck className="h-4 w-4 text-[#0b99ff] shrink-0" />
-                            <div>
-                              <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">IRB_Ethics_Statement_Redacted.txt</div>
-                              <div className="text-[10px] text-slate-400">Institutional Review Board protocol clearance certification</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono text-slate-400">410 KB</span>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDownloadSpecificFile("irb", selectedPackageRev)}
-                              className="h-7 px-2.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 border-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                            >
-                              <Download className="h-3 w-3 mr-1" />
-                              {isDe ? "Laden" : "Download"}
-                            </Button>
-                          </div>
-                        </div>
-                      </>
-                    )
-                  })()}
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex items-start gap-2 text-[11px] text-amber-800 dark:text-amber-300">
-                <Lock className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                <span>
-                  {isDe 
-                    ? "Vertraulichkeitserinnerung: Diese Dateien sind ausschließlich für Ihre Begutachtung bestimmt und dürfen nicht an Dritte weitergegeben werden."
-                    : "Strict Confidentiality: These files are provided solely for peer review. Redistribution, sharing, or uploading to public tools is prohibited."}
-                </span>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2">
-            <Button 
-              onClick={() => setSelectedPackageRev(null)}
-              variant="ghost"
-              className="text-xs font-semibold cursor-pointer"
-            >
-              {isDe ? "Schließen" : "Close"}
-            </Button>
-            <Button
-              onClick={() => {
-                if (selectedPackageRev) handleDownloadFullPackage(selectedPackageRev)
-              }}
-              className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-4 py-2 cursor-pointer flex items-center gap-1.5"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span>
-                {isDownloadingZip 
-                  ? (isDe ? "Wird gepackt..." : "Archiving...") 
-                  : (isDe ? "Komplettes Paket herunterladen (.TXT)" : "Download Full Package (.TXT)")}
-              </span>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ================= MODAL 5: MISCONDUCT & ETHICS ESCALATION DIALOG ================= */}
-      <Dialog open={!!selectedEscalateRev} onOpenChange={(open) => !open && setSelectedEscalateRev(null)}>
-        <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-xl rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              {isDe ? "Wissenschaftliches Fehlverhalten / Ethik-Eskalation" : "Research Integrity & Misconduct Escalation"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              {isDe 
-                ? "Vertrauliche Meldung gemäß COPE-Leitlinien an den Integrity Manager, den Editor und den Journal Manager (JM)."
-                : "Confidential escalation dispatched directly to the Integrity Manager, Handling Editor, and Journal Manager (JM)."}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedEscalateRev && (
-            <form onSubmit={handleConfirmEscalation} className="space-y-4 py-2 text-xs">
-              {/* Manuscript Summary */}
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-semibold text-[#0b99ff] dark:text-[#0b99ff]">{selectedEscalateRev.journal}</span>
-                  <span className="font-mono text-slate-400">ID: {selectedEscalateRev.manuscriptId || selectedEscalateRev.id}</span>
-                </div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-xs">{selectedEscalateRev.title}</h4>
-              </div>
-
-              {/* Journal Manager CC Info Notice */}
-              <div className="p-2.5 rounded-lg bg-sky-50/80 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/50 flex items-center gap-2 text-[11px] text-sky-800 dark:text-sky-300">
-                <Info className="h-4 w-4 shrink-0 text-[#0b99ff]" />
-                <span>
-                  <strong>{isDe ? "Journal Manager (JM) Kopie:" : "Journal Manager (JM) Routing:"}</strong> {isDe 
-                    ? "Eine Prüfkopie wird automatisch an den Journal Manager (JM) gesendet, um formelle Prozesspausen und Archivierung sicherzustellen." 
-                    : "A formal compliance copy is automatically sent to the Journal Manager (JM) for editorial hold management and audit logging."}
-                </span>
-              </div>
-
-              {/* 1. Recipient Target */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
-                  1. {isDe ? "Empfänger der primären Untersuchung:" : "Primary Investigation Recipient:"}
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${
-                    escalateTarget === "both" 
-                      ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white" 
-                      : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="escalateTarget" 
-                      value="both" 
-                      checked={escalateTarget === "both"} 
-                      onChange={() => setEscalateTarget("both")} 
-                    />
-                    <span>{isDe ? "IM + Editor (CC: JM)" : "IM + Editor (CC: JM)"}</span>
-                  </label>
-
-                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${
-                    escalateTarget === "integrity_manager" 
-                      ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white" 
-                      : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="escalateTarget" 
-                      value="integrity_manager" 
-                      checked={escalateTarget === "integrity_manager"} 
-                      onChange={() => setEscalateTarget("integrity_manager")} 
-                    />
-                    <span>{isDe ? "IM Only (CC: JM)" : "IM Only (CC: JM)"}</span>
-                  </label>
-
-                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${
-                    escalateTarget === "handling_editor" 
-                      ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white" 
-                      : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="escalateTarget" 
-                      value="handling_editor" 
-                      checked={escalateTarget === "handling_editor"} 
-                      onChange={() => setEscalateTarget("handling_editor")} 
-                    />
-                    <span>{isDe ? "Editor Only (CC: JM)" : "Editor Only (CC: JM)"}</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* 2. Misconduct Classification */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
-                  2. {isDe ? "Kategorie des vermuteten Fehlverhaltens:" : "Suspected Misconduct Classification:"}
-                </label>
-                <select
-                  value={misconductType}
-                  onChange={(e) => setMisconductType(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-semibold focus:ring-1 focus:ring-[#0b99ff]"
-                >
-                  <option value="figure_manipulation">{isDe ? "Bild- & Grafik-Manipulation (Duplizierung, Band-Splicing, Retusche)" : "Image & Figure Manipulation (Pixel cloning, Western blot splicing)"}</option>
-                  <option value="paper_mill">{isDe ? "Verdacht auf Paper Mill / Ghost-Autorenschaft" : "Paper Mill / Ghost Authorship Syndicate"}</option>
-                  <option value="data_fabrication">{isDe ? "Erfundene oder statistisch unplausible Daten" : "Fabricated Data / Statistically Impossible Results"}</option>
-                  <option value="plagiarism">{isDe ? "Schweres Plagiat / Text-Recycling ohne Zitation" : "Plagiarism & Redundant Text Recycling"}</option>
-                  <option value="coi_violation">{isDe ? "Verschwiegener schwerer Interessenkonflikt" : "Undisclosed Commercial / Institutional Conflict of Interest"}</option>
-                  <option value="unethical_irb">{isDe ? "Fehlende Ethik-Genehmigung / Unethische Probanden-Rekrutierung" : "Missing IRB Approval / Unethical Human/Animal Protocols"}</option>
-                  <option value="other">{isDe ? "Sonstige schwerwiegende Publikationsethik-Verletzung" : "Other Severe COPE Ethical Violation"}</option>
-                </select>
-              </div>
-
-              {/* 3. Urgency / Action Requested */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
-                  3. {isDe ? "Dringlichkeit & Handlungsempfehlung:" : "Severity & Requested Editorial Action:"}
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${
-                    misconductSeverity === "high_urgent" 
-                      ? "border-red-500 bg-red-50/50 dark:bg-red-950/20 font-bold text-red-900 dark:text-red-200" 
-                      : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="misconductSeverity" 
-                      value="high_urgent" 
-                      checked={misconductSeverity === "high_urgent"} 
-                      onChange={() => setMisconductSeverity("high_urgent")} 
-                    />
-                    <span>{isDe ? "Sofortiger Begutachtungsstopp empfohlen" : "Immediate Review Freeze Requested"}</span>
-                  </label>
-
-                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${
-                    misconductSeverity === "medium_discretion" 
-                      ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 font-bold text-amber-900 dark:text-amber-200" 
-                      : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="misconductSeverity" 
-                      value="medium_discretion" 
-                      checked={misconductSeverity === "medium_discretion"} 
-                      onChange={() => setMisconductSeverity("medium_discretion")} 
-                    />
-                    <span>{isDe ? "Hinweis zur Prüfung (Begutachtung fortsetzen)" : "Discretionary Note (Continue Review)"}</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* 4. Specific Locations & References */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
-                  4. {isDe ? "Betroffene Abbildungen / Seitenzahlen / Tabellen:" : "Specific Locations (Page, Figure, or Table references):"}
-                </label>
-                <input
-                  type="text"
-                  value={misconductPageRefs}
-                  onChange={(e) => setMisconductPageRefs(e.target.value)}
-                  placeholder={isDe ? "z.B. Abbildung 3B (identisch zu Abb. 1A) und Seite 8, Tabelle 3" : "e.g. Figure 3B duplicated from Fig 1A with inverted contrast; Page 8 Table 3"}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:ring-1 focus:ring-[#0b99ff]"
-                />
-              </div>
-
-              {/* 5. Detailed Evidence */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
-                  5. {isDe ? "Ausführliche Begründung & Beweishinweise:" : "Detailed Evidence & Integrity Findings:"}
-                </label>
-                <textarea
-                  rows={3}
-                  value={misconductEvidence}
-                  onChange={(e) => setMisconductEvidence(e.target.value)}
-                  placeholder={isDe ? "Beschreiben Sie die auffälligen Muster, Unstimmigkeiten oder methodischen Fälschungsmerkmale..." : "Detail the anomalies, duplicate background noise, mathematical impossibilities, or suspected paper mill characteristics..."}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
-                  required
-                />
-              </div>
-
-              {/* 6. COPE Protection Declaration */}
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox"
-                    checked={misconductCopeCheck}
-                    onChange={(e) => setMisconductCopeCheck(e.target.checked)}
-                    className="mt-0.5 h-3.5 w-3.5 rounded text-amber-600 focus:ring-amber-500"
-                    required
-                  />
-                  <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
-                    {isDe 
-                      ? "Ich bestätige, dass diese Meldung nach bestem wissenschaftlichen Wissen erfolgt. Meine Identität als Gutachter wird gemäß den COPE-Whistleblower-Richtlinien streng vertraulich geschützt."
-                      : "I confirm this report is submitted in good faith on objective scientific grounds. My identity is strictly protected under COPE whistleblower guidelines."}
-                  </span>
-                </label>
-              </div>
-
-              <DialogFooter className="gap-2 pt-2">
-                <Button 
-                  type="button"
-                  onClick={() => setSelectedEscalateRev(null)}
-                  variant="ghost"
-                  className="text-xs font-semibold cursor-pointer"
-                >
-                  {isDe ? "Abbrechen" : "Cancel"}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmittingEscalation}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-5 py-2 cursor-pointer flex items-center gap-1.5 shadow-xs"
-                >
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  <span>
-                    {isSubmittingEscalation 
-                    ? (isDe ? "Wird übermittelt..." : "Dispatching...") 
-                    : (isDe ? "Eskalation vertraulich einreichen" : "Submit Confidential Escalation")}
-                  </span>
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* ================= REVIEWER ONBOARDING & PROFILE SETUP MODAL ================= */}
-      <Dialog 
-        open={showProfileModal} 
-        onOpenChange={(open) => {
-          if (!open) markOnboarded()
-          setShowProfileModal(open)
-        }}
-      >
-        <DialogContent className="max-w-xl max-h-[85vh] flex flex-col p-0 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden">
-          
-          {/* editorial360 Light Sky Blue Top Accent Bar */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0088e0] shrink-0" />
-
-          {/* Modal Header */}
-          <div className="px-6 pt-5 pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <DialogTitle className="text-base font-semibold text-slate-900 dark:text-white">
-              {isDe ? "Gutachterprofil einrichten" : "Reviewer Profile Setup"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              {isDe 
-                ? "Geben Sie Ihre akademische Affiliation, Fachgebiete und Verfügbarkeit für Manuskriptzuweisungen an." 
-                : "Set your academic affiliation, subject expertise, and review availability for manuscript matching."}
-            </DialogDescription>
-
-            {/* Step Navigation Tabs with Light Sky Blue Active Border */}
-            <div className="flex items-center gap-4 mt-3 pt-2 text-xs">
-              {[
-                { step: 1, labelEn: "1. Affiliation", labelDe: "1. Affiliation" },
-                { step: 2, labelEn: "2. Expertise", labelDe: "2. Fachgebiete" },
-                { step: 3, labelEn: "3. Capacity", labelDe: "3. Kapazität" },
-                { step: 4, labelEn: "4. Ethics", labelDe: "4. Ethik" },
-              ].map(st => (
-                <button
-                  key={st.step}
-                  type="button"
-                  onClick={() => setProfileStep(st.step as 1 | 2 | 3 | 4)}
-                  className={`pb-1.5 border-b-2 text-xs transition-colors cursor-pointer ${
-                    profileStep === st.step
-                      ? "border-[#0b99ff] text-[#0b99ff] font-semibold"
-                      : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                  }`}
-                >
-                  {isDe ? st.labelDe : st.labelEn}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Form Body with Scrollable Content and Fixed Footer */}
-          <form onSubmit={handleSaveProfile} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 pt-4">
-
-            {/* STEP 1: Academic Identity & Affiliation */}
-            {profileStep === 1 && (
-              <div className="space-y-3.5">
-                {/* Reviewer Photo Upload Row */}
-                <div className="flex items-center gap-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
-                  <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
-                    {formPhotoUrl ? (
-                      <img src={formPhotoUrl} alt="Reviewer Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{getReviewerInitials(formName)}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
-                      <Upload className="h-3.5 w-3.5 text-[#0b99ff]" />
-                      {isDe ? "Foto hochladen" : "Upload Photo"}
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            const reader = new FileReader()
-                            reader.onloadend = () => {
-                              setFormPhotoUrl(reader.result as string)
-                            }
-                            reader.readAsDataURL(file)
-                          }
-                        }} 
-                      />
-                    </label>
-                    {formPhotoUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setFormPhotoUrl("")}
-                        className="px-2.5 py-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
-                      >
-                        {isDe ? "Entfernen" : "Remove"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Akad. Titel" : "Academic Title"}
-                    </label>
-                    <select
-                      value={formTitle}
-                      onChange={(e) => setFormTitle(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    >
-                      <option value="Prof. Dr.">Prof. Dr.</option>
-                      <option value="Dr.">Dr. / PhD</option>
-                      <option value="Assoc. Prof.">Assoc. Prof.</option>
-                      <option value="Assist. Prof.">Assist. Prof.</option>
-                      <option value="MD">MD</option>
-                      <option value="MD, PhD">MD, PhD</option>
-                      <option value="Postdoctoral Fellow">Postdoctoral Fellow</option>
-                      <option value="Senior Scientist">Senior Scientist</option>
-                      <option value="MSc">MSc / Researcher</option>
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Vollständiger Name *" : "Full Name *"}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formName}
-                      onChange={(e) => setFormName(e.target.value)}
-                      placeholder="Dr. Marcus Vance"
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Institutionelle E-Mail *" : "Institutional Email *"}
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={formEmail}
-                      onChange={(e) => setFormEmail(e.target.value)}
-                      placeholder="m.vance@university.edu"
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Land / Region *" : "Country / Region *"}
-                    </label>
-                    <select
-                      value={formCountry}
-                      onChange={(e) => setFormCountry(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    >
-                      <option value="">{isDe ? "Land auswählen..." : "Select Country..."}</option>
-                      {GLOBAL_COUNTRIES.map((c) => (
-                        <option key={c.code} value={c.name}>
-                          {c.flag} {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Institution / Universität *" : "Institution / University *"}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formInstitution}
-                      onChange={(e) => setFormInstitution(e.target.value)}
-                      placeholder="e.g. Charité – Universitätsmedizin Berlin"
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Fachbereich / Institut" : "Department / Division"}
-                    </label>
-                    <input
-                      type="text"
-                      value={formDepartment}
-                      onChange={(e) => setFormDepartment(e.target.value)}
-                      placeholder="e.g. Department of Cardiology"
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      ORCID iD
-                    </label>
-                    <input
-                      type="text"
-                      value={formOrcid}
-                      onChange={(e) => setFormOrcid(e.target.value)}
-                      placeholder="0000-0004-7711-2093"
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {isDe ? "Google Scholar / Scopus Profil" : "Google Scholar / Scopus Link"}
-                    </label>
-                    <input
-                      type="url"
-                      value={formScholarUrl}
-                      onChange={(e) => setFormScholarUrl(e.target.value)}
-                      placeholder="https://scholar.google.com/citations?user=..."
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 2: Subject Areas & Matching Keywords */}
-            {profileStep === 2 && (
-              <div className="space-y-3.5">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    {isDe ? "Hauptfachdisziplin *" : "Primary Scientific Discipline *"}
-                  </label>
-                  <select
-                    value={formPrimaryDiscipline}
-                    onChange={(e) => {
-                      setFormPrimaryDiscipline(e.target.value)
-                      if (DISCIPLINE_DATA[e.target.value]) {
-                        setFormSubDisciplines(DISCIPLINE_DATA[e.target.value].subDisciplines.slice(0, 3))
-                      }
-                    }}
-                    className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                  >
-                    {Object.entries(DISCIPLINE_DATA).map(([key, disc]) => (
-                      <option key={key} value={key}>
-                        {isDe ? disc.labelDe : disc.labelEn}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sub-Disciplines Chips */}
-                {DISCIPLINE_DATA[formPrimaryDiscipline] && (
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
-                      {isDe ? "Spezialisierte Teilbereiche:" : "Sub-Disciplines:"}
-                    </label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {DISCIPLINE_DATA[formPrimaryDiscipline].subDisciplines.map((sub, i) => {
-                        const isSelected = formSubDisciplines.includes(sub)
-                        return (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => handleToggleSubDiscipline(sub)}
-                            className={`text-xs px-2.5 py-0.5 rounded border transition-colors cursor-pointer ${
-                              isSelected
-                                ? "bg-[#0b99ff] text-white border-[#0b99ff] font-medium shadow-2xs"
-                                : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:border-[#0b99ff]/60"
-                            }`}
-                          >
-                            {isSelected ? "✓ " : "+ "}{sub}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Keyword Tagger */}
-                <div className="space-y-1.5 pt-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
-                    {isDe ? "Forschungsschlagwörter (Keywords):" : "Research Keywords:"}
-                  </label>
-
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={formKeywordInput}
-                      onChange={(e) => setFormKeywordInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          handleAddKeyword()
-                        }
-                      }}
-                      placeholder={isDe ? "Schlagwort eingeben und Enter drücken..." : "Type keyword and press Enter..."}
-                      className="flex-1 px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
-                    />
-                    <Button
-                      type="button"
-                      onClick={() => handleAddKeyword()}
-                      variant="outline"
-                      className="text-xs px-3 h-8 border-[#0b99ff] text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 cursor-pointer font-medium"
-                    >
-                      {isDe ? "Hinzufügen" : "Add"}
-                    </Button>
-                  </div>
-
-                  {/* Active Tags */}
-                  <div className="p-2 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 min-h-[36px] flex flex-wrap items-center gap-1.5">
-                    {formKeywords.length === 0 ? (
-                      <span className="text-xs text-slate-400">
-                        {isDe ? "Keine Schlagwörter hinzugefügt." : "No keywords added yet."}
-                      </span>
-                    ) : (
-                      formKeywords.map((kw, i) => (
-                        <span 
-                          key={i} 
-                          className="inline-flex items-center gap-1 text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-2xs"
-                        >
-                          {kw}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveKeyword(kw)}
-                            className="text-slate-400 hover:text-red-500 ml-0.5 cursor-pointer font-bold"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Keyword Suggestions */}
-                  {DISCIPLINE_DATA[formPrimaryDiscipline] && (
-                    <div className="space-y-1 pt-1">
-                      <span className="text-[11px] text-slate-500 block">
-                        {isDe ? "Empfohlene Keywords:" : "Suggested keywords:"}
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {DISCIPLINE_DATA[formPrimaryDiscipline].keywords.map((sugKw, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => handleAddKeyword(sugKw)}
-                            disabled={formKeywords.includes(sugKw)}
-                            className={`text-[11px] px-2 py-0.5 rounded border transition-colors cursor-pointer ${
-                              formKeywords.includes(sugKw)
-                                ? "opacity-40 bg-slate-100 dark:bg-slate-800 text-slate-400 border-transparent cursor-not-allowed"
-                                : "bg-sky-50 dark:bg-sky-950/40 text-[#0b99ff] border-sky-200 dark:border-sky-800/80 hover:bg-sky-100 dark:hover:bg-sky-900/60"
-                            }`}
-                          >
-                            + {sugKw}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Workload Capacity & Availability */}
-            {profileStep === 3 && (
-              <div className="space-y-3.5">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
-                    {isDe ? "Verfügbarkeit:" : "Availability Status:"}
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <label className={`p-2.5 rounded border cursor-pointer text-xs flex items-center gap-2 ${
-                      formAvailability === "Available"
-                        ? "border-[#0b99ff] bg-sky-50/60 dark:bg-sky-950/30 font-medium text-slate-900 dark:text-white"
-                        : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="formAvailability"
-                        value="Available"
-                        checked={formAvailability === "Available"}
-                        onChange={() => setFormAvailability("Available")}
-                        className="text-[#0b99ff] accent-[#0b99ff]"
-                      />
-                      <span>{isDe ? "Aktiv & Verfügbar" : "Active & Available"}</span>
-                    </label>
-
-                    <label className={`p-2.5 rounded border cursor-pointer text-xs flex items-center gap-2 ${
-                      formAvailability === "Sabbatical"
-                        ? "border-[#0b99ff] bg-sky-50/60 dark:bg-sky-950/30 font-medium text-slate-900 dark:text-white"
-                        : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="formAvailability"
-                        value="Sabbatical"
-                        checked={formAvailability === "Sabbatical"}
-                        onChange={() => setFormAvailability("Sabbatical")}
-                        className="text-[#0b99ff] accent-[#0b99ff]"
-                      />
-                      <span>{isDe ? "Forschungssemester / Pause" : "On Sabbatical / Leave"}</span>
-                    </label>
-                  </div>
-                </div>
-
-                {formAvailability === "Sabbatical" && (
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
-                      {isDe ? "Wieder verfügbar ab:" : "Available from (Date):"}
-                    </label>
-                    <input
-                      type="date"
-                      value={formSabbaticalUntil}
-                      onChange={(e) => setFormSabbaticalUntil(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
-                    {isDe ? "Maximale Begutachtungen (pro Monat):" : "Maximum Workload (Papers per Month):"}
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[1, 2, 3, 4].map(num => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setFormMaxReviews(num)}
-                        className={`py-2 rounded border text-center text-xs transition-colors cursor-pointer ${
-                          formMaxReviews === num
-                            ? "border-[#0b99ff] bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] font-semibold"
-                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-400"
-                        }`}
-                      >
-                        {num} {isDe ? "Artikel" : "papers"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
-                    {isDe ? "Bevorzugte Begutachtungsdauer:" : "Preferred Review Turnaround:"}
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { days: 7, labelEn: "7 Days", labelDe: "7 Tage" },
-                      { days: 14, labelEn: "14 Days", labelDe: "14 Tage" },
-                      { days: 21, labelEn: "21 Days", labelDe: "21 Tage" },
-                    ].map(win => (
-                      <button
-                        key={win.days}
-                        type="button"
-                        onClick={() => setFormTurnaround(win.days)}
-                        className={`py-2 rounded border text-center text-xs transition-colors cursor-pointer ${
-                          formTurnaround === win.days
-                            ? "border-[#0b99ff] bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] font-semibold"
-                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-400"
-                        }`}
-                      >
-                        {isDe ? win.labelDe : win.labelEn}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 4: Ethics & Compliance */}
-            {profileStep === 4 && (
-              <div className="space-y-3.5">
-                <div className="space-y-2.5">
-                  <label className="p-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-start gap-2.5 cursor-pointer text-xs">
-                    <input
-                      type="checkbox"
-                      checked={formCoiChecked}
-                      onChange={(e) => setFormCoiChecked(e.target.checked)}
-                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] accent-[#0b99ff]"
-                      required
-                    />
-                    <div className="space-y-0.5">
-                      <strong className="text-slate-900 dark:text-white block font-medium">
-                        {isDe ? "Interessenkonflikt-Erklärung" : "Conflict of Interest Declaration"}
-                      </strong>
-                      <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                        {isDe 
-                          ? "Ich erkläre, Einladungen bei Ko-Autorenschaft, institutioneller Verflechtung oder Wettbewerbskonflikten abzulehnen."
-                          : "I agree to recuse myself from reviewing manuscripts where institutional, personal, or financial conflicts exist."}
-                      </p>
-                    </div>
-                  </label>
-
-                  <label className="p-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-start gap-2.5 cursor-pointer text-xs">
-                    <input
-                      type="checkbox"
-                      checked={formCopeChecked}
-                      onChange={(e) => setFormCopeChecked(e.target.checked)}
-                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] accent-[#0b99ff]"
-                      required
-                    />
-                    <div className="space-y-0.5">
-                      <strong className="text-slate-900 dark:text-white block font-medium">
-                        {isDe ? "Vertraulichkeitserklärung & COPE-Richtlinien" : "Confidentiality & COPE Compliance"}
-                      </strong>
-                      <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                        {isDe 
-                          ? "Ich behandle Manuskripte streng vertraulich und lade sie nicht in externe KI-Dienste hoch."
-                          : "I agree to treat all submitted manuscripts as strictly confidential and not upload them to third-party public services."}
-                      </p>
-                    </div>
-                  </label>
-                </div>
-
-                {/* Simple Summary */}
-                <div className="p-3 rounded border border-slate-200 dark:border-slate-800 text-xs space-y-1">
-                  <div className="font-semibold text-slate-800 dark:text-slate-200 mb-1">
-                    {isDe ? "Profilübersicht:" : "Profile Summary:"}
-                  </div>
-                  <div className="text-slate-600 dark:text-slate-400 text-[11px] grid grid-cols-2 gap-1">
-                    <div><strong>Name:</strong> {formTitle} {formName}</div>
-                    <div><strong>Discipline:</strong> {DISCIPLINE_DATA[formPrimaryDiscipline]?.[isDe ? "labelDe" : "labelEn"]}</div>
-                    <div><strong>Institution:</strong> {formInstitution}</div>
-                    <div><strong>Capacity:</strong> {formMaxReviews} {isDe ? "Artikel/Mo" : "papers/mo"}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-            </div>
-
-            {/* Modal Dialog Navigation Footer (Pinned at Bottom) */}
-            <DialogFooter className="shrink-0 px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-row items-center justify-between gap-2 z-10">
-              <div>
-                {profileStep > 1 && (
-                  <Button
-                    type="button"
-                    onClick={() => setProfileStep((prev) => (prev - 1) as 1 | 2 | 3 | 4)}
-                    variant="ghost"
-                    className="text-xs h-8 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  >
-                    ← {isDe ? "Zurück" : "Back"}
-                  </Button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    markOnboarded()
-                    setShowProfileModal(false)
-                  }}
-                  variant="ghost"
-                  className="text-xs h-8 text-slate-500 cursor-pointer"
-                >
-                  {isDe 
-                    ? (isFirstTimeOnboarding ? "Überspringen" : "Schließen") 
-                    : (isFirstTimeOnboarding ? "Skip" : "Cancel")}
-                </Button>
-
-                {profileStep < 4 ? (
-                  <Button
-                    type="button"
-                    onClick={() => setProfileStep((prev) => (prev + 1) as 1 | 2 | 3 | 4)}
-                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-4 h-8 cursor-pointer shadow-xs"
-                  >
-                    {isDe ? "Weiter" : "Next"} →
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-4 h-8 cursor-pointer shadow-xs"
-                  >
-                    {isDe ? "Profil speichern" : "Save Profile"}
-                  </Button>
-                )}
-              </div>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* ========================================================================= */}
-      {/* CONFIRMATION POPUP DIALOG FOR REVIEWER                                     */}
-      {/* ========================================================================= */}
-      <Dialog open={confirmDialogState.isOpen} onOpenChange={(open) => setConfirmDialogState(prev => ({ ...prev, isOpen: open }))}>
-        <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-[#0b99ff]" />
-              {confirmDialogState.title}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 pt-2 leading-relaxed">
-              {confirmDialogState.message}
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setConfirmDialogState(prev => ({ ...prev, isOpen: false }))}
-              className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg cursor-pointer"
-            >
-              {isDe ? "Nein, Abbrechen" : "No, Cancel"}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                const action = confirmDialogState.onConfirm
-                setConfirmDialogState(prev => ({ ...prev, isOpen: false }))
-                if (action) action()
-              }}
-              className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
-            >
-              {confirmDialogState.confirmButtonLabel}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-    </div>
-  )
-}
+                                                                              </div>
+                                                                            )}
+
+                                                                            {/* VIEW 2: COMPREHENSIVE PEER REVIEW ACADEMIC CV & IMPACT DOSSIER */}
+                                                                            {certViewMode === "cv" && (
+                                                                              <div className="space-y-4">
+                                                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                                                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                                                    <span>Tenure-Ready Academic Dossier · Synchronized with ORCID and Web of Science</span>
+                                                                                  </div>
+                                                                                  <div className="flex items-center gap-2">
+                                                                                    <Button
+                                                                                      onClick={() => {
+                                                                                        const orcidData = JSON.stringify({
+                                                                                          scholar: getFormattedReviewerName(profile.title, profile.name),
+                                                                                          orcid: profile.orcid || "N/A",
+                                                                                          publisher: "Scholarly Open",
+                                                                                          verifiedReviews: [
+                                                                                            { id: "SOENG-26-RS001", journal: "Engineering & Applied Sciences", date: "2026-08-20", type: "review", blind: "double-blind" },
+                                                                                            { id: "SOMED-26-CR002", journal: "Scholarly Open: Medicine", date: "2026-06-12", type: "review", blind: "double-blind" },
+                                                                                            { id: "SOSOC-26-RV003", journal: "Social Sciences & Humanities", date: "2026-05-28", type: "review", blind: "double-blind" }
+                                                                                          ]
+                                                                                        }, null, 2)
+                                                                                        const blob = new Blob([orcidData], { type: "application/json" })
+                                                                                        const url = URL.createObjectURL(blob)
+                                                                                        const a = document.createElement("a")
+                                                                                        a.href = url
+                                                                                        const cleanPrefix = (profile.name || "Reviewer").replace(/[^a-zA-Z0-9]/g, "_")
+                                                                                        a.download = `${cleanPrefix}_PeerReview_ORCID_Record.json`
+                                                                                        a.click()
+                                                                                      }}
+                                                                                      variant="outline"
+                                                                                      className="text-xs font-semibold px-3 py-2 cursor-pointer shadow-xs flex items-center gap-1.5"
+                                                                                    >
+                                                                                      <Download className="h-3.5 w-3.5" />
+                                                                                      <span>{isDe ? "ORCID JSON Exportieren" : "Export ORCID (JSON)"}</span>
+                                                                                    </Button>
+
+                                                                                    <Button
+                                                                                      onClick={handlePrintCV}
+                                                                                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-4 py-2 cursor-pointer shadow-xs flex items-center gap-1.5"
+                                                                                    >
+                                                                                      <Download className="h-3.5 w-3.5" />
+                                                                                      <span>{isDe ? "Akademischen CV drucken (PDF)" : "Print Academic CV (PDF)"}</span>
+                                                                                    </Button>
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Complete Academic CV Layout */}
+                                                                                <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+
+                                                                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b-2 border-[#166534] dark:border-emerald-600">
+                                                                                    <div className="flex items-center">
+                                                                                      <img
+                                                                                        src="/logo-full-color.svg"
+                                                                                        alt="Scholarly Open"
+                                                                                        className="h-10 sm:h-12 w-auto object-contain dark:hidden"
+                                                                                        onError={(e) => {
+                                                                                          ; (e.currentTarget as HTMLImageElement).src = '/logo-full.svg'
+                                                                                        }}
+                                                                                      />
+                                                                                      <img
+                                                                                        src="/logo-full.svg"
+                                                                                        alt="Scholarly Open"
+                                                                                        className="h-10 sm:h-12 w-auto object-contain hidden dark:block"
+                                                                                      />
+                                                                                    </div>
+
+                                                                                    <div className="text-left sm:text-right text-xs">
+                                                                                      <div className="font-extrabold text-slate-900 dark:text-white text-xs uppercase tracking-wider">
+                                                                                        Academic Peer Review Dossier
+                                                                                      </div>
+                                                                                      <div className="text-[11px] text-slate-500 font-mono">
+                                                                                        Verifier ID: SO-REV-CV-2026 · Updated 2026-08-24
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  {/* Scholar Profile Card */}
+                                                                                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                                                    <div className="flex items-center gap-3.5">
+                                                                                      <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
+                                                                                        {profile.photoUrl ? (
+                                                                                          <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
+                                                                                        ) : (
+                                                                                          <span>{getReviewerInitials(profile.name)}</span>
+                                                                                        )}
+                                                                                      </div>
+                                                                                      <div>
+                                                                                        <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                                                                                          {getFormattedReviewerName(profile.title, profile.name)}
+                                                                                        </h3>
+                                                                                        <p className="text-xs text-slate-600 dark:text-slate-400">
+                                                                                          {profile.department ? `${profile.department} · ` : ""}{profile.institution} ({profile.country})
+                                                                                        </p>
+                                                                                        <div className="flex items-center gap-2 mt-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
+                                                                                          <span>✓ ORCID: {profile.orcid || "Verified Academic Record"}</span>
+                                                                                          <span>•</span>
+                                                                                          <span>WoS: WOS-REV-2026-9812</span>
+                                                                                        </div>
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    <div className="shrink-0 flex flex-wrap gap-2 text-[11px]">
+                                                                                      <span className="px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold flex items-center gap-1">
+                                                                                        <Trophy className="h-3 w-3 text-amber-600 dark:text-amber-400" /> Top Reviewer 2026
+                                                                                      </span>
+                                                                                      <span className="px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1">
+                                                                                        <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" /> COPE Certified Reviewer
+                                                                                      </span>
+                                                                                      <span className="px-2.5 py-1 rounded-md bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-bold flex items-center gap-1">
+                                                                                        <Zap className="h-3 w-3 text-[#0b99ff]" /> Fast Turnaround (&lt;12d)
+                                                                                      </span>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  {/* Lifetime Summary Metrics */}
+                                                                                  <div className="space-y-2">
+                                                                                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-700 dark:text-slate-300">
+                                                                                      Lifetime Peer Review Summary Metrics
+                                                                                    </h4>
+                                                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                                                      <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
+                                                                                        <div className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">12</div>
+                                                                                        <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Completed Reviews</div>
+                                                                                      </div>
+                                                                                      <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
+                                                                                        <div className="text-2xl font-extrabold text-[#0b99ff] dark:text-[#0b99ff]">4.9 / 5.0</div>
+                                                                                        <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Editorial Rigor Score</div>
+                                                                                      </div>
+                                                                                      <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
+                                                                                        <div className="text-2xl font-extrabold text-slate-900 dark:text-white">9.2 Days</div>
+                                                                                        <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Avg Turnaround Time</div>
+                                                                                      </div>
+                                                                                      <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
+                                                                                        <div className="text-2xl font-extrabold text-slate-900 dark:text-white">4 Journals</div>
+                                                                                        <div className="text-[10px] uppercase font-bold text-slate-500 mt-0.5">Core Disciplines</div>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  {/* Journal Contributions Breakdown */}
+                                                                                  <div className="space-y-2">
+                                                                                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-700 dark:text-slate-300">
+                                                                                      Disciplinary Portfolio Contributions
+                                                                                    </h4>
+                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+                                                                                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
+                                                                                        <div className="font-bold text-slate-900 dark:text-white">Scholarly Open: Medicine</div>
+                                                                                        <div className="text-[11px] text-slate-500">6 Reviews · Lead Reviewer</div>
+                                                                                      </div>
+                                                                                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
+                                                                                        <div className="font-bold text-slate-900 dark:text-white">Engineering & Applied Sciences</div>
+                                                                                        <div className="text-[11px] text-slate-500">3 Reviews · Senior Reviewer</div>
+                                                                                      </div>
+                                                                                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
+                                                                                        <div className="font-bold text-slate-900 dark:text-white">Social Sciences & Humanities</div>
+                                                                                        <div className="text-[11px] text-slate-500">2 Reviews · Reviewer</div>
+                                                                                      </div>
+                                                                                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
+                                                                                        <div className="font-bold text-slate-900 dark:text-white">Environmental Science</div>
+                                                                                        <div className="text-[11px] text-slate-500">1 Review · Expert Contributor</div>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  {/* Verified Manuscript Activity Log Table */}
+                                                                                  <div className="space-y-2">
+                                                                                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-700 dark:text-slate-300">
+                                                                                      Verified Chronological Review Activity Log
+                                                                                    </h4>
+                                                                                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                                                                                      <table className="w-full text-left text-xs border-collapse">
+                                                                                        <thead className="bg-slate-100/80 dark:bg-slate-900 text-slate-700 dark:text-slate-300 uppercase text-[10px] font-bold">
+                                                                                          <tr>
+                                                                                            <th className="p-3 border-b border-slate-200 dark:border-slate-800">Manuscript ID</th>
+                                                                                            <th className="p-3 border-b border-slate-200 dark:border-slate-800">Title</th>
+                                                                                            <th className="p-3 border-b border-slate-200 dark:border-slate-800">Journal</th>
+                                                                                            <th className="p-3 border-b border-slate-200 dark:border-slate-800">Completed Date</th>
+                                                                                            <th className="p-3 border-b border-slate-200 dark:border-slate-800">Protocol</th>
+                                                                                            <th className="p-3 border-b border-slate-200 dark:border-slate-800">Status</th>
+                                                                                          </tr>
+                                                                                        </thead>
+                                                                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                                                          <tr>
+                                                                                            <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOENG-26-RS001</td>
+                                                                                            <td className="p-3 font-medium text-slate-900 dark:text-white">Decentralized Federated Learning on Non-IID Data</td>
+                                                                                            <td className="p-3 text-slate-600 dark:text-slate-400">Engineering & Applied Sciences</td>
+                                                                                            <td className="p-3 text-slate-500">2026-08-20</td>
+                                                                                            <td className="p-3 text-slate-500">Double-Blind</td>
+                                                                                            <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
+                                                                                          </tr>
+                                                                                          <tr>
+                                                                                            <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOMED-26-CR002</td>
+                                                                                            <td className="p-3 font-medium text-slate-900 dark:text-white">Clinical Evaluation of AI Diagnostics in Cardiology</td>
+                                                                                            <td className="p-3 text-slate-600 dark:text-slate-400">Scholarly Open: Medicine</td>
+                                                                                            <td className="p-3 text-slate-500">2026-06-12</td>
+                                                                                            <td className="p-3 text-slate-500">Double-Blind</td>
+                                                                                            <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
+                                                                                          </tr>
+                                                                                          <tr>
+                                                                                            <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOSOC-26-RV003</td>
+                                                                                            <td className="p-3 font-medium text-slate-900 dark:text-white">Socio-Economic Impacts of Urban Green Spaces</td>
+                                                                                            <td className="p-3 text-slate-600 dark:text-slate-400">Social Sciences & Humanities</td>
+                                                                                            <td className="p-3 text-slate-500">2026-05-28</td>
+                                                                                            <td className="p-3 text-slate-500">Double-Blind</td>
+                                                                                            <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
+                                                                                          </tr>
+                                                                                          <tr>
+                                                                                            <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOMED-25-RS119</td>
+                                                                                            <td className="p-3 font-medium text-slate-900 dark:text-white">Pharmacokinetic Optimization of Targeted Nanocarriers</td>
+                                                                                            <td className="p-3 text-slate-600 dark:text-slate-400">Scholarly Open: Medicine</td>
+                                                                                            <td className="p-3 text-slate-500">2025-11-14</td>
+                                                                                            <td className="p-3 text-slate-500">Double-Blind</td>
+                                                                                            <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
+                                                                                          </tr>
+                                                                                          <tr>
+                                                                                            <td className="p-3 font-mono font-bold text-[#0b99ff] dark:text-[#0b99ff]">SOENV-25-ES044</td>
+                                                                                            <td className="p-3 font-medium text-slate-900 dark:text-white">Electrochemical Direct Air Capture via Solid Sorbents</td>
+                                                                                            <td className="p-3 text-slate-600 dark:text-slate-400">Environmental Science</td>
+                                                                                            <td className="p-3 text-slate-500">2025-09-03</td>
+                                                                                            <td className="p-3 text-slate-500">Double-Blind</td>
+                                                                                            <td className="p-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Verified ✓</span></td>
+                                                                                          </tr>
+                                                                                        </tbody>
+                                                                                      </table>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500">
+                                                                                    <div>Digital Cryptographic Hash: <span className="font-mono font-bold text-slate-700 dark:text-slate-300">SHA256:88a109fe2c041</span></div>
+                                                                                    <div>Scholarly Open Editorial Registry • Germany & Global Publishing</div>
+                                                                                  </div>
+
+                                                                                </div>
+                                                                              </div>
+                                                                            )}
+
+                                                                          </div>
+                                                                        )}
+
+                                                                        {/* ================= MODAL 1: ACCEPT INVITATION & AUTO-DEADLINE ================= */}
+                                                                        <Dialog open={!!selectedInvForAccept} onOpenChange={(open) => !open && setSelectedInvForAccept(null)}>
+                                                                          <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-lg">
+                                                                            <DialogHeader>
+                                                                              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                                                <Calendar className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
+                                                                                {isDe ? "Begutachtung annehmen & Frist festlegen" : "Accept Assignment & Configure Schedule"}
+                                                                              </DialogTitle>
+                                                                              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                                                                                {isDe ? "Prüfen Sie den Abgabetermin und aktivieren Sie automatische Erinnerungen." : "Review target delivery timeline, auto-reminders, and confidentiality commitment."}
+                                                                              </DialogDescription>
+                                                                            </DialogHeader>
+
+                                                                            {selectedInvForAccept && (
+                                                                              <div className="space-y-4 py-2 text-xs">
+                                                                                <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                                                                  <div className="text-[11px] text-slate-500 font-semibold">{selectedInvForAccept.journal}</div>
+                                                                                  <div className="font-bold text-slate-900 dark:text-white text-sm">{selectedInvForAccept.title}</div>
+                                                                                </div>
+
+                                                                                <div className="space-y-2">
+                                                                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                                                                                    {isDe ? "Abgabetermin festlegen:" : "Submission Turnaround & Deadline:"}
+                                                                                  </label>
+                                                                                  <div className="grid grid-cols-4 gap-1.5">
+                                                                                    {[7, 14, 21, 28].map(d => (
+                                                                                      <button
+                                                                                        key={d}
+                                                                                        type="button"
+                                                                                        onClick={() => setAutoDeadlineDays(d)}
+                                                                                        className={`py-1.5 px-2 rounded text-xs font-semibold border transition-all cursor-pointer ${autoDeadlineDays === d
+                                                                                            ? "bg-[#0b99ff] text-white border-[#0b99ff] shadow-xs"
+                                                                                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                                                                          }`}
+                                                                                      >
+                                                                                        {d} {isDe ? "Tage" : "Days"}
+                                                                                      </button>
+                                                                                    ))}
+                                                                                  </div>
+                                                                                  <div className="flex items-center gap-2">
+                                                                                    <input
+                                                                                      type="date"
+                                                                                      min={new Date().toISOString().split("T")[0]}
+                                                                                      value={getCalculatedDate(autoDeadlineDays)}
+                                                                                      onChange={(e) => {
+                                                                                        if (e.target.value) {
+                                                                                          const targetTime = new Date(e.target.value).getTime()
+                                                                                          const nowTime = new Date().setHours(0, 0, 0, 0)
+                                                                                          const diff = Math.max(1, Math.ceil((targetTime - nowTime) / (1000 * 60 * 60 * 24)))
+                                                                                          setAutoDeadlineDays(diff)
+                                                                                        }
+                                                                                      }}
+                                                                                      className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                    />
+                                                                                    <span className="text-[11px] text-slate-500 whitespace-nowrap">
+                                                                                      ({autoDeadlineDays} {isDe ? "Tage ab heute" : "days from today"})
+                                                                                    </span>
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                                                                                  <span className="font-semibold text-slate-700 dark:text-slate-300 block">
+                                                                                    {isDe ? "Automatische Benachrichtigungen & Kalender-Sync:" : "Automated Reminders & Calendar Sync:"}
+                                                                                  </span>
+
+                                                                                  <label className="flex items-start gap-2 cursor-pointer">
+                                                                                    <input
+                                                                                      type="checkbox"
+                                                                                      checked={reminder5Days}
+                                                                                      onChange={(e) => setReminder5Days(e.target.checked)}
+                                                                                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
+                                                                                    />
+                                                                                    <span className="text-slate-600 dark:text-slate-300">
+                                                                                      {isDe ? "Sanfte Erinnerung 5 Tage vor Abgabetermin per E-Mail" : "Gentle email reminder 5 days before deadline"}
+                                                                                    </span>
+                                                                                  </label>
+
+                                                                                  <label className="flex items-start gap-2 cursor-pointer">
+                                                                                    <input
+                                                                                      type="checkbox"
+                                                                                      checked={reminder48Hours}
+                                                                                      onChange={(e) => setReminder48Hours(e.target.checked)}
+                                                                                      className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
+                                                                                    />
+                                                                                    <span className="text-slate-600 dark:text-slate-300">
+                                                                                      {isDe ? "Dringende Erinnerung 48 Stunden vor Fälligkeit" : "Priority reminder notice 48 hours before due date"}
+                                                                                    </span>
+                                                                                  </label>
+
+                                                                                  <div className="pt-1">
+                                                                                    <button
+                                                                                      type="button"
+                                                                                      onClick={() => setAcceptCalendarSynced(true)}
+                                                                                      className="text-xs font-semibold text-[#0b99ff] dark:text-[#0b99ff] hover:underline flex items-center gap-1.5 cursor-pointer"
+                                                                                    >
+                                                                                      <Calendar className="h-3.5 w-3.5" />
+                                                                                      {acceptCalendarSynced
+                                                                                        ? (isDe ? "✓ Im Kalender vorgemerkt (.ics exportiert)" : "✓ Calendar entry pre-configured (.ics ready)")
+                                                                                        : (isDe ? "Zu Google Kalender / Outlook (.ics) hinzufügen" : "Add to Google Calendar / Outlook (.ics)")}
+                                                                                    </button>
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                <div className="p-3 rounded bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-2">
+                                                                                  <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-400">
+                                                                                    <ShieldCheck className="h-4 w-4" />
+                                                                                    <span>{isDe ? "COPE-Vertraulichkeit & Anti-KI-Erklärung" : "COPE Confidentiality & Anti-AI Declaration"}</span>
+                                                                                  </div>
+                                                                                  <label className="flex items-start gap-2 cursor-pointer">
+                                                                                    <input
+                                                                                      type="checkbox"
+                                                                                      checked={acceptCopeCertified}
+                                                                                      onChange={(e) => setAcceptCopeCertified(e.target.checked)}
+                                                                                      className="mt-0.5 h-3.5 w-3.5 rounded text-amber-600 focus:ring-amber-500"
+                                                                                    />
+                                                                                    <span className="text-[11px] text-amber-900 dark:text-amber-300 leading-tight">
+                                                                                      {isDe
+                                                                                        ? "Ich versichere, dass ich dieses unveröffentlichte Manuskript nicht in öffentliche generative KI-Modelle (wie ChatGPT) hochlade und die Autorendaten strikt vertraulich behandle."
+                                                                                        : "I confirm that I will not upload this unpublished manuscript to public generative AI tools (such as ChatGPT), and will uphold strict author confidentiality under COPE standards."}
+                                                                                    </span>
+                                                                                  </label>
+                                                                                </div>
+                                                                              </div>
+                                                                            )}
+
+                                                                            <DialogFooter className="gap-2">
+                                                                              <Button
+                                                                                onClick={() => setSelectedInvForAccept(null)}
+                                                                                variant="ghost"
+                                                                                className="text-xs font-semibold cursor-pointer"
+                                                                              >
+                                                                                {isDe ? "Abbrechen" : "Cancel"}
+                                                                              </Button>
+                                                                              <Button
+                                                                                onClick={handleConfirmAccept}
+                                                                                disabled={!acceptCopeCertified}
+                                                                                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold cursor-pointer disabled:opacity-50"
+                                                                              >
+                                                                                {isDe ? "Verbindlich annehmen" : "Confirm Acceptance"}
+                                                                              </Button>
+                                                                            </DialogFooter>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ================= MODAL 2: DECLINE INVITATION & RECOMMEND PEER ================= */}
+                                                                        <Dialog open={!!selectedInvForDecline} onOpenChange={(open) => !open && setSelectedInvForDecline(null)}>
+                                                                          <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-lg">
+                                                                            <DialogHeader>
+                                                                              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                                                <UserPlus className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                                                                {isDe ? "Begutachtung ablehnen & Kollegen empfehlen" : "Decline Review & Recommend Peer"}
+                                                                              </DialogTitle>
+                                                                              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                                                                                {isDe ? "Geben Sie kurz den Grund an und schlagen Sie optional qualifizierte Fachkollegen vor." : "State your reason for declining and optionally suggest alternative domain experts for the editor."}
+                                                                              </DialogDescription>
+                                                                            </DialogHeader>
+
+                                                                            {selectedInvForDecline && (
+                                                                              <div className="space-y-4 py-2 text-xs">
+                                                                                <div className="space-y-1.5">
+                                                                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                                                                                    {isDe ? "Grund für die Ablehnung:" : "Reason for declining:"}
+                                                                                  </label>
+                                                                                  <select
+                                                                                    value={declineReason}
+                                                                                    onChange={(e) => setDeclineReason(e.target.value)}
+                                                                                    className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                  >
+                                                                                    <option value="workload">{isDe ? "Hohe Arbeitsbelastung / Keine Zeit in den nächsten 3 Wochen" : "Heavy workload / Insufficient time in the next 3 weeks"}</option>
+                                                                                    <option value="scope">{isDe ? "Außerhalb meines direkten Fachgebiets" : "Outside my direct technical expertise"}</option>
+                                                                                    <option value="coi">{isDe ? "Interessenkonflikt mit Autoren oder Institut" : "Conflict of Interest (COI) with authors or institution"}</option>
+                                                                                    <option value="leave">{isDe ? "Forschungsfreisemester / Urlaub" : "Academic leave / sabbatical"}</option>
+                                                                                    <option value="other">{isDe ? "Sonstiger Grund" : "Other"}</option>
+                                                                                  </select>
+                                                                                </div>
+
+                                                                                <div className="p-3.5 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                                                                                  <div className="flex items-center justify-between">
+                                                                                    <span className="font-bold text-slate-900 dark:text-white text-xs">
+                                                                                      {isDe ? "Empfehlung alternativer Gutachter (Optional)" : "Suggest Alternate Reviewers (Optional)"}
+                                                                                    </span>
+                                                                                    <span className="text-[10px] text-slate-400">{isDe ? "Hilft dem Editor" : "Helps the editor"}</span>
+                                                                                  </div>
+
+                                                                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                    <input
+                                                                                      type="text"
+                                                                                      placeholder={isDe ? "Name des Kollegen" : "Colleague Full Name"}
+                                                                                      value={declineColleagueName}
+                                                                                      onChange={(e) => setDeclineColleagueName(e.target.value)}
+                                                                                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
+                                                                                    />
+                                                                                    <input
+                                                                                      type="email"
+                                                                                      placeholder={isDe ? "Akademische E-Mail" : "Academic Email"}
+                                                                                      value={declineColleagueEmail}
+                                                                                      onChange={(e) => setDeclineColleagueEmail(e.target.value)}
+                                                                                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
+                                                                                    />
+                                                                                  </div>
+
+                                                                                  <input
+                                                                                    type="text"
+                                                                                    placeholder={isDe ? "Institution / Universität" : "Institution / University affiliation"}
+                                                                                    value={declineColleagueAffiliation}
+                                                                                    onChange={(e) => setDeclineColleagueAffiliation(e.target.value)}
+                                                                                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
+                                                                                  />
+
+                                                                                  <input
+                                                                                    type="text"
+                                                                                    placeholder={isDe ? "Kurzer Hinweis zur Eignung" : "Brief suitability note"}
+                                                                                    value={declineColleagueNote}
+                                                                                    onChange={(e) => setDeclineColleagueNote(e.target.value)}
+                                                                                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs"
+                                                                                  />
+                                                                                </div>
+                                                                              </div>
+                                                                            )}
+
+                                                                            <DialogFooter className="gap-2">
+                                                                              <Button
+                                                                                onClick={() => setSelectedInvForDecline(null)}
+                                                                                variant="ghost"
+                                                                                className="text-xs font-semibold cursor-pointer"
+                                                                              >
+                                                                                {isDe ? "Abbrechen" : "Cancel"}
+                                                                              </Button>
+                                                                              <Button
+                                                                                onClick={handleConfirmDecline}
+                                                                                className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-semibold cursor-pointer"
+                                                                              >
+                                                                                {isDe ? "Ablehnung übermitteln" : "Submit Decline & Recommendation"}
+                                                                              </Button>
+                                                                            </DialogFooter>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ================= MODAL: SET / ADJUST REVIEW DEADLINE ================= */}
+                                                                        <Dialog open={!!selectedReviewForDeadline} onOpenChange={(open) => !open && setSelectedReviewForDeadline(null)}>
+                                                                          <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-w-lg rounded-xl p-6 shadow-xl">
+                                                                            <DialogHeader>
+                                                                              <div className="flex items-center gap-2 text-[#0b99ff]">
+                                                                                <Calendar className="h-5 w-5" />
+                                                                                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+                                                                                  {isDe ? "Begutachtungsfrist festlegen oder anpassen" : "Set or Adjust Review Deadline"}
+                                                                                </DialogTitle>
+                                                                              </div>
+                                                                              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                                                                                {isDe
+                                                                                  ? "Legen Sie den verbindlichen Abgabetermin für dieses Manuskript fest oder fordern Sie eine Fristverlängerung an."
+                                                                                  : "Set the target submission deadline for this assigned manuscript or configure an extended turnaround schedule."}
+                                                                              </DialogDescription>
+                                                                            </DialogHeader>
+
+                                                                            {selectedReviewForDeadline && (
+                                                                              <div className="space-y-4 py-2 text-xs">
+                                                                                {deadlineUpdateSuccess && (
+                                                                                  <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold text-xs flex items-center gap-2 animate-in fade-in duration-200">
+                                                                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                                                                    <span>{deadlineUpdateSuccess}</span>
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* Manuscript Summary */}
+                                                                                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                                                                  <div className="text-[10px] uppercase font-bold text-[#0b99ff] tracking-wider">
+                                                                                    {selectedReviewForDeadline.journal} • {selectedReviewForDeadline.id}
+                                                                                  </div>
+                                                                                  <div className="font-bold text-slate-900 dark:text-white text-xs line-clamp-2">
+                                                                                    {selectedReviewForDeadline.title}
+                                                                                  </div>
+                                                                                  <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                                                                    <span>{isDe ? "Aktuelle Frist:" : "Current Deadline:"}</span>
+                                                                                    <strong className="text-slate-800 dark:text-slate-200">{selectedReviewForDeadline.deadline || "None"}</strong>
+                                                                                    {selectedReviewForDeadline.deadline && (
+                                                                                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                                                                        {getDaysRemaining(selectedReviewForDeadline.deadline)} {isDe ? "Tage ab heute" : "days from today"}
+                                                                                      </span>
+                                                                                    )}
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Turnaround Quick Presets */}
+                                                                                <div className="space-y-2">
+                                                                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                                                                                    {isDe ? "Schnellauswahl Bearbeitungszeit:" : "Select Standard Turnaround Window:"}
+                                                                                  </label>
+                                                                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                                                                    {[
+                                                                                      { days: 7, labelEn: "7 Days", labelDe: "7 Tage", tagEn: "Expedited", tagDe: "Eilig" },
+                                                                                      { days: 14, labelEn: "14 Days", labelDe: "14 Tage", tagEn: "COPE Standard", tagDe: "Standard" },
+                                                                                      { days: 21, labelEn: "21 Days", labelDe: "21 Tage", tagEn: "+1 Week Ext.", tagDe: "+1 Woche" },
+                                                                                      { days: 28, labelEn: "28 Days", labelDe: "28 Tage", tagEn: "Complex Study", tagDe: "Ausführlich" }
+                                                                                    ].map((p) => {
+                                                                                      const isSelected = !customDeadlineDate && deadlinePresetDays === p.days
+                                                                                      return (
+                                                                                        <button
+                                                                                          key={p.days}
+                                                                                          type="button"
+                                                                                          onClick={() => {
+                                                                                            setDeadlinePresetDays(p.days)
+                                                                                            setCustomDeadlineDate(getCalculatedDate(p.days))
+                                                                                          }}
+                                                                                          className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${isSelected
+                                                                                              ? "border-[#0b99ff] bg-[#0b99ff]/10 text-slate-900 dark:text-white shadow-2xs ring-1 ring-[#0b99ff]"
+                                                                                              : "border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                                                                                            }`}
+                                                                                        >
+                                                                                          <div className="flex items-center justify-between">
+                                                                                            <span className="font-bold text-xs">{isDe ? p.labelDe : p.labelEn}</span>
+                                                                                            {isSelected && <Check className="w-3.5 h-3.5 text-[#0b99ff]" />}
+                                                                                          </div>
+                                                                                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                                                                                            {isDe ? p.tagDe : p.tagEn}
+                                                                                          </span>
+                                                                                        </button>
+                                                                                      )
+                                                                                    })}
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Exact Target Date Picker */}
+                                                                                <div className="space-y-1.5">
+                                                                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                                                                                    {isDe ? "Genaue Abgabefrist festlegen (Datum):" : "Designated Target Deadline Date:"}
+                                                                                  </label>
+                                                                                  <div className="flex items-center gap-2">
+                                                                                    <input
+                                                                                      type="date"
+                                                                                      min={new Date().toISOString().split("T")[0]}
+                                                                                      value={customDeadlineDate || getCalculatedDate(deadlinePresetDays)}
+                                                                                      onChange={(e) => setCustomDeadlineDate(e.target.value)}
+                                                                                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[#0b99ff] focus:outline-none"
+                                                                                    />
+                                                                                  </div>
+                                                                                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                                                                    {isDe
+                                                                                      ? `Berechnet: ${getDaysRemaining(customDeadlineDate || getCalculatedDate(deadlinePresetDays))} Tage verbleibend ab heute.`
+                                                                                      : `Calculated: ${getDaysRemaining(customDeadlineDate || getCalculatedDate(deadlinePresetDays))} days remaining from today.`}
+                                                                                  </p>
+                                                                                </div>
+
+                                                                                {/* Extension Reason / Note to Editor */}
+                                                                                <div className="space-y-1.5">
+                                                                                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                                                                                    {isDe ? "Grund für Fristanpassung / Notiz an Editor (Optional):" : "Reason / Note to Handling Editor (Optional):"}
+                                                                                  </label>
+                                                                                  <textarea
+                                                                                    rows={2}
+                                                                                    value={deadlineExtensionReason}
+                                                                                    onChange={(e) => setDeadlineExtensionReason(e.target.value)}
+                                                                                    placeholder={isDe ? "z.B. Zusätzliche Zeit für statistische Re-Analyse benötigt..." : "e.g. Additional time needed to cross-examine complex statistical supplement..."}
+                                                                                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-[#0b99ff] focus:outline-none resize-none"
+                                                                                  />
+                                                                                </div>
+                                                                              </div>
+                                                                            )}
+
+                                                                            <DialogFooter className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                                                              <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                onClick={() => setSelectedReviewForDeadline(null)}
+                                                                                className="text-xs h-auto py-2 cursor-pointer"
+                                                                              >
+                                                                                {isDe ? "Abbrechen" : "Cancel"}
+                                                                              </Button>
+                                                                              <Button
+                                                                                type="button"
+                                                                                onClick={handleSaveDeadline}
+                                                                                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold py-2 px-4 h-auto cursor-pointer shadow-xs"
+                                                                              >
+                                                                                <Calendar className="w-3.5 h-3.5 mr-1" />
+                                                                                {isDe ? "Frist verbindlich speichern" : "Save Review Deadline"}
+                                                                              </Button>
+                                                                            </DialogFooter>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ================= MODAL 3: FULL ELECTRONIC REVIEWER ASSESSMENT FORM ================= */}
+                                                                        <Dialog open={!!selectedReviewForEval} onOpenChange={(open) => !open && setSelectedReviewForEval(null)}>
+                                                                          <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg p-0">
+                                                                            <form onSubmit={handleSubmitEvaluation}>
+                                                                              <div className="p-5 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-950 z-10 flex items-center justify-between">
+                                                                                <div>
+                                                                                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                                                                                    Scholarly Open • Electronic Reviewer’s Assessment
+                                                                                  </span>
+                                                                                  <h2 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                                                                                    {selectedReviewForEval?.title}
+                                                                                  </h2>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-2">
+                                                                                  {lastDraftSavedAt && (
+                                                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                                                                                      <CheckCircle2 className="h-3 w-3" />
+                                                                                      Draft saved ({lastDraftSavedAt})
+                                                                                    </span>
+                                                                                  )}
+                                                                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
+                                                                                    <ShieldCheck className="h-3 w-3" />
+                                                                                    AI Index: Clean (3%)
+                                                                                  </span>
+                                                                                </div>
+                                                                              </div>
+
+                                                                              <div className="p-6 space-y-6 text-xs">
+                                                                                {evalError && (
+                                                                                  <div className="p-3 rounded bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400 font-semibold text-xs">
+                                                                                    {evalError}
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* Round 2 Re-Assessment Header Banner */}
+                                                                                {(isRound2Active || Boolean((selectedReviewForEval as any)?.isRound2)) && (
+                                                                                  <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-2 border-[#0b99ff]/40 shadow-xs">
+                                                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                                                      <div className="space-y-1">
+                                                                                        <div className="flex items-center gap-2">
+                                                                                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0b99ff] text-white flex items-center gap-1 shadow-xs">
+                                                                                            <RotateCcw className="h-3 w-3" />
+                                                                                            Round 2 Re-Assessment
+                                                                                          </span>
+                                                                                          <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                                                                                            Revised Manuscript & Author Rebuttal Available
+                                                                                          </span>
+                                                                                        </div>
+                                                                                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                                                                                          The author team has revised the manuscript in response to referee comments and provided a point-by-point rebuttal. Download the materials below to review changes.
+                                                                                        </p>
+                                                                                      </div>
+
+                                                                                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                                                                                        <Button
+                                                                                          type="button"
+                                                                                          onClick={() => handleDownloadSpecificFile("fulltext", selectedReviewForEval!)}
+                                                                                          className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shadow-xs flex items-center gap-1.5"
+                                                                                        >
+                                                                                          <Download className="h-3.5 w-3.5" />
+                                                                                          <span>Revised Manuscript (.docx)</span>
+                                                                                        </Button>
+                                                                                        <Button
+                                                                                          type="button"
+                                                                                          variant="outline"
+                                                                                          onClick={() => handleDownloadSpecificFile("supp", selectedReviewForEval!)}
+                                                                                          className="bg-white dark:bg-slate-900 border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shadow-xs flex items-center gap-1.5"
+                                                                                        >
+                                                                                          <FileText className="h-3.5 w-3.5" />
+                                                                                          <span>Author Rebuttal (.docx)</span>
+                                                                                        </Button>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* Review Submission Deadline Banner inside Assessment Form */}
+                                                                                {selectedReviewForEval && (
+                                                                                  <div className="p-3.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                                                    <div className="flex items-center gap-2.5">
+                                                                                      <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-[#0b99ff] shrink-0">
+                                                                                        <Clock className="w-4 h-4" />
+                                                                                      </div>
+                                                                                      <div>
+                                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                                          <span className="font-bold text-slate-900 dark:text-white text-xs">
+                                                                                            {isDe ? "Begutachtungsfrist:" : "Review Target Deadline:"} {selectedReviewForEval.deadline || "14 days"}
+                                                                                          </span>
+                                                                                          {(() => {
+                                                                                            const daysLeft = getDaysRemaining(selectedReviewForEval.deadline)
+                                                                                            const isOverdue = daysLeft < 0
+                                                                                            return (
+                                                                                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isOverdue
+                                                                                                  ? "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40"
+                                                                                                  : daysLeft <= 3
+                                                                                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40"
+                                                                                                    : "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40"
+                                                                                                }`}>
+                                                                                                {isOverdue
+                                                                                                  ? (isDe ? `${Math.abs(daysLeft)} Tage überfällig` : `${Math.abs(daysLeft)} days overdue`)
+                                                                                                  : (isDe ? `Noch ${daysLeft} Tage verbleibend` : `${daysLeft} days remaining`)}
+                                                                                              </span>
+                                                                                            )
+                                                                                          })()}
+                                                                                        </div>
+                                                                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                                                                          {isDe
+                                                                                            ? "Benötigen Sie mehr Zeit für Literatur- oder Datenprüfung? Sie können die Frist hier direkt anpassen."
+                                                                                            : "Need additional time to verify data or references? You can adjust or extend your review deadline anytime."}
+                                                                                        </p>
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    <Button
+                                                                                      type="button"
+                                                                                      variant="outline"
+                                                                                      onClick={() => handleOpenDeadlineModal(selectedReviewForEval)}
+                                                                                      className="border-blue-300 dark:border-blue-800 text-[#0b99ff] hover:bg-blue-100 dark:hover:bg-blue-900/40 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shrink-0"
+                                                                                    >
+                                                                                      <Calendar className="w-3.5 h-3.5 mr-1" />
+                                                                                      {isDe ? "Frist anpassen" : "Adjust Deadline"}
+                                                                                    </Button>
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* Section 1: Manuscript Meta & Structural Verification */}
+                                                                                <div className="space-y-3">
+                                                                                  <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                                                                                    1. {isDe ? "Manuskript-Struktur & Grunddaten" : "Manuscript Structure & Details"}
+                                                                                  </h3>
+
+                                                                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                                                    <div className="space-y-1">
+                                                                                      <label className="font-semibold text-slate-600 dark:text-slate-400">{isDe ? "Artikelumfang:" : "Length of article:"}</label>
+                                                                                      <input
+                                                                                        type="text"
+                                                                                        value={articleLength}
+                                                                                        onChange={(e) => setArticleLength(e.target.value)}
+                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                                                                                      />
+                                                                                    </div>
+                                                                                    <div className="space-y-1">
+                                                                                      <label className="font-semibold text-slate-600 dark:text-slate-400">{isDe ? "Anzahl Tabellen:" : "Number of Tables:"}</label>
+                                                                                      <input
+                                                                                        type="text"
+                                                                                        value={tablesCount}
+                                                                                        onChange={(e) => setTablesCount(e.target.value)}
+                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                                                                                      />
+                                                                                    </div>
+                                                                                    <div className="space-y-1">
+                                                                                      <label className="font-semibold text-slate-600 dark:text-slate-400">{isDe ? "Anzahl Abbildungen:" : "Number of Figures:"}</label>
+                                                                                      <input
+                                                                                        type="text"
+                                                                                        value={figuresCount}
+                                                                                        onChange={(e) => setFiguresCount(e.target.value)}
+                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                                                                                      />
+                                                                                    </div>
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Section 2: 10-Point Questionnaire Matrix */}
+                                                                                <div className="space-y-3">
+                                                                                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                                                                                    <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide flex items-center gap-1.5">
+                                                                                      <span>2. {isDe ? "Gutachter-Fragebogen (10 Kriterien)" : "Reviewer Questionnaire (10 Criteria)"}</span>
+                                                                                      <span className="text-rose-500 font-bold">*</span>
+                                                                                    </h3>
+                                                                                    <span className="text-[10px] font-semibold text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/40">
+                                                                                      {isDe ? "Alle 10 Fragen erforderlich" : "All 10 criteria required"}
+                                                                                    </span>
+                                                                                  </div>
+
+                                                                                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                                                    {QUESTIONNAIRE_CRITERIA.map((item, idx) => (
+                                                                                      <div key={item.id} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                                                        <div className="text-slate-800 dark:text-slate-200 font-medium pr-2">
+                                                                                          <span className="text-slate-400 dark:text-slate-500 mr-1.5 font-bold">{idx + 1}.</span>
+                                                                                          {item.label}
+                                                                                        </div>
+
+                                                                                        <div className="flex items-center gap-1.5 shrink-0">
+                                                                                          {(["yes", "no", "na"] as const).map((val) => (
+                                                                                            <button
+                                                                                              key={val}
+                                                                                              type="button"
+                                                                                              onClick={() => setAnswers(prev => ({ ...prev, [item.id]: val }))}
+                                                                                              className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors cursor-pointer ${answers[item.id] === val
+                                                                                                  ? val === "yes"
+                                                                                                    ? "bg-green-600 text-white"
+                                                                                                    : val === "no"
+                                                                                                      ? "bg-red-600 text-white"
+                                                                                                      : "bg-slate-700 text-white"
+                                                                                                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                                                                                }`}
+                                                                                            >
+                                                                                              {val === "na" ? "N/A" : val}
+                                                                                            </button>
+                                                                                          ))}
+                                                                                        </div>
+                                                                                      </div>
+                                                                                    ))}
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Section 3: Publishing Priority Rating */}
+                                                                                <div className="space-y-2">
+                                                                                  <div className="flex items-center justify-between">
+                                                                                    <label className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide">
+                                                                                      3. {isDe ? "Publikations-Priorität (1 = Höchste, 10 = Geringste Priorität):" : "Publishing Priority Rating (1 = Highest, 10 = Lowest):"}
+                                                                                    </label>
+                                                                                    <span className="font-bold text-[#0b99ff] dark:text-[#0b99ff] text-sm">
+                                                                                      {isDe ? "Stufe" : "Score"}: {priorityRating} / 10
+                                                                                    </span>
+                                                                                  </div>
+
+                                                                                  <div className="grid grid-cols-10 gap-1">
+                                                                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                                                                      <button
+                                                                                        key={num}
+                                                                                        type="button"
+                                                                                        onClick={() => setPriorityRating(num)}
+                                                                                        className={`py-2 rounded font-bold text-xs transition-colors cursor-pointer ${priorityRating === num
+                                                                                            ? "bg-[#0b99ff] text-white"
+                                                                                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                                                                          }`}
+                                                                                      >
+                                                                                        {num}
+                                                                                      </button>
+                                                                                    ))}
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Section 4: Comments to Authors */}
+                                                                                <div className="space-y-4">
+                                                                                  <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-1.5 flex items-center gap-1.5">
+                                                                                    <span>4. {isDe ? "Gutachter-Kommentare für den/die Autor(en)" : "Comments to Author(s)"}</span>
+                                                                                    <span className="text-rose-500 font-bold">*</span>
+                                                                                  </h3>
+
+                                                                                  <div className="space-y-1">
+                                                                                    <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                                                                                      <span>{isDe ? "Allgemeine Kommentare (Gesamteinschätzung, Stärken, Hauptaussagen) *" : "General comments to the Author(s) *"}</span>
+                                                                                      <span className="text-[10px] font-medium text-rose-500 dark:text-rose-400">({isDe ? "mind. 30 Zeichen" : "Mandatory, min. 30 chars"})</span>
+                                                                                    </label>
+                                                                                    <textarea
+                                                                                      rows={3}
+                                                                                      value={generalComments}
+                                                                                      onChange={(e) => setGeneralComments(e.target.value)}
+                                                                                      placeholder={isDe ? "Fassen Sie die Hauptstärken und übergeordneten Verbesserungsbereiche zusammen..." : "Summarize the primary contribution, core strengths, and general structural feedback..."}
+                                                                                      className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                    />
+                                                                                  </div>
+
+                                                                                  <div className="space-y-1">
+                                                                                    <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                                                                                      <span>{isDe ? "Spezifische / Zeilengenaue Anmerkungen (Methoden, Gleichungen, Tabellen) *" : "Specific line-by-line comments to the Author(s) *"}</span>
+                                                                                      <span className="text-[10px] font-medium text-rose-500 dark:text-rose-400">({isDe ? "mind. 20 Zeichen" : "Mandatory, min. 20 chars"})</span>
+                                                                                    </label>
+                                                                                    <textarea
+                                                                                      rows={4}
+                                                                                      value={specificComments}
+                                                                                      onChange={(e) => setSpecificComments(e.target.value)}
+                                                                                      placeholder={isDe ? "z.B. Seite 4, Zeile 112: Genauere Erläuterung der Stichprobenzusammensetzung erforderlich..." : "e.g. Page 4, line 112: Clarify statistical degrees of freedom in Table 2..."}
+                                                                                      className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                    />
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Section 5: Confidential Remarks for Handling Editor */}
+                                                                                <div className="space-y-1 p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                                                                  <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white text-xs">
+                                                                                    <Lock className="h-3.5 w-3.5 text-slate-500" />
+                                                                                    <span>{isDe ? "Vertrauliche Bemerkungen für den zuständigen Editor (Nicht für Autoren sichtbar):" : "Confidential Remarks to Handling Editor (Not visible to authors):"}</span>
+                                                                                  </div>
+                                                                                  <textarea
+                                                                                    rows={2}
+                                                                                    value={editorConfidentialComments}
+                                                                                    onChange={(e) => setEditorConfidentialComments(e.target.value)}
+                                                                                    placeholder={isDe ? "Optionale vertrauliche Hinweise an den Editor bezüglich methodischer Bedenken..." : "Optional private notes to the handling editor regarding ethical concerns or candid publishability..."}
+                                                                                    className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                  />
+                                                                                </div>
+
+                                                                                {/* Misconduct Escalation Callout in Evaluation Form */}
+                                                                                <div className="p-3.5 rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                                                                  <div className="flex items-start gap-2.5">
+                                                                                    <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                                                                    <div className="space-y-0.5">
+                                                                                      <div className="font-bold text-amber-900 dark:text-amber-200">
+                                                                                        {isDe ? "Verdacht auf schwerwiegendes Fehlverhalten oder Paper Mill?" : "Suspect Research Misconduct, Data Fabrication, or Paper Mill?"}
+                                                                                      </div>
+                                                                                      <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                                                                                        {isDe
+                                                                                          ? "Eskalieren Sie diesen Fall direkt an den Integritäts-Manager (IM) und den zuständigen Editor unter COPE-Whistleblower-Schutz."
+                                                                                          : "Escalate confidentially to the Integrity Manager (IM) and Handling Editor under COPE whistleblower protections."}
+                                                                                      </p>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                  <Button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                      if (selectedReviewForEval) {
+                                                                                        handleOpenEscalate(selectedReviewForEval)
+                                                                                      }
+                                                                                    }}
+                                                                                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 h-auto cursor-pointer shrink-0 rounded shadow-xs"
+                                                                                  >
+                                                                                    <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                                                                                    {isDe ? "Fehlverhalten melden" : "Escalate to IM / Editor"}
+                                                                                  </Button>
+                                                                                </div>
+
+                                                                                {/* Section 6: Recommendation Verdict */}
+                                                                                <div className="space-y-2">
+                                                                                  <label className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wide block">
+                                                                                    5. {isDe ? "Abschließende Gutachter-Empfehlung (Recommendation):" : "Final Recommendation:"}
+                                                                                  </label>
+
+                                                                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                    {[
+                                                                                      "Accept without any Changes",
+                                                                                      "Re-review and Accept with Minor Changes",
+                                                                                      "Re-review and Accept with Major Changes",
+                                                                                      "Re-write and Re-submit",
+                                                                                      "Reject"
+                                                                                    ].map((rec) => (
+                                                                                      <label
+                                                                                        key={rec}
+                                                                                        className={`flex items-center gap-2 p-2.5 rounded border text-xs cursor-pointer transition-colors ${recommendation === rec
+                                                                                            ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white"
+                                                                                            : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                                                                          }`}
+                                                                                      >
+                                                                                        <input
+                                                                                          type="radio"
+                                                                                          name="recommendation"
+                                                                                          value={rec}
+                                                                                          checked={recommendation === rec}
+                                                                                          onChange={() => setRecommendation(rec as any)}
+                                                                                          className="text-[#0b99ff] focus:ring-[#0b99ff]"
+                                                                                        />
+                                                                                        <span>{rec}</span>
+                                                                                      </label>
+                                                                                    ))}
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* Section 7: Mandatory Disclosures */}
+                                                                                <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+                                                                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                                                                      {isDe ? "Wären Sie bereit, eine überarbeitete Fassung (Revision) zu begutachten?" : "Would you be willing to review a revision of this manuscript?"}
+                                                                                    </span>
+                                                                                    <div className="flex items-center gap-3">
+                                                                                      <label className="flex items-center gap-1.5 cursor-pointer">
+                                                                                        <input
+                                                                                          type="radio"
+                                                                                          name="willingRevision"
+                                                                                          value="Yes"
+                                                                                          checked={willingRevision === "Yes"}
+                                                                                          onChange={() => setWillingRevision("Yes")}
+                                                                                        />
+                                                                                        <span>{isDe ? "Ja" : "Yes"}</span>
+                                                                                      </label>
+                                                                                      <label className="flex items-center gap-1.5 cursor-pointer">
+                                                                                        <input
+                                                                                          type="radio"
+                                                                                          name="willingRevision"
+                                                                                          value="No"
+                                                                                          checked={willingRevision === "No"}
+                                                                                          onChange={() => setWillingRevision("No")}
+                                                                                        />
+                                                                                        <span>{isDe ? "Nein" : "No"}</span>
+                                                                                      </label>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                                                                      {isDe ? "Offenlegung von Interessenkonflikten (COI):" : "Conflict of Interest (COI) disclosure:"}
+                                                                                    </span>
+                                                                                    <div className="flex items-center gap-3">
+                                                                                      <label className="flex items-center gap-1.5 cursor-pointer">
+                                                                                        <input
+                                                                                          type="radio"
+                                                                                          name="coiStatus"
+                                                                                          value="None"
+                                                                                          checked={coiStatus === "None"}
+                                                                                          onChange={() => setCoiStatus("None")}
+                                                                                        />
+                                                                                        <span>{isDe ? "Keine Interessenkonflikte (None)" : "None"}</span>
+                                                                                      </label>
+                                                                                      <label className="flex items-center gap-1.5 cursor-pointer">
+                                                                                        <input
+                                                                                          type="radio"
+                                                                                          name="coiStatus"
+                                                                                          value="Yes"
+                                                                                          checked={coiStatus === "Yes"}
+                                                                                          onChange={() => setCoiStatus("Yes")}
+                                                                                        />
+                                                                                        <span>{isDe ? "Ja, vorhanden" : "Yes declared"}</span>
+                                                                                      </label>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  {/* Section 8: Review Recognition & Certificate Preferences */}
+                                                                                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                                                                                    <div className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                                                                                      {isDe ? "Anerkennung & Gutachter-Zertifikat:" : "Review Recognition & Certificate Preferences:"}
+                                                                                    </div>
+                                                                                    <label className="flex items-start gap-2 cursor-pointer">
+                                                                                      <input
+                                                                                        type="checkbox"
+                                                                                        checked={requestCertificate}
+                                                                                        onChange={(e) => setRequestCertificate(e.target.checked)}
+                                                                                        className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
+                                                                                      />
+                                                                                      <span className="text-xs text-slate-700 dark:text-slate-300">
+                                                                                        {isDe
+                                                                                          ? "Offizielles Gutachter-Zertifikat (Certificate of Review Recognition) nach redaktioneller Entscheidung ausstellen."
+                                                                                          : "Issue an official Certificate of Review Recognition upon editorial sign-off."}
+                                                                                      </span>
+                                                                                    </label>
+                                                                                    <label className="flex items-start gap-2 cursor-pointer">
+                                                                                      <input
+                                                                                        type="checkbox"
+                                                                                        checked={syncOrcid}
+                                                                                        onChange={(e) => setSyncOrcid(e.target.checked)}
+                                                                                        className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
+                                                                                      />
+                                                                                      <span className="text-xs text-slate-700 dark:text-slate-300">
+                                                                                        {isDe
+                                                                                          ? `Begutachtungsnachweis automatisch mit meinem ORCID-Profil (${profile.orcid || "Verifizierter Datensatz"}) synchronisieren.`
+                                                                                          : `Automatically sync review credit to my ORCID profile (${profile.orcid || "Verified Record"}).`}
+                                                                                      </span>
+                                                                                    </label>
+                                                                                  </div>
+
+                                                                                  <div className="p-3 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                                                                    <label className="flex items-start gap-2 cursor-pointer">
+                                                                                      <input
+                                                                                        type="checkbox"
+                                                                                        checked={evalCopeCheck}
+                                                                                        onChange={(e) => setEvalCopeCheck(e.target.checked)}
+                                                                                        className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] focus:ring-[#0b99ff]"
+                                                                                      />
+                                                                                      <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
+                                                                                        {isDe
+                                                                                          ? "Ich bestätige, dass dieses Gutachten meine eigene unabhängige wissenschaftliche Bewertung darstellt und alle ethischen Standards (COPE) eingehalten wurden."
+                                                                                          : "I certify that this assessment is my own independent evaluation, free of unauthorized AI generation, and adheres to COPE peer-review ethics."}
+                                                                                      </span>
+                                                                                    </label>
+                                                                                  </div>
+                                                                                </div>
+                                                                              </div>
+
+                                                                              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-wrap items-center justify-between gap-2.5">
+                                                                                <div className="flex items-center gap-2.5">
+                                                                                  <Button
+                                                                                    type="button"
+                                                                                    onClick={handleManualSaveDraft}
+                                                                                    variant="outline"
+                                                                                    className="text-xs font-semibold cursor-pointer border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 shadow-2xs"
+                                                                                  >
+                                                                                    <Save className="h-3.5 w-3.5 text-[#0b99ff]" />
+                                                                                    <span>{isDe ? "Entwurf speichern" : "Save Draft"}</span>
+                                                                                  </Button>
+                                                                                  {draftSavedToast && (
+                                                                                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 animate-in fade-in duration-200">
+                                                                                      {draftSavedToast}
+                                                                                    </span>
+                                                                                  )}
+                                                                                </div>
+
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <Button
+                                                                                    type="button"
+                                                                                    onClick={() => setSelectedReviewForEval(null)}
+                                                                                    variant="ghost"
+                                                                                    className="text-xs font-semibold cursor-pointer text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                                                                                  >
+                                                                                    {isDe ? "Schließen" : "Close"}
+                                                                                  </Button>
+                                                                                  <Button
+                                                                                    type="submit"
+                                                                                    disabled={isSubmitting}
+                                                                                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-sm"
+                                                                                  >
+                                                                                    {isSubmitting
+                                                                                      ? (isDe ? "Wird übermittelt..." : "Submitting...")
+                                                                                      : (isDe ? "Gutachten einreichen (+12 Pkt)" : "Submit Evaluation (+12 Pts)")}
+                                                                                  </Button>
+                                                                                </div>
+                                                                              </div>
+                                                                            </form>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ================= MODAL 3B: INDIVIDUAL PEER REVIEW RECOGNITION CERTIFICATE ================= */}
+                                                                        <Dialog open={!!selectedCertReview} onOpenChange={(open) => !open && setSelectedCertReview(null)}>
+                                                                          <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-2xl rounded-2xl p-6 shadow-2xl">
+                                                                            <DialogHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
+                                                                              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
+                                                                                <span>Certificate of Peer Review Recognition</span>
+                                                                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/40">
+                                                                                  Verified Credential ✓
+                                                                                </span>
+                                                                              </DialogTitle>
+                                                                              <DialogDescription className="text-xs text-slate-500">
+                                                                                Official academic peer review recognition issued by Scholarly Open i.G.
+                                                                              </DialogDescription>
+                                                                            </DialogHeader>
+
+                                                                            {selectedCertReview && (
+                                                                              <div className="space-y-4 py-2">
+                                                                                {/* Institutional Certificate Canvas Card */}
+                                                                                <div className="border-4 border-double border-emerald-700/70 dark:border-emerald-600/70 rounded-xl p-6 sm:p-8 bg-gradient-to-b from-slate-50/60 to-white dark:from-slate-900/40 dark:to-slate-950 text-center space-y-4 shadow-sm relative overflow-hidden">
+                                                                                  <div className="flex items-center justify-center gap-2">
+                                                                                    <img
+                                                                                      src="/logo-mark.svg"
+                                                                                      alt="Scholarly Open"
+                                                                                      className="h-9 w-auto object-contain"
+                                                                                      onError={(e) => {
+                                                                                        ; (e.currentTarget as HTMLImageElement).src = '/logo-mark-01.png'
+                                                                                      }}
+                                                                                    />
+                                                                                    <div className="text-xl font-black text-[#132415] dark:text-white">
+                                                                                      Scholarly <span className="text-[#F6BB14]">Open</span>
+                                                                                    </div>
+                                                                                  </div>
+
+                                                                                  <div className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-400 tracking-widest">
+                                                                                    Editorial Board Peer Review Recognition
+                                                                                  </div>
+
+                                                                                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                                                                                    Certificate of Peer Review
+                                                                                  </h3>
+
+                                                                                  <div className="space-y-1">
+                                                                                    <div className="text-xs text-slate-500">This official certificate is presented to</div>
+                                                                                    <div className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 border-b-2 border-emerald-600 inline-block px-4 pb-0.5">
+                                                                                      {getFormattedReviewerName(profile.title, profile.name)}
+                                                                                    </div>
+                                                                                    <div className="text-xs text-slate-500">{profile.institution}</div>
+                                                                                  </div>
+
+                                                                                  <p className="text-xs text-slate-700 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+                                                                                    In recognition of your scholarly contribution as an expert peer reviewer for manuscript:
+                                                                                    <strong className="block text-slate-900 dark:text-white mt-1">
+                                                                                      {selectedCertReview.manuscriptId || selectedCertReview.id}: &ldquo;{selectedCertReview.title}&rdquo;
+                                                                                    </strong>
+                                                                                    <span className="text-slate-500 text-[11px] block mt-0.5">
+                                                                                      Journal: {selectedCertReview.journal} • Final Sign-Off: {selectedCertReview.completedDate || "2026-06-12"}
+                                                                                    </span>
+                                                                                  </p>
+
+                                                                                  <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500 flex-wrap gap-2">
+                                                                                    <div className="text-left font-mono">
+                                                                                      <div>Verification ID: CERT-REV-{selectedCertReview.id}-2026</div>
+                                                                                      <div>ORCID iD: {profile.orcid || "Verified Academic Record"} (Synced ✓)</div>
+                                                                                    </div>
+                                                                                    <div className="text-right">
+                                                                                      <span className="font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
+                                                                                        COPE Compliant Verification Seal
+                                                                                      </span>
+                                                                                      <span className="text-slate-400">Managing Editorial Office</span>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                </div>
+                                                                              </div>
+                                                                            )}
+
+                                                                            <DialogFooter className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 flex-wrap">
+                                                                              <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => setSelectedCertReview(null)}
+                                                                                className="text-xs h-8 cursor-pointer"
+                                                                              >
+                                                                                Close
+                                                                              </Button>
+                                                                              <div className="flex items-center gap-2">
+                                                                                <Button
+                                                                                  variant="outline"
+                                                                                  size="sm"
+                                                                                  onClick={() => {
+                                                                                    alert(`✓ Review credential synced with ORCID record (0000-0004-7711-2093).`)
+                                                                                  }}
+                                                                                  className="text-xs h-8 font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 cursor-pointer"
+                                                                                >
+                                                                                  Sync with ORCID
+                                                                                </Button>
+                                                                                <Button
+                                                                                  size="sm"
+                                                                                  onClick={() => {
+                                                                                    if (typeof window !== "undefined") {
+                                                                                      window.print()
+                                                                                    }
+                                                                                  }}
+                                                                                  className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold h-8 px-4 shadow-xs cursor-pointer"
+                                                                                >
+                                                                                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                                                                                  Download PDF / Print
+                                                                                </Button>
+                                                                              </div>
+                                                                            </DialogFooter>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ================= MODAL 4: BLINDED MANUSCRIPT PACKAGE DOWNLOAD ================= */}
+                                                                        <Dialog open={!!selectedPackageRev} onOpenChange={(open) => !open && setSelectedPackageRev(null)}>
+                                                                          <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-lg rounded-xl">
+                                                                            <DialogHeader>
+                                                                              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                                                <FileDown className="h-4 w-4 text-[#0b99ff] dark:text-[#0b99ff]" />
+                                                                                {isDe ? "Blinded Manuskript-Paket herunterladen" : "Blinded Manuscript File Package"}
+                                                                              </DialogTitle>
+                                                                              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                                                                                {isDe
+                                                                                  ? "Vertrauliche, anonymisierte Dokumente für das Doppelblind-Gutachten."
+                                                                                  : "Confidential, anonymized documents pre-sanitized for double-blind review."}
+                                                                              </DialogDescription>
+                                                                            </DialogHeader>
+
+                                                                            {selectedPackageRev && (
+                                                                              <div className="space-y-3.5 py-2 text-xs">
+                                                                                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                                                                  <div className="flex items-center justify-between text-[11px]">
+                                                                                    <span className="font-semibold text-[#0b99ff] dark:text-[#0b99ff]">{selectedPackageRev.journal}</span>
+                                                                                    <span className="text-slate-400">ID: {selectedPackageRev.manuscriptId || selectedPackageRev.id}</span>
+                                                                                  </div>
+                                                                                  <h4 className="font-bold text-slate-900 dark:text-white text-xs">{selectedPackageRev.title}</h4>
+                                                                                </div>
+
+                                                                                <div className="space-y-2">
+                                                                                  <span className="font-bold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider block">
+                                                                                    {isDe ? "Enthaltene anonymisierte Dateien:" : "Included Blinded Files:"}
+                                                                                  </span>
+
+                                                                                  <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-lg border border-slate-200 dark:border-slate-800">
+                                                                                    {(() => {
+                                                                                      const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
+                                                                                      if (isAortic) {
+                                                                                        return (
+                                                                                          <>
+                                                                                            <div className="p-2.5 flex items-center justify-between gap-2">
+                                                                                              <div className="flex items-center gap-2">
+                                                                                                <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                                                                                                <div>
+                                                                                                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                                                                                    Blinded_Revised_Manuscript_SOMED-26-RW01.docx
+                                                                                                  </div>
+                                                                                                  <div className="text-[10px] text-slate-400">
+                                                                                                    Revised Fulltext · Anonymized for Double-Blind Peer Review (Authors/PII Redacted)
+                                                                                                  </div>
+                                                                                                </div>
+                                                                                              </div>
+                                                                                              <div className="flex items-center gap-2">
+                                                                                                <span className="text-[11px] font-mono text-slate-400">84.1 KB</span>
+                                                                                                <Button
+                                                                                                  type="button"
+                                                                                                  size="sm"
+                                                                                                  variant="outline"
+                                                                                                  onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
+                                                                                                  className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
+                                                                                                >
+                                                                                                  <Download className="h-3 w-3 mr-1" />
+                                                                                                  {isDe ? "Laden" : "Download"}
+                                                                                                </Button>
+                                                                                              </div>
+                                                                                            </div>
+
+                                                                                            <div className="p-2.5 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800">
+                                                                                              <div className="flex items-center gap-2">
+                                                                                                <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
+                                                                                                <div>
+                                                                                                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                                                                                    Blinded_Author_Rebuttal_SOMED-26-RW01.docx
+                                                                                                  </div>
+                                                                                                  <div className="text-[10px] text-slate-400">
+                                                                                                    Point-by-Point Author Rebuttal Letter · Anonymized for Double-Blind Review
+                                                                                                  </div>
+                                                                                                </div>
+                                                                                              </div>
+                                                                                              <div className="flex items-center gap-2">
+                                                                                                <span className="text-[11px] font-mono text-slate-400">25.8 KB</span>
+                                                                                                <Button
+                                                                                                  type="button"
+                                                                                                  size="sm"
+                                                                                                  variant="outline"
+                                                                                                  onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
+                                                                                                  className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                                                                                                >
+                                                                                                  <Download className="h-3 w-3 mr-1" />
+                                                                                                  {isDe ? "Laden" : "Download"}
+                                                                                                </Button>
+                                                                                              </div>
+                                                                                            </div>
+                                                                                          </>
+                                                                                        )
+                                                                                      }
+                                                                                      return (
+                                                                                        <div className="p-2.5 flex items-center justify-between gap-2">
+                                                                                          <div className="flex items-center gap-2">
+                                                                                            <FileText className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                                                                                            <div>
+                                                                                              <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                                                                                                Blinded_Manuscript_FullText.docx
+                                                                                              </div>
+                                                                                              <div className="text-[10px] text-slate-400">
+                                                                                                Main text · 14 Pages · Anonymized (Authors/PII Redacted)
+                                                                                              </div>
+                                                                                            </div>
+                                                                                          </div>
+                                                                                          <div className="flex items-center gap-2">
+                                                                                            <span className="text-[11px] font-mono text-slate-400">2.4 MB</span>
+                                                                                            <Button
+                                                                                              type="button"
+                                                                                              size="sm"
+                                                                                              variant="outline"
+                                                                                              onClick={() => handleDownloadSpecificFile("fulltext", selectedPackageRev)}
+                                                                                              className="h-7 px-2.5 text-[11px] font-bold text-[#0b99ff] border-[#0b99ff]/30 hover:bg-[#0b99ff]/10 cursor-pointer"
+                                                                                            >
+                                                                                              <Download className="h-3 w-3 mr-1" />
+                                                                                              {isDe ? "Laden" : "Download"}
+                                                                                            </Button>
+                                                                                          </div>
+                                                                                        </div>
+                                                                                      )
+                                                                                    })()}
+
+                                                                                    {(() => {
+                                                                                      const isAortic = selectedPackageRev.manuscriptId === "SOMED-26-RW01" || selectedPackageRev.id === "SOMED-26-RW01" || selectedPackageRev.title?.toLowerCase().includes("prevent earlier") || selectedPackageRev.title?.toLowerCase().includes("acute aortic dissection")
+                                                                                      if (isAortic) {
+                                                                                        return null
+                                                                                      }
+                                                                                      return (
+                                                                                        <>
+                                                                                          <div className="p-2.5 flex items-center justify-between gap-2">
+                                                                                            <div className="flex items-center gap-2">
+                                                                                              <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
+                                                                                              <div>
+                                                                                                <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Supplementary_Tables_Figures.txt</div>
+                                                                                                <div className="text-[10px] text-slate-400">High-res vector figures (300 DPI) & Extended Datasets</div>
+                                                                                              </div>
+                                                                                            </div>
+                                                                                            <div className="flex items-center gap-2">
+                                                                                              <span className="text-[11px] font-mono text-slate-400">8.1 MB</span>
+                                                                                              <Button
+                                                                                                type="button"
+                                                                                                size="sm"
+                                                                                                variant="outline"
+                                                                                                onClick={() => handleDownloadSpecificFile("supp", selectedPackageRev)}
+                                                                                                className="h-7 px-2.5 text-[11px] font-bold text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                                                                                              >
+                                                                                                <Download className="h-3 w-3 mr-1" />
+                                                                                                {isDe ? "Laden" : "Download"}
+                                                                                              </Button>
+                                                                                            </div>
+                                                                                          </div>
+
+                                                                                          <div className="p-2.5 flex items-center justify-between gap-2">
+                                                                                            <div className="flex items-center gap-2">
+                                                                                              <ShieldCheck className="h-4 w-4 text-[#0b99ff] shrink-0" />
+                                                                                              <div>
+                                                                                                <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">IRB_Ethics_Statement_Redacted.txt</div>
+                                                                                                <div className="text-[10px] text-slate-400">Institutional Review Board protocol clearance certification</div>
+                                                                                              </div>
+                                                                                            </div>
+                                                                                            <div className="flex items-center gap-2">
+                                                                                              <span className="text-[11px] font-mono text-slate-400">410 KB</span>
+                                                                                              <Button
+                                                                                                type="button"
+                                                                                                size="sm"
+                                                                                                variant="outline"
+                                                                                                onClick={() => handleDownloadSpecificFile("irb", selectedPackageRev)}
+                                                                                                className="h-7 px-2.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 border-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                                                                                              >
+                                                                                                <Download className="h-3 w-3 mr-1" />
+                                                                                                {isDe ? "Laden" : "Download"}
+                                                                                              </Button>
+                                                                                            </div>
+                                                                                          </div>
+                                                                                        </>
+                                                                                      )
+                                                                                    })()}
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex items-start gap-2 text-[11px] text-amber-800 dark:text-amber-300">
+                                                                                  <Lock className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                                                                                  <span>
+                                                                                    {isDe
+                                                                                      ? "Vertraulichkeitserinnerung: Diese Dateien sind ausschließlich für Ihre Begutachtung bestimmt und dürfen nicht an Dritte weitergegeben werden."
+                                                                                      : "Strict Confidentiality: These files are provided solely for peer review. Redistribution, sharing, or uploading to public tools is prohibited."}
+                                                                                  </span>
+                                                                                </div>
+                                                                              </div>
+                                                                            )}
+
+                                                                            <DialogFooter className="gap-2">
+                                                                              <Button
+                                                                                onClick={() => setSelectedPackageRev(null)}
+                                                                                variant="ghost"
+                                                                                className="text-xs font-semibold cursor-pointer"
+                                                                              >
+                                                                                {isDe ? "Schließen" : "Close"}
+                                                                              </Button>
+                                                                              <Button
+                                                                                onClick={() => {
+                                                                                  if (selectedPackageRev) handleDownloadFullPackage(selectedPackageRev)
+                                                                                }}
+                                                                                className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-4 py-2 cursor-pointer flex items-center gap-1.5"
+                                                                              >
+                                                                                <Download className="h-3.5 w-3.5" />
+                                                                                <span>
+                                                                                  {isDownloadingZip
+                                                                                    ? (isDe ? "Wird gepackt..." : "Archiving...")
+                                                                                    : (isDe ? "Komplettes Paket herunterladen (.TXT)" : "Download Full Package (.TXT)")}
+                                                                                </span>
+                                                                              </Button>
+                                                                            </DialogFooter>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ================= MODAL 5: MISCONDUCT & ETHICS ESCALATION DIALOG ================= */}
+                                                                        <Dialog open={!!selectedEscalateRev} onOpenChange={(open) => !open && setSelectedEscalateRev(null)}>
+                                                                          <DialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 sm:max-w-xl rounded-xl">
+                                                                            <DialogHeader>
+                                                                              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                                                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                                                                                {isDe ? "Wissenschaftliches Fehlverhalten / Ethik-Eskalation" : "Research Integrity & Misconduct Escalation"}
+                                                                              </DialogTitle>
+                                                                              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                                                                                {isDe
+                                                                                  ? "Vertrauliche Meldung gemäß COPE-Leitlinien an den Integrity Manager, den Editor und den Journal Manager (JM)."
+                                                                                  : "Confidential escalation dispatched directly to the Integrity Manager, Handling Editor, and Journal Manager (JM)."}
+                                                                              </DialogDescription>
+                                                                            </DialogHeader>
+
+                                                                            {selectedEscalateRev && (
+                                                                              <form onSubmit={handleConfirmEscalation} className="space-y-4 py-2 text-xs">
+                                                                                {/* Manuscript Summary */}
+                                                                                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
+                                                                                  <div className="flex items-center justify-between text-[11px]">
+                                                                                    <span className="font-semibold text-[#0b99ff] dark:text-[#0b99ff]">{selectedEscalateRev.journal}</span>
+                                                                                    <span className="font-mono text-slate-400">ID: {selectedEscalateRev.manuscriptId || selectedEscalateRev.id}</span>
+                                                                                  </div>
+                                                                                  <h4 className="font-bold text-slate-900 dark:text-white text-xs">{selectedEscalateRev.title}</h4>
+                                                                                </div>
+
+                                                                                {/* Journal Manager CC Info Notice */}
+                                                                                <div className="p-2.5 rounded-lg bg-sky-50/80 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/50 flex items-center gap-2 text-[11px] text-sky-800 dark:text-sky-300">
+                                                                                  <Info className="h-4 w-4 shrink-0 text-[#0b99ff]" />
+                                                                                  <span>
+                                                                                    <strong>{isDe ? "Journal Manager (JM) Kopie:" : "Journal Manager (JM) Routing:"}</strong> {isDe
+                                                                                      ? "Eine Prüfkopie wird automatisch an den Journal Manager (JM) gesendet, um formelle Prozesspausen und Archivierung sicherzustellen."
+                                                                                      : "A formal compliance copy is automatically sent to the Journal Manager (JM) for editorial hold management and audit logging."}
+                                                                                  </span>
+                                                                                </div>
+
+                                                                                {/* 1. Recipient Target */}
+                                                                                <div className="space-y-1.5">
+                                                                                  <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
+                                                                                    1. {isDe ? "Empfänger der primären Untersuchung:" : "Primary Investigation Recipient:"}
+                                                                                  </label>
+                                                                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                                                    <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${escalateTarget === "both"
+                                                                                        ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white"
+                                                                                        : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                                                                      }`}>
+                                                                                      <input
+                                                                                        type="radio"
+                                                                                        name="escalateTarget"
+                                                                                        value="both"
+                                                                                        checked={escalateTarget === "both"}
+                                                                                        onChange={() => setEscalateTarget("both")}
+                                                                                      />
+                                                                                      <span>{isDe ? "IM + Editor (CC: JM)" : "IM + Editor (CC: JM)"}</span>
+                                                                                    </label>
+
+                                                                                    <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${escalateTarget === "integrity_manager"
+                                                                                        ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white"
+                                                                                        : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                                                                      }`}>
+                                                                                      <input
+                                                                                        type="radio"
+                                                                                        name="escalateTarget"
+                                                                                        value="integrity_manager"
+                                                                                        checked={escalateTarget === "integrity_manager"}
+                                                                                        onChange={() => setEscalateTarget("integrity_manager")}
+                                                                                      />
+                                                                                      <span>{isDe ? "IM Only (CC: JM)" : "IM Only (CC: JM)"}</span>
+                                                                                    </label>
+
+                                                                                    <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${escalateTarget === "handling_editor"
+                                                                                        ? "border-[#0b99ff] bg-[#0b99ff]/5 dark:bg-[#0b99ff]/10 font-bold text-slate-900 dark:text-white"
+                                                                                        : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                                                                      }`}>
+                                                                                      <input
+                                                                                        type="radio"
+                                                                                        name="escalateTarget"
+                                                                                        value="handling_editor"
+                                                                                        checked={escalateTarget === "handling_editor"}
+                                                                                        onChange={() => setEscalateTarget("handling_editor")}
+                                                                                      />
+                                                                                      <span>{isDe ? "Editor Only (CC: JM)" : "Editor Only (CC: JM)"}</span>
+                                                                                    </label>
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* 2. Misconduct Classification */}
+                                                                                <div className="space-y-1.5">
+                                                                                  <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
+                                                                                    2. {isDe ? "Kategorie des vermuteten Fehlverhaltens:" : "Suspected Misconduct Classification:"}
+                                                                                  </label>
+                                                                                  <select
+                                                                                    value={misconductType}
+                                                                                    onChange={(e) => setMisconductType(e.target.value)}
+                                                                                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-semibold focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                  >
+                                                                                    <option value="figure_manipulation">{isDe ? "Bild- & Grafik-Manipulation (Duplizierung, Band-Splicing, Retusche)" : "Image & Figure Manipulation (Pixel cloning, Western blot splicing)"}</option>
+                                                                                    <option value="paper_mill">{isDe ? "Verdacht auf Paper Mill / Ghost-Autorenschaft" : "Paper Mill / Ghost Authorship Syndicate"}</option>
+                                                                                    <option value="data_fabrication">{isDe ? "Erfundene oder statistisch unplausible Daten" : "Fabricated Data / Statistically Impossible Results"}</option>
+                                                                                    <option value="plagiarism">{isDe ? "Schweres Plagiat / Text-Recycling ohne Zitation" : "Plagiarism & Redundant Text Recycling"}</option>
+                                                                                    <option value="coi_violation">{isDe ? "Verschwiegener schwerer Interessenkonflikt" : "Undisclosed Commercial / Institutional Conflict of Interest"}</option>
+                                                                                    <option value="unethical_irb">{isDe ? "Fehlende Ethik-Genehmigung / Unethische Probanden-Rekrutierung" : "Missing IRB Approval / Unethical Human/Animal Protocols"}</option>
+                                                                                    <option value="other">{isDe ? "Sonstige schwerwiegende Publikationsethik-Verletzung" : "Other Severe COPE Ethical Violation"}</option>
+                                                                                  </select>
+                                                                                </div>
+
+                                                                                {/* 3. Urgency / Action Requested */}
+                                                                                <div className="space-y-1.5">
+                                                                                  <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
+                                                                                    3. {isDe ? "Dringlichkeit & Handlungsempfehlung:" : "Severity & Requested Editorial Action:"}
+                                                                                  </label>
+                                                                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                    <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${misconductSeverity === "high_urgent"
+                                                                                        ? "border-red-500 bg-red-50/50 dark:bg-red-950/20 font-bold text-red-900 dark:text-red-200"
+                                                                                        : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                                                                      }`}>
+                                                                                      <input
+                                                                                        type="radio"
+                                                                                        name="misconductSeverity"
+                                                                                        value="high_urgent"
+                                                                                        checked={misconductSeverity === "high_urgent"}
+                                                                                        onChange={() => setMisconductSeverity("high_urgent")}
+                                                                                      />
+                                                                                      <span>{isDe ? "Sofortiger Begutachtungsstopp empfohlen" : "Immediate Review Freeze Requested"}</span>
+                                                                                    </label>
+
+                                                                                    <label className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-colors flex items-center gap-2 ${misconductSeverity === "medium_discretion"
+                                                                                        ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 font-bold text-amber-900 dark:text-amber-200"
+                                                                                        : "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                                                                      }`}>
+                                                                                      <input
+                                                                                        type="radio"
+                                                                                        name="misconductSeverity"
+                                                                                        value="medium_discretion"
+                                                                                        checked={misconductSeverity === "medium_discretion"}
+                                                                                        onChange={() => setMisconductSeverity("medium_discretion")}
+                                                                                      />
+                                                                                      <span>{isDe ? "Hinweis zur Prüfung (Begutachtung fortsetzen)" : "Discretionary Note (Continue Review)"}</span>
+                                                                                    </label>
+                                                                                  </div>
+                                                                                </div>
+
+                                                                                {/* 4. Specific Locations & References */}
+                                                                                <div className="space-y-1">
+                                                                                  <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
+                                                                                    4. {isDe ? "Betroffene Abbildungen / Seitenzahlen / Tabellen:" : "Specific Locations (Page, Figure, or Table references):"}
+                                                                                  </label>
+                                                                                  <input
+                                                                                    type="text"
+                                                                                    value={misconductPageRefs}
+                                                                                    onChange={(e) => setMisconductPageRefs(e.target.value)}
+                                                                                    placeholder={isDe ? "z.B. Abbildung 3B (identisch zu Abb. 1A) und Seite 8, Tabelle 3" : "e.g. Figure 3B duplicated from Fig 1A with inverted contrast; Page 8 Table 3"}
+                                                                                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                  />
+                                                                                </div>
+
+                                                                                {/* 5. Detailed Evidence */}
+                                                                                <div className="space-y-1">
+                                                                                  <label className="font-bold text-slate-800 dark:text-slate-200 text-xs block">
+                                                                                    5. {isDe ? "Ausführliche Begründung & Beweishinweise:" : "Detailed Evidence & Integrity Findings:"}
+                                                                                  </label>
+                                                                                  <textarea
+                                                                                    rows={3}
+                                                                                    value={misconductEvidence}
+                                                                                    onChange={(e) => setMisconductEvidence(e.target.value)}
+                                                                                    placeholder={isDe ? "Beschreiben Sie die auffälligen Muster, Unstimmigkeiten oder methodischen Fälschungsmerkmale..." : "Detail the anomalies, duplicate background noise, mathematical impossibilities, or suspected paper mill characteristics..."}
+                                                                                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                    required
+                                                                                  />
+                                                                                </div>
+
+                                                                                {/* 6. COPE Protection Declaration */}
+                                                                                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                                                                  <label className="flex items-start gap-2 cursor-pointer">
+                                                                                    <input
+                                                                                      type="checkbox"
+                                                                                      checked={misconductCopeCheck}
+                                                                                      onChange={(e) => setMisconductCopeCheck(e.target.checked)}
+                                                                                      className="mt-0.5 h-3.5 w-3.5 rounded text-amber-600 focus:ring-amber-500"
+                                                                                      required
+                                                                                    />
+                                                                                    <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
+                                                                                      {isDe
+                                                                                        ? "Ich bestätige, dass diese Meldung nach bestem wissenschaftlichen Wissen erfolgt. Meine Identität als Gutachter wird gemäß den COPE-Whistleblower-Richtlinien streng vertraulich geschützt."
+                                                                                        : "I confirm this report is submitted in good faith on objective scientific grounds. My identity is strictly protected under COPE whistleblower guidelines."}
+                                                                                    </span>
+                                                                                  </label>
+                                                                                </div>
+
+                                                                                <DialogFooter className="gap-2 pt-2">
+                                                                                  <Button
+                                                                                    type="button"
+                                                                                    onClick={() => setSelectedEscalateRev(null)}
+                                                                                    variant="ghost"
+                                                                                    className="text-xs font-semibold cursor-pointer"
+                                                                                  >
+                                                                                    {isDe ? "Abbrechen" : "Cancel"}
+                                                                                  </Button>
+                                                                                  <Button
+                                                                                    type="submit"
+                                                                                    disabled={isSubmittingEscalation}
+                                                                                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-5 py-2 cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                                                                  >
+                                                                                    <AlertTriangle className="h-3.5 w-3.5" />
+                                                                                    <span>
+                                                                                      {isSubmittingEscalation
+                                                                                        ? (isDe ? "Wird übermittelt..." : "Dispatching...")
+                                                                                        : (isDe ? "Eskalation vertraulich einreichen" : "Submit Confidential Escalation")}
+                                                                                    </span>
+                                                                                  </Button>
+                                                                                </DialogFooter>
+                                                                              </form>
+                                                                            )}
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ================= REVIEWER ONBOARDING & PROFILE SETUP MODAL ================= */}
+                                                                        <Dialog
+                                                                          open={showProfileModal}
+                                                                          onOpenChange={(open) => {
+                                                                            if (!open) markOnboarded()
+                                                                            setShowProfileModal(open)
+                                                                          }}
+                                                                        >
+                                                                          <DialogContent className="max-w-xl max-h-[85vh] flex flex-col p-0 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl bg-white dark:bg-slate-950 overflow-hidden">
+
+                                                                            {/* editorial360 Light Sky Blue Top Accent Bar */}
+                                                                            <div className="h-1.5 w-full bg-gradient-to-r from-[#0b99ff] via-sky-400 to-[#0088e0] shrink-0" />
+
+                                                                            {/* Modal Header */}
+                                                                            <div className="px-6 pt-5 pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                                                                              <DialogTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                                                                                {isDe ? "Gutachterprofil einrichten" : "Reviewer Profile Setup"}
+                                                                              </DialogTitle>
+                                                                              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                                                {isDe
+                                                                                  ? "Geben Sie Ihre akademische Affiliation, Fachgebiete und Verfügbarkeit für Manuskriptzuweisungen an."
+                                                                                  : "Set your academic affiliation, subject expertise, and review availability for manuscript matching."}
+                                                                              </DialogDescription>
+
+                                                                              {/* Step Navigation Tabs with Light Sky Blue Active Border */}
+                                                                              <div className="flex items-center gap-4 mt-3 pt-2 text-xs">
+                                                                                {[
+                                                                                  { step: 1, labelEn: "1. Affiliation", labelDe: "1. Affiliation" },
+                                                                                  { step: 2, labelEn: "2. Expertise", labelDe: "2. Fachgebiete" },
+                                                                                  { step: 3, labelEn: "3. Capacity", labelDe: "3. Kapazität" },
+                                                                                  { step: 4, labelEn: "4. Ethics", labelDe: "4. Ethik" },
+                                                                                ].map(st => (
+                                                                                  <button
+                                                                                    key={st.step}
+                                                                                    type="button"
+                                                                                    onClick={() => setProfileStep(st.step as 1 | 2 | 3 | 4)}
+                                                                                    className={`pb-1.5 border-b-2 text-xs transition-colors cursor-pointer ${profileStep === st.step
+                                                                                        ? "border-[#0b99ff] text-[#0b99ff] font-semibold"
+                                                                                        : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                                                                      }`}
+                                                                                  >
+                                                                                    {isDe ? st.labelDe : st.labelEn}
+                                                                                  </button>
+                                                                                ))}
+                                                                              </div>
+                                                                            </div>
+
+                                                                            {/* Form Body with Scrollable Content and Fixed Footer */}
+                                                                            <form onSubmit={handleSaveProfile} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                                                                              <div className="flex-1 overflow-y-auto p-6 space-y-4 pt-4">
+
+                                                                                {/* STEP 1: Academic Identity & Affiliation */}
+                                                                                {profileStep === 1 && (
+                                                                                  <div className="space-y-3.5">
+                                                                                    {/* Reviewer Photo Upload Row */}
+                                                                                    <div className="flex items-center gap-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                                                                                      <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ring-2 ring-slate-200 dark:ring-slate-800">
+                                                                                        {formPhotoUrl ? (
+                                                                                          <img src={formPhotoUrl} alt="Reviewer Avatar" className="w-full h-full object-cover" />
+                                                                                        ) : (
+                                                                                          <span>{getReviewerInitials(formName)}</span>
+                                                                                        )}
+                                                                                      </div>
+                                                                                      <div className="flex items-center gap-2">
+                                                                                        <label className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
+                                                                                          <Upload className="h-3.5 w-3.5 text-[#0b99ff]" />
+                                                                                          {isDe ? "Foto hochladen" : "Upload Photo"}
+                                                                                          <input
+                                                                                            type="file"
+                                                                                            accept="image/*"
+                                                                                            className="hidden"
+                                                                                            onChange={(e) => {
+                                                                                              const file = e.target.files?.[0]
+                                                                                              if (file) {
+                                                                                                const reader = new FileReader()
+                                                                                                reader.onloadend = () => {
+                                                                                                  setFormPhotoUrl(reader.result as string)
+                                                                                                }
+                                                                                                reader.readAsDataURL(file)
+                                                                                              }
+                                                                                            }}
+                                                                                          />
+                                                                                        </label>
+                                                                                        {formPhotoUrl && (
+                                                                                          <button
+                                                                                            type="button"
+                                                                                            onClick={() => setFormPhotoUrl("")}
+                                                                                            className="px-2.5 py-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                                                                                          >
+                                                                                            {isDe ? "Entfernen" : "Remove"}
+                                                                                          </button>
+                                                                                        )}
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          {isDe ? "Akad. Titel" : "Academic Title"}
+                                                                                        </label>
+                                                                                        <select
+                                                                                          value={formTitle}
+                                                                                          onChange={(e) => setFormTitle(e.target.value)}
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        >
+                                                                                          <option value="Prof. Dr.">Prof. Dr.</option>
+                                                                                          <option value="Dr.">Dr. / PhD</option>
+                                                                                          <option value="Assoc. Prof.">Assoc. Prof.</option>
+                                                                                          <option value="Assist. Prof.">Assist. Prof.</option>
+                                                                                          <option value="MD">MD</option>
+                                                                                          <option value="MD, PhD">MD, PhD</option>
+                                                                                          <option value="Postdoctoral Fellow">Postdoctoral Fellow</option>
+                                                                                          <option value="Senior Scientist">Senior Scientist</option>
+                                                                                          <option value="MSc">MSc / Researcher</option>
+                                                                                        </select>
+                                                                                      </div>
+
+                                                                                      <div className="sm:col-span-2 space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          {isDe ? "Vollständiger Name *" : "Full Name *"}
+                                                                                        </label>
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          required
+                                                                                          value={formName}
+                                                                                          onChange={(e) => setFormName(e.target.value)}
+                                                                                          placeholder="Dr. Marcus Vance"
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        />
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          {isDe ? "Institutionelle E-Mail *" : "Institutional Email *"}
+                                                                                        </label>
+                                                                                        <input
+                                                                                          type="email"
+                                                                                          required
+                                                                                          value={formEmail}
+                                                                                          onChange={(e) => setFormEmail(e.target.value)}
+                                                                                          placeholder="m.vance@university.edu"
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        />
+                                                                                      </div>
+
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          {isDe ? "Land / Region *" : "Country / Region *"}
+                                                                                        </label>
+                                                                                        <select
+                                                                                          value={formCountry}
+                                                                                          onChange={(e) => setFormCountry(e.target.value)}
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        >
+                                                                                          <option value="">{isDe ? "Land auswählen..." : "Select Country..."}</option>
+                                                                                          {GLOBAL_COUNTRIES.map((c) => (
+                                                                                            <option key={c.code} value={c.name}>
+                                                                                              {c.flag} {c.name}
+                                                                                            </option>
+                                                                                          ))}
+                                                                                        </select>
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          {isDe ? "Institution / Universität *" : "Institution / University *"}
+                                                                                        </label>
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          required
+                                                                                          value={formInstitution}
+                                                                                          onChange={(e) => setFormInstitution(e.target.value)}
+                                                                                          placeholder="e.g. Charité – Universitätsmedizin Berlin"
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        />
+                                                                                      </div>
+
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          {isDe ? "Fachbereich / Institut" : "Department / Division"}
+                                                                                        </label>
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          value={formDepartment}
+                                                                                          onChange={(e) => setFormDepartment(e.target.value)}
+                                                                                          placeholder="e.g. Department of Cardiology"
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        />
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          ORCID iD
+                                                                                        </label>
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          value={formOrcid}
+                                                                                          onChange={(e) => setFormOrcid(e.target.value)}
+                                                                                          placeholder="0000-0004-7711-2093"
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        />
+                                                                                      </div>
+
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                          {isDe ? "Google Scholar / Scopus Profil" : "Google Scholar / Scopus Link"}
+                                                                                        </label>
+                                                                                        <input
+                                                                                          type="url"
+                                                                                          value={formScholarUrl}
+                                                                                          onChange={(e) => setFormScholarUrl(e.target.value)}
+                                                                                          placeholder="https://scholar.google.com/citations?user=..."
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        />
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* STEP 2: Subject Areas & Matching Keywords */}
+                                                                                {profileStep === 2 && (
+                                                                                  <div className="space-y-3.5">
+                                                                                    <div className="space-y-1">
+                                                                                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                                                        {isDe ? "Hauptfachdisziplin *" : "Primary Scientific Discipline *"}
+                                                                                      </label>
+                                                                                      <select
+                                                                                        value={formPrimaryDiscipline}
+                                                                                        onChange={(e) => {
+                                                                                          setFormPrimaryDiscipline(e.target.value)
+                                                                                          if (DISCIPLINE_DATA[e.target.value]) {
+                                                                                            setFormSubDisciplines(DISCIPLINE_DATA[e.target.value].subDisciplines.slice(0, 3))
+                                                                                          }
+                                                                                        }}
+                                                                                        className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                      >
+                                                                                        {Object.entries(DISCIPLINE_DATA).map(([key, disc]) => (
+                                                                                          <option key={key} value={key}>
+                                                                                            {isDe ? disc.labelDe : disc.labelEn}
+                                                                                          </option>
+                                                                                        ))}
+                                                                                      </select>
+                                                                                    </div>
+
+                                                                                    {/* Sub-Disciplines Chips */}
+                                                                                    {DISCIPLINE_DATA[formPrimaryDiscipline] && (
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                                                                                          {isDe ? "Spezialisierte Teilbereiche:" : "Sub-Disciplines:"}
+                                                                                        </label>
+                                                                                        <div className="flex flex-wrap gap-1.5">
+                                                                                          {DISCIPLINE_DATA[formPrimaryDiscipline].subDisciplines.map((sub, i) => {
+                                                                                            const isSelected = formSubDisciplines.includes(sub)
+                                                                                            return (
+                                                                                              <button
+                                                                                                key={i}
+                                                                                                type="button"
+                                                                                                onClick={() => handleToggleSubDiscipline(sub)}
+                                                                                                className={`text-xs px-2.5 py-0.5 rounded border transition-colors cursor-pointer ${isSelected
+                                                                                                    ? "bg-[#0b99ff] text-white border-[#0b99ff] font-medium shadow-2xs"
+                                                                                                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:border-[#0b99ff]/60"
+                                                                                                  }`}
+                                                                                              >
+                                                                                                {isSelected ? "✓ " : "+ "}{sub}
+                                                                                              </button>
+                                                                                            )
+                                                                                          })}
+                                                                                        </div>
+                                                                                      </div>
+                                                                                    )}
+
+                                                                                    {/* Keyword Tagger */}
+                                                                                    <div className="space-y-1.5 pt-1">
+                                                                                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                                                                                        {isDe ? "Forschungsschlagwörter (Keywords):" : "Research Keywords:"}
+                                                                                      </label>
+
+                                                                                      <div className="flex gap-2">
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          value={formKeywordInput}
+                                                                                          onChange={(e) => setFormKeywordInput(e.target.value)}
+                                                                                          onKeyDown={(e) => {
+                                                                                            if (e.key === "Enter") {
+                                                                                              e.preventDefault()
+                                                                                              handleAddKeyword()
+                                                                                            }
+                                                                                          }}
+                                                                                          placeholder={isDe ? "Schlagwort eingeben und Enter drücken..." : "Type keyword and press Enter..."}
+                                                                                          className="flex-1 px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff] focus:border-[#0b99ff]"
+                                                                                        />
+                                                                                        <Button
+                                                                                          type="button"
+                                                                                          onClick={() => handleAddKeyword()}
+                                                                                          variant="outline"
+                                                                                          className="text-xs px-3 h-8 border-[#0b99ff] text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 cursor-pointer font-medium"
+                                                                                        >
+                                                                                          {isDe ? "Hinzufügen" : "Add"}
+                                                                                        </Button>
+                                                                                      </div>
+
+                                                                                      {/* Active Tags */}
+                                                                                      <div className="p-2 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 min-h-[36px] flex flex-wrap items-center gap-1.5">
+                                                                                        {formKeywords.length === 0 ? (
+                                                                                          <span className="text-xs text-slate-400">
+                                                                                            {isDe ? "Keine Schlagwörter hinzugefügt." : "No keywords added yet."}
+                                                                                          </span>
+                                                                                        ) : (
+                                                                                          formKeywords.map((kw, i) => (
+                                                                                            <span
+                                                                                              key={i}
+                                                                                              className="inline-flex items-center gap-1 text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-2xs"
+                                                                                            >
+                                                                                              {kw}
+                                                                                              <button
+                                                                                                type="button"
+                                                                                                onClick={() => handleRemoveKeyword(kw)}
+                                                                                                className="text-slate-400 hover:text-red-500 ml-0.5 cursor-pointer font-bold"
+                                                                                              >
+                                                                                                ×
+                                                                                              </button>
+                                                                                            </span>
+                                                                                          ))
+                                                                                        )}
+                                                                                      </div>
+
+                                                                                      {/* Keyword Suggestions */}
+                                                                                      {DISCIPLINE_DATA[formPrimaryDiscipline] && (
+                                                                                        <div className="space-y-1 pt-1">
+                                                                                          <span className="text-[11px] text-slate-500 block">
+                                                                                            {isDe ? "Empfohlene Keywords:" : "Suggested keywords:"}
+                                                                                          </span>
+                                                                                          <div className="flex flex-wrap gap-1">
+                                                                                            {DISCIPLINE_DATA[formPrimaryDiscipline].keywords.map((sugKw, i) => (
+                                                                                              <button
+                                                                                                key={i}
+                                                                                                type="button"
+                                                                                                onClick={() => handleAddKeyword(sugKw)}
+                                                                                                disabled={formKeywords.includes(sugKw)}
+                                                                                                className={`text-[11px] px-2 py-0.5 rounded border transition-colors cursor-pointer ${formKeywords.includes(sugKw)
+                                                                                                    ? "opacity-40 bg-slate-100 dark:bg-slate-800 text-slate-400 border-transparent cursor-not-allowed"
+                                                                                                    : "bg-sky-50 dark:bg-sky-950/40 text-[#0b99ff] border-sky-200 dark:border-sky-800/80 hover:bg-sky-100 dark:hover:bg-sky-900/60"
+                                                                                                  }`}
+                                                                                              >
+                                                                                                + {sugKw}
+                                                                                              </button>
+                                                                                            ))}
+                                                                                          </div>
+                                                                                        </div>
+                                                                                      )}
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* STEP 3: Workload Capacity & Availability */}
+                                                                                {profileStep === 3 && (
+                                                                                  <div className="space-y-3.5">
+                                                                                    <div className="space-y-1">
+                                                                                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                                                                                        {isDe ? "Verfügbarkeit:" : "Availability Status:"}
+                                                                                      </label>
+                                                                                      <div className="grid grid-cols-2 gap-2">
+                                                                                        <label className={`p-2.5 rounded border cursor-pointer text-xs flex items-center gap-2 ${formAvailability === "Available"
+                                                                                            ? "border-[#0b99ff] bg-sky-50/60 dark:bg-sky-950/30 font-medium text-slate-900 dark:text-white"
+                                                                                            : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                                                                                          }`}>
+                                                                                          <input
+                                                                                            type="radio"
+                                                                                            name="formAvailability"
+                                                                                            value="Available"
+                                                                                            checked={formAvailability === "Available"}
+                                                                                            onChange={() => setFormAvailability("Available")}
+                                                                                            className="text-[#0b99ff] accent-[#0b99ff]"
+                                                                                          />
+                                                                                          <span>{isDe ? "Aktiv & Verfügbar" : "Active & Available"}</span>
+                                                                                        </label>
+
+                                                                                        <label className={`p-2.5 rounded border cursor-pointer text-xs flex items-center gap-2 ${formAvailability === "Sabbatical"
+                                                                                            ? "border-[#0b99ff] bg-sky-50/60 dark:bg-sky-950/30 font-medium text-slate-900 dark:text-white"
+                                                                                            : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                                                                                          }`}>
+                                                                                          <input
+                                                                                            type="radio"
+                                                                                            name="formAvailability"
+                                                                                            value="Sabbatical"
+                                                                                            checked={formAvailability === "Sabbatical"}
+                                                                                            onChange={() => setFormAvailability("Sabbatical")}
+                                                                                            className="text-[#0b99ff] accent-[#0b99ff]"
+                                                                                          />
+                                                                                          <span>{isDe ? "Forschungssemester / Pause" : "On Sabbatical / Leave"}</span>
+                                                                                        </label>
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    {formAvailability === "Sabbatical" && (
+                                                                                      <div className="space-y-1">
+                                                                                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                                                                                          {isDe ? "Wieder verfügbar ab:" : "Available from (Date):"}
+                                                                                        </label>
+                                                                                        <input
+                                                                                          type="date"
+                                                                                          value={formSabbaticalUntil}
+                                                                                          onChange={(e) => setFormSabbaticalUntil(e.target.value)}
+                                                                                          className="w-full px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#0b99ff]"
+                                                                                        />
+                                                                                      </div>
+                                                                                    )}
+
+                                                                                    <div className="space-y-1">
+                                                                                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                                                                                        {isDe ? "Maximale Begutachtungen (pro Monat):" : "Maximum Workload (Papers per Month):"}
+                                                                                      </label>
+                                                                                      <div className="grid grid-cols-4 gap-2">
+                                                                                        {[1, 2, 3, 4].map(num => (
+                                                                                          <button
+                                                                                            key={num}
+                                                                                            type="button"
+                                                                                            onClick={() => setFormMaxReviews(num)}
+                                                                                            className={`py-2 rounded border text-center text-xs transition-colors cursor-pointer ${formMaxReviews === num
+                                                                                                ? "border-[#0b99ff] bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] font-semibold"
+                                                                                                : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-400"
+                                                                                              }`}
+                                                                                          >
+                                                                                            {num} {isDe ? "Artikel" : "papers"}
+                                                                                          </button>
+                                                                                        ))}
+                                                                                      </div>
+                                                                                    </div>
+
+                                                                                    <div className="space-y-1">
+                                                                                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                                                                                        {isDe ? "Bevorzugte Begutachtungsdauer:" : "Preferred Review Turnaround:"}
+                                                                                      </label>
+                                                                                      <div className="grid grid-cols-3 gap-2">
+                                                                                        {[
+                                                                                          { days: 7, labelEn: "7 Days", labelDe: "7 Tage" },
+                                                                                          { days: 14, labelEn: "14 Days", labelDe: "14 Tage" },
+                                                                                          { days: 21, labelEn: "21 Days", labelDe: "21 Tage" },
+                                                                                        ].map(win => (
+                                                                                          <button
+                                                                                            key={win.days}
+                                                                                            type="button"
+                                                                                            onClick={() => setFormTurnaround(win.days)}
+                                                                                            className={`py-2 rounded border text-center text-xs transition-colors cursor-pointer ${formTurnaround === win.days
+                                                                                                ? "border-[#0b99ff] bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] font-semibold"
+                                                                                                : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-400"
+                                                                                              }`}
+                                                                                          >
+                                                                                            {isDe ? win.labelDe : win.labelEn}
+                                                                                          </button>
+                                                                                        ))}
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* STEP 4: Ethics & Compliance */}
+                                                                                {profileStep === 4 && (
+                                                                                  <div className="space-y-3.5">
+                                                                                    <div className="space-y-2.5">
+                                                                                      <label className="p-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-start gap-2.5 cursor-pointer text-xs">
+                                                                                        <input
+                                                                                          type="checkbox"
+                                                                                          checked={formCoiChecked}
+                                                                                          onChange={(e) => setFormCoiChecked(e.target.checked)}
+                                                                                          className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] accent-[#0b99ff]"
+                                                                                          required
+                                                                                        />
+                                                                                        <div className="space-y-0.5">
+                                                                                          <strong className="text-slate-900 dark:text-white block font-medium">
+                                                                                            {isDe ? "Interessenkonflikt-Erklärung" : "Conflict of Interest Declaration"}
+                                                                                          </strong>
+                                                                                          <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                                                                                            {isDe
+                                                                                              ? "Ich erkläre, Einladungen bei Ko-Autorenschaft, institutioneller Verflechtung oder Wettbewerbskonflikten abzulehnen."
+                                                                                              : "I agree to recuse myself from reviewing manuscripts where institutional, personal, or financial conflicts exist."}
+                                                                                          </p>
+                                                                                        </div>
+                                                                                      </label>
+
+                                                                                      <label className="p-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-start gap-2.5 cursor-pointer text-xs">
+                                                                                        <input
+                                                                                          type="checkbox"
+                                                                                          checked={formCopeChecked}
+                                                                                          onChange={(e) => setFormCopeChecked(e.target.checked)}
+                                                                                          className="mt-0.5 h-3.5 w-3.5 rounded text-[#0b99ff] accent-[#0b99ff]"
+                                                                                          required
+                                                                                        />
+                                                                                        <div className="space-y-0.5">
+                                                                                          <strong className="text-slate-900 dark:text-white block font-medium">
+                                                                                            {isDe ? "Vertraulichkeitserklärung & COPE-Richtlinien" : "Confidentiality & COPE Compliance"}
+                                                                                          </strong>
+                                                                                          <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                                                                                            {isDe
+                                                                                              ? "Ich behandle Manuskripte streng vertraulich und lade sie nicht in externe KI-Dienste hoch."
+                                                                                              : "I agree to treat all submitted manuscripts as strictly confidential and not upload them to third-party public services."}
+                                                                                          </p>
+                                                                                        </div>
+                                                                                      </label>
+                                                                                    </div>
+
+                                                                                    {/* Simple Summary */}
+                                                                                    <div className="p-3 rounded border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+                                                                                      <div className="font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                                                                                        {isDe ? "Profilübersicht:" : "Profile Summary:"}
+                                                                                      </div>
+                                                                                      <div className="text-slate-600 dark:text-slate-400 text-[11px] grid grid-cols-2 gap-1">
+                                                                                        <div><strong>Name:</strong> {formTitle} {formName}</div>
+                                                                                        <div><strong>Discipline:</strong> {DISCIPLINE_DATA[formPrimaryDiscipline]?.[isDe ? "labelDe" : "labelEn"]}</div>
+                                                                                        <div><strong>Institution:</strong> {formInstitution}</div>
+                                                                                        <div><strong>Capacity:</strong> {formMaxReviews} {isDe ? "Artikel/Mo" : "papers/mo"}</div>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )}
+                                                                              </div>
+
+                                                                              {/* Modal Dialog Navigation Footer (Pinned at Bottom) */}
+                                                                              <DialogFooter className="shrink-0 px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-row items-center justify-between gap-2 z-10">
+                                                                                <div>
+                                                                                  {profileStep > 1 && (
+                                                                                    <Button
+                                                                                      type="button"
+                                                                                      onClick={() => setProfileStep((prev) => (prev - 1) as 1 | 2 | 3 | 4)}
+                                                                                      variant="ghost"
+                                                                                      className="text-xs h-8 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                                                                    >
+                                                                                      ← {isDe ? "Zurück" : "Back"}
+                                                                                    </Button>
+                                                                                  )}
+                                                                                </div>
+
+                                                                                <div className="flex items-center gap-2">
+                                                                                  <Button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                      markOnboarded()
+                                                                                      setShowProfileModal(false)
+                                                                                    }}
+                                                                                    variant="ghost"
+                                                                                    className="text-xs h-8 text-slate-500 cursor-pointer"
+                                                                                  >
+                                                                                    {isDe
+                                                                                      ? (isFirstTimeOnboarding ? "Überspringen" : "Schließen")
+                                                                                      : (isFirstTimeOnboarding ? "Skip" : "Cancel")}
+                                                                                  </Button>
+
+                                                                                  {profileStep < 4 ? (
+                                                                                    <Button
+                                                                                      type="button"
+                                                                                      onClick={() => setProfileStep((prev) => (prev + 1) as 1 | 2 | 3 | 4)}
+                                                                                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-4 h-8 cursor-pointer shadow-xs"
+                                                                                    >
+                                                                                      {isDe ? "Weiter" : "Next"} →
+                                                                                    </Button>
+                                                                                  ) : (
+                                                                                    <Button
+                                                                                      type="submit"
+                                                                                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-4 h-8 cursor-pointer shadow-xs"
+                                                                                    >
+                                                                                      {isDe ? "Profil speichern" : "Save Profile"}
+                                                                                    </Button>
+                                                                                  )}
+                                                                                </div>
+                                                                              </DialogFooter>
+                                                                            </form>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                        {/* ========================================================================= */}
+                                                                        {/* CONFIRMATION POPUP DIALOG FOR REVIEWER                                     */}
+                                                                        {/* ========================================================================= */}
+                                                                        <Dialog open={confirmDialogState.isOpen} onOpenChange={(open) => setConfirmDialogState(prev => ({ ...prev, isOpen: open }))}>
+                                                                          <DialogContent className="max-w-md bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-sans shadow-2xl">
+                                                                            <DialogHeader>
+                                                                              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                                                <AlertCircle className="h-5 w-5 text-[#0b99ff]" />
+                                                                                {confirmDialogState.title}
+                                                                              </DialogTitle>
+                                                                              <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 pt-2 leading-relaxed">
+                                                                                {confirmDialogState.message}
+                                                                              </DialogDescription>
+                                                                            </DialogHeader>
+
+                                                                            <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                                                              <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => setConfirmDialogState(prev => ({ ...prev, isOpen: false }))}
+                                                                                className="text-xs font-semibold border-slate-200 dark:border-slate-800 h-8 px-3.5 rounded-lg cursor-pointer"
+                                                                              >
+                                                                                {isDe ? "Nein, Abbrechen" : "No, Cancel"}
+                                                                              </Button>
+                                                                              <Button
+                                                                                size="sm"
+                                                                                onClick={() => {
+                                                                                  const action = confirmDialogState.onConfirm
+                                                                                  setConfirmDialogState(prev => ({ ...prev, isOpen: false }))
+                                                                                  if (action) action()
+                                                                                }}
+                                                                                className={`text-white text-xs font-bold h-8 px-4 rounded-lg cursor-pointer ${confirmDialogState.confirmColorClass}`}
+                                                                              >
+                                                                                {confirmDialogState.confirmButtonLabel}
+                                                                              </Button>
+                                                                            </DialogFooter>
+                                                                          </DialogContent>
+                                                                        </Dialog>
+
+                                                                      </div>
+                                                                    )
+                                                                    }
 

@@ -1053,13 +1053,23 @@ export default function Editorial360Page() {
     orcid?: string
     photoUrl?: string
     badges?: string[]
-  } | null>(null)
+  } | null>({
+    title: "Dr.",
+    name: "Dr. German J. Chaud",
+    email: "germanchaud@gmail.com",
+    institution: "Hospital las Higueras, Talcahuano, Chile",
+    department: "Department of Cardiovascular Surgery",
+    country: "Chile",
+    specialization: "Cardiovascular Surgery, Acute Aortic Dissection, Thoracic Surgery",
+    photoUrl: "",
+    badges: ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"]
+  })
 
   const getReviewerInitials = (name?: string) => {
-    if (!name) return "MV"
+    if (!name) return "GC"
     const cleaned = name.replace(/^(Dr\.|Prof\.|Prof\. Dr\.|Mr\.|Ms\.|Mrs\.)\s+/i, "").trim()
     const parts = cleaned.split(/\s+/).filter(Boolean)
-    if (parts.length === 0) return "MV"
+    if (parts.length === 0) return "GC"
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
   }
@@ -1854,9 +1864,10 @@ export default function Editorial360Page() {
               return [...mapped, ...localOnly]
             })
 
-            // If arrived via author link, sync author profile with their active submitted manuscript
-            const activeAuthorMsId = urlManuscriptId || urlId
-            if (activeAuthorMsId) {
+            // If arrived via author link, sync author profile with their active submitted manuscript ONLY for author sessions
+            const isReviewerSession = role === "reviewer" || urlRole === "reviewer" || urlAction === "review" || urlAction === "round2"
+            const activeAuthorMsId = urlManuscriptId || (urlRole === "author" ? urlId : null)
+            if (activeAuthorMsId && !isReviewerSession) {
               const currentActive = mapped.find(m => m.id === activeAuthorMsId || (activeAuthorMsId.toLowerCase().includes("rw01") && m.id === "SOMED-26-RW01"))
               if (currentActive) {
                 if (currentActive.authorName) setProfFullName(currentActive.authorName)
@@ -5971,7 +5982,7 @@ Specific comments to the Author(s):
     if (activeRevObj) {
       const targetPaper = manuscripts.find(m => m.title === activeRevObj.title)
       const paperId = targetPaper ? targetPaper.id : "MS-2026-081"
-      const activeReviewerName = reviewerProfile?.name || regName || "Dr. Evelyn Vane"
+      const activeReviewerName = reviewerProfile?.name || regName || (email.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")
       
       const newReview: ReviewFeedback = {
         id: `REV-FB-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -7814,23 +7825,34 @@ Specific comments to the Author(s):
               {/* Reviewer Quick Badges in Header */}
               {role === "reviewer" && (
                 <div className="hidden md:flex items-center gap-2 mr-1">
-                  {/* Active Review Capacity Badge */}
+                  {/* Journal Branding Masthead Pill */}
                   <div
-                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
-                    title={language === "de" ? "Gutachter-Verfügbarkeit & Kapazität" : "Reviewer Availability & Capacity"}
+                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/80 shadow-2xs select-none"
+                    title="Scholarly Open: Medicine — Official Journal Masthead"
                   >
                     <span className="relative flex h-2 w-2 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-500 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
                     </span>
-                    <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                      {language === "de" ? "Aktiv (2 Artikel/Mo. max)" : "Active (2 papers/mo max)"}
+                    <span className="font-bold text-sky-900 dark:text-sky-200 tracking-tight">
+                      Scholarly Open: Medicine
                     </span>
                   </div>
 
-                  {/* Official ORCID Identity Badge for Reviewer */}
+                  {/* Round 2 Re-evaluation Desk Status Pill */}
+                  <div
+                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80 shadow-2xs select-none"
+                    title="Round 2 Peer Review Evaluation Desk"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                      {language === "de" ? "Runde 2 Begutachtung" : "Round 2 Evaluation Desk"}
+                    </span>
+                  </div>
+
+                  {/* Official ORCID Identity Badge for Reviewer - ONLY if reviewer has a registered ORCID */}
                   {(() => {
-                    const activeOrcid = reviewerProfile?.orcid || (email === "germanchaud@gmail.com" ? "" : (profOrcid || regOrcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : "")))
+                    const activeOrcid = reviewerProfile?.orcid || (email.toLowerCase().includes("chaud") ? "" : (profOrcid || regOrcid || ""))
                     if (!activeOrcid) return null
                     return (
                       <a
@@ -8088,7 +8110,7 @@ Specific comments to the Author(s):
                 >
                   <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
                     <div className="h-full w-full rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden flex items-center justify-center ring-2 ring-white dark:ring-[#272832]">
-                      {((role === "reviewer" && reviewerProfile?.photoUrl) ||
+                      {((role === "reviewer" && reviewerProfile?.photoUrl && !reviewerProfile.photoUrl.includes("sam-lee")) ||
                         (role === "editor" && editorPhotoUrl) ||
                         (role === "jm" && (profPhotoUrl || "/images/editors/noor.jpeg")) ||
                         (role === "author" && authorPhotoUrl)) ? (
@@ -8098,13 +8120,13 @@ Specific comments to the Author(s):
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                        <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                       )}
                     </div>
                   </div>
                   <div className="hidden lg:flex flex-col text-left pr-1">
                     <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 leading-tight">
-                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                      {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? profFullName : role === "reviewer" ? (reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                     </span>
                     <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
                       {role === "editor"
@@ -8112,7 +8134,7 @@ Specific comments to the Author(s):
                         : role === "jm" 
                         ? jmStaffRole
                         : role === "reviewer" 
-                        ? (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
+                        ? (language === "de" ? "Eingeladener Fachgutachter" : "Invited Expert Referee") 
                         : role === "author" 
                         ? (language === "de" ? "Hauptautor" : "Principal Author") 
                         : (role === "im" || role === "ria") 
@@ -8136,7 +8158,7 @@ Specific comments to the Author(s):
                       {/* User Header */}
                       <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-[#272832]">
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#0b99ff] to-[#0066cc] text-white font-bold text-xs shadow-xs uppercase overflow-hidden">
-                          {((role === "reviewer" && reviewerProfile?.photoUrl) ||
+                          {((role === "reviewer" && reviewerProfile?.photoUrl && !reviewerProfile.photoUrl.includes("sam-lee")) ||
                             (role === "editor" && editorPhotoUrl) ||
                             (role === "jm" && (profPhotoUrl || "/images/editors/noor.jpeg")) ||
                             (role === "author" && authorPhotoUrl)) ? (
@@ -8146,21 +8168,21 @@ Specific comments to the Author(s):
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
+                            <span>{role === "editor" ? (editorName ? editorName.replace(/^Prof\.\s*|^Dr\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "AT") : role === "jm" ? (jmFullName ? jmFullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NF") : role === "author" ? (profFullName ? profFullName.replace(/^Dr\.\s*|^Prof\.\s*/i, '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : (email ? email.slice(0, 2).toUpperCase() : "AU")) : role === "reviewer" ? getReviewerInitials(reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "IM" : "SO"}</span>
                           )}
                         </div>
                         <div className="space-y-0.5 overflow-hidden text-left flex-1">
                           <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? (profFullName || (email ? email.split('@')[0] : "Author")) : role === "reviewer" ? (reviewerProfile?.name || regName || "Dr. Marcus Vance") : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
+                            {role === "editor" ? editorName : role === "jm" ? (jmFullName || "Noor F.") : role === "author" ? (profFullName || (email ? email.split('@')[0] : "Author")) : role === "reviewer" ? (reviewerProfile?.name || regName || (email?.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud")) : (role === "im" || role === "ria") ? "Dr. Helen Vance" : "editorial360 Admin"}
                           </h4>
-                          <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : role === "reviewer" ? (reviewerProfile?.email || email) : email}</p>
+                          <p className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate">{role === "editor" ? editorEmail : role === "jm" ? jmDeskEmail : role === "reviewer" ? (reviewerProfile?.email || (email?.toLowerCase().includes("chaud") ? "germanchaud@gmail.com" : email)) : email}</p>
                           <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0b99ff]/10 text-[#0b99ff] border border-[#0b99ff]/20">
                             {role === "editor"
                               ? editorRank
                               : role === "jm" 
                               ? jmStaffRole
                               : role === "reviewer" 
-                              ? (language === "de" ? "Fachgutachter" : "Expert Reviewer") 
+                              ? (language === "de" ? "Eingeladener Fachgutachter" : "Invited Expert Referee") 
                               : role === "author" 
                               ? (language === "de" ? "Verifizierter Autor" : "Verified Author") 
                               : (role === "im" || role === "ria") 
@@ -9065,19 +9087,22 @@ Specific comments to the Author(s):
                   <ReviewerWorkspace
                     language={language}
                     user={{
-                      name: reviewerProfile?.name || (email === "reviewer@scholarlyopen.org" ? "Dr. Marcus Vance" : (regName || profFullName || (email ? email.split('@')[0] : "Academic Referee"))),
-                      email: reviewerProfile?.email || email || regEmail || (email === "reviewer@scholarlyopen.org" ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
-                      orcid: reviewerProfile?.orcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : (profOrcid || regOrcid || "")),
-                      institution: reviewerProfile?.institution || (email === "reviewer@scholarlyopen.org" ? "Charité – Universitätsmedizin Berlin" : (profInstitution || "Academic Institution")),
-                      photoUrl: reviewerProfile?.photoUrl || ""
+                      name: reviewerProfile?.name || (email.toLowerCase().includes("chaud") ? "Dr. German J. Chaud" : "Dr. German J. Chaud"),
+                      email: reviewerProfile?.email || (email.toLowerCase().includes("chaud") ? "germanchaud@gmail.com" : (email || "germanchaud@gmail.com")),
+                      orcid: reviewerProfile?.orcid || (email.toLowerCase().includes("chaud") ? "" : (profOrcid || regOrcid || "")),
+                      institution: reviewerProfile?.institution || "Hospital las Higueras, Talcahuano, Chile",
+                      photoUrl: ""
                     }}
-                    initialProfile={reviewerProfile || (email === "reviewer@scholarlyopen.org" ? {
-                      name: "Dr. Marcus Vance",
-                      email: "m.vance@university-charite.de",
-                      institution: "Charité – Universitätsmedizin Berlin",
+                    initialProfile={reviewerProfile || {
+                      title: "Dr.",
+                      name: "Dr. German J. Chaud",
+                      email: "germanchaud@gmail.com",
+                      institution: "Hospital las Higueras, Talcahuano, Chile",
+                      department: "Department of Cardiovascular Surgery",
+                      country: "Chile",
                       photoUrl: "",
-                      badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"]
-                    } : undefined)}
+                      badges: ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"]
+                    }}
                     onSaveProfile={(updated) => {
                       setReviewerProfile(updated)
                       if (updated.photoUrl) setProfPhotoUrl(updated.photoUrl)
