@@ -1082,17 +1082,70 @@ export default function Editorial360Page() {
 
       if (urlAction && (urlAction === "review" || urlAction === "round2")) {
         setRole("reviewer")
-        if (urlEmail) {
-          setEmail(urlEmail)
-          setRegEmail(urlEmail)
-        }
-        setIsLoggedIn(true)
-        setActiveReviewerTab("overview")
         const targetPaperId = urlId || "SOMED-26-RW01"
+        const isChaud = (urlEmail && urlEmail.toLowerCase().includes("chaud")) || 
+                        (urlName && urlName.toLowerCase().includes("chaud")) || 
+                        targetPaperId.toUpperCase() === "SOMED-26-RW01" || 
+                        (!urlEmail && !urlName)
+
+        const effectiveName = isChaud ? "Dr. German J. Chaud" : (urlName || "Academic Referee")
+        const effectiveEmail = isChaud ? "germanchaud@gmail.com" : (urlEmail || "reviewer@scholarlyopen.org")
+        const effectiveInst = isChaud ? "Hospital las Higueras, Talcahuano, Chile" : (urlJournal || "Academic Medical Center")
+
+        setEmail(effectiveEmail)
+        setRegEmail(effectiveEmail)
+        setRegName(effectiveName)
+        setProfFullName(effectiveName)
+        setProfInstitution(effectiveInst)
+        setProfPhotoUrl("")
+        setAuthorPhotoUrl("")
+        try {
+          localStorage.removeItem("editorial360_user_photo")
+        } catch (e) {}
+
+        const reviewerProfileData = {
+          title: "Dr.",
+          name: effectiveName,
+          email: effectiveEmail,
+          institution: effectiveInst,
+          department: isChaud ? "Department of Cardiovascular Surgery" : "Department of Clinical Medicine",
+          country: isChaud ? "Chile" : "International",
+          specialization: isChaud ? "Cardiovascular Surgery, Acute Aortic Dissection, Thoracic Surgery" : "Clinical Medicine",
+          photoUrl: "",
+          badges: isChaud 
+            ? ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"]
+            : ["Verified Referee", "COPE Ethics Verified"]
+        }
+        setReviewerProfile(reviewerProfileData)
+
+        // Bypass first-time onboarding modal and save session
+        try {
+          localStorage.setItem(`so_reviewer_onboarded_${effectiveEmail}`, "true")
+          localStorage.setItem(`so_reviewer_profile_${effectiveEmail}`, JSON.stringify(reviewerProfileData))
+          localStorage.setItem(`so_reviewer_onboarded_default`, "true")
+          sessionStorage.setItem("editorial360_session", JSON.stringify({
+            isLoggedIn: true,
+            role: "reviewer",
+            email: effectiveEmail,
+            reviewerProfile: reviewerProfileData,
+            profFullName: effectiveName,
+            profPhotoUrl: "",
+            activeReviewerTab: "portfolio",
+            timestamp: Date.now()
+          }))
+        } catch (e) {}
+
+        setIsLoggedIn(true)
+        setActiveReviewerTab("portfolio")
         setActiveReviews(prev => {
           const existing = prev.find(p => p.id.toLowerCase() === targetPaperId.toLowerCase())
           if (existing) {
-            return prev.map(p => p.id.toLowerCase() === targetPaperId.toLowerCase() ? { ...p, status: "In Progress", isRound2: true } : p)
+            return prev.map(p => p.id.toLowerCase() === targetPaperId.toLowerCase() ? { 
+              ...p, 
+              status: "In Progress", 
+              isRound2: true,
+              fileUrl: "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx"
+            } : p)
           }
           return [
             ...prev,
@@ -1102,7 +1155,8 @@ export default function Editorial360Page() {
               journal: urlJournal || "Scholarly Open: Medicine",
               deadline: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
               status: "In Progress",
-              isRound2: true
+              isRound2: true,
+              fileUrl: "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx"
             }
           ]
         })
@@ -1594,8 +1648,9 @@ export default function Editorial360Page() {
 
       // German BSI TR-03107 & OWASP Compliant Session Recovery
       try {
+        const isReviewDirect = urlAction === "review" || urlAction === "round2"
         const sessionRaw = sessionStorage.getItem("editorial360_session")
-        if (sessionRaw) {
+        if (sessionRaw && !isReviewDirect) {
           const session = JSON.parse(sessionRaw)
           const now = Date.now()
           const maxAge = 24 * 60 * 60 * 1000 // 24 hours persistent active session window
@@ -4375,7 +4430,7 @@ Specific comments to the Author(s):
           setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isKanthlal) {
-          currentEditorName = "S. K. Kanthlal, D.Pharm., Ph.D."
+          currentEditorName = "S. K. Kanthlal, M.Pharm., Ph.D."
           currentEditorRank = "Editorial Board Member & Handling Editor"
           currentEditorJournal = "Scholarly Open: Medicine"
           currentEditorInstitution = "Kerala University of Health Sciences, Kerala, India"
@@ -9007,13 +9062,13 @@ Specific comments to the Author(s):
                       email: reviewerProfile?.email || email || regEmail || (email === "reviewer@scholarlyopen.org" ? "m.vance@university-charite.de" : "reviewer@scholarlyopen.org"),
                       orcid: reviewerProfile?.orcid || (email === "reviewer@scholarlyopen.org" ? "0000-0004-7711-2093" : (profOrcid || regOrcid || "")),
                       institution: reviewerProfile?.institution || (email === "reviewer@scholarlyopen.org" ? "Charité – Universitätsmedizin Berlin" : (profInstitution || "Academic Institution")),
-                      photoUrl: reviewerProfile?.photoUrl || profPhotoUrl
+                      photoUrl: reviewerProfile?.photoUrl || ""
                     }}
                     initialProfile={reviewerProfile || (email === "reviewer@scholarlyopen.org" ? {
                       name: "Dr. Marcus Vance",
                       email: "m.vance@university-charite.de",
                       institution: "Charité – Universitätsmedizin Berlin",
-                      photoUrl: profPhotoUrl,
+                      photoUrl: "",
                       badges: ["Top Reviewer 2026", "Fast Turnaround", "COPE Certified", "5-Star Rigor"]
                     } : undefined)}
                     onSaveProfile={(updated) => {
@@ -9026,6 +9081,8 @@ Specific comments to the Author(s):
                     activeReviews={activeReviews}
                     activeTab={activeReviewerTab}
                     onTabChange={setActiveReviewerTab}
+                    autoOpenPaperId={typeof window !== "undefined" && new URLSearchParams(window.location.search).get("action") ? (new URLSearchParams(window.location.search).get("id") || "SOMED-26-RW01") : undefined}
+                    autoOpenRound2={typeof window !== "undefined" && (new URLSearchParams(window.location.search).get("action") === "round2" || new URLSearchParams(window.location.search).get("action") === "review")}
                     onAcceptInvitation={handleAcceptReviewInvitation}
                     onDeclineInvitation={handleDeclineReviewInvitation}
                     onUpdateDeadline={handleUpdateReviewDeadline}
@@ -14281,7 +14338,7 @@ Specific comments to the Author(s):
                     <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 space-y-1">
                       <div className="flex items-center gap-1.5 font-bold text-[#0b99ff]">
                         <ShieldCheck className="h-4 w-4" />
-                        <span>Appointed Editor Verified: S. K. Kanthlal, D.Pharm., Ph.D.</span>
+                        <span>Appointed Editor Verified: S. K. Kanthlal, M.Pharm., Ph.D.</span>
                       </div>
                       <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
                         Editorial Board Member &amp; Handling Editor for <em>Scholarly Open: Medicine</em>. Pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Kanthlal2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Medicine2026!</code>.

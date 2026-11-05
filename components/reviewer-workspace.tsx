@@ -170,6 +170,8 @@ interface ReviewerWorkspaceProps {
   onSaveProfile?: (profile: ReviewerProfile) => void
   activeTab?: "overview" | "portfolio" | "forensics" | "wallet" | "certificate"
   onTabChange?: (tab: "overview" | "portfolio" | "forensics" | "wallet" | "certificate") => void
+  autoOpenPaperId?: string
+  autoOpenRound2?: boolean
   onAcceptInvitation: (invId: string, autoDeadline: string, reminders: { days5: boolean; hours48: boolean }) => void
   onDeclineInvitation: (invId: string, reason: string, recommendation?: { name: string; email: string; affiliation: string; note: string }) => void
   onUpdateDeadline?: (paperId: string, newDeadline: string, reason?: string) => void
@@ -239,6 +241,8 @@ export function ReviewerWorkspace({
   onSaveProfile,
   activeTab = "overview",
   onTabChange,
+  autoOpenPaperId,
+  autoOpenRound2,
   onAcceptInvitation,
   onDeclineInvitation,
   onUpdateDeadline,
@@ -250,8 +254,33 @@ export function ReviewerWorkspace({
   const [profile, setProfile] = useState<ReviewerProfile>(() => {
     const rawName = user?.name || initialProfile?.name || ""
     const rawEmail = user?.email || initialProfile?.email || ""
+    const isChaud = rawName.toLowerCase().includes("chaud") || rawEmail.toLowerCase().includes("chaud") || (typeof window !== "undefined" && (window.location.search.toLowerCase().includes("chaud") || window.location.search.includes("SOMED-26-RW01")))
     const isBolutife = rawName.toLowerCase().includes("bolutife") || rawEmail.toLowerCase().includes("olofinjana")
     const isMarcus = rawEmail.includes("m.vance") || rawName.includes("Marcus Vance")
+
+    if (isChaud) {
+      return {
+        title: "Dr.",
+        name: "Dr. German J. Chaud",
+        email: rawEmail || "germanchaud@gmail.com",
+        photoUrl: "",
+        badges: ["Cardiovascular Surgery Specialist", "COPE Ethics Certified", "Invited Peer Reviewer"],
+        institution: "Hospital las Higueras, Talcahuano, Chile",
+        department: "Department of Cardiovascular Surgery",
+        country: "Chile",
+        orcid: user?.orcid || "",
+        scholarUrl: "",
+        primaryDiscipline: "medicine",
+        subDisciplines: ["Cardiovascular Surgery", "Aortic Dissection", "Thoracic Surgery", "Emergency Medicine"],
+        keywords: ["Acute Aortic Dissection", "Aortic Repair", "Cardiovascular Surgery", "Emergency Protocols", "Clinical Outcomes"],
+        maxReviewsPerMonth: 2,
+        preferredTurnaround: 14,
+        availabilityStatus: "Available",
+        sabbaticalUntil: "",
+        coiAcknowledged: true,
+        isCompleted: true
+      }
+    }
 
     if (isBolutife) {
       return {
@@ -329,9 +358,22 @@ export function ReviewerWorkspace({
   useEffect(() => {
     const rawName = user?.name || initialProfile?.name || ""
     const rawEmail = user?.email || initialProfile?.email || ""
+    const isChaud = rawName.toLowerCase().includes("chaud") || rawEmail.toLowerCase().includes("chaud") || (typeof window !== "undefined" && (window.location.search.toLowerCase().includes("chaud") || window.location.search.includes("SOMED-26-RW01")))
     const isBolutife = rawName.toLowerCase().includes("bolutife") || rawEmail.toLowerCase().includes("olofinjana")
 
-    if (isBolutife) {
+    if (isChaud) {
+      setProfile(prev => ({
+        ...prev,
+        title: "Dr.",
+        name: "Dr. German J. Chaud",
+        email: rawEmail || "germanchaud@gmail.com",
+        institution: "Hospital las Higueras, Talcahuano, Chile",
+        department: "Department of Cardiovascular Surgery",
+        country: "Chile",
+        primaryDiscipline: "medicine",
+        photoUrl: ""
+      }))
+    } else if (isBolutife) {
       setProfile(prev => ({
         ...prev,
         title: "Prof.",
@@ -383,6 +425,13 @@ export function ReviewerWorkspace({
   // One-time automatic popup on first login
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const action = params.get("action")
+      if (action === "review" || action === "round2") {
+        setIsFirstTimeOnboarding(false)
+        setShowProfileModal(false)
+        return
+      }
       const userKey = `so_reviewer_onboarded_${user?.email || "default"}`
       const hasOnboarded = localStorage.getItem(userKey)
       if (!hasOnboarded) {
@@ -405,8 +454,9 @@ export function ReviewerWorkspace({
 
   // Wallet & Gamification state
   const isMarcusEmail = (user?.email || "").toLowerCase().includes("m.vance")
-  const [points, setPoints] = useState(isMarcusEmail ? 35 : 0)
-  const [reviewsDone, setReviewsDone] = useState(isMarcusEmail ? 3 : 0)
+  const isChaudReviewer = (user?.email || "").toLowerCase().includes("chaud") || (user?.name || "").toLowerCase().includes("chaud") || (typeof window !== "undefined" && window.location.search.includes("SOMED-26-RW01"))
+  const [points, setPoints] = useState(isMarcusEmail ? 35 : (isChaudReviewer ? 25 : 0))
+  const [reviewsDone, setReviewsDone] = useState(isMarcusEmail ? 3 : (isChaudReviewer ? 1 : 0))
   const [walletExpiryDays, setWalletExpiryDays] = useState(365)
   const [certViewMode, setCertViewMode] = useState<"certificate" | "cv">("certificate")
 
@@ -965,6 +1015,28 @@ export function ReviewerWorkspace({
     setLastDraftSavedAt(null)
     setEvalCopeCheck(false)
   }
+
+  // Auto-open evaluation modal reliably
+  const [hasAutoOpened, setHasAutoOpened] = useState(false)
+  useEffect(() => {
+    if (hasAutoOpened) return
+
+    const effectiveTargetId = autoOpenPaperId || (typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("id") || (new URLSearchParams(window.location.search).get("action") ? "SOMED-26-RW01" : "")) : "")
+    const isR2Action = autoOpenRound2 || (typeof window !== "undefined" && (new URLSearchParams(window.location.search).get("action") === "round2" || new URLSearchParams(window.location.search).get("action") === "review"))
+
+    if (effectiveTargetId && (localActiveReviews.length > 0 || activeReviews.length > 0)) {
+      const allReviews = localActiveReviews.length > 0 ? localActiveReviews : activeReviews
+      const matched = allReviews.find(
+        r => (r.id && r.id.toLowerCase() === effectiveTargetId.toLowerCase()) || 
+             (r.manuscriptId && r.manuscriptId.toLowerCase() === effectiveTargetId.toLowerCase())
+      ) || allReviews[0]
+
+      if (matched && !selectedReviewForEval) {
+        setHasAutoOpened(true)
+        handleOpenEval(matched, isR2Action || Boolean((matched as any).isRound2))
+      }
+    }
+  }, [autoOpenPaperId, autoOpenRound2, localActiveReviews, activeReviews, hasAutoOpened, selectedReviewForEval])
 
   // Auto-save review draft as reviewer types
   useEffect(() => {
@@ -2044,6 +2116,31 @@ COPE Guidance & Plan S Benchmark Archive
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      {(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01") && (
+                        <>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleDownloadSpecificFile("fulltext", rev)}
+                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                            title="Download Blinded Revised Manuscript (.docx)"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            <span>{isDe ? "Überarb. Manuskript" : "Revised MS (.docx)"}</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleDownloadSpecificFile("supp", rev)}
+                            className="border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                            title="Download Author Point-by-Point Rebuttal (.docx)"
+                          >
+                            <FileText className="h-3.5 w-3.5" />
+                            <span>{isDe ? "Autoren-Rebuttal" : "Rebuttal (.docx)"}</span>
+                          </Button>
+                        </>
+                      )}
+
                       <Button
                         variant="outline"
                         onClick={() => setSelectedPackageRev(rev)}
@@ -2077,11 +2174,13 @@ COPE Guidance & Plan S Benchmark Archive
                       ) : null}
 
                       <Button
-                        onClick={() => handleOpenEval(rev)}
+                        onClick={() => handleOpenEval(rev, Boolean((rev as any).isRound2))}
                         className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs"
                       >
                         <FileText className="h-3.5 w-3.5 mr-1" />
-                        {isDe ? "Gutachten ausfüllen" : "Open Assessment Form"}
+                        {rev.isRound2 
+                          ? (isDe ? "Zweitbegutachtung (R2) öffnen" : "Open Round 2 Assessment")
+                          : (isDe ? "Gutachten ausfüllen" : "Open Assessment Form")}
                       </Button>
                     </div>
                   </div>
@@ -2181,6 +2280,31 @@ COPE Guidance & Plan S Benchmark Archive
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      {(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01") && (
+                        <>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleDownloadSpecificFile("fulltext", rev)}
+                            className="border-blue-200 dark:border-blue-900/60 text-[#0b99ff] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                            title="Download Blinded Revised Manuscript (.docx)"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            <span>{isDe ? "Überarb. Manuskript" : "Revised MS (.docx)"}</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleDownloadSpecificFile("supp", rev)}
+                            className="border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-2.5 py-1.5 h-auto cursor-pointer rounded flex items-center gap-1 shadow-2xs"
+                            title="Download Author Point-by-Point Rebuttal (.docx)"
+                          >
+                            <FileText className="h-3.5 w-3.5" />
+                            <span>{isDe ? "Autoren-Rebuttal" : "Rebuttal (.docx)"}</span>
+                          </Button>
+                        </>
+                      )}
+
                       <Button
                         variant="outline"
                         onClick={() => setSelectedPackageRev(rev)}
@@ -2213,11 +2337,11 @@ COPE Guidance & Plan S Benchmark Archive
                             </Button>
                           )}
                           <Button
-                            onClick={() => handleOpenEval(rev)}
-                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded"
+                            onClick={() => handleOpenEval(rev, Boolean(rev.isRound2 || rev.id === "SOMED-26-RW01" || rev.manuscriptId === "SOMED-26-RW01"))}
+                            className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-3 py-1.5 h-auto cursor-pointer rounded shadow-xs flex items-center gap-1"
                           >
-                            <FileText className="h-3.5 w-3.5 mr-1" />
-                            {isDe ? "Formular öffnen" : "Open Assessment"}
+                            {rev.isRound2 || rev.id === "SOMED-26-RW01" ? <RotateCcw className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+                            <span>{rev.isRound2 || rev.id === "SOMED-26-RW01" ? (isDe ? "Zweitbegutachtung (R2) starten" : "Start Round 2 Re-Assessment") : (isDe ? "Formular öffnen" : "Open Assessment")}</span>
                           </Button>
                         </>
                       ) : (
@@ -3822,6 +3946,48 @@ COPE Guidance & Plan S Benchmark Archive
               {evalError && (
                 <div className="p-3 rounded bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400 font-semibold text-xs">
                   {evalError}
+                </div>
+              )}
+
+              {/* Round 2 Re-Assessment Header Banner */}
+              {(isRound2Active || Boolean((selectedReviewForEval as any)?.isRound2)) && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-2 border-[#0b99ff]/40 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0b99ff] text-white flex items-center gap-1 shadow-xs">
+                          <RotateCcw className="h-3 w-3" />
+                          Round 2 Re-Assessment
+                        </span>
+                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                          Revised Manuscript & Author Rebuttal Available
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                        The author team has revised the manuscript in response to referee comments and provided a point-by-point rebuttal. Download the materials below to review changes.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <Button
+                        type="button"
+                        onClick={() => handleDownloadSpecificFile("fulltext", selectedReviewForEval!)}
+                        className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shadow-xs flex items-center gap-1.5"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        <span>Revised Manuscript (.docx)</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleDownloadSpecificFile("supp", selectedReviewForEval!)}
+                        className="bg-white dark:bg-slate-900 border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-semibold px-3 py-1.5 h-auto cursor-pointer rounded-lg shadow-xs flex items-center gap-1.5"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>Author Rebuttal (.docx)</span>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
 

@@ -13178,7 +13178,7 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                           paperId: ms.id,
                           paperTitle: ms.title,
                           actionLabel: "Access Reviewer Evaluation Desk",
-                          actionUrl: `${baseUrl}/editorial360?action=review&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}`,
+                          actionUrl: `${baseUrl}/editorial360?action=round2&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}`,
                           defaultSubject: `[${journalName}] Round 2 Peer Review Invitation: Revised Manuscript ${ms.id}`,
                           defaultBody: `Dear Colleague,
 
@@ -13196,7 +13196,7 @@ Evaluation Summary & Resources:
 ${reviewerAttachedFiles}
 
 Please click the secure button below to access the evaluation form and revised files:
-${baseUrl}/editorial360?action=review&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}
+${baseUrl}/editorial360?action=round2&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}
 
 Thank you for your dedicated service to scholarly rigor and academic excellence.
 
@@ -13215,7 +13215,15 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                             for (const targetEmail of emailList) {
                               const matchingRev = reviewerDetailsList.find(r => r.email.toLowerCase() === targetEmail.toLowerCase())
                               const targetName = matchingRev ? matchingRev.name : (data.recipientName || "Peer Reviewer")
-                              const personalizedBody = data.bodyText.replace(/Dear Colleague,/gi, `Dear ${targetName},`)
+                              const directLink = `${baseUrl}/editorial360?action=round2&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}&email=${encodeURIComponent(targetEmail)}&name=${encodeURIComponent(targetName)}`
+                              const personalizedBody = (data.bodyText || "")
+                                .replace(/Dear Colleague,/gi, `Dear ${targetName},`)
+                                .replace(new RegExp(`${baseUrl.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}/editorial360\\?action=[^\\s\\n<]+`, "g"), directLink)
+                              const personalizedHtml = data.renderedHtml
+                                ? data.renderedHtml
+                                    .replace(/Dear Colleague,/gi, `Dear ${targetName},`)
+                                    .replace(new RegExp(`${baseUrl.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}/editorial360\\?action=[^"'>\\s]+`, "g"), directLink)
+                                : undefined
 
                               const res = await fetch("/api/editorial360/email", {
                                 method: "POST",
@@ -13225,7 +13233,7 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                                   recipientName: targetName,
                                   customSubject: data.subject,
                                   customBody: personalizedBody,
-                                  customHtml: data.renderedHtml,
+                                  customHtml: personalizedHtml || data.renderedHtml,
                                   journal: effectiveJournal,
                                   fromEmail: getJournalReplyTo(effectiveJournal),
                                   senderName: `${effectiveJournal} Editorial Office`

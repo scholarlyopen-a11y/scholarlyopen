@@ -869,7 +869,7 @@ Dr. Rabea actively serves in international oncology leadership, having served as
   },
   {
     slug: "s-k-kanthlal",
-    name: "S. K. Kanthlal, D.Pharm., Ph.D.",
+    name: "S. K. Kanthlal, M.Pharm., Ph.D.",
     role: "Editorial Board Member & Handling Editor",
     affiliation: "Kerala University of Health Sciences, Kerala, India",
     specialization: "Pharmaceutical Sciences, Pharmacology, Cardiovascular & Cancer Research, Molecular Biology, Endothelium Function",
@@ -968,7 +968,7 @@ Dr. Rabea actively serves in international oncology leadership, having served as
         type: "milestone"
       }
     ],
-    biography: `Dr. S. K. Kanthlal, D.Pharm., Ph.D., is a Professor at the Kerala University of Health Sciences, Kerala, India, bringing over 13 years of distinguished academic teaching, laboratory leadership, and biomedical research experience. He previously served as an Assistant Professor at the Amrita School of Pharmacy, Amrita Vishwa Vidyapeetham, Kochi, from January 2013 to November 2024. He earned his Ph.D. in Pharmaceutical Sciences (2022) from Amrita Vishwa Vidyapeetham, where his doctoral research demonstrated the vasorelaxant and antioxidant mechanisms of aqueous large cardamom extracts in experimental models of hypertension and endothelial dysfunction. He holds an M.Pharm in Pharmacology (2012) and a B.Pharm (2009) from The Tamil Nadu Dr. M.G.R. Medical University, and a D.Pharm (2005) from NMS College, Directorate of Medical Education.
+    biography: `Dr. S. K. Kanthlal, M.Pharm., Ph.D., is a Professor at the Kerala University of Health Sciences, Kerala, India, bringing over 13 years of distinguished academic teaching, laboratory leadership, and biomedical research experience. He previously served as an Assistant Professor at the Amrita School of Pharmacy, Amrita Vishwa Vidyapeetham, Kochi, from January 2013 to November 2024. He earned his Ph.D. in Pharmaceutical Sciences (2022) from Amrita Vishwa Vidyapeetham, where his doctoral research demonstrated the vasorelaxant and antioxidant mechanisms of aqueous large cardamom extracts in experimental models of hypertension and endothelial dysfunction. He holds an M.Pharm in Pharmacology (2012) and a B.Pharm (2009) from The Tamil Nadu Dr. M.G.R. Medical University, and a D.Pharm (2005) from NMS College, Directorate of Medical Education.
 
 Dr. Kanthlal's research portfolio centers on cardiovascular pharmacology, endothelial dysfunction, cancer therapeutics, and inflammatory bowel disease (IBD). His laboratory competencies include mammalian cell culture across vascular, neural, and oncologic cell lines, isolation of primary cells from animal models, and molecular/biochemical methodologies including nucleic acid isolation, PCR, western blotting, agarose/polyacrylamide electrophoresis, and ELISA. Between 2016 and 2019, he served as Co-Investigator on a competitive INR 25 Lakhs grant funded by the Spices Board of India investigating aortic endothelial dynamics under hypertensive stress.
 
