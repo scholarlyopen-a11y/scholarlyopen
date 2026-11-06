@@ -107,6 +107,18 @@ function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEdito
     const isKanthlal = normName.includes("kanthlal") || normSlug.includes("kanthlal")
     if (isKanthlal) {
       ed.photoUrl = "/images/editors/kanthlal-sk.png"
+      if (ed.name) {
+        ed.name = ed.name.replace(/D\.?\s*Pharm\.?,\s*/gi, "").replace(/,\s*D\.?\s*Pharm\.?/gi, "")
+        if (!ed.name.includes("M.Pharm.")) {
+          ed.name = "S. K. Kanthlal, M.Pharm., Ph.D."
+        }
+      }
+      if (ed.biography) {
+        ed.biography = ed.biography
+          .replace(/D\.?\s*Pharm\.?,\s*Ph\.?D\.?/gi, "M.Pharm., Ph.D.")
+          .replace(/,\s*and a D\.?Pharm\s*\([^)]*\)\s*from[^.]*/gi, "")
+          .replace(/and a D\.?Pharm\s*\([^)]*\)\s*from[^.]*/gi, "")
+      }
     }
 
     const key = (ed.id || ed.email || ed.name).toLowerCase()

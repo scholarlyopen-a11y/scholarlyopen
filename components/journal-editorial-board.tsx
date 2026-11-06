@@ -66,7 +66,16 @@ function getEditorProfileSlug(editor: EditorMember): string | undefined {
     .replace(/^-+|-+$/g, "")
 }
 
-function EditorCard({ editor, featured = false }: { editor: EditorMember; featured?: boolean }) {
+function EditorCard({ editor: rawEditor, featured = false }: { editor: EditorMember; featured?: boolean }) {
+  // Defensive sanitization: ensure D.Pharm is never shown in editor name or bio
+  const sanitizedName = rawEditor.name.replace(/D\.?\s*Pharm\.?,\s*/gi, "").replace(/,\s*D\.?\s*Pharm\.?/gi, "")
+  const sanitizedBio = rawEditor.biography
+    ? rawEditor.biography
+        .replace(/D\.?\s*Pharm\.?,\s*Ph\.?D\.?/gi, "M.Pharm., Ph.D.")
+        .replace(/,\s*and a D\.?Pharm\s*\([^)]*\)\s*from[^.]*/gi, "")
+        .replace(/and a D\.?Pharm\s*\([^)]*\)\s*from[^.]*/gi, "")
+    : undefined
+  const editor = { ...rawEditor, name: sanitizedName, biography: sanitizedBio }
   const initials = editor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   const isOpen = editor.name.toLowerCase().includes("position open")
   const isEcr = editor.role?.toLowerCase().includes("early career") || 

@@ -13099,6 +13099,14 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
 
                       // Strictly fetch ONLY Round 2 evaluations — NEVER mix with Round 1 legacy reviews
                       const isSomed26 = ms.id === "SOMED-26-RW01"
+                      const targetReviews = isSomed26 
+                        ? initialReviews.filter(r => r.id === "REV-FB-PN02-ROUND2" || r.id === "REV-FB-1793887143406-386")
+                        : initialReviews.filter(r => 
+                            (r.paperId === ms.id || (r as any).manuscriptId === ms.id) &&
+                            (r.commentsAuthor || r.sanitizedCommentsAuthor) &&
+                            !r.id.toLowerCase().includes("sam-01") &&
+                            !r.id.toLowerCase().includes("1791559472514")
+                          )
                       let formattedCritiques = ""
 
                       if (isSomed26) {
@@ -13122,13 +13130,7 @@ Official Recommendation: Re-review and Accept with Major Changes
 ======================================================================
 ${chaudText}`
                       } else {
-                        const msReviews = initialReviews.filter(r => 
-                          (r.paperId === ms.id || (r as any).manuscriptId === ms.id) &&
-                          (r.commentsAuthor || r.sanitizedCommentsAuthor) &&
-                          !r.id.toLowerCase().includes("sam-01") &&
-                          !r.id.toLowerCase().includes("1791559472514")
-                        )
-                        formattedCritiques = msReviews.map((r, i) => {
+                        formattedCritiques = targetReviews.map((r, i) => {
                           const rName = r.reviewerName || `Referee #${i + 1}`
                           const rec = r.recommendation ? `Official Recommendation: ${r.recommendation}\n` : ""
                           const comments = (r.sanitizedCommentsAuthor || r.commentsAuthor || "").trim()
@@ -13207,8 +13209,8 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                           }
 
                           // Release comments locally if callback exists
-                          if (onReleaseComments && msReviews.length > 0) {
-                            msReviews.forEach(r => {
+                          if (onReleaseComments && targetReviews.length > 0) {
+                            targetReviews.forEach(r => {
                               onReleaseComments(r.id, r.sanitizedCommentsAuthor || r.commentsAuthor || "")
                             })
                           }

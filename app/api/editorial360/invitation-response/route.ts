@@ -276,6 +276,20 @@ export async function GET() {
     if (isKanthlal && (!credId || credId === "EBM-EDITOR")) {
       credId = "EBM-KANTHLAL"
     }
+    if (isKanthlal) {
+      if (r.candidateName) {
+        r.candidateName = r.candidateName.replace(/D\.?\s*Pharm\.?,\s*/gi, "").replace(/,\s*D\.?\s*Pharm\.?/gi, "")
+        if (!r.candidateName.includes("M.Pharm.")) {
+          r.candidateName = "S. K. Kanthlal, M.Pharm., Ph.D."
+        }
+      }
+      if (r.biography) {
+        r.biography = r.biography
+          .replace(/D\.?\s*Pharm\.?,\s*Ph\.?D\.?/gi, "M.Pharm., Ph.D.")
+          .replace(/,\s*and a D\.?Pharm\s*\([^)]*\)\s*from[^.]*/gi, "")
+          .replace(/and a D\.?Pharm\s*\([^)]*\)\s*from[^.]*/gi, "")
+      }
+    }
 
     const isConfirmedApproved = isVerpoort || isCacciola || isHesham || isKanthlal || Boolean(r.jmApproved)
 
