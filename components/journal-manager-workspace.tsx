@@ -12759,9 +12759,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </Button>
             </div>
           ) : (
-            <div className="space-y-3.5 py-2 text-xs">
+            <div className="space-y-3 py-1.5 text-xs">
               {/* 1. File Downloads - Dual Track: Editor (Unblinded) & Reviewer (Blinded) */}
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {/* Track A: Handling Editor Copy (Unblinded) */}
                 <div className="p-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/40 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
@@ -12769,14 +12769,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <FileCheck2 className="h-3.5 w-3.5 text-[#0b99ff]" />
                       Handling Editor Track (Unblinded) · Prof. Weihua Gong
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-blue-700 dark:text-blue-300 font-semibold bg-blue-100/70 dark:bg-blue-900/50 px-2 py-0.5 rounded-full">
-                        {((selectedEditorPackageFiles.unblindedManuscript ? 1 : 0) + (selectedEditorPackageFiles.unblindedRebuttal ? 1 : 0))} / 2 Selected for Editor
-                      </span>
-                      <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
-                        Author PII Included
-                      </span>
-                    </div>
+                    <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                      Author PII Included
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {/* Editor Manuscript */}
@@ -12800,7 +12795,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               Revised Manuscript (.docx)
                             </span>
                             <span className="text-[10px] text-slate-400 block font-mono">
-                              84.1 KB · Unblinded Fulltext
+                              84.1 KB
                             </span>
                           </div>
                         </label>
@@ -12836,7 +12831,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               Author Rebuttal (.docx)
                             </span>
                             <span className="text-[10px] text-slate-400 block font-mono">
-                              25.8 KB · Full Letterhead
+                              25.8 KB
                             </span>
                           </div>
                         </label>
@@ -12858,16 +12853,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-emerald-950 dark:text-emerald-300 text-[11px] flex items-center gap-1.5">
                       <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                      Reviewer Track (Anonymized) · Dr. Praveen Nagula & Dr. Chaud GJ
+                      Reviewer Track (Anonymized) · Dr. Praveen Nagula & Dr. German J. Chaud
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-100/70 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
-                        {((selectedReviewerPackageFiles.blindedManuscript ? 1 : 0) + (selectedReviewerPackageFiles.blindedRebuttal ? 1 : 0))} / 2 Selected for Reviewers
-                      </span>
-                      <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
-                        Double-Blind Verified
-                      </span>
-                    </div>
+                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
+                      Double-Blind Verified
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {/* Reviewer Blinded Manuscript */}
@@ -12891,7 +12881,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               Blinded Manuscript (.docx)
                             </span>
                             <span className="text-[10px] text-slate-400 block font-mono">
-                              84.1 KB · Redacted Details
+                              84.1 KB
                             </span>
                           </div>
                         </label>
@@ -12927,7 +12917,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               Blinded Rebuttal (.docx)
                             </span>
                             <span className="text-[10px] text-slate-400 block font-mono">
-                              25.8 KB · Sign-off Redacted
+                              25.8 KB
                             </span>
                           </div>
                         </label>
@@ -12942,29 +12932,26 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </a>
                     </div>
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-0.5">
-                    <span className="flex items-center gap-1">
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓ ICMJE Redaction:</span> Author name, academic credentials, institutional affiliations, and contact email have been sanitized.
-                    </span>
-                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium italic">
-                      Tick boxes indicate documents attached for reviewer dispatch
-                    </span>
-                  </div>
                 </div>
               </div>
 
-              {/* 2. Point-by-Point Author Rebuttal */}
-              <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1.5">
-                <div className="font-bold text-slate-700 dark:text-slate-300 text-xs">
-                  Author Rebuttal & Point-by-Point Response:
-                </div>
-                <div className="p-2.5 bg-white dark:bg-[#14151a] border border-slate-200/80 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 text-xs max-h-28 overflow-y-auto leading-relaxed whitespace-pre-wrap">
+              {/* 2. Point-by-Point Author Rebuttal (Collapsible) */}
+              <details className="p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl group">
+                <summary className="font-bold text-slate-700 dark:text-slate-300 text-xs flex items-center justify-between cursor-pointer select-none">
+                  <span className="flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-slate-500" />
+                    Author Rebuttal & Point-by-Point Response
+                  </span>
+                  <span className="text-[10px] text-[#0b99ff] font-semibold group-open:hidden">Expand ▼</span>
+                  <span className="text-[10px] text-slate-400 font-semibold hidden group-open:inline">Collapse ▲</span>
+                </summary>
+                <div className="mt-2 p-2 bg-white dark:bg-[#14151a] border border-slate-200/80 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 text-xs max-h-32 overflow-y-auto leading-relaxed whitespace-pre-wrap">
                   {selectedRevisionManuscript?.rebuttalText || (selectedRevisionManuscript?.id === "SOMED-26-RW01"
-                    ? "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response."
+                    ? "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01. We have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response."
                     : "We thank the reviewers for their constructive feedback. All comments have been addressed in the revised manuscript and itemized response document."
                   )}
                 </div>
-              </div>
+              </details>
 
               {/* 3. Streamlined Actions */}
               <div className="space-y-2 pt-1">
@@ -12979,7 +12966,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       Forward to Handling Editor
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Route to {selectedRevisionManuscript?.assignedEditorName || (selectedRevisionManuscript?.id === "SOMED-26-RW01" ? "Weihua Gong, M.D., Ph.D." : "Handling Editor")} with official editorial letter (CC: Journal & Gmail).
+                      Route dossier to {selectedRevisionManuscript?.assignedEditorName || "Handling Editor"} (CC: Journal & Gmail).
                     </div>
                   </div>
                   <Button
@@ -13096,7 +13083,7 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                       Send Critiques to Author (Request Revision)
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Dispatch official Decision Letter with sanitized referee comments & 21-day revision guidelines directly to authors (CC: Journal & Gmail).
+                      Send official Decision Letter with referee critiques directly to authors (CC: Journal & Gmail).
                     </div>
                   </div>
                   <Button
@@ -13244,7 +13231,7 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                         Dispatch for Round 2 Peer Review
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Customize & send re-review invitations (14-day turnaround, CC: Journal & Gmail).
+                        Send re-review invitations (14-day turnaround, CC: Journal & Gmail).
                       </div>
                     </div>
                     <Button
@@ -13419,7 +13406,7 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                       Final Accept & Advance to Production
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Send official Acceptance Notice to authors (CC: Journal & Gmail) and advance to galley proofing.
+                      Send official Acceptance Notice to authors and advance to galley proofing.
                     </div>
                   </div>
                   <Button
