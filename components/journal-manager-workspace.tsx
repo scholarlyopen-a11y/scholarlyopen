@@ -10828,12 +10828,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                   targetDate.setDate(targetDate.getDate() + extraDays)
                   const targetDeadlineDate = rev.deadline || targetDate.toISOString().split("T")[0]
 
-                  // Compute display score & recommendation
+                  // Compute display score & recommendation (Round 2)
                   const mrAny = matchedReview as any
-                  const displayScore = isNagula ? "6 / 10" : (mrAny?.scores 
+                  const displayScore = isNagula ? "3 / 10" : (isChaud ? "4 / 10" : (mrAny?.scores 
                     ? ((mrAny.scores.novelty + mrAny.scores.methodology + mrAny.scores.clarity + mrAny.scores.significance) / 4).toFixed(1)
-                    : (matchedReview?.originality ? `${matchedReview.originality}.0` : "4.8"))
-                  const displayRecommendation = isNagula ? "Re-write and Re-submit" : (matchedReview?.recommendation || "Minor Revision")
+                    : (matchedReview?.originality ? `${matchedReview.originality}.0` : "4.8")))
+                  const displayRecommendation = isNagula ? "Major Revision" : (isChaud ? "Re-review and Accept with Major Changes" : (matchedReview?.recommendation || "Major Revision"))
 
                   if (isDeclined) {
                     return (
@@ -13097,22 +13097,43 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                       const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
                       const directAccessUrl = `${baseUrl}/editorial360?action=author_portal&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}`
 
-                      // Aggregate peer review critiques for this manuscript
-                      const msReviews = initialReviews.filter(r => 
-                        (r.paperId === ms.id || (r as any).manuscriptId === ms.id) &&
-                        (r.commentsAuthor || r.sanitizedCommentsAuthor)
-                      )
-
+                      // Strictly fetch ONLY Round 2 evaluations — NEVER mix with Round 1 legacy reviews
+                      const isSomed26 = ms.id === "SOMED-26-RW01"
                       let formattedCritiques = ""
-                      if (msReviews.length > 0) {
+
+                      if (isSomed26) {
+                        // Reviewer 1: Dr. Praveen Nagula (Round 2 Verbatim Report)
+                        const praveenR2 = initialReviews.find(r => r.id === "REV-FB-PN02-ROUND2")
+                        const praveenText = (praveenR2?.commentsAuthor || praveenR2?.sanitizedCommentsAuthor || PRAVEEN_NAGULA_RAF.generalComments).trim()
+
+                        // Reviewer 2: Dr. German J. Chaud (Round 2 Verbatim Report)
+                        const chaudR2 = initialReviews.find(r => r.id === "REV-FB-1793887143406-386")
+                        const chaudText = (chaudR2?.commentsAuthor || chaudR2?.sanitizedCommentsAuthor || (CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"))).trim()
+
+                        formattedCritiques = `======================================================================
+REVIEWER 1: Dr. Praveen Nagula (Round 2 Peer Review Report)
+Official Recommendation: Major Revision
+======================================================================
+${praveenText}
+
+======================================================================
+REVIEWER 2: Dr. German J. Chaud (Round 2 Peer Review Report)
+Official Recommendation: Re-review and Accept with Major Changes
+======================================================================
+${chaudText}`
+                      } else {
+                        const msReviews = initialReviews.filter(r => 
+                          (r.paperId === ms.id || (r as any).manuscriptId === ms.id) &&
+                          (r.commentsAuthor || r.sanitizedCommentsAuthor) &&
+                          !r.id.toLowerCase().includes("sam-01") &&
+                          !r.id.toLowerCase().includes("1791559472514")
+                        )
                         formattedCritiques = msReviews.map((r, i) => {
                           const rName = r.reviewerName || `Referee #${i + 1}`
-                          const rec = r.recommendation ? `Recommendation: ${r.recommendation}\n` : ""
-                          const comments = r.sanitizedCommentsAuthor || r.commentsAuthor || ""
-                          return `--------------------------------------------------\nREVIEWER ${i + 1} (${rName}):\n${rec}\n${comments}`
+                          const rec = r.recommendation ? `Official Recommendation: ${r.recommendation}\n` : ""
+                          const comments = (r.sanitizedCommentsAuthor || r.commentsAuthor || "").trim()
+                          return `======================================================================\nREVIEWER ${i + 1}: ${rName} (Round 2 Peer Review Report)\n${rec}======================================================================\n${comments}`
                         }).join("\n\n")
-                      } else {
-                        formattedCritiques = `--------------------------------------------------\nREVIEWER 1 (Dr. Praveen Nagula):\nRecommendation: Major Revision\n\n${PRAVEEN_NAGULA_RAF.generalComments}\n\nSpecific Line Critiques & Actionable Revision Plan:\n${PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")}\n\n--------------------------------------------------\nREVIEWER 2 (Dr. German J. Chaud):\nRecommendation: Re-review and Accept with Major Changes\n\n${CHAUD_GJ_RAF.generalComments}\n\nSpecific Line Critiques:\n${CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")}`
                       }
 
                       setIsRevisionModalOpen(false)
@@ -13125,7 +13146,7 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                         paperTitle: ms.title,
                         actionLabel: "Access Author Portal & Submit Revision",
                         actionUrl: directAccessUrl,
-                        defaultSubject: `[${journalName}] Editorial Decision on Manuscript ${ms.id}: Revision Required`,
+                        defaultSubject: `[${journalName}] Editorial Decision on Manuscript ${ms.id}: Revision Required (Round 2)`,
                         defaultBody: `Dear ${authorName},
 
 Thank you for submitting your manuscript to ${journalName}.
@@ -13133,21 +13154,17 @@ Thank you for submitting your manuscript to ${journalName}.
 Manuscript ID: ${ms.id}
 Title: "${ms.title}"
 
-The formal peer review re-evaluation process for your manuscript has concluded. Enclosed below are the comprehensive evaluation reports and recommendations provided by the expert referees.
+The formal Round 2 peer review re-evaluation process for your manuscript has concluded. Enclosed below are the complete, unedited evaluation reports and recommendations provided verbatim by the expert referees for this second round of review.
 
 EDITORIAL DECISION: REVISION REQUIRED (MAJOR REVISION)
 Revision Submission Window: 21 calendar days
 
-Based on the evaluations, both referees note the critical clinical importance and conceptual ambition of your work. However, they have detailed essential recommendations regarding:
-1. Operational Feasibility: Address hyperacute workflow friction and operational paradoxes (e.g., hyperacute external consultation timing).
-2. Theoretical Grounding: Anchor the framework explicitly within established implementation science models (CFIR / Donabedian) rather than exploratory author-defined concepts.
-3. Cross-Referencing & Concision: Consolidate redundant textual disclaimers into a unified Limitations section, and ensure full correspondence between citations, tables, and bibliography.
+Please carefully review each referee report in full and address all comments and recommendations in your revised submission.
 
-PEER EVALUATION REPORTS:
 ${formattedCritiques}
 
 RESUBMISSION GUIDELINES:
-1. Revised Manuscript: Upload your updated manuscript with all revisions clearly highlighted or tracked.
+1. Revised Manuscript: Upload your updated manuscript with all revisions clearly highlighted or tracked (DOCX/PDF).
 2. Point-by-Point Rebuttal: Enclose an itemized response table detailing how each referee recommendation has been incorporated.
 3. Direct Access Portal:
 ${directAccessUrl}
