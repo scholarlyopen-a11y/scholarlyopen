@@ -2844,6 +2844,7 @@ Specific comments to the Author(s):
   const [rebuttalFileName, setRebuttalFileName] = useState<string>("")
   const [rebuttalFileSize, setRebuttalFileSize] = useState<string>("")
   const [revisionRebuttal, setRevisionRebuttal] = useState<string>("")
+  const [revisionCoverLetter, setRevisionCoverLetter] = useState<string>("")
   const revisionFileInputRef = useRef<HTMLInputElement>(null)
   const rebuttalFileInputRef = useRef<HTMLInputElement>(null)
   const revisionCommentsScrollRef = useRef<HTMLDivElement>(null)
@@ -5460,6 +5461,7 @@ Specific comments to the Author(s):
         rebuttalFileSize: finalRebuttalSize,
         rebuttalFileUrl: finalRebuttalUrl || (m as any).rebuttalFileUrl,
         rebuttalText: revisionRebuttal || (m as any).rebuttalText,
+        coverLetter: revisionCoverLetter || (m as any).coverLetter,
         revisionDate: nowIso,
         lastActivity: nowIso,
         updatedAt: nowIso,
@@ -5491,6 +5493,7 @@ Specific comments to the Author(s):
         rebuttal_file_name: finalRebuttalName || null,
         rebuttal_file_url: finalRebuttalUrl || null,
         rebuttal_text: revisionRebuttal || null,
+        cover_letter: revisionCoverLetter || null,
         updatedAt: nowIso,
         date: nowIso
       })
@@ -5695,6 +5698,7 @@ Specific comments to the Author(s):
     setRebuttalFileName("")
     setRebuttalFileSize("")
     setRevisionRebuttal("")
+    setRevisionCoverLetter("")
     try {
       const targetId = revisionPaperId || "SOMED-26-RW01"
       localStorage.removeItem(`editorial360_rebuttal_draft_${targetId}`)
@@ -14252,17 +14256,28 @@ Specific comments to the Author(s):
                           )
                         }
 
-                        return matched
+                        // Deduplicate: if multiple reviews exist for Nagula or Chaud, prioritize Round 2
+                        const round2Nagula = matched.find(r => r.id === "REV-FB-PN02-ROUND2")
+                        const round2Chaud = matched.find(r => r.id === "REV-FB-1793887143406-386")
+                        let displayReviews = matched
+                        if (round2Nagula || round2Chaud) {
+                          displayReviews = [
+                            round2Nagula || matched.find(r => r.id === "REV-FB-SAM-01" || r.reviewerName?.toLowerCase().includes("nagula")),
+                            round2Chaud || matched.find(r => r.id === "REV-FB-1791559472514-816" || r.reviewerName?.toLowerCase().includes("chaud"))
+                          ].filter(Boolean) as ReviewFeedback[]
+                        }
+
+                        return displayReviews
                           .filter((rev, idx) => {
-                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
-                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.id === "REV-FB-PN02-ROUND2" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.id === "REV-FB-1793887143406-386" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
                             if (revisionCommentsTab === "rev1") return isRev1
                             if (revisionCommentsTab === "rev3") return isRev3
                             return true
                           })
                           .map((rev, idx) => {
-                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
-                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.id === "REV-FB-PN02-ROUND2" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.id === "REV-FB-1793887143406-386" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
 
                             let commentText = rev.sanitizedCommentsAuthor || rev.commentsAuthor || ""
                             if (isAortic) {
@@ -14346,6 +14361,23 @@ Specific comments to the Author(s):
                         ? "Geben Sie hier Ihre detaillierte Stellungnahme ein (oder klicken Sie auf '+ Add to Rebuttal' bei den Gutachterkommentaren)..."
                         : "Enter your detailed itemized response to reviewer feedback (or click '+ Add to Rebuttal' from comments)..."}
                     />
+
+                    {/* Optional: Short Cover Letter / Note to Editor */}
+                    <div className="space-y-1 shrink-0 pt-1">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                        <span>{language === "de" ? "Begleitschreiben / Anmerkung an den Editor" : "Cover Letter / Note to Editor"}</span>
+                        <span className="text-[10px] text-slate-400 font-normal">({language === "de" ? "Optional" : "Optional"})</span>
+                      </label>
+                      <textarea
+                        value={revisionCoverLetter}
+                        onChange={(e) => setRevisionCoverLetter(e.target.value)}
+                        rows={2}
+                        className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0b99ff] resize-none leading-relaxed shadow-2xs font-sans"
+                        placeholder={language === "de" 
+                          ? "Optionale kurze Nachricht oder Begleitschreiben an den Handling Editor & das Journal Manager Desk..."
+                          : "Optional brief cover letter or comments to the Handling Editor & Journal Desk..."}
+                      />
+                    </div>
                   </div>
                   
                   {/* File Upload Grid: Revised Manuscript & Separate Rebuttal File */}
