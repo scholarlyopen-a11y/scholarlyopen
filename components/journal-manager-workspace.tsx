@@ -13089,6 +13089,153 @@ scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
                   </Button>
                 </div>
 
+                {/* Action: Send Critiques Directly to Author (Request Revision) */}
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl gap-3">
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white text-xs">
+                      Send Critiques to Author (Request Revision)
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      Dispatch official Decision Letter with sanitized referee comments & 21-day revision guidelines directly to authors (CC: Journal & Gmail).
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (!selectedRevisionManuscript) return
+                      const ms = selectedRevisionManuscript
+                      const journalName = ms.journal || "Scholarly Open: Medicine"
+                      const authorName = ms.authorName || "Dr. Sam Lee"
+                      const authorEmail = ms.authorEmail || (ms.id === "SOMED-26-RW01" ? "Applied.EBM.Institute@proton.me" : "author@scholarlyopen.org")
+                      const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://www.scholarlyopen.org"
+                      const directAccessUrl = `${baseUrl}/editorial360?action=author_portal&id=${encodeURIComponent(ms.id)}&journal=${encodeURIComponent(journalName)}`
+
+                      // Aggregate peer review critiques for this manuscript
+                      const msReviews = initialReviews.filter(r => 
+                        (r.paperId === ms.id || (r as any).manuscriptId === ms.id) &&
+                        (r.commentsAuthor || r.sanitizedCommentsAuthor)
+                      )
+
+                      let formattedCritiques = ""
+                      if (msReviews.length > 0) {
+                        formattedCritiques = msReviews.map((r, i) => {
+                          const rName = r.reviewerName || `Referee #${i + 1}`
+                          const rec = r.recommendation ? `Recommendation: ${r.recommendation}\n` : ""
+                          const comments = r.sanitizedCommentsAuthor || r.commentsAuthor || ""
+                          return `--------------------------------------------------\nREVIEWER ${i + 1} (${rName}):\n${rec}\n${comments}`
+                        }).join("\n\n")
+                      } else {
+                        formattedCritiques = `--------------------------------------------------\nREVIEWER 1 (Dr. Praveen Nagula):\nRecommendation: Major Revision\n\n${PRAVEEN_NAGULA_RAF.generalComments}\n\nSpecific Line Critiques & Actionable Revision Plan:\n${PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")}\n\n--------------------------------------------------\nREVIEWER 2 (Dr. German J. Chaud):\nRecommendation: Re-review and Accept with Major Changes\n\n${CHAUD_GJ_RAF.generalComments}\n\nSpecific Line Critiques:\n${CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")}`
+                      }
+
+                      setIsRevisionModalOpen(false)
+                      openEmailDispatch({
+                        templateId: "decision_revision_to_author",
+                        recipientEmail: authorEmail,
+                        recipientName: authorName,
+                        journal: journalName,
+                        paperId: ms.id,
+                        paperTitle: ms.title,
+                        actionLabel: "Access Author Portal & Submit Revision",
+                        actionUrl: directAccessUrl,
+                        defaultSubject: `[${journalName}] Editorial Decision on Manuscript ${ms.id}: Revision Required`,
+                        defaultBody: `Dear ${authorName},
+
+Thank you for submitting your manuscript to ${journalName}.
+
+Manuscript ID: ${ms.id}
+Title: "${ms.title}"
+
+The formal peer review re-evaluation process for your manuscript has concluded. Enclosed below are the comprehensive evaluation reports and recommendations provided by the expert referees.
+
+EDITORIAL DECISION: REVISION REQUIRED (MAJOR REVISION)
+Revision Submission Window: 21 calendar days
+
+Based on the evaluations, both referees note the critical clinical importance and conceptual ambition of your work. However, they have detailed essential recommendations regarding:
+1. Operational Feasibility: Address hyperacute workflow friction and operational paradoxes (e.g., hyperacute external consultation timing).
+2. Theoretical Grounding: Anchor the framework explicitly within established implementation science models (CFIR / Donabedian) rather than exploratory author-defined concepts.
+3. Cross-Referencing & Concision: Consolidate redundant textual disclaimers into a unified Limitations section, and ensure full correspondence between citations, tables, and bibliography.
+
+PEER EVALUATION REPORTS:
+${formattedCritiques}
+
+RESUBMISSION GUIDELINES:
+1. Revised Manuscript: Upload your updated manuscript with all revisions clearly highlighted or tracked.
+2. Point-by-Point Rebuttal: Enclose an itemized response table detailing how each referee recommendation has been incorporated.
+3. Direct Access Portal:
+${directAccessUrl}
+
+Thank you for your commitment to scientific rigor and for publishing with ${journalName}.
+
+Warm regards,
+
+Noor F.
+Editorial Manager & Publishing Coordinator
+${journalName} · Scholarly Open
+scholarlyopen@gmail.com | https://www.scholarlyopen.org`,
+                        onCancel: () => {
+                          setIsRevisionModalOpen(true)
+                        },
+                        onConfirmSend: async (data: any) => {
+                          const effectiveJournal = data.journal || journalName
+                          const res = await fetch("/api/editorial360/email", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              to: data.recipientEmail,
+                              recipientName: authorName,
+                              customSubject: data.subject,
+                              customBody: data.bodyText,
+                              customHtml: data.renderedHtml,
+                              journal: effectiveJournal,
+                              fromEmail: getJournalReplyTo(effectiveJournal),
+                              senderName: `${effectiveJournal} Editorial Office`
+                            })
+                          })
+
+                          const resData = await res.json().catch(() => null)
+                          if (!res.ok || !resData?.success) {
+                            throw new Error(resData?.error || `Email dispatch failed (HTTP ${res.status}).`)
+                          }
+
+                          if (onUpdateManuscriptStatus) {
+                            onUpdateManuscriptStatus(ms.id, "Revision Required")
+                          }
+
+                          // Release comments locally if callback exists
+                          if (onReleaseComments && msReviews.length > 0) {
+                            msReviews.forEach(r => {
+                              onReleaseComments(r.id, r.sanitizedCommentsAuthor || r.commentsAuthor || "")
+                            })
+                          }
+
+                          if (onAddNotification) {
+                            onAddNotification({
+                              paperId: ms.id,
+                              paperTitle: ms.title,
+                              journal: effectiveJournal,
+                              type: "decision_rendered",
+                              actorName: "Journal Manager",
+                              actorRole: "JM Desk",
+                              headline: `Decision Dispatched to Author: Revision Required (${authorName})`,
+                              summary: `Official Decision Letter and referee critiques dispatched directly to ${authorName} (${data.recipientEmail}) with CC to scholarlyopen@gmail.com and ${getJournalReplyTo(effectiveJournal)}.`,
+                              recipient: data.recipientEmail
+                            })
+                          }
+
+                          setRevisionActionSuccess(`✓ Official Revision Decision and referee critiques dispatched directly to ${authorName} (${data.recipientEmail}) with CC to scholarlyopen@gmail.com.`)
+                          setIsRevisionModalOpen(true)
+                          setDispatchDialogConfig((prev: EmailDispatchConfig) => ({ ...prev, isOpen: false }))
+                        }
+                      })
+                    }}
+                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold h-8 px-3.5 rounded-lg cursor-pointer shrink-0"
+                  >
+                    <Send className="h-3.5 w-3.5 mr-1" />
+                    Dispatch to Author
+                  </Button>
+                </div>
+
                 {/* Action 2: Dispatch Round 2 Review */}
                 <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
