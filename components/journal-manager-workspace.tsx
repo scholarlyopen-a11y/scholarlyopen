@@ -228,58 +228,60 @@ export const PRAVEEN_NAGULA_RAF = {
   reviewerName: "Dr. Praveen Nagula",
   reviewerEmail: "drpraveennagula@gmail.com",
   manuscriptId: "SOMED-26-RW01",
-  manuscriptTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
-  manuscriptType: "REVIEW ARTICLE",
-  typeOfReview: "DOUBLE-BLINDED",
+  manuscriptTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: A Proposed Evidence-Based Medicine–Integrated Rapid Response Framework (EBM-IRRF) for Acute Aortic Dissection",
+  manuscriptType: "PERSPECTIVE / CONCEPTUAL FRAMEWORK",
+  typeOfReview: "DOUBLE-BLINDED (ROUND 2 RE-EVALUATION)",
   journal: "Scholarly Open: Medicine",
-  dueDate: "On or before, 29th August, 2026",
-  submittedDate: "2026-08-28",
-  keyWords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking",
+  dueDate: "Completed (Round 2 Evaluation)",
+  submittedDate: "2026-11-06",
+  keyWords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Implementation Science; CFIR; Donabedian Model; Emergency Care; Multidisciplinary Care; Systems Thinking",
   structure: {
-    lengthOfArticle: "too long",
-    numberOfTables: "none",
-    numberOfFigures: "none"
+    lengthOfArticle: "needs condensation",
+    numberOfTables: "adequate (reorganize Table 5)",
+    numberOfFigures: "needs streamlined workflow"
   },
   questionnaire: [
-    { question: "Does the manuscript fit into the mission of the journal?", answer: "No" as const },
+    { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" as const },
     { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" as const },
     { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" as const },
     { question: "Is the information on the Institutional Review Board approval stated?", answer: "No" as const },
     { question: "Is the problem significant and concisely stated?", answer: "Yes" as const },
     { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" as const },
-    { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "N/A" as const },
-    { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "N/A" as const },
+    { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "No" as const },
+    { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" as const },
     { question: "Is adequate reference made to other work in the field?", answer: "Yes" as const },
-    { question: "Are the language, grammar and syntax acceptable?", answer: "No" as const }
+    { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" as const }
   ],
-  priorityRating: 6, // 1 is highest priority, 10 is lowest priority
-  generalComments: "The review article to be concised. Tables to be provided.",
+  priorityRating: 3, // 1 is highest priority, 10 is lowest priority
+  generalComments: "PEER REVIEW & EVALUATION REPORT (ROUND 2)\nScholarly Journal Editorial Assessment\n\nEditorial Recommendation: Major Revision\nThe manuscript addresses a vital emergency cardiovascular challenge with strong theoretical rigor. However, substantial conceptual, methodological, and structural refinements are required before peer-reviewed publication.\n\n1. EXECUTIVE SUMMARY\nThis manuscript tackles a critically important challenge in emergency cardiovascular medicine—mitigating preventable delays in the diagnosis, interhospital transfer, and definitive surgical management of Acute Aortic Dissection (AAD). The authors synthesize contemporary clinical guidelines (ACC/AHA 2022, ESC 2024), healthcare quality frameworks (Donabedian Model), and implementation science concepts (CFIR) to propose an Evidence-Based Medicine–Integrated Rapid Response Framework (EBM-IRRF).\nWhile the conceptual ambition and writing quality are commendable, the paper currently suffers from theoretical over-modularization, procedural friction within hyperacute workflows, pseudo-systematic methodological presentation, and excessive textual redundancy. Address these core concerns prior to publication.\n\n2. CORE CONCEPTUAL & THEORETICAL CRITIQUES\n• 2.1. Framework Redundancy and Incremental Value: The manuscript repackages well-established emergency cardiovascular protocols (e.g., Code Aorta, Regional Aortic Care Networks, and early CT angiography protocols) into a novel seven-component acronym. To justify publication in a scholarly journal, the authors must clearly articulate what EBM-IRRF achieves that existing pathways do not already accomplish. Merely appending operational terminology to established clinical guidelines creates conceptual inflation rather than new scientific insight.\n• 2.2. Logistical Contradiction of 'Third-Party EBM Consultation': In Component 5, the framework introduces an 'optional independent third-party EBM consultation mechanism' for complex cases. In hyperacute Stanford Type A dissection—where mortality escalates by 1% to 2% per hour from symptom onset—introducing an external evidence-appraisal layer presents a severe operational paradox. Although the text states that consultation 'must not delay emergency treatment,' it offers no realistic protocol for how external consultation can occur in real time without creating decision-making friction, cognitive overload, or legal liability during an emergency operation.\n• 2.3. Over-Reliance on Author-Defined Methodologies ('SBSR'): Section 3.1 relies heavily on Systems-Based Scientific Reasoning (SBSR) as its core theoretical paradigm. Because SBSR is an author-defined concept rather than a validated implementation science methodology, using it to justify a non-systematic literature review creates artificial complexity. The manuscript would gain substantial credibility by anchoring its rationale strictly within established implementation science frameworks, such as CFIR and the Donabedian Structure–Process–Outcome model.\n\n3. METHODOLOGICAL & STRUCTURAL REFINEMENTS\n• 3.1. Misalignment in Methodology Presentation: Section 3 uses terminology suggestive of a systematic review without adhering to PRISMA guidelines or prospective registration. The methodology should be simplified to reflect a narrative perspective and evidence synthesis.\n• 3.2. Textual Redundancy and Disclaimers: Consolidate defensive caveats ('the framework remains unvalidated,' 'efficacy is unproven') into a single dedicated 'Scope and Limitations' subsection.\n• 3.3. Question-Driven Rationale Compression: Compress the 9 exploratory research questions in Section 1.4 into 3 overarching scientific themes.",
   specificComments: [
-    "too low references for a review article",
-    "what has been changed over the years in the management to be mentioned",
-    "the manuscript to be neatly structured to have a good orientation for the reader regarding the topic",
-    "no figures were provided",
-    "atleast tables to be there"
+    "[CRITICAL] Component 5 & Workflow: Reframe 'Third-Party EBM Consultation' strictly to post-acute/longitudinal surveillance (Components 1 & 4), or explicitly restrict it to asynchronous quality audits to prevent hyperacute surgical delays.",
+    "[CRITICAL] Section 1 & Introduction: Explicitly define EBM-IRRF as an operational implementation overlay for existing ACC/AHA/ESC guidelines, establishing its distinct value proposition over Code Aorta.",
+    "[MAJOR] Section 3 (Methods): Remove pseudo-systematic terminology. Replace the detailed justification of 'SBSR' with a streamlined narrative review methodology grounded in CFIR and Donabedian models.",
+    "[MAJOR] Section 1.4 (Questions): Consolidate the 9 exploratory questions into 3 core scientific themes: (1) Operational Integration, (2) Multidisciplinary Coordination, and (3) Digital/AI Triage Support.",
+    "[MINOR] Table 5 (Evaluation): Reorganize proposed evaluation indicators strictly according to Donabedian categories (Structure, Process, Outcome) for theoretical consistency.",
+    "[MINOR] Entire Manuscript: Consolidate recurring 'unvalidated status' disclaimers into a unified 'Limitations and Safety Safeguards' section in the Discussion."
   ],
-  recommendation: "Re-write and Re-submit",
+  confidentialCommentsEditor: "Dear Noor F.,\n\nI have reviewed the article. My comments are in the attached PDF file.\nI used AI to review the manuscript in detail, and I have gone through the comments.\nThey are genuine and need consideration for a good outcome of the manuscript before publication.\n\nThank you.\nKindly acknowledge receipt of the mail.",
+  recommendation: "Major Revision",
   willingToReviewRevision: "Yes",
   conflictOfInterest: "None"
 }
 
 export const CHAUD_GJ_RAF = {
-  reviewerName: "Dr. Chaud GJ",
+  reviewerName: "Dr. German J. Chaud",
   reviewerEmail: "germanchaud@gmail.com",
   manuscriptId: "SOMED-26-RW01",
   manuscriptTitle: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
-  manuscriptType: "REVIEW ARTICLE",
-  typeOfReview: "DOUBLE-BLINDED",
+  manuscriptType: "PERSPECTIVE / CONCEPTUAL FRAMEWORK",
+  typeOfReview: "DOUBLE-BLINDED (ROUND 2 RE-EVALUATION)",
   journal: "Scholarly Open: Medicine",
-  dueDate: "On or before, 15th October, 2026",
-  submittedDate: "2026-10-09",
+  dueDate: "Completed (Round 2 Evaluation)",
+  submittedDate: "2026-11-05",
   keyWords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking",
   structure: {
-    lengthOfArticle: "too long",
-    numberOfTables: "needs tables",
+    lengthOfArticle: "needs condensation",
+    numberOfTables: "adequate",
     numberOfFigures: "needs simplified diagram"
   },
   questionnaire: [
@@ -295,18 +297,13 @@ export const CHAUD_GJ_RAF = {
     { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" as const }
   ],
   priorityRating: 4, // 1 is highest priority, 10 is lowest priority
-  generalComments: "This manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.",
+  generalComments: "The authors have made substantial efforts to address the concerns raised during the initial review. The revised manuscript demonstrates significant improvements in scientific organization, methodological transparency, clinical relevance, and the integration of contemporary evidence regarding acute aortic dissection management.\n\nI particularly appreciate the expanded discussion of regional aortic networks, interhospital transfer, specialized aortic centers, and multidisciplinary emergency response. These additions strengthen the clinical relevance of the proposed framework.\n\nThe clarification that EBM-IRRF represents an evidence-informed conceptual proposal, rather than a validated clinical intervention, is appropriate. The distinction between clinical decision-making authority and organizational accountability is also clearly established.\n\nMost of my original concerns have therefore been satisfactorily addressed.\n\nNevertheless, three issues require further attention before publication.\n\nOverall assessment: The revised manuscript addresses a clinically important topic and demonstrates meaningful improvements following peer review. The authors have appropriately acknowledged the conceptual nature of the proposed framework and the need for prospective validation. I consider the manuscript potentially suitable for publication after the remaining issues concerning reference accuracy, concision, and conceptual differentiation have been satisfactorily addressed.\n\nFinal recommendation: Major Revision.",
   specificComments: [
-    "Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.",
-    "Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.",
-    "Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.",
-    "Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).",
-    "Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).",
-    "Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.",
-    "Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.",
-    "Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality)."
+    "Accuracy of scientific references: Several inconsistencies remain between in-text citations and their corresponding bibliography entries, including references supporting evidence-based medicine principles, the Donabedian model, implementation science, and regional transfer strategies. For example, reference 5 is used to support general evidence-based medicine principles, while reference 6 is incorrectly associated with the Donabedian framework in Table 4. A comprehensive verification of all references and their correspondence with the manuscript is necessary.",
+    "Manuscript length and redundancy: Although the manuscript has been reorganized, substantial repetition remains across the Introduction, Literature Review, Results, and Discussion. Considering its classification as a Perspective Article, further condensation would improve scientific clarity, readability, and the presentation of the principal conceptual contribution.",
+    "Originality and potential clinical applicability: The proposed EBM-IRRF incorporates several established elements of contemporary acute aortic dissection management, including specialized aortic teams, regional referral networks, standardized emergency pathways, and multidisciplinary coordination. The authors should more explicitly distinguish the incremental contribution of EBM-IRRF from previously published Aorta Code programs and established regional systems. A concise description of its distinctive operational features and proposed evaluation criteria would strengthen the manuscript without requiring additional empirical data at this stage."
   ],
-  confidentialCommentsEditor: "Dear Editor-in-Chief,\n\nThank you for the opportunity to review this manuscript.\n\nThe authors address an important topic: the organization of healthcare systems for the prevention, recognition, and timely treatment of acute aortic dissection.\n\nI recommend Major Revision, conditional upon satisfactory clarification of the supplementary data and ethics documentation.\n\nIf these discrepancies cannot be adequately resolved, the manuscript's scientific and ethical suitability for publication should be reconsidered.\n\nSincerely,\nDr. Chaud GJ",
+  confidentialCommentsEditor: "The authors have clarified that the revised manuscript is a conceptual Perspective Article involving no original patient-level data or statistical analyses.\n\nHowever, documentation associated with the previous submission described ethics approval, participant consent, and supplementary statistical analyses.\n\nI recommend that the editorial office verify whether these materials were formally withdrawn, superseded, or submitted in error, and confirm that the final submission is internally consistent.\n\nThis request is intended to ensure methodological and administrative transparency and does not imply scientific misconduct.",
   recommendation: "Re-review and Accept with Major Changes",
   willingToReviewRevision: "Yes",
   conflictOfInterest: "None"
@@ -318,13 +315,7 @@ export function getRafDataForReview(
   trackingManuscript?: any
 ) {
   const norm = (reviewerName || "").toLowerCase()
-  if (norm.includes("nagula")) {
-    return PRAVEEN_NAGULA_RAF
-  }
-  if (norm.includes("chaud")) {
-    return CHAUD_GJ_RAF
-  }
-  if (matchedReview) {
+  if (matchedReview && (matchedReview.commentsAuthor || matchedReview.originalComments)) {
     if (matchedReview.rafData || matchedReview.raf) {
       return matchedReview.rafData || matchedReview.raf
     }
@@ -333,45 +324,41 @@ export function getRafDataForReview(
     const msJournal = trackingManuscript?.journal || "Scholarly Open: Medicine"
     const commAuth = matchedReview.commentsAuthor || matchedReview.originalComments || ""
     const specificParts = commAuth.includes("Specific")
-      ? commAuth.split(/Specific.*?:/i)[1]?.trim().split(/\n(?:\d+\.|\-)\s+/).filter(Boolean)
+      ? commAuth.split(/Specific.*?:/i)[1]?.trim().split(/\n(?:\d+\.|\-|\•)\s+/).filter(Boolean)
       : [commAuth]
 
     return {
       reviewerName: matchedReview.reviewerName || reviewerName || "Peer Reviewer",
-      reviewerEmail: matchedReview.reviewerEmail || "",
+      reviewerEmail: matchedReview.reviewerEmail || (norm.includes("chaud") ? "germanchaud@gmail.com" : norm.includes("nagula") ? "drpraveennagula@gmail.com" : ""),
       manuscriptId: msId,
       manuscriptTitle: msTitle,
-      manuscriptType: "RESEARCH ARTICLE",
-      typeOfReview: "DOUBLE-BLINDED",
+      manuscriptType: "PERSPECTIVE / CONCEPTUAL FRAMEWORK",
+      typeOfReview: "DOUBLE-BLINDED (ROUND 2 RE-EVALUATION)",
       journal: msJournal,
-      dueDate: "On or before, 14 days from dispatch",
+      dueDate: "Completed (Round 2 Evaluation)",
       submittedDate: matchedReview.createdAt ? matchedReview.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
-      keyWords: Array.isArray(trackingManuscript?.keywords) ? trackingManuscript.keywords.join("; ") : (trackingManuscript?.keywords || "Peer Review; Scholarly Publishing"),
+      keyWords: Array.isArray(trackingManuscript?.keywords) ? trackingManuscript.keywords.join("; ") : (trackingManuscript?.keywords || "Acute Aortic Dissection; EBM; Healthcare Operations"),
       structure: {
-        lengthOfArticle: "appropriate",
+        lengthOfArticle: "needs condensation",
         numberOfTables: "adequate",
-        numberOfFigures: "adequate"
+        numberOfFigures: "needs simplified diagram"
       },
-      questionnaire: [
-        { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" as const },
-        { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" as const },
-        { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" as const },
-        { question: "Is the information on the Institutional Review Board approval stated?", answer: "Yes" as const },
-        { question: "Is the problem significant and concisely stated?", answer: "Yes" as const },
-        { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" as const },
-        { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "Yes" as const },
-        { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" as const },
-        { question: "Is adequate reference made to other work in the field?", answer: "Yes" as const },
-        { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" as const }
-      ],
-      priorityRating: matchedReview.originality ? Math.max(1, 11 - (matchedReview.originality * 2)) : 5,
+      questionnaire: norm.includes("chaud") ? CHAUD_GJ_RAF.questionnaire : PRAVEEN_NAGULA_RAF.questionnaire,
+      priorityRating: matchedReview.priorityRating || (norm.includes("nagula") ? 3 : 4),
       generalComments: commAuth.split(/Specific.*?:/i)[0]?.trim() || commAuth,
       specificComments: specificParts.length > 0 ? specificParts : [commAuth],
-      confidentialCommentsEditor: matchedReview.commentsEditor || "No confidential editor concerns noted.",
-      recommendation: matchedReview.recommendation || "Minor Revision",
+      confidentialCommentsEditor: matchedReview.commentsEditor || (norm.includes("chaud") ? CHAUD_GJ_RAF.confidentialCommentsEditor : PRAVEEN_NAGULA_RAF.confidentialCommentsEditor),
+      recommendation: matchedReview.recommendation || (norm.includes("nagula") ? "Major Revision" : "Re-review and Accept with Major Changes"),
       willingToReviewRevision: "Yes",
       conflictOfInterest: "None"
     }
+  }
+
+  if (norm.includes("chaud")) {
+    return CHAUD_GJ_RAF
+  }
+  if (norm.includes("nagula") || norm.includes("praveen")) {
+    return PRAVEEN_NAGULA_RAF
   }
   return PRAVEEN_NAGULA_RAF
 }
@@ -2920,7 +2907,7 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
         editorAssigned: true,
         assignedEditorName: "Weihua Gong, M.D., Ph.D.",
-        reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
+        reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. German J. Chaud", "Ikeda N"],
         keywords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking"
       })
     }
@@ -2928,7 +2915,7 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     return list.map(m => {
       // Ensure SOMED-26-RW01 has active reviewers and keeps assignedEditorName if appointed
       if (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier")) {
-        const cleanRev = ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"]
+        const cleanRev = ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. German J. Chaud", "Ikeda N"]
         return {
           ...m,
           id: "SOMED-26-RW01",
@@ -10617,8 +10604,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               if (!hasTwoSubmittedReviews) return null
 
               const areBothDispatched = Boolean(
-                (approvedReviewRemarks["Dr. Praveen Nagula"] || approvedReviewRemarks["REV-FB-SAM-01"]) &&
-                (approvedReviewRemarks["Dr. Chaud GJ"] || approvedReviewRemarks["REV-FB-1791559472514-816"])
+                (approvedReviewRemarks["Dr. Praveen Nagula"] || approvedReviewRemarks["REV-FB-PN02-ROUND2"] || approvedReviewRemarks["REV-FB-SAM-01"]) &&
+                (approvedReviewRemarks["Dr. German J. Chaud"] || approvedReviewRemarks["Dr. Chaud GJ"] || approvedReviewRemarks["REV-FB-1793887143406-386"] || approvedReviewRemarks["REV-FB-1791559472514-816"])
               )
               const editorDisplayName = trackingManuscript?.assignedEditorName || "Weihua Gong, M.D., Ph.D."
 
@@ -10635,10 +10622,10 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-slate-900 dark:text-white text-xs">
-                          2 Peer Review Evaluations Logged
+                          2 Peer Review Evaluations Logged (Round 2)
                         </span>
                         <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
-                          {isMedAortic ? "Dr. Praveen Nagula (#1) & Dr. Chaud GJ (#3)" : "2 Reviewers Completed"}
+                          {isMedAortic ? "Dr. Praveen Nagula (#1) & Dr. German J. Chaud (#3)" : "2 Reviewers Completed"}
                         </span>
                         {areBothDispatched && (
                           <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-700">
@@ -10648,8 +10635,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       </div>
                       <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
                         {areBothDispatched
-                          ? `Comments from both reviewers have been vetted and released to Handling Editor (${editorDisplayName}). Full remarks are unlocked on his desk.`
-                          : `Both reviewers have submitted evaluation reports. Dispatch sanitized comments directly to Handling Editor (${editorDisplayName}) to unlock them on his desk for formulating the editorial verdict.`}
+                          ? `Round 2 comments from both reviewers have been vetted and released to Handling Editor (${editorDisplayName}). Full remarks are unlocked on his desk.`
+                          : `Both reviewers have submitted Round 2 evaluation reports (Major Revision). Dispatch sanitized comments directly to Handling Editor (${editorDisplayName}) to unlock them on his desk for formulating the official decision.`}
                       </p>
                     </div>
                   </div>
@@ -10659,13 +10646,14 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       type="button"
                       size="sm"
                       onClick={() => {
-                        // 1. Release full itemized comments
-                        const rev1Comments = `General comments to the Author(s):\nThe review article to be concised. Tables to be provided.\n\nSpecific comments to the Author(s):\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there`
-
-                        const rev3Comments = `General comments to the Author(s):\nThis manuscript addresses an important and frequently underestimated challenge in cardiovascular medicine: the need to approach acute aortic dissection (AAD) not only as a surgical emergency but also as a time-dependent healthcare systems challenge.\n\nThe proposed Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF) offers a potentially valuable perspective by integrating prevention, early recognition, multidisciplinary coordination, organizational preparedness, and continuous quality improvement.\n\nThe manuscript's principal strength is its recognition that successful treatment depends not only on clinical expertise but also on the ability of healthcare systems to deliver that expertise without unnecessary delay.\n\nHowever, several methodological and conceptual issues require clarification before the manuscript can be considered for publication.\n\nSpecific comments to the Author(s):\n1. Clarification of manuscript type and methodology: The manuscript is presented as a scholarly perspective and describes an evidence-based synthesis. However, no structured methodology for identifying, selecting, or evaluating the literature is provided. Define as a narrative perspective or include reproducible search methodology.\n2. Inconsistencies between manuscript and supplementary materials: Explicitly states no original patient-level data analyzed, yet supplementary materials describe ROC curves, propensity-score matching, and anonymized dataset. Clarify whether supplementary analyses belong to this submission or withdraw them.\n3. Ethics approval and informed consent: Accompanied ethics statement reports institutional approval and written informed consent, whereas manuscript describes no original human-subject research. Clarify approved research and role of participants.\n4. Greater emphasis on regional aortic networks and interhospital transfer: Frame intrahospital organization around regional referral networks, rapid CT sharing, and interhospital transfer protocols (Early recognition → definitive imaging → specialist consultation → immediate referral → coordinated transfer → definitive treatment).\n5. Prioritization of clinically relevant interventions: Separate established clinical priorities (rapid imaging, hemodynamic stabilization, surgery) from conceptual proposals (real-time EBM consultation, AI integration, executive escalation).\n6. Hospital leadership and executive escalation: Implement tiered escalation based on predefined operational barriers rather than routine executive activation for every suspected case.\n7. Public awareness and reference to Senator Lindsey Graham: Substantially shorten Author's Note and present the event as contextual motivation for examining systemic improvements without speculating on individual clinical care.\n8. Framework validation and measurable outcomes: Define explicit implementation and evaluation strategy with measurable performance indicators (time to diagnosis, transfer duration, mortality).`
+                        // 1. Release full itemized Round 2 comments
+                        const rev1Comments = PRAVEEN_NAGULA_RAF.generalComments + "\n\nSpecific Line Critiques & Actionable Revision Plan:\n" + PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")
+                        const rev3Comments = CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")
 
                         if (onReleaseComments) {
+                          onReleaseComments("REV-FB-PN02-ROUND2", rev1Comments)
                           onReleaseComments("REV-FB-SAM-01", rev1Comments)
+                          onReleaseComments("REV-FB-1793887143406-386", rev3Comments)
                           onReleaseComments("REV-FB-1791559472514-816", rev3Comments)
                         }
 
@@ -10673,8 +10661,11 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                         setApprovedReviewRemarks(prev => ({
                           ...prev,
                           "Dr. Praveen Nagula": true,
+                          "Dr. German J. Chaud": true,
                           "Dr. Chaud GJ": true,
+                          "REV-FB-PN02-ROUND2": true,
                           "REV-FB-SAM-01": true,
+                          "REV-FB-1793887143406-386": true,
                           "REV-FB-1791559472514-816": true
                         }))
 
@@ -10683,7 +10674,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           method: "PATCH",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
-                            id: "REV-FB-SAM-01",
+                            id: "REV-FB-PN02-ROUND2",
                             status: "Released",
                             sanitizedCommentsAuthor: rev1Comments
                           })
@@ -10693,7 +10684,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           method: "PATCH",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
-                            id: "REV-FB-1791559472514-816",
+                            id: "REV-FB-1793887143406-386",
                             status: "Released",
                             sanitizedCommentsAuthor: rev3Comments
                           })
@@ -10709,13 +10700,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             journal: trackingManuscript?.journal || "Scholarly Open: Medicine",
                             sender: "JM Noor",
                             type: "review_complete",
-                            title: `Review Comments Released for ${trackingManuscript?.id || "SOMED-26-RW01"}`,
-                            message: `JM Noor has vetted and released the peer evaluations from Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. Chaud GJ) to Handling Editor (${editorDisplayName}). Remarks are unlocked on your desk for formulating the official decision.`,
+                            title: `Round 2 Review Comments Released for ${trackingManuscript?.id || "SOMED-26-RW01"}`,
+                            message: `JM Noor has vetted and released the Round 2 peer evaluations from Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. German J. Chaud) to Handling Editor (${editorDisplayName}). Remarks are unlocked on your desk for formulating the official decision.`,
                             priority: "high"
                           })
                         }
 
-                        setEditorPromptSuccess(`✓ Peer evaluations from Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. Chaud GJ) sanitized & released to Handling Editor (${editorDisplayName}). Comments are now unlocked on his desk.`)
+                        setEditorPromptSuccess(`✓ Round 2 peer evaluations from Reviewer #1 (Dr. Praveen Nagula) and Reviewer #3 (Dr. German J. Chaud) sanitized & released to Handling Editor (${editorDisplayName}). Comments are now unlocked on his desk.`)
                         setTimeout(() => setEditorPromptSuccess(null), 6000)
                       }}
                       className={`h-8.5 px-3.5 text-xs font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-xs transition-all whitespace-nowrap ${
@@ -11204,33 +11195,25 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                             {(() => {
                               const revObj: JmReviewFeedback = isNagula ? {
-                                id: "REV-FB-PN01",
+                                id: matchedReview?.id || "REV-FB-PN02-ROUND2",
                                 paperId: trackingManuscript?.id || "SOMED-26-RW01",
                                 reviewerName: "Dr. Praveen Nagula",
-                                originality: 3,
-                                commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
-                                sanitizedCommentsAuthor: `General comments to the Author(s):
-“The review article to be concised. Tables to be provided.”
-
-Specific comments to the Author(s):
-1. too low references for a review article
-2. what has been changed over the years in the management to be mentioned
-3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
-4. no figures were provided
-5. atleast tables to be there`,
-                                commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
-                                recommendation: "Re-write and Re-submit",
-                                status: "Pending Moderation"
-                              } : isChaud ? {
-                                id: matchedReview?.id || "REV-FB-1791559472514-816",
-                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
-                                reviewerName: "Dr. Chaud GJ",
                                 originality: 4,
-                                commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                                sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                                commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
-                                recommendation: CHAUD_GJ_RAF.recommendation,
-                                status: "Pending Moderation"
+                                commentsAuthor: matchedReview?.commentsAuthor || (PRAVEEN_NAGULA_RAF.generalComments + "\n\nSpecific Line Critiques & Actionable Revision Plan:\n" + PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                sanitizedCommentsAuthor: matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || (PRAVEEN_NAGULA_RAF.generalComments + "\n\nSpecific Line Critiques & Actionable Revision Plan:\n" + PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                commentsEditor: matchedReview?.commentsEditor || PRAVEEN_NAGULA_RAF.confidentialCommentsEditor,
+                                recommendation: matchedReview?.recommendation || "Major Revision",
+                                status: (matchedReview?.status as any) || "Pending Moderation"
+                              } : isChaud ? {
+                                id: matchedReview?.id || "REV-FB-1793887143406-386",
+                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                reviewerName: "Dr. German J. Chaud",
+                                originality: 5,
+                                commentsAuthor: matchedReview?.commentsAuthor || (CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                sanitizedCommentsAuthor: matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || (CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                commentsEditor: matchedReview?.commentsEditor || CHAUD_GJ_RAF.confidentialCommentsEditor,
+                                recommendation: matchedReview?.recommendation || "Re-review and Accept with Major Changes",
+                                status: (matchedReview?.status as any) || "Pending Moderation"
                               } : (matchedReview ? {
                                 id: matchedReview.id,
                                 paperId: trackingManuscript?.id || matchedReview.paperId,
@@ -11287,9 +11270,9 @@ Specific comments to the Author(s):
                         {isSubmitted ? (
                           <div className="flex items-center gap-2 flex-wrap pt-0.5">
                             {isNagula ? (
-                              <span>Priority Rating: <strong className="text-slate-700 dark:text-slate-300 font-bold">6 / 10</strong> • Recommendation: <span className="text-amber-700 dark:text-amber-300 font-bold bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 text-[11px]">Re-write and Re-submit</span></span>
+                              <span>Priority Rating: <strong className="text-slate-700 dark:text-slate-300 font-bold">3 / 10</strong> • Recommendation: <span className="text-purple-700 dark:text-purple-300 font-bold bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 text-[11px]">Major Revision (Round 2)</span></span>
                             ) : isChaud ? (
-                              <span>Priority Rating: <strong className="text-slate-700 dark:text-slate-300 font-bold">4 / 10</strong> • Recommendation: <span className="text-purple-700 dark:text-purple-300 font-bold bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 text-[11px]">Re-review and Accept with Major Changes</span></span>
+                              <span>Priority Rating: <strong className="text-slate-700 dark:text-slate-300 font-bold">4 / 10</strong> • Recommendation: <span className="text-purple-700 dark:text-purple-300 font-bold bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 text-[11px]">Re-review and Accept with Major Changes (Round 2)</span></span>
                             ) : (
                               <span>Scorecard: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{displayScore} / 5.0</strong> • Recommendation: <strong className="text-[#0b99ff]">{displayRecommendation}</strong></span>
                             )}
@@ -11317,15 +11300,15 @@ Specific comments to the Author(s):
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
                               <span className="text-[10px] text-slate-400 block font-medium">Priority Rating</span>
-                              <strong className="text-slate-900 dark:text-white text-xs">{isNagula ? "6 / 10" : isChaud ? "4 / 10" : `${displayScore} / 5.0`}</strong>
+                              <strong className="text-slate-900 dark:text-white text-xs">{isNagula ? "3 / 10" : isChaud ? "4 / 10" : `${displayScore} / 5.0`}</strong>
                             </div>
                             <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
                               <span className="text-[10px] text-slate-400 block font-medium">Verdict</span>
-                              <strong className="text-slate-900 dark:text-white text-xs">{displayRecommendation}</strong>
+                              <strong className="text-slate-900 dark:text-white text-xs">{isNagula ? "Major Revision" : isChaud ? "Re-review and Accept with Major Changes" : displayRecommendation}</strong>
                             </div>
                             <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
                               <span className="text-[10px] text-slate-400 block font-medium">Review Protocol</span>
-                              <strong className="text-slate-900 dark:text-white text-xs">Double-Blinded</strong>
+                              <strong className="text-slate-900 dark:text-white text-xs">Double-Blinded (Round 2)</strong>
                             </div>
                             <div className="p-2.5 rounded-lg bg-white dark:bg-[#18191e] border border-slate-200 dark:border-slate-800">
                               <span className="text-[10px] text-slate-400 block font-medium">Handling Editor Access</span>
@@ -11340,7 +11323,7 @@ Specific comments to the Author(s):
                               Author-Facing Feedback {isRemarksApproved ? "(Sanitized & Dispatched)" : "(Raw / Pending JM Moderation)"}:
                             </span>
                             <p className="text-[11px] text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed italic bg-slate-50 dark:bg-slate-900 p-2.5 rounded border border-slate-100 dark:border-slate-800">
-                              &ldquo;{isNagula ? "The review article to be concised. Tables to be provided. Specific comments: 1. too low references for a review article; 2. what has been changed over the years in the management to be mentioned; 3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic; 4. no figures were provided; 5. atleast tables to be there." : (matchedReview?.commentsAuthor || "Evaluation report logged.")}&rdquo;
+                              &ldquo;{isNagula ? (matchedReview?.commentsAuthor || PRAVEEN_NAGULA_RAF.generalComments) : isChaud ? (matchedReview?.commentsAuthor || CHAUD_GJ_RAF.generalComments) : (matchedReview?.commentsAuthor || "Evaluation report logged.")}&rdquo;
                             </p>
                           </div>
 
@@ -11362,33 +11345,25 @@ Specific comments to the Author(s):
 
                             {(() => {
                               const revObj: JmReviewFeedback = isNagula ? {
-                                id: "REV-FB-PN01",
+                                id: matchedReview?.id || "REV-FB-PN02-ROUND2",
                                 paperId: trackingManuscript?.id || "SOMED-26-RW01",
                                 reviewerName: "Dr. Praveen Nagula",
-                                originality: 3,
-                                commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
-                                sanitizedCommentsAuthor: `General comments to the Author(s):
-“The review article to be concised. Tables to be provided.”
-
-Specific comments to the Author(s):
-1. too low references for a review article
-2. what has been changed over the years in the management to be mentioned
-3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
-4. no figures were provided
-5. atleast tables to be there`,
-                                commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
-                                recommendation: "Re-write and Re-submit",
-                                status: "Pending Moderation"
-                              } : isChaud ? {
-                                id: matchedReview?.id || "REV-FB-1791559472514-816",
-                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
-                                reviewerName: "Dr. Chaud GJ",
                                 originality: 4,
-                                commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                                sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                                commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
-                                recommendation: CHAUD_GJ_RAF.recommendation,
-                                status: "Pending Moderation"
+                                commentsAuthor: matchedReview?.commentsAuthor || (PRAVEEN_NAGULA_RAF.generalComments + "\n\nSpecific Line Critiques & Actionable Revision Plan:\n" + PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                sanitizedCommentsAuthor: matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || (PRAVEEN_NAGULA_RAF.generalComments + "\n\nSpecific Line Critiques & Actionable Revision Plan:\n" + PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                commentsEditor: matchedReview?.commentsEditor || PRAVEEN_NAGULA_RAF.confidentialCommentsEditor,
+                                recommendation: matchedReview?.recommendation || "Major Revision",
+                                status: (matchedReview?.status as any) || "Pending Moderation"
+                              } : isChaud ? {
+                                id: matchedReview?.id || "REV-FB-1793887143406-386",
+                                paperId: trackingManuscript?.id || "SOMED-26-RW01",
+                                reviewerName: "Dr. German J. Chaud",
+                                originality: 5,
+                                commentsAuthor: matchedReview?.commentsAuthor || (CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                sanitizedCommentsAuthor: matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || (CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                                commentsEditor: matchedReview?.commentsEditor || CHAUD_GJ_RAF.confidentialCommentsEditor,
+                                recommendation: matchedReview?.recommendation || "Re-review and Accept with Major Changes",
+                                status: (matchedReview?.status as any) || "Pending Moderation"
                               } : (matchedReview ? {
                                 id: matchedReview.id,
                                 paperId: trackingManuscript?.id || matchedReview.paperId,
@@ -12690,33 +12665,25 @@ Specific comments to the Author(s):
                   r.reviewerName?.toLowerCase().includes(revName.toLowerCase().replace(/^(?:dr\.?|prof\.?)\s+/i, ""))
                 )
                 const revObj: JmReviewFeedback = isNagula ? {
-                  id: "REV-FB-PN01",
+                  id: matchedReview?.id || "REV-FB-PN02-ROUND2",
                   paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
                   reviewerName: "Dr. Praveen Nagula",
-                  originality: 3,
-                  commentsAuthor: "The review article to be concised. Tables to be provided.\n\nSpecific comments:\n1. too low references for a review article\n2. what has been changed over the years in the management to be mentioned\n3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic\n4. no figures were provided\n5. atleast tables to be there",
-                  sanitizedCommentsAuthor: `General comments to the Author(s):
-“The review article to be concised. Tables to be provided.”
-
-Specific comments to the Author(s):
-1. too low references for a review article
-2. what has been changed over the years in the management to be mentioned
-3. the manuscript to be neatly structured to have a good orientation for the reader regarding the topic
-4. no figures were provided
-5. atleast tables to be there`,
-                  commentsEditor: "Reviewer evaluated submission via Electronic Assessment Form (RAF). Priority rating: 6/10. Recommendation: Re-write and Re-submit.",
-                  recommendation: "Re-write and Re-submit",
-                  status: "Pending Moderation"
-                } : isChaud ? {
-                  id: matchedReview?.id || "REV-FB-1791559472514-816",
-                  paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
-                  reviewerName: "Dr. Chaud GJ",
                   originality: 4,
-                  commentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                  sanitizedCommentsAuthor: CHAUD_GJ_RAF.generalComments + "\n\nSpecific comments:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n"),
-                  commentsEditor: CHAUD_GJ_RAF.confidentialCommentsEditor,
-                  recommendation: CHAUD_GJ_RAF.recommendation,
-                  status: "Pending Moderation"
+                  commentsAuthor: matchedReview?.commentsAuthor || (PRAVEEN_NAGULA_RAF.generalComments + "\n\nSpecific Line Critiques & Actionable Revision Plan:\n" + PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                  sanitizedCommentsAuthor: matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || (PRAVEEN_NAGULA_RAF.generalComments + "\n\nSpecific Line Critiques & Actionable Revision Plan:\n" + PRAVEEN_NAGULA_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                  commentsEditor: matchedReview?.commentsEditor || PRAVEEN_NAGULA_RAF.confidentialCommentsEditor,
+                  recommendation: matchedReview?.recommendation || "Major Revision",
+                  status: (matchedReview?.status as any) || "Pending Moderation"
+                } : isChaud ? {
+                  id: matchedReview?.id || "REV-FB-1793887143406-386",
+                  paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
+                  reviewerName: "Dr. German J. Chaud",
+                  originality: 5,
+                  commentsAuthor: matchedReview?.commentsAuthor || (CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                  sanitizedCommentsAuthor: matchedReview?.sanitizedCommentsAuthor || matchedReview?.commentsAuthor || (CHAUD_GJ_RAF.generalComments + "\n\nSpecific Line Critiques:\n" + CHAUD_GJ_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")),
+                  commentsEditor: matchedReview?.commentsEditor || CHAUD_GJ_RAF.confidentialCommentsEditor,
+                  recommendation: matchedReview?.recommendation || "Re-review and Accept with Major Changes",
+                  status: (matchedReview?.status as any) || "Pending Moderation"
                 } : {
                   id: matchedReview?.id || `REV-FB-${revName.replace(/\s+/g, '')}`,
                   paperId: viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01",
