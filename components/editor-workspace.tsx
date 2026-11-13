@@ -608,6 +608,9 @@ export function EditorWorkspace({
   isRefreshingNotifications = false,
   reviews = [],
   onReleaseComments,
+  onSwitchToAuthor,
+  onSubmitArticle,
+  authorSubmissionsCount = 0,
   user = {
     name: "Prof. Aris Thorne",
     title: "Editor-in-Chief & Managing Editor",

@@ -8119,7 +8119,7 @@ Specific comments to the Author(s):
                     setNewAuthorAffiliation("Wuhan University of Technology / Ghent University")
                     setNewAuthorCountry("China")
                     setNewAuthorOrcid("0000-0002-5184-5500")
-                    setSubmitJournal("chemistry")
+                    setNewJournal("Scholarly Open: Chemistry")
                   }
                   setIsSubmitWizardOpen(true)
                 }
@@ -9296,7 +9296,7 @@ Specific comments to the Author(s):
                         setNewAuthorAffiliation("Wuhan University of Technology / Ghent University")
                         setNewAuthorCountry("China")
                         setNewAuthorOrcid("0000-0002-5184-5500")
-                        setSubmitJournal("chemistry")
+                        setNewJournal("Scholarly Open: Chemistry")
                       }
                       setIsSubmitWizardOpen(true)
                     }}
