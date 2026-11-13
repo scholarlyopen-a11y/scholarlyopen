@@ -7978,8 +7978,116 @@ Specific comments to the Author(s):
             {/* Theme, Translation, Notification & User Profile Actions */}
             <div className="flex items-center gap-2.5">
               
-              {/* Author Quick Badges in Header */}
-              {role === "author" && (
+              {/* Dual-Persona Dashboard Switcher & Small Submit Button for Editors / EICs */}
+              {(() => {
+                const isFrancisUser = Boolean(
+                  (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
+                  (editorName && editorName.toLowerCase().includes("verpoort"))
+                )
+                const isEditorUser = Boolean(editorName || editorEmail || isFrancisUser)
+
+                if (isEditorUser) {
+                  const isEIC = Boolean(
+                    isFrancisUser ||
+                    editorRank?.toLowerCase().includes("chief") ||
+                    editorRank?.toLowerCase().includes("managing") ||
+                    editorName?.toLowerCase().includes("verpoort") ||
+                    editorName?.toLowerCase().includes("thorne")
+                  )
+                  const editorToggleLabel = isEIC ? "EIC" : (language === "de" ? "Redaktion" : "Editor")
+
+                  const activeOrcid = editorOrcid || (
+                    editorName?.toLowerCase().includes("cacciola") ? "0000-0003-1296-7633" :
+                    editorName?.toLowerCase().includes("verpoort") ? "0000-0002-5184-5500" :
+                    editorName?.toLowerCase().includes("gong") ? "0000-0002-0213-7313" :
+                    "0000-0002-9842-1102"
+                  )
+
+                  const handleLaunchSubmitForEditor = () => {
+                    handleQuickSwitch("author")
+                    if (isFrancisUser) {
+                      setNewFirstName("Francis")
+                      setNewLastName("Verpoort")
+                      setNewAuthorEmail(editorEmail || "francis@whut.edu.cn")
+                      setNewAuthorAffiliation("Wuhan University of Technology / Ghent University")
+                      setNewAuthorCountry("China")
+                      setNewAuthorOrcid("0000-0002-5184-5500")
+                      setNewJournal("Scholarly Open: Chemistry")
+                    }
+                    setIsSubmitWizardOpen(true)
+                  }
+
+                  return (
+                    <div className="hidden md:flex items-center gap-2 mr-1">
+                      {/* Author / EIC Toggle */}
+                      <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161820] border border-slate-200/90 dark:border-[#2b2d38] shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => handleQuickSwitch("editor")}
+                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                            role === "editor"
+                              ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-2xs font-bold"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                          title={language === "de" ? "Zum Redaktions-Desk wechseln" : `Switch to ${editorToggleLabel} Desk`}
+                        >
+                          <ShieldCheck className="h-3.5 w-3.5" />
+                          <span>{editorToggleLabel}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickSwitch("author")}
+                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                            role === "author"
+                              ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-2xs font-bold"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                          title={language === "de" ? "Zum Autoren-Portal wechseln" : "Switch to Author Submissions"}
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          <span>{language === "de" ? "Autor" : "Author"}</span>
+                        </button>
+                      </div>
+
+                      {/* Small Submit Button */}
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleLaunchSubmitForEditor}
+                        className="h-7 px-2.5 rounded-lg text-xs font-semibold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-2xs flex items-center gap-1 cursor-pointer"
+                        title={language === "de" ? "Artikel einreichen" : "Submit Article"}
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>{language === "de" ? "Einreichen" : "Submit"}</span>
+                      </Button>
+
+                      {/* Official Verified ORCID Record */}
+                      {activeOrcid && (
+                        <a
+                          href={`https://orcid.org/${activeOrcid}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
+                          title={language === "de" ? "Verifiziertes ORCID-Profil des Herausgebers" : "View Verified ORCID Record"}
+                        >
+                          <span className="h-3.5 w-3.5 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[8px] tracking-tighter shrink-0 shadow-2xs">
+                            iD
+                          </span>
+                          <span className="text-xs font-medium tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
+                            {activeOrcid}
+                          </span>
+                          <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
+                        </a>
+                      )}
+                    </div>
+                  )
+                }
+
+                return null
+              })()}
+
+              {/* Author Quick Badges in Header (Standalone Authors Only - NOT for Editors) */}
+              {role === "author" && !editorName && !editorEmail && !email?.toLowerCase().includes("whut.edu.cn") && !email?.toLowerCase().includes("verpoort") && (
                 <div className="hidden md:flex items-center gap-2 mr-1">
                   {/* Active Submissions Counter Badge */}
                   <button
@@ -8091,127 +8199,6 @@ Specific comments to the Author(s):
                   })()}
                 </div>
               )}
-
-              {/* Dual-Persona Dashboard Switcher & Submit Article Button */}
-              {(role === "editor" || role === "author") && (() => {
-                const isFrancis = Boolean(
-                  (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
-                  (editorName && editorName.toLowerCase().includes("verpoort"))
-                )
-                const isEditorUser = Boolean(editorName || editorEmail || isFrancis)
-
-                const activeEditorCount = editorScopedManuscripts.length
-                const authorMsCount = authorScopedManuscripts.length
-
-                const activeOrcid = editorOrcid || (
-                  editorName?.toLowerCase().includes("cacciola") ? "0000-0003-1296-7633" :
-                  editorName?.toLowerCase().includes("verpoort") ? "0000-0002-5184-5500" :
-                  editorName?.toLowerCase().includes("gong") ? "0000-0002-0213-7313" :
-                  "0000-0002-9842-1102"
-                )
-
-                const handleLaunchSubmitForEditor = () => {
-                  handleQuickSwitch("author")
-                  if (isFrancis) {
-                    setNewFirstName("Francis")
-                    setNewLastName("Verpoort")
-                    setNewAuthorEmail(editorEmail || "francis@whut.edu.cn")
-                    setNewAuthorAffiliation("Wuhan University of Technology / Ghent University")
-                    setNewAuthorCountry("China")
-                    setNewAuthorOrcid("0000-0002-5184-5500")
-                    setNewJournal("Scholarly Open: Chemistry")
-                  }
-                  setIsSubmitWizardOpen(true)
-                }
-
-                return (
-                  <div className="hidden md:flex items-center gap-2 mr-1">
-                    {/* Role Switcher Pill: Editor Desk <-> Author Track */}
-                    {isEditorUser && (
-                      <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-200/70 dark:bg-[#161820] border border-slate-300/80 dark:border-[#2b2d38] shadow-2xs">
-                        <button
-                          type="button"
-                          onClick={() => handleQuickSwitch("editor")}
-                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                            role === "editor"
-                              ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-xs"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                          title={language === "de" ? "Zum Redaktions-Desk wechseln" : "Switch to Editor-in-Chief Desk"}
-                        >
-                          <ShieldCheck className="h-3.5 w-3.5" />
-                          <span className="hidden xl:inline">{language === "de" ? "Redaktion" : "Editor Desk"}</span>
-                          {role !== "editor" && (
-                            <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
-                              {activeEditorCount}
-                            </span>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleQuickSwitch("author")}
-                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                            role === "author"
-                              ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-xs"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                          title={language === "de" ? "Zum Autoren-Portal wechseln" : "Switch to Author Submissions"}
-                        >
-                          <FileText className="h-3.5 w-3.5" />
-                          <span className="hidden xl:inline">{language === "de" ? "Autoren-Portal" : "Author Portal"}</span>
-                          <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
-                            {authorMsCount}
-                          </span>
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Dedicated + Submit Article Button */}
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleLaunchSubmitForEditor}
-                      className="h-8 px-3 rounded-lg text-xs font-bold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-xs flex items-center gap-1.5 cursor-pointer"
-                      title={language === "de" ? "Neuen Artikel als Autor einreichen" : "Submit New Article as Author"}
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      <span>{language === "de" ? "Artikel einreichen" : "Submit Article"}</span>
-                    </Button>
-
-                    {/* Active Submissions Badge (when on Editor Desk) */}
-                    {role === "editor" && (
-                      <div
-                        className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
-                        title={language === "de" ? "Aktive redaktionelle Manuskripte" : "Active Manuscripts Under Handling"}
-                      >
-                        <FileText className="h-3.5 w-3.5 text-[#0b99ff]" />
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">
-                          {language === "de" ? `${activeEditorCount} Manuskripte aktiv` : `${activeEditorCount} Active Submissions`}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Official ORCID Identity Badge for Editor */}
-                    {activeOrcid && (
-                      <a
-                        href={`https://orcid.org/${activeOrcid}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
-                        title={language === "de" ? "Verifiziertes ORCID-Profil des Herausgebers" : "View Editor's Verified ORCID Record"}
-                      >
-                        <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
-                          iD
-                        </span>
-                        <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
-                          {activeOrcid}
-                        </span>
-                        <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
-                      </a>
-                    )}
-                  </div>
-                )
-              })()}
 
               {/* 1. Dark/Light Mode Toggle */}
               <button
