@@ -4004,6 +4004,14 @@ Specific comments to the Author(s):
     const isChief = editorRank?.toLowerCase().includes("chief") || editorRank?.toLowerCase().includes("managing") || editorName?.toLowerCase().includes("aris thorne")
     
     return manuscripts.filter((m: any) => {
+      // COPE Recusal Firewall: If this editor is the author, hide from Editor triage!
+      const isAuthorSelf = Boolean(
+        (m.authorEmail && editorEmail && m.authorEmail.toLowerCase().trim() === editorEmail.toLowerCase().trim()) ||
+        (m.author && editorName && m.author.toLowerCase().includes(editorName.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim())) ||
+        (m.authorName && editorName && m.authorName.toLowerCase().includes(editorName.toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim()))
+      )
+      if (isAuthorSelf) return false
+
       if (isGong) {
         return m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")
       }
@@ -4081,10 +4089,18 @@ Specific comments to the Author(s):
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
     const activeUrlMsId = urlParams ? (urlParams.get("manuscriptId") || urlParams.get("id")) : null
 
+    const isFrancisUser = Boolean(
+      (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
+      (profFullName && profFullName.toLowerCase().includes("verpoort")) ||
+      (editorName && editorName.toLowerCase().includes("verpoort"))
+    )
+
     const isSamLeeUser = Boolean(
-      (email && (email.toLowerCase().includes("sam") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me"))) ||
-      (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
-      (activeUrlMsId && (activeUrlMsId === "SOMED-26-RW01" || activeUrlMsId.toLowerCase().includes("rw01")))
+      !isFrancisUser && (
+        (email && (email.toLowerCase().includes("sam") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me"))) ||
+        (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
+        (activeUrlMsId && (activeUrlMsId === "SOMED-26-RW01" || activeUrlMsId.toLowerCase().includes("rw01")))
+      )
     )
 
     const authorFiltered = isDemoAuthor 
@@ -4101,9 +4117,11 @@ Specific comments to the Author(s):
           return false
         })
 
-    const finalManuscripts = (authorFiltered.length === 0 && isSamLeeUser)
+    const finalManuscripts = isFrancisUser
+      ? authorFiltered
+      : (authorFiltered.length === 0 && isSamLeeUser)
       ? [INITIAL_MEDICINE_MANUSCRIPT]
-      : (authorFiltered.length > 0 ? authorFiltered : [INITIAL_MEDICINE_MANUSCRIPT])
+      : (authorFiltered.length > 0 ? authorFiltered : (isDemoAuthor ? [INITIAL_MEDICINE_MANUSCRIPT] : []))
 
     return Array.from(
       new Map(finalManuscripts.map((m: any) => [m.id ? m.id : m.title, m])).values()
@@ -8074,9 +8092,16 @@ Specific comments to the Author(s):
                 </div>
               )}
 
-              {/* Editor Quick Badges in Main Header */}
-              {role === "editor" && (() => {
+              {/* Dual-Persona Dashboard Switcher & Submit Article Button */}
+              {(role === "editor" || role === "author") && (() => {
+                const isFrancis = Boolean(
+                  (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
+                  (editorName && editorName.toLowerCase().includes("verpoort"))
+                )
+                const isEditorUser = Boolean(editorName || editorEmail || isFrancis)
+
                 const activeEditorCount = editorScopedManuscripts.length
+                const authorMsCount = authorScopedManuscripts.length
 
                 const activeOrcid = editorOrcid || (
                   editorName?.toLowerCase().includes("cacciola") ? "0000-0003-1296-7633" :
@@ -8085,18 +8110,86 @@ Specific comments to the Author(s):
                   "0000-0002-9842-1102"
                 )
 
+                const handleLaunchSubmitForEditor = () => {
+                  handleQuickSwitch("author")
+                  if (isFrancis) {
+                    setNewFirstName("Francis")
+                    setNewLastName("Verpoort")
+                    setNewAuthorEmail(editorEmail || "francis@whut.edu.cn")
+                    setNewAuthorAffiliation("Wuhan University of Technology / Ghent University")
+                    setNewAuthorCountry("China")
+                    setNewAuthorOrcid("0000-0002-5184-5500")
+                    setSubmitJournal("chemistry")
+                  }
+                  setIsSubmitWizardOpen(true)
+                }
+
                 return (
                   <div className="hidden md:flex items-center gap-2 mr-1">
-                    {/* Active Submissions Badge */}
-                    <div
-                      className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
-                      title={language === "de" ? "Aktive redaktionelle Manuskripte" : "Active Manuscripts Under Handling"}
+                    {/* Role Switcher Pill: Editor Desk <-> Author Track */}
+                    {isEditorUser && (
+                      <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-200/70 dark:bg-[#161820] border border-slate-300/80 dark:border-[#2b2d38] shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => handleQuickSwitch("editor")}
+                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                            role === "editor"
+                              ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-xs"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                          title={language === "de" ? "Zum Redaktions-Desk wechseln" : "Switch to Editor-in-Chief Desk"}
+                        >
+                          <ShieldCheck className="h-3.5 w-3.5" />
+                          <span className="hidden xl:inline">{language === "de" ? "Redaktion" : "Editor Desk"}</span>
+                          {role !== "editor" && (
+                            <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
+                              {activeEditorCount}
+                            </span>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickSwitch("author")}
+                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                            role === "author"
+                              ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-xs"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                          title={language === "de" ? "Zum Autoren-Portal wechseln" : "Switch to Author Submissions"}
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          <span className="hidden xl:inline">{language === "de" ? "Autoren-Portal" : "Author Portal"}</span>
+                          <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
+                            {authorMsCount}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Dedicated + Submit Article Button */}
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleLaunchSubmitForEditor}
+                      className="h-8 px-3 rounded-lg text-xs font-bold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      title={language === "de" ? "Neuen Artikel als Autor einreichen" : "Submit New Article as Author"}
                     >
-                      <FileText className="h-3.5 w-3.5 text-[#0b99ff]" />
-                      <span className="font-semibold text-slate-900 dark:text-slate-100">
-                        {language === "de" ? `${activeEditorCount} Manuskripte aktiv` : `${activeEditorCount} Active Submissions`}
-                      </span>
-                    </div>
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>{language === "de" ? "Artikel einreichen" : "Submit Article"}</span>
+                    </Button>
+
+                    {/* Active Submissions Badge (when on Editor Desk) */}
+                    {role === "editor" && (
+                      <div
+                        className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
+                        title={language === "de" ? "Aktive redaktionelle Manuskripte" : "Active Manuscripts Under Handling"}
+                      >
+                        <FileText className="h-3.5 w-3.5 text-[#0b99ff]" />
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">
+                          {language === "de" ? `${activeEditorCount} Manuskripte aktiv` : `${activeEditorCount} Active Submissions`}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Official ORCID Identity Badge for Editor */}
                     {activeOrcid && (
@@ -9189,6 +9282,25 @@ Specific comments to the Author(s):
                     language={language}
                     activeTab={activeEditorTab}
                     onTabChange={setActiveEditorTab}
+                    onSwitchToAuthor={() => handleQuickSwitch("author")}
+                    onSubmitArticle={() => {
+                      handleQuickSwitch("author")
+                      const isFrancis = Boolean(
+                        (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
+                        (editorName && editorName.toLowerCase().includes("verpoort"))
+                      )
+                      if (isFrancis) {
+                        setNewFirstName("Francis")
+                        setNewLastName("Verpoort")
+                        setNewAuthorEmail(editorEmail || "francis@whut.edu.cn")
+                        setNewAuthorAffiliation("Wuhan University of Technology / Ghent University")
+                        setNewAuthorCountry("China")
+                        setNewAuthorOrcid("0000-0002-5184-5500")
+                        setSubmitJournal("chemistry")
+                      }
+                      setIsSubmitWizardOpen(true)
+                    }}
+                    authorSubmissionsCount={authorScopedManuscripts.length}
                     manuscripts={editorScopedManuscripts as any}
                     reviews={reviews as any}
                     onReleaseComments={(revId, sanitizedText) => {
@@ -9308,15 +9420,55 @@ Specific comments to the Author(s):
                   const isDe = language === "de"
                   const uniqueManuscripts = authorScopedManuscripts
 
-                  const isSamLee = Boolean(
-                    (email && (email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("sam") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me"))) ||
-                    (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
-                    uniqueManuscripts.some(m => m.id === "SOMED-26-RW01" && (m.author?.toLowerCase().includes("sam") || m.authorName?.toLowerCase().includes("sam") || m.authorEmail?.toLowerCase().includes("applied.ebm.institute") || m.authorEmail?.toLowerCase().includes("proton.me")))
+                  const isFrancis = Boolean(
+                    (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
+                    (editorName && editorName.toLowerCase().includes("verpoort"))
                   )
-                  const displayAuthorName = isSamLee ? "Sam Lee" : (profFullName || regName || (email ? email.split('@')[0] : "Author"))
+                  const isSamLee = Boolean(
+                    !isFrancis && (
+                      (email && (email.toLowerCase().includes("sam.lee") || email.toLowerCase().includes("sam") || email.toLowerCase().includes("applied.ebm.institute") || email.toLowerCase().includes("proton.me"))) ||
+                      (profFullName && profFullName.toLowerCase().includes("sam lee")) ||
+                      uniqueManuscripts.some(m => m.id === "SOMED-26-RW01" && (m.author?.toLowerCase().includes("sam") || m.authorName?.toLowerCase().includes("sam") || m.authorEmail?.toLowerCase().includes("applied.ebm.institute") || m.authorEmail?.toLowerCase().includes("proton.me")))
+                    )
+                  )
+                  const displayAuthorName = isSamLee ? "Sam Lee" : (isFrancis ? "Francis Verpoort, Ph.D." : (profFullName || regName || (email ? email.split('@')[0] : "Author")))
 
                   return (
                     <div className="space-y-6">
+                      {/* Editor-in-Chief Dual-Persona Author Notice */}
+                      {isFrancis && (
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-sky-50 to-indigo-50/50 dark:from-sky-950/30 dark:to-indigo-950/20 border border-sky-200 dark:border-sky-800/60 shadow-2xs">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-xl bg-sky-500/10 flex items-center justify-center text-[#0b99ff] shrink-0">
+                              <ShieldCheck className="h-5 w-5" />
+                            </div>
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                                  {isDe ? "Autoren-Portal für Chefredakteur" : "Editor-in-Chief Author Portal"}
+                                </h4>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60">
+                                  COPE Recusal Enforced
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                                {isDe 
+                                  ? "Sie sind als einreichender Autor angemeldet. Ihre Einreichungen zu Scholarly Open: Chemistry werden unabhängig begutachtet und sind von Ihrem Redaktions-Desk getrennt." 
+                                  : "You are currently viewing your personal author submissions. In compliance with COPE standards, your manuscripts are independently handled and completely masked from your Editor Desk."}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            onClick={() => handleQuickSwitch("editor")}
+                            className="bg-white dark:bg-[#18191e] border border-sky-300 dark:border-sky-700 text-[#0b99ff] hover:bg-sky-50 dark:hover:bg-sky-950/40 text-xs font-bold px-3.5 py-1.5 h-auto rounded-lg shadow-2xs shrink-0 cursor-pointer flex items-center gap-1.5"
+                          >
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            <span>{isDe ? "Zum Redaktions-Desk" : "Back to Editor Desk"}</span>
+                          </Button>
+                        </div>
+                      )}
+
                       {/* Unverified ORCID Notice Banner (Tiered Gatekeeping) */}
                       {!isOrcidVerified && (
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 shadow-2xs">
@@ -13468,6 +13620,19 @@ Specific comments to the Author(s):
               {submitStep === 1 && (
                 <div className="space-y-3.5 py-1 text-xs">
                   
+                  {/* COPE Recusal Governance Notice if submitting author is an Editor */}
+                  {Boolean(editorName || newAuthorEmail?.toLowerCase().includes("whut.edu.cn") || newAuthorEmail === editorEmail) && (
+                    <div className="p-3 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-2.5 shadow-2xs">
+                      <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <span className="font-bold">COPE Editorial Recusal Protocol Active:</span>
+                        <p className="leading-relaxed text-amber-800 dark:text-amber-300">
+                          Because you serve on the Editorial Board, this submission will be automatically recused from your editor triage queue and assigned to an independent senior handling editor via the Journal Manager.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Subtle Corresponding Author Banner */}
                   <div className="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950/50 border border-slate-200/70 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
                     <span className="font-semibold text-slate-800 dark:text-slate-200">
