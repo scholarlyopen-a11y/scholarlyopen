@@ -1450,7 +1450,7 @@ export default function Editorial360Page() {
         setActiveAuthorTab("submissions")
         setAuthorFilter("all")
 
-        // Immediately link and inject the claimed manuscript with Revision Under Evaluation status
+        // Immediately link and inject the claimed manuscript with Revision Required status (Round 2)
         setManuscripts(prev => {
           const exists = prev.some(m => m.id === claimId || (claimId === "SOMED-26-RW01" && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("aortic"))))
           let updated: Manuscript[]
@@ -1461,18 +1461,21 @@ export default function Editorial360Page() {
                   ...INITIAL_MEDICINE_MANUSCRIPT,
                   ...m,
                   id: claimId,
-                  status: "Revision Under Evaluation",
-                  submissionStage: "Revision Under Evaluation",
+                  status: "Revision Required",
+                  submissionStage: "Round 2 Minor Revision Requested",
                   authorName: claimName,
                   author: claimName,
                   authorEmail: claimEmail,
                   authorAffiliation: m.authorAffiliation || "Applied Evidence-Based Medicine (EBM) Institute",
                   authorCountry: m.authorCountry || "United States",
                   fileUrl: m.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
-                  revisedFileUrl: m.revisedFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
-                  rebuttalFileUrl: m.rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx",
+                  revisedFileUrl: m.revisedFileUrl || "/manuscripts/SOMED-26-RW01-revised-manuscript.docx",
+                  rebuttalFileUrl: m.rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-rebuttal.docx",
                   editorAssigned: true,
-                  assignedEditorName: m.assignedEditorName || "Weihua Gong, M.D., Ph.D."
+                  assignedEditorName: "S. K. Kanthlal, M.Pharm., Ph.D.",
+                  previousEditorName: "Weihua Gong, M.D., Ph.D.",
+                  handlingEditorComments: KANTHLAL_HANDLING_EDITOR_DIRECTIVE.rawEmailText,
+                  handlingEditorDecision: "Minor Revision Required"
                 }
               }
               return m
@@ -1481,13 +1484,17 @@ export default function Editorial360Page() {
             const newClaimed: Manuscript = {
               ...INITIAL_MEDICINE_MANUSCRIPT,
               id: claimId,
-              status: "Revision Under Evaluation",
-              submissionStage: "Revision Under Evaluation",
+              status: "Revision Required",
+              submissionStage: "Round 2 Minor Revision Requested",
               authorName: claimName,
               author: claimName,
               authorEmail: claimEmail,
               authorAffiliation: "Applied Evidence-Based Medicine (EBM) Institute",
-              authorCountry: "United States"
+              authorCountry: "United States",
+              assignedEditorName: "S. K. Kanthlal, M.Pharm., Ph.D.",
+              previousEditorName: "Weihua Gong, M.D., Ph.D.",
+              handlingEditorComments: KANTHLAL_HANDLING_EDITOR_DIRECTIVE.rawEmailText,
+              handlingEditorDecision: "Minor Revision Required"
             }
             updated = [newClaimed, ...prev]
           }
@@ -1496,6 +1503,10 @@ export default function Editorial360Page() {
           } catch (e) {}
           return updated
         })
+
+        // Automatically open the revision dialogue so Dr. Sam Lee directly sees Dr. Kanthlal's directive & R2 submission form
+        setRevisionPaperId(claimId)
+        setIsRevisionDialogOpen(true)
 
         try {
           sessionStorage.setItem("editorial360_session", JSON.stringify({
@@ -1508,7 +1519,7 @@ export default function Editorial360Page() {
           }))
         } catch (e) {}
 
-        setSuccess(`Welcome, ${claimName}! Manuscript ${claimId} has been successfully verified and claimed on your Author Desk under status: Revision Under Evaluation.`)
+        setSuccess(`Welcome, ${claimName}! Manuscript ${claimId} loaded for Round 2 Revision under 2nd Handling Editor Dr. S. K. Kanthlal.`)
       }
 
       const urlManuscriptId = params.get("manuscriptId")
@@ -1965,15 +1976,18 @@ export default function Editorial360Page() {
                     ...INITIAL_MEDICINE_MANUSCRIPT,
                     ...m,
                     id: "SOMED-26-RW01",
-                    status: "Revision Under Evaluation",
-                    submissionStage: "Revision Under Evaluation",
+                    status: "Revision Required",
+                    submissionStage: "Round 2 Minor Revision Requested",
                     authorName: "Dr. Sam Lee",
                     author: "Dr. Sam Lee",
                     authorEmail: "Applied.EBM.Institute@proton.me",
                     authorAffiliation: "Applied Evidence-Based Medicine (EBM) Institute",
                     revisedFileUrl: m.revisedFileUrl || INITIAL_MEDICINE_MANUSCRIPT.revisedFileUrl,
                     rebuttalFileUrl: m.rebuttalFileUrl || INITIAL_MEDICINE_MANUSCRIPT.rebuttalFileUrl,
-                    assignedEditorName: m.assignedEditorName || "Weihua Gong, M.D., Ph.D."
+                    assignedEditorName: "S. K. Kanthlal, M.Pharm., Ph.D.",
+                    previousEditorName: "Weihua Gong, M.D., Ph.D.",
+                    handlingEditorDecision: "Minor Revision Required",
+                    handlingEditorComments: KANTHLAL_HANDLING_EDITOR_DIRECTIVE.rawEmailText
                   }
                 }
                 return m
@@ -7985,7 +7999,7 @@ Specific comments to the Author(s):
             {/* Theme, Translation, Notification & User Profile Actions */}
             <div className="flex items-center gap-2.5">
               
-              {/* Dual-Persona Dashboard Switcher & Small Submit Button for Editors / EICs */}
+              {/* Dual-Persona Dashboard Switcher & Submit Article Button for Editors / EICs (Image 4 Design) */}
               {(() => {
                 const isFrancisUser = Boolean(
                   (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
@@ -8001,7 +8015,7 @@ Specific comments to the Author(s):
                     editorName?.toLowerCase().includes("verpoort") ||
                     editorName?.toLowerCase().includes("thorne")
                   )
-                  const editorToggleLabel = isEIC ? "EIC" : (language === "de" ? "Redaktion" : "Editor")
+                  const editorToggleLabel = isEIC ? "Editor Desk" : (language === "de" ? "Redaktion" : "Editor Desk")
 
                   const activeOrcid = editorOrcid || (
                     editorName?.toLowerCase().includes("cacciola") ? "0000-0003-1296-7633" :
@@ -8009,6 +8023,17 @@ Specific comments to the Author(s):
                     editorName?.toLowerCase().includes("gong") ? "0000-0002-0213-7313" :
                     "0000-0002-9842-1102"
                   )
+
+                  const activeEditorCount = editorScopedManuscripts.length
+                  const authorMsCount = manuscripts.filter((m: any) => {
+                    const cleanEmail = (editorEmail || email || "").toLowerCase().trim()
+                    const cleanName = (editorName || profFullName || "").toLowerCase().replace(/^(prof\.|dr\.)\s*/i, "").trim()
+                    return Boolean(
+                      (cleanEmail && m.authorEmail && m.authorEmail.toLowerCase().trim() === cleanEmail) ||
+                      (cleanName && m.author && m.author.toLowerCase().includes(cleanName)) ||
+                      (cleanName && m.authorName && m.authorName.toLowerCase().includes(cleanName))
+                    )
+                  }).length
 
                   const handleLaunchSubmitForEditor = () => {
                     handleQuickSwitch("author")
@@ -8026,7 +8051,39 @@ Specific comments to the Author(s):
 
                   return (
                     <div className="hidden md:flex items-center gap-2 mr-1">
-                      {/* Author / EIC Toggle */}
+                      {/* Active Submissions Counter Pill */}
+                      <div
+                        className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
+                        title={role === "editor" ? "Active Manuscripts Under Editorial Handling" : "Active Manuscripts Under Personal Author Handling"}
+                      >
+                        <span className="h-2 w-2 rounded-full bg-[#0b99ff]" />
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">
+                          {role === "editor" ? activeEditorCount : authorMsCount} Active Submissions
+                        </span>
+                      </div>
+
+                      {/* Link ORCID (if unlinked) */}
+                      {!activeOrcid && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOrcidInput("")
+                            setOrcidAuthSuccessMsg(null)
+                            setIsOrcidAuthModalOpen(true)
+                          }}
+                          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs bg-white dark:bg-[#1c1e26] hover:bg-slate-50 dark:hover:bg-[#252834] text-slate-600 dark:text-slate-300 border border-dashed border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs group"
+                          title="Connect ORCID iD"
+                        >
+                          <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0">
+                            iD
+                          </span>
+                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                            Link ORCID
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Author / Editor Persona Segmented Toggle */}
                       <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161820] border border-slate-200/90 dark:border-[#2b2d38] shadow-2xs">
                         <button
                           type="button"
@@ -8036,10 +8093,13 @@ Specific comments to the Author(s):
                               ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-2xs font-bold"
                               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                           }`}
-                          title={language === "de" ? "Zum Redaktions-Desk wechseln" : `Switch to ${editorToggleLabel} Desk`}
+                          title={language === "de" ? "Zum Redaktions-Desk wechseln" : `Switch to ${editorToggleLabel}`}
                         >
                           <ShieldCheck className="h-3.5 w-3.5" />
                           <span>{editorToggleLabel}</span>
+                          <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
+                            {activeEditorCount}
+                          </span>
                         </button>
                         <button
                           type="button"
@@ -8052,20 +8112,23 @@ Specific comments to the Author(s):
                           title={language === "de" ? "Zum Autoren-Portal wechseln" : "Switch to Author Submissions"}
                         >
                           <FileText className="h-3.5 w-3.5" />
-                          <span>{language === "de" ? "Autor" : "Author"}</span>
+                          <span>{language === "de" ? "Autoren-Portal" : "Author Portal"}</span>
+                          <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
+                            {authorMsCount}
+                          </span>
                         </button>
                       </div>
 
-                      {/* Small Submit Button */}
+                      {/* Submit Article Button */}
                       <Button
                         type="button"
                         size="sm"
                         onClick={handleLaunchSubmitForEditor}
-                        className="h-7 px-2.5 rounded-lg text-xs font-semibold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-2xs flex items-center gap-1 cursor-pointer"
+                        className="h-8 px-3 rounded-lg text-xs font-bold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-2xs flex items-center gap-1.5 cursor-pointer"
                         title={language === "de" ? "Artikel einreichen" : "Submit Article"}
                       >
                         <Plus className="h-3.5 w-3.5" />
-                        <span>{language === "de" ? "Einreichen" : "Submit"}</span>
+                        <span>{language === "de" ? "Artikel einreichen" : "Submit Article"}</span>
                       </Button>
 
                       {/* Official Verified ORCID Record */}
@@ -8074,7 +8137,7 @@ Specific comments to the Author(s):
                           href={`https://orcid.org/${activeOrcid}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
+                          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
                           title={language === "de" ? "Verifiziertes ORCID-Profil des Herausgebers" : "View Verified ORCID Record"}
                         >
                           <span className="h-3.5 w-3.5 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[8px] tracking-tighter shrink-0 shadow-2xs">
@@ -9976,6 +10039,11 @@ Specific comments to the Author(s):
                                                   }`} />
                                                   {translateStatus(m.status)}
                                                 </span>
+                                                {m.submissionStage && (
+                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800">
+                                                    {m.submissionStage}
+                                                  </span>
+                                                )}
                                               </div>
                                               <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
                                                 {m.title}
@@ -9983,6 +10051,22 @@ Specific comments to the Author(s):
                                               <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
                                                 {m.abstract}
                                               </p>
+                                              {(m.id === "SOMED-26-RW01" || m.submissionStage?.includes("Round 2")) && (
+                                                <div className="mt-2.5 p-3 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs space-y-1.5">
+                                                  <div className="flex flex-wrap items-center justify-between gap-1.5 font-bold text-amber-900 dark:text-amber-200">
+                                                    <span className="flex items-center gap-1.5">
+                                                      <span className="h-2 w-2 rounded-full bg-amber-500" />
+                                                      2nd Handling Editor: Dr. S. K. Kanthlal, M.Pharm., Ph.D.
+                                                    </span>
+                                                    <span className="text-[10px] px-2 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 uppercase font-extrabold tracking-wider">
+                                                      Round 2 Action Directive
+                                                    </span>
+                                                  </div>
+                                                  <p className="text-[11.5px] text-amber-800 dark:text-amber-300 font-medium leading-relaxed">
+                                                    Directives: 1. Condense abstract (≤ 300 words) &middot; 2. Eliminate redundancy in Introduction &middot; 3. Keep Perspective scope narrow &amp; selective.
+                                                  </p>
+                                                </div>
+                                              )}
                                             </div>
 
                                             <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
@@ -10012,7 +10096,7 @@ Specific comments to the Author(s):
                                                     className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-2xs transition-colors flex items-center gap-1.5"
                                                   >
                                                     <Upload className="h-3.5 w-3.5" />
-                                                    <span>{isDe ? "Revision einreichen" : "Submit Revision"}</span>
+                                                    <span>{isDe ? "R2-Revision einreichen" : (m.submissionStage?.includes("Round 2") ? "Submit R2 Revision" : "Submit Revision")}</span>
                                                   </Button>
                                                 )}
                                             </div>
@@ -10097,9 +10181,10 @@ Specific comments to the Author(s):
                                                           setRevisionPaperId(m.id)
                                                           setIsRevisionDialogOpen(true)
                                                         }}
-                                                        className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
+                                                        className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer shadow-2xs transition-colors inline-flex items-center gap-1"
                                                       >
-                                                        {isDe ? "Überarbeiten" : "Revise"}
+                                                        <Upload className="h-3 w-3" />
+                                                        <span>{isDe ? "R2 einreichen" : (m.submissionStage?.includes("Round 2") ? "Submit R2" : "Revise")}</span>
                                                       </button>
                                                     )}
                                                   </div>
