@@ -353,7 +353,7 @@ export async function PATCH(req: Request) {
 
       if (targetRecord && isDisapproving) {
         const currentWatchlist = await getStoredDisapproved()
-        const filtered = currentWatchlist.filter(d => d.email.toLowerCase() !== targetRecord.candidateEmail.toLowerCase())
+        const filtered = currentWatchlist.filter((d: any) => d.email.toLowerCase() !== targetRecord.candidateEmail.toLowerCase())
         await saveStoredDisapproved([
           {
             id: `WATCH-${Date.now().toString().slice(-6)}`,
@@ -415,7 +415,7 @@ export async function DELETE(req: Request) {
     // Retain purged candidate on integrity watchlist so future attempts are caught
     if (removedRecord && removedRecord.candidateEmail) {
       const currentWatchlist = await getStoredDisapproved()
-      const exists = currentWatchlist.some(w => w.email.toLowerCase() === removedRecord.candidateEmail.toLowerCase())
+      const exists = currentWatchlist.some((w: any) => w.email.toLowerCase() === removedRecord.candidateEmail.toLowerCase())
       if (!exists) {
         await saveStoredDisapproved([
           {
@@ -495,7 +495,7 @@ export async function POST(req: Request) {
     const cleanOrcid = (orcid || "").trim()
 
     const disapprovedList = await getStoredDisapproved()
-    const matchDisapproved = disapprovedList.find(d => 
+    const matchDisapproved = disapprovedList.find((d: any) => 
       (d.email && d.email.toLowerCase() === cleanEmail) || 
       (cleanOrcid && d.orcid && d.orcid === cleanOrcid)
     )

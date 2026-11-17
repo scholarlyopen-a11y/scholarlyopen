@@ -125,7 +125,7 @@ export async function POST(req: Request) {
     const cleanOrcid = (orcid || "").trim()
 
     const disapprovedList = await getStoredDisapproved()
-    const matchDisapproved = disapprovedList.find(d => 
+    const matchDisapproved = disapprovedList.find((d: any) => 
       (d.email && d.email.toLowerCase() === cleanEmail) || 
       (cleanOrcid && d.orcid && d.orcid === cleanOrcid)
     )
@@ -214,7 +214,7 @@ export async function PATCH(req: Request) {
     // If candidate was disapproved, permanently register in watchlist
     if (updatedCandidate && isDisapproving) {
       const currentWatchlist = await getStoredDisapproved()
-      const filtered = currentWatchlist.filter(d => d.email.toLowerCase() !== updatedCandidate.candidateEmail.toLowerCase())
+      const filtered = currentWatchlist.filter((d: any) => d.email.toLowerCase() !== updatedCandidate.candidateEmail.toLowerCase())
       await saveStoredDisapproved([
         {
           id: `WATCH-${Date.now().toString().slice(-6)}`,
@@ -311,7 +311,7 @@ export async function DELETE(req: Request) {
     // If candidate was deleted, preserve them in the disapproved / watchlist registry
     if (removedCandidate) {
       const currentWatchlist = await getStoredDisapproved()
-      const exists = currentWatchlist.some(w => w.email.toLowerCase() === removedCandidate.candidateEmail.toLowerCase())
+      const exists = currentWatchlist.some((w: any) => w.email.toLowerCase() === removedCandidate.candidateEmail.toLowerCase())
       if (!exists) {
         await saveStoredDisapproved([
           {

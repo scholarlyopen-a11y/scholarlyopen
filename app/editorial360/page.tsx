@@ -101,6 +101,7 @@ import { OFFICIAL_JOURNALS, DEFAULT_EDITORIAL_EMAIL } from "@/lib/data/journal-c
 import { EditorialBoardOnboarding, type EditorialBoardOnboardingData } from "@/components/editorial-board-onboarding"
 import { GLOBAL_COUNTRIES } from "@/lib/data/countries"
 import { ForensicsInvestigationSuite } from "@/components/forensics-investigation-suite"
+import { KANTHLAL_HANDLING_EDITOR_DIRECTIVE } from "@/lib/data/editorial-constants"
 
 const ReviewerWorkspace = dynamic(
   () => import("@/components/reviewer-workspace").then(mod => mod.ReviewerWorkspace),
@@ -187,13 +188,16 @@ interface Manuscript {
   dataDoi?: string
   editorAssigned?: boolean
   assignedEditorName?: string
+  previousEditorName?: string
+  handlingEditorComments?: string
+  handlingEditorDecision?: string
 }
 
 export const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
   id: "SOMED-26-RW01",
   title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
   journal: "Scholarly Open: Medicine",
-  status: "Revision Under Evaluation",
+  status: "Revision Required",
   date: "2026-10-21",
   reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
   integrityStatus: "Clean",
@@ -206,8 +210,8 @@ export const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
   authorEmail: "Applied.EBM.Institute@proton.me",
   authorAffiliation: "Applied Evidence-Based Medicine (EBM) Institute",
   authorCountry: "United States",
-  articleType: "Review Article",
-  submissionStage: "Revision Under Evaluation",
+  articleType: "Perspective",
+  submissionStage: "Round 2 Minor Revision Requested",
   abstract: "Acute aortic dissection (AAD) represents one of the most time-critical cardiovascular emergencies, with early mortality escalating by 1% to 2% per hour from symptom onset. This paper establishes a multidisciplinary evidence-based operations framework combining automated early clinical suspicion scores, emergency point-of-care ultrasound protocols, streamlined door-to-imaging pathways (<30 minutes), and centralized aortic surgical dispatch teams to drastically mitigate diagnostic delays and optimize definitive surgical intervention.",
   fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
   fileSize: "39.5 KB",
@@ -221,7 +225,10 @@ export const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
   rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
   revisionDate: "2026-10-21T07:30:00.000Z",
   editorAssigned: true,
-  assignedEditorName: "Weihua Gong, M.D., Ph.D."
+  assignedEditorName: "S. K. Kanthlal, M.Pharm., Ph.D.",
+  previousEditorName: "Weihua Gong, M.D., Ph.D.",
+  handlingEditorComments: `Dear Noor F,\n\nI have gone through the manuscript, comments and the explanations thoroughly. The reviewers have put appreciable efforts in critically evaluating the manuscript. \n\nAlso the authors have carefully addressed the comments with relevant explanations. \n\nBut there are still a few deficiencies to address to make this work publishable. \n\nAs mentioned by Reviewer 2, the Manuscript Length and redundancy need to be carefully addressed again (Especially in the Introduction Section). \nThe abstract is lengthy (reduce to 300 or below). \nAs it is a Perspective article, The Scope should be narrow nd crystal clear and must be Narrow and selective.\n\nBut overall, the work looks good and is appreciable. After those minor revisions, it may be publishable .. \n\n\nRegards\nDr. Kanthlal\nEditor`,
+  handlingEditorDecision: "Minor Revision Required"
 }
 
 // Review Invitation mock data
@@ -5597,7 +5604,7 @@ Specific comments to the Author(s):
       }
 
       const targetJournalEmails = journalEmailsMap[targetJournalName] || ["editorial@scholarlyopen.org"]
-      const handlingEditorEmail = targetPaper?.assignedEditorEmail || (isAortic ? "126010@sh9hospital.org.cn" : "")
+      const handlingEditorEmail = targetPaper?.assignedEditorEmail || (isAortic ? "lalpharm@gmail.com" : "")
 
       const journalAlertHtml = `
 <!DOCTYPE html>
@@ -14419,54 +14426,129 @@ Specific comments to the Author(s):
                           ].filter(Boolean) as ReviewFeedback[]
                         }
 
-                        return displayReviews
-                          .filter((rev, idx) => {
-                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.id === "REV-FB-PN02-ROUND2" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
-                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.id === "REV-FB-1793887143406-386" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
-                            if (revisionCommentsTab === "rev1") return isRev1
-                            if (revisionCommentsTab === "rev3") return isRev3
-                            return true
-                          })
-                          .map((rev, idx) => {
-                            const isRev1 = rev.id === "REV-FB-SAM-01" || rev.id === "REV-FB-PN02-ROUND2" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
-                            const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.id === "REV-FB-1793887143406-386" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+                        return (
+                          <div className="space-y-3">
+                            {/* 2nd Handling Editor Directive & Formal Verdict Card */}
+                            {isAortic && (
+                              <div className="p-4 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/40 dark:from-indigo-950/30 dark:via-[#161820] dark:to-sky-950/20 shadow-xs space-y-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-indigo-100 dark:border-indigo-900/40 pb-2.5">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800 shadow-2xs">
+                                      <ShieldCheck className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                                          Handling Editor Decision · Dr. S. K. Kanthlal, M.Pharm., Ph.D.
+                                        </h4>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60">
+                                          Minor Revision Required
+                                        </span>
+                                      </div>
+                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                        Assigned in succession following non-response from Dr. Weihua Gong · Kerala University of Health Sciences (<span className="font-mono text-indigo-600 dark:text-indigo-400">lalpharm@gmail.com</span>)
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const directiveHeader = `--- Response to Handling Editor (Dr. S. K. Kanthlal) ---\n1. Manuscript Length & Redundancy (Introduction Section):\n2. Abstract Condensation (≤300 words):\n3. Narrow & Selective Perspective Scope:\n`
+                                      setRevisionRebuttal(prev => prev ? `${prev}\n\n${directiveHeader}` : directiveHeader)
+                                    }}
+                                    className="text-[10px] text-[#0b99ff] hover:underline font-bold cursor-pointer shrink-0"
+                                  >
+                                    + Address Editor Points
+                                  </button>
+                                </div>
 
-                            let commentText = rev.sanitizedCommentsAuthor || rev.commentsAuthor || ""
-                            if (isAortic) {
-                              if (isRev1 && commentText.length < 250) commentText = aorticRev1
-                              if (isRev3 && commentText.length < 250) commentText = aorticRev3
-                            }
+                                <div className="space-y-2">
+                                  <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                                    3 Mandatory Pre-Publication Requirements from Handling Editor:
+                                  </div>
+                                  <div className="grid grid-cols-1 gap-1.5 text-xs">
+                                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-2">
+                                      <span className="h-4 w-4 rounded-full bg-amber-500/10 text-amber-600 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                      <span className="text-[11.5px] text-slate-700 dark:text-slate-300">
+                                        <strong>Manuscript Length & Redundancy:</strong> As highlighted by Reviewer 2, carefully address manuscript length and eliminate redundancy, especially in the <em>Introduction Section</em>.
+                                      </span>
+                                    </div>
+                                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-2">
+                                      <span className="h-4 w-4 rounded-full bg-amber-500/10 text-amber-600 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                      <span className="text-[11.5px] text-slate-700 dark:text-slate-300">
+                                        <strong>Abstract Condensation:</strong> The abstract is lengthy — reduce word count strictly to <strong>300 words or below</strong>.
+                                      </span>
+                                    </div>
+                                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-2">
+                                      <span className="h-4 w-4 rounded-full bg-amber-500/10 text-amber-600 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                      <span className="text-[11.5px] text-slate-700 dark:text-slate-300">
+                                        <strong>Selective Perspective Scope:</strong> As a Perspective article, the scope must be crystal clear, narrow, and selective.
+                                      </span>
+                                    </div>
+                                  </div>
 
-                            const reviewerTag = isRev3 ? "Reviewer #3" : (isRev1 ? "Reviewer #1" : `Reviewer #${idx + 1}`)
-
-                            return (
-                              <div key={rev.id || idx} className="space-y-2 p-3.5 bg-white dark:bg-[#131418] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs">
-                                <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-slate-100 dark:border-slate-800">
-                                  <span className="text-xs font-bold text-slate-900 dark:text-white">
-                                    [{reviewerTag}]
-                                  </span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/60">
-                                      {rev.recommendation}
+                                  <div className="pt-1.5">
+                                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                                      Verbatim Decision Communication (Sent via Email):
                                     </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const templateHeader = `--- Response to [${reviewerTag}] (${rev.recommendation}) ---\n`
-                                        setRevisionRebuttal(prev => prev ? `${prev}\n\n${templateHeader}` : templateHeader)
-                                      }}
-                                      className="text-[10px] text-[#0b99ff] hover:underline font-semibold cursor-pointer"
-                                    >
-                                      + Add to Rebuttal
-                                    </button>
+                                    <pre className="text-[11px] text-slate-700 dark:text-slate-300 font-sans whitespace-pre-wrap leading-relaxed p-3 rounded bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800">
+                                      {KANTHLAL_HANDLING_EDITOR_DIRECTIVE.rawEmailText}
+                                    </pre>
                                   </div>
                                 </div>
-                                <div className="text-[11.5px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed pt-1">
-                                  {commentText}
-                                </div>
                               </div>
-                            )
-                          })
+                            )}
+
+                            {displayReviews
+                              .filter((rev, idx) => {
+                                const isRev1 = rev.id === "REV-FB-SAM-01" || rev.id === "REV-FB-PN02-ROUND2" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                                const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.id === "REV-FB-1793887143406-386" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+                                if (revisionCommentsTab === "rev1") return isRev1
+                                if (revisionCommentsTab === "rev3") return isRev3
+                                return true
+                              })
+                              .map((rev, idx) => {
+                                const isRev1 = rev.id === "REV-FB-SAM-01" || rev.id === "REV-FB-PN02-ROUND2" || rev.reviewerName?.toLowerCase().includes("nagula") || idx === 0
+                                const isRev3 = rev.id === "REV-FB-1791559472514-816" || rev.id === "REV-FB-1793887143406-386" || rev.reviewerName?.toLowerCase().includes("chaud") || idx === 1
+
+                                let commentText = rev.sanitizedCommentsAuthor || rev.commentsAuthor || ""
+                                if (isAortic) {
+                                  if (isRev1 && commentText.length < 250) commentText = aorticRev1
+                                  if (isRev3 && commentText.length < 250) commentText = aorticRev3
+                                }
+
+                                const reviewerTag = isRev3 ? "Reviewer #3" : (isRev1 ? "Reviewer #1" : `Reviewer #${idx + 1}`)
+
+                                return (
+                                  <div key={rev.id || idx} className="space-y-2 p-3.5 bg-white dark:bg-[#131418] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs">
+                                    <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+                                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                        [{reviewerTag}]
+                                      </span>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/60">
+                                          {rev.recommendation}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const templateHeader = `--- Response to [${reviewerTag}] (${rev.recommendation}) ---\n`
+                                            setRevisionRebuttal(prev => prev ? `${prev}\n\n${templateHeader}` : templateHeader)
+                                          }}
+                                          className="text-[10px] text-[#0b99ff] hover:underline font-semibold cursor-pointer"
+                                        >
+                                          + Add to Rebuttal
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <div className="text-[11.5px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans leading-relaxed pt-1">
+                                      {commentText}
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                          </div>
+                        )
                       })()}
                     </div>
                   </div>
@@ -17875,11 +17957,27 @@ function ClockWidget() {
 }
 
 
+interface HeaderProfileStats {
+  label: string
+  value: string
+}
+
+interface HeaderProfileData {
+  name: string
+  title: string
+  orcid: string
+  avatar: string
+  stats: HeaderProfileStats[]
+  badges?: string[]
+  nextBadge?: string
+  interests?: string
+}
+
 // User Profile Header Component
 function UserProfileHeader({ role }: { role: string }) {
   if (role === 'admin') return null;
 
-  const getProfileData = () => {
+  const getProfileData = (): HeaderProfileData | null => {
     switch (role) {
       case 'author':
         return {
@@ -17970,7 +18068,7 @@ function UserProfileHeader({ role }: { role: string }) {
       </div>
       
       <div className="flex-1 w-full border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 pt-4 md:pt-0 md:pl-6 flex flex-wrap gap-4">
-        {data.stats.map((stat, i) => (
+        {data.stats.map((stat: HeaderProfileStats, i: number) => (
           <div key={i} className="flex-1 min-w-[100px] bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-center">
             <div className="text-xl font-black text-slate-700 dark:text-slate-300">{stat.value}</div>
             <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">{stat.label}</div>
@@ -17988,7 +18086,7 @@ function UserProfileHeader({ role }: { role: string }) {
              <div>
                <h4 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Badges Earned</h4>
                <div className="flex flex-wrap gap-1.5 mt-1">
-                 {data.badges.map(b => (
+                 {data.badges.map((b: string) => (
                    <span key={b} className="text-[9px] font-bold bg-[#0b99ff]/10 text-[#0b99ff] px-2 py-0.5 rounded-full border border-[#0b99ff]/20">{b}</span>
                  ))}
                </div>

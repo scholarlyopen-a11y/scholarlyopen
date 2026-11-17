@@ -67,6 +67,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { GLOBAL_COUNTRIES } from "@/lib/data/countries"
+import { PRAVEEN_NAGULA_R1_RAF, CHAUD_GJ_R1_RAF } from "@/lib/data/editorial-constants"
 
 export interface ReviewerProfile {
   title: string
@@ -525,6 +526,7 @@ export function ReviewerWorkspace({
   const [selectedInvForDecline, setSelectedInvForDecline] = useState<ReviewInvitationItem | null>(null)
   const [selectedReviewForEval, setSelectedReviewForEval] = useState<ActiveReviewItem | null>(null)
   const [isRound2Active, setIsRound2Active] = useState<boolean>(false)
+  const [showRound1ArchiveInEval, setShowRound1ArchiveInEval] = useState<boolean>(false)
   const [selectedPackageRev, setSelectedPackageRev] = useState<ActiveReviewItem | null>(null)
   const [selectedCertReview, setSelectedCertReview] = useState<ActiveReviewItem | null>(null)
   const [requestCertificate, setRequestCertificate] = useState(true)
@@ -934,6 +936,22 @@ export function ReviewerWorkspace({
     setIsRound2Active(isRound2 || Boolean((rev as any).isRound2) || rev.status === "Completed")
     setSelectedReviewForEval(rev)
     setEvalError("")
+
+    // If review is already completed, populate evaluation fields with sealed record
+    if (rev.status === "Completed") {
+      const isChaud = (profile?.email || user?.email || "").toLowerCase().includes("chaud") || rev.id?.includes("386")
+      const rData = isChaud ? CHAUD_GJ_R1_RAF : PRAVEEN_NAGULA_R1_RAF
+      const revAny = rev as any
+      setGeneralComments(revAny.generalCommentsAuthor || revAny.generalComments || revAny.commentsAuthor || rData.generalComments)
+      setSpecificComments(Array.isArray(rData.specificComments) ? rData.specificComments.map((s, i) => `${i + 1}. ${s}`).join("\n\n") : "")
+      setEditorConfidentialComments(revAny.confidentialCommentsEditor || revAny.commentsEditor || rData.confidentialCommentsEditor)
+      if (rev.recommendation || rData.recommendation) {
+        setRecommendation((rev.recommendation || rData.recommendation) as any)
+      }
+      setPriorityRating(rData.priorityRating || 5)
+      setEvalCopeCheck(true)
+      return
+    }
 
     // Check for locally saved draft
     const draftKey = `editorial360_draft_eval_${rev.manuscriptId || rev.id}_${profile?.email || user?.email || ""}`
@@ -3168,6 +3186,12 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                   </h2>
                                                                                 </div>
                                                                                 <div className="flex items-center gap-2">
+                                                                                  {selectedReviewForEval?.status === "Completed" && (
+                                                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 shadow-2xs">
+                                                                                      <Lock className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                                                                                      {isDe ? "COPE Versiegelt · Schreibgeschützt" : "COPE Sealed · Read Only"}
+                                                                                    </span>
+                                                                                  )}
                                                                                   {lastDraftSavedAt && (
                                                                                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                                                                                       <CheckCircle2 className="h-3 w-3" />
@@ -3185,6 +3209,35 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                 {evalError && (
                                                                                   <div className="p-3 rounded bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-400 font-semibold text-xs">
                                                                                     {evalError}
+                                                                                  </div>
+                                                                                )}
+
+                                                                                {/* Official COPE Locking Banner for Completed Evaluations */}
+                                                                                {selectedReviewForEval?.status === "Completed" && (
+                                                                                  <div className="p-4 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/50 dark:via-teal-950/40 dark:to-emerald-950/50 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                      <div className="h-9 w-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-300 dark:border-emerald-700 shadow-2xs">
+                                                                                        <Lock className="h-4 w-4" />
+                                                                                      </div>
+                                                                                      <div>
+                                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                                          <h4 className="text-xs font-bold text-emerald-950 dark:text-emerald-100 uppercase tracking-wider">
+                                                                                            {isDe ? "Offizielles Gutachten formell übermittelt & versiegelt" : "Official Peer Review Formally Submitted & Sealed"}
+                                                                                          </h4>
+                                                                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 border border-emerald-300/80">
+                                                                                            COPE Immutable Record
+                                                                                          </span>
+                                                                                        </div>
+                                                                                        <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mt-0.5 leading-relaxed">
+                                                                                          {isDe
+                                                                                            ? "Gemäß den ethischen Standards von COPE sind eingereichte Begutachtungen dauerhaft fixiert. Nachträgliche Änderungen sind gesperrt."
+                                                                                            : "Under COPE ethical peer review auditing standards, once an evaluation is formally submitted, it is permanently locked into the publication record and restricted from further editing."}
+                                                                                        </p>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                    <div className="text-[11px] font-mono text-emerald-800 dark:text-emerald-300 bg-white/80 dark:bg-slate-900/80 px-2.5 py-1 rounded border border-emerald-200 dark:border-emerald-800 shrink-0">
+                                                                                      Record ID: {selectedReviewForEval?.id}
+                                                                                    </div>
                                                                                   </div>
                                                                                 )}
 
@@ -3226,6 +3279,59 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                           <span>Author Rebuttal (.docx)</span>
                                                                                         </Button>
                                                                                       </div>
+                                                                                    </div>
+
+                                                                                    {/* Round 1 Historical Reference Drawer */}
+                                                                                    <div className="mt-3 pt-3 border-t border-indigo-200/70 dark:border-indigo-900/60 flex flex-col gap-2.5">
+                                                                                      <div className="flex items-center justify-between">
+                                                                                        <div className="flex items-center gap-2">
+                                                                                          <Layers className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                                                                          <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                                                                            {isDe ? "Mein Gutachten aus Runde 1 & Autoren-Antwort" : "My Round 1 Evaluation & Author Rebuttal (Reference Archive)"}
+                                                                                          </span>
+                                                                                        </div>
+                                                                                        <Button
+                                                                                          type="button"
+                                                                                          variant="outline"
+                                                                                          size="sm"
+                                                                                          onClick={() => setShowRound1ArchiveInEval(!showRound1ArchiveInEval)}
+                                                                                          className="h-7 text-xs font-semibold border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-950/40 cursor-pointer"
+                                                                                        >
+                                                                                          {showRound1ArchiveInEval ? (isDe ? "Archiv ausblenden" : "Hide R1 Archive") : (isDe ? "Runde 1 ansehen" : "View My Round 1 Archive")}
+                                                                                        </Button>
+                                                                                      </div>
+                                                                                      
+                                                                                      {showRound1ArchiveInEval && (() => {
+                                                                                        const isChaud = (profile?.email || user?.email || "").toLowerCase().includes("chaud") || selectedReviewForEval?.id?.includes("386")
+                                                                                        const r1Data = isChaud ? CHAUD_GJ_R1_RAF : PRAVEEN_NAGULA_R1_RAF
+                                                                                        return (
+                                                                                          <div className="space-y-2.5 pt-2 border-t border-indigo-200/50 dark:border-indigo-900/40 animate-in fade-in">
+                                                                                            <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900/40 space-y-2">
+                                                                                              <div className="flex items-center justify-between text-xs font-bold">
+                                                                                                <span className="text-indigo-900 dark:text-indigo-200">
+                                                                                                  Round 1 Verdict: {r1Data.recommendation}
+                                                                                                </span>
+                                                                                                <span className="text-[10px] text-slate-500 font-mono">
+                                                                                                  Submitted: {r1Data.submittedDate}
+                                                                                                </span>
+                                                                                              </div>
+                                                                                              <div className="text-[11.5px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                                                                                {r1Data.generalComments}
+                                                                                              </div>
+                                                                                              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                                                                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                                                                                                  Specific Points Raised in Round 1:
+                                                                                                </span>
+                                                                                                <ul className="list-disc list-inside space-y-0.5 text-[11px] text-slate-600 dark:text-slate-400">
+                                                                                                  {r1Data.specificComments.map((pt, i) => (
+                                                                                                    <li key={i}>{pt}</li>
+                                                                                                  ))}
+                                                                                                </ul>
+                                                                                              </div>
+                                                                                            </div>
+                                                                                          </div>
+                                                                                        )
+                                                                                      })()}
                                                                                     </div>
                                                                                   </div>
                                                                                 )}
@@ -3291,8 +3397,9 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                       <input
                                                                                         type="text"
                                                                                         value={articleLength}
+                                                                                        readOnly={selectedReviewForEval?.status === "Completed"}
                                                                                         onChange={(e) => setArticleLength(e.target.value)}
-                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs read-only:bg-slate-100 dark:read-only:bg-slate-800/60"
                                                                                       />
                                                                                     </div>
                                                                                     <div className="space-y-1">
@@ -3300,8 +3407,9 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                       <input
                                                                                         type="text"
                                                                                         value={tablesCount}
+                                                                                        readOnly={selectedReviewForEval?.status === "Completed"}
                                                                                         onChange={(e) => setTablesCount(e.target.value)}
-                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs read-only:bg-slate-100 dark:read-only:bg-slate-800/60"
                                                                                       />
                                                                                     </div>
                                                                                     <div className="space-y-1">
@@ -3309,8 +3417,9 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                       <input
                                                                                         type="text"
                                                                                         value={figuresCount}
+                                                                                        readOnly={selectedReviewForEval?.status === "Completed"}
                                                                                         onChange={(e) => setFiguresCount(e.target.value)}
-                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                                                                                        className="w-full px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs read-only:bg-slate-100 dark:read-only:bg-slate-800/60"
                                                                                       />
                                                                                     </div>
                                                                                   </div>
@@ -3341,8 +3450,9 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                             <button
                                                                                               key={val}
                                                                                               type="button"
+                                                                                              disabled={selectedReviewForEval?.status === "Completed"}
                                                                                               onClick={() => setAnswers(prev => ({ ...prev, [item.id]: val }))}
-                                                                                              className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors cursor-pointer ${answers[item.id] === val
+                                                                                              className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors ${selectedReviewForEval?.status === "Completed" ? "cursor-default opacity-85" : "cursor-pointer"} ${answers[item.id] === val
                                                                                                   ? val === "yes"
                                                                                                     ? "bg-green-600 text-white"
                                                                                                     : val === "no"
@@ -3376,8 +3486,9 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                       <button
                                                                                         key={num}
                                                                                         type="button"
+                                                                                        disabled={selectedReviewForEval?.status === "Completed"}
                                                                                         onClick={() => setPriorityRating(num)}
-                                                                                        className={`py-2 rounded font-bold text-xs transition-colors cursor-pointer ${priorityRating === num
+                                                                                        className={`py-2 rounded font-bold text-xs transition-colors ${selectedReviewForEval?.status === "Completed" ? "cursor-default" : "cursor-pointer"} ${priorityRating === num
                                                                                             ? "bg-[#0b99ff] text-white"
                                                                                             : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                                                                                           }`}
@@ -3403,6 +3514,7 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                     <textarea
                                                                                       rows={3}
                                                                                       value={generalComments}
+                                                                                      readOnly={selectedReviewForEval?.status === "Completed"}
                                                                                       onChange={(e) => setGeneralComments(e.target.value)}
                                                                                       placeholder={isDe ? "Fassen Sie die Hauptstärken und übergeordneten Verbesserungsbereiche zusammen..." : "Summarize the primary contribution, core strengths, and general structural feedback..."}
                                                                                       className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
@@ -3417,6 +3529,7 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                     <textarea
                                                                                       rows={4}
                                                                                       value={specificComments}
+                                                                                      readOnly={selectedReviewForEval?.status === "Completed"}
                                                                                       onChange={(e) => setSpecificComments(e.target.value)}
                                                                                       placeholder={isDe ? "z.B. Seite 4, Zeile 112: Genauere Erläuterung der Stichprobenzusammensetzung erforderlich..." : "e.g. Page 4, line 112: Clarify statistical degrees of freedom in Table 2..."}
                                                                                       className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
@@ -3433,6 +3546,7 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                   <textarea
                                                                                     rows={2}
                                                                                     value={editorConfidentialComments}
+                                                                                    readOnly={selectedReviewForEval?.status === "Completed"}
                                                                                     onChange={(e) => setEditorConfidentialComments(e.target.value)}
                                                                                     placeholder={isDe ? "Optionale vertrauliche Hinweise an den Editor bezüglich methodischer Bedenken..." : "Optional private notes to the handling editor regarding ethical concerns or candid publishability..."}
                                                                                     className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs resize-none focus:ring-1 focus:ring-[#0b99ff]"
@@ -3493,6 +3607,7 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                           type="radio"
                                                                                           name="recommendation"
                                                                                           value={rec}
+                                                                                          disabled={selectedReviewForEval?.status === "Completed"}
                                                                                           checked={recommendation === rec}
                                                                                           onChange={() => setRecommendation(rec as any)}
                                                                                           className="text-[#0b99ff] focus:ring-[#0b99ff]"
@@ -3612,44 +3727,64 @@ COPE Guidance & Plan S Benchmark Archive
                                                                                 </div>
                                                                               </div>
 
-                                                                              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-wrap items-center justify-between gap-2.5">
-                                                                                <div className="flex items-center gap-2.5">
-                                                                                  <Button
-                                                                                    type="button"
-                                                                                    onClick={handleManualSaveDraft}
-                                                                                    variant="outline"
-                                                                                    className="text-xs font-semibold cursor-pointer border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 shadow-2xs"
-                                                                                  >
-                                                                                    <Save className="h-3.5 w-3.5 text-[#0b99ff]" />
-                                                                                    <span>{isDe ? "Entwurf speichern" : "Save Draft"}</span>
-                                                                                  </Button>
-                                                                                  {draftSavedToast && (
-                                                                                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 animate-in fade-in duration-200">
-                                                                                      {draftSavedToast}
+                                                                              {selectedReviewForEval?.status === "Completed" ? (
+                                                                                <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-emerald-50/50 dark:bg-emerald-950/20 flex flex-wrap items-center justify-between gap-3 w-full">
+                                                                                  <div className="flex items-center gap-2">
+                                                                                    <div className="h-7 w-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-300 dark:border-emerald-700 shadow-2xs">
+                                                                                      <Lock className="h-3.5 w-3.5" />
+                                                                                    </div>
+                                                                                    <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
+                                                                                      {isDe ? "Offizieller Begutachtungsdatensatz dauerhaft versiegelt (COPE-Integritätsstandard)" : "Evaluation Formally Submitted & Sealed · Edits Restricted (COPE Protocols)"}
                                                                                     </span>
-                                                                                  )}
-                                                                                </div>
-
-                                                                                <div className="flex items-center gap-2">
+                                                                                  </div>
                                                                                   <Button
                                                                                     type="button"
                                                                                     onClick={() => setSelectedReviewForEval(null)}
-                                                                                    variant="ghost"
-                                                                                    className="text-xs font-semibold cursor-pointer text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                                                                                    className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-bold px-5 py-2 cursor-pointer shadow-xs rounded-lg"
                                                                                   >
-                                                                                    {isDe ? "Schließen" : "Close"}
-                                                                                  </Button>
-                                                                                  <Button
-                                                                                    type="submit"
-                                                                                    disabled={isSubmitting}
-                                                                                    className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-sm"
-                                                                                  >
-                                                                                    {isSubmitting
-                                                                                      ? (isDe ? "Wird übermittelt..." : "Submitting...")
-                                                                                      : (isDe ? "Gutachten einreichen (+12 Pkt)" : "Submit Evaluation (+12 Pts)")}
+                                                                                    {isDe ? "Schließen" : "Close Evaluation"}
                                                                                   </Button>
                                                                                 </div>
-                                                                              </div>
+                                                                              ) : (
+                                                                                <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-wrap items-center justify-between gap-2.5">
+                                                                                  <div className="flex items-center gap-2.5">
+                                                                                    <Button
+                                                                                      type="button"
+                                                                                      onClick={handleManualSaveDraft}
+                                                                                      variant="outline"
+                                                                                      className="text-xs font-semibold cursor-pointer border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 shadow-2xs"
+                                                                                    >
+                                                                                      <Save className="h-3.5 w-3.5 text-[#0b99ff]" />
+                                                                                      <span>{isDe ? "Entwurf speichern" : "Save Draft"}</span>
+                                                                                    </Button>
+                                                                                    {draftSavedToast && (
+                                                                                      <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 animate-in fade-in duration-200">
+                                                                                        {draftSavedToast}
+                                                                                      </span>
+                                                                                    )}
+                                                                                  </div>
+
+                                                                                  <div className="flex items-center gap-2">
+                                                                                    <Button
+                                                                                      type="button"
+                                                                                      onClick={() => setSelectedReviewForEval(null)}
+                                                                                      variant="ghost"
+                                                                                      className="text-xs font-semibold cursor-pointer text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                                                                                    >
+                                                                                      {isDe ? "Schließen" : "Close"}
+                                                                                    </Button>
+                                                                                    <Button
+                                                                                      type="submit"
+                                                                                      disabled={isSubmitting}
+                                                                                      className="bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-bold px-5 py-2 cursor-pointer shadow-sm"
+                                                                                    >
+                                                                                      {isSubmitting
+                                                                                        ? (isDe ? "Wird übermittelt..." : "Submitting...")
+                                                                                        : (isDe ? "Gutachten einreichen (+12 Pkt)" : "Submit Evaluation (+12 Pts)")}
+                                                                                    </Button>
+                                                                                  </div>
+                                                                                </div>
+                                                                              )}
                                                                             </form>
                                                                           </DialogContent>
                                                                         </Dialog>

@@ -9,6 +9,7 @@ const FILE_PATH = "reviews.json"
 export interface StoredReview {
   id: string
   paperId: string
+  round?: number
   reviewerName: string
   reviewerEmail?: string
   status: "Pending Moderation" | "Released" | "Archived"
@@ -29,6 +30,7 @@ const DEFAULT_REVIEWS: StoredReview[] = [
   {
     id: "REV-FB-1793887143406-386",
     paperId: "SOMED-26-RW01",
+    round: 2,
     reviewerName: "Dr. German J. Chaud",
     reviewerEmail: "germanchaud@gmail.com",
     status: "Pending Moderation",
@@ -92,6 +94,7 @@ Final recommendation: Major Revision.`,
   {
     id: "REV-FB-PN02-ROUND2",
     paperId: "SOMED-26-RW01",
+    round: 2,
     reviewerName: "Dr. Praveen Nagula",
     reviewerEmail: "drpraveennagula@gmail.com",
     status: "Pending Moderation",
@@ -202,6 +205,7 @@ The proposed framework holds potential to organize complex emergency care workfl
   {
     id: "REV-FB-SAM-01",
     paperId: "SOMED-26-RW01",
+    round: 1,
     reviewerName: "Dr. Praveen Nagula",
     reviewerEmail: "drpraveennagula@gmail.com",
     status: "Released",
@@ -234,6 +238,7 @@ Specific comments to the Author(s):
   {
     id: "REV-FB-1791559472514-816",
     paperId: "SOMED-26-RW01",
+    round: 1,
     reviewerName: "Chaud GJ",
     reviewerEmail: "germanchaud@gmail.com",
     status: "Released",

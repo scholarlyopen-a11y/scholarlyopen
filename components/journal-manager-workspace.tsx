@@ -142,9 +142,9 @@ export interface JmManuscript {
   id: string
   title: string
   journal: string
-  status: "Draft" | "Awaiting Initial Check" | "Submitted" | "Under Review" | "Revision Required" | "Revision Under Evaluation" | "Accepted" | "Rejected"
+  status: "Draft" | "Awaiting Initial Check" | "Submitted" | "Under Review" | "Revision Required" | "Revision Under Evaluation" | "Accepted" | "Rejected" | (string & {})
   date: string
-  reviewers: string[]
+  reviewers?: string[]
   integrityStatus: "Clean" | "Flagged" | "Unchecked" | "Breach Confirmed" | "Raw Data Requested" | "Inquiry Dispatched" | string
   plagiarismScore?: number
   aiScore?: number
@@ -167,8 +167,13 @@ export interface JmManuscript {
   revisedFileName?: string
   revisedFileSize?: string
   revisedFileUrl?: string
+  rebuttalFileName?: string
+  rebuttalFileSize?: string
   rebuttalFileUrl?: string
   rebuttalText?: string
+  previousEditorName?: string
+  handlingEditorComments?: string
+  handlingEditorDecision?: string
   doi?: string
   revisionDate?: string
   updatedAt?: string
@@ -307,6 +312,18 @@ export const CHAUD_GJ_RAF = {
   recommendation: "Re-review and Accept with Major Changes",
   willingToReviewRevision: "Yes",
   conflictOfInterest: "None"
+}
+
+import {
+  PRAVEEN_NAGULA_R1_RAF,
+  CHAUD_GJ_R1_RAF,
+  KANTHLAL_HANDLING_EDITOR_DIRECTIVE
+} from "@/lib/data/editorial-constants"
+
+export {
+  PRAVEEN_NAGULA_R1_RAF,
+  CHAUD_GJ_R1_RAF,
+  KANTHLAL_HANDLING_EDITOR_DIRECTIVE
 }
 
 export function getRafDataForReview(
@@ -2367,6 +2384,8 @@ ${journalEmail} | https://www.scholarlyopen.org`
   // Track Review Modal
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false)
   const [trackingManuscript, setTrackingManuscript] = useState<JmManuscript | null>(null)
+  const [selectedReviewRoundTab, setSelectedReviewRoundTab] = useState<"round2" | "round1">("round2")
+  const [isKanthlalDirectiveExpanded, setIsKanthlalDirectiveExpanded] = useState<boolean>(true)
   const [nudgedReviewers, setNudgedReviewers] = useState<Record<string, boolean>>({})
   const [rescindedReviewers, setRescindedReviewers] = useState<Record<string, boolean>>({})
   const [extendedDays, setExtendedDays] = useState<Record<string, number>>({})
@@ -2808,7 +2827,10 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
   // Helper to resolve Handling Editor details with real academic contact email
   const resolveEditorDetails = (name?: string, msId?: string) => {
     const norm = (name || "").toLowerCase()
-    if (msId === "SOMED-26-RW01" || norm.includes("gong") || norm.includes("weihua")) {
+    if (norm.includes("kanthlal") || norm.includes("kanthal") || (msId === "SOMED-26-RW01" && !norm.includes("gong"))) {
+      return { name: "S. K. Kanthlal, M.Pharm., Ph.D.", email: "lalpharm@gmail.com" }
+    }
+    if (norm.includes("gong") || norm.includes("weihua")) {
       return { name: "Weihua Gong, M.D., Ph.D.", email: "weihua.gong@zju.edu.cn" }
     }
     if (norm.includes("boakye") || norm.includes("kofi")) {
@@ -2906,7 +2928,10 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
         rebuttalFileUrl: "/manuscripts/SOMED-26-RW01-rebuttal.docx",
         rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
         editorAssigned: true,
-        assignedEditorName: "Weihua Gong, M.D., Ph.D.",
+        assignedEditorName: "S. K. Kanthlal, M.Pharm., Ph.D.",
+        previousEditorName: "Weihua Gong, M.D., Ph.D.",
+        handlingEditorComments: KANTHLAL_HANDLING_EDITOR_DIRECTIVE.rawEmailText,
+        handlingEditorDecision: "Minor Revision Required",
         reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. German J. Chaud", "Ikeda N"],
         keywords: "Acute Aortic Dissection; Evidence-Based Medicine; Healthcare Operations; Healthcare Management; Quality Improvement; Patient Safety; Multidisciplinary Care; Cardiovascular Surgery; Primary Prevention; Artificial Intelligence; Organizational Leadership; Systems Thinking"
       })
@@ -2920,8 +2945,8 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
           ...m,
           id: "SOMED-26-RW01",
           journal: "Scholarly Open: Medicine",
-          status: m.status === "Accepted" || m.status === "Rejected" ? m.status : "Revision Under Evaluation",
-          submissionStage: "Revision Under Evaluation",
+          status: m.status === "Accepted" || m.status === "Rejected" ? m.status : "Revision Required",
+          submissionStage: "Round 2 Minor Revision Requested",
           authorName: "Dr. Sam Lee",
           authorEmail: (m.authorEmail && !m.authorEmail.includes("vane")) ? m.authorEmail : "Applied.EBM.Institute@proton.me",
           fileName: m.fileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
@@ -2930,11 +2955,14 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
           revisedFileName: m.revisedFileName || "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
           revisedFileSize: m.revisedFileSize || "39.5 KB",
           revisedFileUrl: m.revisedFileUrl || "/manuscripts/SOMED-26-RW01-revised-manuscript.docx",
-          rebuttalFileName: (m as any).rebuttalFileName || "Response to Reviewers_101926.docx",
-          rebuttalFileSize: (m as any).rebuttalFileSize || "25.8 KB",
-          rebuttalFileUrl: (m as any).rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-rebuttal.docx",
-          rebuttalText: (m as any).rebuttalText || "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
-          assignedEditorName: m.assignedEditorName || "Weihua Gong, M.D., Ph.D.",
+          rebuttalFileName: m.rebuttalFileName || "Response to Reviewers_101926.docx",
+          rebuttalFileSize: m.rebuttalFileSize || "25.8 KB",
+          rebuttalFileUrl: m.rebuttalFileUrl || "/manuscripts/SOMED-26-RW01-rebuttal.docx",
+          rebuttalText: m.rebuttalText || "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
+          assignedEditorName: "S. K. Kanthlal, M.Pharm., Ph.D.",
+          previousEditorName: "Weihua Gong, M.D., Ph.D.",
+          handlingEditorComments: KANTHLAL_HANDLING_EDITOR_DIRECTIVE.rawEmailText,
+          handlingEditorDecision: "Minor Revision Required",
           editorAssigned: true,
           reviewers: cleanRev
         }
@@ -3149,6 +3177,8 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     }
     return set
   }, [selectedManuscript?.id, trackingManuscript?.id, selectedManuscript?.reviewers, trackingManuscript?.reviewers, sentEmailsHistory, paperReviewerHistory])
+
+  const isMedAortic = Boolean(trackingManuscript?.id === "SOMED-26-RW01" || trackingManuscript?.title?.includes("Prevent Earlier"))
 
   // Unified reviewer history list for Review Tracker modal, incorporating persistent sent invitations
   const modalReviewerDisplayList = useMemo(() => {
@@ -10607,7 +10637,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 (approvedReviewRemarks["Dr. Praveen Nagula"] || approvedReviewRemarks["REV-FB-PN02-ROUND2"] || approvedReviewRemarks["REV-FB-SAM-01"]) &&
                 (approvedReviewRemarks["Dr. German J. Chaud"] || approvedReviewRemarks["Dr. Chaud GJ"] || approvedReviewRemarks["REV-FB-1793887143406-386"] || approvedReviewRemarks["REV-FB-1791559472514-816"])
               )
-              const editorDisplayName = trackingManuscript?.assignedEditorName || "Weihua Gong, M.D., Ph.D."
+              const editorDisplayName = trackingManuscript?.assignedEditorName || "S. K. Kanthlal, M.Pharm., Ph.D."
 
               return (
                 <div className="p-3.5 sm:p-4 rounded-xl border bg-gradient-to-r from-sky-50/80 via-emerald-50/40 to-white dark:from-sky-950/40 dark:via-emerald-950/20 dark:to-[#18191e] border-sky-200 dark:border-sky-800/60 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0 w-full box-border animate-in fade-in">
@@ -10690,7 +10720,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           })
                         }).catch(e => console.error(e))
 
-                        // 4. Send notification to Dr. Gong
+                        // 4. Send notification to Handling Editor
                         if (onAddNotification) {
                           onAddNotification({
                             id: `NOTIF-${Date.now()}`,
@@ -10718,12 +10748,12 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       {areBothDispatched ? (
                         <>
                           <Check className="h-3.5 w-3.5 mr-1" />
-                          <span>Comments Dispatched to {isMedAortic ? "Dr. Gong" : "Editor"} ✓</span>
+                          <span>Comments Dispatched to {editorDisplayName.includes("Kanthlal") ? "Dr. Kanthlal" : isMedAortic ? "Dr. Kanthlal" : "Editor"} ✓</span>
                         </>
                       ) : (
                         <>
                           <Send className="h-3.5 w-3.5 mr-1" />
-                          <span>Dispatch Comments to {isMedAortic ? "Dr. Gong" : "Handling Editor"}</span>
+                          <span>Dispatch Comments to {editorDisplayName.includes("Kanthlal") ? "Dr. Kanthlal" : isMedAortic ? "Dr. Kanthlal" : "Handling Editor"}</span>
                         </>
                       )}
                     </Button>
@@ -10731,6 +10761,134 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </div>
               )
             })()}
+
+            {/* 2nd Handling Editor Directive & Succession Card (Dr. S. K. Kanthlal) */}
+            {isMedAortic && (
+              <div className="p-4 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/40 dark:from-indigo-950/30 dark:via-[#161820] dark:to-sky-950/20 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-indigo-100 dark:border-indigo-900/40 pb-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                          2nd Handling Editor Directive · Dr. S. K. Kanthlal, M.Pharm., Ph.D.
+                        </h4>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60">
+                          Minor Revision Required
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        Assigned in succession following non-response from Dr. Weihua Gong · Kerala University of Health Sciences, Kerala, India (<span className="font-mono text-indigo-600 dark:text-indigo-400">lalpharm@gmail.com</span>)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-semibold px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                      <Check className="h-3 w-3" />
+                      Dispatched to Dr. Sam Lee via Email
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsKanthlalDirectiveExpanded(prev => !prev)}
+                      className="h-7 text-xs font-semibold px-2 cursor-pointer text-indigo-600 dark:text-indigo-400"
+                    >
+                      {isKanthlalDirectiveExpanded ? "Hide Full Email" : "View Full Email"}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* 3 Actionable Refinements Callout */}
+                <div className="p-3 rounded-lg bg-white/90 dark:bg-[#121318] border border-indigo-100 dark:border-indigo-900/40 space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 block">
+                    3 Actionable Deficiencies Identified by Dr. Kanthlal (Pre-Publication Refinements):
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="p-2.5 rounded-md bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 space-y-1">
+                      <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 block">
+                        1. Redundancy & Length
+                      </span>
+                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
+                        As noted by Reviewer 2, Manuscript Length and redundancy must be carefully addressed again (especially in the Introduction).
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-md bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/80 dark:border-sky-900/50 space-y-1">
+                      <span className="text-[10px] font-bold text-sky-800 dark:text-sky-300 block">
+                        2. Abstract Word Limit
+                      </span>
+                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
+                        The abstract is lengthy; reduce to 300 words or below for concise indexing and readers.
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-md bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/50 space-y-1">
+                      <span className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block">
+                        3. Perspective Scope
+                      </span>
+                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
+                        As a Perspective article, the scope should be narrow, crystal clear, and selective.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expandable Verbatim Email Body */}
+                {isKanthlalDirectiveExpanded && (
+                  <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#121318] border border-slate-200 dark:border-slate-800 space-y-1.5 animate-in fade-in">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                      Verbatim Email Transcript from Dr. S. K. Kanthlal (to Noor F):
+                    </span>
+                    <pre className="text-[11px] text-slate-700 dark:text-slate-300 font-sans whitespace-pre-wrap leading-relaxed p-3 rounded bg-white dark:bg-[#18191e] border border-slate-200/80 dark:border-slate-800">
+                      {KANTHLAL_HANDLING_EDITOR_DIRECTIVE.rawEmailText}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Review Rounds Switcher Tabs (For SOMED-26-RW01) */}
+            {isMedAortic && (
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5 pt-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Review Round:
+                  </span>
+                  <div className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-[#131418] border border-slate-200 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReviewRoundTab("round2")}
+                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        selectedReviewRoundTab === "round2"
+                          ? "bg-[#0b99ff] text-white shadow-xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      <span>Round 2 (Re-evaluations · 2 Completed)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReviewRoundTab("round1")}
+                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        selectedReviewRoundTab === "round1"
+                          ? "bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 shadow-xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <Lock className="h-3 w-3" />
+                      <span>Round 1 Baseline Archive (Locked 🔒)</span>
+                    </button>
+                  </div>
+                </div>
+
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {selectedReviewRoundTab === "round2" ? "2 referee reports logged for R2" : "Round 1 historical record sealed under COPE"}
+                </span>
+              </div>
+            )}
 
             {editorPromptSuccess && (
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-2xs">
@@ -10746,39 +10904,134 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
             )}
 
-            {/* Reviewer History */}
-            <div className="space-y-3 pt-1">
-              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-[#0b99ff]" />
-                  <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs uppercase tracking-wider">
-                    Reviewer History
-                  </span>
+            {/* Reviewer History & Round Content */}
+            {isMedAortic && selectedReviewRoundTab === "round1" ? (
+              <div className="space-y-3.5 pt-1 animate-in fade-in">
+                {/* Official Locking Banner */}
+                <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-[#14151a] border border-slate-200 dark:border-slate-800 flex items-center gap-3 text-xs text-slate-700 dark:text-slate-300">
+                  <div className="h-8 w-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-900 dark:text-white">Historical Record Sealing (COPE Compliance):</span>{" "}
+                    Round 1 evaluations and author responses are permanently sealed as the baseline record. Neither reviewers nor authors may edit submitted historical evaluations. Initial Handling Editor during Round 1: <strong className="text-slate-800 dark:text-slate-200">Prof. Weihua Gong</strong>.
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    {modalReviewerDisplayList.length} logged
-                  </span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (trackingManuscript) {
-                        const targetMs = trackingManuscript
-                        setIsTrackModalOpen(false)
-                        setTimeout(() => {
-                          handleOpenAssign(targetMs, true)
-                        }, 50)
-                      }
-                    }}
-                    className="h-7 text-[11px] font-semibold border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    <UserPlus className="h-3 w-3 mr-1 text-[#0b99ff]" />
-                    Invite Reviewer
-                  </Button>
+
+                {/* Reviewer 1 (Dr. Praveen Nagula) - Round 1 Archived Evaluation */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] space-y-3 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-2.5">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>Dr. Praveen Nagula</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">Reviewer #1</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Round 1 Archived · Locked 🔒</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">drpraveennagula@gmail.com · Evaluated via Electronic Assessment Form (RAF)</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2.5 py-1 rounded-md border border-rose-200 dark:border-rose-900/50">
+                        Recommendation: Re-write and Re-submit
+                      </span>
+                      <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                        Score: 3 / 10
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#121318] border border-slate-200/80 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-sans">
+                    <span className="font-bold text-slate-900 dark:text-white block mb-1">General Comments to Author(s):</span>
+                    {PRAVEEN_NAGULA_R1_RAF.generalComments}
+                    {"\n\n"}
+                    <span className="font-bold text-slate-900 dark:text-white block mb-1">Specific Line Critiques:</span>
+                    {PRAVEEN_NAGULA_R1_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")}
+                  </div>
+                </div>
+
+                {/* Reviewer 3 (Dr. German J. Chaud) - Round 1 Archived Evaluation */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] space-y-3 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-2.5">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>Dr. German J. Chaud (Dr. Chaud GJ)</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Reviewer #3</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Round 1 Archived · Locked 🔒</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">germanchaud@gmail.com · Hospital las Higueras, Talcahuano, Chile</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-900/50">
+                        Recommendation: Re-review and Accept with Major Changes
+                      </span>
+                      <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                        Score: 4 / 10
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#121318] border border-slate-200/80 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-sans max-h-72 overflow-y-auto">
+                    <span className="font-bold text-slate-900 dark:text-white block mb-1">General Comments to Author(s):</span>
+                    {CHAUD_GJ_R1_RAF.generalComments}
+                    {"\n\n"}
+                    <span className="font-bold text-slate-900 dark:text-white block mb-1">Specific Itemized Inquiries (8 Points):</span>
+                    {CHAUD_GJ_R1_RAF.specificComments.map((c, i) => `${i + 1}. ${c}`).join("\n")}
+                  </div>
+                </div>
+
+                {/* Author's Round 1 Rebuttal Letter & Response to Reviewers */}
+                <div className="p-4 rounded-xl border border-sky-200 dark:border-sky-800/60 bg-sky-50/40 dark:bg-sky-950/20 space-y-2.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-[#0b99ff]" />
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                        Dr. Sam Lee · Author Point-by-Point Rebuttal to Round 1
+                      </h4>
+                    </div>
+                    <a
+                      href="/manuscripts/SOMED-26-RW01-rebuttal.docx"
+                      download="Response to Reviewers_101926.docx"
+                      className="text-xs font-bold text-[#0b99ff] hover:underline flex items-center gap-1"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Download Rebuttal (.docx)
+                    </a>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed italic bg-white dark:bg-[#18191e] p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                    &ldquo;Dear Handling Editor and Reviewers, we thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection.' We have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (&lt;30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics.&rdquo;
+                  </p>
                 </div>
               </div>
+            ) : (
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-[#0b99ff]" />
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs uppercase tracking-wider">
+                      Reviewer History
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {modalReviewerDisplayList.length} logged
+                    </span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (trackingManuscript) {
+                          const targetMs = trackingManuscript
+                          setIsTrackModalOpen(false)
+                          setTimeout(() => {
+                            handleOpenAssign(targetMs, true)
+                          }, 50)
+                        }
+                      }}
+                      className="h-7 text-[11px] font-semibold border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <UserPlus className="h-3 w-3 mr-1 text-[#0b99ff]" />
+                      Invite Reviewer
+                    </Button>
+                  </div>
+                </div>
 
               {modalReviewerDisplayList.length === 0 ? (
                 <div className="p-8 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
@@ -11407,6 +11660,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 })
               )}
             </div>
+          )}
           </div>
 
           <DialogFooter className="p-4 px-6 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/70 dark:bg-slate-900/70 flex flex-row items-center justify-between gap-3 w-full box-border">
@@ -12367,8 +12621,9 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 <span className="font-bold text-[#0b99ff] bg-[#0b99ff]/10 px-2.5 py-0.5 rounded-md border border-[#0b99ff]/20 text-xs font-mono">
                   {viewingRafData?.manuscriptId || trackingManuscript?.id || "SOMED-26-RW01"}
                 </span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/80">
-                  Official Completed RAF
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/80 flex items-center gap-1">
+                  <Lock className="h-3 w-3" />
+                  Official Completed RAF · Sealed &amp; Locked
                 </span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/80">
                   Recommendation: {viewingRafData?.recommendation || "Re-write and Re-submit"}

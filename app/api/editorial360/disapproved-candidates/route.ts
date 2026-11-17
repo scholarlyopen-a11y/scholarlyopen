@@ -23,12 +23,12 @@ export interface DisapprovedCandidateRecord {
   notes?: string
 }
 
-async function getStoredDisapproved(): Promise<DisapprovedCandidateRecord[]> {
+export async function getStoredDisapproved(): Promise<DisapprovedCandidateRecord[]> {
   const data = await readEditorialData<{ disapproved: DisapprovedCandidateRecord[] }>(FILE_PATH, { disapproved: [] })
   return Array.isArray(data?.disapproved) ? data.disapproved : []
 }
 
-async function saveStoredDisapproved(records: DisapprovedCandidateRecord[]): Promise<void> {
+export async function saveStoredDisapproved(records: DisapprovedCandidateRecord[]): Promise<void> {
   const payload = {
     disapproved: records,
     lastUpdated: new Date().toISOString()

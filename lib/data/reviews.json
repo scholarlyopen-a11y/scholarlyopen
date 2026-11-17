@@ -3,6 +3,7 @@
     {
       "id": "REV-FB-1793887143406-386",
       "paperId": "SOMED-26-RW01",
+      "round": 2,
       "reviewerName": "Dr. German J. Chaud",
       "reviewerEmail": "germanchaud@gmail.com",
       "status": "Pending Moderation",
@@ -20,6 +21,7 @@
     {
       "id": "REV-FB-PN02-ROUND2",
       "paperId": "SOMED-26-RW01",
+      "round": 2,
       "reviewerName": "Dr. Praveen Nagula",
       "reviewerEmail": "drpraveennagula@gmail.com",
       "status": "Pending Moderation",
@@ -37,6 +39,7 @@
     {
       "id": "REV-FB-SAM-01",
       "paperId": "SOMED-26-RW01",
+      "round": 1,
       "reviewerName": "Dr. Praveen Nagula",
       "reviewerEmail": "drpraveennagula@gmail.com",
       "status": "Released",
@@ -53,6 +56,7 @@
     {
       "id": "REV-FB-1791559472514-816",
       "paperId": "SOMED-26-RW01",
+      "round": 1,
       "reviewerName": "Dr. German J. Chaud",
       "reviewerEmail": "germanchaud@gmail.com",
       "status": "Released",

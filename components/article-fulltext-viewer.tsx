@@ -30,8 +30,8 @@ function OrcidIcon({ className = "w-4 h-4" }: { className?: string }) {
   )
 }
 
-export function ArticleFullTextViewer() {
-  const article = samLeeArticleFullText
+export function ArticleFullTextViewer({ article: propArticle }: { article?: typeof samLeeArticleFullText } = {}) {
+  const article = propArticle || samLeeArticleFullText
   const [activeSection, setActiveSection] = useState<string>("abstract")
   const [copiedCitation, setCopiedCitation] = useState<string | null>(null)
   const [highlightedRef, setHighlightedRef] = useState<string | null>(null)
@@ -287,7 +287,7 @@ export function ArticleFullTextViewer() {
                 <span className="text-foreground font-bold">{author.name}</span>
                 {/* Official ORCID iD Icon stuck right next to academic credentials */}
                 <a
-                  href={`https://orcid.org/${article.authors[0].orcid || "0009-0009-6801-4031"}`}
+                  href={`https://orcid.org/${(article.authors[0] as any)?.orcid || "0009-0009-6801-4031"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   title="ORCID: 0009-0009-6801-4031"

@@ -379,9 +379,14 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
   author: "Dr. Sam Lee",
   authorName: "Dr. Sam Lee",
   authorEmail: "Applied.EBM.Institute@proton.me",
-  status: "Revision Under Evaluation",
+  status: "Revision Required",
+  submissionStage: "Round 2 Minor Revision Requested",
   date: "2026-10-21",
-  assignedEditorName: "Weihua Gong, M.D., Ph.D.",
+  reviewers: ["Dr. Praveen Nagula", "Dr. Ragab Aziza", "Dr. Chaud GJ", "Ikeda N"],
+  assignedEditorName: "S. K. Kanthlal, M.Pharm., Ph.D.",
+  previousEditorName: "Weihua Gong, M.D., Ph.D.",
+  handlingEditorComments: `Dear Noor F,\n\nI have gone through the manuscript, comments and the explanations thoroughly. The reviewers have put appreciable efforts in critically evaluating the manuscript. \n\nAlso the authors have carefully addressed the comments with relevant explanations. \n\nBut there are still a few deficiencies to address to make this work publishable. \n\nAs mentioned by Reviewer 2, the Manuscript Length and redundancy need to be carefully addressed again (Especially in the Introduction Section). \nThe abstract is lengthy (reduce to 300 or below). \nAs it is a Perspective article, The Scope should be narrow nd crystal clear and must be Narrow and selective.\n\nBut overall, the work looks good and is appreciable. After those minor revisions, it may be publishable .. \n\n\nRegards\nDr. Kanthlal\nEditor`,
+  handlingEditorDecision: "Minor Revision Required",
   fileName: "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx",
   fileUrl: "/manuscripts/SOMED-26-RW01-revised-manuscript.docx",
   fileSize: "39.5 KB",
@@ -393,7 +398,7 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
   rebuttalFileSize: "25.8 KB",
   rebuttalText: "Dear Handling Editor and Reviewers,\n\nWe thank the reviewers for their constructive comments and rigorous evaluation of our manuscript SOMED-26-RW01 titled 'Prevent Earlier, Recognize Sooner, Treat Faster: A Proposed Evidence-Based Medicine–Integrated Rapid Response Framework (EBM-IRRF) for Acute Aortic Dissection.'\n\nWe have thoroughly revised the manuscript according to all referee recommendations, incorporated door-to-imaging clinical workflow benchmarks (<30 min), updated multidisciplinary care coordination guidelines, and expanded operational metrics. Below and in the attached separate response document is our detailed point-by-point response.",
   wordCount: 4820,
-  articleType: "Review Article",
+  articleType: "Perspective",
   abstract: "Acute aortic dissection (AAD) is a catastrophic cardiovascular emergency with mortality escalating by 1–2% per hour from symptom onset. Traditional care models often suffer from delayed symptom recognition, fragmented emergency triage, inter-hospital transport delays, and unstandardized handoffs. This review proposes the Evidence-Based Integrated Rapid Aortic Response Framework (EB-IRARF), bridging clinical emergency medicine, operations management, and systems thinking. We synthesize operational benchmarks including door-to-CT imaging times (<30 min), inter-facility transfer protocols, and standardized clinical decision support algorithms to minimize diagnostic and therapeutic bottlenecks. Multidisciplinary institutional coordination, simulated high-reliability team training, and real-time electronic tracking systems are presented to improve survival outcomes in acute aortic dissection.",
   keywords: "Acute Aortic Dissection; Emergency Medicine; Healthcare Operations; Quality Improvement; Cardiovascular Surgery; Evidence-Based Medicine",
   integrityStatus: "Clear",
@@ -402,9 +407,100 @@ const DEFAULT_MEDICINE_MANUSCRIPT: JmManuscript = {
 }
 
 const FALLBACK_AORTIC_REVIEWS = [
+  // ROUND 2 RE-EVALUATION REVIEWS (Current Active Evaluation Round)
+  {
+    id: "REV-FB-PN02-ROUND2",
+    paperId: "SOMED-26-RW01",
+    round: 2,
+    reviewerName: "Reviewer #1",
+    originality: 3,
+    methodology: 4,
+    clarity: 4,
+    significance: 3,
+    articleLength: "appropriate",
+    tablesCount: "adequate",
+    figuresCount: "needs simplified diagram",
+    priorityScore: "3 / 10",
+    questionnaire: [
+      { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" },
+      { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" },
+      { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" },
+      { question: "Is the information on the Institutional Review Board approval stated?", answer: "N/A" },
+      { question: "Is the problem significant and concisely stated?", answer: "Yes" },
+      { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" },
+      { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "Yes" },
+      { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" },
+      { question: "Is adequate reference made to other work in the field?", answer: "Yes" },
+      { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" },
+    ],
+    commentsAuthor: `General comments to the Author(s):
+The author(s) have satisfactorily addressed the structural and referencing comments raised during initial review. The addition of structured clinical benchmarking and door-to-imaging workflows substantially strengthens the manuscript. However, the manuscript remains dense in the early sections, and several key implementation barriers require sharper delineation before final sign-off.
+
+Specific comments to the Author(s):
+1. Introduction redundancy: The introductory sections continue to dwell on background epidemiology that could be streamlined.
+2. Abstract focus: Abstract should be shortened to provide a tighter synopsis of operational recommendations.
+3. Perspective scope: The narrative should explicitly stay focused on the operations perspective rather than attempting an exhaustive clinical guideline.`,
+    commentsEditor: "Dear Editor, I have re-reviewed the revision. Author made significant improvements. Minor editorial polish and scope sharpening required before acceptance.",
+    recommendation: "Major Revision",
+    sanitizedCommentsAuthor: `General comments to the Author(s):
+The author(s) have satisfactorily addressed the structural and referencing comments raised during initial review. The addition of structured clinical benchmarking and door-to-imaging workflows substantially strengthens the manuscript. However, the manuscript remains dense in the early sections, and several key implementation barriers require sharper delineation before final sign-off.
+
+Specific comments to the Author(s):
+1. Introduction redundancy: The introductory sections continue to dwell on background epidemiology that could be streamlined.
+2. Abstract focus: Abstract should be shortened to provide a tighter synopsis of operational recommendations.
+3. Perspective scope: The narrative should explicitly stay focused on the operations perspective rather than attempting an exhaustive clinical guideline.`,
+    status: "Released",
+    reviewerEmail: "drpraveennagula@gmail.com"
+  },
+  {
+    id: "REV-FB-1793887143406-386",
+    paperId: "SOMED-26-RW01",
+    round: 2,
+    reviewerName: "Reviewer #3",
+    originality: 4,
+    methodology: 4,
+    clarity: 4,
+    significance: 4,
+    articleLength: "too long",
+    tablesCount: "adequate",
+    figuresCount: "needs simplified diagram",
+    priorityScore: "4 / 10",
+    questionnaire: [
+      { question: "Does the manuscript fit into the mission of the journal?", answer: "Yes" },
+      { question: "Does the manuscript contain original and significant information to justify publication?", answer: "Yes" },
+      { question: "Does the abstract clearly and accurately describe the content of the article?", answer: "Yes" },
+      { question: "Is the information on the Institutional Review Board approval stated?", answer: "N/A" },
+      { question: "Is the problem significant and concisely stated?", answer: "Yes" },
+      { question: "Does the literature review follow the specific aim of the study?", answer: "Yes" },
+      { question: "Are the experimental and/or theoretical methods described comprehensively?", answer: "Yes" },
+      { question: "Are the discussion interpretations and conclusions justified by the results of the study?", answer: "Yes" },
+      { question: "Is adequate reference made to other work in the field?", answer: "Yes" },
+      { question: "Are the language, grammar and syntax acceptable?", answer: "Yes" },
+    ],
+    commentsAuthor: `General comments to the Author(s):
+The revision shows significant improvement, particularly in aligning the manuscript as an operations perspective and clarifying the role of regional transfer networks. However, Manuscript Length and redundancy need to be carefully addressed again (Especially in the Introduction Section). The abstract remains lengthy and should be condensed below 300 words. As a Perspective article, the scope must be narrow and selective.
+
+Specific comments to the Author(s):
+1. Manuscript Length and redundancy: Introduction must be tightened; eliminate repetitive background text.
+2. Abstract condensation: Shorten abstract to ≤ 300 words.
+3. Scope selectivity: Narrow and focus the scope strictly on the operational transfer and triage model.`,
+    commentsEditor: "Dear Editor, Recommend minor revision / accept with minor changes after the author addresses the length, abstract, and scope refinements.",
+    recommendation: "Re-review and Accept with Major Changes",
+    sanitizedCommentsAuthor: `General comments to the Author(s):
+The revision shows significant improvement, particularly in aligning the manuscript as an operations perspective and clarifying the role of regional transfer networks. However, Manuscript Length and redundancy need to be carefully addressed again (Especially in the Introduction Section). The abstract remains lengthy and should be condensed below 300 words. As a Perspective article, the scope must be narrow and selective.
+
+Specific comments to the Author(s):
+1. Manuscript Length and redundancy: Introduction must be tightened; eliminate repetitive background text.
+2. Abstract condensation: Shorten abstract to ≤ 300 words.
+3. Scope selectivity: Narrow and focus the scope strictly on the operational transfer and triage model.`,
+    status: "Released",
+    reviewerEmail: "germanchaud@gmail.com"
+  },
+  // ROUND 1 BASELINE ARCHIVED REVIEWS (Locked Historical Record)
   {
     id: "REV-FB-SAM-01",
     paperId: "SOMED-26-RW01",
+    round: 1,
     reviewerName: "Reviewer #1",
     originality: 3,
     methodology: 3,
@@ -452,6 +548,7 @@ Specific comments to the Author(s):
   {
     id: "REV-FB-1791559472514-816",
     paperId: "SOMED-26-RW01",
+    round: 1,
     reviewerName: "Reviewer #3",
     originality: 4,
     methodology: 4,
@@ -544,8 +641,10 @@ export function getReviewsForManuscript(reviewsList: any[], paperId?: string, pa
     FALLBACK_AORTIC_REVIEWS.forEach(fb => {
       const existingIdx = matches.findIndex(m => 
         m.id === fb.id || 
-        (fb.reviewerEmail && m.reviewerEmail && m.reviewerEmail.toLowerCase() === fb.reviewerEmail.toLowerCase()) ||
-        (m.reviewerName && m.reviewerName.toLowerCase().includes(fb.reviewerEmail?.includes("nagula") ? "nagula" : "chaud"))
+        ((m as any).round === (fb as any).round && (
+          (fb.reviewerEmail && m.reviewerEmail && m.reviewerEmail.toLowerCase() === fb.reviewerEmail.toLowerCase()) ||
+          (m.reviewerName && m.reviewerName.toLowerCase().includes(fb.reviewerEmail?.includes("nagula") ? "nagula" : "chaud"))
+        ))
       )
       if (existingIdx >= 0) {
         matches[existingIdx] = {
@@ -634,6 +733,15 @@ export function EditorWorkspace({
     ))
   )
 
+  const isKanthlalUser = Boolean(
+    (user?.name && (user.name.toLowerCase().includes("kanthlal") || user.name.toLowerCase().includes("kanthal") || user.name.toLowerCase().includes("s. k."))) ||
+    (user?.email && (
+      user.email.toLowerCase().includes("kanthlal") ||
+      user.email.toLowerCase().includes("kanthal") ||
+      user.email.toLowerCase().includes("lalpharm")
+    ))
+  )
+
   const [internalTab, setInternalTab] = useState<string>(activeTab || "desk")
 
   useEffect(() => {
@@ -661,15 +769,20 @@ export function EditorWorkspace({
     if (Array.isArray(initialManuscripts) && initialManuscripts.length > 0) {
       setManuscripts(prev => {
         const hasAortic = initialManuscripts.some(m => m.id === "SOMED-26-RW01")
-        if (!hasAortic && isGongUser) {
+        if (!hasAortic && (isGongUser || isKanthlalUser)) {
           return [DEFAULT_MEDICINE_MANUSCRIPT, ...initialManuscripts]
         }
         return initialManuscripts.map(m => {
-          if (isGongUser && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier"))) {
+          if ((isGongUser || isKanthlalUser) && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier"))) {
             return {
               ...m,
-              assignedEditorName: "Weihua Gong, M.D., Ph.D.",
-              assignedEditorEmail: "126010@sh9hospital.org.cn",
+              assignedEditorName: isKanthlalUser ? "S. K. Kanthlal, M.Pharm., Ph.D." : "Weihua Gong, M.D., Ph.D.",
+              assignedEditorEmail: isKanthlalUser ? "lalpharm@gmail.com" : "126010@sh9hospital.org.cn",
+              previousEditorName: isKanthlalUser ? "Weihua Gong, M.D., Ph.D." : (m as any).previousEditorName,
+              handlingEditorComments: isKanthlalUser ? DEFAULT_MEDICINE_MANUSCRIPT.handlingEditorComments : (m as any).handlingEditorComments,
+              handlingEditorDecision: isKanthlalUser ? "Minor Revision Required" : (m as any).handlingEditorDecision,
+              status: m.status === "Accepted" || m.status === "Rejected" ? m.status : "Revision Required",
+              submissionStage: "Round 2 Minor Revision Requested",
               editorAssigned: true
             }
           }
@@ -677,7 +790,7 @@ export function EditorWorkspace({
         })
       })
     }
-  }, [initialManuscripts, isGongUser])
+  }, [initialManuscripts, isGongUser, isKanthlalUser])
 
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedJournal, setSelectedJournal] = useState<string>(() => {
@@ -945,7 +1058,7 @@ export function EditorWorkspace({
       : sourceList.filter(m => {
           if (!user?.name && !user?.email) return false
           
-          if (isGongUser && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("acute aortic"))) {
+          if ((isGongUser || isKanthlalUser) && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("acute aortic"))) {
             return true
           }
 
@@ -956,12 +1069,12 @@ export function EditorWorkspace({
           return matchesName || matchesEmail
         })
 
-    // Absolute fallback guarantee: only for Dr. Weihua Gong, inject SOMED-26-RW01 if missing
-    if (isGongUser && !list.some(m => m.id === "SOMED-26-RW01")) {
+    // Absolute fallback guarantee: for Dr. Kanthlal or Dr. Gong, inject SOMED-26-RW01 if missing
+    if ((isGongUser || isKanthlalUser) && !list.some(m => m.id === "SOMED-26-RW01")) {
       list = [DEFAULT_MEDICINE_MANUSCRIPT, ...list]
     }
     return list
-  }, [isChiefEditor, manuscripts, initialManuscripts, user?.name, user?.email, user?.journal, isGongUser])
+  }, [isChiefEditor, manuscripts, initialManuscripts, user?.name, user?.email, user?.journal, isGongUser, isKanthlalUser])
 
   // Filter counts (Synchronized 1:1 with Journal Manager Workspace)
   const triageCount = activeManuscripts.filter(m => m.status === "Awaiting Initial Check" || m.status === "Submitted" || m.status === "Draft").length
@@ -980,7 +1093,7 @@ export function EditorWorkspace({
     const matchesJournal = selectedJournal === "all" || 
       m.journal.toLowerCase().includes(selectedJournal.toLowerCase()) || 
       selectedJournal.toLowerCase().includes(m.journal.toLowerCase()) ||
-      (isGongUser && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")))
+      ((isGongUser || isKanthlalUser) && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")))
     const matchesSearch = !searchQuery ||
       m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1614,9 +1727,45 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
       )}
 
       {/* ========================================================================= */}
-      {/* 0. 1-CLICK AUTHENTICATED SESSION BANNER FOR DR. WEIHUA GONG (MEDICINE)    */}
+      {/* 0. 1-CLICK AUTHENTICATED SESSION BANNER FOR DR. KANTHLAL & DR. GONG        */}
       {/* ========================================================================= */}
-      {isGongUser && (
+      {isKanthlalUser && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-50 via-white to-sky-50/60 dark:from-indigo-950/30 dark:via-[#18191e] dark:to-sky-950/20 border border-indigo-200/80 dark:border-indigo-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5 border border-indigo-200 dark:border-indigo-800">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-600 text-white">
+                  2nd Handling Editor Assigned
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300">
+                  Minor Revision Verdict Recorded
+                </span>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Welcome, Dr. S. K. Kanthlal
+                </h4>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
+                You are assigned as 2nd Handling Editor for manuscript <strong>SOMED-26-RW01</strong> (&ldquo;Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection&rdquo;) following succession from Dr. Weihua Gong. Your minor revision directive (redundancy reduction, abstract ≤300 words, narrow Perspective scope) has been transmitted to author Dr. Sam Lee.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
+            <Button
+              type="button"
+              onClick={() => setIsPermanentRegisterModalOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold h-9 px-4 rounded-xl shadow-xs cursor-pointer transition-all"
+            >
+              <Key className="h-3.5 w-3.5 mr-1.5" />
+              <span>Set Permanent Password</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {isGongUser && !isKanthlalUser && (
         <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-50 via-white to-sky-50/60 dark:from-sky-950/30 dark:via-[#18191e] dark:to-sky-950/20 border border-sky-200/80 dark:border-sky-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
           <div className="flex items-start gap-3.5">
             <div className="p-2.5 rounded-xl bg-[#0b99ff]/10 text-[#0b99ff] shrink-0 mt-0.5 border border-[#0b99ff]/20">
@@ -1632,7 +1781,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 </h4>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-                You are securely signed in as Handling Editor for manuscript <strong>SOMED-26-RW01</strong>. To set a permanent password or register your preferred email address for future editorial assignments, click <strong>Set Permanent Password</strong>.
+                You are signed in as previous Handling Editor for manuscript <strong>SOMED-26-RW01</strong>. Succession to Dr. S. K. Kanthlal has been instituted for active Round 2 evaluation.
               </p>
             </div>
           </div>
@@ -1673,7 +1822,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
                 <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  {user.journal || (user.name?.toLowerCase().includes("cacciola") || user.name?.toLowerCase().includes("verpoort") ? "Scholarly Open: Chemistry" : isGongUser ? "Scholarly Open: Medicine" : "Scholarly Open")}
+                  {user.journal || (user.name?.toLowerCase().includes("cacciola") || user.name?.toLowerCase().includes("verpoort") ? "Scholarly Open: Chemistry" : (isGongUser || isKanthlalUser) ? "Scholarly Open: Medicine" : "Scholarly Open")}
                 </span>
                 <span className="text-slate-300 dark:text-slate-700 select-none">|</span>
                 <span>
@@ -1682,6 +1831,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       ? "Food Chemistry (SSD CHIM/10) at University of Messina"
                       : user.name?.toLowerCase().includes("verpoort")
                       ? "Wuhan University of Technology / Ghent University"
+                      : isKanthlalUser
+                      ? "Kerala University of Health Sciences, Kerala, India"
                       : isGongUser
                       ? "Shanghai Jiao Tong University School of Medicine, China"
                       : "Scholarly Open Editorial Board"
@@ -1703,6 +1854,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       ? "Food Chemistry · Comprehensive 2D-LC (LC×LC) · Mass Spectrometry (MS/MS) · Bioactive Compounds & Natural Matrices"
                       : user.name?.toLowerCase().includes("verpoort")
                       ? "Inorganic & Coordination Chemistry · Catalysis · Advanced Nanomaterials"
+                      : isKanthlalUser
+                      ? "Pharmacology & Therapeutics · Clinical Evidence-Based Medicine · Cardiovascular Operations"
                       : isGongUser
                       ? "Cardiovascular Surgery · Clinical Oncology · Evidence-Based Medicine · Organ Transplantation"
                       : user.journal?.toLowerCase().includes("chem")
@@ -2694,7 +2847,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                 {activeManuscripts.length} <span className="text-xs font-medium text-slate-500">Manuscripts</span>
               </div>
               <span className="text-xs font-medium text-[#0b99ff] block">
-                {user?.journal || (user?.name?.toLowerCase().includes("cacciola") || user?.name?.toLowerCase().includes("verpoort") ? "Scholarly Open: Chemistry" : isGongUser ? "Scholarly Open: Medicine" : "Scholarly Open")}
+                {user?.journal || (user?.name?.toLowerCase().includes("cacciola") || user?.name?.toLowerCase().includes("verpoort") ? "Scholarly Open: Chemistry" : (isGongUser || isKanthlalUser) ? "Scholarly Open: Medicine" : "Scholarly Open")}
               </span>
             </div>
 
@@ -2728,7 +2881,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               <span className="text-xs font-medium text-emerald-600 block">
                 {user?.journal?.toLowerCase().includes("chem") || user?.name?.toLowerCase().includes("cacciola") || user?.name?.toLowerCase().includes("verpoort")
                   ? "Peer-Reviewed Chemistry"
-                  : isGongUser || user?.journal?.toLowerCase().includes("med")
+                  : (isGongUser || isKanthlalUser) || user?.journal?.toLowerCase().includes("med")
                   ? "Evidence-Based Medicine"
                   : "COPE Publishing Standards"}
               </span>
@@ -6395,7 +6548,13 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     Preferred Official Email Address
                   </label>
                   <div className="space-y-1.5">
-                    {(isGongUser
+                    {(isKanthlalUser
+                      ? [
+                          "lalpharm@gmail.com",
+                          "kanthsklal@hotmail.com",
+                          "editor.med@scholarlyopen.org"
+                        ]
+                      : isGongUser
                       ? [
                           "126010@sh9hospital.org.cn",
                           "weihua.gong@googlemail.com",

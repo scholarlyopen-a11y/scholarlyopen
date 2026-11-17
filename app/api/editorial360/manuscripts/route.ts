@@ -13,8 +13,8 @@ export async function GET() {
           id: "SOMED-26-RW01",
           title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
           journal: "Scholarly Open: Medicine",
-          status: "Revision Under Evaluation",
-          submission_stage: "Revision Under Evaluation",
+          status: "Revision Required",
+          submission_stage: "Round 2 Minor Revision Requested",
           author_first_name: "Sam",
           author_last_name: "Lee",
           author_name: "Dr. Sam Lee",
@@ -26,7 +26,9 @@ export async function GET() {
           file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.docx",
           revised_file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.docx",
           rebuttal_file_url: "/manuscripts/SOMED-26-RW01-rebuttal.docx",
-          assigned_editor_name: "Weihua Gong, M.D., Ph.D."
+          assigned_editor_name: "S. K. Kanthlal, M.Pharm., Ph.D.",
+          previous_editor_name: "Weihua Gong, M.D., Ph.D.",
+          handling_editor_comments: `Dear Noor F,\n\nI have gone through the manuscript, comments and the explanations thoroughly. The reviewers have put appreciable efforts in critically evaluating the manuscript.\n\nAlso the authors have carefully addressed the comments with relevant explanations.\n\nBut there are still a few deficiencies to address to make this work publishable.\n\nAs mentioned by Reviewer 2, the Manuscript Length and redundancy need to be carefully addressed again (Especially in the Introduction Section).\nThe abstract is lengthy (reduce to 300 or below).\nAs it is a Perspective article, The Scope should be narrow nd crystal clear and must be Narrow and selective.\n\nBut overall, the work looks good and is appreciable. After those minor revisions, it may be publishable ..\n\n\nRegards\nDr. Kanthlal\nEditor`
         } as any
       ]
     }
@@ -39,8 +41,8 @@ export async function GET() {
           id: "SOMED-26-RW01",
           title: "Prevent Earlier, Recognize Sooner, Treat Faster: An Evidence-Based Healthcare Operations Approach to Acute Aortic Dissection",
           journal: "Scholarly Open: Medicine",
-          status: "Revision Under Evaluation",
-          submission_stage: "Revision Under Evaluation",
+          status: "Revision Required",
+          submission_stage: "Round 2 Minor Revision Requested",
           author_first_name: "Sam",
           author_last_name: "Lee",
           author_name: "Dr. Sam Lee",
@@ -52,7 +54,9 @@ export async function GET() {
           file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.docx",
           revised_file_url: "/manuscripts/SOMED-26-RW01-revised-manuscript.docx",
           rebuttal_file_url: "/manuscripts/SOMED-26-RW01-rebuttal.docx",
-          assigned_editor_name: "Weihua Gong, M.D., Ph.D."
+          assigned_editor_name: "S. K. Kanthlal, M.Pharm., Ph.D.",
+          previous_editor_name: "Weihua Gong, M.D., Ph.D.",
+          handling_editor_comments: `Dear Noor F,\n\nI have gone through the manuscript, comments and the explanations thoroughly. The reviewers have put appreciable efforts in critically evaluating the manuscript.\n\nAlso the authors have carefully addressed the comments with relevant explanations.\n\nBut there are still a few deficiencies to address to make this work publishable.\n\nAs mentioned by Reviewer 2, the Manuscript Length and redundancy need to be carefully addressed again (Especially in the Introduction Section).\nThe abstract is lengthy (reduce to 300 or below).\nAs it is a Perspective article, The Scope should be narrow nd crystal clear and must be Narrow and selective.\n\nBut overall, the work looks good and is appreciable. After those minor revisions, it may be publishable ..\n\n\nRegards\nDr. Kanthlal\nEditor`
         }
       ] 
     })
