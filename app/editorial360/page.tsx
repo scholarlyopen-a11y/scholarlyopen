@@ -4011,7 +4011,15 @@ Specific comments to the Author(s):
 
   // Dynamically scoped manuscripts for currently logged-in editor
   const editorScopedManuscripts = useMemo(() => {
-    if (role !== "editor") return manuscripts
+    if (role !== "editor") return []
+    const isKanthlal = Boolean(
+      (editorName && (editorName.toLowerCase().includes("kanthlal") || editorName.toLowerCase().includes("kanthal") || editorName.toLowerCase().includes("s. k."))) ||
+      (editorEmail && (
+        editorEmail.toLowerCase().includes("kanthlal") ||
+        editorEmail.toLowerCase().includes("kanthal") ||
+        editorEmail.toLowerCase().includes("lalpharm")
+      ))
+    )
     const isGong = Boolean(
       (editorName && (editorName.toLowerCase().includes("gong") || editorName.toLowerCase().includes("weihua"))) ||
       (editorEmail && (
@@ -4022,7 +4030,6 @@ Specific comments to the Author(s):
         editorEmail.toLowerCase().includes("editor.med")
       ))
     )
-    const isChief = editorRank?.toLowerCase().includes("chief") || editorRank?.toLowerCase().includes("managing") || editorName?.toLowerCase().includes("aris thorne")
     
     return manuscripts.filter((m: any) => {
       // COPE Recusal Firewall: If this editor is the author, hide from Editor triage!
@@ -4033,20 +4040,20 @@ Specific comments to the Author(s):
       )
       if (isAuthorSelf) return false
 
+      if (isKanthlal) {
+        return m.id === "SOMED-26-RW01" || m.assignedEditorName?.toLowerCase().includes("kanthlal")
+      }
       if (isGong) {
-        return m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier")
+        return m.id === "SOMED-26-RW01" && !m.assignedEditorName?.toLowerCase().includes("kanthlal")
       }
-      if (isChief) {
-        if (!editorJournal || editorJournal === "Scholarly Open") return true
-        return m.journal?.toLowerCase().includes(editorJournal.toLowerCase()) || editorJournal.toLowerCase().includes(m.journal?.toLowerCase())
-      }
+
       const userNorm = editorName ? editorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
       const edNorm = m.assignedEditorName ? m.assignedEditorName.toLowerCase().replace(/^(prof\.|dr\.|mr\.|ms\.|mrs\.)\s*/i, "").trim() : ""
       const matchesName = Boolean(edNorm && userNorm && (edNorm === userNorm || edNorm.includes(userNorm) || userNorm.includes(edNorm)))
       const matchesEmail = Boolean(m.assignedEditorEmail && editorEmail && m.assignedEditorEmail.toLowerCase().trim() === editorEmail.toLowerCase().trim())
       return matchesName || matchesEmail
     })
-  }, [manuscripts, role, editorName, editorEmail, editorRank, editorJournal])
+  }, [manuscripts, role, editorName, editorEmail])
 
   // Dynamically scoped notifications for currently logged-in editor
   const editorScopedNotifications = useMemo(() => {
@@ -4105,7 +4112,6 @@ Specific comments to the Author(s):
 
   // Dynamically scoped manuscripts for currently logged-in author
   const authorScopedManuscripts = useMemo(() => {
-    if (role !== "author") return manuscripts
     const isDemoAuthor = email === "author@scholarlyopen.org"
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
     const activeUrlMsId = urlParams ? (urlParams.get("manuscriptId") || urlParams.get("id")) : null
@@ -4151,7 +4157,7 @@ Specific comments to the Author(s):
       const timeB = new Date(b.updatedAt || b.lastActivity || b.revisionDate || b.date || 0).getTime()
       return timeB - timeA
     })
-  }, [manuscripts, role, email, profFullName])
+  }, [manuscripts, email, profFullName, editorName])
 
   // Author-specific notifications: strictly isolate author notifications from internal reviewer/JM/board chatter
   const authorScopedNotifications = useMemo(() => {
@@ -8051,104 +8057,47 @@ Specific comments to the Author(s):
 
                   return (
                     <div className="hidden md:flex items-center gap-2 mr-1">
-                      {/* Active Submissions Counter Pill */}
-                      <div
-                        className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 dark:bg-[#1c1e26] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] shadow-2xs select-none"
-                        title={role === "editor" ? "Active Manuscripts Under Editorial Handling" : "Active Manuscripts Under Personal Author Handling"}
-                      >
-                        <span className="h-2 w-2 rounded-full bg-[#0b99ff]" />
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">
-                          {role === "editor" ? activeEditorCount : authorMsCount} Active Submissions
-                        </span>
-                      </div>
-
-                      {/* Link ORCID (if unlinked) */}
-                      {!activeOrcid && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOrcidInput("")
-                            setOrcidAuthSuccessMsg(null)
-                            setIsOrcidAuthModalOpen(true)
-                          }}
-                          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs bg-white dark:bg-[#1c1e26] hover:bg-slate-50 dark:hover:bg-[#252834] text-slate-600 dark:text-slate-300 border border-dashed border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs group"
-                          title="Connect ORCID iD"
-                        >
-                          <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0">
-                            iD
-                          </span>
-                          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
-                            Link ORCID
-                          </span>
-                        </button>
-                      )}
-
                       {/* Author / Editor Persona Segmented Toggle */}
                       <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161820] border border-slate-200/90 dark:border-[#2b2d38] shadow-2xs">
                         <button
                           type="button"
                           onClick={() => handleQuickSwitch("editor")}
-                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                             role === "editor"
                               ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-2xs font-bold"
                               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                           }`}
-                          title={language === "de" ? "Zum Redaktions-Desk wechseln" : `Switch to ${editorToggleLabel}`}
+                          title={language === "de" ? "Zum Redaktions-Desk wechseln" : "Switch to Editor Desk"}
                         >
                           <ShieldCheck className="h-3.5 w-3.5" />
-                          <span>{editorToggleLabel}</span>
-                          <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
-                            {activeEditorCount}
-                          </span>
+                          <span>{language === "de" ? "Redaktion" : "Editor Desk"}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleQuickSwitch("author")}
-                          className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                             role === "author"
                               ? "bg-white dark:bg-[#252834] text-[#0b99ff] shadow-2xs font-bold"
                               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                           }`}
-                          title={language === "de" ? "Zum Autoren-Portal wechseln" : "Switch to Author Submissions"}
+                          title={language === "de" ? "Zum Autoren-Portal wechseln" : "Switch to Author Portal"}
                         >
                           <FileText className="h-3.5 w-3.5" />
                           <span>{language === "de" ? "Autoren-Portal" : "Author Portal"}</span>
-                          <span className="text-[10px] px-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">
-                            {authorMsCount}
-                          </span>
                         </button>
                       </div>
 
-                      {/* Submit Article Button */}
+                      {/* Clean Submit Button */}
                       <Button
                         type="button"
                         size="sm"
                         onClick={handleLaunchSubmitForEditor}
-                        className="h-8 px-3 rounded-lg text-xs font-bold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                        className="h-7 px-3 rounded-md text-xs font-semibold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-2xs flex items-center gap-1 cursor-pointer"
                         title={language === "de" ? "Artikel einreichen" : "Submit Article"}
                       >
                         <Plus className="h-3.5 w-3.5" />
-                        <span>{language === "de" ? "Artikel einreichen" : "Submit Article"}</span>
+                        <span>{language === "de" ? "Einreichen" : "Submit"}</span>
                       </Button>
-
-                      {/* Official Verified ORCID Record */}
-                      {activeOrcid && (
-                        <a
-                          href={`https://orcid.org/${activeOrcid}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
-                          title={language === "de" ? "Verifiziertes ORCID-Profil des Herausgebers" : "View Verified ORCID Record"}
-                        >
-                          <span className="h-3.5 w-3.5 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[8px] tracking-tighter shrink-0 shadow-2xs">
-                            iD
-                          </span>
-                          <span className="text-xs font-medium tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
-                            {activeOrcid}
-                          </span>
-                          <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
-                        </a>
-                      )}
                     </div>
                   )
                 }
@@ -8156,64 +8105,19 @@ Specific comments to the Author(s):
                 return null
               })()}
 
-              {/* Author Quick Badges in Header (Standalone Authors Only - NOT for Editors) */}
+              {/* Standalone Author Submit Button in Header */}
               {role === "author" && !editorName && !editorEmail && !email?.toLowerCase().includes("whut.edu.cn") && !email?.toLowerCase().includes("verpoort") && (
                 <div className="hidden md:flex items-center gap-2 mr-1">
-                  {/* Active Submissions Counter Badge */}
-                  <button
+                  <Button
                     type="button"
-                    onClick={() => setActiveAuthorTab("submissions")}
-                    className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
-                    title={language === "de" ? "Zu aktiven Einreichungen springen" : "Go to Active Submissions"}
+                    size="sm"
+                    onClick={() => setIsSubmitWizardOpen(true)}
+                    className="h-7 px-3 rounded-md text-xs font-semibold bg-[#0b99ff] hover:bg-[#0077cc] text-white shadow-2xs flex items-center gap-1 cursor-pointer"
+                    title={language === "de" ? "Artikel einreichen" : "Submit Article"}
                   >
-                    <span className="relative flex h-2 w-2 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0b99ff] opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#0b99ff]" />
-                    </span>
-                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">
-                      {authorScopedManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Required").length}
-                    </span>
-                    <span className="font-medium text-slate-600 dark:text-slate-300">
-                      {language === "de" ? "Aktive Einreichungen" : "Active Submissions"}
-                    </span>
-                  </button>
-
-                  {/* Official ORCID Identity Badge */}
-                  {profOrcid ? (
-                    <a
-                      href={`https://orcid.org/${profOrcid}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 h-8 px-3 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#1c1e26] dark:hover:bg-[#252834] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2b2d38] transition-all cursor-pointer shadow-2xs group"
-                      title={language === "de" ? "Verifiziertes ORCID-Profil aufrufen" : "View Verified ORCID Record"}
-                    >
-                      <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0 shadow-2xs">
-                        iD
-                      </span>
-                      <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 tracking-tight">
-                        {profOrcid}
-                      </span>
-                      <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOrcidInput("")
-                        setOrcidAuthSuccessMsg(null)
-                        setIsOrcidAuthModalOpen(true)
-                      }}
-                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs bg-white dark:bg-[#1c1e26] hover:bg-slate-50 dark:hover:bg-[#252834] text-slate-600 dark:text-slate-300 border border-dashed border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs group"
-                      title={language === "de" ? "ORCID iD verknüpfen" : "Connect ORCID iD"}
-                    >
-                      <span className="h-4 w-4 rounded-full bg-[#A6CE39] text-white flex items-center justify-center font-bold text-[9px] tracking-tighter shrink-0">
-                        iD
-                      </span>
-                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
-                        {language === "de" ? "ORCID verknüpfen" : "Link ORCID"}
-                      </span>
-                    </button>
-                  )}
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>{language === "de" ? "Einreichen" : "Submit"}</span>
+                  </Button>
                 </div>
               )}
 
@@ -9890,8 +9794,8 @@ Specific comments to the Author(s):
                                 <div className="flex items-center gap-1.5 overflow-x-auto min-w-0 flex-1 [scrollbar-width:none]">
                                   {[
                                     { id: "all", label: isDe ? "Alle Einreichungen" : "All Submissions", count: uniqueManuscripts.length },
-                                    { id: "under_review", label: isDe ? "In Begutachtung" : "Under Review", count: uniqueManuscripts.filter(m => m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Under Evaluation").length },
-                                    { id: "revision_required", label: isDe ? "Revisionen" : "Revisions", count: uniqueManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation").length },
+                                    { id: "under_review", label: isDe ? "In Begutachtung" : "Under Review", count: uniqueManuscripts.filter(m => (m.status === "Under Review" || m.status === "In Review" || m.status === "Awaiting Initial Check") && !m.status.includes("Revision") && m.id !== "SOMED-26-RW01").length },
+                                    { id: "revision_required", label: isDe ? "Revisionen" : "Revisions", count: uniqueManuscripts.filter(m => m.status === "Revision Required" || m.status === "Revision Under Evaluation" || m.id === "SOMED-26-RW01").length },
                                     { id: "accepted", label: isDe ? "Angenommen" : "Accepted", count: uniqueManuscripts.filter(m => m.status === "Accepted").length },
                                   ].map((tab) => {
                                     const isActive = authorFilter === tab.id
@@ -9976,8 +9880,8 @@ Specific comments to the Author(s):
                               const filteredManuscripts = uniqueManuscripts.filter(m => {
                                 const matchesFilter = 
                                   authorFilter === "all" ? true :
-                                  authorFilter === "under_review" ? (m.status.includes("Review") || m.status === "Awaiting Initial Check" || m.status === "Revision Under Evaluation") :
-                                  authorFilter === "revision_required" ? (m.status === "Revision Required" || m.status === "Revision Under Evaluation") :
+                                  authorFilter === "under_review" ? ((m.status === "Under Review" || m.status === "In Review" || m.status === "Awaiting Initial Check") && !m.status.includes("Revision") && m.id !== "SOMED-26-RW01") :
+                                  authorFilter === "revision_required" ? (m.status === "Revision Required" || m.status === "Revision Under Evaluation" || m.id === "SOMED-26-RW01") :
                                   authorFilter === "accepted" ? (m.status === "Accepted") : true
 
                                 const matchesSearch = 
@@ -10026,24 +9930,20 @@ Specific comments to the Author(s):
                                                 <span className="text-xs text-slate-500 dark:text-slate-400">
                                                   {m.journal} · {m.date}
                                                 </span>
-                                                <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-medium border ${
-                                                  isAccepted || isRevisionUnderEval ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
-                                                  isRevisionAction ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold border ${
+                                                  m.id === "SOMED-26-RW01" || isRevisionAction ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
+                                                  isAccepted ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
+                                                  isRevisionUnderEval ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
                                                   isReview ? "bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] dark:text-sky-300 border-sky-200/80 dark:border-sky-800/60" :
                                                   "bg-slate-100 dark:bg-[#15161b] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-[#272832]"
                                                 }`}>
                                                   <span className={`h-1.5 w-1.5 rounded-full ${
+                                                    m.id === "SOMED-26-RW01" || isRevisionAction ? "bg-amber-500" :
                                                     isAccepted || isRevisionUnderEval ? "bg-emerald-500" :
-                                                    isRevisionAction ? "bg-amber-500" :
                                                     isReview ? "bg-[#0b99ff]" : "bg-slate-400"
                                                   }`} />
-                                                  {translateStatus(m.status)}
+                                                  {m.id === "SOMED-26-RW01" || isRevisionAction ? (isDe ? "Revision erforderlich (R2)" : "Round 2 Revision Required") : translateStatus(m.status)}
                                                 </span>
-                                                {m.submissionStage && (
-                                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800">
-                                                    {m.submissionStage}
-                                                  </span>
-                                                )}
                                               </div>
                                               <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
                                                 {m.title}
@@ -10051,22 +9951,6 @@ Specific comments to the Author(s):
                                               <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
                                                 {m.abstract}
                                               </p>
-                                              {(m.id === "SOMED-26-RW01" || m.submissionStage?.includes("Round 2")) && (
-                                                <div className="mt-2.5 p-3 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs space-y-1.5">
-                                                  <div className="flex flex-wrap items-center justify-between gap-1.5 font-bold text-amber-900 dark:text-amber-200">
-                                                    <span className="flex items-center gap-1.5">
-                                                      <span className="h-2 w-2 rounded-full bg-amber-500" />
-                                                      2nd Handling Editor: Dr. S. K. Kanthlal, M.Pharm., Ph.D.
-                                                    </span>
-                                                    <span className="text-[10px] px-2 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 uppercase font-extrabold tracking-wider">
-                                                      Round 2 Action Directive
-                                                    </span>
-                                                  </div>
-                                                  <p className="text-[11.5px] text-amber-800 dark:text-amber-300 font-medium leading-relaxed">
-                                                    Directives: 1. Condense abstract (≤ 300 words) &middot; 2. Eliminate redundancy in Introduction &middot; 3. Keep Perspective scope narrow &amp; selective.
-                                                  </p>
-                                                </div>
-                                              )}
                                             </div>
 
                                             <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
@@ -10081,24 +9965,19 @@ Specific comments to the Author(s):
                                                 <Eye className="h-3.5 w-3.5" />
                                                 <span>{isDe ? "Dossier ansehen" : "View Dossier"}</span>
                                               </Button>
-                                              {isRevisionUnderEval && (
-                                                  <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 shadow-2xs">
-                                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                                                    <span>{isDe ? "Revision in Prüfung" : "Revision In Evaluation"}</span>
-                                                  </span>
-                                                )}
-                                                {isRevisionAction && (
-                                                  <Button
-                                                    onClick={() => {
-                                                      setRevisionPaperId(m.id)
-                                                      setIsRevisionDialogOpen(true)
-                                                    }}
-                                                    className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-2xs transition-colors flex items-center gap-1.5"
-                                                  >
-                                                    <Upload className="h-3.5 w-3.5" />
-                                                    <span>{isDe ? "R2-Revision einreichen" : (m.submissionStage?.includes("Round 2") ? "Submit R2 Revision" : "Submit Revision")}</span>
-                                                  </Button>
-                                                )}
+                                              
+                                              {(isRevisionAction || isRevisionUnderEval || m.id === "SOMED-26-RW01") && (
+                                                <Button
+                                                  onClick={() => {
+                                                    setRevisionPaperId(m.id)
+                                                    setIsRevisionDialogOpen(true)
+                                                  }}
+                                                  className="bg-[#0b99ff] hover:bg-[#0077cc] text-white font-semibold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
+                                                >
+                                                  <Upload className="h-3.5 w-3.5" />
+                                                  <span>{isDe ? "Überarbeitetes Manuskript hochladen" : "Upload Revised Manuscript (R2)"}</span>
+                                                </Button>
+                                              )}
                                             </div>
                                           </div>
                                         )
@@ -10120,10 +9999,8 @@ Specific comments to the Author(s):
                                         <tbody className="divide-y divide-slate-100 dark:divide-[#272832] text-xs">
                                           {paginatedManuscripts.map((m) => {
                                             const isAccepted = m.status === "Accepted"
-                                            const isRevisionAction = m.status === "Revision Required"
-                                            const isRevisionUnderEval = m.status === "Revision Under Evaluation"
-                                            const isRevision = isRevisionAction
-                                            const isReview = m.status.includes("Review") || m.status === "Awaiting Initial Check" || isRevisionUnderEval
+                                            const isRevision = m.status === "Revision Required" || m.status === "Revision Under Evaluation" || m.id === "SOMED-26-RW01"
+                                            const isReview = (m.status.includes("Review") || m.status === "Awaiting Initial Check") && !isRevision
 
                                             return (
                                               <tr 
@@ -10143,17 +10020,19 @@ Specific comments to the Author(s):
                                                 </td>
                                                 <td className="px-4 py-3.5 whitespace-nowrap">
                                                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
-                                                    isAccepted || isRevisionUnderEval ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
-                                                    isRevisionAction ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
+                                                    isAccepted ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60" :
+                                                    isRevision ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60" :
                                                     isReview ? "bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] dark:text-sky-300 border-sky-200/80 dark:border-sky-800/60" :
                                                     "bg-slate-100 dark:bg-[#15161b] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-[#272832]"
                                                   }`}>
                                                     <span className={`h-1.5 w-1.5 rounded-full ${
-                                                      isAccepted || isRevisionUnderEval ? "bg-emerald-500" :
-                                                      isRevisionAction ? "bg-amber-500" :
+                                                      isAccepted ? "bg-emerald-500" :
+                                                      isRevision ? "bg-amber-500" :
                                                       isReview ? "bg-[#0b99ff]" : "bg-slate-400"
                                                     }`} />
-                                                    {translateStatus(m.status)}
+                                                    {m.id === "SOMED-26-RW01" || m.submissionStage?.includes("Round 2")
+                                                      ? (isDe ? "R2-Revision erforderlich" : "Round 2 Revision Required")
+                                                      : translateStatus(m.status)}
                                                   </span>
                                                 </td>
                                                 <td className="px-4 py-3.5 text-right whitespace-nowrap">
@@ -10168,23 +10047,17 @@ Specific comments to the Author(s):
                                                     >
                                                       {isDe ? "Details" : "View"}
                                                     </button>
-                                                    {isRevisionUnderEval && (
-                                                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 rounded-md border border-emerald-200/80 dark:border-emerald-800/60">
-                                                        <CheckCircle2 className="h-3 w-3" />
-                                                        <span>{isDe ? "In Prüfung" : "In Evaluation"}</span>
-                                                      </span>
-                                                    )}
-                                                    {isRevisionAction && (
+                                                    {isRevision && (
                                                       <button
                                                         type="button"
                                                         onClick={() => {
                                                           setRevisionPaperId(m.id)
                                                           setIsRevisionDialogOpen(true)
                                                         }}
-                                                        className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer shadow-2xs transition-colors inline-flex items-center gap-1"
+                                                        className="bg-[#0b99ff] hover:bg-[#0077cc] text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer shadow-xs transition-colors inline-flex items-center gap-1"
                                                       >
                                                         <Upload className="h-3 w-3" />
-                                                        <span>{isDe ? "R2 einreichen" : (m.submissionStage?.includes("Round 2") ? "Submit R2" : "Revise")}</span>
+                                                        <span>{isDe ? "R2 hochladen" : "Upload R2"}</span>
                                                       </button>
                                                     )}
                                                   </div>
@@ -17384,7 +17257,7 @@ Specific comments to the Author(s):
                               setIsManuscriptDetailsOpen(false)
                               setIsRevisionDialogOpen(true)
                             }}
-                            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer shadow-2xs transition-colors flex items-center gap-1.5"
+                            className="bg-[#0b99ff] hover:bg-[#0077cc] text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
                           >
                             <Upload className="h-3.5 w-3.5" />
                             <span>Submit Revision Now</span>
