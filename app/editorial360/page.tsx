@@ -14404,7 +14404,7 @@ Specific comments to the Author(s):
                                         </span>
                                       </div>
                                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                        Assigned in succession following non-response from Dr. Weihua Gong · Kerala University of Health Sciences (<span className="font-mono text-indigo-600 dark:text-indigo-400">lalpharm@gmail.com</span>)
+                                        Handling Editor &middot; Kerala University of Health Sciences
                                       </p>
                                     </div>
                                   </div>
