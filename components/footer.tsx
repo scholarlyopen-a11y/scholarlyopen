@@ -4,7 +4,6 @@ import Link from "next/link"
 import { Mail } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { LogoSO } from "./logo-so"
-import { FooterWaves } from "./footer-waves"
 
 // Compliance Badge Component
 function ComplianceBadge({ name, abbr, description }: { name: string; abbr: string; description: string }) {
@@ -20,9 +19,9 @@ function ComplianceBadge({ name, abbr, description }: { name: string; abbr: stri
 
 function CcByLogo() {
   return (
-    <a
-      href="https://creativecommons.org/licenses/by/4.0/"
-      target="_blank"
+    <a 
+      href="https://creativecommons.org/licenses/by/4.0/" 
+      target="_blank" 
       rel="noopener noreferrer"
       className="inline-block hover:opacity-90 transition-opacity shrink-0"
       title="Creative Commons Attribution 4.0 International License"
@@ -156,147 +155,144 @@ export function Footer() {
 
   return (
     <footer 
-      className="text-white relative overflow-hidden w-full select-none"
+      className="text-white"
       style={{
-        background: 'linear-gradient(180deg, #07190f 0%, #0b2416 30%, #081d12 100%)'
+        background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-mid) 45%, var(--primary-dark) 100%)'
       }}
     >
-      {/* Floating Animated Waves in Light Brand Pista & Emerald */}
-      <FooterWaves />
-
       {/* Compliance Bar */}
       <div className="border-b border-[var(--primary-foreground)]/20">
-          <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-accent">{t("compliance.title")}</h3>
-                <p className="mt-1 text-xs text-white/60">Committed to the highest standards in scholarly publishing</p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {complianceBadges.map((badge) => (
-                  <ComplianceBadge key={badge.abbr} {...badge} />
-                ))}
-              </div>
+        <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-accent">{t("compliance.title")}</h3>
+              <p className="mt-1 text-xs text-white/60">Committed to the highest standards in scholarly publishing</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {complianceBadges.map((badge) => (
+                <ComplianceBadge key={badge.abbr} {...badge} />
+              ))}
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Brand */}
-            <div className="lg:col-span-1">
-              <Link href="/" className="flex items-center gap-3">
-                <div className="flex h-24 w-[320px] max-w-full shrink-0 items-center">
-                  <LogoSO variant="lockup" className="h-full w-auto object-contain" />
-                </div>
-              </Link>
-              <p className="mt-4 text-sm text-white/70 leading-relaxed">
-                {t("brand.description")}
-              </p>
-              <div className="mt-6 space-y-3 text-sm text-white/70">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 shrink-0" />
-                  <a href="mailto:info@scholarlyopen.org" className="break-all hover:text-white transition-colors">
-                    info@scholarlyopen.org
-                  </a>
-                </div>
+      <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Brand */}
+          <div className="lg:col-span-1">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="flex h-24 w-[320px] max-w-full shrink-0 items-center">
+                <LogoSO variant="lockup" className="h-full w-auto object-contain" />
               </div>
-              {/* Social Media */}
-              <div className="mt-6 flex items-center gap-3">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white/60 hover:text-white hover:bg-secondary/20 transition-colors"
-                    aria-label={social.name}
+            </Link>
+            <p className="mt-4 text-sm text-white/70 leading-relaxed">
+              {t("brand.description")}
+            </p>
+            <div className="mt-6 space-y-3 text-sm text-white/70">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 shrink-0" />
+                <a href="mailto:info@scholarlyopen.org" className="break-all hover:text-white transition-colors">
+                  info@scholarlyopen.org
+                </a>
+              </div>
+            </div>
+            {/* Social Media */}
+            <div className="mt-6 flex items-center gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white/60 hover:text-white hover:bg-secondary/20 transition-colors"
+                  aria-label={social.name}
+                >
+                  <social.icon className="h-5 w-5 block" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Journals */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">{t("nav.journals")}</h3>
+            <ul className="mt-4 space-y-3">
+              {footerLinks.journals.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/70 hover:text-white transition-colors"
                   >
-                    <social.icon className="h-5 w-5 block" />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Journals */}
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">{t("nav.journals")}</h3>
-              <ul className="mt-4 space-y-3">
-                {footerLinks.journals.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/70 hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* For Authors */}
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">{t("footer.forAuthors")}</h3>
-              <ul className="mt-4 space-y-3">
-                {footerLinks.forAuthors.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/70 hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* About & Policies */}
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">{t("footer.aboutUs")}</h3>
-              <ul className="mt-4 space-y-3">
-                {footerLinks.aboutUs.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/70 hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90 mt-8">{t("footer.policies")}</h3>
-              <ul className="mt-4 space-y-3">
-                {footerLinks.policies.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/70 hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="mt-12 border-t border-[var(--primary-foreground)]/20 pt-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm text-white/60">
-                <p>
-                  &copy; {new Date().getFullYear()} {t("footer.copyright")}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-white/60 text-xs">
-                <CcByLogo />
-                <span>{t("footer.ccbyStatement")}</span>
-              </div>
+          {/* For Authors */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">{t("footer.forAuthors")}</h3>
+            <ul className="mt-4 space-y-3">
+              {footerLinks.forAuthors.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/70 hover:text-white transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* About & Policies */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90">{t("footer.aboutUs")}</h3>
+            <ul className="mt-4 space-y-3">
+              {footerLinks.aboutUs.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/70 hover:text-white transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/90 mt-8">{t("footer.policies")}</h3>
+            <ul className="mt-4 space-y-3">
+              {footerLinks.policies.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/70 hover:text-white transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12 border-t border-[var(--primary-foreground)]/20 pt-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-white/60">
+              <p>
+                &copy; {new Date().getFullYear()} {t("footer.copyright")}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-white/60 text-xs">
+              <CcByLogo />
+              <span>{t("footer.ccbyStatement")}</span>
             </div>
           </div>
         </div>
+      </div>
     </footer>
   )
 }
