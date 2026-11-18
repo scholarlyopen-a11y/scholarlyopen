@@ -155,16 +155,18 @@ export function Footer() {
   ]
 
   return (
-    <footer 
-      className="text-white relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-mid) 45%, var(--primary-dark) 100%)'
-      }}
-    >
-      {/* Flowing Animated Waves */}
+    <footer className="text-white relative overflow-hidden">
+      {/* Flowing Animated Waves in Brand Pista & Dark Green - Starts the footer with organic wave crests */}
       <FooterWaves />
 
-      {/* Compliance Bar */}
+      {/* Main Footer Container with Seamless Dark Green Gradient */}
+      <div 
+        className="w-full text-white"
+        style={{
+          background: 'linear-gradient(90deg, #0b2416 0%, #103420 45%, #0a2014 100%)'
+        }}
+      >
+        {/* Compliance Bar */}
       <div className="border-b border-[var(--primary-foreground)]/20">
         <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -296,6 +298,7 @@ export function Footer() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </footer>
   )
