@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Mail } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { LogoSO } from "./logo-so"
+import { FooterWaves } from "./footer-waves"
 
 // Compliance Badge Component
 function ComplianceBadge({ name, abbr, description }: { name: string; abbr: string; description: string }) {
@@ -155,11 +156,14 @@ export function Footer() {
 
   return (
     <footer 
-      className="text-white"
+      className="text-white relative overflow-hidden"
       style={{
         background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-mid) 45%, var(--primary-dark) 100%)'
       }}
     >
+      {/* Flowing Animated Waves */}
+      <FooterWaves />
+
       {/* Compliance Bar */}
       <div className="border-b border-[var(--primary-foreground)]/20">
         <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">

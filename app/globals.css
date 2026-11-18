@@ -270,5 +270,21 @@ html {
   background-clip: padding-box;
 }
 
+/* ========================================================= */
+/* SUPPRESS THIRD-PARTY HOOKS & FLOATING PLATFORM BADGES     */
+/* ========================================================= */
+#netlify-badge,
+iframe[src*="netlify"],
+[data-netlify-badge],
+.netlify-badge,
+div[style*="z-index: 2147483647"],
+netlify-badge {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+
 
 
