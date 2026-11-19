@@ -59,6 +59,7 @@ import {
   Target,
   Trophy,
   Upload,
+  Paperclip,
   Link2,
   Linkedin,
   GraduationCap,
@@ -179,6 +180,9 @@ interface Manuscript {
   rebuttalFileSize?: string
   rebuttalFileUrl?: string
   rebuttalText?: string
+  supplementaryFileName?: string
+  supplementaryFileSize?: string
+  supplementaryFileUrl?: string
   revisionDate?: string
   updatedAt?: string
   lastActivity?: string
@@ -1896,6 +1900,9 @@ export default function Editorial360Page() {
               rebuttalFileSize: m.rebuttal_file_size || (m.id === "SOMED-26-RW01" ? "25.8 KB" : undefined),
               rebuttalFileUrl: m.rebuttal_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : undefined),
               rebuttalText: m.rebuttal_text || (m.id === "SOMED-26-RW01" ? INITIAL_MEDICINE_MANUSCRIPT.rebuttalText : undefined),
+              supplementaryFileName: m.supplementary_file_name,
+              supplementaryFileSize: m.supplementary_file_size,
+              supplementaryFileUrl: m.supplementary_file_url,
               revisionDate: m.revision_date || (m.id === "SOMED-26-RW01" ? "2026-10-21T07:30:00.000Z" : undefined),
               coverLetter: m.cover_letter,
               ethicsIrb: m.ethics_irb,
@@ -2135,6 +2142,9 @@ export default function Editorial360Page() {
               rebuttalFileSize: m.rebuttal_file_size || (m.id === "SOMED-26-RW01" ? "25.8 KB" : undefined),
               rebuttalFileUrl: m.rebuttal_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : undefined),
               rebuttalText: m.rebuttal_text || (m.id === "SOMED-26-RW01" ? INITIAL_MEDICINE_MANUSCRIPT.rebuttalText : undefined),
+              supplementaryFileName: m.supplementary_file_name,
+              supplementaryFileSize: m.supplementary_file_size,
+              supplementaryFileUrl: m.supplementary_file_url,
               revisionDate: m.revision_date || (m.id === "SOMED-26-RW01" ? "2026-10-21T07:30:00.000Z" : undefined),
               coverLetter: m.cover_letter,
               ethicsIrb: m.ethics_irb,
@@ -2864,10 +2874,14 @@ Specific comments to the Author(s):
   const [rebuttalFile, setRebuttalFile] = useState<File | null>(null)
   const [rebuttalFileName, setRebuttalFileName] = useState<string>("")
   const [rebuttalFileSize, setRebuttalFileSize] = useState<string>("")
+  const [supplementaryFile, setSupplementaryFile] = useState<File | null>(null)
+  const [supplementaryFileName, setSupplementaryFileName] = useState<string>("")
+  const [supplementaryFileSize, setSupplementaryFileSize] = useState<string>("")
   const [revisionRebuttal, setRevisionRebuttal] = useState<string>("")
   const [revisionCoverLetter, setRevisionCoverLetter] = useState<string>("")
   const revisionFileInputRef = useRef<HTMLInputElement>(null)
   const rebuttalFileInputRef = useRef<HTMLInputElement>(null)
+  const supplementaryFileInputRef = useRef<HTMLInputElement>(null)
   const revisionCommentsScrollRef = useRef<HTMLDivElement>(null)
 
   // Forgot password & account credential recovery modal state
@@ -5485,6 +5499,36 @@ Specific comments to the Author(s):
       }
     }
 
+    let finalSupplementaryName = supplementaryFileName
+    let finalSupplementarySize = supplementaryFileSize
+    let finalSupplementaryUrl = ""
+
+    if (supplementaryFile) {
+      try {
+        const formData = new FormData()
+        formData.append("file", supplementaryFile)
+        formData.append("manuscriptId", revisionPaperId || "SOMED-26-RW01")
+        formData.append("fileType", "supplementary")
+
+        const uploadRes = await fetch("/api/editorial360/upload", {
+          method: "POST",
+          body: formData,
+        })
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          if (uploadData.ok && uploadData.fileUrl) {
+            finalSupplementaryUrl = uploadData.fileUrl
+          }
+        }
+      } catch (suppErr) {
+        console.warn("Supplementary upload failed, falling back to blob URL:", suppErr)
+        try { finalSupplementaryUrl = URL.createObjectURL(supplementaryFile) } catch (e) {}
+      }
+      if (!finalSupplementaryUrl) {
+        try { finalSupplementaryUrl = URL.createObjectURL(supplementaryFile) } catch (e) {}
+      }
+    }
+
     // Resolve author metadata for automated email confirmation
     const targetPaper = manuscripts.find(m => m.id === revisionPaperId)
     const authorEmailToSend = targetPaper?.authorEmail || (isAortic ? "Applied.EBM.Institute@proton.me" : email)
@@ -5506,6 +5550,9 @@ Specific comments to the Author(s):
         rebuttalFileSize: finalRebuttalSize,
         rebuttalFileUrl: finalRebuttalUrl || (m as any).rebuttalFileUrl,
         rebuttalText: revisionRebuttal || (m as any).rebuttalText,
+        supplementaryFileName: finalSupplementaryName || (m as any).supplementaryFileName,
+        supplementaryFileSize: finalSupplementarySize || (m as any).supplementaryFileSize,
+        supplementaryFileUrl: finalSupplementaryUrl || (m as any).supplementaryFileUrl,
         coverLetter: revisionCoverLetter || (m as any).coverLetter,
         revisionDate: nowIso,
         lastActivity: nowIso,
@@ -5538,6 +5585,9 @@ Specific comments to the Author(s):
         rebuttal_file_name: finalRebuttalName || null,
         rebuttal_file_url: finalRebuttalUrl || null,
         rebuttal_text: revisionRebuttal || null,
+        supplementary_file_name: finalSupplementaryName || null,
+        supplementary_file_size: finalSupplementarySize || null,
+        supplementary_file_url: finalSupplementaryUrl || null,
         cover_letter: revisionCoverLetter || null,
         updatedAt: nowIso,
         date: nowIso
@@ -5569,6 +5619,7 @@ Specific comments to the Author(s):
         <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;"><strong>Article Title:</strong> <span style="color: #0f172a;">${targetPaperTitle}</span></p>
         <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;"><strong>Revised Manuscript:</strong> <span style="color: #0f172a; font-weight: 600;">${finalFileName} (${finalFileSize})</span></p>
         <p style="margin: 0; font-size: 13px; color: #64748b;"><strong>Response to Reviewers:</strong> <span style="color: #0f172a; font-weight: 600;">${finalRebuttalName || "Attached Response Document"}</span></p>
+        ${finalSupplementaryName ? `<p style="margin: 8px 0 0; font-size: 13px; color: #64748b;"><strong>Supplementary / Authorship Form:</strong> <span style="color: #0f172a; font-weight: 600;">${finalSupplementaryName} (${finalSupplementarySize})</span></p>` : ''}
       </div>
       <p style="font-size: 14px; line-height: 1.6; color: #334155;">
         We confirm that your revised manuscript and response document have been successfully received and placed on the desk of the <strong>Handling Editor</strong> and <strong>Journal Manager</strong> with status <em>"Revision Under Evaluation"</em>.
@@ -5664,6 +5715,7 @@ Specific comments to the Author(s):
             <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Response Document:</td>
             <td style="padding: 6px 0; color: #0284c7; font-weight: 600;">${finalRebuttalName || "Attached Response Document"}</td>
           </tr>
+          ${finalSupplementaryName ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Supplementary / Form:</td><td style="padding: 6px 0; color: #0284c7; font-weight: 600;">${finalSupplementaryName} (${finalSupplementarySize})</td></tr>` : ''}
           <tr>
             <td style="padding: 6px 0; color: #64748b; font-weight: 600;">New Status:</td>
             <td style="padding: 6px 0; color: #059669; font-weight: 700;">Revision Under Evaluation</td>
@@ -5742,6 +5794,9 @@ Specific comments to the Author(s):
     setRebuttalFile(null)
     setRebuttalFileName("")
     setRebuttalFileSize("")
+    setSupplementaryFile(null)
+    setSupplementaryFileName("")
+    setSupplementaryFileSize("")
     setRevisionRebuttal("")
     setRevisionCoverLetter("")
     try {
@@ -14572,8 +14627,8 @@ Specific comments to the Author(s):
                     </div>
                   </div>
                   
-                  {/* File Upload Grid: Revised Manuscript & Separate Rebuttal File */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 shrink-0">
+                  {/* File Upload Grid: Revised Manuscript, Rebuttal File & Supplementary/Authorship Form */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 shrink-0">
                     {/* Card 1: Revised Manuscript */}
                     <input
                       type="file"
@@ -14660,7 +14715,53 @@ Specific comments to the Author(s):
                             {language === "de" ? "2. Antwort an Gutachter (Dokument)" : "2. Response to Reviewers Document"}
                           </span>
                           <span className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 text-center">
-                            DOCX, PDF separate file (Optional / Attached)
+                            DOCX, PDF (Optional / Attached)
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Card 3: Supplementary Files / Authorship Change Form */}
+                    <input
+                      type="file"
+                      ref={supplementaryFileInputRef}
+                      accept=".pdf,.docx,.doc,.zip,.xlsx,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setSupplementaryFile(file)
+                          setSupplementaryFileName(file.name)
+                          setSupplementaryFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
+                        }
+                      }}
+                    />
+                    <div 
+                      onClick={() => supplementaryFileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                        supplementaryFile 
+                          ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
+                          : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-amber-500 hover:bg-amber-50/30"
+                      }`}
+                    >
+                      {supplementaryFile ? (
+                        <>
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mb-1 animate-in zoom-in-50" />
+                          <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 text-center line-clamp-1 break-all">
+                            {supplementaryFileName}
+                          </span>
+                          <span className="text-[9.5px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            {supplementaryFileSize} · Supplementary / Authorship Form
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Paperclip className="h-5 w-5 text-amber-500 mb-1" />
+                          <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 text-center">
+                            {language === "de" ? "3. Zusatz- / Autorenschafts-Formular" : "3. Supplementary / Authorship Form"}
+                          </span>
+                          <span className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 text-center">
+                            PDF, DOCX, ZIP (Authorship Form / Data)
                           </span>
                         </>
                       )}
@@ -17094,7 +17195,7 @@ Specific comments to the Author(s):
                             {selectedManuscriptDetails.revisionDate || selectedManuscriptDetails.updatedAt || selectedManuscriptDetails.date}
                           </span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div className={`grid grid-cols-1 ${selectedManuscriptDetails.supplementaryFileName ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-3 text-xs`}>
                           <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center justify-between gap-2">
                             <div className="min-w-0">
                               <span className="text-[10px] uppercase font-bold text-slate-400 block">{language === "de" ? "Überarbeitetes Manuskript" : "Revised Manuscript"}</span>
@@ -17152,6 +17253,37 @@ Specific comments to the Author(s):
                               <Download className="h-4 w-4" />
                             </button>
                           </div>
+
+                          {selectedManuscriptDetails.supplementaryFileName && (
+                            <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#131418] border border-slate-200/80 dark:border-[#272832] flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">{language === "de" ? "Zusatz / Autorenschafts-Formular" : "Supplementary / Authorship Form"}</span>
+                                <p className="font-semibold text-slate-900 dark:text-white truncate" title={selectedManuscriptDetails.supplementaryFileName}>
+                                  {selectedManuscriptDetails.supplementaryFileName}
+                                </p>
+                                {selectedManuscriptDetails.supplementaryFileSize && (
+                                  <span className="text-[10px] text-slate-500">{selectedManuscriptDetails.supplementaryFileSize}</span>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const dlUrl = selectedManuscriptDetails.supplementaryFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                  const dlName = selectedManuscriptDetails.supplementaryFileName || "Authorship_Change_Form.pdf"
+                                  const link = document.createElement("a")
+                                  link.href = dlUrl
+                                  link.download = dlName
+                                  document.body.appendChild(link)
+                                  link.click()
+                                  document.body.removeChild(link)
+                                }}
+                                className="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-[#20222a] text-[#0b99ff] shrink-0 cursor-pointer"
+                                title="Download Supplementary / Authorship Form"
+                              >
+                                <Download className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {selectedManuscriptDetails.rebuttalText && (
@@ -17521,6 +17653,37 @@ Specific comments to the Author(s):
                                   document.body.removeChild(link)
                                 }}
                                 className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 hover:bg-emerald-200/80 border border-emerald-300/80 px-2.5 py-1 rounded-md transition-all cursor-pointer shrink-0"
+                              >
+                                <Download className="h-3 w-3" />
+                                <span>Download</span>
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Supplementary / Authorship Form File if submitted */}
+                          {selectedManuscriptDetails.supplementaryFileName && (
+                            <div className="p-2.5 rounded-lg bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/80 dark:border-sky-800/60 flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-semibold text-slate-900 dark:text-white truncate">
+                                  {selectedManuscriptDetails.supplementaryFileName}
+                                </p>
+                                <p className="text-[10px] text-sky-600 dark:text-sky-400 font-medium">
+                                  {selectedManuscriptDetails.supplementaryFileSize || "File attached"} · Supplementary / Authorship Change Form
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const dlUrl = selectedManuscriptDetails.supplementaryFileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                  const dlName = selectedManuscriptDetails.supplementaryFileName || "Authorship_Change_Form.pdf"
+                                  const link = document.createElement("a")
+                                  link.href = dlUrl
+                                  link.download = dlName
+                                  document.body.appendChild(link)
+                                  link.click()
+                                  document.body.removeChild(link)
+                                }}
+                                className="inline-flex items-center gap-1 text-xs font-bold text-sky-700 hover:text-sky-800 dark:text-sky-300 bg-sky-100/80 hover:bg-sky-200/80 border border-sky-300/80 px-2.5 py-1 rounded-md transition-all cursor-pointer shrink-0"
                               >
                                 <Download className="h-3 w-3" />
                                 <span>Download</span>
