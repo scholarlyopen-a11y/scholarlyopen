@@ -475,17 +475,16 @@
       "affiliation": "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt",
       "department": "Department of Chemistry, Faculty of Science",
       "country": "Egypt",
-      "specialization": "Physical Chemistry, Environmental Remediation, Wastewater Treatment, Adsorption Kinetics, Nanocomposites, Photocatalysis",
+      "specialization": "Water purification, waste management, environmental chemistry, material science, Green hydrogen, and characterization & recycling of waste.",
       "researchInterests": [
-        "Physical Chemistry",
-        "Wastewater Treatment & Water Purification",
-        "Adsorption Kinetics & Heavy Metal Removal",
-        "Photocatalytic Degradation & Green Synthesis",
-        "Nanomaterials & Metal Oxide Nanocomposites",
-        "Environmental Analytical Chemistry",
-        "Industrial Waste Recycling & Circular Economy"
+        "Water Purification & Wastewater Treatment",
+        "Waste Management & Industrial Waste Recycling",
+        "Green Hydrogen & Photocatalytic Production",
+        "Material Science & Nanocomposites",
+        "Adsorption & Decolorization",
+        "Recycling of Waste & Byproducts"
       ],
-      "biography": "Assoc. Prof. Dr. Safaa El-Nahas is an Associate Professor of Physical Chemistry in the Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt. With an accomplished academic and research trajectory, Dr. El-Nahas has established an internationally recognized research profile specializing in physical chemistry, environmental chemistry, materials science, and water/wastewater remediation. Her laboratory investigates green synthesis of nanomaterials, metal oxide nanostructures, heterogeneous photocatalysis, and the upcycling of industrial and agricultural byproducts into high-capacity biosorbents for the removal of toxic heavy metals, water hardness ions, and emerging organic pollutants. She has authored over 30 peer-reviewed scientific publications in leading international journals and actively serves as an Editorial Board Member and peer reviewer.",
+      "biography": "Prof. Safaa El-Nahas Abas is a Professor of Physical Chemistry in the Chemistry Department, Faculty of Science, Qena University (South Valley University), Egypt. Well-versed across water purification, waste management, environmental remediation, and materials science, her research focuses on Green hydrogen, photocatalysis, and waste characterization and recycling. She serves as Director of the Chemical and Agricultural Consultation Unit and Technical Coordinator at the Center for Quality Assurance & Accreditation.",
       "orcid": "0000-0002-8185-1338",
       "googleScholar": "https://scholar.google.com/citations?view_op=search_authors&mauthors=Safaa+El-Nahas",
       "researchGate": "https://www.researchgate.net/profile/Safaa-El-Nahas",
@@ -493,7 +492,9 @@
       "jmApproved": true,
       "hasAcceptedTerms": true,
       "consentProfileUpload": true,
-      "acceptedAt": "2026-11-18T10:00:00.000Z"
+      "acceptedAt": "2026-11-18T10:00:00.000Z",
+      "photoUrl": "/images/editors/safaa-el-nahas.jpg",
+      "scopusId": "54789523700"
     }
   ],
   "lastUpdated": "2026-11-23T09:10:48.811Z"

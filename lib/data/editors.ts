@@ -1848,11 +1848,13 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     name: "Safaa El-Nahas, Ph.D.",
     role: "Editorial Board Member & Handling Editor",
     affiliation: "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt",
-    specialization: "Physical Chemistry, Environmental Remediation, Wastewater Treatment, Adsorption Kinetics, Nanocomposites, Photocatalysis, and Sustainable Materials.",
+    specialization: "Water purification, waste management, environmental chemistry, material science, Green hydrogen, and characterization & recycling of waste.",
     email: "editor.environsci@scholarlyopen.org",
     orcid: "0000-0002-8185-1338",
+    scopusId: "54789523700",
     googleScholar: "https://scholar.google.com/citations?view_op=search_authors&mauthors=Safaa+El-Nahas",
     researchGate: "https://www.researchgate.net/profile/Safaa-El-Nahas",
+    imageUrl: "/images/editors/safaa-el-nahas.jpg",
     journalSlug: "environmental-science",
     assignedSections: [
       "Water & Air Quality",
@@ -1862,87 +1864,114 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
       "Ecosystem Services & Pollution Remediation"
     ],
     expertise: [
-      "Wastewater Treatment & Water Purification",
-      "Adsorption Kinetics & Heavy Metal Removal",
-      "Photocatalytic Degradation & Green Synthesis",
-      "Nanomaterials & Metal Oxide Nanocomposites",
-      "Environmental Analytical Chemistry",
-      "Industrial Waste Recycling & Circular Economy",
-      "Water Hardness Softening & Desalination"
+      "Water Purification & Wastewater Treatment",
+      "Waste Management & Industrial Waste Recycling",
+      "Green Hydrogen & Photocatalytic H2O2 Production",
+      "Material Science & Nanocomposites",
+      "Adsorbent Synthesis (Cement Waste Dust & Biosorbents)",
+      "Recycling of Aluminum Scrap & Spent Solutions",
+      "Organic Fertilizer from Agricultural Byproducts",
+      "Characterization & Catalytic Degradation",
+      "ISO 17025 Quality Standards & Laboratory Safety"
     ],
     badges: [
       "Editorial Board Member",
       "Handling Editor",
-      "Associate Professor, SVU Egypt",
-      "Water Treatment Specialist",
+      "Professor of Physical Chemistry",
+      "Director, Consultation Unit Qena",
+      "ISF Go Green 1st Place Winner",
       "COPE Ethics Verified"
     ],
-    welcomeMessage: "As an Editorial Board Member and Handling Editor for Scholarly Open: Environmental Science, I am dedicated to advancing rigorous, open, and reproducible research in water remediation, environmental chemistry, and sustainable waste upcycling. We warmly welcome original research and transformative insights addressing pressing global environmental challenges.",
+    welcomeMessage: "As an Editorial Board Member and Handling Editor for Scholarly Open: Environmental Science, I am dedicated to advancing high-impact, transparent, and reproducible research in water purification, industrial waste recycling, and green chemical technologies. We warmly welcome original contributions that pioneer transformative environmental solutions.",
     stats: [
-      { label: "Citations", value: "380+", description: "Google Scholar Citations" },
+      { label: "Citations", value: "380+", description: "Global Scientific Citations" },
       { label: "H-Index", value: "11", description: "Scholarly H-Index" },
-      { label: "Publications", value: "30+", description: "Peer-reviewed journal papers" },
-      { label: "Focus", value: "Water Remediation", description: "Nanocomposites & Adsorption" }
+      { label: "Publications", value: "30+", description: "Peer-reviewed scientific papers" },
+      { label: "Core Fields", value: "Water & Waste", description: "Purification & Green Hydrogen" }
     ],
     timeline: [
       {
         year: "2026–Present",
         title: "Editorial Board Member & Handling Editor — Scholarly Open",
-        description: "Appointed to the editorial leadership of Scholarly Open: Environmental Science, overseeing peer review, editorial triage, and open scientific dissemination.",
+        description: "Appointed to the editorial leadership of Scholarly Open: Environmental Science, overseeing rigorous double-blind peer review and editorial stewardship.",
         type: "milestone"
       },
       {
-        year: "2020–Present",
-        title: "Associate Professor of Physical Chemistry",
-        description: "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt. Leading advanced investigations in water treatment, biosorbents, and nanocomposites.",
+        year: "Present",
+        title: "Professor of Physical Chemistry & Unit Director",
+        description: "Chemistry Department, Faculty of Science, Qena University / South Valley University, Egypt. Director of the Chemical and Agricultural Consultation Unit & Member of Nanocomposite Lab.",
         type: "career"
       },
       {
-        year: "2015–2020",
-        title: "Assistant Professor / Lecturer of Physical Chemistry",
-        description: "Department of Chemistry, South Valley University, Qena, Egypt.",
-        type: "career"
+        year: "2023",
+        title: "First Place Winner — ISF Competition",
+        description: "Head of the Go Green team, awarded First Place in the 2023 Innovators and Geniuses Support Fund (ISF) national competition for sustainable environmental innovation.",
+        type: "milestone"
       },
       {
-        year: "Ph.D.",
-        title: "Doctor of Philosophy (Ph.D.) in Physical Chemistry",
-        description: "Faculty of Science, South Valley University, Egypt. Advanced research in physical and analytical chemistry applied to solution kinetics and separations.",
+        year: "PhD",
+        title: "Ph.D. in Analytical Chemistry",
+        description: "Faculty of Science, Qena University, Egypt. Advanced research in solution chemistry, kinetics, separation methods, and material characterization.",
         type: "education"
       }
     ],
     personalPublications: [
       {
-        title: "Controlled morphological and physical properties of ZnO nanostructures synthesized by domestic microwave route",
-        journal: "Materials Chemistry and Physics",
-        year: "2021"
+        title: "Economic and viable utilization of cement waste dust for water Remediation",
+        journal: "International Journal of Environmental Science and Technology",
+        year: "2026",
+        doi: "10.1007/s13762-025-06299-x"
       },
       {
-        title: "Tailoring ZnO nanorods for efficient photocatalytic production of H2O2 from water without sacrificial agents: a study on length optimization",
-        journal: "Results in Surfaces and Interfaces",
+        title: "Integrated application of sugarcane by-product-derived organic fertilizer (SOFA) and mineral nitrogen enhances yield, fruit quality, and soil properties of eggplant in sandy soil conditions",
+        journal: "Scientific Reports",
+        year: "2026",
+        doi: "10.1038/s41598-026-20996-y"
+      },
+      {
+        title: "Enhancing Photocatalytic H2O2 Production Through Suppression Electron–Hole Recombination in ZnO/CuO Composite Synthesized via Facile Hydrothermal Method",
+        journal: "Journal of Electronic Materials",
+        year: "2025",
+        doi: "10.1007/s11664-024-11608-4"
+      },
+      {
+        title: "Recycling Spent-Die Cleaning Solution Waste into Low-Density Nano-aluminum Fluoride for Sustainable Resource Management",
+        journal: "JOM",
+        year: "2025"
+      },
+      {
+        title: "Creative Approaches to Long-Term Recycling of Aluminium Scrap Forming AlSiMgMnCu Alloy with Excellent Mechanical and Microstructural Properties",
+        journal: "The Minerals, Metals & Materials Society (TMS)",
         year: "2024"
       },
       {
-        title: "Application of agricultural waste and natural biosorbents for the efficient removal of toxic heavy metals from aqueous solutions",
-        journal: "Environmental Technology & Innovation",
-        year: "2022"
+        title: "Direct and Easily Prepared Nanocomposite Impurity-Free Hydroxyapatite Derived from CKD as an Effective Catalyst for trans-2-Butene Production",
+        journal: "Applied Catalysis A: General",
+        year: "2023",
+        doi: "10.1016/j.apcata.2023.119039"
       },
       {
-        title: "Kinetic and thermodynamic modeling of organic pollutant adsorption onto synthesized nano-zeolites and metal-oxide composites",
-        journal: "Journal of Environmental Chemical Engineering",
-        year: "2023"
+        title: "Facile and affordable synthetic route of nano powder zeolite and its application in fast softening of water hardness",
+        journal: "Journal of Water Process Engineering",
+        year: "2020",
+        doi: "10.1016/j.jwpe.2020.101104"
       }
     ],
     editorialRoles: [
       "Editorial Board Member & Handling Editor, Scholarly Open: Environmental Science (2026–present)",
-      "Peer Reviewer, International Journal of Environmental Analytical Chemistry",
-      "Peer Reviewer, Materials Chemistry and Physics",
-      "Peer Reviewer, Desalination and Water Treatment"
+      "Reviewer for Journal of Hazardous Materials",
+      "Reviewer for International Journal of Environmental Science and Technology",
+      "Reviewer for Materials Chemistry and Physics",
+      "Reviewer for Desalination and Water Treatment"
     ],
     honors: [
-      "Faculty Excellence Award in Scientific Publishing, South Valley University",
-      "Distinguished Research Contributor in Environmental Chemistry and Water Remediation"
+      "Head of Go Green Team — 1st Place Winner, Innovators and Geniuses Support Fund (ISF) Competition (2023)",
+      "Director, Chemical and Agricultural Consultation Unit, Qena University",
+      "Technical Coordinator, Center for Quality Assurance & Accreditation, Qena University",
+      "Member, Faculty Research Ethics Committee (2018, 2021, 2022)",
+      "Member of Nanocomposite Lab, Qena University"
     ],
-    biography: `Assoc. Prof. Dr. Safaa El-Nahas is an Associate Professor of Physical Chemistry in the Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt. With an accomplished academic and research trajectory, Dr. El-Nahas has established an internationally recognized research profile specializing in physical chemistry, environmental chemistry, materials science, and water/wastewater remediation. Her laboratory investigates green synthesis of nanomaterials, metal oxide nanostructures (such as ZnO, CuO, and nano-zeolites), heterogeneous photocatalysis, and the upcycling of industrial and agricultural byproducts into high-capacity biosorbents for the removal of toxic heavy metals, water hardness ions, and emerging organic pollutants. She has authored over 30 peer-reviewed scientific publications in leading international journals (including Materials Chemistry and Physics, Results in Surfaces and Interfaces, and Journal of Environmental Chemical Engineering), and actively serves as an Editorial Board Member and peer reviewer across high-impact chemistry and environmental engineering platforms.`
+    biography: `Prof. Safaa El-Nahas Abas is a Professor of Physical Chemistry in the Chemistry Department, Faculty of Science, Qena University (South Valley University), Egypt. Well-versed across water purification, waste management, environmental remediation, and materials science, her research focuses on Green hydrogen production, photocatalytic solar conversion, and the sustainable characterization and recycling of industrial and agricultural wastes. She serves as Director of the Chemical and Agricultural Consultation Unit at Qena University, a senior researcher in the Nanocomposite Lab, and Technical Coordinator at the Center for Quality Assurance & Accreditation. She led the Go Green scientific team to First Place in the 2023 Innovators and Geniuses Support Fund (ISF) national competition. She has authored over 30 peer-reviewed articles across prestigious international journals including Scientific Reports, International Journal of Environmental Science and Technology, Journal of Water Process Engineering, JOM, and Applied Catalysis A, and actively contributes as an Editorial Board Member and expert referee across global environmental science and chemical engineering platforms.`
   },
   {
     slug: "position-open-environmental-science-ebm-2",

@@ -86,7 +86,8 @@ const DEFAULT_USERS: StoredUserRecord[] = [
     department: "Faculty of Science, South Valley University",
     officeLocation: "Qena, Egypt & Global Environmental Science Desk",
     createdAt: "2026-11-18T10:00:00.000Z",
-    orcid: "0000-0002-8185-1338"
+    orcid: "0000-0002-8185-1338",
+    photoUrl: "/images/editors/safaa-el-nahas.jpg"
   }
 ]
 

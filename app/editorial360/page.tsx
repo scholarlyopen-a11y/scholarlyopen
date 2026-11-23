@@ -1583,6 +1583,7 @@ export default function Editorial360Page() {
           targetEditorName = "Safaa El-Nahas, Ph.D."
           targetEditorEmail = edEmail || "safaa.elnahas@sci.svu.edu.eg"
           setEditorName(targetEditorName)
+          setEditorPhotoUrl("/images/editors/safaa-el-nahas.jpg")
           setEditorRank("Editorial Board Member & Handling Editor")
           setEditorJournal("Scholarly Open: Environmental Science")
           setEditorInstitution("Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt")
@@ -4648,7 +4649,7 @@ Specific comments to the Author(s):
           currentEditorInstitution = "Wuhan University of Technology"
           currentEditorCountry = "China"
           currentEditorOrcid = "0000-0002-5184-5500"
-          currentEditorPhotoUrl = matchedCloudUser?.photoUrl || profPhotoUrl || ""
+          currentEditorPhotoUrl = matchedCloudUser?.photoUrl || "/images/editors/safaa-el-nahas.jpg"
 
           setEditorName(currentEditorName)
           setEditorRank(currentEditorRank)

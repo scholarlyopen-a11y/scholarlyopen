@@ -107,6 +107,8 @@ export async function generateStaticParams() {
       allSlugs.add("safaa-el-nahas")
       allSlugs.add("safaa-elnahas")
       allSlugs.add("prof-safaa-elnahas")
+      allSlugs.add("safaa-el-nahas-abas")
+      allSlugs.add("prof-safaa-el-nahas-abas")
     }
     if (editor.slug.includes("abdelmonsef")) {
       allSlugs.add("aboubakr-haredi-abdelmonsef-ahmed")
