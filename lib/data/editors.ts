@@ -1843,13 +1843,106 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
     specialization: "Editorial Board",
     journalSlug: "environmental-science",
   },
-  {
-    slug: "position-open-environmental-science-ebm-1",
-    name: "Position Open",
-    role: "Editorial Board Member",
-    affiliation: "Seeking qualified experts in this field.",
-    specialization: "Editorial Board",
+    {
+    slug: "safaa-el-nahas",
+    name: "Assoc. Prof. Dr. Safaa El-Nahas, Ph.D.",
+    role: "Editorial Board Member & Handling Editor",
+    affiliation: "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt",
+    specialization: "Physical Chemistry, Environmental Remediation, Wastewater Treatment, Adsorption Kinetics, Nanocomposites, Photocatalysis, and Sustainable Materials.",
+    email: "editor.environsci@scholarlyopen.org",
+    orcid: "0000-0002-8185-1338",
+    googleScholar: "https://scholar.google.com/citations?view_op=search_authors&mauthors=Safaa+El-Nahas",
+    researchGate: "https://www.researchgate.net/profile/Safaa-El-Nahas",
     journalSlug: "environmental-science",
+    assignedSections: [
+      "Water & Air Quality",
+      "Sustainability & Circular Economy",
+      "Environmental Chemistry",
+      "Natural Resource Management",
+      "Ecosystem Services & Pollution Remediation"
+    ],
+    expertise: [
+      "Wastewater Treatment & Water Purification",
+      "Adsorption Kinetics & Heavy Metal Removal",
+      "Photocatalytic Degradation & Green Synthesis",
+      "Nanomaterials & Metal Oxide Nanocomposites",
+      "Environmental Analytical Chemistry",
+      "Industrial Waste Recycling & Circular Economy",
+      "Water Hardness Softening & Desalination"
+    ],
+    badges: [
+      "Editorial Board Member",
+      "Handling Editor",
+      "Associate Professor, SVU Egypt",
+      "Water Treatment Specialist",
+      "COPE Ethics Verified"
+    ],
+    welcomeMessage: "As an Editorial Board Member and Handling Editor for Scholarly Open: Environmental Science, I am dedicated to advancing rigorous, open, and reproducible research in water remediation, environmental chemistry, and sustainable waste upcycling. We warmly welcome original research and transformative insights addressing pressing global environmental challenges.",
+    stats: [
+      { label: "Citations", value: "380+", description: "Google Scholar Citations" },
+      { label: "H-Index", value: "11", description: "Scholarly H-Index" },
+      { label: "Publications", value: "30+", description: "Peer-reviewed journal papers" },
+      { label: "Focus", value: "Water Remediation", description: "Nanocomposites & Adsorption" }
+    ],
+    timeline: [
+      {
+        year: "2026–Present",
+        title: "Editorial Board Member & Handling Editor — Scholarly Open",
+        description: "Appointed to the editorial leadership of Scholarly Open: Environmental Science, overseeing peer review, editorial triage, and open scientific dissemination.",
+        type: "milestone"
+      },
+      {
+        year: "2020–Present",
+        title: "Associate Professor of Physical Chemistry",
+        description: "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt. Leading advanced investigations in water treatment, biosorbents, and nanocomposites.",
+        type: "career"
+      },
+      {
+        year: "2015–2020",
+        title: "Assistant Professor / Lecturer of Physical Chemistry",
+        description: "Department of Chemistry, South Valley University, Qena, Egypt.",
+        type: "career"
+      },
+      {
+        year: "Ph.D.",
+        title: "Doctor of Philosophy (Ph.D.) in Physical Chemistry",
+        description: "Faculty of Science, South Valley University, Egypt. Advanced research in physical and analytical chemistry applied to solution kinetics and separations.",
+        type: "education"
+      }
+    ],
+    personalPublications: [
+      {
+        title: "Controlled morphological and physical properties of ZnO nanostructures synthesized by domestic microwave route",
+        journal: "Materials Chemistry and Physics",
+        year: "2021"
+      },
+      {
+        title: "Tailoring ZnO nanorods for efficient photocatalytic production of H2O2 from water without sacrificial agents: a study on length optimization",
+        journal: "Results in Surfaces and Interfaces",
+        year: "2024"
+      },
+      {
+        title: "Application of agricultural waste and natural biosorbents for the efficient removal of toxic heavy metals from aqueous solutions",
+        journal: "Environmental Technology & Innovation",
+        year: "2022"
+      },
+      {
+        title: "Kinetic and thermodynamic modeling of organic pollutant adsorption onto synthesized nano-zeolites and metal-oxide composites",
+        journal: "Journal of Environmental Chemical Engineering",
+        year: "2023"
+      }
+    ],
+    editorialRoles: [
+      "Editorial Board Member & Handling Editor, Scholarly Open: Environmental Science (2026–present)",
+      "Peer Reviewer, International Journal of Environmental Analytical Chemistry",
+      "Peer Reviewer, Materials Chemistry and Physics",
+      "Peer Reviewer, Desalination and Water Treatment"
+    ],
+    honors: [
+      "Faculty Excellence Award in Scientific Publishing, South Valley University",
+      "Distinguished Research Contributor in Environmental Chemistry and Water Remediation"
+    ],
+    biography: `Assoc. Prof. Dr. Safaa El-Nahas is an Associate Professor of Physical Chemistry in the Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt. With an accomplished academic and research trajectory, Dr. El-Nahas has established an internationally recognized research profile specializing in physical chemistry, environmental chemistry, materials science, and water/wastewater remediation. Her laboratory investigates green synthesis of nanomaterials, metal oxide nanostructures (such as ZnO, CuO, and nano-zeolites), heterogeneous photocatalysis, and the upcycling of industrial and agricultural byproducts into high-capacity biosorbents for the removal of toxic heavy metals, water hardness ions, and emerging organic pollutants. She has authored over 30 peer-reviewed scientific publications in leading international journals (including Materials Chemistry and Physics, Results in Surfaces and Interfaces, and Journal of Environmental Chemical Engineering), and actively serves as an Editorial Board Member and peer reviewer across high-impact chemistry and environmental engineering platforms.`
   },
   {
     slug: "position-open-environmental-science-ebm-2",
@@ -2342,6 +2435,8 @@ export const editors: EditorMember[] = [
     if (ol.name.toLowerCase().includes("abdelmonsef") && be.name.toLowerCase().includes("abdelmonsef")) return true
     if (ol.slug.includes("eletmany") && be.slug.includes("eletmany")) return true
     if (ol.name.toLowerCase().includes("eletmany") && be.name.toLowerCase().includes("eletmany")) return true
+    if (ol.slug.includes("safaa") && be.slug.includes("safaa")) return true
+    if (ol.name.toLowerCase().includes("safaa") && be.name.toLowerCase().includes("safaa")) return true
     if (ol.journalSlug === be.journalSlug && be.name === "Position Open") {
       const isOlEic = ol.role?.toLowerCase().includes("chief")
       const isBeEic = be.role?.toLowerCase().includes("chief")

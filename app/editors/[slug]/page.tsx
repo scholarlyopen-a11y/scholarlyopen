@@ -30,6 +30,12 @@ function findEditorBySlug(rawSlug: string) {
   let found = editors.find((e) => e.slug.toLowerCase() === slug)
   if (found) return found
 
+  // Aliases for Assoc. Prof. Dr. Safaa El-Nahas
+  if (slug.includes("safaa") || slug.includes("elnahas") || slug.includes("el-nahas")) {
+    found = editors.find(e => e.slug.includes("safaa") || e.name.toLowerCase().includes("safaa") || e.name.toLowerCase().includes("elnahas") || e.name.toLowerCase().includes("el-nahas"))
+    if (found) return found
+  }
+
   // Aliases for Dr. Aboubakr Haredi Abdelmonsef Ahmed
   if (slug.includes("abdelmonsef") || slug.includes("aboubakr")) {
     found = editors.find(e => e.slug.includes("abdelmonsef") || e.name.toLowerCase().includes("abdelmonsef"))
@@ -94,6 +100,13 @@ export async function generateStaticParams() {
     if (editor.slug === "francis-verpoort") {
       allSlugs.add("francis-verpoort-ph-d")
       allSlugs.add("francis-verpoort-phd")
+    }
+    if (editor.slug.includes("safaa") || editor.slug === "safaa-el-nahas") {
+      allSlugs.add("prof-safaa-el-nahas")
+      allSlugs.add("dr-safaa-el-nahas")
+      allSlugs.add("safaa-el-nahas")
+      allSlugs.add("safaa-elnahas")
+      allSlugs.add("prof-safaa-elnahas")
     }
     if (editor.slug.includes("abdelmonsef")) {
       allSlugs.add("aboubakr-haredi-abdelmonsef-ahmed")

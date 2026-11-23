@@ -1562,6 +1562,7 @@ export default function Editorial360Page() {
                          edEmail.toLowerCase().includes("editor.med")
                        ))
         const isJustice = (edName && edName.toLowerCase().includes("justice")) || (edEmail && edEmail.toLowerCase().includes("justice"))
+        const isSafaaAction = (edName && (edName.toLowerCase().includes("safaa") || edName.toLowerCase().includes("elnahas"))) || (edEmail && (edEmail.toLowerCase().includes("safaa") || edEmail.toLowerCase().includes("elnahas") || edEmail.toLowerCase() === "safaa.elnahas@sci.svu.edu.eg"))
 
         let targetEditorName = "Handling Editor"
         let targetEditorEmail = edEmail || "editor@scholarlyopen.org"
@@ -1576,6 +1577,17 @@ export default function Editorial360Page() {
           setEditorCountry("China")
           setEditorOrcid("0000-0002-0213-7313")
           setEditorPhotoUrl("/images/editors/weihua-gong.jpg")
+          setEditorEmail(targetEditorEmail)
+          setEmail(targetEditorEmail)
+        } else if (isSafaaAction) {
+          targetEditorName = "Assoc. Prof. Dr. Safaa El-Nahas, Ph.D."
+          targetEditorEmail = edEmail || "safaa.elnahas@sci.svu.edu.eg"
+          setEditorName(targetEditorName)
+          setEditorRank("Editorial Board Member & Handling Editor")
+          setEditorJournal("Scholarly Open: Environmental Science")
+          setEditorInstitution("Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt")
+          setEditorCountry("Egypt")
+          setEditorOrcid("0000-0002-8185-1338")
           setEditorEmail(targetEditorEmail)
           setEmail(targetEditorEmail)
         } else if (isJustice) {
@@ -4624,6 +4636,7 @@ Specific comments to the Author(s):
                        cleanEmail.toLowerCase().includes("sh9hospital") || 
                        (cleanEmail.toLowerCase().includes("editor.med") && !cleanEmail.toLowerCase().includes("justice"))
         const isJustice = cleanEmail.toLowerCase().includes("justice") || cleanEmail.toLowerCase().includes("boakye")
+        const isSafaa = cleanEmail.toLowerCase().includes("safaa") || cleanEmail.toLowerCase().includes("elnahas") || cleanEmail.toLowerCase() === "safaa.elnahas@sci.svu.edu.eg"
         const isKumar = cleanEmail.toLowerCase().includes("kumar") || cleanEmail.toLowerCase().includes("prashant") || cleanEmail.toLowerCase().includes("surrey")
         const isKanthlal = cleanEmail.toLowerCase().includes("kanthlal") || cleanEmail.toLowerCase().includes("lalpharm") || cleanEmail.toLowerCase() === "lalpharm@gmail.com" || cleanEmail.toLowerCase() === "kanthsklal@hotmail.com"
         const matchedCloudUser = users.find(u => u.email?.toLowerCase() === cleanEmail.toLowerCase())
@@ -4678,6 +4691,23 @@ Specific comments to the Author(s):
           setEditorCountry(currentEditorCountry)
           setEditorOrcid(currentEditorOrcid)
           setEditorPhotoUrl(currentEditorPhotoUrl)
+          setEditorEmail(cleanEmail)
+        } else if (isSafaa) {
+          currentEditorName = "Assoc. Prof. Dr. Safaa El-Nahas, Ph.D."
+          currentEditorRank = "Editorial Board Member & Handling Editor"
+          currentEditorJournal = "Scholarly Open: Environmental Science"
+          currentEditorInstitution = "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt"
+          currentEditorCountry = "Egypt"
+          currentEditorOrcid = "0000-0002-8185-1338"
+          currentEditorPhotoUrl = matchedCloudUser?.photoUrl || profPhotoUrl || ""
+
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
+          setEditorOrcid(currentEditorOrcid)
+          if (currentEditorPhotoUrl) setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isHesham) {
           currentEditorName = "Hesham Hussein, PhD"
@@ -14837,6 +14867,21 @@ Specific comments to the Author(s):
                 const isHesham = low.includes("hesham") || low.includes("hecham") || low === "hecham.husein@gmail.com"
                 const isVerpoort = low.includes("verpoort") || low === "francis@whut.edu.cn"
                 const isCacciola = low.includes("cacciola") || low === "cacciolaf@unime.it"
+
+                const isSafaa = low.includes("safaa") || low.includes("elnahas") || low === "safaa.elnahas@sci.svu.edu.eg"
+                if (isSafaa) {
+                  return (
+                    <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold text-[#0b99ff]">
+                        <ShieldCheck className="h-4 w-4" />
+                        <span>Appointed Editor Verified: Assoc. Prof. Dr. Safaa El-Nahas, Ph.D.</span>
+                      </div>
+                      <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
+                        Editorial Board Member &amp; Handling Editor for <em>Scholarly Open: Environmental Science</em>. You can enter any new password below, or use pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Safaa2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">safaa2026</code>.
+                      </p>
+                    </div>
+                  )
+                }
 
                 if (isFurqan) {
                   return (
