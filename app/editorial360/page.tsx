@@ -1580,7 +1580,7 @@ export default function Editorial360Page() {
           setEditorEmail(targetEditorEmail)
           setEmail(targetEditorEmail)
         } else if (isSafaaAction) {
-          targetEditorName = "Assoc. Prof. Dr. Safaa El-Nahas, Ph.D."
+          targetEditorName = "Safaa El-Nahas, Ph.D."
           targetEditorEmail = edEmail || "safaa.elnahas@sci.svu.edu.eg"
           setEditorName(targetEditorName)
           setEditorRank("Editorial Board Member & Handling Editor")
@@ -4693,7 +4693,7 @@ Specific comments to the Author(s):
           setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isSafaa) {
-          currentEditorName = "Assoc. Prof. Dr. Safaa El-Nahas, Ph.D."
+          currentEditorName = "Safaa El-Nahas, Ph.D."
           currentEditorRank = "Editorial Board Member & Handling Editor"
           currentEditorJournal = "Scholarly Open: Environmental Science"
           currentEditorInstitution = "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt"
@@ -14874,7 +14874,7 @@ Specific comments to the Author(s):
                     <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200 space-y-1">
                       <div className="flex items-center gap-1.5 font-bold text-[#0b99ff]">
                         <ShieldCheck className="h-4 w-4" />
-                        <span>Appointed Editor Verified: Assoc. Prof. Dr. Safaa El-Nahas, Ph.D.</span>
+                        <span>Appointed Editor Verified: Safaa El-Nahas, Ph.D.</span>
                       </div>
                       <p className="text-[11.5px] text-slate-600 dark:text-slate-300">
                         Editorial Board Member &amp; Handling Editor for <em>Scholarly Open: Environmental Science</em>. You can enter any new password below, or use pre-authorized keys: <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">Safaa2026!</code> or <code className="font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-sky-300 dark:border-sky-700">safaa2026</code>.

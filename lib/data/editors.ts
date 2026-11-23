@@ -1845,7 +1845,7 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
   },
     {
     slug: "safaa-el-nahas",
-    name: "Assoc. Prof. Dr. Safaa El-Nahas, Ph.D.",
+    name: "Safaa El-Nahas, Ph.D.",
     role: "Editorial Board Member & Handling Editor",
     affiliation: "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt",
     specialization: "Physical Chemistry, Environmental Remediation, Wastewater Treatment, Adsorption Kinetics, Nanocomposites, Photocatalysis, and Sustainable Materials.",

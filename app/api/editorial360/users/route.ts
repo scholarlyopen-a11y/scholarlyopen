@@ -73,6 +73,20 @@ const DEFAULT_USERS: StoredUserRecord[] = [
     country: "Germany",
     status: "Active",
     createdAt: "2026-01-15T10:00:00.000Z"
+  },
+  {
+    id: "USR-EBM-ELNAHAS",
+    name: "Safaa El-Nahas, Ph.D.",
+    email: "safaa.elnahas@sci.svu.edu.eg",
+    role: "editor",
+    affiliation: "Department of Chemistry, Faculty of Science, South Valley University, Qena, Egypt",
+    country: "Egypt",
+    status: "Active",
+    staffRole: "Editorial Board Member & Handling Editor",
+    department: "Faculty of Science, South Valley University",
+    officeLocation: "Qena, Egypt & Global Environmental Science Desk",
+    createdAt: "2026-11-18T10:00:00.000Z",
+    orcid: "0000-0002-8185-1338"
   }
 ]
 
