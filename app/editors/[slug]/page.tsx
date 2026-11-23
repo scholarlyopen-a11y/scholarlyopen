@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { 
   Mail, ExternalLink, ArrowLeft, BookOpen, GraduationCap, 
@@ -171,6 +171,11 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
   
   if (!editor) {
     notFound()
+  }
+
+  // Canonical slug enforcement: seamlessly redirect legacy or prefixed slugs (e.g. /editors/prof-safaa-el-nahas) to the official house style (/editors/safaa-el-nahas)
+  if (slug !== editor.slug && (slug.startsWith("prof-") || slug.startsWith("dr-") || slug.startsWith("assoc-prof-") || slug.startsWith("asst-prof-"))) {
+    redirect(`/editors/${editor.slug}`)
   }
 
   // Get articles published in this editor's journal

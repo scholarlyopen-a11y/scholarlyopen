@@ -845,9 +845,14 @@ export function JournalManagerWorkspace({
       ))
     )
 
-    const editorSlug = candidate.slug 
-      || matchingEditor?.slug 
+    const rawSlugCandidate = candidate.slug || matchingEditor?.slug
+    const cleanCandidateSlug = rawSlugCandidate
+      ? rawSlugCandidate.replace(/^(prof-|dr-|assoc-prof-|asst-prof-)/i, "")
+      : undefined
+
+    const editorSlug = cleanCandidateSlug 
       || cleanLookupName
+          .replace(/^(prof-|dr-|assoc-prof-|asst-prof-)/i, "")
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-+|-+$/g, "")
     const profileUrl = `https://www.scholarlyopen.org/editors/${editorSlug}`
