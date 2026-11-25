@@ -303,22 +303,31 @@ export function JournalPage({
         }
 
         // 4. Live Early Career Editorial Board Members
-        const liveEcr = approved.filter((e: any) => e.role?.toLowerCase().includes("early career") || e.role?.toLowerCase().includes("ecr"))
+        const liveEcr = approved.filter((e: any) => 
+          e.role?.toLowerCase().includes("early career") || 
+          e.role?.toLowerCase().includes("ecr") ||
+          e.role?.toLowerCase().includes("senior researcher") ||
+          (e.name && e.name.toLowerCase().includes("namiq"))
+        )
         if (liveEcr.length > 0) {
-          const mappedEcr: EditorMember[] = liveEcr.map((e: any) => ({
-            name: e.name,
-            role: e.role || "Early Career Editorial Board Member",
-            affiliation: e.affiliation || "Academic Institution",
-            specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Peer Review & Emerging Research"),
-            imageUrl: (e.photoUrl && !e.photoUrl.includes("supabase.co")) ? e.photoUrl : undefined,
-            email: e.email,
-            orcid: e.orcid,
-            googleScholar: e.googleScholar || e.scholarUrl,
-            linkedin: e.linkedin,
-            researchGate: e.researchGate,
-            biography: e.biography,
-            expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
-          }))
+          const mappedEcr: EditorMember[] = liveEcr.map((e: any) => {
+            const isNamiq = (e.name && e.name.toLowerCase().includes("namiq")) || (e.slug && e.slug.includes("namiq"))
+            return {
+              name: isNamiq ? "Karez Namiq, M.D." : e.name,
+              slug: isNamiq ? "karez-namiq" : (e.slug || (e.name ? e.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : undefined)),
+              role: e.role || "Early Career Editorial Board Member",
+              affiliation: isNamiq ? "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq" : (e.affiliation || "Academic Institution"),
+              specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Peer Review & Emerging Research"),
+              imageUrl: (e.photoUrl && !e.photoUrl.includes("supabase.co")) ? e.photoUrl : (isNamiq ? "/images/editors/karez-namiq.jpg" : undefined),
+              email: isNamiq ? "editor.med@scholarlyopen.org" : e.email,
+              orcid: e.orcid,
+              googleScholar: e.googleScholar || e.scholarUrl,
+              linkedin: e.linkedin,
+              researchGate: e.researchGate,
+              biography: e.biography,
+              expertise: Array.isArray(e.researchInterests) ? e.researchInterests : []
+            }
+          })
           setCurrentEcrEditorialBoard(prev => {
             const combined = [...mappedEcr]
             for (const existing of prev) {

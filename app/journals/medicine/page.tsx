@@ -5,7 +5,8 @@ import { editors } from "@/lib/data/editors"
 
 export default function MedicinePage() {
   const associateEditors = editors.filter(e => e.journalSlug === "medicine" && (e.role === "Associate Editor" || e.role === "Editor-in-Chief"))
-  const editorialBoard = editors.filter(e => e.journalSlug === "medicine" && (e.role.includes("Editorial Board") || e.role.includes("Editorial Board")))
+  const editorialBoard = editors.filter(e => e.journalSlug === "medicine" && e.role.includes("Editorial Board") && !e.role.toLowerCase().includes("early career") && !e.role.toLowerCase().includes("ecr"))
+  const ecrEditorialBoard = editors.filter(e => e.journalSlug === "medicine" && (e.role.toLowerCase().includes("early career") || e.role.toLowerCase().includes("ecr") || e.role.toLowerCase().includes("senior researcher") || e.name.toLowerCase().includes("namiq") || e.slug.includes("namiq")))
 
   return (
     <JournalPage
@@ -48,6 +49,7 @@ export default function MedicinePage() {
       journalSlug="medicine"
       associateEditors={associateEditors.length > 0 ? associateEditors : undefined}
       editorialBoard={editorialBoard.length > 0 ? editorialBoard : undefined}
+      ecrEditorialBoard={ecrEditorialBoard.length > 0 ? ecrEditorialBoard : undefined}
     />
   )
 }

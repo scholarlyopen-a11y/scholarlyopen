@@ -30,6 +30,12 @@ function findEditorBySlug(rawSlug: string) {
   let found = editors.find((e) => e.slug.toLowerCase() === slug)
   if (found) return found
 
+  // Aliases for Dr. Karez Namiq
+  if (slug.includes("karez") || slug.includes("namiq")) {
+    found = editors.find(e => e.slug.includes("karez") || e.slug.includes("namiq") || e.name.toLowerCase().includes("karez") || e.name.toLowerCase().includes("namiq"))
+    if (found) return found
+  }
+
   // Aliases for Assoc. Prof. Dr. Safaa El-Nahas
   if (slug.includes("safaa") || slug.includes("elnahas") || slug.includes("el-nahas")) {
     found = editors.find(e => e.slug.includes("safaa") || e.name.toLowerCase().includes("safaa") || e.name.toLowerCase().includes("elnahas") || e.name.toLowerCase().includes("el-nahas"))
@@ -97,6 +103,11 @@ export async function generateStaticParams() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
     if (cleanNameSlug) allSlugs.add(cleanNameSlug)
+    if (editor.slug === "karez-namiq" || editor.slug.includes("namiq")) {
+      allSlugs.add("karez-namiq")
+      allSlugs.add("dr-karez-namiq")
+      allSlugs.add("karez-sarbast-namiq")
+    }
     if (editor.slug === "francis-verpoort") {
       allSlugs.add("francis-verpoort-ph-d")
       allSlugs.add("francis-verpoort-phd")

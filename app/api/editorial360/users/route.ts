@@ -75,6 +75,20 @@ const DEFAULT_USERS: StoredUserRecord[] = [
     createdAt: "2026-01-15T10:00:00.000Z"
   },
   {
+    id: "USR-ECR-NAMIQ",
+    name: "Karez Namiq, M.D.",
+    email: "kareznamiq@gmail.com",
+    role: "editor",
+    affiliation: "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq",
+    country: "Iraq",
+    status: "Active",
+    staffRole: "Early Career Editorial Board Member & Handling Editor",
+    department: "Medical Oncology",
+    officeLocation: "Erbil, Iraq & Global Medicine Editorial Desk",
+    createdAt: "2026-11-23T15:20:00.000Z",
+    photoUrl: "/images/editors/karez-namiq.jpg"
+  },
+  {
     id: "USR-EBM-ELNAHAS",
     name: "Safaa El-Nahas, Ph.D.",
     email: "safaa.elnahas@sci.svu.edu.eg",

@@ -1676,6 +1676,18 @@ export default function Editorial360Page() {
         setRegEmail(urlEmail)
         setEmail(urlEmail)
       }
+      const isNamiqParam = (urlName && urlName.toLowerCase().includes("namiq")) || (urlEmail && urlEmail.toLowerCase().includes("namiq"))
+      if (isNamiqParam) {
+        setRole("editor")
+        setEditorName("Karez Namiq, M.D.")
+        setEditorEmail(urlEmail || "kareznamiq@gmail.com")
+        setEditorJournal("Scholarly Open: Medicine")
+        setEditorInstitution("Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq")
+        setEditorCountry("Iraq")
+        setEditorRank("Early Career Editorial Board Member & Handling Editor")
+        setEditorPhotoUrl("/images/editors/karez-namiq.jpg")
+        setIsLoggedIn(true)
+      }
       const urlAffil = params.get("affiliation") || ""
       if (urlAffil) {
         setRegAffiliation(urlAffil)
@@ -4534,7 +4546,10 @@ Specific comments to the Author(s):
       lowerEmail.includes("tahir") || 
       lowerEmail.includes("hesham") || 
       lowerEmail.includes("hecham") || 
-      lowerEmail.includes("chamberland") || 
+      lowerEmail.includes("chamberland") ||
+      lowerEmail.includes("namiq") ||
+      lowerEmail.includes("karez") ||
+      lowerEmail === "kareznamiq@gmail.com" || 
       lowerEmail === "cacciolaf@unime.it" || 
       lowerEmail === "francis@whut.edu.cn" ||
       lowerEmail === "furqan061@gmail.com" ||
@@ -4552,6 +4567,10 @@ Specific comments to the Author(s):
       (storedCustomPassword && enteredPwd === storedCustomPassword.trim()) ||
       matchesCloudHash ||
       (isAppointedEditor && (
+        enteredPwd === "Karez2026!" ||
+        enteredPwd === "karez2026" ||
+        enteredPwd.toLowerCase().includes("karez") ||
+        enteredPwd.toLowerCase().includes("namiq") ||
         enteredPwd === "Verpoort2026!" ||
         enteredPwd === "verpoort2026" || 
         enteredPwd === "verpoort" || 
@@ -4637,6 +4656,7 @@ Specific comments to the Author(s):
                        cleanEmail.toLowerCase().includes("sh9hospital") || 
                        (cleanEmail.toLowerCase().includes("editor.med") && !cleanEmail.toLowerCase().includes("justice"))
         const isJustice = cleanEmail.toLowerCase().includes("justice") || cleanEmail.toLowerCase().includes("boakye")
+        const isNamiq = cleanEmail.toLowerCase().includes("namiq") || cleanEmail.toLowerCase().includes("karez") || cleanEmail.toLowerCase() === "kareznamiq@gmail.com"
         const isSafaa = cleanEmail.toLowerCase().includes("safaa") || cleanEmail.toLowerCase().includes("elnahas") || cleanEmail.toLowerCase() === "safaa.elnahas@sci.svu.edu.eg"
         const isKumar = cleanEmail.toLowerCase().includes("kumar") || cleanEmail.toLowerCase().includes("prashant") || cleanEmail.toLowerCase().includes("surrey")
         const isKanthlal = cleanEmail.toLowerCase().includes("kanthlal") || cleanEmail.toLowerCase().includes("lalpharm") || cleanEmail.toLowerCase() === "lalpharm@gmail.com" || cleanEmail.toLowerCase() === "kanthsklal@hotmail.com"
@@ -4691,6 +4711,21 @@ Specific comments to the Author(s):
           setEditorInstitution(currentEditorInstitution)
           setEditorCountry(currentEditorCountry)
           setEditorOrcid(currentEditorOrcid)
+          setEditorPhotoUrl(currentEditorPhotoUrl)
+          setEditorEmail(cleanEmail)
+        } else if (isNamiq) {
+          currentEditorName = "Karez Namiq, M.D."
+          currentEditorRank = "Early Career Editorial Board Member & Handling Editor"
+          currentEditorJournal = "Scholarly Open: Medicine"
+          currentEditorInstitution = "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq"
+          currentEditorCountry = "Iraq"
+          currentEditorPhotoUrl = "/images/editors/karez-namiq.jpg"
+
+          setEditorName(currentEditorName)
+          setEditorRank(currentEditorRank)
+          setEditorJournal(currentEditorJournal)
+          setEditorInstitution(currentEditorInstitution)
+          setEditorCountry(currentEditorCountry)
           setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isSafaa) {

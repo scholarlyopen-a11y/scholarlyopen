@@ -99,6 +99,30 @@ function sanitizeEditorRecords(rawList: OnboardedEditorRecord[]): OnboardedEdito
       continue
     }
 
+    const isNamiq = normName.includes("namiq") || normName.includes("karez") || normSlug.includes("namiq")
+    if (isNamiq) {
+      if (seenKeys.has("karez-namiq")) continue
+      seenKeys.add("karez-namiq")
+      result.push({
+        ...ed,
+        id: ed.id || "EBM-NAMIQ",
+        slug: "karez-namiq",
+        name: "Karez Namiq, M.D.",
+        role: "Early Career Editorial Board Member & Handling Editor",
+        journal: "Scholarly Open: Medicine",
+        journalSlug: "medicine",
+        affiliation: "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq",
+        department: "Medical Oncology",
+        country: "Iraq",
+        specialization: "Medical Oncology, Breast Cancer Management, Supportive & Palliative Care, Oncology Nutrition & Clinical Research",
+        photoUrl: "/images/editors/karez-namiq.jpg",
+        email: "kareznamiq@gmail.com",
+        status: "Active Handling Editor",
+        jmApproved: true
+      })
+      continue
+    }
+
     const isRabea = normName.includes("rabea") || normSlug.includes("rabea")
     if (isRabea) {
       ed.photoUrl = "/images/editors/ahmed-magdy-rabea.jpg"

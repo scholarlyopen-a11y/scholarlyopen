@@ -7394,6 +7394,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 ? "Editor-in-Chief" 
                                 : resp.type === "ae" 
                                 ? "Associate Editor" 
+                                : (resp.type === "ecr" || (resp.role && resp.role.toLowerCase().includes("early career")) || (resp.candidateName && resp.candidateName.toLowerCase().includes("namiq")))
+                                ? "Early Career Editorial Board"
                                 : resp.type === "reviewer_claim" 
                                 ? "Certified Referee" 
                                 : "Editorial Board Member"}
@@ -7426,7 +7428,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
                                       <XCircle className="w-3 h-3" /> Disapproved - Blocked
                                     </span>
-                                  ) : (resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham")) ? (
+                                  ) : (resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham") || resp.candidateName?.toLowerCase().includes("namiq") || resp.candidateEmail?.toLowerCase().includes("namiq")) ? (
                                     <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                       <CheckCircle2 className="w-3 h-3" /> Live on Masthead
                                     </span>

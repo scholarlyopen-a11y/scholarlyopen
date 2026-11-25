@@ -160,6 +160,8 @@ function EditorCard({ editor: rawEditor, featured = false }: { editor: EditorMem
                         e.currentTarget.src = "/images/editors/hesham-hussein.png"
                       } else if (editor.slug?.includes("kanthlal") || editor.name.toLowerCase().includes("kanthlal")) {
                         e.currentTarget.src = "/images/editors/kanthlal-sk.png"
+                      } else if (editor.slug?.includes("namiq") || editor.name.toLowerCase().includes("namiq") || editor.name.toLowerCase().includes("karez")) {
+                        e.currentTarget.src = "/images/editors/karez-namiq.jpg"
                       }
                     }}
                   />

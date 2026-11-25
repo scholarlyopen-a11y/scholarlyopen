@@ -70,6 +70,21 @@
       "createdAt": "2026-11-18T10:00:00.000Z",
       "orcid": "0000-0002-8185-1338",
       "photoUrl": "/images/editors/safaa-el-nahas.jpg"
+    },
+    {
+      "id": "USR-ECR-NAMIQ",
+      "name": "Karez Namiq, M.D.",
+      "email": "kareznamiq@gmail.com",
+      "role": "editor",
+      "staffRole": "Early Career Editorial Board Member & Handling Editor",
+      "affiliation": "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq",
+      "country": "Iraq",
+      "status": "Active",
+      "department": "Medical Oncology",
+      "officeLocation": "Erbil, Iraq & Global Medicine Editorial Desk",
+      "createdAt": "2026-11-23T15:20:00Z",
+      "activeTasks": 0,
+      "photoUrl": "/images/editors/karez-namiq.jpg"
     }
   ]
 }

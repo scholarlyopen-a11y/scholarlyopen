@@ -1,6 +1,59 @@
 {
   "onboardedEditors": [
     {
+      "id": "EBM-NAMIQ",
+      "slug": "karez-namiq",
+      "name": "Karez Namiq, M.D.",
+      "email": "kareznamiq@gmail.com",
+      "role": "Early Career Editorial Board Member & Handling Editor",
+      "journal": "Scholarly Open: Medicine",
+      "journalSlug": "medicine",
+      "affiliation": "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq",
+      "department": "Medical Oncology",
+      "country": "Iraq",
+      "specialization": "Medical Oncology, Breast Cancer Management, Supportive & Palliative Care, Oncology Nutrition & Clinical Research",
+      "researchInterests": [
+        "Medical Oncology",
+        "Breast Cancer",
+        "Neoadjuvant Systemic Therapy",
+        "Supportive and Palliative Care",
+        "Oncology Nutrition",
+        "Clinical Trial Reporting Guidelines",
+        "Cancer Care in Developing Settings",
+        "Clinical Evidence-Based Medicine"
+      ],
+      "biography": "Dr. Karez Sarbast Namiq is a Medical Oncology Specialist and clinical cancer researcher based in Erbil, Kurdistan Region, Iraq. She serves at Hawler Medical University and Nanakali Hospital for Blood Diseases and Cancer, and is an active member of the Iraqi Society of Clinical Oncology (ISCO). She graduated from the European School of Oncology (ESO) and holds international certifications in breast cancer management (ESO/Ulm University), palliative care (ESMO), and oncology nutrition (ONC). Her clinical and academic research investigates neoadjuvant chemotherapy, breast cancer outcomes, resource-stratified multidisciplinary oncology care, and core outcome sets in clinical trials. She serves on the Early Career Editorial Board (ECEB) of Scholarly Open: Medicine.",
+      "photoUrl": "/images/editors/karez-namiq.jpg",
+      "cvFileName": "CV_Dr_Karez_Namiq_2026.pdf",
+      "cvFileSize": "240 KB",
+      "orcid": "",
+      "googleScholar": "https://scholar.google.com/citations?view_op=search_authors&mauthors=Karez+Namiq",
+      "researchGate": "https://www.researchgate.net/profile/Karez-Namiq",
+      "linkedin": "https://www.linkedin.com/in/karez-sarbast-namiq",
+      "publications": [
+        {
+          "title": "Neoadjuvant Therapy in Nonmetastatic Breast Cancer in Kurdistan, Iraq",
+          "journal": "JCO Global Oncology",
+          "year": "2023"
+        },
+        {
+          "title": "Core outcome sets for locoregional treatment reporting in neoadjuvant systemic breast cancer trials",
+          "journal": "International Collaborative Guidelines",
+          "year": "2024"
+        },
+        {
+          "title": "Survival Outcomes and Real-World Evidence in Metastatic Renal Cell Carcinoma in Northern Iraq",
+          "journal": "Kurdistan Medical Journal",
+          "year": "2024"
+        }
+      ],
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "status": "Active Handling Editor",
+      "jmApproved": true,
+      "acceptedAt": "2026-11-23T15:20:00Z"
+    },
+    {
       "id": "EBM-HUSSEIN",
       "slug": "hesham-hussein",
       "name": "Hesham Hussein, PhD",

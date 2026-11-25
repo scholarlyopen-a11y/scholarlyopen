@@ -37,6 +37,7 @@ export interface InvitationResponseRecord {
   watchlistFlagged?: boolean
   flagReason?: string
   slug?: string
+  role?: string
 }
 
 let responseStore: InvitationResponseRecord[] = [
@@ -276,6 +277,24 @@ export async function GET() {
     if (isKanthlal && (!credId || credId === "EBM-EDITOR")) {
       credId = "EBM-KANTHLAL"
     }
+    const isNamiq = (r.candidateEmail && (r.candidateEmail.toLowerCase().includes("karez") || r.candidateEmail.toLowerCase().includes("namiq"))) ||
+                    (r.candidateName && (r.candidateName.toLowerCase().includes("karez") || r.candidateName.toLowerCase().includes("namiq"))) ||
+                    (r.slug && r.slug.toLowerCase().includes("namiq")) ||
+                    r.id === "RESP-NAMIQ" || r.id === "EBM-NAMIQ"
+
+    if (isNamiq) {
+      credId = "EBM-NAMIQ"
+      r.candidateName = "Karez Namiq, M.D."
+      r.role = "Early Career Editorial Board Member & Handling Editor"
+      r.type = "board"
+      r.journal = "Scholarly Open: Medicine"
+      r.affiliation = "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq"
+      r.country = "Iraq"
+      r.photoUrl = "/images/editors/karez-namiq.jpg"
+      r.jmApproved = true
+      r.status = "Active Handling Editor"
+    }
+
     if (isKanthlal) {
       if (r.candidateName) {
         r.candidateName = r.candidateName.replace(/D\.?\s*Pharm\.?,\s*/gi, "").replace(/,\s*D\.?\s*Pharm\.?/gi, "")
