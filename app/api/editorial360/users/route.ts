@@ -76,7 +76,7 @@ const DEFAULT_USERS: StoredUserRecord[] = [
   },
   {
     id: "USR-ECR-NAMIQ",
-    name: "Karez Namiq, M.D.",
+    name: "Karez Namiq, M.D. M.Sc",
     email: "kareznamiq@gmail.com",
     role: "editor",
     affiliation: "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq",

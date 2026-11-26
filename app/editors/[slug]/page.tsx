@@ -431,7 +431,9 @@ export default async function EditorProfilePage({ params }: EditorPageProps) {
                       )}
                       {stat.value}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1 leading-snug">{stat.description}</p>
+                    {stat.description ? (
+                      <p className="text-xs text-muted-foreground mt-1 leading-snug">{stat.description}</p>
+                    ) : null}
                   </div>
                 ))}
               </div>

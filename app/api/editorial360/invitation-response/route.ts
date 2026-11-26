@@ -254,22 +254,22 @@ export async function GET() {
         credId = `EBM-${cleanName || "2026"}`
       }
     }
-    const isVerpoort = (r.candidateEmail && r.candidateEmail.toLowerCase().includes("verpoort")) || 
-                       (r.candidateName && r.candidateName.toLowerCase().includes("verpoort")) ||
-                       (r.slug && r.slug.toLowerCase().includes("verpoort")) ||
-                       r.id === "RESP-VERPOORT"
-    const isCacciola = (r.candidateEmail && r.candidateEmail.toLowerCase().includes("cacciola")) || 
-                       (r.candidateName && r.candidateName.toLowerCase().includes("cacciola")) ||
-                       (r.slug && r.slug.toLowerCase().includes("cacciola")) ||
-                       r.id === "RESP-CACCIOLA"
+    const isVerpoort = (r.candidateEmail && r.candidateEmail.toLowerCase().includes("verpoort")) ||
+      (r.candidateName && r.candidateName.toLowerCase().includes("verpoort")) ||
+      (r.slug && r.slug.toLowerCase().includes("verpoort")) ||
+      r.id === "RESP-VERPOORT"
+    const isCacciola = (r.candidateEmail && r.candidateEmail.toLowerCase().includes("cacciola")) ||
+      (r.candidateName && r.candidateName.toLowerCase().includes("cacciola")) ||
+      (r.slug && r.slug.toLowerCase().includes("cacciola")) ||
+      r.id === "RESP-CACCIOLA"
     const isHesham = (r.candidateEmail && (r.candidateEmail.toLowerCase().includes("hecham") || r.candidateEmail.toLowerCase().includes("hesham"))) ||
-                     (r.candidateName && r.candidateName.toLowerCase().includes("hesham")) ||
-                     (r.slug && r.slug.toLowerCase().includes("hesham")) ||
-                     r.id === "RESP-HUSSEIN" || r.id === "EBM-HUSSEIN"
+      (r.candidateName && r.candidateName.toLowerCase().includes("hesham")) ||
+      (r.slug && r.slug.toLowerCase().includes("hesham")) ||
+      r.id === "RESP-HUSSEIN" || r.id === "EBM-HUSSEIN"
     const isKanthlal = (r.candidateEmail && (r.candidateEmail.toLowerCase().includes("lalpharm") || r.candidateEmail.toLowerCase().includes("kanthsklal"))) ||
-                       (r.candidateName && r.candidateName.toLowerCase().includes("kanthlal")) ||
-                       (r.slug && r.slug.toLowerCase().includes("kanthlal")) ||
-                       r.id === "RESP-KANTHLAL" || r.id === "EBM-KANTHLAL"
+      (r.candidateName && r.candidateName.toLowerCase().includes("kanthlal")) ||
+      (r.slug && r.slug.toLowerCase().includes("kanthlal")) ||
+      r.id === "RESP-KANTHLAL" || r.id === "EBM-KANTHLAL"
 
     if (isHesham && (!credId || credId === "EBM-EDITOR")) {
       credId = "EBM-HESHAM"
@@ -278,13 +278,14 @@ export async function GET() {
       credId = "EBM-KANTHLAL"
     }
     const isNamiq = (r.candidateEmail && (r.candidateEmail.toLowerCase().includes("karez") || r.candidateEmail.toLowerCase().includes("namiq"))) ||
-                    (r.candidateName && (r.candidateName.toLowerCase().includes("karez") || r.candidateName.toLowerCase().includes("namiq"))) ||
-                    (r.slug && r.slug.toLowerCase().includes("namiq")) ||
-                    r.id === "RESP-NAMIQ" || r.id === "EBM-NAMIQ"
+      (r.candidateName && (r.candidateName.toLowerCase().includes("karez") || r.candidateName.toLowerCase().includes("namiq"))) ||
+      (r.slug && r.slug.toLowerCase().includes("namiq")) ||
+      r.id === "RESP-NAMIQ" || r.id === "EBM-NAMIQ"
 
     if (isNamiq) {
       credId = "EBM-NAMIQ"
       r.candidateName = "Karez Namiq, M.D."
+      r.candidateName = "Karez Namiq, M.D. M.Sc"
       r.role = "Early Career Editorial Board Member & Handling Editor"
       r.type = "board"
       r.journal = "Scholarly Open: Medicine"
@@ -312,8 +313,8 @@ export async function GET() {
 
     const isConfirmedApproved = isVerpoort || isCacciola || isHesham || isKanthlal || Boolean(r.jmApproved)
 
-    return { 
-      ...r, 
+    return {
+      ...r,
       credentialId: credId,
       jmApproved: isConfirmedApproved,
       status: isConfirmedApproved ? "Active Handling Editor" : (r.status || (r.jmApproved ? "Active Handling Editor" : "Pending JM Approval"))
@@ -497,15 +498,15 @@ export async function POST(req: Request) {
     // Mandatory checks for editorial board onboarding
     if (type === "eic" || type === "ae" || type === "board") {
       if (!biography || biography.trim().length < 50) {
-        return NextResponse.json({ 
-          success: false, 
-          error: "Academic Biography (minimum 50 characters) is required for editorial board appointment." 
+        return NextResponse.json({
+          success: false,
+          error: "Academic Biography (minimum 50 characters) is required for editorial board appointment."
         }, { status: 400 })
       }
       if (!cvFileName && !cvBase64) {
-        return NextResponse.json({ 
-          success: false, 
-          error: "A Curriculum Vitae (CV) document (PDF or DOCX) is mandatory for editorial board appointment." 
+        return NextResponse.json({
+          success: false,
+          error: "A Curriculum Vitae (CV) document (PDF or DOCX) is mandatory for editorial board appointment."
         }, { status: 400 })
       }
     }
@@ -514,8 +515,8 @@ export async function POST(req: Request) {
     const cleanOrcid = (orcid || "").trim()
 
     const disapprovedList = await getStoredDisapproved()
-    const matchDisapproved = disapprovedList.find((d: any) => 
-      (d.email && d.email.toLowerCase() === cleanEmail) || 
+    const matchDisapproved = disapprovedList.find((d: any) =>
+      (d.email && d.email.toLowerCase() === cleanEmail) ||
       (cleanOrcid && d.orcid && d.orcid === cleanOrcid)
     )
 
@@ -633,13 +634,13 @@ export async function POST(req: Request) {
           auth: { user, pass }
         })
 
-        const roleLabel = type === "eic" 
-          ? "Editor-in-Chief" 
-          : type === "ae" 
-          ? "Associate Editor" 
-          : type === "reviewer_claim" 
-          ? "Certified Peer Reviewer" 
-          : "Editorial Board Member & Handling Editor"
+        const roleLabel = type === "eic"
+          ? "Editor-in-Chief"
+          : type === "ae"
+            ? "Associate Editor"
+            : type === "reviewer_claim"
+              ? "Certified Peer Reviewer"
+              : "Editorial Board Member & Handling Editor"
 
         const subject = type === "reviewer_claim"
           ? `[${journal}] [Reviewer Gateway Active] ${candidateName} (${credentialId || "Certified"})`

@@ -1679,7 +1679,7 @@ export default function Editorial360Page() {
       const isNamiqParam = (urlName && urlName.toLowerCase().includes("namiq")) || (urlEmail && urlEmail.toLowerCase().includes("namiq"))
       if (isNamiqParam) {
         setRole("editor")
-        setEditorName("Karez Namiq, M.D.")
+        setEditorName("Karez Namiq, M.D. M.Sc")
         setEditorEmail(urlEmail || "kareznamiq@gmail.com")
         setEditorJournal("Scholarly Open: Medicine")
         setEditorInstitution("Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq")
@@ -4714,7 +4714,7 @@ Specific comments to the Author(s):
           setEditorPhotoUrl(currentEditorPhotoUrl)
           setEditorEmail(cleanEmail)
         } else if (isNamiq) {
-          currentEditorName = "Karez Namiq, M.D."
+          currentEditorName = "Karez Namiq, M.D. M.Sc"
           currentEditorRank = "Early Career Editorial Board Member & Handling Editor"
           currentEditorJournal = "Scholarly Open: Medicine"
           currentEditorInstitution = "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq"

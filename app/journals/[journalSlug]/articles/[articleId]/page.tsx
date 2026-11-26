@@ -3,7 +3,7 @@ import Link from "next/link"
 import { 
   Calendar, FileText, Users, ExternalLink, ArrowLeft, 
   Quote, Tag, BookOpen, Download, Check, Sparkles, Send, 
-  AlertCircle, ShieldCheck
+  AlertCircle, ShieldCheck, Clock, CheckCircle2, Activity
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -39,12 +39,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
 
   const isSample = isSampleArticle(article)
   const isProof = Boolean(article.isUnpublishedProof)
-  const titleText = isProof
-    ? `[Confidential Proof] ${article.title} | Scholarly Open`
-    : isSample 
-      ? `[Format Preview] ${article.title} | Scholarly Open` 
-      : `${article.title} | Scholarly Open`
-  const descText = article.abstract.slice(0, 160) + (article.abstract.length > 160 ? "..." : "")
+  const isUnderReview = article.lifecycleStatus === "under_review" || article.lifecycleStatus === "revision_requested"
 
   // Format journal name nicely from slug
   const journalName = journalSlug
@@ -52,6 +47,15 @@ export async function generateMetadata({ params }: ArticlePageProps) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
     .replace("And", "&")
+
+  const titleText = isUnderReview
+    ? `[Preprint Under Review] ${article.title} | Scholarly Open: ${journalName}`
+    : isProof
+    ? `[Confidential Proof] ${article.title} | Scholarly Open`
+    : isSample 
+      ? `[Format Preview] ${article.title} | Scholarly Open` 
+      : `${article.title} | Scholarly Open`
+  const descText = article.abstract.slice(0, 160) + (article.abstract.length > 160 ? "..." : "")
 
   const pdfFullUrl = `https://www.scholarlyopen.org${article.pdfUrl || `/manuscripts/${article.id}-revised-manuscript.pdf`}`
   const articleFullUrl = `https://www.scholarlyopen.org/journals/${journalSlug}/articles/${article.id}`
@@ -121,6 +125,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   }
 
   const isSample = isSampleArticle(article)
+  const isUnderReview = article.lifecycleStatus === "under_review" || article.lifecycleStatus === "revision_requested"
 
   const articleTypeLabels: Record<string, string> = {
     research: "Research Article",
@@ -182,6 +187,140 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         <div className="container max-w-5xl mx-auto px-4">
           {article.id === "SOMED-26-RW01" ? (
             <>
+              {/* Navigation link back to Journal */}
+              <div className="mb-6 flex items-center justify-between">
+                <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary pl-0">
+                  <Link href={`/journals/${journalSlug}`}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to {journalName} Journal
+                  </Link>
+                </Button>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" asChild className="text-xs">
+                    <Link href={`/submit?journal=${journalSlug}`}>
+                      <Send className="h-3.5 w-3.5 mr-1.5" />
+                      Submit to this Journal
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              {isUnderReview && (
+                <div className="mb-8 rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-gradient-to-br from-blue-50/80 via-indigo-50/30 to-slate-50 dark:from-[#111319] dark:via-blue-950/20 dark:to-[#161820] p-6 shadow-sm space-y-6">
+                  {/* Top Bar */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-100 dark:border-blue-900/40 pb-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline" className="bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30 text-xs font-bold flex items-center gap-1.5 py-1 px-3">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        In Active Peer Review · Round 1
+                      </Badge>
+                      <span className="text-xs font-mono font-semibold bg-white/80 dark:bg-slate-800/80 text-blue-900 dark:text-blue-200 px-2.5 py-1 rounded-md border border-blue-200/60 dark:border-blue-800/60">
+                        Track ID: {article.trackId || article.id}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>Submitted: {article.submissionDate || article.publishedDate}</span>
+                    </div>
+                  </div>
+
+                  {/* Handling Editor & Review Stage */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-blue-100 dark:border-blue-900/30 space-y-1">
+                      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">Assigned Handling Editor</span>
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        {article.handlingEditorSlug ? (
+                          <Link href={`/editors/${article.handlingEditorSlug}`} className="text-sm font-bold text-foreground hover:text-primary transition-colors">
+                            {article.handlingEditor}
+                          </Link>
+                        ) : (
+                          <span className="text-sm font-bold text-foreground">{article.handlingEditor}</span>
+                        )}
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold border border-emerald-200 dark:border-emerald-800">
+                          Active Desk
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">Scholarly Open: Medicine · Peer Review Oversight</p>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-blue-100 dark:border-blue-900/30 space-y-1">
+                      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">Publication Status</span>
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                        <span className="text-sm font-bold text-foreground">Open Access Preprint</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 font-semibold border border-blue-200 dark:border-blue-800">
+                          CC BY 4.0
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">Under active peer review · Standard publication fees apply upon formal acceptance</p>
+                    </div>
+                  </div>
+
+                  {/* Visual Review Progress Tracker */}
+                  <div className="space-y-2 pt-1">
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                      <Activity className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      Peer Review Progress
+                    </span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                      <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+                        <div className="flex items-center gap-1.5 text-xs font-bold">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>1. Submission</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground block mt-0.5">Received Oct 26, 2026</span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+                        <div className="flex items-center gap-1.5 text-xs font-bold">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>2. Editorial Triage</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground block mt-0.5">Completed Oct 28, 2026</span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-blue-500/15 border border-blue-500/40 text-blue-800 dark:text-blue-200 shadow-xs">
+                        <div className="flex items-center gap-1.5 text-xs font-bold">
+                          <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                          <span>3. Peer Review</span>
+                        </div>
+                        <span className="text-[10px] text-blue-700 dark:text-blue-300 font-semibold block mt-0.5">Under Evaluation (Round 1)</span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-slate-500">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold">
+                          <span className="w-3.5 h-3.5 rounded-full border border-slate-400 shrink-0 flex items-center justify-center text-[9px]">4</span>
+                          <span>4. Version of Record</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground block mt-0.5">Pending Final Decision</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions & Policy Notice */}
+                  <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-muted-foreground border-t border-blue-100 dark:border-blue-900/40">
+                    <p className="max-w-xl text-[11px] leading-relaxed">
+                      This manuscript is an unedited open-access preprint currently under peer evaluation. Citations should reference this work using identifier <strong>{article.trackId}</strong>.
+                    </p>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {article.pdfUrl && (
+                        <Button size="sm" variant="default" asChild className="text-xs font-semibold shadow-xs">
+                          <a href={article.pdfUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="w-3.5 h-3.5 mr-1.5" />
+                            Preprint PDF (v1)
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {article.isUnpublishedProof && (
                 <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-center justify-between gap-3 shadow-xs">
                   <div className="flex items-center gap-2.5">

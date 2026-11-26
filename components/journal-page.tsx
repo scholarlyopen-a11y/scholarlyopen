@@ -172,8 +172,8 @@ export function JournalPage({
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/^-+|-+$/g, "")
           const defaultPhoto = cleanSlug.includes("verpoort") ? "/images/editors/francis-verpoort.png" : (liveEiC.photoUrl || undefined)
-          const officialEmail = (journalSlug === "chemistry" || cleanSlug.includes("verpoort")) 
-            ? "editor.chem@scholarlyopen.org" 
+          const officialEmail = (journalSlug === "chemistry" || cleanSlug.includes("verpoort"))
+            ? "editor.chem@scholarlyopen.org"
             : (liveEiC.email?.endsWith("@scholarlyopen.org") ? liveEiC.email : `editor.${journalSlug}@scholarlyopen.org`)
 
           setCurrentEiC({
@@ -232,13 +232,13 @@ export function JournalPage({
               name: isAbdelmonsef ? "Aboubakr Haredi Abdelmonsef Ahmed, Ph.D." : (isEletmany ? "Mohamed R. Eletmany, Ph.D." : e.name),
               slug: isAbdelmonsef ? "aboubakr-haredi-abdelmonsef" : (isTahir ? "furqan-tahir" : (isEletmany ? "mohamed-eletmany" : e.slug)),
               role: e.role || "Associate Editor",
-              affiliation: isAbdelmonsef 
-                ? "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt" 
+              affiliation: isAbdelmonsef
+                ? "Chemistry Department, Faculty of Science, Qena University, Qena, Egypt"
                 : isEletmany
-                ? "Chemistry Department, Faculty of Science, South Valley University, Qena, Egypt"
-                : isTahir
-                ? "King Abdullah University of Science and Technology (KAUST),\nEnvironmental Science and Engineering, Saudi Arabia"
-                : (e.affiliation || "Academic Institution"),
+                  ? "Chemistry Department, Faculty of Science, South Valley University, Qena, Egypt"
+                  : isTahir
+                    ? "King Abdullah University of Science and Technology (KAUST),\nEnvironmental Science and Engineering, Saudi Arabia"
+                    : (e.affiliation || "Academic Institution"),
               specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
               imageUrl: isAbdelmonsef ? "/images/editors/aboubakr-abdelmonsef.png" : (isEletmany ? "/images/editors/mohamed-eletmany.jpg" : (liveEiC && liveEiC.email === e.email ? liveEiC.photoUrl : e.photoUrl)),
               email: (isAbdelmonsef || isEletmany) ? "editor.chem@scholarlyopen.org" : e.email,
@@ -275,8 +275,8 @@ export function JournalPage({
             role: e.role || "Editorial Board Member",
             affiliation: e.affiliation || "Academic Institution",
             specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Academic Research & Peer Review"),
-            imageUrl: (e.photoUrl && !e.photoUrl.includes("supabase.co")) 
-              ? e.photoUrl 
+            imageUrl: (e.photoUrl && !e.photoUrl.includes("supabase.co"))
+              ? e.photoUrl
               : (e.name?.toLowerCase().includes("rabea") ? "/images/editors/ahmed-magdy-rabea.jpg" : (e.name?.toLowerCase().includes("kanthlal") ? "/images/editors/kanthlal-sk.png" : (e.name?.toLowerCase().includes("hussein") ? "/images/editors/hesham-hussein.png" : e.photoUrl))),
             email: e.email,
             orcid: e.orcid,
@@ -303,8 +303,8 @@ export function JournalPage({
         }
 
         // 4. Live Early Career Editorial Board Members
-        const liveEcr = approved.filter((e: any) => 
-          e.role?.toLowerCase().includes("early career") || 
+        const liveEcr = approved.filter((e: any) =>
+          e.role?.toLowerCase().includes("early career") ||
           e.role?.toLowerCase().includes("ecr") ||
           e.role?.toLowerCase().includes("senior researcher") ||
           (e.name && e.name.toLowerCase().includes("namiq"))
@@ -313,11 +313,11 @@ export function JournalPage({
           const mappedEcr: EditorMember[] = liveEcr.map((e: any) => {
             const isNamiq = (e.name && e.name.toLowerCase().includes("namiq")) || (e.slug && e.slug.includes("namiq"))
             return {
-              name: isNamiq ? "Karez Namiq, M.D." : e.name,
+              name: isNamiq ? "Karez Namiq, M.D. M.Sc" : e.name,
               slug: isNamiq ? "karez-namiq" : (e.slug || (e.name ? e.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : undefined)),
               role: e.role || "Early Career Editorial Board Member",
               affiliation: isNamiq ? "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq" : (e.affiliation || "Academic Institution"),
-              specialization: e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Peer Review & Emerging Research"),
+              specialization: isNamiq ? "Medical Oncology" : (e.specialization || (Array.isArray(e.researchInterests) ? e.researchInterests.join(", ") : "Peer Review & Emerging Research")),
               imageUrl: (e.photoUrl && !e.photoUrl.includes("supabase.co")) ? e.photoUrl : (isNamiq ? "/images/editors/karez-namiq.jpg" : undefined),
               email: isNamiq ? "editor.med@scholarlyopen.org" : e.email,
               orcid: e.orcid,
@@ -495,7 +495,7 @@ export function JournalPage({
       <Header />
       <main className="flex-1">
         {/* Dynamic Branded Header - Styled in correct custom brand colors */}
-        <section 
+        <section
           className={`relative overflow-hidden ${currentBrandTheme.text} border-b ${currentBrandTheme.border}`}
           style={{ backgroundColor: currentBrandTheme.bgColor }}
         >
@@ -552,7 +552,7 @@ export function JournalPage({
 
         {/* Main Content Layout - Scrollable Sections */}
         <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 space-y-24">
-          
+
           {/* Section 1: Aims & Scope */}
           <section className="space-y-12 animate-in fade-in duration-300">
             <div>
@@ -562,7 +562,7 @@ export function JournalPage({
                 <p>{t("journal.aboutText")}</p>
               </div>
             </div>
-            
+
             {/* Highlights Grid */}
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {mainHighlights.map((highlight) => (
@@ -595,9 +595,9 @@ export function JournalPage({
                   <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6">{t("journal.sections")}</h3>
                   <div className="flex flex-wrap gap-2.5">
                     {sectionTopics.map((topic) => (
-                      <Badge 
-                        key={topic} 
-                        variant="secondary" 
+                      <Badge
+                        key={topic}
+                        variant="secondary"
                         className="bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-sm font-medium px-4 py-2 rounded-full border border-slate-200/50 dark:border-slate-700/50 shadow-sm transition-all duration-300 hover:scale-[1.02] cursor-default"
                       >
                         {topic}

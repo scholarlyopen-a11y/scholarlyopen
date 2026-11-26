@@ -28,7 +28,7 @@ export interface EditorMember {
   stats?: {
     label: string
     value: string
-    description: string
+    description?: string
   }[]
   personalPublications?: {
     title: string
@@ -1499,17 +1499,17 @@ Dr. Boakye-Appiah earned his M.D. (MBChB) and B.Sc. in Human Biology from Kwame 
   },
     {
     slug: "karez-namiq",
-    name: "Karez Namiq, M.D.",
+    name: "Karez Namiq, M.D. M.Sc",
     role: "Early Career Editorial Board Member & Handling Editor",
     affiliation: "Iraqi Society of Clinical Oncology (ISCO), Erbil, Iraq",
-    specialization: "Medical Oncology, Breast Cancer Management, Supportive & Palliative Care, Oncology Nutrition & Clinical Research",
+    specialization: "Medical Oncology",
     imageUrl: "/images/editors/karez-namiq.jpg",
     email: "editor.med@scholarlyopen.org",
     orcid: "",
     googleScholar: "https://scholar.google.com/citations?view_op=search_authors&mauthors=Karez+Namiq",
     researchGate: "https://www.researchgate.net/profile/Karez-Namiq",
     linkedin: "https://www.linkedin.com/in/karez-sarbast-namiq",
-    biography: `Dr. Karez Sarbast Namiq is a Medical Oncology Specialist and clinical cancer researcher based in Erbil, Kurdistan Region, Iraq. She serves at Hawler Medical University and Nanakali Hospital for Blood Diseases and Cancer, and is an active member of the Iraqi Society of Clinical Oncology (ISCO). She graduated from the European School of Oncology (ESO) and holds international certifications in breast cancer management (ESO/Ulm University), palliative care (ESMO), and oncology nutrition (ONC).
+    biography: `Dr. Karez Sarbast Namiq holds a Master's degree in Medical Oncology and is a Medical Oncology Specialist and clinical cancer researcher based in Erbil, Kurdistan Region, Iraq. She serves at Hawler Medical University and Nanakali Hospital for Blood Diseases and Cancer, and is an active member of the Iraqi Society of Clinical Oncology (ISCO). She graduated from the European School of Oncology (ESO) and holds international certifications in breast cancer management (ESO/Ulm University), palliative care (ESMO), and oncology nutrition (ONC).
 
 Her clinical and academic research investigates neoadjuvant chemotherapy, breast cancer outcomes, resource-stratified multidisciplinary oncology care, and core outcome sets in clinical trials. She serves on the Early Career Editorial Board (ECEB) of Scholarly Open: Medicine, supporting peer-review rigor and mentored editorial curation.`,
     assignedSections: [
@@ -1544,29 +1544,28 @@ Her clinical and academic research investigates neoadjuvant chemotherapy, breast
         type: "career"
       },
       {
-        year: "2024",
-        title: "ESMO Palliative Care & Oncology Nutrition Certifications",
-        description: "Awarded certifications in palliative oncology care and oncology nutrition by the European Society for Medical Oncology (ESMO).",
+        year: "2023",
+        title: "Neoadjuvant Breast Cancer Clinical Trial Study",
+        description: "Published pivotal research on neoadjuvant therapy in nonmetastatic breast cancer in Kurdistan, Iraq in JCO Global Oncology.",
         type: "milestone"
       },
       {
-        year: "2023",
-        title: "Certificate of Competence in Breast Cancer",
+        year: "2022",
+        title: "Certificate of Competence",
         description: "Completed specialized postgraduate competence training with the European School of Oncology (ESO) and Ulm University.",
         type: "education"
       },
       {
-        year: "2023",
-        title: "Neoadjuvant Breast Cancer Clinical Trial Study",
-        description: "Published pivotal research on neoadjuvant therapy in nonmetastatic breast cancer in Kurdistan, Iraq in JCO Global Oncology.",
+        year: "2021",
+        title: "ESMO Palliative Care",
+        description: "Awarded certifications in palliative oncology care and oncology nutrition by the European Society for Medical Oncology (ESMO).",
         type: "milestone"
       }
     ],
     stats: [
       {
         label: "Clinical Subspecialty",
-        value: "Medical Oncology",
-        description: "Breast Cancer Management & Neoadjuvant Systemic Care"
+        value: "Medical Oncology"
       },
       {
         label: "International Training",
