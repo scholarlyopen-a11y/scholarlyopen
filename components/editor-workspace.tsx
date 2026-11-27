@@ -2285,8 +2285,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                       <div className="text-slate-600 dark:text-slate-400 flex items-center gap-2 flex-wrap">
                         <span>Peer Reviews: <span className="font-semibold text-slate-800 dark:text-slate-200">Double-Blind ({matchingReviews.length} Submitted · {paper.reviewers?.length || 3} Assigned)</span></span>
                         <a
-                          href={paper.fileUrl || (paper.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                          download={paper.fileName || (paper.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${paper.id}_Manuscript.docx`)}
+                          href={paper.fileUrl || (paper.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : paper.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                          download={paper.fileName || (paper.id === "SOCHEM-26-RW101" ? "manuscript-MOFs_FV.docx" : paper.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${paper.id}_Manuscript.docx`)}
                           className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-[#0b99ff] border border-sky-200 dark:border-sky-800 font-bold hover:bg-sky-100 dark:hover:bg-sky-900/60 transition-colors cursor-pointer ml-1"
                           title="Download actual submitted manuscript (.docx)"
                         >
@@ -4382,7 +4382,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                     name: (selectedRevisionForEvaluation as any)?.revisedFileName || (selectedRevisionForEvaluation as any)?.fileName || "Revised_Manuscript_Clean_V2.docx", 
                     type: "Clean Revised Manuscript Document (Submitted by Author)", 
                     size: (selectedRevisionForEvaluation as any)?.revisedFileSize || (selectedRevisionForEvaluation as any)?.fileSize || "38.6 KB",
-                    url: (selectedRevisionForEvaluation as any)?.revisedFileUrl || (selectedRevisionForEvaluation as any)?.fileUrl || (selectedRevisionForEvaluation?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
+                    url: (selectedRevisionForEvaluation as any)?.revisedFileUrl || (selectedRevisionForEvaluation as any)?.fileUrl || (selectedRevisionForEvaluation?.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : selectedRevisionForEvaluation?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
                   },
                   { 
                     name: (selectedRevisionForEvaluation as any)?.rebuttalFileName || "Response_to_Reviewers_Document.docx", 
@@ -5441,7 +5441,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                               </div>
                             </div>
                             <a
-                              href={selectedPaperForDetail?.revisedFileUrl || selectedPaperForDetail?.fileUrl || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                              href={selectedPaperForDetail?.revisedFileUrl || selectedPaperForDetail?.fileUrl || (selectedPaperForDetail?.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : selectedPaperForDetail?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
                               download={selectedPaperForDetail?.revisedFileName || selectedPaperForDetail?.fileName || `${selectedPaperForDetail?.id}_Revised_Manuscript.docx`}
                               className="p-2 rounded-lg bg-white dark:bg-[#1e2027] border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 transition-colors cursor-pointer"
                               title="Download Revised Manuscript (.docx)"
@@ -5499,8 +5499,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                             </div>
                           </div>
                           <a
-                            href={selectedPaperForDetail?.fileUrl || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                            download={selectedPaperForDetail?.fileName || (selectedPaperForDetail?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedPaperForDetail?.id || "Manuscript"}_Main_Document.docx`)}
+                            href={selectedPaperForDetail?.fileUrl || (selectedPaperForDetail?.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : selectedPaperForDetail?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                            download={selectedPaperForDetail?.fileName || (selectedPaperForDetail?.id === "SOCHEM-26-RW101" ? "manuscript-MOFs_FV.docx" : selectedPaperForDetail?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedPaperForDetail?.id || "Manuscript"}_Main_Document.docx`)}
                             className="p-2 rounded-lg bg-white dark:bg-[#1e2027] border border-slate-200 dark:border-[#272832] text-slate-700 dark:text-slate-300 hover:text-[#0b99ff] transition-colors cursor-pointer"
                             title="Download Main Manuscript (.docx)"
                           >

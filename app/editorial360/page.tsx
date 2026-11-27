@@ -260,6 +260,7 @@ export const INITIAL_CHEMISTRY_MANUSCRIPT: Manuscript = {
   keywords: "Metal-organic frameworks (MOFs); Dye adsorption; Wastewater treatment; Cationic dyes; Anionic dyes; Adsorption mechanism.",
   fileName: "manuscript-MOFs_FV.docx",
   fileSize: "4.4 MB",
+  fileUrl: "/manuscripts/SOCHEM-26-RW101-manuscript.docx",
   ethicsIrb: "None declared / Not applicable",
   fundingGrant: "No external funding declared",
   dataDoi: "Available upon reasonable request",
@@ -1946,9 +1947,9 @@ export default function Editorial360Page() {
               articleType: m.article_type || "Original Research",
               submissionStage: m.submission_stage || "Initial Submission",
               abstract: m.abstract,
-              fileName: m.file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
-              fileSize: m.file_size || (m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
-              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
+              fileName: m.file_name || (m.id === "SOCHEM-26-RW101" ? "manuscript-MOFs_FV.docx" : m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
+              fileSize: m.file_size || (m.id === "SOCHEM-26-RW101" ? "4.4 MB" : m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
+              fileUrl: m.file_url || (m.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
               revisedFileName: m.revised_file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
               revisedFileSize: m.revised_file_size || (m.id === "SOMED-26-RW01" ? "39.5 KB" : undefined),
               revisedFileUrl: m.revised_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
@@ -2188,9 +2189,9 @@ export default function Editorial360Page() {
               articleType: m.article_type || "Original Research",
               submissionStage: m.submission_stage || "Initial Submission",
               abstract: m.abstract,
-              fileName: m.file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
-              fileSize: m.file_size || (m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
-              fileUrl: m.file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
+              fileName: m.file_name || (m.id === "SOCHEM-26-RW101" ? "manuscript-MOFs_FV.docx" : m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
+              fileSize: m.file_size || (m.id === "SOCHEM-26-RW101" ? "4.4 MB" : m.id === "SOMED-26-RW01" ? "38.6 KB" : undefined),
+              fileUrl: m.file_url || (m.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
               revisedFileName: m.revised_file_name || (m.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : undefined),
               revisedFileSize: m.revised_file_size || (m.id === "SOMED-26-RW01" ? "39.5 KB" : undefined),
               revisedFileUrl: m.revised_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
@@ -17363,7 +17364,7 @@ Specific comments to the Author(s):
                             <button
                               type="button"
                               onClick={() => {
-                                const dlUrl = selectedManuscriptDetails.revisedFileUrl || selectedManuscriptDetails.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                const dlUrl = selectedManuscriptDetails.revisedFileUrl || selectedManuscriptDetails.fileUrl || (selectedManuscriptDetails.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : "/manuscripts/SOMED-26-RW01-manuscript.docx")
                                 const dlName = selectedManuscriptDetails.revisedFileName || selectedManuscriptDetails.fileName || "Revised_Manuscript.docx"
                                 const link = document.createElement("a")
                                 link.href = dlUrl
@@ -17766,7 +17767,7 @@ Specific comments to the Author(s):
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const dlUrl = selectedManuscriptDetails.revisedFileUrl || selectedManuscriptDetails.fileUrl || "/manuscripts/SOMED-26-RW01-manuscript.docx"
+                                  const dlUrl = selectedManuscriptDetails.revisedFileUrl || selectedManuscriptDetails.fileUrl || (selectedManuscriptDetails.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : "/manuscripts/SOMED-26-RW01-manuscript.docx")
                                   const dlName = selectedManuscriptDetails.revisedFileName || selectedManuscriptDetails.fileName || "Revised_Manuscript.docx"
                                   const link = document.createElement("a")
                                   link.href = dlUrl
@@ -17858,8 +17859,9 @@ Specific comments to the Author(s):
                               type="button"
                               onClick={() => {
                                 const isAortic = selectedManuscriptDetails.id === "SOMED-26-RW01" || selectedManuscriptDetails.title?.toLowerCase().includes("prevent earlier")
-                                const dlUrl = selectedManuscriptDetails.fileUrl || (isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
-                                const dlName = selectedManuscriptDetails.fileName || (isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscriptDetails.id}_Manuscript.docx`)
+                                const isMof = selectedManuscriptDetails.id === "SOCHEM-26-RW101" || selectedManuscriptDetails.title?.toLowerCase().includes("mof")
+                                const dlUrl = selectedManuscriptDetails.fileUrl || (isMof ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
+                                const dlName = selectedManuscriptDetails.fileName || (isMof ? "manuscript-MOFs_FV.docx" : isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscriptDetails.id}_Manuscript.docx`)
                                 const link = document.createElement("a")
                                 link.href = dlUrl
                                 link.download = dlName
@@ -17918,8 +17920,9 @@ Specific comments to the Author(s):
                   type="button"
                   onClick={() => {
                     const isAortic = selectedManuscriptDetails?.id === "SOMED-26-RW01" || selectedManuscriptDetails?.title?.toLowerCase().includes("prevent earlier")
-                    const dlUrl = selectedManuscriptDetails?.fileUrl || (isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
-                    const dlName = selectedManuscriptDetails?.fileName || (isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscriptDetails?.id || "Manuscript"}_Dossier.zip`)
+                    const isMof = selectedManuscriptDetails?.id === "SOCHEM-26-RW101" || selectedManuscriptDetails?.title?.toLowerCase().includes("mof")
+                    const dlUrl = selectedManuscriptDetails?.fileUrl || (isMof ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : isAortic ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : "/downloads/Scholarly_Open_Manuscript_Template.txt")
+                    const dlName = selectedManuscriptDetails?.fileName || (isMof ? "manuscript-MOFs_FV.docx" : isAortic ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscriptDetails?.id || "Manuscript"}_Manuscript.docx`)
                     const link = document.createElement("a")
                     link.href = dlUrl
                     link.download = dlName

@@ -1178,9 +1178,20 @@ export function ReviewerWorkspace({
 
   const handleDownloadSpecificFile = (type: "fulltext" | "supp" | "irb", rev: ActiveReviewItem) => {
     const id = rev.manuscriptId || rev.id || "SOMED-26-RS001"
-    const isAortic = id === "SOMED-26-RW01" || rev.title?.toLowerCase().includes("prevent earlier") || rev.title?.toLowerCase().includes("acute aortic dissection") || Boolean((rev as any).fileUrl)
+    const isMof = id === "SOCHEM-26-RW101" || rev.title?.toLowerCase().includes("mof") || rev.journal?.includes("Chemistry")
+    const isAortic = (id === "SOMED-26-RW01" || rev.title?.toLowerCase().includes("prevent earlier") || rev.title?.toLowerCase().includes("acute aortic dissection")) && !isMof
 
     if (type === "fulltext") {
+      if (isMof) {
+        const link = document.createElement("a")
+        link.href = "/manuscripts/SOCHEM-26-RW101-manuscript-blinded.docx"
+        link.download = `Blinded_Manuscript_${id}.docx`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return
+      }
+
       if (isAortic) {
         const link = document.createElement("a")
         link.href = "/manuscripts/SOMED-26-RW01-revised-manuscript-blinded.docx"
@@ -1222,6 +1233,30 @@ Quantitative comparisons demonstrate a 14.8% relative improvement in predictive 
 `
       handleDownloadFile(`${id}_Blinded_Manuscript_FullText.txt`, content)
     } else if (type === "supp") {
+      if (isMof) {
+        const content = `================================================================================
+SCHOLARLY OPEN • SUPPLEMENTARY DATASETS, CHARACTERIZATION & TABLES
+================================================================================
+MANUSCRIPT ID: ${id}
+TITLE: ${rev.title}
+
+SUPPLEMENTARY FIGURE S1:
+- Nitrogen adsorption-desorption isotherms (77 K) and pore size distributions of ZIF-8, MIL-101(Cr), and UiO-66.
+- BET surface areas: ZIF-8 (1,620 m²/g), MIL-101 (3,240 m²/g), UiO-66 (1,180 m²/g).
+
+SUPPLEMENTARY TABLE S1:
+- Langmuir and Freundlich isotherm parameters for Methylene Blue and Congo Red adsorption across pH 3.0–11.0.
+
+SUPPLEMENTARY TABLE S2:
+- Pseudo-first-order and pseudo-second-order kinetic constants and correlation coefficients (R² > 0.992).
+
+SUPPLEMENTARY DATASET 1:
+- Open Research Data deposition: 10.5555/zenodo.mof-dye-kinetics-2026 (Double-blind verified).
+`
+        handleDownloadFile(`${id}_Supplementary_Tables_Figures.txt`, content)
+        return
+      }
+
       if (isAortic) {
         const link = document.createElement("a")
         link.href = "/manuscripts/SOMED-26-RW01-rebuttal-blinded.docx"
@@ -1250,18 +1285,14 @@ SUPPLEMENTARY DATASET 1:
       handleDownloadFile(`${id}_Supplementary_Tables_Figures.txt`, content)
     } else if (type === "irb") {
       const content = `================================================================================
-SCHOLARLY OPEN • INSTITUTIONAL REVIEW BOARD (IRB) CLEARANCE STATEMENT
+SCHOLARLY OPEN • INSTITUTIONAL REVIEW BOARD (IRB) / ETHICS CLEARANCE STATEMENT
 ================================================================================
 MANUSCRIPT ID: ${id}
-CLEARANCE PROTOCOL: #2026-ETHICS-4401
-STATUS: APPROVED & VERIFIED COMPLIANT WITH DECLARATION OF HELSINKI
-
-The institutional ethics committee evaluated the protocol submitted for the study titled:
-"${rev.title}".
-Informed written consent was secured from all participants prior to anonymization.
-All clinical research procedures adhere strictly to COPE guidelines and local statutory laws.
+STATUS: VERIFIED COMPLIANT / NOT APPLICABLE FOR INORGANIC/MATERIALS CHEMISTRY
+DECLARATION:
+All chemical research procedures adhere strictly to COPE ethics guidelines and laboratory safety standards.
 `
-      handleDownloadFile(`${id}_IRB_Ethics_Statement_Redacted.txt`, content)
+      handleDownloadFile(`${id}_Ethics_Statement.txt`, content)
     }
   }
 
@@ -1270,7 +1301,18 @@ All clinical research procedures adhere strictly to COPE guidelines and local st
     setTimeout(() => {
       setIsDownloadingZip(false)
       const id = rev.manuscriptId || rev.id || "SOMED-26-RS001"
-      const isAortic = id === "SOMED-26-RW01" || rev.title?.toLowerCase().includes("prevent earlier") || rev.title?.toLowerCase().includes("acute aortic dissection") || Boolean((rev as any).fileUrl)
+      const isMof = id === "SOCHEM-26-RW101" || rev.title?.toLowerCase().includes("mof") || rev.journal?.includes("Chemistry")
+      const isAortic = (id === "SOMED-26-RW01" || rev.title?.toLowerCase().includes("prevent earlier") || rev.title?.toLowerCase().includes("acute aortic dissection")) && !isMof
+
+      if (isMof) {
+        const link = document.createElement("a")
+        link.href = "/manuscripts/SOCHEM-26-RW101-manuscript-blinded.docx"
+        link.download = `Blinded_Peer_Review_Package_${id}.docx`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return
+      }
 
       if (isAortic) {
         const link = document.createElement("a")

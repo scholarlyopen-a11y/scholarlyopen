@@ -9694,8 +9694,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </span>
               <div className="grid grid-cols-1 gap-2">
                 <a
-                  href={selectedManuscript?.fileUrl || (selectedManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : selectedManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                  download={selectedManuscript?.fileName || (selectedManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscript?.id || "Manuscript"}_Main_Document.docx`)}
+                  href={selectedManuscript?.fileUrl || (selectedManuscript?.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : selectedManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : selectedManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                  download={selectedManuscript?.fileName || (selectedManuscript?.id === "SOCHEM-26-RW101" ? "manuscript-MOFs_FV.docx" : selectedManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${selectedManuscript?.id || "Manuscript"}_Main_Document.docx`)}
                   className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-[#0b99ff] transition-all text-slate-700 dark:text-slate-300 font-medium"
                 >
                   <div className="flex items-center gap-2 truncate">
@@ -10533,8 +10533,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
               </div>
               <div className="flex items-center gap-2 shrink-0 flex-wrap">
                 <a
-                  href={trackingManuscript?.fileUrl || (trackingManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : trackingManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                  download={trackingManuscript?.fileName || (trackingManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${trackingManuscript?.id || "Manuscript"}_Main_Document.docx`)}
+                  href={trackingManuscript?.fileUrl || (trackingManuscript?.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : trackingManuscript?.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : trackingManuscript?.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                  download={trackingManuscript?.fileName || (trackingManuscript?.id === "SOCHEM-26-RW101" ? "manuscript-MOFs_FV.docx" : trackingManuscript?.id === "SOMED-26-RW01" ? "Sam_Lee_Acute_Aortic_Dissection_EBM_Manuscript.docx" : `${trackingManuscript?.id || "Manuscript"}_Main_Document.docx`)}
                   className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#0b99ff] hover:bg-[#0088e0] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
                   title="Download Manuscript (.docx)"
                 >
@@ -12036,8 +12036,8 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
 
                 <div className="flex items-center gap-2 shrink-0">
                   <a
-                    href={readingManuscript.fileUrl || (readingManuscript.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : readingManuscript.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
-                    download={readingManuscript.fileName || `${readingManuscript.id}_Manuscript.docx`}
+                    href={readingManuscript.fileUrl || (readingManuscript.id === "SOCHEM-26-RW101" ? "/manuscripts/SOCHEM-26-RW101-manuscript.docx" : readingManuscript.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-manuscript.docx" : readingManuscript.revisedFileUrl || "/downloads/Scholarly_Open_Manuscript_Template.txt")}
+                    download={readingManuscript.fileName || (readingManuscript.id === "SOCHEM-26-RW101" ? "manuscript-MOFs_FV.docx" : `${readingManuscript.id}_Manuscript.docx`)}
                     className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18191e] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer shadow-2xs"
                   >
                     <Download className="h-3.5 w-3.5" />

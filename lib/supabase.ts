@@ -75,7 +75,21 @@ function getLocalManuscripts(): DbManuscript[] {
     if (fs.existsSync(LOCAL_MANUSCRIPTS_FILE)) {
       const data = fs.readFileSync(LOCAL_MANUSCRIPTS_FILE, "utf-8")
       const parsed = JSON.parse(data)
-      if (Array.isArray(parsed)) return parsed
+      if (Array.isArray(parsed)) {
+        return parsed.map((m: any) => {
+          let file_url = m.file_url
+          if (!file_url) {
+            if (m.id === "SOCHEM-26-RW101" || m.title?.toLowerCase().includes("mof")) {
+              file_url = "/manuscripts/SOCHEM-26-RW101-manuscript.docx"
+            } else if (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("acute aortic")) {
+              file_url = "/manuscripts/SOMED-26-RW01-revised-manuscript.docx"
+            } else if (m.file_name) {
+              file_url = `/manuscripts/${m.file_name}`
+            }
+          }
+          return { ...m, file_url }
+        })
+      }
     }
   } catch (e) {
     console.warn("Could not read local manuscripts file:", e)
@@ -123,6 +137,7 @@ function getLocalManuscripts(): DbManuscript[] {
       article_type: "Review",
       file_name: "manuscript-MOFs_FV.docx",
       file_size: "4.4 MB",
+      file_url: "/manuscripts/SOCHEM-26-RW101-manuscript.docx",
       ethics_irb: "None declared / Not applicable",
       funding_grant: "No external funding declared",
       data_doi: "Available upon reasonable request",
@@ -174,9 +189,28 @@ export async function getDbManuscripts(): Promise<DbManuscript[]> {
 
     const remote = await res.json()
     if (Array.isArray(remote) && remote.length > 0) {
-      // Sync local file with remote records
-      saveLocalManuscripts(remote)
-      return remote
+      // Ensure file_url and file paths are populated for each manuscript
+      const enriched = remote.map((m: any) => {
+        let file_url = m.file_url
+        if (!file_url) {
+          if (m.id === "SOCHEM-26-RW101" || m.title?.toLowerCase().includes("mof")) {
+            file_url = "/manuscripts/SOCHEM-26-RW101-manuscript.docx"
+          } else if (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("acute aortic")) {
+            file_url = "/manuscripts/SOMED-26-RW01-revised-manuscript.docx"
+          } else if (m.file_name) {
+            file_url = `/manuscripts/${m.file_name}`
+          }
+        }
+        return {
+          ...m,
+          file_url,
+          revised_file_url: m.revised_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-revised-manuscript.docx" : undefined),
+          rebuttal_file_url: m.rebuttal_file_url || (m.id === "SOMED-26-RW01" ? "/manuscripts/SOMED-26-RW01-rebuttal.docx" : undefined)
+        }
+      })
+      // Sync local file with enriched records
+      saveLocalManuscripts(enriched)
+      return enriched
     }
   } catch (error) {
     lastRestrictedTime = now
