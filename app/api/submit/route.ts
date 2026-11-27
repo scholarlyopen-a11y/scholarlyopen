@@ -267,12 +267,37 @@ export async function POST(request: Request) {
     },
   })
 
+  let fileBuffer: Buffer | null = null
+  let storedFileUrl: string | undefined = undefined
+  if (file instanceof File && file.size > 0) {
+    try {
+      fileBuffer = Buffer.from(await file.arrayBuffer())
+      const fs = await import("fs")
+      const path = await import("path")
+      const dir = path.join(process.cwd(), "public", "manuscripts")
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+
+      const ext = path.extname(file.name) || ".docx"
+      const safeId = trackingId.replace(/[^a-zA-Z0-9_-]/g, "")
+      const savedFileName = `${safeId}-manuscript${ext}`
+      fs.writeFileSync(path.join(dir, savedFileName), fileBuffer)
+      storedFileUrl = `/manuscripts/${savedFileName}`
+
+      const safeOriginalName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_")
+      if (safeOriginalName && safeOriginalName !== savedFileName) {
+        fs.writeFileSync(path.join(dir, safeOriginalName), fileBuffer)
+      }
+    } catch (saveErr) {
+      console.warn("Could not persist manuscript to public/manuscripts:", saveErr)
+    }
+  }
+
   const attachments =
-    file instanceof File && file.size > 0
+    file instanceof File && file.size > 0 && fileBuffer
       ? [
           {
             filename: file.name || "manuscript",
-            content: Buffer.from(await file.arrayBuffer()),
+            content: fileBuffer,
             contentType: file.type || undefined,
           },
         ]
@@ -372,6 +397,7 @@ export async function POST(request: Request) {
       abstract,
       file_name: file instanceof File ? file.name : "manuscript.pdf",
       file_size: file instanceof File ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : "Unspecified",
+      file_url: storedFileUrl,
       integrity_status: "Clean",
       editor_assigned: false,
     })
