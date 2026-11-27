@@ -59,44 +59,20 @@ function journalLabel(value: string) {
 }
 
 function getJournalShortCode(discipline: string): string {
-  switch (discipline?.toLowerCase().trim()) {
-    case "medicine":
-    case "med":
-      return "SOMED"
-    case "social-sciences":
-    case "social-sciences-humanities":
-    case "ssh":
-      return "SOSSH"
-    case "biology":
-    case "bio":
-      return "SOBIO"
-    case "chemistry":
-    case "chem":
-      return "SOCHEM"
-    case "engineering":
-    case "eas":
-      return "SOEAS"
-    case "environmental-science":
-    case "env":
-      return "SOENV"
-    case "clinical-ai-digital-health":
-    case "cai":
-      return "SOCAI"
-    case "ai-safety-governance":
-    case "ais":
-      return "SOAIS"
-    case "quantum-engineering":
-    case "qe":
-      return "SOQE"
-    case "synthetic-biology-bio-design":
-    case "sbd":
-      return "SOSBD"
-    case "space-resources-orbital-economy":
-    case "sre":
-      return "SOSRE"
-    default:
-      return "SO" + (discipline || "GEN").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3)
-  }
+  const d = (discipline || "").toLowerCase().trim()
+  if (d.includes("medicine") || d === "med") return "SOMED"
+  if (d.includes("chemistry") || d === "chem") return "SOCHEM"
+  if (d.includes("biology") || d === "bio") return "SOBIO"
+  if (d.includes("social") || d.includes("ssh")) return "SOSSH"
+  if (d.includes("engineering") || d.includes("eas")) return "SOEAS"
+  if (d.includes("environmental") || d.includes("env")) return "SOENV"
+  if (d.includes("clinical-ai") || d.includes("clinical ai") || d.includes("digital health") || d.includes("cai")) return "SOCAI"
+  if (d.includes("ai-safety") || d.includes("ai safety") || d.includes("governance") || d.includes("ais")) return "SOAIS"
+  if (d.includes("quantum") || d.includes("qe")) return "SOQE"
+  if (d.includes("synthetic") || d.includes("bio-design") || d.includes("sbd")) return "SOSBD"
+  if (d.includes("space") || d.includes("orbital") || d.includes("sre")) return "SOSRE"
+  if (d.includes("decarbonization") || d.includes("dec")) return "SODEC"
+  return "SOCHEM"
 }
 
 function getArticleTypeCode(articleType: string): string {

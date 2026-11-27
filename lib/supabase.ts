@@ -105,6 +105,35 @@ function getLocalManuscripts(): DbManuscript[] {
       ai_score: 2,
       created_at: "2026-09-27T10:00:00Z",
       updated_at: new Date().toISOString()
+    },
+    {
+      id: "SOCHEM-26-RW101",
+      title: "Recent advances in the application of MOF-based adsorbents for toxic dye removal from wastewater and their mechanism",
+      journal: "Scholarly Open: Chemistry",
+      status: "Awaiting Initial Check",
+      submission_stage: "Initial Submission",
+      author_first_name: "Francis",
+      author_last_name: "Verpoort",
+      author_name: "Francis Verpoort",
+      author_email: "francis@whut.edu.cn",
+      author_affiliation: "Wuhan University of Technology, Department of Materials Science and Engineering",
+      author_country: "China",
+      author_orcid: "0000-0002-5184-5500",
+      co_authors: "Maira Aslam, Laiba, Muhammad Zain Ashiq, Ayesha Noreen, Muhammad Imtiaz",
+      article_type: "Review",
+      file_name: "manuscript-MOFs_FV.docx",
+      file_size: "4.4 MB",
+      ethics_irb: "None declared / Not applicable",
+      funding_grant: "No external funding declared",
+      data_doi: "Available upon reasonable request",
+      integrity_status: "Clean",
+      plagiarism_score: 0,
+      ai_score: 0,
+      editor_assigned: false,
+      assigned_editor_name: undefined,
+      reviewers: [],
+      created_at: "2026-11-27T07:42:53.666Z",
+      updated_at: new Date().toISOString()
     }
   ]
 }

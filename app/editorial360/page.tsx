@@ -235,6 +235,37 @@ export const INITIAL_MEDICINE_MANUSCRIPT: Manuscript = {
   handlingEditorDecision: "Minor Revision Required"
 }
 
+export const INITIAL_CHEMISTRY_MANUSCRIPT: Manuscript = {
+  id: "SOCHEM-26-RW101",
+  title: "Recent advances in the application of MOF-based adsorbents for toxic dye removal from wastewater and their mechanism",
+  journal: "Scholarly Open: Chemistry",
+  status: "Awaiting Initial Check",
+  date: "2026-11-27",
+  reviewers: [],
+  integrityStatus: "Clean",
+  plagiarismScore: 0,
+  aiScore: 0,
+  author: "Francis Verpoort, Ph.D.",
+  authorFirstName: "Francis",
+  authorLastName: "Verpoort",
+  authorName: "Francis Verpoort, Ph.D.",
+  authorEmail: "francis@whut.edu.cn",
+  authorAffiliation: "Wuhan University of Technology, Department of Materials Science and Engineering",
+  authorCountry: "China",
+  authorOrcid: "0000-0002-5184-5500",
+  coAuthors: "Maira Aslam, Laiba, Muhammad Zain Ashiq, Ayesha Noreen, Muhammad Imtiaz",
+  articleType: "Review",
+  submissionStage: "Initial Submission",
+  abstract: "The increasing influx of pollutants from various sources continues to complicate wastewater treatment processes. Over the past few decades, water contamination has surged, presenting one of the most challenging environmental issues globally. Understanding the underlying chemistry is essential for identifying structural characteristics that can be adjusted to enhance material properties. This review systematically consolidates and critically examines recent breakthroughs (2018-2024) in the use of notable MOF families, such as ZIFs, MILs, and UiO-series, for the removal of cationic (e.g., Methylene Blue) and anionic (e.g., Congo Red) dyes.",
+  keywords: "Metal-organic frameworks (MOFs); Dye adsorption; Wastewater treatment; Cationic dyes; Anionic dyes; Adsorption mechanism.",
+  fileName: "manuscript-MOFs_FV.docx",
+  fileSize: "4.4 MB",
+  ethicsIrb: "None declared / Not applicable",
+  fundingGrant: "No external funding declared",
+  dataDoi: "Available upon reasonable request",
+  editorAssigned: false
+}
+
 // Review Invitation mock data
 interface ReviewInvitation {
   id: string
@@ -2199,8 +2230,8 @@ export default function Editorial360Page() {
     }
   }, [isLoggedIn])
 
-  // Initial State: Contains active SOMED-26-RW01 submission, clean of legacy dummy mocks
-  const [manuscripts, setManuscripts] = useState<Manuscript[]>([INITIAL_MEDICINE_MANUSCRIPT])
+  // Initial State: Contains active submissions, clean of legacy dummy mocks
+  const [manuscripts, setManuscripts] = useState<Manuscript[]>([INITIAL_MEDICINE_MANUSCRIPT, INITIAL_CHEMISTRY_MANUSCRIPT])
 
   const [reviewInvitations, setReviewInvitations] = useState<ReviewInvitation[]>([])
 
@@ -4175,6 +4206,17 @@ Specific comments to the Author(s):
           if (isSamLeeUser && (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("aortic"))) {
             return true
           }
+          if (isFrancisUser && (
+            m.id === "SOCHEM-26-RW101" ||
+            m.id === "SO-26-RW875" ||
+            (m.authorEmail && (m.authorEmail.toLowerCase().includes("verpoort") || m.authorEmail.toLowerCase().includes("whut.edu.cn"))) ||
+            (m.author_email && (m.author_email.toLowerCase().includes("verpoort") || m.author_email.toLowerCase().includes("whut.edu.cn"))) ||
+            (m.authorName && m.authorName.toLowerCase().includes("verpoort")) ||
+            (m.author_name && m.author_name.toLowerCase().includes("verpoort")) ||
+            (m.journal && m.journal.includes("Chemistry") && (m.title?.toLowerCase().includes("mof") || m.title?.toLowerCase().includes("dye")))
+          )) {
+            return true
+          }
           if (activeUrlMsId && m.id && m.id.toLowerCase() === activeUrlMsId.toLowerCase()) return true
           if (activeUrlMsId && activeUrlMsId.toLowerCase().includes("rw01") && (m.id === "SOMED-26-RW01" || m.title?.includes("Prevent Earlier"))) return true
           if (m.authorEmail && email && m.authorEmail.toLowerCase() === email.toLowerCase()) return true
@@ -4184,7 +4226,7 @@ Specific comments to the Author(s):
         })
 
     const finalManuscripts = isFrancisUser
-      ? authorFiltered
+      ? (authorFiltered.length > 0 ? authorFiltered : [INITIAL_CHEMISTRY_MANUSCRIPT])
       : (authorFiltered.length === 0 && isSamLeeUser)
       ? [INITIAL_MEDICINE_MANUSCRIPT]
       : (authorFiltered.length > 0 ? authorFiltered : (isDemoAuthor ? [INITIAL_MEDICINE_MANUSCRIPT] : []))
@@ -5373,13 +5415,27 @@ Specific comments to the Author(s):
     const randomNum = Math.floor(Math.random() * 800) + 100
     const journalPrefix = newJournal.includes("Medicine") 
       ? "SOMED" 
+      : newJournal.includes("Chemistry")
+      ? "SOCHEM"
       : newJournal.includes("Biology") 
       ? "SOBIO" 
       : newJournal.includes("Engineering") 
       ? "SOEAS" 
+      : newJournal.includes("Environmental")
+      ? "SOENV"
       : newJournal.includes("Social") 
       ? "SOSSH" 
-      : "SO"
+      : newJournal.includes("Clinical AI")
+      ? "SOCAI"
+      : newJournal.includes("AI Safety")
+      ? "SOAIS"
+      : newJournal.includes("Quantum")
+      ? "SOQE"
+      : newJournal.includes("Synthetic")
+      ? "SOSBD"
+      : newJournal.includes("Space")
+      ? "SOSRE"
+      : "SOCHEM"
     const newMsId = `${journalPrefix}-${shortYear}-RW${randomNum}`
     const authorFullName = `${newFirstName.trim()} ${newLastName.trim()}`.trim() || profFullName || (email ? email.split('@')[0] : "Author")
 
@@ -9705,15 +9761,17 @@ Specific comments to the Author(s):
                               <div className="space-y-1 sm:pl-4 pt-3 sm:pt-0">
                                 <div className="flex items-center justify-between">
                                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                                    {isDe ? "Inaugural-Rabatt (APC)" : "Inaugural APC Discount"}
+                                    {isFrancis ? (isDe ? "APC-Erlass" : "APC Waiver") : (isDe ? "Inaugural-Rabatt (APC)" : "Inaugural APC Discount")}
                                   </span>
                                   <Check className="h-4 w-4 text-emerald-500" />
                                 </div>
                                 <div className="text-2xl sm:text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
-                                  50% Off
+                                  {isFrancis ? "100% Waived" : "50% Off"}
                                 </div>
                                 <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block">
-                                  {isDe ? "Gründungsband-Erlass aktiv" : "Inaugural Issue Launch Offer"}
+                                  {isFrancis 
+                                    ? (isDe ? "100% Gebührenerlass genehmigt (0 € APC)" : "100% APC Waived (Approved)")
+                                    : (isDe ? "Gründungsband-Erlass aktiv" : "Inaugural Issue Launch Offer")}
                                 </span>
                               </div>
 
@@ -9819,9 +9877,13 @@ Specific comments to the Author(s):
                                   <div className="space-y-2 text-xs">
                                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
                                       <span className="font-normal text-slate-600 dark:text-slate-400">
-                                        {isDe ? "APC-Rabatt (Waiver Code)" : "APC Launch Grant"}
+                                        {isFrancis 
+                                          ? (isDe ? "APC-Status (Genehmigt)" : "APC Status")
+                                          : (isDe ? "APC-Rabatt (Waiver Code)" : "APC Launch Grant")}
                                       </span>
-                                      <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums text-sm">50% Off (INAUGURAL-50)</span>
+                                      <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums text-sm">
+                                        {isFrancis ? "100% Waived (FULL-WAIVER)" : "50% Off (INAUGURAL-50)"}
+                                      </span>
                                     </div>
 
                                     <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#131418] border border-slate-100 dark:border-[#272832]">
@@ -10065,6 +10127,12 @@ Specific comments to the Author(s):
                                                   }`} />
                                                   {m.id === "SOMED-26-RW01" || isRevisionAction ? (isDe ? "Revision erforderlich (R2)" : "Round 2 Revision Required") : translateStatus(m.status)}
                                                 </span>
+                                                {(isFrancis || m.id === "SOCHEM-26-RW101" || m.authorEmail?.toLowerCase().includes("verpoort")) && (
+                                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700/60">
+                                                    <Check className="h-3 w-3 text-emerald-600" />
+                                                    100% Waived
+                                                  </span>
+                                                )}
                                               </div>
                                               <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
                                                 {m.title}
@@ -10155,6 +10223,11 @@ Specific comments to the Author(s):
                                                       ? (isDe ? "R2-Revision erforderlich" : "Round 2 Revision Required")
                                                       : translateStatus(m.status)}
                                                   </span>
+                                                  {(isFrancis || m.id === "SOCHEM-26-RW101" || m.authorEmail?.toLowerCase().includes("verpoort")) && (
+                                                    <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700/60">
+                                                      100% Waived
+                                                    </span>
+                                                  )}
                                                 </td>
                                                 <td className="px-4 py-3.5 text-right whitespace-nowrap">
                                                   <div className="flex items-center justify-end gap-2">
@@ -17820,6 +17893,14 @@ Specific comments to the Author(s):
                               <span className="text-[#0b99ff] font-medium">{selectedManuscriptDetails.dataDoi}</span>
                             ) : (
                               <span>{selectedManuscriptDetails.dataDoi || "Available upon reasonable request"}</span>
+                            )}
+                          </p>
+                          <p>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">Article Processing Charge (APC):</span>{" "}
+                            {(selectedManuscriptDetails.id === "SOCHEM-26-RW101" || selectedManuscriptDetails.authorEmail?.toLowerCase().includes("verpoort") || selectedManuscriptDetails.authorName?.toLowerCase().includes("verpoort")) ? (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">100% Waived (€0 / Full Author Grant Applied)</span>
+                            ) : (
+                              <span>50% Launch Discount Active</span>
                             )}
                           </p>
                         </div>
