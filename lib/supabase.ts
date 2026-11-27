@@ -80,7 +80,7 @@ function getLocalManuscripts(): DbManuscript[] {
           let file_url = m.file_url
           if (!file_url) {
             if (m.id === "SOCHEM-26-RW101" || m.title?.toLowerCase().includes("mof")) {
-              file_url = "/manuscripts/SOCHEM-26-RW101-manuscript.docx"
+              file_url = "https://lfnwqbzcwticwdjowsmv.supabase.co/storage/v1/object/public/manuscripts/SOCHEM-26-RW101/manuscript-MOFs_FV.docx"
             } else if (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("acute aortic")) {
               file_url = "/manuscripts/SOMED-26-RW01-revised-manuscript.docx"
             } else if (m.file_name) {
@@ -194,7 +194,7 @@ export async function getDbManuscripts(): Promise<DbManuscript[]> {
         let file_url = m.file_url
         if (!file_url) {
           if (m.id === "SOCHEM-26-RW101" || m.title?.toLowerCase().includes("mof")) {
-            file_url = "/manuscripts/SOCHEM-26-RW101-manuscript.docx"
+            file_url = "https://lfnwqbzcwticwdjowsmv.supabase.co/storage/v1/object/public/manuscripts/SOCHEM-26-RW101/manuscript-MOFs_FV.docx"
           } else if (m.id === "SOMED-26-RW01" || m.title?.toLowerCase().includes("prevent earlier") || m.title?.toLowerCase().includes("acute aortic")) {
             file_url = "/manuscripts/SOMED-26-RW01-revised-manuscript.docx"
           } else if (m.file_name) {

@@ -20,7 +20,8 @@
     "file_name": "manuscript-MOFs_FV.docx",
     "file_size": "4.4 MB",
     "cover_letter": "Editor-in-Chief\nScholarly Open: Chemistry\n\n\nSubject: Submission of Review Article  \"Recent advances in the application of MOF-based adsorbents for toxic dye removal from wastewater and their mechanism \"\nDear Editor-in-Chief,\nI am pleased to submit our review article entitled \"Recent advances in the application of MOF-based adsorbents for toxic dye removal from wastewater and their mechanism \" for consideration in Scholarly Open: Chemistry. This manuscript provides a comprehensive analysis of the role of MOFs in the adsorption of hazardous dyes, such as methylene blue, methyl orange, and rhodamine-B, from wastewater, an urgent environmental challenge due to increasing pollution levels.\nOur review highlights:\n•\tStructural design and properties of MOFs that enhance dye adsorption.\n•\tComparative analysis of MOFs for cationic and anionic dye removal, including adsorption capacity, efficiency, reusability, and optimal conditions (pH, temperature).\n•\tMechanistic insights into dye adsorption processes and key factors influencing performance.\nGiven the growing interest in advanced materials such as MOFs for environmental remediation, this work aligns well with the scope of Scholarly Open: Chemistry. We believe our review will be valuable to researchers in materials science, environmental chemistry, and wastewater treatment.\nThis manuscript is original, has not been published elsewhere, and is not under consideration by any other journal. All authors have approved the submission, and there are no conflicts of interest to declare.\nWe would be grateful for your consideration and look forward to the reviewers’ feedback. Please let me know if any additional information is required.\nThank you for your time and effort.\nSincerely,\nProf. F. Verpoort\n",
-    "file_url": "/manuscripts/SOCHEM-26-RW101-manuscript.docx",
+    "file_url": "https://lfnwqbzcwticwdjowsmv.supabase.co/storage/v1/object/public/manuscripts/SOCHEM-26-RW101/manuscript-MOFs_FV.docx",
+    "blinded_file_url": "https://lfnwqbzcwticwdjowsmv.supabase.co/storage/v1/object/public/manuscripts/SOCHEM-26-RW101/SOCHEM-26-RW101-manuscript-blinded.docx",
     "ethics_irb": "None declared / Not applicable",
     "funding_grant": "No external funding declared",
     "data_doi": "Available upon reasonable request",
@@ -31,8 +32,7 @@
     "assigned_editor_name": null,
     "reviewers": [],
     "created_at": "2026-11-27T07:42:53.666123+00:00",
-    "updated_at": "2026-11-27T12:14:11.953+00:00",
-    "file_url": "/manuscripts/SOCHEM-26-RW101-manuscript.docx"
+    "updated_at": "2026-11-27T12:14:11.953+00:00"
   },
   {
     "id": "SOMED-26-RW01",
