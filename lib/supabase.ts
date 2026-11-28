@@ -324,7 +324,7 @@ export async function deleteDbManuscript(id: string): Promise<boolean> {
       },
       cache: "no-store",
     })
-  } catch (e) {}
+  } catch (e) { }
 
   return true
 }

@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic"
 import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
-import { getStoredDisapproved, saveStoredDisapproved, DisapprovedCandidateRecord } from "../disapproved-candidates/route"
+import { getStoredDisapproved, saveStoredDisapproved, type DisapprovedCandidateRecord } from "@/lib/disapproved-store"
 import { getJournalReplyTo } from "@/lib/data/journal-contacts"
 
 export interface InvitationResponseRecord {
@@ -65,6 +65,8 @@ function sanitizeAcademicName(name: string): string {
     cleaned = "Bolutife Olofinjana, Ph.D."
   } else if (cleaned.toLowerCase() === "prashant kumar") {
     cleaned = "Prashant Kumar, Ph.D."
+  } else if (cleaned.toLowerCase() === "william harrison" || cleaned.toLowerCase() === "william h. harrison") {
+    cleaned = "William H. Harrison, Ph.D"
   }
   return cleaned
 }
@@ -282,6 +284,24 @@ export async function GET() {
       (r.slug && r.slug.toLowerCase().includes("namiq")) ||
       r.id === "RESP-NAMIQ" || r.id === "EBM-NAMIQ"
 
+    const isHarrison = (r.candidateEmail && (r.candidateEmail.toLowerCase().includes("socsci@scholarlyopen.org") || r.candidateEmail.toLowerCase().includes("harrison"))) ||
+      (r.candidateName && r.candidateName.toLowerCase().includes("harrison")) ||
+      (r.slug && r.slug.toLowerCase().includes("harrison")) ||
+      r.id === "RESP-HARRISON" || r.id === "EBM-HARRISON"
+
+    if (isHarrison) {
+      credId = "EBM-HARRISON"
+      r.candidateName = "William H. Harrison, Ph.D"
+      r.role = "Editorial Board Member & Handling Editor"
+      r.type = "board"
+      r.journal = "Scholarly Open: Social Sciences & Humanities"
+      r.affiliation = "College of Liberal Arts, Fairmont State University, USA"
+      r.country = "USA"
+      r.photoUrl = "/images/editors/william-harrison.jpg"
+      r.jmApproved = true
+      r.status = "Active Handling Editor"
+    }
+
     if (isNamiq) {
       credId = "EBM-NAMIQ"
       r.candidateName = "Karez Namiq, M.D."
@@ -311,7 +331,7 @@ export async function GET() {
       }
     }
 
-    const isConfirmedApproved = isVerpoort || isCacciola || isHesham || isKanthlal || Boolean(r.jmApproved)
+    const isConfirmedApproved = isVerpoort || isCacciola || isHesham || isKanthlal || isNamiq || isHarrison || Boolean(r.jmApproved)
 
     return {
       ...r,

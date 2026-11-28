@@ -482,7 +482,64 @@
       "jmApproved": true,
       "watchlistFlagged": false,
       "specialization": "Pharmaceutical Sciences, Pharmacology, Cardiovascular & Cancer Research, Molecular Biology, Endothelium Function"
+    },
+    {
+      "id": "RESP-HARRISON",
+      "type": "board",
+      "candidateName": "William H. Harrison, Ph.D",
+      "candidateEmail": "editor.socsci@scholarlyopen.org",
+      "journal": "Scholarly Open: Social Sciences & Humanities",
+      "journalSlug": "social-sciences-humanities",
+      "decision": "yes",
+      "credentialId": "EBM-HARRISON",
+      "timestamp": "2026-11-20T10:00:00Z",
+      "notes": "Editorial Board Member onboarded via verified portal",
+      "affiliation": "College of Liberal Arts, Fairmont State University, USA",
+      "department": "College of Liberal Arts / Department of Political Science",
+      "country": "USA",
+      "role": "Editorial Board Member & Handling Editor",
+      "specialization": "International Relations, Political Psychology, and American Government",
+      "biography": "Dr. William Harrison is a Professor of Political Science at Fairmont State University. His research focuses on the disproportionate voting power in the United States, religious influence on international and American politics, in-group/out-group dichotomy, and non-governmental organizations. His dissertation explored 'Foreign Christian Influence on Developing World Domestic Social Policy', analyzing whether foreign groups are more able to influence policy in countries with lower state capacity.",
+      "photoUrl": "/images/editors/william-harrison.jpg",
+      "cvFileName": "CV_Dr_William_Harrison_2026.pdf",
+      "cvFileSize": "310 KB",
+      "orcid": "0009-0003-5885-0112",
+      "googleScholar": "https://scholar.google.com/citations?view_op=search_authors&mauthors=William+H+Harrison+Fairmont",
+      "researchGate": "https://www.researchgate.net/profile/William-Harrison",
+      "linkedin": "https://www.linkedin.com/in/william-harrison-fairmont",
+      "researchInterests": [
+        "International Relations",
+        "Political Psychology",
+        "American Government",
+        "Disproportionate Voting Power",
+        "Religious Influence in Politics",
+        "In-Group / Out-Group Dichotomy",
+        "Non-Governmental Organizations (NGOs)",
+        "Developing World Social Policy"
+      ],
+      "publications": [
+        {
+          "title": "Is the West Wobbling on its Democratic Pedestal",
+          "journal": "Two Day Hybrid International Conference on Democracy, Governance, and Sustainability",
+          "year": "2024"
+        },
+        {
+          "title": "2023 The Earth as a New Small Town",
+          "journal": "Southern Political Science Association Annual Conference",
+          "year": "2024"
+        },
+        {
+          "title": "Foreign Christian Influence on Developing World Domestic Social Policy",
+          "journal": "West Virginia University Ph.D. Dissertation",
+          "year": "2012"
+        }
+      ],
+      "hasAcceptedTerms": true,
+      "consentProfileUpload": true,
+      "status": "Active Handling Editor",
+      "jmApproved": true,
+      "acceptedAt": "2026-11-20T10:00:00Z"
     }
   ],
-  "lastUpdated": "2026-11-25T08:27:46.221Z"
+  "lastUpdated": "2026-11-28T12:44:50.553Z"
 }

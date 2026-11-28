@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic"
 import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
-import { getStoredDisapproved, saveStoredDisapproved, DisapprovedCandidateRecord } from "../disapproved-candidates/route"
+import { getStoredDisapproved, saveStoredDisapproved, type DisapprovedCandidateRecord } from "@/lib/disapproved-store"
 
 export interface ReviewerTestRecord {
   id: string

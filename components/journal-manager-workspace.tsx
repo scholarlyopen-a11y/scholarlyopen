@@ -443,6 +443,14 @@ export const EDITORIAL_BOARD_CANDIDATES = [
     affiliation: "Eli Lilly and Company, USA",
     journal: "Scholarly Open: Medicine",
     specialization: "Obesity, Cardiometabolic Health, Clinical Pharmacology"
+  },
+  {
+    name: "William H. Harrison, Ph.D",
+    role: "Editorial Board Member · Social Sciences & Humanities",
+    email: "editor.socsci@scholarlyopen.org",
+    affiliation: "College of Liberal Arts, Fairmont State University, USA",
+    journal: "Scholarly Open: Social Sciences & Humanities",
+    specialization: "International Relations, Political Psychology, and American Government"
   }
 ]
 
@@ -2846,6 +2854,9 @@ scholarlyopen@gmail.com | https://scholarlyopen.org`
     }
     if (norm.includes("chamberland") || norm.includes("celeste")) {
       return { name: "Celeste Chamberland, Ph.D.", email: "cchamberland@roosevelt.edu" }
+    }
+    if (norm.includes("harrison") || norm.includes("william")) {
+      return { name: "William H. Harrison, Ph.D", email: "editor.socsci@scholarlyopen.org" }
     }
     if (norm.includes("cacciola") || norm.includes("francesco")) {
       return { name: "Prof. Francesco Cacciola", email: "cacciolaf@unime.it" }
@@ -7428,7 +7439,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                     <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
                                       <XCircle className="w-3 h-3" /> Disapproved - Blocked
                                     </span>
-                                  ) : (resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham") || resp.candidateName?.toLowerCase().includes("namiq") || resp.candidateEmail?.toLowerCase().includes("namiq")) ? (
+                                  ) : (resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham") || resp.candidateName?.toLowerCase().includes("namiq") || resp.candidateEmail?.toLowerCase().includes("namiq") || resp.candidateName?.toLowerCase().includes("harrison") || resp.candidateEmail?.toLowerCase().includes("socsci")) ? (
                                     <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                       <CheckCircle2 className="w-3 h-3" /> Live on Masthead
                                     </span>
@@ -7469,7 +7480,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                           </td>
                           <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             {(() => {
-                              const isApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham"))
+                              const isApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham") || resp.candidateName?.toLowerCase().includes("harrison") || resp.candidateEmail?.toLowerCase().includes("socsci"))
                               const displayCred = (resp.credentialId || "").trim() || (
                                 isApproved
                                   ? (resp.type === "reviewer_claim" 
@@ -7506,7 +7517,7 @@ Please use the buttons below to access your reviewer scorecard or confirm your a
                                 <span>Welcome Letter</span>
                               </button>
                               {(() => {
-                                const isRowApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham"))
+                                const isRowApproved = Boolean(resp.jmApproved || resp.candidateName?.toLowerCase().includes("verpoort") || resp.candidateName?.toLowerCase().includes("cacciola") || resp.candidateName?.toLowerCase().includes("hesham") || resp.candidateEmail?.toLowerCase().includes("hecham") || resp.candidateName?.toLowerCase().includes("harrison") || resp.candidateEmail?.toLowerCase().includes("socsci"))
                                 return (
                                   <button
                                     type="button"

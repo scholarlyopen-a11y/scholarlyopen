@@ -4483,6 +4483,8 @@ Specific comments to the Author(s):
         low.includes("hesham") ||
         low.includes("hecham") ||
         low.includes("chamberland") ||
+        low.includes("harrison") ||
+        low.includes("editor.socsci@scholarlyopen.org") ||
         low.includes("unime.it") ||
         low.includes("whut.edu.cn")
       ) {
@@ -4590,6 +4592,8 @@ Specific comments to the Author(s):
       lowerEmail.includes("hesham") || 
       lowerEmail.includes("hecham") || 
       lowerEmail.includes("chamberland") ||
+      lowerEmail.includes("harrison") ||
+      lowerEmail.includes("editor.socsci@scholarlyopen.org") ||
       lowerEmail.includes("namiq") ||
       lowerEmail.includes("karez") ||
       lowerEmail === "kareznamiq@gmail.com" || 
