@@ -8189,11 +8189,16 @@ Specific comments to the Author(s):
               
               {/* Dual-Persona Dashboard Switcher & Submit Article Button for Editors / EICs (Image 4 Design) */}
               {(() => {
+                // Do not display Editor/Author persona switcher or author submit button for Journal Manager, Reviewers, or Integrity desk
+                if (role === "jm" || role === "reviewer" || role === "im" || role === "ria") {
+                  return null
+                }
+
                 const isFrancisUser = Boolean(
                   (email && (email.toLowerCase().includes("verpoort") || email.toLowerCase().includes("francis") || email.toLowerCase().includes("whut.edu.cn"))) ||
                   (editorName && editorName.toLowerCase().includes("verpoort"))
                 )
-                const isEditorUser = Boolean(editorName || editorEmail || isFrancisUser)
+                const isEditorUser = Boolean(role === "editor" || isFrancisUser)
 
                 if (isEditorUser) {
                   const isEIC = Boolean(
